@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmformat.c,v 1.2 2004-11-15 16:11:52 strik Exp $";
+    "@(#) $Id: cbmformat.c,v 1.3 2004-12-07 19:44:45 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -19,13 +19,8 @@ static char *rcsid =
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef WIN32
-    #include "unixcompat.h"
-#else
-    #include <errno.h>
-    #include <error.h>
-    #include <unistd.h>
-#endif
+
+#include "arch.h"
 
 static unsigned char dskfrmt[] = {
 #include "cbmformat.inc"
@@ -55,7 +50,7 @@ static void hint(char *s)
     fprintf(stderr, "Try `%s' -h for more information.\n", s);
 }
 
-int _cdecl main(int argc, char *argv[])
+int ARCH_MAINDECL main(int argc, char *argv[])
 {
     int status = 0, id_ofs = 0, name_len, i;
     CBM_FILE fd;
@@ -79,7 +74,7 @@ int _cdecl main(int argc, char *argv[])
 
     const char shortopts[] ="hVnxospt:";
 
-    while ((c = (unsigned char) getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
+    while((c=(unsigned char)getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
         switch(c)
         {
@@ -97,7 +92,7 @@ int _cdecl main(int argc, char *argv[])
                       return 0;
             case 'p': show_progress = 1;
                       break;
-            case 't': tracks = (unsigned char) atoi(optarg);
+            case 't': tracks = arch_atoc(optarg);
                       break;
             default : hint(argv[0]);
                       return 1;
@@ -112,7 +107,7 @@ int _cdecl main(int argc, char *argv[])
     }
 
     arg = argv[optind++];
-    drive = (unsigned char) atoi(arg);
+    drive = arch_atoc(arg);
     if(drive < 8 || drive > 11)
     {
         fprintf(stderr, "Invalid drive number (%s)\n", arg);
@@ -192,7 +187,7 @@ int _cdecl main(int argc, char *argv[])
     }
     else
     {
-        unix_error(0, get_errno(), "%s", cbm_get_driver_name(0));
+        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
         return 1;
     }
 }

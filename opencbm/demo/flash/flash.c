@@ -9,25 +9,22 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: flash.c,v 1.1 2004-11-07 11:05:11 strik Exp $";
+    "@(#) $Id: flash.c,v 1.2 2004-12-07 19:44:46 strik Exp $";
 #endif
 
 #include "opencbm.h"
 
-#ifdef WIN32
-    #include "unixcompat.h"
-#else
-    #include <unistd.h>
-#endif
+#include "arch.h"
+
 #include <stdlib.h>
 
 static unsigned char flash[] = {
 #include "flash.inc"
 };
 
-int __cdecl main(int argc, char *argv[])
+int ARCH_MAINDECL main(int argc, char *argv[])
 {
-    __u_char drv = argc > 1 ? atoi(argv[1]) : 8;
+    __u_char drv = argc > 1 ? arch_atoc(argv[1]) : 8;
     CBM_FILE fd;
     
     if(cbm_driver_open(&fd, 0) == 0)

@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.3 2004-11-24 20:08:18 strik Exp $";
+    "@(#) $Id: main.c,v 1.4 2004-12-07 19:44:45 strik Exp $";
 #endif
 
 #include <ctype.h>
@@ -20,12 +20,7 @@ static char *rcsid =
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef WIN32
-    #include "unixcompat.h"
-#else
-    #include <unistd.h>
-    #include <errno.h>
-#endif
+#include "arch.h"
 
 #include "opencbm.h"
 #include "cbmcopy.h"
@@ -113,10 +108,10 @@ static void hint(char *prog)
 }
 
 
-static void __cdecl reset(int dummy)
+static void ARCH_SIGNALDECL reset(int dummy)
 {
     fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
-    sleep(1);
+    arch_sleep(1);
     cbm_reset(fd_cbm);
     cbm_driver_close(fd_cbm);
     exit(1);
@@ -142,7 +137,7 @@ static void char_star_opt_once(const char **arg,
 }
 
 
-int __cdecl main(int argc, char **argv)
+int ARCH_MAINDECL main(int argc, char **argv)
 {
     CBM_FILE fd;
     FILE *file;
@@ -493,7 +488,7 @@ int __cdecl main(int argc, char **argv)
                 {
                     my_message_cb( sev_warning,
                                    "warning could not read %s: %s",
-                                   fname, unix_strerror(get_errno()) );
+                                   fname, arch_strerror(arch_get_errno()) );
                 }
             }
             else
@@ -504,7 +499,7 @@ int __cdecl main(int argc, char **argv)
 
                 if(output_name)
                 {
-                    fs_name = strdup(output_name);
+                    fs_name = arch_strdup(output_name);
                 }
                 else
                 {
@@ -568,7 +563,7 @@ int __cdecl main(int argc, char **argv)
                             {
                                 my_message_cb(sev_warning,
                                               "could not write %s: %s",
-                                              fs_name, unix_strerror(get_errno()));
+                                              fs_name, arch_strerror(arch_get_errno()));
                             }
                         }
                         fclose(file);
@@ -577,7 +572,7 @@ int __cdecl main(int argc, char **argv)
                     {
                         my_message_cb(sev_warning,
                                       "could not open %s: %s",
-                                      fs_name, unix_strerror(get_errno()));
+                                      fs_name, arch_strerror(arch_get_errno()));
                     }
 
                     if(filedata)

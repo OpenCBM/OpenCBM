@@ -10,16 +10,14 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.1 2004-11-07 11:05:12 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.2 2004-12-07 19:44:48 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef WIN32
-    #include "unixcompat.h"
-#endif /* #ifdef WIN32 */
+#include "arch.h"
 
 
 static const char d64_sector_map[MAX_TRACKS+1] =
@@ -638,7 +636,7 @@ int d64copy_get_transfer_mode_index(const char *name)
     tm_len = strlen(name);
     for(i = 0, t = transfers; t->trf; i++, t++)
     {
-        if(strcasecmp(name, t->name) == 0)
+        if(arch_strcasecmp(name, t->name) == 0)
         {
             /* full match */
             return i;
@@ -646,7 +644,7 @@ int d64copy_get_transfer_mode_index(const char *name)
         if(t->abbrev[strlen(t->abbrev)-1] == '%')
         {
             abbrev_len = strlen(t->abbrev) - 1;
-            if(abbrev_len <= tm_len && strncasecmp(t->name, name, tm_len) == 0)
+            if(abbrev_len <= tm_len && arch_strncasecmp(t->name, name, tm_len) == 0)
             {
                 return i;
             }

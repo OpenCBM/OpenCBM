@@ -9,16 +9,13 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: morse.c,v 1.1 2004-11-07 11:05:11 strik Exp $";
+    "@(#) $Id: morse.c,v 1.2 2004-12-07 19:44:47 strik Exp $";
 #endif
 
 #include "opencbm.h"
 
-#ifdef WIN32
-	#include "unixcompat.h"
-#else
-	#include <unistd.h>
-#endif
+#include "arch.h"
+
 #include <fcntl.h>
 #include <stdlib.h>
 
@@ -26,9 +23,9 @@ static unsigned char morse[] = {
 #include "morse.inc"
 };
 
-int __cdecl main(int argc, char *argv[])
+int ARCH_MAINDECL main(int argc, char *argv[])
 {
-    __u_char drv = argc > 1 ? atoi(argv[1]) : 8;
+    __u_char drv = argc > 1 ? arch_atoc(argv[1]) : 8;
     CBM_FILE fd;
     
     if(cbm_driver_open(&fd, 0) == 0)

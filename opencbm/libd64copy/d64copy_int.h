@@ -7,7 +7,7 @@
  *  Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
-/* $Id: d64copy_int.h,v 1.1 2004-11-07 11:05:12 strik Exp $ */
+/* $Id: d64copy_int.h,v 1.2 2004-12-07 19:44:48 strik Exp $ */
 
 #ifndef D64COPY_INT_H
 #define D64COPY_INT_H
@@ -16,9 +16,7 @@
 #include "d64copy.h"
 #include "gcr.h"
 
-#ifdef WIN32
-    #include "unixcompat.h"
-#endif /* #ifdef WIN32 */
+#include "arch.h"
 
 /* standard .d64 track count */
 #define STD_TRACKS   35

@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: fs.c,v 1.2 2004-11-15 16:11:52 strik Exp $";
+    "@(#) $Id: fs.c,v 1.3 2004-12-07 19:44:48 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -17,11 +17,8 @@ static char *rcsid =
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 
-#ifndef WIN32
-    #include <unistd.h>
-#endif // #ifndef WIN32
+#include "arch.h"
 
 static d64copy_settings *fs_settings;
 
@@ -65,7 +62,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
                      const void *arg, int for_writing,
                      turbo_start start, d64copy_message_cb message_cb)
 {
-    struct _stat statrec;
+    size_t filesize;
     int stat_ok, is_image, error_info;
     int tr = 0;
     char *name = (char*)arg;
@@ -74,18 +71,18 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
     fs_settings = settings;
     block_count = 0;
 
-    stat_ok = stat(name, &statrec) == 0;
+    stat_ok = arch_filesize(name, &filesize) == 0;
     is_image = error_info = 0;
 
     if(stat_ok)
     {
-        if(statrec.st_size == D71_BLOCKS * BLOCKSIZE)
+        if(filesize == D71_BLOCKS * BLOCKSIZE)
         {
             is_image = 1;
             block_count = D71_BLOCKS;
             tr = D71_TRACKS;
         }
-        else if(statrec.st_size == D71_BLOCKS * (BLOCKSIZE + 1))
+        else if(filesize == D71_BLOCKS * (BLOCKSIZE + 1))
         {
             is_image = 1;
             error_info = 1;
@@ -97,11 +94,11 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
             block_count = STD_BLOCKS;
             for( tr = STD_TRACKS; !is_image && tr <= TOT_TRACKS; )
             {
-                is_image = statrec.st_size == block_count * BLOCKSIZE;
+                is_image = filesize == block_count * BLOCKSIZE;
                 if(!is_image)
                 {
                     error_info = is_image =
-                        statrec.st_size == block_count * (BLOCKSIZE + 1);
+                        filesize == block_count * (BLOCKSIZE + 1);
                 }
                 if(!is_image)
                 {
@@ -183,7 +180,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
                 fclose(the_file);
                 if(!is_image)
                 {
-                    unlink(name);
+                    arch_unlink(name);
                 }
                 return 1;
             }
@@ -222,7 +219,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
                         message_cb(0, "could not write %s", name);
                         fclose(the_file);
                         if(!is_image)
-                            unlink(name);
+                            arch_unlink(name);
                         return 1;
                     }
                     block_count += s;
@@ -269,7 +266,7 @@ static void close_disk(void)
     } 
     else
     {
-        ftruncate(fileno(the_file), block_count * BLOCKSIZE);
+        arch_ftruncate(arch_fileno(the_file), block_count * BLOCKSIZE);
     }
 
     if(error_map)

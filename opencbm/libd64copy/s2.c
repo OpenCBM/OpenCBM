@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s2.c,v 1.1 2004-11-07 11:05:12 strik Exp $";
+    "@(#) $Id: s2.c,v 1.2 2004-12-07 19:44:48 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -17,10 +17,7 @@ static char *rcsid =
 
 #include <stdlib.h>
 
-#ifndef WIN32
-    #include <unistd.h>
-#endif // #ifndef WIN32
-
+#include "arch.h"
 
 static const unsigned char s2_drive_prog[] = {
 #include "s2.inc"
@@ -85,7 +82,7 @@ static int read_block(unsigned char tr, unsigned char se, char *block)
     s2_write_byte(fd_cbm, tr);
     s2_write_byte(fd_cbm, se);
 #ifndef USE_CBM_IEC_WAIT
-    usleep(20000);
+    arch_usleep(20000);
 #endif
     s2_read_byte(fd_cbm, &status);
     for(i=0;i<BLOCKSIZE;i++) s2_read_byte(fd_cbm, &block[i]);
@@ -104,7 +101,7 @@ static int write_block(unsigned char tr, unsigned char se, const char *blk, int 
 
 #ifndef USE_CBM_IEC_WAIT
     if(size == BLOCKSIZE) {
-        usleep(20000);
+        arch_usleep(20000);
     }
 #endif
     s2_read_byte(fd_cbm, &status);
@@ -126,7 +123,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
     cbm_iec_release(fd_cbm, IEC_CLOCK);
     while(!cbm_iec_get(fd_cbm, IEC_CLOCK));
     cbm_iec_set(fd_cbm, IEC_ATN);
-    usleep(20000);
+    arch_usleep(20000);
     
     return 0;
 }

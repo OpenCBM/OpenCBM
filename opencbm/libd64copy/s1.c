@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.1 2004-11-07 11:05:12 strik Exp $";
+    "@(#) $Id: s1.c,v 1.2 2004-12-07 19:44:48 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -17,11 +17,7 @@ static char *rcsid =
 
 #include <stdlib.h>
 
-#ifndef WIN32
-    #ifndef USE_CBM_IEC_WAIT
-        #include <unistd.h>
-    #endif
-#endif // #ifndef WIN32
+#include "arch.h"
 
 static const unsigned char s1_drive_prog[] = {
 #include "s1.inc"
@@ -97,7 +93,7 @@ static int read_block(unsigned char tr, unsigned char se, char *block)
     s1_write_byte(fd_cbm, tr);
     s1_write_byte(fd_cbm, se);
 #ifndef USE_CBM_IEC_WAIT    
-    usleep(20000);
+    arch_usleep(20000);
 #endif    
     s1_read_byte(fd_cbm, &status);
     for(i=0;i<256;i++) s1_read_byte(fd_cbm, &block[i]);
@@ -116,7 +112,7 @@ static int write_block(unsigned char tr, unsigned char se, const char *blk, int 
     for(i=0;i<size;i++) s1_write_byte(fd_cbm, blk[i]);
 #ifndef USE_CBM_IEC_WAIT    
     if(size == BLOCKSIZE) {
-        usleep(20000);
+        arch_usleep(20000);
     }
 #endif    
     s1_read_byte(fd_cbm, &status);

@@ -1,0 +1,23 @@
+
+TARGETNAME=arch
+TARGETPATH=../../../bin
+TARGETTYPE=LIBRARY
+
+TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
+           $(SDK_LIB_PATH)/user32.lib   \
+           $(SDK_LIB_PATH)/advapi32.lib
+
+INCLUDES=../../../include
+
+C_DEFINES = $(C_DEFINES) /DHAVE_STRING_H=1
+
+
+
+SOURCES=../error.c \
+        ../file.c \
+        ../getopt.c \
+        ../getopt1.c \
+        ../getopt_init.c
+
+UMTYPE=console
+#UMBASE=0x100000

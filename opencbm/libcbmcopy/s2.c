@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s2.c,v 1.1 2004-11-07 11:05:12 strik Exp $";
+    "@(#) $Id: s2.c,v 1.2 2004-12-07 19:44:48 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -17,11 +17,7 @@ static char *rcsid =
 
 #include <stdlib.h>
 
-#ifdef WIN32
-    #include "unixcompat.h"
-#else
-    #include <unistd.h>
-#endif
+#include "arch.h"
 
 
 static unsigned char s2r15x1[] = {
@@ -141,7 +137,7 @@ static int start_turbo(CBM_FILE fd, int write)
     cbm_iec_release(fd, IEC_CLOCK);
     cbm_iec_wait(fd, IEC_CLOCK, 1);
     cbm_iec_set(fd, IEC_ATN);
-    usleep(20000);
+    arch_usleep(20000);
     return 0;
 }
 
@@ -150,7 +146,7 @@ static void exit_turbo(CBM_FILE fd, int write)
     cbm_iec_release(fd, IEC_ATN);
     cbm_iec_release(fd, IEC_DATA);
     cbm_iec_set(fd, IEC_CLOCK);
-    usleep(20000);
+    arch_usleep(20000);
     cbm_iec_wait(fd, IEC_DATA, 0);
 }
 

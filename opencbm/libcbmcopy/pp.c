@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.1 2004-11-07 11:05:12 strik Exp $";
+    "@(#) $Id: pp.c,v 1.2 2004-12-07 19:44:47 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -17,13 +17,7 @@ static char *rcsid =
 
 #include <stdlib.h>
 
-#ifdef WIN32
-    #include "unixcompat.h"
-#else
-    #ifndef USE_CBM_IEC_WAIT
-        #include <unistd.h>
-    #endif
-#endif
+#include "arch.h"
 
 static const unsigned char ppr1541[] = {
 #include "ppr-1541.inc"

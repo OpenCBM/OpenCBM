@@ -9,19 +9,14 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.2 2004-11-15 16:11:52 strik Exp $";
+    "@(#) $Id: main.c,v 1.3 2004-12-07 19:44:45 strik Exp $";
 #endif
 
 #include "opencbm.h"
 #include "d64copy.h"
 
-#ifdef WIN32
-    #include "unixcompat.h"
-#else
-    #include <error.h>
-    #include <errno.h>
-    #include <unistd.h>
-#endif 
+#include "arch.h"
+
 #include <getopt.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -121,10 +116,10 @@ static void hint(char *s)
     fprintf(stderr, "Try `%s' --help for more information.\n", s);
 }
 
-static void __cdecl reset(int dummy)
+static void ARCH_SIGNALDECL reset(int dummy)
 {
     fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
-    sleep(1);
+    arch_sleep(1);
     cbm_reset(fd_cbm);
     cbm_driver_close(fd_cbm);
     exit(1);
@@ -204,7 +199,7 @@ static int my_status_cb(d64copy_status status)
 }
 
 
-int __cdecl main(int argc, char *argv[])
+int ARCH_MAINDECL main(int argc, char *argv[])
 {
     d64copy_settings *settings;
 
@@ -260,7 +255,7 @@ int __cdecl main(int argc, char *argv[])
                       break;
             case 'n': no_progress = 1;
                       break;
-            case 'i': settings->interleave = (unsigned char) atoi(optarg);
+            case 'i': settings->interleave = arch_atoc(optarg);
                       break;
             case 's': settings->start_track = atoi(optarg);
                       break;
@@ -381,7 +376,7 @@ int __cdecl main(int argc, char *argv[])
     }
     else
     {
-        unix_error(0, get_errno(), "%s", cbm_get_driver_name(0));
+        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
     }
 
     free(settings);

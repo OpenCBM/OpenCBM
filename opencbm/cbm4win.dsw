@@ -54,13 +54,25 @@ Package=<4>
     Project_Dep_Name opencbm
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name unixcompat
+    Project_Dep_Name arch
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "cbmcopy"=.\cbmcopy\cbmcopy.dsp - Package Owner=<4>
+Project: "arch"=.\arch\windows\WINBUILD\arch.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "cbmcopy"=.\cbmcopy\WINBUILD\cbmcopy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -75,13 +87,13 @@ Package=<4>
     Project_Dep_Name opencbm
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name unixcompat
+    Project_Dep_Name arch
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "cbmctrl"=.\cbmctrl\cbmctrl.dsp - Package Owner=<4>
+Project: "cbmctrl"=.\cbmctrl\WINBUILD\cbmctrl.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -93,13 +105,13 @@ Package=<4>
     Project_Dep_Name opencbm
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name unixcompat
+    Project_Dep_Name arch
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "cbmformat"=.\cbmformat\cbmformat.dsp - Package Owner=<4>
+Project: "cbmformat"=.\cbmformat\WINBUILD\cbmformat.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -111,13 +123,13 @@ Package=<4>
     Project_Dep_Name opencbm
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name unixcompat
+    Project_Dep_Name arch
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "d64copy"=.\d64copy\d64copy.dsp - Package Owner=<4>
+Project: "d64copy"=.\d64copy\WINBUILD\d64copy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -132,13 +144,49 @@ Package=<4>
     Project_Dep_Name opencbm
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name unixcompat
+    Project_Dep_Name arch
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "demoflash"=.\demo\flash\demoflash.dsp - Package Owner=<4>
+Project: "demoflash"=.\demo\flash\WINBUILD\demoflash.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "demomorse"=.\demo\morse\WINBUILD\demomorse.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "install"=.\install\WINBUILD\install.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -153,7 +201,22 @@ Package=<4>
 
 ###############################################################################
 
-Project: "demomorse"=.\demo\morse\demomorse.dsp - Package Owner=<4>
+Project: "libcbmcopy"=.\libcbmcopy\WINBUILD\libcbmcopy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "libd64copy"=.\libd64copy\WINBUILD\libd64copy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -164,53 +227,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name opencbm
     End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "install"=.\install\install.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
     Begin Project Dependency
-    Project_Dep_Name opencbm
+    Project_Dep_Name arch
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "libcbmcopy"=.\libcbmcopy\libcbmcopy.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "libd64copy"=.\libd64copy\libd64copy.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name opencbm
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "opencbm"=.\dll\opencbm.dsp - Package Owner=<4>
+Project: "opencbm"=.\dll\WINBUILD\opencbm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -259,18 +283,6 @@ Package=<4>
 ###############################################################################
 
 Project: "syswdm"=.\sys\wdm\syswdm.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "unixcompat"=.\unixcompat\unixcompat.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.4 2004-11-21 16:29:09 strik Exp $ \n
+** \version $Id: debug.h,v 1.5 2004-12-07 19:44:47 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -167,7 +167,7 @@
 
 #ifdef DBG_DLL
 /* Make the linker happy if the DLL is to be generated */
-int _cdecl main(int argc, char *argv[])
+int __cdecl main(int argc, char *argv[])
 {
 }
 #endif

@@ -10,34 +10,18 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.4 2004-11-24 20:08:18 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.5 2004-12-07 19:44:45 strik Exp $";
 #endif
 
 #include "opencbm.h"
 
-#ifndef WIN32
-        #include <ctype.h>
-        #include <errno.h>
-        #include <error.h>
-#endif
-        #include <stdio.h>
-        #include <stdlib.h>
-        #include <string.h>
-#ifndef WIN32
-        #include <sys/stat.h>
-#endif
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+ 
 typedef int (*mainfunc)(CBM_FILE fd, char *argv[]);
 
-#ifdef WIN32
-    #include "unixcompat.h"
-    #include <fcntl.h>
-#endif
-
-unsigned char atoc(const char *str)
-{
-    return (unsigned char) atoi(str);
-}
+#include "arch.h"
 
 /*
  * Simple wrapper for reset
@@ -52,7 +36,7 @@ static int do_reset(CBM_FILE fd, char *argv[])
  */
 static int do_listen(CBM_FILE fd, char *argv[])
 {
-    return cbm_listen(fd, atoc(argv[0]), atoc(argv[1]));
+    return cbm_listen(fd, arch_atoc(argv[0]), arch_atoc(argv[1]));
 }
 
 /*
@@ -60,7 +44,7 @@ static int do_listen(CBM_FILE fd, char *argv[])
  */
 static int do_talk(CBM_FILE fd, char *argv[])
 {
-    return cbm_talk(fd, atoc(argv[0]), atoc(argv[1]));
+    return cbm_talk(fd, arch_atoc(argv[0]), arch_atoc(argv[1]));
 }
 
 /*
@@ -84,7 +68,7 @@ static int do_untalk(CBM_FILE fd, char *argv[])
  */
 static int do_open(CBM_FILE fd, char *argv[])
 {
-    return cbm_open(fd, atoc(argv[0]), atoc(argv[1]), argv[2], strlen(argv[2]));
+    return cbm_open(fd, arch_atoc(argv[0]), arch_atoc(argv[1]), argv[2], strlen(argv[2]));
 }
 
 /*
@@ -92,7 +76,7 @@ static int do_open(CBM_FILE fd, char *argv[])
  */
 static int do_close(CBM_FILE fd, char *argv[])
 {
-    return cbm_close(fd, atoc(argv[0]), atoc(argv[1]));
+    return cbm_close(fd, arch_atoc(argv[0]), arch_atoc(argv[1]));
 }
 
 /*
@@ -104,7 +88,7 @@ static int do_status(CBM_FILE fd, char *argv[])
     unsigned char unit;
     int rv;
 
-    unit = atoc(argv[0]);
+    unit = arch_atoc(argv[0]);
 
     rv = cbm_device_status(fd, unit, buf, sizeof(buf));
     fprintf(stderr, "%s", cbm_petscii2ascii(buf));
@@ -119,8 +103,8 @@ static int do_command(CBM_FILE fd, char *argv[])
 {
     int  rv;
 
-    rv = cbm_listen(fd, atoc(argv[0]), 15);
-    if (rv == 0)
+    rv = cbm_listen(fd, arch_atoc(argv[0]), 15);
+    if(rv == 0)
     {
         cbm_raw_write(fd, argv[1], strlen(argv[1]));
         rv = cbm_unlisten(fd);
@@ -137,21 +121,21 @@ static int do_dir(CBM_FILE fd, char *argv[])
     int rv;
     unsigned char unit;
 
-    unit = atoc(argv[0]);
+    unit = arch_atoc(argv[0]);
     rv = cbm_open(fd, unit, 0, "$", strlen("$"));
-    if (rv == 0)
+    if(rv == 0)
     {
-        if (cbm_device_status(fd, unit, buf, sizeof(buf)) == 0)
+        if(cbm_device_status(fd, unit, buf, sizeof(buf)) == 0)
         {
             cbm_talk(fd, unit, 0);
-            if (cbm_raw_read(fd, buf, 2) == 2)
+            if(cbm_raw_read(fd, buf, 2) == 2)
             {
-                while (cbm_raw_read(fd, buf, 2) == 2)
+                while(cbm_raw_read(fd, buf, 2) == 2)
                 {
-                    if (cbm_raw_read(fd, buf, 2) == 2)
+                    if(cbm_raw_read(fd, buf, 2) == 2)
                     {
                         printf("%u ", buf[0] | (buf[1] << 8));
-                        while ((cbm_raw_read(fd, &c, 1) == 1) && c)
+                        while((cbm_raw_read(fd, &c, 1) == 1) && c)
                         {
                             putchar(cbm_petscii2ascii_c(c));
                         }
@@ -183,23 +167,23 @@ static int do_download(CBM_FILE fd, char *argv[])
     char *tail, buf[32], cmd[7];
     FILE *f;
 
-    unit = atoc(argv[0]);
+    unit = arch_atoc(argv[0]);
 
     addr = strtol(argv[1], &tail, 0);
-    if (addr < 0 || addr > 0xffff || *tail)
+    if(addr < 0 || addr > 0xffff || *tail)
     {
-        unix_error(0, 0, "invalid address: %s", argv[1]);
+        arch_error(0, 0, "invalid address: %s", argv[1]);
         return 1;
     }
 
     count = strtol(argv[2], &tail, 0);
-    if ((count + addr) > 0x10000 || *tail)
+    if((count + addr) > 0x10000 || *tail)
     {
-        unix_error(0, get_errno(), "invalid byte count %s", argv[2]);
+        arch_error(0, arch_get_errno(), "invalid byte count %s", argv[2]);
         return 1;
     }
 
-    if (argv[3] && strcmp(argv[3],"-") != 0)
+    if(argv[3] && strcmp(argv[3],"-") != 0)
     {
         /* a filename (other than simply "-") was given, open that file */
 
@@ -209,27 +193,24 @@ static int do_download(CBM_FILE fd, char *argv[])
     {
         /* no filename was given, open stdout in binary mode */
 
-        f = fdopen(fileno(stdout), "wb");
-
-#ifdef WIN32
+        f = arch_fdopen(arch_fileno(stdout), "wb");
 
         /* set binary mode for output stream */
 
-        _setmode(fileno(stdout), _O_BINARY);
-#endif
+        arch_setbinmode(arch_fileno(stdout));
     }
 
-    if (!f)
+    if(!f)
     {
-        unix_error(0, get_errno(), "could not open output file: %s",
+        arch_error(0, arch_get_errno(), "could not open output file: %s",
               (argv[3] && strcmp(argv[3], "-") != 0) ? argv[3] : "stdout");
         return 1;
     }
 
-    for (i = 0; (rv == 0) && (i < count); i+=32)
+    for(i = 0; (rv == 0) && (i < count); i+=32)
     {
         c = count - i;
-        if (c > 32) 
+        if(c > 32) 
         {
             c = 32;
         }
@@ -237,13 +218,13 @@ static int do_download(CBM_FILE fd, char *argv[])
         cbm_listen(fd, unit, 15);
         rv = cbm_raw_write(fd, cmd, 6) == 6 ? 0 : 1;
         cbm_unlisten(fd);
-        if (rv == 0)
+        if(rv == 0)
         {
             addr += c;
             cbm_talk(fd, unit, 15);
             rv = cbm_raw_read(fd, buf, c) == c ? 0 : 1;
             cbm_untalk(fd);
-            if (rv == 0)
+            if(rv == 0)
             {
                 fwrite(buf, 1, c, f);
             }
@@ -264,53 +245,51 @@ static int do_upload(CBM_FILE fd, char *argv[])
     char *tail, *fn;
     unsigned char addr_buf[2];
     unsigned char buf[65537];
-    struct _stat statrec;
     FILE *f;
 
-    unit = atoc(argv[0]);
+    unit = arch_atoc(argv[0]);
 
     addr = strtoul(argv[1], &tail, 0);
-    if (addr < -1 || addr > 0xffff || *tail)
+    if(addr < -1 || addr > 0xffff || *tail)
     {
-        unix_error(0, 0, "invalid address: %s", argv[1]);
+        arch_error(0, 0, "invalid address: %s", argv[1]);
         return 1;
     }
 
-    if (!argv[2] || strcmp(argv[2], "-") == 0 || strcmp(argv[2], "") == 0)
+    if(!argv[2] || strcmp(argv[2], "-") == 0 || strcmp(argv[2], "") == 0)
     {
         fn = "(stdin)";
         f = stdin;
 
-#ifdef WIN32
-
         // set binary mode for input stream
 
-        _setmode(fileno(stdin), _O_BINARY);
-#endif
+        arch_setbinmode(arch_fileno(stdin));
     }
     else
     {
+        size_t filesize;
+
         fn = argv[2];
         f = fopen(argv[2], "rb");
         if(f == NULL)
         {
-            unix_error(0, errno, "could not open %s", fn);
+            arch_error(0, arch_get_errno(), "could not open %s", fn);
             return 1;
         }
-        if(stat(argv[2], &statrec))
+        if(arch_filesize(argv[2], &filesize))
         {
-            unix_error(0, errno, "could not stat %s", fn);
+            arch_error(0, arch_get_errno(), "could not stat %s", fn);
             return 1;
         }
     }
 
-    if (addr == -1)
+    if(addr == -1)
     {
         /* read address from file */
-        if (fread(addr_buf, 2, 1, f) != 1)
+        if(fread(addr_buf, 2, 1, f) != 1)
         {
-            unix_error(0, get_errno(), "could not read %s", fn);
-            if (f != stdin) fclose(f);
+            arch_error(0, arch_get_errno(), "could not read %s", fn);
+            if(f != stdin) fclose(f);
             return 1;
         }
 
@@ -322,25 +301,25 @@ static int do_upload(CBM_FILE fd, char *argv[])
     size = fread(buf, 1, sizeof(buf), f);
     if(ferror(f))
     {
-        unix_error(0, 0, "could not read %s", fn);
-        if (f != stdin) fclose(f);
+        arch_error(0, 0, "could not read %s", fn);
+        if(f != stdin) fclose(f);
         return 1;
     }
-    else if (size == 0 && feof(f))
+    else if(size == 0 && feof(f))
     {
-        unix_error(0, 0, "no data: %s", fn);
+        arch_error(0, 0, "no data: %s", fn);
         if(f != stdin) fclose(f);
         return 1;
     }
 
     if(addr + size > 0x10000)
     {
-        unix_error(0, 0, "program too big: %s", fn);
+        arch_error(0, 0, "program too big: %s", fn);
         if (f != stdin) fclose(f);
         return 1;
     }
 
-    if (f != stdin) fclose(f);
+    if(f != stdin) fclose(f);
 
     return (cbm_upload(fd, unit, addr, buf, size) == (int)size) ? 0 : 1;
 }
@@ -356,15 +335,15 @@ static int do_detect(CBM_FILE fd, char *argv[])
 
     num_devices = 0;
 
-    for (device = 8; device < 16; device++)
+    for( device = 8; device < 16; device++ )
     {
-        if (cbm_identify(fd, device, NULL, &type_str) == 0)
+        if( cbm_identify( fd, device, NULL, &type_str ) == 0 )
         {
             num_devices++;
             printf( "%2d: %s\n", device, type_str );
         }
     }
-    set_errno(0);
+    arch_set_errno(0);
     return num_devices > 0 ? 0 : 1;
 }
 
@@ -399,44 +378,45 @@ static struct prog *find_main(char *name)
 {
     int i;
 
-    for (i=0; prog_table[i].name; i++) {
-        if (strcmp(name, prog_table[i].name) == 0) {
+    for(i=0; prog_table[i].name; i++)
+    {
+        if(strcmp(name, prog_table[i].name) == 0)
+        {
             return &prog_table[i];
         }
     }
     return NULL;
 }
 
-
-int __cdecl main(int argc, char *argv[])
+int ARCH_MAINDECL main(int argc, char *argv[])
 {
     struct prog *p;
     int i;
 
     p = argc < 2 ? NULL : find_main(argv[1]);
-    if (p)
+    if(p)
     {
-        if ((p->req_args_min <= argc-2) && (p->req_args_max >= argc-2))
+        if((p->req_args_min <= argc-2) && (p->req_args_max >= argc-2))
         {
             CBM_FILE fd;
             int rv;
 
             rv = cbm_driver_open(&fd, 0);
-            
-            if (rv == 0)
+
+            if(rv == 0)
             {
                 rv = p->prog(fd, &argv[2]) != 0;
-                if (rv && get_errno())
+                if(rv && arch_get_errno())
                 {
-                    unix_error(0, get_errno(), "%s", argv[1]);
+                    arch_error(0, arch_get_errno(), "%s", argv[1]);
                 }
                 cbm_driver_close(fd);
             }
             else
             {
-                if (get_errno())
+                if(arch_get_errno())
                 {
-                    unix_error(0, get_errno(), "%s", cbm_get_driver_name(0));
+                    arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
                 }
                 rv = 1;
             }
@@ -444,14 +424,15 @@ int __cdecl main(int argc, char *argv[])
         }
         else
         {
-            unix_error(0, get_errno(), "wrong number of arguments:\n\n  %s %s %s\n",
+            arch_error(0, arch_get_errno(), "wrong number of arguments:\n\n  %s %s %s\n",
                         argv[0], argv[1], p->arglist);
         }
     }
     else
     {
         printf("invalid command, available ones are:\n\n");
-        for (i=0; prog_table[i].prog; i++) {
+        for(i=0; prog_table[i].prog; i++)
+        {
             printf("  %s %s\n", prog_table[i].name, prog_table[i].arglist);
         }
     }

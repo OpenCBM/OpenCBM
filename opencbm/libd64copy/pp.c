@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.1 2004-11-07 11:05:12 strik Exp $";
+    "@(#) $Id: pp.c,v 1.2 2004-12-07 19:44:48 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -17,11 +17,7 @@ static char *rcsid =
 
 #include <stdlib.h>
 
-#ifndef WIN32
-    #ifndef USE_CBM_IEC_WAIT
-        #include <unistd.h>
-    #endif /* USE_CBM_IEC_WAIT */
-#endif // #ifndef WIN32
+#include "arch.h"
 
 enum pp_direction_e
 {
@@ -44,7 +40,7 @@ static void pp_check_direction(enum pp_direction_e dir)
     static enum pp_direction_e direction = PP_READ;
     if(direction != dir)
     {
-        usleep(100);
+        arch_usleep(100);
         direction = dir;
     }
 }
@@ -100,7 +96,7 @@ static int read_block(unsigned char tr, unsigned char se, char *block)
 
     pp_write(fd_cbm, tr, se);
 #ifndef USE_CBM_IEC_WAIT    
-    usleep(20000);
+    arch_usleep(20000);
 #endif
     pp_read(fd_cbm, &status, &status);
 
@@ -125,7 +121,7 @@ static int write_block(unsigned char tr, unsigned char se, const char *blk, int 
 
 #ifndef USE_CBM_IEC_WAIT    
     if(size == BLOCKSIZE) {
-        usleep(20000);
+        arch_usleep(20000);
     }
 #endif
 

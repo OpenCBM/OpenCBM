@@ -1,6 +1,6 @@
 DIRS= \
+	arch \
 	cbmformat \
-	unixcompat \
 	libcbmcopy \
 	cbmcopy \
 	libd64copy \
