@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.4 2004-11-21 15:29:41 strik Exp $ \n
+** \version $Id: debug.c,v 1.5 2004-11-21 15:42:53 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -1090,20 +1090,40 @@ DbgOutputMemoryBuffer(const char *String)
 
     if (DbgMemoryBuffer)
     {
-        int strLength;
+        ULONG strLength;
+
+        if (DbgNextWriteMemoryBuffer > DBG_SIZE_MEMORY_BUFFER)
+        {
+            KeBugCheckEx(0x123, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, -1, 0);
+        }
         
         strLength = strlen(String) + 1;
+
+        if (strLength >= 200)
+        {
+            KeBugCheckEx(0x123, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, strLength, 0);
+        }
         
         // Does the string fit into the buffer?
 
-        if (DbgNextWriteMemoryBuffer + strLength >= DBG_SIZE_MEMORY_BUFFER)
+        if (DbgNextWriteMemoryBuffer + strLength > DBG_SIZE_MEMORY_BUFFER)
         {
+            if (DBG_SIZE_MEMORY_BUFFER - DbgNextWriteMemoryBuffer >= strLength)
+            {
+                KeBugCheckEx(0x124, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, strLength, 0);
+            }
+
             RtlZeroMemory(&DbgMemoryBuffer[DbgNextWriteMemoryBuffer],
                 DBG_SIZE_MEMORY_BUFFER - DbgNextWriteMemoryBuffer);
 
             DbgNextWriteMemoryBuffer = 0;
         }
 
+        if (DbgNextWriteMemoryBuffer > DBG_SIZE_MEMORY_BUFFER)
+        {
+            KeBugCheckEx(0x125, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, strLength, 0);
+        }
+        
         if (DbgNextWriteMemoryBuffer > 0)
         {
             DbgMemoryBuffer[DbgNextWriteMemoryBuffer-1] = 13;
@@ -1111,6 +1131,12 @@ DbgOutputMemoryBuffer(const char *String)
 
         RtlCopyMemory(&DbgMemoryBuffer[DbgNextWriteMemoryBuffer], String, strLength);
         DbgNextWriteMemoryBuffer += strLength;
+
+        if (DbgNextWriteMemoryBuffer > DBG_SIZE_MEMORY_BUFFER)
+        {
+            KeBugCheckEx(0x126, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, strLength, 0);
+        }
+        
     }
 
     InterlockedExchange(&DbgMemoryBufferSpinLock, 0);

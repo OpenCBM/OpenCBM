@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/queue.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: queue.c,v 1.2 2004-11-17 20:30:12 strik Exp $ \n
+** \version $Id: queue.c,v 1.3 2004-11-21 15:42:53 strik Exp $ \n
 ** \n
 ** \brief Functions for queueung IRPs
 **
@@ -859,21 +859,60 @@ QueuePoll(PQUEUE Queue, PDEVICE_OBJECT Fdo)
 NTSTATUS
 QueueSignal(PQUEUE Queue)
 {
+#ifdef USE_FAST_START_THREAD
+
+    LARGE_INTEGER timeout;
+
+#endif // #ifdef USE_FAST_START_THREAD
+
     FUNC_ENTER();
 
     // Wake up the waiting thread
 
 #ifdef USE_FAST_START_THREAD
 
-    DBG_IRQL( <= DISPATCH_LEVEL);
-    KeSetEvent(&Queue->NotEmptyEvent, IO_NO_INCREMENT, TRUE);
+    // The fast start of the thread is only allowed if we are running
+    // at PASSIVE_LEVEL.
 
-    DBG_IRQL( < DISPATCH_LEVEL);
-    KeWaitForSingleObject(&Queue->BackSignalEvent,
-        Executive,
-        KernelMode,
-        FALSE,
-        NULL);
+    if (KeGetCurrentIrql() == PASSIVE_LEVEL)
+    {
+        // Make sure the "backsignal event" is not set before we start the thread
+
+        DBG_IRQL( <= DISPATCH_LEVEL);
+        KeClearEvent(&Queue->BackSignalEvent);
+
+
+        // Initialize the timeout value
+
+        timeout.QuadPart = 1;
+
+        // Signal the other thread. Make sure no-one else can disturb us
+        // by setting the last argument (Wait) to TRUE
+
+        DBG_IRQL( == PASSIVE_LEVEL);
+        KeSetEvent(&Queue->NotEmptyEvent, IO_NO_INCREMENT, TRUE);
+
+        // Make sure the other thread is scheduled by waiting for the
+        // "back event"
+
+        // This IRQL restriction "normally" applies. Anyway, as the above
+        // KeSetEvent() was called with Wait == TRUE, in fact, we *are* at
+        // DISPATCH_LEVEL, so this tests does not make sense.
+
+        // DBG_IRQL( < DISPATCH_LEVEL);
+        KeWaitForSingleObject(&Queue->BackSignalEvent,
+            Executive,
+            KernelMode,
+            FALSE,
+            &timeout);
+    }
+    else
+    {
+        // As no fast start is allowed, just signal the thread
+
+        DBG_IRQL( <= DISPATCH_LEVEL);
+        KeSetEvent(&Queue->NotEmptyEvent, IO_NO_INCREMENT, FALSE);
+    }
 
 #else // #ifdef USE_FAST_START_THREAD
 
