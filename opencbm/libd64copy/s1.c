@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.3 2004-12-13 18:19:56 strik Exp $";
+    "@(#) $Id: s1.c,v 1.4 2004-12-22 18:00:20 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -26,10 +26,10 @@ static const unsigned char s1_drive_prog[] = {
 static CBM_FILE fd_cbm;
 static int two_sided;
 
-static int s1_write_byte(CBM_FILE fd, unsigned char c)
+static int s1_write_byte_nohs(CBM_FILE fd, unsigned char c)
 {
     int b, i;
-    for(i=7; i>=0; i--) {
+    for(i=7; ; i--) {
         b=(c >> i) & 1;
         if(b) cbm_iec_set(fd, IEC_DATA); else cbm_iec_release(fd, IEC_DATA);
         cbm_iec_release(fd, IEC_CLOCK);
@@ -46,12 +46,25 @@ static int s1_write_byte(CBM_FILE fd, unsigned char c)
 #endif
         cbm_iec_release(fd, IEC_DATA);
         cbm_iec_set(fd, IEC_CLOCK);
+
+        if(i<=0) return 0;
+
 #ifndef USE_CBM_IEC_WAIT
         while(!cbm_iec_get(fd, IEC_DATA));
 #else
         cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
     }
+}
+
+static int s1_write_byte(CBM_FILE fd, unsigned char c)
+{
+    s1_write_byte_nohs(fd, c);
+#ifndef USE_CBM_IEC_WAIT
+    while(!cbm_iec_get(fd, IEC_DATA));
+#else
+    cbm_iec_wait(fd, IEC_DATA, 1);
+#endif
     return 0;
 }
 
@@ -139,7 +152,8 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
 static void close_disk(void)
 {
     s1_write_byte(fd_cbm, 0);
-    s1_write_byte(fd_cbm, 0);
+    s1_write_byte_nohs(fd_cbm, 0);
+    usleep(100);
 }
 
 static int send_track_map(unsigned char tr, const char *trackmap, unsigned char count)

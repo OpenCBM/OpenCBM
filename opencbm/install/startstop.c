@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.5 2004-11-21 15:23:35 strik Exp $ \n
+** \version $Id: startstop.c,v 1.6 2004-12-22 18:00:18 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -41,12 +41,10 @@
 /*! \brief Output a path
 
  \param Text
-
    Pointer to a string that will be printed before
    the path string.
 
  \param Path
-
    Pointer to a string which contains the path.
 
 */
@@ -64,12 +62,10 @@ OutputPathString(IN PCHAR Text, IN PCHAR Path)
 /*! \brief Output a version string
 
  \param Text
-
    Pointer to a string that will be printed before
    the version string.
 
  \param Version
-
    A (coded) version information, as defined by
    CBMT_I_INSTALL_OUT_MAKE_VERSION()
 

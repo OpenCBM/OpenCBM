@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.1 2004-12-22 14:43:21 strik Exp $ \n
+** \version $Id: cbm.c,v 1.2 2004-12-22 18:00:18 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -104,7 +104,6 @@ memdump(IN const char *Where, IN const unsigned char *InputBuffer, IN const size
  Get the name of the driver for a specific parallel port.
 
  \param PortNumber
-
    The port number for the driver to open. 0 means "default" driver, while
    values != 0 enumerate each driver.
 
@@ -128,17 +127,14 @@ cbm_get_driver_name(int PortNumber)
 
  This function Opens the driver.
 
- \param HandleDevice
-  
+ \param HandleDevice  
    Pointer to a CBM_FILE which will contain the file handle of the driver.
 
  \param PortNumber
-
    The port number of the driver to open. 0 means "default" driver, while
    values != 0 enumerate each driver.
 
- \return 
-
+ \return
    ==0: This function completed successfully
    !=0: otherwise
 
@@ -159,8 +155,7 @@ cbm_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 
  Closes the driver, which has be opened with cbm_driver_open() before.
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  cbm_driver_close() should be called to balance a previous call to
@@ -187,20 +182,16 @@ cbm_driver_close(CBM_FILE HandleDevice)
 
  This function sends data after a cbm_listen().
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  \param Buffer
-
    Pointer to a buffer which hold the bytes to write to the bus.
 
  \param Count
-
    Number of bytes to be written.
 
  \return
-
    >= 0: The actual number of bytes written. 
    <0  indicates an error.
 
@@ -238,20 +229,16 @@ cbm_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 
  This function retrieves data after a cbm_talk().
 
- \param HandleDevice
-  
+ \param HandleDevice 
    A CBM_FILE which contains the file handle of the driver.
 
  \param Buffer
-
    Pointer to a buffer which will hold the bytes read.
 
  \param Count
-
    Number of bytes to be read at most.
 
  \return
-
    >= 0: The actual number of bytes read. 
    <0  indicates an error.
 
@@ -290,21 +277,17 @@ cbm_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
  This prepares a LISTENer, so that it will wait for our
  bytes we will write in the future.
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
-
    The address of the device on the IEC serial bus. This
    is known as primary address, too.
 
  \param SecondaryAddress
-
    The secondary address for the device on the IEC serial bus.
 
  \return
-
    0 means success, else failure
 
  If cbm_driver_open() did not succeed, it is illegal to 
@@ -334,21 +317,17 @@ cbm_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddr
  This prepares a TALKer, so that it will prepare to send
  us some bytes in the future.
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
-
    The address of the device on the IEC serial bus. This
    is known as primary address, too.
 
  \param SecondaryAddress
-
    The secondary address for the device on the IEC serial bus.
 
  \return
-
    0 means success, else failure
 
  If cbm_driver_open() did not succeed, it is illegal to 
@@ -376,30 +355,24 @@ cbm_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
 
  This function opens a file on the IEC serial bus.
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
-
    The address of the device on the IEC serial bus. This
    is known as primary address, too.
 
  \param SecondaryAddress
-
    The secondary address for the device on the IEC serial bus.
 
  \param Filename
-
    The filename of the file to be opened
 
  \param FilenameLength
-
    The size of the Filename. If zero, the Filename has to be
    a null-terminated string.
 
  \return
-
    0 means success, else failure
 
  If cbm_driver_open() did not succeed, it is illegal to 
@@ -451,21 +424,17 @@ cbm_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
 
  This function closes a file on the IEC serial bus.
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
-
    The address of the device on the IEC serial bus. This
    is known as primary address, too.
 
  \param SecondaryAddress
-
    The secondary address for the device on the IEC serial bus.
 
  \return
-
    0 on success, else failure
 
  If cbm_driver_open() did not succeed, it is illegal to 
@@ -497,12 +466,10 @@ cbm_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddre
  to just one device, but to all devices on that IEC
  serial bus. 
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  \return
-
    0 on success, else failure
 
  At least on a 1541 floppy drive, an UNLISTEN also undoes
@@ -531,12 +498,10 @@ cbm_unlisten(CBM_FILE HandleDevice)
  to just one device, but to all devices on that IEC
  serial bus. 
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  \return
-
    0 on success, else failure
 
  At least on a 1541 floppy drive, an UNTALK also undoes
@@ -564,12 +529,10 @@ cbm_untalk(CBM_FILE HandleDevice)
  This function gets the EOI ("End of Information") flag 
  after reading the IEC serial bus.
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  \return
-
    != 0 if EOI was signalled, else 0.
 
  If a previous read returned less than the specified number
@@ -598,12 +561,10 @@ cbm_get_eoi(CBM_FILE HandleDevice)
  This function resets the EOI ("End of Information") flag
  which might be still set after reading the IEC serial bus.
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  \return
-
    0 on success, != 0 means an error has occured.
 
  If cbm_driver_open() did not succeed, it is illegal to 
@@ -627,12 +588,10 @@ cbm_clear_eoi(CBM_FILE HandleDevice)
  This function performs a hardware RESET of all devices on
  the IEC serial bus.
 
- \param HandleDevice
-  
+ \param HandleDevice  
    A CBM_FILE which contains the file handle of the driver.
 
  \return
-
    0 on success, else failure
 
  Don't overuse this function! Normally, an initial RESET
@@ -667,11 +626,9 @@ cbm_reset(CBM_FILE HandleDevice)
  an XP1541/1571 cable.
 
  \param HandleDevice
-
    A CBM_FILE which contains the file handle of the driver.
 
  \return
-
    the byte which was received on the parallel port
 
  This function reads the current state of the port. No handshaking
@@ -738,11 +695,9 @@ cbm_pp_write(CBM_FILE HandleDevice, __u_char Byte)
  This function reads the state of all lines on the IEC serial bus.
 
  \param HandleDevice
-
    A CBM_FILE which contains the file handle of the driver.
 
  \return
-
    The state of the lines. The result is an OR between
    the bit flags IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
 
@@ -774,13 +729,11 @@ cbm_iec_poll(CBM_FILE HandleDevice)
  This function activates (sets to 0V) a line on the IEC serial bus.
 
  \param HandleDevice
-
    A CBM_FILE which contains the file handle of the driver.
 
  \param Line
-
    The line to be activated. This must be exactly one of
-   IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
+   IEC_DATA, IEC_CLOCK, or IEC_ATN.
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
@@ -808,13 +761,11 @@ cbm_iec_set(CBM_FILE HandleDevice, int Line)
  This function deactivates (sets to 5V) a line on the IEC serial bus.
 
  \param HandleDevice
-
    A CBM_FILE which contains the file handle of the driver.
 
  \param Line
-
    The line to be deactivated. This must be exactly one of
-   IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
+   IEC_DATA, IEC_CLOCK, or IEC_ATN.
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
@@ -843,7 +794,6 @@ cbm_iec_release(CBM_FILE HandleDevice, int Line)
  on the IEC serial bus.
 
  \param HandleDevice
-
    A CBM_FILE which contains the file handle of the driver.
 
  \param Line
@@ -887,16 +837,13 @@ cbm_iec_wait(CBM_FILE HandleDevice, int Line, int State)
  This function gets the (logical) state of a line on the IEC serial bus.
 
  \param HandleDevice
-
    A CBM_FILE which contains the file handle of the driver.
 
  \param Line
-
    The line to be tested. This must be exactly one of
    IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
 
  \return
-
    1 if the line is set, 0 if it is not
 
  If cbm_driver_open() did not succeed, it is illegal to 
@@ -924,30 +871,24 @@ cbm_iec_get(CBM_FILE HandleDevice, int Line)
  via use of "M-W" commands.
 
  \param HandleDevice
-
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
-
    The address of the device on the IEC serial bus. This
    is known as primary address, too.
 
  \param DriveMemAddress
-
    The address in the drive's memory where the program is to be
    stored.
    
  \param Program
-
    Pointer to a byte buffer which holds the program in the 
    caller's address space.
 
  \param Size
-
    The size of the program to be stored, in bytes.
 
  \return
-
    Returns the number of bytes written into program memory.
    If it does not equal Size, than an error occurred.
 
@@ -1109,25 +1050,20 @@ cbm_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress,
  This function Executes a command in the connected floppy drive.
 
  \param HandleDevice
-
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
-
    The address of the device on the IEC serial bus. This
    is known as primary address, too.
 
  \param Command
-
    Pointer to a string which holds the command to be executed.
 
  \param Size
-
    The length of the command in bytes. If zero, the Command
    has to be a null-terminated string.
 
  \return
-
    0 on success.
 
  If cbm_driver_open() did not succeed, it is illegal to 

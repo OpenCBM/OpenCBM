@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.4 2004-12-22 14:57:04 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.5 2004-12-22 18:00:17 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -55,6 +55,9 @@ extern "C" {
 # define WINAPI /*!< WINAPI is a dummy on MS-DOS */
 # define CBM_FILE int /*!< The "file descriptor" for an opened driver */
 # define __u_char unsigned char /*!< __u_char as unsigned char */
+
+extern int vdd_init(void);
+extern void vdd_uninit(void);
 
 #else
 

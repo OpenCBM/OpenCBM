@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.8 2004-11-25 19:54:25 strik Exp $ \n
+** \version $Id: debug.c,v 1.9 2004-12-22 18:00:21 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -1213,11 +1213,9 @@ DbgFreeMemoryBuffer(VOID)
  output buffer.
 
  \param String:
-
     Pointer to the string which is to be output
 
  \todo
-
     More debugging for the sanity checks to find the
     cause why DbgBufferSynchronizeStart() does not work
     without using the SpinLock.

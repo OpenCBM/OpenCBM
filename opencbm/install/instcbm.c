@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.6 2004-11-21 15:29:40 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.7 2004-12-22 18:00:17 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -601,6 +601,12 @@ RemoveDriver(parameter_t *Parameter)
         DBG_PRINT((DBG_PREFIX "Trying to delete %s", driverSystemPath));
         DeleteFile(driverSystemPath);
 
+        // try to delete opencbmvdd.dll
+
+        strcpy(&driverSystemPath[driverSystemLen], "OPENCBMVDD.DLL");
+        DBG_PRINT((DBG_PREFIX "Trying to delete %s", driverSystemPath));
+        DeleteFile(driverSystemPath);
+
         strcpy(&driverSystemPath[driverSystemLen], "DRIVERS\\");
 
         // Remember the new length of the system driver path
@@ -803,11 +809,22 @@ InstallDriver(parameter_t *Parameter)
                         }
                         else
                         {
-                            printf("\n");
-                            strcpy(driverSystemPath, "System32\\DRIVERS\\");
-                            strcat(driverSystemPath, driverToUse);
-                            CbmInstall(OPENCBM_DRIVERNAME, driverSystemPath,
-                                Parameter->AutomaticStart);
+                            strcpy(&driverLocalPath[driverLocalLen], "opencbmvdd.dll");
+                            strcpy(&driverSystemPath[driverSystemLen], "opencbmvdd.dll");
+                            printf("\nCopying '%s' to '%s'", driverLocalPath, driverSystemPath);
+                            if (!CopyFile(driverLocalPath, driverSystemPath, FALSE))
+                            {
+                                error = 10;
+                                printf(" FAILED!\n");
+                            }
+                            else
+                            {
+                                printf("\n");
+                                strcpy(driverSystemPath, "System32\\DRIVERS\\");
+                                strcat(driverSystemPath, driverToUse);
+                                CbmInstall(OPENCBM_DRIVERNAME, driverSystemPath,
+                                    Parameter->AutomaticStart);
+                            }
                         }
                     }
 

@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/test.cpp \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: TEST.CPP,v 1.1 2004-12-22 14:57:04 strik Exp $ \n
+** \version $Id: TEST.CPP,v 1.2 2004-12-22 18:00:21 strik Exp $ \n
 ** \n
 ** \brief Some tests for the DOS API
 **
@@ -110,12 +110,16 @@ writefile(CBM_FILE f, __u_char drv, const char * const filename)
     n = cbm_open(f, drv, 2, filename, 0);
     printf("cbm_open \"%s\" %s!\n", filename, n == 0 ? "success" : "FAILED");
 
-    cbm_listen(f, drv, 2);
-    cbm_raw_write(f, text, strlen(text));
-    cbm_unlisten(f);
+    if (n == 0)
+    {
+        cbm_listen(f, drv, 2);
+        cbm_raw_write(f, text, strlen(text));
+        cbm_unlisten(f);
 
-    n = cbm_close(f, drv, 2);
-    printf("cbm_close %s!\n", n == 0 ? "success" : "FAILED");
+        n = cbm_close(f, drv, 2);
+        printf("cbm_close %s!\n", n == 0 ? "success" : "FAILED");
+    }
+
     printf("\n");
 }
 
@@ -127,36 +131,99 @@ readfile(CBM_FILE f, __u_char drv, const char * const filename)
     n = cbm_open(f, drv, 2, filename, 0);
     printf("cbm_open \"%s\" %s!\n", filename, n == 0 ? "success" : "FAILED");
 
-    printf("File contents: '");
-    cbm_talk(f, drv, 2);
-
-    while (!cbm_get_eoi(f))
+    if (n==0)
     {
-        char c;
+        printf("File contents: '");
+        cbm_talk(f, drv, 2);
 
-        cbm_raw_read(f, &c, 1);
+        while (!cbm_get_eoi(f))
+        {
+            char c;
 
-        printf("%c", c);
+            cbm_raw_read(f, &c, 1);
+
+            printf("%c", c);
+        }
+        printf("'\n");
+        cbm_untalk(f);
+
+        n = cbm_close(f, drv, 2);
+        printf("cbm_close %s!\n", n == 0 ? "success" : "FAILED");
     }
-    printf("'\n");
-    cbm_untalk(f);
-
-    n = cbm_close(f, drv, 2);
-    printf("cbm_close %s!\n", n == 0 ? "success" : "FAILED");
     printf("\n");
 }
 
-#define DRV 9
+void
+changelines(CBM_FILE f)
+{
+    cbm_iec_release(f,IEC_DATA);
+    cbm_iec_release(f,IEC_ATN);
+    cbm_iec_release(f,IEC_CLOCK);
 
-int main(void)
+    sleep(2);
+
+    for (int atn=0; atn<2; atn++)
+    {
+        if (atn)
+            cbm_iec_set(f, IEC_ATN);
+        else
+            cbm_iec_release(f, IEC_ATN);
+
+        for (int clk=0; clk<2; clk++)
+        {
+            if (clk)
+                cbm_iec_set(f, IEC_CLOCK);
+            else
+                cbm_iec_release(f, IEC_CLOCK);
+
+            for (int data=0; data<2; data++)
+            {
+                if (data)
+                    cbm_iec_set(f, IEC_DATA);
+                else
+                    cbm_iec_release(f, IEC_DATA);
+
+                sleep(1);
+            }
+        }
+    }
+}
+
+int main(int argc, char **argv)
 {
     int ret, n;
+    unsigned char drive = 8;
     CBM_FILE f;
     char buffer[80];
     char *devicetype_str;
+    const char *drivername;
     enum cbm_device_type_e devicetype;
+    int checklines = 0;
 
-    printf("VDDTEST " __DATE__ " " __TIME__ "\n");
+    if (argc>1)
+    {
+        int i;
+
+        for (i=0; i < argc; i++)
+        {
+            switch (argv[i][0])
+            {
+            case '-':
+                    checklines = 1;
+                    break;
+
+            default:
+                    drive = atoi(argv[i]);
+            }
+        }
+    }
+
+    printf("VDDTEST " __DATE__ " " __TIME__ ", using drive %u\n", drive);
+
+    vdd_init();
+
+    drivername = cbm_get_driver_name(0);
+    printf("cbm_get_driver_name() returned %s.\n", drivername);
 
     ret = cbm_driver_open(&f, 0);
 
@@ -170,29 +237,34 @@ int main(void)
     n = cbm_reset(f);
     printf("cbm_reset %s\n", n==0 ? "success" : "FAILED");
 
-    n = cbm_device_status(f, DRV, buffer, sizeof(buffer));
+    if (checklines)
+    {
+        changelines(f);
+    }
+
+    n = cbm_device_status(f, drive, buffer, sizeof(buffer));
     printf("cbm_device_status returned: %u\n%s\n\n", n, buffer);
 
-    n = cbm_open(f, DRV, 15, "I0", 0);
-    printf("cbm_open 8,15,\"I0\" %s!\n", n == 0 ? "success" : "FAILED");
-    n = cbm_close(f, DRV, 15);
+    n = cbm_open(f, drive, 15, "I0", 0);
+    printf("cbm_open %u,15,\"I0\" %s!\n", drive, n == 0 ? "success" : "FAILED");
+    n = cbm_close(f, drive, 15);
     printf("cbm_close %s!\n", n == 0 ? "success" : "FAILED");
 
-    n = own_device_status(f, DRV, buffer, sizeof(buffer));
+    n = own_device_status(f, drive, buffer, sizeof(buffer));
     printf("own_device_status returned: %u\n%s\n\n", n, buffer);
 
-    n = cbm_identify(f, DRV, &devicetype, &devicetype_str);
+    n = cbm_identify(f, drive, &devicetype, &devicetype_str);
     printf("cbm_identify %s!\n", n==0 ? "success" : "FAILED");
     printf("cbm_identify returned: %u - '%s'.\n\n", (unsigned) devicetype,
                          devicetype_str);
 
-    n = cbm_exec_command(f, DRV, "S0:CBM4WIN.VDD", 0);
+    n = cbm_exec_command(f, drive, "S0:CBM4WIN.VDD", 0);
     printf("cbm_exec_command(scratch) %s!\n", n==0 ? "success" : "FAILED");
 
-    writefile(f, DRV, "CBM4WIN.VDD,S,W");
-    readfile(f, DRV, "CBM4WIN.VDD,S,R");
+    writefile(f, drive, "CBM4WIN.VDD,S,W");
+    readfile(f, drive, "CBM4WIN.VDD,S,R");
 
-    morse(f, DRV);
+    morse(f, drive);
 
     cbm_driver_close(f);
     printf("cbm_driver_close success!\n");

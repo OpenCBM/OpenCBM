@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s2.c,v 1.3 2004-12-13 18:19:56 strik Exp $";
+    "@(#) $Id: s2.c,v 1.4 2004-12-22 18:00:20 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -49,10 +49,10 @@ static int s2_read_byte(CBM_FILE fd, unsigned char *c)
     return 0;
 }
 
-static int s2_write_byte(CBM_FILE fd, unsigned char c)
+static int s2_write_byte_nohs(CBM_FILE fd, unsigned char c)
 {
     int i;
-    for(i=4; i>0; i--) {
+    for(i=4; ; i--) {
         c & 1 ? cbm_iec_set(fd, IEC_DATA) : cbm_iec_release(fd, IEC_DATA);
         c >>= 1;
         cbm_iec_release(fd, IEC_ATN);
@@ -64,12 +64,25 @@ static int s2_write_byte(CBM_FILE fd, unsigned char c)
         c & 1 ? cbm_iec_set(fd, IEC_DATA) : cbm_iec_release(fd, IEC_DATA);
         c >>= 1;
         cbm_iec_set(fd, IEC_ATN);
+
+        if(i<=1) return 0;
+
 #ifndef USE_CBM_IEC_WAIT
         while(!cbm_iec_get(fd, IEC_CLOCK));
 #else
         cbm_iec_wait(fd, IEC_CLOCK, 1);
 #endif
     }
+}
+
+static int s2_write_byte(CBM_FILE fd, unsigned char c)
+{
+    s2_write_byte_nohs(fd, c);
+#ifndef USE_CBM_IEC_WAIT
+    while(!cbm_iec_get(fd, IEC_CLOCK));
+#else
+    cbm_iec_wait(fd, IEC_CLOCK, 1);
+#endif
     cbm_iec_release(fd, IEC_DATA);
     return 0;
 }
@@ -131,7 +144,9 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
 static void close_disk(void)
 {
     s2_write_byte(fd_cbm, 0);
-    s2_write_byte(fd_cbm, 0);
+    s2_write_byte_nohs(fd_cbm, 0);
+    usleep(100);
+    cbm_iec_release(fd_cbm, IEC_DATA);
     cbm_iec_release(fd_cbm, IEC_ATN);
     cbm_iec_set(fd_cbm, IEC_CLOCK);
 }

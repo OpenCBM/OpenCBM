@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/cbmfile.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmfile.c,v 1.1 2004-12-22 14:43:22 strik Exp $ \n
+** \version $Id: cbmfile.c,v 1.2 2004-12-22 18:00:21 strik Exp $ \n
 ** \n
 ** \brief Function for handling the CBM_FILE to BX conversions
 **
@@ -55,7 +55,8 @@ init_cbmfiles(void)
     }
 }
 
-CBM_FILE vdd_cbmfile_get(WORD a)
+CBM_FILE
+vdd_cbmfile_get(WORD a)
 {
     CBM_FILE ret;
 
@@ -73,7 +74,8 @@ CBM_FILE vdd_cbmfile_get(WORD a)
     return ret;
 }
 
-WORD vdd_cbmfile_store(CBM_FILE cbmfile)
+WORD
+vdd_cbmfile_store(CBM_FILE cbmfile)
 {
     WORD i;
 
@@ -98,21 +100,37 @@ WORD vdd_cbmfile_store(CBM_FILE cbmfile)
     return i;
 }
 
-CBM_FILE vdd_cbmfile_delete(WORD a)
+CBM_FILE
+vdd_cbmfile_delete(WORD a)
 {
     CBM_FILE cbmfile;
 
     init_cbmfiles();
 
-    if (CbmFile[a] != INVALID_HANDLE_VALUE)
+    cbmfile = INVALID_HANDLE_VALUE;
+
+    if (a < MAX_CBMFILE_VALUES)
     {
-        cbmfile = CbmFile[a];
-        CbmFile[a] = INVALID_HANDLE_VALUE;
-    }
-    else
-    {
-        cbmfile = INVALID_HANDLE_VALUE;
+        if (CbmFile[a] != INVALID_HANDLE_VALUE)
+        {
+            cbmfile = CbmFile[a];
+            CbmFile[a] = INVALID_HANDLE_VALUE;
+        }
     }
 
     return cbmfile;
+}
+
+VOID
+vdd_cbmfile_closeall(VOID)
+{
+    int i;
+
+    init_cbmfiles();
+
+    for (i=0; i < MAX_CBMFILE_VALUES; i++)
+    {
+        cbm_driver_close(CbmFile[i]);
+        CbmFile[i] = INVALID_HANDLE_VALUE;
+    }
 }

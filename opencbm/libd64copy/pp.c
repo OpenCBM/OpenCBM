@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.3 2004-12-13 18:19:56 strik Exp $";
+    "@(#) $Id: pp.c,v 1.4 2004-12-22 18:00:20 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -45,7 +45,7 @@ static void pp_check_direction(enum pp_direction_e dir)
     }
 }
 
-static int pp_write(CBM_FILE fd, char c1, char c2)
+static int pp_write_nohs(CBM_FILE fd, char c1, char c2)
 {
     pp_check_direction(PP_WRITE);
     cbm_pp_write(fd, c1);
@@ -58,12 +58,18 @@ static int pp_write(CBM_FILE fd, char c1, char c2)
 
     cbm_pp_write(fd, c2);
     cbm_iec_set(fd, IEC_CLOCK);
+
+    return 0;
+}
+
+static int pp_write(CBM_FILE fd, char c1, char c2)
+{
+    pp_write_nohs(fd, c1, c2);
 #ifndef USE_CBM_IEC_WAIT
     while(!cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
-
     return 0;
 }
 
@@ -161,7 +167,8 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
 
 static void close_disk(void)
 {
-    pp_write(fd_cbm, 0, 0);
+    pp_write_nohs(fd_cbm, 0, 0);
+    usleep(100);
     cbm_iec_wait(fd_cbm, IEC_DATA, 0);
 }
 

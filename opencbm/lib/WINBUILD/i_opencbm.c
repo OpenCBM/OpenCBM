@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.1 2004-12-22 14:43:21 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.2 2004-12-22 18:00:18 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -59,20 +59,16 @@
  wrapper for convenience.
 
  \param RegKey
-
    A handle to an already opened registry key.
 
  \param SubKey
-
    Pointer to a null-terminiated string which holds the name
    of the value to be created or changed.
 
  \param Value
-
    Pointer to a variable which will contain the value from the registry
 
  \return
-
    ERROR_SUCCESS on success, -1 otherwise
 
  If this function returns -1, the given Value will not be changed at all!
@@ -117,7 +113,6 @@ RegGetDWORD(IN HKEY RegKey, IN char *SubKey, OUT LPDWORD Value)
  to be opened as default.
 
  \return 
-
    Returns the number of the parallel port to be opened as default,
    starting with 0.
 
@@ -221,7 +216,6 @@ cbm_i_get_debugging_flags(VOID)
  Get the name of the driver for a specific parallel port.
 
  \param PortNumber
-
    The port number for the driver to open. 0 means "default" driver, while
    values != 0 enumerate each driver.
 
@@ -268,17 +262,14 @@ cbm_i_get_driver_name(int PortNumber)
 
  This function Opens the driver.
 
- \param HandleDevice
-  
+ \param HandleDevice  
    Pointer to a CBM_FILE which will contain the file handle of the driver.
 
  \param PortNumber
-
    The port number of the driver to open. 0 means "default" driver, while
    values != 0 enumerate each driver.
 
  \return 
-
    ==0: This function completed successfully
    !=0: otherwise
 
@@ -327,7 +318,6 @@ cbm_i_driver_open(CBM_FILE *HandleDevice, int PortNumber)
  Closes the driver, which has be opened with cbm_driver_open() before.
 
  \param HandleDevice
-  
    A CBM_FILE which contains the file handle of the driver.
 
  cbm_driver_close() should be called to balance a previous call to
@@ -355,41 +345,33 @@ cbm_i_driver_close(CBM_FILE HandleDevice)
  It is used internally only.
 
  \param HandleDevice
-  
    A CBM_FILE which contains the file handle of the driver.
 
  \param ControlCode
-
    The ControlCode of the IOCTL to be performed.
 
  \param TextControlCode
-
    A string representation of the IOCTL to be performed. This is
    used for debugging purposes, only, and not available in
    free builds.
 
  \param InBuffer
-
    Pointer to a buffer which holds the input parameters for the
    IOCTL. Can be NULL if no input buffer is needed.
 
  \param InBufferSize
-
    Size of the buffer pointed to by InBuffer. If InBuffer is NULL,
    this has to be zero,
 
  \param OutBuffer
-
    Pointer to a buffer which holds the output parameters of the
    IOCTL. Can be NULL if no output buffer is needed.
 
  \param OutBufferSize
-
    Size of the buffer pointed to by OutBuffer. If OutBuffer is NULL,
    this has to be zero,
 
  \return
-
    TRUE: IOCTL succeeded, else
    FALSE  an error occurred processing the IOCTL
 

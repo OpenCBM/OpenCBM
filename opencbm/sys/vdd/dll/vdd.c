@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/vdd.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.c,v 1.1 2004-12-22 14:43:22 strik Exp $ \n
+** \version $Id: vdd.c,v 1.2 2004-12-22 18:00:22 strik Exp $ \n
 ** \n
 ** \brief VDD for accessing the driver from DOS
 **
@@ -50,6 +50,23 @@ EXTERN BOOL VDDInitialize(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 EXTERN VOID VDDRegisterInit(VOID);
 EXTERN VOID VDDDispatch(VOID);
 
+/*! \brief VDD blocking callback
+
+ Whenever the VDD is blocked (that is, there is no active DOS program
+ left), this function is called. This opportunity is used to close
+ all active CBM_FILE handles.
+*/
+
+static VOID
+VDDBlockHandler(VOID)
+{
+    FUNC_ENTER();
+
+    vdd_cbmfile_closeall();
+
+    FUNC_LEAVE();
+}
+
 /*! \brief VDD initialization und unloading
 
  This function is called whenever the VDD is loaded or unloaded.
@@ -77,16 +94,18 @@ VDDInitialize(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 
     DBG_PRINT((DBG_PREFIX "OpencbmVDD.Entry: " __DATE__ " " __TIME__));
 
-    DbgFlags |= DBGF_PARAM;
-
     switch (Reason) 
     {
         case DLL_PROCESS_ATTACH:
-            DBG_PRINT((DBG_PREFIX "ATTACH"));
+            VDDInstallUserHook(Module, NULL, NULL, VDDBlockHandler, NULL);
             break;
 
         case DLL_PROCESS_DETACH:
-            DBG_PRINT((DBG_PREFIX "DETACH"));
+            VDDDeInstallUserHook(Module);
+
+            // make sure all CBM_FILE handles are closed
+            // whenever this VDD is unloaded
+            vdd_cbmfile_closeall();
             break;
 
         default:
@@ -108,7 +127,6 @@ VDDRegisterInit(VOID)
 {
     FUNC_ENTER();
 
-    DBG_PRINT((DBG_PREFIX "RegisterInit"));
     setCF(0);
 
     FUNC_LEAVE();
@@ -127,20 +145,8 @@ VDDDispatch(VOID)
     CBM_FILE cbmfile;
     BOOLEAN error;
 
-#if 0
-    int port;
-    int size;
-    UCHAR priaddr_or_line;
-    UCHAR secaddr_or_state;
-    WORD buffer;
-    WORD upload_address;
-
-#endif
-
     FUNC_ENTER();
 
-    DBG_PRINT((DBG_PREFIX "Dispatch"));
-    
     FUNC_PARAM((DBG_PREFIX
         "CALL:\n"
         "EAX = %08x, EBX = %08x, ECX = %08x, EDX = %08x,\n"
@@ -155,112 +161,15 @@ VDDDispatch(VOID)
 
     functioncode = getDL();
 
-#if 0
-    /* Process the handle to the file for everything but
-     * FC_DRIVER_OPEN and FC_GET_DRIVER_NAME
-     */
-
-    switch (functioncode)
-    {
-    case FC_DRIVER_OPEN:
-    case FC_GET_DRIVER_NAME:
-        break;
-
-    default:
-        cbmfile = (CBM_FILE) getEBX();
-        break;
-    }
-
-    /* get a port or a size from CX (or DI in the case of FC_CBM_OPEN)
-     * for commands which have this parameter
-     */
-    switch (functioncode)
-    {
-    case FC_DRIVER_OPEN:
-        port = getCX();
-        break;
-
-    case FC_GET_DRIVER_NAME:
-        port = getCX();
-        size = getDI();
-        break;
-
-    case FC_RAW_READ:
-    case FC_RAW_WRITE:
-    case FC_UPLOAD:
-    case FC_DEVICE_STATUS:
-    case FC_EXEC_COMMAND:
-    case FC_IDENTIFY:
-        size = getCX();
-        break;
-
-    case FC_OPEN:
-        size = getDI();
-        break;
-
-    default:
-        break;
-    }
-
-    /* process primary and secondary address for commands 
-     * which have these (primary in DH, secondary in CL) */
-
-    switch (functioncode)
-    {
-    case FC_IEC_RELEASE:
-
-    case FC_LISTEN:
-    case FC_TALK:
-    case FC_OPEN:
-        /* these commands have primary and secondary address.
-         * at first, process the secondary address: 
-         */
-        secaddr_or_state = getCL();
-
-        /* FALL-THROUGH */
-
-    case FC_IEC_GET:
-    case FC_IEC_SET:
-
-    case FC_PP_WRITE:
-
-    case FC_UPLOAD:
-    case FC_DEVICE_STATUS:
-    case FC_EXEC_COMMAND:
-    case FC_IDENTIFY:
-        priaddr_or_line = getDH();
-    }
-
-    switch (functioncode)
-    {
-    case FC_UPLOAD:
-        upload_address = getDI();
-        /* FALL THROUGH */
-
-    case FC_OPEN:
-    case FC_RAW_READ:
-    case FC_RAW_WRITE:
-    case FC_DEVICE_STATUS:
-    case FC_EXEC_COMMAND:
-    case FC_IDENTIFY:
-        buffer = getSI();
-        break;
-
-    default:
-        buffer = 0;
-        break;
-    }
-
-#else
-
     error = FALSE;
 
     // convert to BX value into a CBM_FILE
     switch (functioncode)
     {
     case FC_DRIVER_OPEN:
-        // FC_DRIVER_OPEN is special,
-	// it does not have a BX input.
+    case FC_GET_DRIVER_NAME:
+        // FC_DRIVER_OPEN and FC_GER_DRIVER_NAME are special,
+        // they do not have a BX input.
         break;
 
     default:
@@ -302,6 +211,7 @@ VDDDispatch(VOID)
         case FC_DEVICE_STATUS:   error = vdd_device_status(cbmfile); break; 
         case FC_EXEC_COMMAND:    error = vdd_exec_command(cbmfile);  break;
         case FC_IDENTIFY:        error = vdd_identify(cbmfile);      break;
+        case FC_GET_DRIVER_NAME: error = vdd_get_driver_name();      break;
 
         default:
             // this function is not implemented:
@@ -310,8 +220,6 @@ VDDDispatch(VOID)
             break;
         }
     }
-
-#endif
 
     setCF(error ? 1 : 0);
 

@@ -431,6 +431,7 @@ INPUT                  = cbmctrl/ \
                          sys/libcommon/ \
                          sys/libiec/ \
                          sys/nt4/ \
+                         sys/vdd/ \
                          sys/wdm/ \
                          cbmcopy/ \
                          cbmformat/ \

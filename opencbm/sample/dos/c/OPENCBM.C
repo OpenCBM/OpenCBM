@@ -2,7 +2,7 @@
 // TINY, SMALL.
 // Other's may work, but are not tested.
 // Essentially, this program assumes that all data is accessed
-// via DS, and DS and ES are always the same.
+// via DS, and that DS, ES and SS are always the same.
 
 
 /*
@@ -17,7 +17,7 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/opencbn.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: OPENCBM.C,v 1.1 2004-12-22 14:57:04 strik Exp $ \n
+** \version $Id: OPENCBM.C,v 1.2 2004-12-22 18:00:21 strik Exp $ \n
 ** \n
 ** \brief Library for accessing the driver from DOS
 **
@@ -27,6 +27,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef unsigned int WORD;
 
@@ -53,7 +54,7 @@ static WORD VDD_HANDLE = -1;
 
 static int vdd_initialized = 0;
 
-static int
+int
 vdd_init(void)
 {
     static const char DllName[] = "OpencbmVDD.DLL";
@@ -105,13 +106,14 @@ vdd_init(void)
     }
     else
     {
+        atexit(vdd_uninit);
         vdd_initialized = 1;
     }
 
     return error ? 1 : 0;
 }
 
-static void
+void
 vdd_uninit(void)
 {
     if (vdd_initialized)
@@ -134,16 +136,21 @@ cbm_driver_open(CBM_FILE *f, int port)
     WORD retax;
 
     vdd_init();
-    atexit(vdd_uninit);
 
-    asm {
-        mov cx,[port]
-        CbmDispatchCallNoBx(0)
-        mov [cbmfile],BX
-        mov [retax],AX
+    if (port < 256)
+    {
+        asm {
+            mov dh,byte ptr [port]
+            CbmDispatchCallNoBx(0)
+            mov [cbmfile],BX
+            mov [retax],AX
+        }
+        *f = cbmfile;
     }
-
-    *f = cbmfile;
+    else
+    {
+        retax = 1;
+    }
 
     return retax;
 }
@@ -158,16 +165,13 @@ cbm_driver_close(CBM_FILE f)
 }
 
 
-// const char * cbm_get_driver_name(int port);
-
-
 int
 cbm_listen(CBM_FILE f, __u_char dev, __u_char secadr)
 {
     WORD retVal;
 
     asm {
-        mov dh,[dev]
+        mov ch,[dev]
         mov cl,[secadr]
         CbmDispatchCallRetVal(2)
     }
@@ -180,7 +184,7 @@ cbm_talk(CBM_FILE f, __u_char dev, __u_char secadr)
     WORD retVal;
 
     asm {
-        mov dh,[dev]
+        mov ch,[dev]
         mov cl,[secadr]
         CbmDispatchCallRetVal(3)
     }
@@ -193,7 +197,7 @@ cbm_open(CBM_FILE f, __u_char dev, __u_char secadr, const void *fname, size_t le
     WORD retVal;
 
     asm {
-        mov dh,[dev]
+        mov ch,[dev]
         mov cl,[secadr]
         mov si,[fname]
         mov di,[len]
@@ -208,7 +212,7 @@ cbm_close(CBM_FILE f, __u_char dev, __u_char secadr)
     WORD retVal;
 
     asm {
-        mov dh,[dev]
+        mov ch,[dev]
         mov cl,[secadr]
         CbmDispatchCallRetVal(5)
     }
@@ -222,7 +226,7 @@ cbm_raw_read(CBM_FILE f, void *buf, size_t size)
     WORD retVal;
 
     asm {
-        mov di,[buf]
+        mov si,[buf]
         mov cx,[size]
         CbmDispatchCallRetVal(6)
     }
@@ -236,7 +240,7 @@ cbm_raw_write(CBM_FILE f, const void *buf, size_t size)
     WORD retVal;
 
     asm {
-        mov di,[buf]
+        mov si,[buf]
         mov cx,[size]
         CbmDispatchCallRetVal(7)
     }
@@ -319,7 +323,7 @@ void
 cbm_pp_write(CBM_FILE f, __u_char c)
 {
     asm {
-        mov dh,[c]
+        mov cl,[c]
         CbmDispatchCall(14)
     }
 }
@@ -343,28 +347,26 @@ cbm_iec_get(CBM_FILE f, int line)
     WORD retVal;
 
     asm {
-        mov dh,byte ptr [line]
+        mov cl,byte ptr [line]
         CbmDispatchCallRetVal(16)
     }
     return retVal;
 }
 
-// @@@untested
 void
 cbm_iec_set(CBM_FILE f, int line)
 {
     asm {
-        mov dh,byte ptr [line]
+        mov cl,byte ptr [line]
         CbmDispatchCall(17)
     }
 }
 
-// @@@untested
 void
 cbm_iec_release(CBM_FILE f, int line)
 {
     asm {
-        mov dh,byte ptr [line]
+        mov cl,byte ptr [line]
         CbmDispatchCall(18)
     }
 }
@@ -376,8 +378,8 @@ cbm_iec_wait(CBM_FILE f, int line, int state)
     WORD retVal;
 
     asm {
-        mov dh,byte ptr [line]
-        mov cl,byte ptr [state]
+        mov cl,byte ptr [line]
+        mov ch,byte ptr [state]
         CbmDispatchCallRetVal(19)
     }
     return retVal;
@@ -407,7 +409,7 @@ cbm_device_status(CBM_FILE f, __u_char dev, void *buf, size_t bufsize)
 
     asm {
         mov dh,[dev]
-        mov di,[buf]
+        mov si,[buf]
         mov cx,[bufsize]
         CbmDispatchCallRetVal(21)
     }
@@ -454,4 +456,30 @@ cbm_identify(CBM_FILE f, __u_char drv,
         *type_str = local_type_str;
     }
     return retVal;
+}
+
+
+#define GETDRIVERNAME_PORTNAME_MAXLENGTH 256
+static char GetDriverName_Portname[GETDRIVERNAME_PORTNAME_MAXLENGTH];
+
+const char *
+cbm_get_driver_name(int port)
+{
+    if (port<256)
+    {
+        asm {
+            mov dh,byte ptr [port]
+            lea si,[GetDriverName_Portname]
+            mov cx,GETDRIVERNAME_PORTNAME_MAXLENGTH
+            CbmDispatchCallNoBx(24)
+        }
+
+        GetDriverName_Portname[GETDRIVERNAME_PORTNAME_MAXLENGTH-1] = 0;
+    }
+    else
+    {
+        strcpy(GetDriverName_Portname, "<invalid port no!>");
+    }
+
+    return GetDriverName_Portname;
 }
