@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.5 2004-12-07 19:44:45 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.6 2005-03-02 18:17:17 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -143,13 +143,13 @@ static int do_dir(CBM_FILE fd, char *argv[])
                     }
                 }
                 cbm_device_status(fd, unit, buf, sizeof(buf));
-                fprintf(stderr, cbm_petscii2ascii(buf));
+                fprintf(stderr, "%s", cbm_petscii2ascii(buf));
             }
             cbm_untalk(fd);
         }
         else
         {
-            fprintf(stderr, cbm_petscii2ascii(buf));
+            fprintf(stderr, "%s", cbm_petscii2ascii(buf));
         }
         cbm_close(fd, unit, 0);
     }
@@ -244,7 +244,7 @@ static int do_upload(CBM_FILE fd, char *argv[])
     size_t size;
     char *tail, *fn;
     unsigned char addr_buf[2];
-    unsigned char buf[65537];
+    static unsigned char buf[65537];
     FILE *f;
 
     unit = arch_atoc(argv[0]);
@@ -267,7 +267,7 @@ static int do_upload(CBM_FILE fd, char *argv[])
     }
     else
     {
-        size_t filesize;
+        off_t filesize;
 
         fn = argv[2];
         f = fopen(argv[2], "rb");

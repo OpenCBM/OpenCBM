@@ -194,7 +194,11 @@ SOURCE=.\waitlistener.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\include\cbm4win_common.h
+SOURCE=..\include\WINDOWS\arch_cbm_driver.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\include\cbm_driver.h
 # End Source File
 # Begin Source File
 

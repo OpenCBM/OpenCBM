@@ -11,14 +11,14 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: init.c,v 1.2 2005-03-02 18:17:21 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 #include "iec.h"
 
 /*! The name of this device */

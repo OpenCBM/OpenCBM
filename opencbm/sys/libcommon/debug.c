@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.10 2005-02-13 17:58:12 strik Exp $ \n
+** \version $Id: debug.c,v 1.11 2005-03-02 18:17:21 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -23,7 +23,7 @@
 
 // #include <wdm.h>
 #include <ntddk.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 
 #include "../../arch/windows/debug.c"
 

@@ -11,14 +11,14 @@
 /*! ************************************************************** 
 ** \file sys/libiec/dpc.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dpc.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: dpc.c,v 1.2 2005-03-02 18:17:21 strik Exp $ \n
 ** \n
 ** \brief DPC handle for the IEC bus
 **
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 #include "i_iec.h"
 
 #ifdef USE_DPC

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file service.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: service.c,v 1.2 2004-11-16 19:54:34 strik Exp $ \n
+** \version $Id: service.c,v 1.3 2005-03-02 18:17:20 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the service control manager for the OPENCBM driver
 **
@@ -479,6 +479,8 @@ CbmCheckPresence(IN LPCTSTR DriverName)
     SC_HANDLE scService;
 
     FUNC_ENTER();
+
+    scService = NULL;
 
     scManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 

@@ -10,7 +10,7 @@ DLLBASE=0x10000000
 
 DLLENTRY=opencbm_init
 
-INCLUDES=../../include;../
+INCLUDES=../../include;../../include/WINDOWS;../
 
 SOURCES=../cbm.c \
 	../detect.c \

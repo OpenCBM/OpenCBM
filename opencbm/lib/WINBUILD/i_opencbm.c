@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.3 2005-02-13 17:58:12 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.4 2005-03-02 18:17:20 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -579,10 +579,12 @@ cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
 
     FUNC_ENTER();
 
-    DBG_ASSERT(Buffer);
+    DBG_ASSERT(Buffer != NULL);
     DBG_ASSERT(BufferLen >= sizeof(ULONG));
 
     outBuffer = (PCBMT_I_INSTALL_OUT) Buffer;
+
+    DBG_ASSERT(outBuffer != NULL);
 
     if (cbmarch_driver_open(&HandleDevice, 0) == 0)
     {

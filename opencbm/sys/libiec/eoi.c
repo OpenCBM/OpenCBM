@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/eoi.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: eoi.c,v 1.2 2004-12-13 18:19:56 strik Exp $ \n
+** \version $Id: eoi.c,v 1.3 2005-03-02 18:17:22 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -21,7 +21,7 @@
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 #include "i_iec.h"
 
 /*! \brief Check if an EOI signal has been sent over the IEC bus

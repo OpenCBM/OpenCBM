@@ -85,7 +85,7 @@ void arch_error(int AUnused, unsigned int ErrorCode, const char *Format, ...)
                       NULL,
                       ErrorCode,
                       MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-                      (LPTSTR) &ErrorMessageBuffer,
+                      (LPTSTR) ErrorMessageBuffer,
                       sizeof(ErrorMessageBuffer)-1,
                       NULL);
 
@@ -97,34 +97,36 @@ void arch_error(int AUnused, unsigned int ErrorCode, const char *Format, ...)
     // Now, append the optional string to the output
 
     if (Format && *Format)
-
-    va_start(ap, Format);
-
-    n = _vsnprintf(&ErrorMessageBuffer[m], sizeof(ErrorMessageBuffer) - m, Format, ap);
-
-    va_end(ap);
-
-    if (n >= 0)
     {
-        n += m;
-    }
+        va_start(ap, Format);
 
-    if (n < 0 || n >= sizeof(ErrorMessageBuffer)-1)
-    {
-        n = sizeof(ErrorMessageBuffer)-2;
-    }
+        n = _vsnprintf(&ErrorMessageBuffer[m], sizeof(ErrorMessageBuffer) - m, Format, ap);
 
-    // make sure there is a trailing zero
+        va_end(ap);
 
-    ErrorMessageBuffer[n] = 0;
+        if (n >= 0)
+        {
+            n += m;
+        }
 
-    fprintf(stderr, "\nAUnused = %u, ErrorCode = %u: %s\n", AUnused, ErrorCode, ErrorMessageBuffer);
+        if (n < 0 || n >= sizeof(ErrorMessageBuffer)-1)
+        {
+            n = sizeof(ErrorMessageBuffer)-2;
+        }
+
+        // make sure there is a trailing zero
+
+        ErrorMessageBuffer[n] = 0;
+
+        fprintf(stderr, "\nAUnused = %u, ErrorCode = %u: %s\n", AUnused, ErrorCode, ErrorMessageBuffer);
 
 #if DBG
 
-    ErrorMessageBuffer[n] = '\n';
-    ErrorMessageBuffer[n+1] = 0;
-    OutputDebugString(ErrorMessageBuffer);
+        ErrorMessageBuffer[n] = '\n';
+        ErrorMessageBuffer[n+1] = 0;
+        OutputDebugString(ErrorMessageBuffer);
 
 #endif
+
+    }
 }

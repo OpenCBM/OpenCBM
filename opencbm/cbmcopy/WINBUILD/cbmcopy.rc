@@ -7,5 +7,5 @@
 #define VER_FILEDESCRIPTION_STR     "cbmcopy Program for CBM4WIN Parallel Port Driver"
 #define VER_INTERNALNAME_STR        "cbmcopy.exe"
 
-#include "srtcommon.ver"
+#include "version.common.h"
 #include "common.ver"

@@ -11,14 +11,14 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/util-reg.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util-reg.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: util-reg.c,v 1.2 2005-03-02 18:17:21 strik Exp $ \n
 ** \n
 ** \brief Some utility functions for accessing the registry
 **
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 
 /*! \brief Open a registry path for reading
 
@@ -309,13 +309,13 @@ cbm_registry_read_ulong(IN HANDLE HandleKey, IN PCWSTR KeyName, OUT PULONG Value
 
     FUNC_PARAM((DBG_PREFIX "'%ws'", KeyName));
 
-    p = (PKEY_VALUE_PARTIAL_INFORMATION) &buffer;
+    p = (PKEY_VALUE_PARTIAL_INFORMATION) buffer;
 
     RtlInitUnicodeString(&keyNameUnicode, KeyName);
 
     ntStatus = ZwQueryValueKey(HandleKey, &keyNameUnicode, 
         KeyValuePartialInformation, 
-        &buffer, sizeof(buffer), &retValueSize);
+        buffer, sizeof(buffer), &retValueSize);
 
     if (NT_SUCCESS(ntStatus))
     {
@@ -366,7 +366,7 @@ cbm_registry_write_ulong(IN HANDLE HandleKey, IN PCWSTR KeyName, IN ULONG Value)
 
     FUNC_PARAM((DBG_PREFIX "'%ws'", KeyName));
 
-    p = (PKEY_VALUE_PARTIAL_INFORMATION) &buffer;
+    p = (PKEY_VALUE_PARTIAL_INFORMATION) buffer;
 
     RtlInitUnicodeString(&keyNameUnicode, KeyName);
 

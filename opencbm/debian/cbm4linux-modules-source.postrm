@@ -1,0 +1,16 @@
+#! /bin/sh
+# postrm script for cbm4linux
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+#DEBHELPER#
+
+if [ "$1" = "purge" ]; then
+	rmdir --ignore-fail-on-non-empty /etc/cbm4linux
+fi
+
+db_stop
+
+exit 0

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/unlisten.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: unlisten.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: unlisten.c,v 1.2 2005-03-02 18:17:22 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -21,7 +21,7 @@
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 #include "i_iec.h"
 
 /*! \brief Send an UNLISTEN over the IEC bus

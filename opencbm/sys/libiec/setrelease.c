@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/set.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: setrelease.c,v 1.1 2005-01-22 19:50:41 strik Exp $ \n
+** \version $Id: setrelease.c,v 1.2 2005-03-02 18:17:22 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -21,7 +21,7 @@
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 #include "i_iec.h"
 
 /*! \brief Set a specific line on the IEC bus
@@ -58,10 +58,10 @@ cbmiec_iec_setrelease(IN PDEVICE_EXTENSION Pdx, IN USHORT Mask, IN USHORT Line)
 
     // Set the correct line as given by the call
 
-    if ( (Line & !(IEC_LINE_DATA | IEC_LINE_CLOCK | IEC_LINE_ATN | IEC_LINE_RESET))
-        || (Mask & !(IEC_LINE_DATA | IEC_LINE_CLOCK | IEC_LINE_ATN | IEC_LINE_RESET)))
+    if ( (Line & ~(IEC_LINE_DATA | IEC_LINE_CLOCK | IEC_LINE_ATN | IEC_LINE_RESET))
+        || (Mask & ~(IEC_LINE_DATA | IEC_LINE_CLOCK | IEC_LINE_ATN | IEC_LINE_RESET)))
     {
-        // the was some bit set that is not recognized, return
+        // there was some bit set that is not recognized, return
         // with an error
         ntStatus = STATUS_INVALID_PARAMETER;
     }

@@ -11,14 +11,14 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/queue.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: queue.c,v 1.3 2004-11-21 15:42:53 strik Exp $ \n
+** \version $Id: queue.c,v 1.4 2005-03-02 18:17:21 strik Exp $ \n
 ** \n
 ** \brief Functions for queueung IRPs
 **
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 
 /*
  This file contains the quite tricky part of the drivers.

@@ -1,5 +1,5 @@
 TARGETNAME=libiec
-TARGETPATH=..\..\bin
+TARGETPATH=../../bin
 TARGETTYPE=DRIVER_LIBRARY
 USE_PDB=1
 
@@ -10,7 +10,7 @@ BROWSERFILE=libiec.bsc -n
 C_DEFINES=$(C_DEFINES) -DCSQ_STATIC=1
 !endif
 
-INCLUDES=..\include;..\..\include;..\libcommon
+INCLUDES=../include;../include/WINDOWS;../../include;../../include/WINDOWS;../libcommon
 
 SOURCES= 	init.c \
 		debug.c \

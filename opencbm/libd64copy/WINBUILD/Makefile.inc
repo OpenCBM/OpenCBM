@@ -3,4 +3,4 @@ a65: ..\pp1541.inc ..\pp1571.inc ..\s1.inc ..\s2.inc ..\turboread1541.inc ..\tur
 .SUFFIXES: .a65
 
 {..\}.a65{..\}.inc:
-    ..\..\buildoneinc ..\.. $?
+    ..\..\WINDOWS\buildoneinc ..\.. $?

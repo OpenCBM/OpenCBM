@@ -1,0 +1,275 @@
+.TH CBMCTRL 1
+.SH NAME
+ cbmctrl \- control serial CBM devices
+.P
+.B This document is poorly maintained and probably outdated. 
+If in doubt, use the Texinfo manual. If the
+.B info
+program is properly installed at your site, the command
+.IP
+.B info cbm4linux
+.PP
+should give you access to the complete manual.
+.SH SYNOPSIS
+.B cbmctrl "action [...]"
+.SH DESCRIPTION
+.B cbmctrl
+can control all kinds of serial CBM devices like floppy drives and printers.
+So far, it has been successfully tested with the disk drives
+.SM 1541(-II),
+.SM 1571
+and a
+.SM MPS-1200
+printer.
+.SH OPTIONS
+.B cbmctrl
+understands the following
+.B actions:
+.TP
+.BI reset 
+Triggers a hardware reset on all attached devices.
+.TP
+.BI listen " dev sa"
+Tell device
+.I dev
+to listen on secondary address
+.IR sa .
+Until the next
+.B unlisten
+command, everything written to the special device
+.I /dev/cbm
+will be received by this device.
+.RS
+.PP
+This command corresponds to the following 6502 assembler code on a C64:
+.RS
+.PD 0
+.P
+lda #dev
+.P
+jsr $ffb1
+.P
+lda #sa
+.P
+ora #$60
+.P
+jsr $ff93
+.PD
+.RE
+.RE
+.TP
+.BI talk " dev sa"
+Tell device
+.I dev
+to talk on secondary address
+.IR sa .
+Until the next
+.B untalk
+command, data from this device can be received from this device by reading
+the special device
+.IR /dev/cbm .
+.RS
+.PP
+This command corresponds to the following 6502 assembler code on a C64:
+.RS
+.PD 0
+.P
+lda #dev
+.P
+jsr $ffb4
+.P
+lda #sa
+.P
+ora #$60
+.P
+jsr $ff96
+.PD
+.RE
+.RE
+.TP
+.BI unlisten
+Ends communication with listening devices until the next
+.B listen
+or
+.B talk
+command. This corresponds to the C64 kernel routine $ffae.
+.TP
+.BI untalk
+Ends communication with talking devices until the next
+.B listen
+or
+.B talk
+command. This corresponds to the C64 kernel routine $ffab.
+.TP
+.BI open " dev sa fn"
+Open file
+.I fn
+on device
+.IR dev .
+After opening, data can be read/written by sending a
+.B talk
+resp.
+.B listen
+command with secondary address
+.IR sa .
+.RS
+.P
+If
+.I sa 
+is greater than 1, file type and access mode must also be specified
+by appending 
+.I ",type,mode"
+to
+.IR fn .
+Valid types are
+.BR D ,
+.BR P ,
+.BR S ,
+.BR U
+and 
+.B R
+(del, prg, seq, usr, rel), valid modes are 
+.B R
+for reading and
+.B W
+for writing.
+.RE
+.TP
+.BI close " dev sa"
+Close the file associated with secondary address
+.I sa
+on device
+.IR dev .
+.TP
+.BI status " dev"
+Copies input from device
+.IR dev ,
+secondary address 15 (error channel), to standard out. Note that all upper case
+characters are changed to lower case. Carriage return (0x0d) is also changed
+to linefeed (0x0a).
+.PP
+.RS
+This command is similar to (in this case, no character conversions would be
+made)
+.RS
+.PD 0
+cbmctrl talk
+.I dev
+15
+.P
+cat /dev/cbm
+.P
+cbmctrl untalk
+.PD
+.RE
+.RE
+.TP
+.BI command " dev cmd"
+Sends
+.I cmd
+to device
+.IR dev ,
+secondary address 15 (command channel). Note that most (all?) devices accept
+upper case commands only.
+.PP
+.RS
+This command is identical to
+.RS
+.PD 0
+.P
+cbmctrl listen
+.I dev
+15
+.P
+echo -n
+.I cmd
+> /dev/cbm
+.P
+cbmctrl unlisten
+.PD
+.RE
+.RE
+.TP
+.BI dir " dev"
+Display directory from disk in device
+.TP
+.BI download " device address count [file]"
+Read
+.I count
+bytes from drive memory, starting at
+.I address
+via one or more
+.BI M-R
+commands. Memory contents are written to standard output unless
+.I file
+is ommited or equivalent to -.
+.TP
+.BI upload " device address [file]"
+Send
+.I file
+to drive memory, starting at
+.I address
+via one or more
+.BI M-W
+commands. If
+.I address
+is -1, the first to bytes from
+.I file
+are considered as start address. Reads standard input if
+.I file 
+is ommited or equivalent to -.
+.SH BUGS
+Let's not talk about it, ok?
+.SH EXAMPLES
+.TP
+Send file contents to printer #4:
+.RS
+.PD 0
+cbmctrl listen 4 0
+.P
+cat
+.I filename
+> /dev/cbm
+.P
+cbmctrl unlisten
+.PD
+.RE
+.TP
+Copy file to disk drive #8:
+.RS
+.PD 0
+cbmctrl open 8 2
+.IR CBMNAME ,P,W
+.P
+cbmctrl listen 8 2
+.P
+cat
+.IR linuxname
+> /dev/cbm
+.P
+cbmctrl unlisten
+.P
+cbmctrl close 8 2
+.PD
+.RE
+.TP
+Copy file from disk drive #8:
+.RS
+.PD 0
+cbmctrl open 8 2
+.IR CBMNAME ,P,R
+.P
+cbmctrl talk 8 2
+.P
+cat /dev/cbm >
+.IR linuxname
+.P
+cbmctrl untalk
+.P
+cbmctrl close 8 2
+.PD
+.RE
+.SH AUTHOR
+Michael Klein <michael.klein@puffin.lb.shuttle.de>
+.SH DATE
+Nov 19 2004

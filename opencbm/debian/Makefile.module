@@ -1,0 +1,7 @@
+EXTRA_CFLAGS := -include /etc/cbm4linux/cbm4linux-modules-source.conf.h
+obj-m 	     := cbm.o
+cbm-objs     := cbm_module.o
+
+# for 2.2/2.4:
+modules:
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c -o $(obj-m) cbm_module.c

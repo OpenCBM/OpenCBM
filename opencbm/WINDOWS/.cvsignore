@@ -1,0 +1,10 @@
+bin
+doxy
+*.err
+*.log
+*.wrn
+*.plg
+*Debug
+*Release
+*.opt
+*.ncb

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.3 2004-11-24 20:08:19 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.4 2005-03-02 18:17:22 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -21,7 +21,7 @@
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 #include "i_iec.h"
 
 /*! \brief Read some bytes from the IEC bus

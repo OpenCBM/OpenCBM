@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/wait.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: wait.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: wait.c,v 1.3 2005-03-02 18:17:22 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -21,7 +21,7 @@
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 #include "i_iec.h"
 
 /*! \brief Wait for a line to have a specific value

@@ -110,7 +110,7 @@ SOURCE=..\startstop.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\..\include\cbmioctl.h
+SOURCE=..\..\include\WINDOWS\cbmioctl.h
 # End Source File
 # Begin Source File
 

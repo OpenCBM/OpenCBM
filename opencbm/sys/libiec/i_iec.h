@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.4 2005-01-22 19:50:41 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.5 2005-03-02 18:17:22 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -21,8 +21,6 @@
 #define I_CBMIEC_H
 
 #include "iec.h"
-
-#include <parallel.h>
 
 /* The port addresses (relative) of the parallel port */
 
@@ -55,13 +53,13 @@
 #define PP_RESET_IN   0x80 //!< The RESET IN bit
 
 /*! Get the address of the parallel port DATA register out of the Pdx info */
-#define PAR_PORT (Pdx->PortInfo->Controller + PARALLEL_DATA_OFFSET)
+#define PAR_PORT (Pdx->ParPortPortAddress + PARALLEL_DATA_OFFSET)
 /*! Get the address of the parallel port STATUS register (= the port for input)
  * out of the Pdx info */
-#define IN_PORT  (Pdx->PortInfo->Controller + PARALLEL_STATUS_OFFSET)
+#define IN_PORT  (Pdx->ParPortPortAddress + PARALLEL_STATUS_OFFSET)
 /*! Get the address of the parallel port CONTROL register (= the port for
  * output) out of the Pdx info */
-#define OUT_PORT (Pdx->PortInfo->Controller + PARALLEL_CONTROL_OFFSET)
+#define OUT_PORT (Pdx->ParPortPortAddress + PARALLEL_CONTROL_OFFSET)
 
 /*! set an output line on the parallel port */
 #define CBMIEC_SET(_set)              Pdx->IecOutBits|=(_set); WRITE_PORT_UCHAR(OUT_PORT,(UCHAR)(Pdx->IecOutEor ^ Pdx->IecOutBits))

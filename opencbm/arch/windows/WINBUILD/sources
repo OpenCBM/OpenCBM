@@ -7,7 +7,7 @@ TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib
 
-INCLUDES=../../../include
+INCLUDES=../../../include;../../../include/WINDOWS
 
 C_DEFINES = $(C_DEFINES) /DHAVE_STRING_H=1
 

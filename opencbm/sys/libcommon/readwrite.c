@@ -11,14 +11,14 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/readwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: readwrite.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: readwrite.c,v 1.2 2005-03-02 18:17:21 strik Exp $ \n
 ** \n
 ** \brief Perform reading from and writing to the driver
 **
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 #include "iec.h"
 
 /*! \brief Check the buffer of an read or write IRP

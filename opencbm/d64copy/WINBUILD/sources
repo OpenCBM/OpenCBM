@@ -10,7 +10,7 @@ TARGETLIBS=../../bin/*/opencbm.lib      \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib
 
-INCLUDES=../../include;../../arch/windows/
+INCLUDES=../../include;../../include/WINDOWS;../../arch/windows/
 
 SOURCES=../main.c \
         d64copy.rc

@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: fs.c,v 1.4 2004-12-13 18:19:56 strik Exp $";
+    "@(#) $Id: fs.c,v 1.5 2005-03-02 18:17:21 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -62,7 +62,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
                      const void *arg, int for_writing,
                      turbo_start start, d64copy_message_cb message_cb)
 {
-    size_t filesize;
+    off_t filesize;
     int stat_ok, is_image, error_info;
     int tr = 0;
     char *name = (char*)arg;

@@ -11,14 +11,14 @@
 /*! ************************************************************** 
 ** \file sys/wdm/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.6 2004-11-21 16:29:09 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.7 2005-03-02 18:17:23 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 #include <cbmioctl.h>
 
 /*! \brief create functional device object (FDO) for enumerated device

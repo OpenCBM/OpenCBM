@@ -1,0 +1,25 @@
+#! /bin/sh
+# postinst script for cbm4linux
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+if [ "$1" = "configure" ]; then
+
+	# from lirc:
+	[ -x /usr/sbin/update-devfsd ] && /usr/sbin/update-devfsd >&2
+
+	db_get cbm4linux/install_device
+	if $RET; then
+		if [ ! -e /dev/cbm ]; then
+			mknod /dev/cbm c 10 177
+			chown root.users /dev/cbm
+			chmod 660 /dev/cbm
+		fi
+	fi
+fi
+
+#DEBHELPER#
+
+exit 0

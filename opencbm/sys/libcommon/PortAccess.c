@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: PortAccess.c,v 1.2 2005-03-02 18:17:21 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -19,7 +19,7 @@
 
 #include <initguid.h>
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 
 /*! \internal \brief Send an IOCTL to the parallel port driver
 
@@ -291,6 +291,11 @@ ParPortInit(PUNICODE_STRING ParallelPortName, PDEVICE_EXTENSION Pdx)
     else
     {
         ntStatus = STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    if (NT_SUCCESS(ntStatus))
+    {
+        Pdx->ParPortPortAddress = Pdx->PortInfo->Controller;
     }
 
     // if we failed getting the parallel port info, but there was memory

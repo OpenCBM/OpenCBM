@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/wdm/PortEnum.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortEnum.c,v 1.1 2004-11-07 11:05:15 strik Exp $ \n
+** \version $Id: PortEnum.c,v 1.2 2005-03-02 18:17:23 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -22,7 +22,7 @@
 
 #define PENUMERATE_DEFINED //!< Make sure the PENUMERATE is correctly defined
 typedef struct ENUMERATE_WDM *PENUMERATE;
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 
 /*! This struct is used as internal storage for
  * the ParPortEnumerateOpen()/ParPortEnumerate()/ParPortEnumerateClose()

@@ -11,14 +11,14 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.4 2005-01-22 19:50:41 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.5 2005-03-02 18:17:21 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 #include "cbmioctl.h"
 #include "iec.h"
 

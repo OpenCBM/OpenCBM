@@ -9,7 +9,7 @@ TARGETLIBS=../../../bin/*/opencbm.lib   \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib
 
-INCLUDES=../../../include
+INCLUDES=../../../include;../../../include/WINDOWS
 
 SOURCES=../flash.c \
         flash.rc

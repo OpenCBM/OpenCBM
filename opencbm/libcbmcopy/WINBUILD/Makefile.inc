@@ -3,4 +3,4 @@ a65: ..\ppr-1541.inc ..\ppr-1571.inc ..\ppw-1541.inc ..\ppw-1571.inc ..\s1r-1581
 .SUFFIXES: .a65
 
 {..\}.a65{..\}.inc:
-    ..\..\buildoneinc ..\.. $?
+    ..\..\WINDOWS\buildoneinc ..\.. $?

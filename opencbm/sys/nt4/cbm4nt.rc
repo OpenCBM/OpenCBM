@@ -7,7 +7,7 @@
 #define VER_FILEDESCRIPTION_STR     "CBM4WIN Parallel Port Driver, NT4 version"
 #define VER_INTERNALNAME_STR        "cbm4nt.sys"
 
-#include "srtcommon.ver"
+#include "version.common.h"
 #include "common.ver"
 
 #include "../libcommon/cbmlog.rc"

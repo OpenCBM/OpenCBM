@@ -1,0 +1,254 @@
+
+                   README for cbm4linux 0.3.3
+                   --------------------------
+
+This  is version 0.3.x of cbm4linux, a Linux kernel device driver
+for the serial CBM bus (C64, VIC-20, etc.).  It should  work with
+any  devices  that  understand  the "normal" talk and listen com­
+mands. It's been tested with several 1541, 1541-II, 1571 and 1581
+drives,  along  with and a MPS-1200.  1541 clones like the OC-118
+have also been reported to work.
+
+The following cable types are supported: 
+
+  XP1571             (version >= 0.2.4)
+  XM1541 and XA1541  (version >= 0.2.1)
+  XP1541             (version >= 0.2.0)
+  Modified XE1541    (all versions, obsoleted by the XM1541, 
+                      see config.make)
+
+More  information on the different cable types can be obtained on
+the Star Commander  homepage  (<http://sta.c64.org/sc.html>)  and
+the file CABLE (included in this packages).
+
+This package is provided `as is', no warranty of any kind will be
+taken for any damage or data loss caused by it or by any  use  of
+it.
+
+
+*** WARNING *****************************************************
+
+HOTPLUGGING  can  KILL  your hardware. Do not connect anything to
+the parallel port while the system is up. Always SHUT DOWN,  CON­
+NECT, REBOOT.  Again, absolutely NO WARRANTY.
+
+*****************************************************************
+
+
+INSTALLATION:
+~~~~~~~~~~~~~
+
+The kernel module (cbm.o) does not require any kernel patches and
+should compile right out of the box, at least  with kernel  2.2.x
+and 2.4.x, but 2.0.x might still work as well.
+
+If  you  intend  to  modify  the drive routines for `d64copy' and
+`cbmformat' you also need a crossassembler.  `config.make'  comes
+with   rules   for  A.Fachat's  `xa'  (available  from  funet  or
+<http://www.lb.shuttle.de/puffin/cbm4linux>)  and   Ullrich   von
+Bassewitz'   `cl65'  (comes  with  cc65,  <http://www.cc65.org>).
+Starting with version 0.2.3, cbm4linux includes precompiled  6502
+binaries, so  as long  as  you don't touch the .a65 files there's
+no need for a crossassembler.
+
+This package comes with a .spec file for those who want to  build
+binary .RPMs.  See the RPM documentation for  details  about  the
+build  process.  If you upgrade from a previous (non-RPM) version
+and want to install a binary RPM, don't forget to remove the  old
+files  hanging aroung (just do "make uninstall", prferably in the
+*old* source directory).
+
+
+COMPILE-TIME CONFIGURATION:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Compile-time configuration is located in `config.make'. Check the
+KERN_FLAGS line if you're running kernel 2.0.x or  if  you  don't
+want  to  use  the  Linux parport subsystem for some reason. Same
+goes for SMP machines.
+
+
+COMPILATION:
+~~~~~~~~~~~~
+
+Type
+
+    make             (no root priviledges required)
+
+to  build  the  kernel module, libraries and utility programs (no
+root priviledges required),
+
+    make dev         (as root)
+
+to   create   the  character  device "/dev/cbm" with major 10 and
+minor 177 (this number is registered,  so  it  shouldn't  collide
+with anything else :)). Finally
+
+    make install     (as root)
+
+will  install  all  necessary  stuff  to  /usr/local/...  (can be
+changed in `config.make')
+
+
+LOADING THE MODULE:
+~~~~~~~~~~~~~~~~~~~
+
+If  you're  using  the  parport subsystem (which is default), you
+should now be able to load the driver module by issuing (as root)
+
+    /sbin/modprobe parport      (unless compiled into the kernel)
+    /sbin/insmod cbm lp=<your_lp>   (usually 0, which is default)
+
+or, when built with -DDIRECT_PORT_ACCESS:
+
+    /sbin/insmod cbm port=<your_ioport> irq=<your_irq>
+     (default is 0x378 for port, 7 for irq)
+
+Check /var/log/messages for correct cable type (XA1541/XM1541).
+
+
+IF IT FAILS:
+~~~~~~~~~~~~
+
+* /var/log/messages might give you some hints.
+
+* Using the parport subsystem:
+   - the port is occupied by another device (e.g. lp.o)
+     cbm.o does NOT support port sharing (wouldn't work anyway).
+     (`cat /proc/parport/<port>/devices')
+
+   - parport_pc doesn't use an IRQ.
+     /etc/modules.conf should contain something like:
+       alias parport_lowlevel parport_pc
+       options parport_pc io=0x378 irq=7
+     (`cat /proc/interrupts')
+
+* Using direct port access:
+  
+   - the port/IRQ is occupied by another driver (e.g. parport.o)
+     (`cat /proc/interrupts')
+     (`cat /proc/ioports')
+
+
+DEVICE ACCESS:
+~~~~~~~~~~~~~~
+
+As a first test, I'd suggest something simple like
+
+    cbmctrl command 8 I0:    (assuming drive 8)
+    cbmctrl status 8
+
+(no root priviledges required)
+
+Failure can be caused by:
+* incorrect module parameters
+* wrong BIOS settings (esp. IRQ)
+* broken cable
+
+
+RUNTIME CONFIGURATION:
+~~~~~~~~~~~~~~~~~~~~~~
+
+You  really  want  to  add  this to /etc/modules.conf to have the
+driver loaded on demand:
+(/etc/conf.modules on older SuSE systems)
+
+    alias char-major-10-177 cbm
+    options cbm [options]
+
+With [options] being one or more of:
+
+* lp=<lp>       (parport only, as used in /sbin/insmod above)
+* irq=<irq>     (direct port only, as used in /sbin/insmod above)
+* port=<port>   (direct port only, as used in /sbin/insmod above)
+* cable=<n>     force cable type:
+                -1  for autodetection (default)
+                 0  for XM1541 (non-inverting)
+                 1  for XA1541 (inverting)
+* reset=<n>     initializing behaviour:
+                -1  smart IEC reset (direct port default)
+                 0  no IEC reset
+                 1  force IEC reset (parport default)
+
+
+Congratulations, that's all!
+
+
+HOW TO USE:
+~~~~~~~~~~~
+
+As  the  kernel driver is quite useless for itself, the following
+utility programs are included with this package:
+
+  cbmctrl    command line utility for direct device access at
+             talk/listen level.
+
+  cbmformat  fast 1541 disk formatter.
+
+  cbmcopy    fast 1541/1570/1571/1581 file copier.
+
+  d64copy    copies .d64 images to 1541 compatible drives and
+             vice versa. Type `d64copy -h' to get a list of valid
+             options. Use the device number to address the disk
+             drive, e.g. `d64copy -t serial2 8 img.d64'.
+
+             This version contains the StarCommander Turbo and
+             Warp routines and custom transfer routines as well
+             as parallel cable (XP1541) support. These are the
+             benchmarks for my Pentium-200/MMX system (seconds)
+
+                 mode               write     read
+
+                 parallel turbo     54.02    53.30
+                 parallel warp      32.47    29.56
+                 serial1 turbo     168.59   168.58
+                 serial1 warp      183.57   158.87
+                 serial2 turbo      95.02    95.26
+                 serial2 warp       88.29    80.57
+
+Documentation  comes in ASCII, DVI, HTML and Texinfo. If you have
+the GNU info program installed you can access the latter one with
+
+    info cbm4linux
+
+
+CREDITS:
+~~~~~~~~
+
+The fast format drive routine used by `cbmformat' and the turbo
+and warp drive routines used in `libd64copy' and `libcbmcopy'
+are heavily based on Joe Forster/STAs Star Commander routines.
+
+The XP1541 and XP1571 cables (C) by Joe Forster/STA.
+The original XE1541 cable (C) by Nicolas Welte and Wolfgang Moser
+The XA1541 cable (C) by Michael Klein and Nicolas Welte
+
+
+THANKS TO: (in no particular order)
+~~~~~~~~~~
+
+Joe Forster/STA     for supplying the Star Commander source and
+                    about the X?1541 interfaces
+Nicolas Welte       for help with the XA1541 and XM1541 interfaces
+                    and a free factory-new 1571 mechanic
+Andreas Boose &
+the VICE team       for VICE
+André Fachat        for the xa 6502 crossassembler
+Wolfgang Moser      for discussion, patches and offering a free 1571 drive
+Spiro Trikaliotis   interesting discussion, lots of fixes and doing an overall
+		    great review while porting the driver to "other" operating
+		    systems ;-)
+
+And anyone else who sent patches, suggestions, praises & flames!
+
+
+FEEDBACK:
+~~~~~~~~~
+
+Feel free to drop me a note if you have ideas, patches etc. or if
+you just want to tell me how happy you are with this program ;-)
+
+
+Have fun,
+Michael Klein <nip@c64.org>
+

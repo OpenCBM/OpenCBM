@@ -127,7 +127,7 @@ SOURCE=..\archlib.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\cbmioctl.h
+SOURCE=..\..\include\WINDOWS\cbmioctl.h
 # End Source File
 # Begin Source File
 
@@ -160,7 +160,7 @@ SOURCE=.\sources
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\srtcommon.ver
+SOURCE=..\..\include\WINDOWS\version.common.h
 # End Source File
 # End Target
 # End Project

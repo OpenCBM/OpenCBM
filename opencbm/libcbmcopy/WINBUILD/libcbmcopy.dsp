@@ -105,6 +105,10 @@ SOURCE=..\s2.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=..\..\include\cbmcopy.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\cbmcopy_int.h
 # End Source File
 # End Group

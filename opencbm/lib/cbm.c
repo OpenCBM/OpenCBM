@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.4 2005-02-13 17:58:12 strik Exp $ \n
+** \version $Id: cbm.c,v 1.5 2005-03-02 18:17:20 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -230,7 +230,7 @@ cbm_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 int CBMAPIDECL 
 cbm_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
-    DWORD bytesRead;
+    int bytesRead;
 
     FUNC_ENTER();
 
@@ -907,7 +907,7 @@ cbm_exec_command(CBM_FILE HandleDevice, __u_char DeviceAddress,
     rv = cbmarch_listen(HandleDevice, DeviceAddress, 15);
     if(rv == 0) {
         if(Size == 0) {
-            Size = (USHORT) strlen(Command);
+            Size = (size_t) strlen(Command);
         }
         rv = (size_t) cbmarch_raw_write(HandleDevice, Command, Size) != Size;
         cbmarch_unlisten(HandleDevice);

@@ -7,5 +7,5 @@
 #define VER_FILEDESCRIPTION_STR     "Interface VDD for OPENCBM Parallel Port Driver"
 #define VER_INTERNALNAME_STR        "opencbmvdd.dll"
 
-#include "srtcommon.ver"
+#include "version.common.h"
 #include "common.ver"

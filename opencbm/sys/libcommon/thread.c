@@ -11,14 +11,14 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/thread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: thread.c,v 1.2 2004-11-16 19:54:34 strik Exp $ \n
+** \version $Id: thread.c,v 1.3 2005-03-02 18:17:21 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
 ****************************************************************/
 
 #include <wdm.h>
-#include "cbm4win_common.h"
+#include "cbm_driver.h"
 
 /*! \brief Start the worker thread
 

@@ -1,11 +1,13 @@
 /*! ************************************************************** 
 ** \file arch/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.1 2005-02-13 17:58:11 strik Exp $ \n
+** \version $Id: debug.c,v 1.2 2005-03-02 18:17:17 strik Exp $ \n
 ** \n
 ** \brief Debugging help functions and definitions
 **
 ****************************************************************/
+
+#if DBG
 
 #ifndef DBG_KERNELMODE
     /*! Mark: We are in user-space (for debug.h) */
@@ -127,3 +129,5 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
     }
     va_end(arg_ptr);
 }
+
+#endif // #if DBG

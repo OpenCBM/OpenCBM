@@ -1,0 +1,18 @@
+cbm4linux (0.3.3-1) unstable; urgency=low
+
+  * version bump
+
+ -- Michael Klein <michael.klein@puffin.lb.shuttle.de>  Sat, 28 Aug 2004 20:40:44 +0200
+
+cbm4linux (0.3.2-2) unstable; urgency=low
+
+  * kernel 2.6 module build fixes
+
+ -- Michael Klein <michael.klein@puffin.lb.shuttle.de>  Fri, 13 Feb 2004 18:33:28 +0100
+
+cbm4linux (0.3.2-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Michael Klein <michael.klein@puffin.lb.shuttle.de>  Sun, 31 Aug 2003 14:16:39 +0200
+

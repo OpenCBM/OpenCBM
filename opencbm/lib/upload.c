@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.1 2005-02-13 17:58:12 strik Exp $ \n
+** \version $Id: upload.c,v 1.2 2005-03-02 18:17:20 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -75,10 +75,10 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
 {
     const char *bufferToProgram = Program;
 
-    USHORT c;
-    USHORT i;
-    USHORT rv = 0;
-    UCHAR command[] = { 'M', '-', 'W', ' ', ' ', ' ' };
+    unsigned char command[] = { 'M', '-', 'W', ' ', ' ', ' ' };
+    size_t i;
+    int rv = 0;
+    int c;
 
     FUNC_ENTER();
 
@@ -103,9 +103,9 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
         // M-W <lowaddress> <highaddress> <count>
         // build that command:
 
-        command[3]=(UCHAR) (DriveMemAddress % 256);
-        command[4]=(UCHAR) (DriveMemAddress / 256);
-        command[5]=(UCHAR) c; 
+        command[3] = (unsigned char) (DriveMemAddress % 256);
+        command[4] = (unsigned char) (DriveMemAddress / 256);
+        command[5] = (unsigned char) c; 
 
         // Write the M-W command to the drive...
 

@@ -9,7 +9,7 @@ TARGETLIBS=../../bin/*/arch.lib         \
            $(SDK_LIB_PATH)/setupapi.lib \
            $(SDK_LIB_PATH)/advapi32.lib
 
-INCLUDES=../../include;../../lib/WINBUILD;../../lib;../../arch/windows
+INCLUDES=../../include;../../include/WINDOWS;../../lib/WINBUILD;../../lib;../../arch/windows
 
 SOURCES=../instcbm.c \
         ../i_opencbm.c \

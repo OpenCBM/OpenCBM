@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.6 2004-12-22 18:00:18 strik Exp $ \n
+** \version $Id: startstop.c,v 1.7 2005-03-02 18:17:20 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -33,8 +33,6 @@
 
 /*! The name of the executable */
 #define DBG_PROGNAME "INSTCBM.EXE"
-
-#include "cbmioctl.h"
 
 #include "debug.h"
 
@@ -90,7 +88,7 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version)
     {
         _snprintf(buffer, sizeof(buffer)-1, "COULD NOT DETERMINE VERSION");
     }
-    buffer[sizeof(buffer)] = 0;
+    buffer[sizeof(buffer)-1] = 0;
 
     OutputPathString(Text, buffer);
 
@@ -167,7 +165,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 
             if (length >= sizeof(dllPath))
             {
-                dllPath[sizeof(dllPath)] = 0;
+                dllPath[sizeof(dllPath)-1] = 0;
             }
 
             FreeLibrary(handleDll);
@@ -205,7 +203,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
             regLength = sizeof(driverPathFromRegistry);
 
             regReturn = RegQueryValueEx(regKey, "ImagePath", NULL, &regType, 
-                (LPBYTE)&driverPathFromRegistry, &regLength);
+                (LPBYTE)driverPathFromRegistry, &regLength);
 
             if (regReturn != ERROR_SUCCESS)
             {
@@ -220,7 +218,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 
                 // Make sure there is a trailing zero
 
-                driverPathFromRegistry[sizeof(driverPathFromRegistry)] = 0;
+                driverPathFromRegistry[sizeof(driverPathFromRegistry)-1] = 0;
 
                 // Find out if there is a colon ":" in the path
 
@@ -249,10 +247,9 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
                     // There is no colon, that is, the path is relative (to the windows directory)
                     // Thus, make sure the windows directory is appended in front of it
 
-                    GetWindowsDirectory(driverPath, sizeof(driverPath));
-                    lengthString = strlen(driverPath);
+                    lengthString = GetWindowsDirectory(driverPath, sizeof(driverPath));
 
-                    if (lengthString < sizeof(driverPath))
+                    if ((lengthString != 0) && (lengthString < sizeof(driverPath)))
                     {
                         strncat(&driverPath[lengthString], "\\", sizeof(driverPath)-lengthString);
                         ++lengthString;

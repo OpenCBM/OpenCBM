@@ -1,5 +1,5 @@
 TARGETNAME=libcommon
-TARGETPATH=..\..\bin
+TARGETPATH=../../bin
 TARGETTYPE=DRIVER_LIBRARY
 USE_PDB=1
 
@@ -10,7 +10,7 @@ BROWSERFILE=libcommon.bsc -n
 C_DEFINES=$(C_DEFINES) -DCSQ_STATIC=1
 !endif
 
-INCLUDES=..\include;..\..\include
+INCLUDES=../include;../include/WINDOWS;../../include;../../include/WINDOWS
 
 SOURCES= 	openclose.c \
 		init.c \
