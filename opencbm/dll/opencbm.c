@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file dll/opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm.c,v 1.4 2004-11-24 20:08:18 strik Exp $ \n
+** \version $Id: opencbm.c,v 1.5 2004-11-27 19:36:03 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -1154,7 +1154,7 @@ cbm_identify(CBM_FILE HandleDevice, __u_char DeviceAddress,
 {
     enum cbm_device_type_e deviceType = cbm_dt_unknown;
     unsigned short magic;
-    unsigned char buf[2];
+    unsigned char buf[3];
     const char command[] = { 'M', '-', 'R', (char) 0x40, (char) 0xff, (char) 0x02 };
     char *deviceString = "*unknown*";
     int rv = -1;
@@ -1164,7 +1164,7 @@ cbm_identify(CBM_FILE HandleDevice, __u_char DeviceAddress,
     if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0 
         && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
     {
-        if (cbm_raw_read(HandleDevice, buf, 2) == 2)
+        if (cbm_raw_read(HandleDevice, buf, 3) == 3)
         {
             magic = buf[0] | (buf[1] << 8);
 
