@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.5 2004-11-21 15:23:35 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.6 2004-11-21 15:29:40 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -247,6 +247,9 @@ struct parameter_s
 
 #if DBG
 
+    /*! --buffer was given */
+    BOOL OutputDebuggingBuffer;
+
     /*! --debugflags was given */
     BOOL DebugFlagsDriverWereGiven;
 
@@ -411,13 +414,18 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { "check",      no_argument,       NULL, 'c' },
 #if DBG
         { "debugflags", required_argument, NULL, 'D' },
+        { "buffer",     no_argument,       NULL, 'B' },
 #endif // #if DBG
         { "nocopy",     no_argument,       NULL, 'n' },
         { "automatic",  no_argument,       NULL, 'A' },
         { NULL,         0,                 NULL, 0   }
     };
 
-    const char shortopts[] ="hrFl:nuD:cA";
+    const char shortopts[] = "hrFl:nucA"
+#if DBG
+                             "D:B"
+#endif // #if DBG
+                             ;
 
     FUNC_ENTER();
 
@@ -522,6 +530,11 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
                     Parameter->DebugFlagsDll, Parameter->DebugFlagsDllWereGiven ? "TRUE" : "FALSE",
                     Parameter->DebugFlagsInstall, Parameter->DebugFlagsInstallWereGiven ? "TRUE" : "FALSE"));
             }
+            break;
+
+        case 'B':
+            Parameter->OutputDebuggingBuffer = TRUE;
+            Parameter->NoExecute = TRUE;
             break;
 
 #endif // #if DBG
@@ -941,6 +954,15 @@ main(int Argc, char **Argv)
             }
         }
     }
+
+#if DBG
+
+    if (parameter.OutputDebuggingBuffer)
+    {
+        CbmOutputDebuggingBuffer();
+    }
+
+#endif // #if DBG
 
     FUNC_LEAVE_INT(retValue);
 }

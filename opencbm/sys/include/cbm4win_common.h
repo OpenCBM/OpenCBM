@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/cbm4win_common.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm4win_common.h,v 1.1 2004-11-07 11:05:13 strik Exp $ \n
+** \version $Id: cbm4win_common.h,v 1.2 2004-11-21 15:29:40 strik Exp $ \n
 ** \n
 ** \brief Definitions for the cbm4win driver
 **
@@ -206,6 +206,11 @@ AddDeviceCommonInit(IN PDEVICE_OBJECT Fdo, IN PUNICODE_STRING DeviceName, IN PCW
 
 extern NTSTATUS
 cbm_install(IN PDEVICE_EXTENSION Pdx, OUT PCBMT_I_INSTALL_OUT ReturnBuffer, IN OUT PULONG ReturnLength);
+
+#if DBG
+extern NTSTATUS
+cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer, IN OUT PULONG ReturnLength);
+#endif // #if DBG
 
 extern VOID
 cbm_init_registry(IN PUNICODE_STRING RegistryPath);

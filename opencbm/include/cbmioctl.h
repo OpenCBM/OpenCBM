@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.1 2004-11-07 11:05:12 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.2 2004-11-21 15:29:40 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -212,8 +212,13 @@ typedef CBMT_BOOLEAN    CBMT_GET_EOI_OUT;
 //! IOCTL for waiting for an IEC line
 #define CBMCTRL_IEC_WAIT    _CBMIO(CBMCTRL_BASE, 15) // CBMT_IEC_WAIT_IN     CBMT_IEC_WAIT_OUT
 
-//! IOCTL for performing und checking the installation
+//! IOCTL for performing und checking the installation; ONLY FOR USE OF INSTCBM!
 #define CBMCTRL_I_INSTALL   _CBMIO(CBMCTRL_BASE, 16) // -                    CBMT_I_INSTALL_OUT (or an array of it)
+
+#if DBG
+//! IOCTL reading the debug buffer of the driver; ONLY FOR USE OF INSTCBM!
+#define CBMCTRL_I_READDBG   _CBMIO(CBMCTRL_BASE, 17) // -                    char array which will be filled
+#endif // #if DBG
 
 /* these are the return codes of CBMCTRL_I_INSTALL: */
 

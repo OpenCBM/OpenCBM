@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file install/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.1 2004-11-07 11:05:12 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.2 2004-11-21 15:29:40 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the driver
 **
@@ -29,3 +29,54 @@
 // Application
 
 #include "../dll/i_opencbm.c"
+
+
+#if DBG
+
+#include <stdio.h>
+
+/*! \brief Output contents of the debugging buffer
+
+ This functions outputs the contents of the kernel-mode
+ debugging buffer to the screen.
+
+ This function is for use of the installation routines only!
+*/
+
+VOID
+CbmOutputDebuggingBuffer(VOID)
+{
+    CHAR buffer[0x20000];
+
+    CBM_FILE HandleDevice;
+
+    FUNC_ENTER();
+
+    if (cbm_i_driver_open(&HandleDevice, 0) == 0)
+    {
+        PCHAR p = buffer;
+        PCHAR endLine;
+
+        cbm_ioctl(HandleDevice, CBMCTRL(I_READDBG), NULL, 0, buffer, sizeof(buffer));
+        cbm_i_driver_close(HandleDevice);
+
+        printf("Output of the debugging buffer:\n\n");
+
+        do {
+
+            endLine = strchr(p, 13);
+            if (endLine)
+            {
+                *endLine = 0;
+            }
+            printf("%s", p);
+
+            p = endLine + 1;
+
+        } while (endLine);
+    }
+
+    FUNC_LEAVE();
+}
+
+#endif // #if DBG

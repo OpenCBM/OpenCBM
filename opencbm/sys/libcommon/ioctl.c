@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.2 2004-11-21 15:29:41 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -225,6 +225,15 @@ cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
             ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_I_INSTALL_OUT), STATUS_SUCCESS);
             break;
 
+#if DBG
+
+        case CBMCTRL_I_READDBG:
+            DBG_IRP(CBMCTRL_I_READDBG);
+            ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CHAR), STATUS_SUCCESS);
+            break;
+
+#endif // #if DBG
+
         default:
             DBG_ERROR((DBG_PREFIX "unknown IRP_MJ_DEVICE_CONTROL"));
             ntStatus = STATUS_INVALID_PARAMETER;
@@ -397,6 +406,16 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
             returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
             ntStatus = cbm_install(Pdx, OUTPUTVALUE(CBMT_I_INSTALL_OUT), &returnLength);
             break;
+
+#if DBG
+
+        case CBMCTRL_I_READDBG:
+            DBG_IRP(CBMCTRL_I_READDBG);
+            returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
+            ntStatus = cbm_dbg_readbuffer(Pdx, OUTPUTVALUE(CHAR), &returnLength);
+            break;
+
+#endif // #if DBG
 
         default:
             // As cbm_devicecontrol() already checked the IRP,

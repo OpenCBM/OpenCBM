@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.3 2004-11-16 19:54:34 strik Exp $ \n
+** \version $Id: debug.c,v 1.4 2004-11-21 15:29:41 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -1022,8 +1022,8 @@ ULONG DbgKeGetCurrentProcessorNumber()
 
 #if DBG
 
-static char *DbgMemoryBuffer = NULL;
-static int DbgNextWriteMemoryBuffer = 0;
+static PCHAR DbgMemoryBuffer = NULL;
+static ULONG DbgNextWriteMemoryBuffer = 0;
 
 /* as we are not allowed to use a spin lock at elevated IRQL, define our own one */
 static LONG DbgMemoryBufferSpinLock = 0;
@@ -1114,6 +1114,103 @@ DbgOutputMemoryBuffer(const char *String)
     }
 
     InterlockedExchange(&DbgMemoryBufferSpinLock, 0);
+}
+
+/*! \brief Give the debug buffer contents to the installer
+
+ This function is used to get the contents of the debug buffer
+ for the use of the installer.
+
+ \param Pdx
+   Pointer to the device extension.
+
+ \param ReturnBuffer
+   Pointer to a buffer which will contain the result.
+
+ \param ReturnLength
+   Pointer to a ULONG which contains the length of the ReturnBuffer
+   on entry, and which will contain the length of the written
+   ReturnBuffer on exit.
+
+ \return 
+   If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
+   returns one of the error status values.
+ 
+ This function copies the last ReturnLength bytes into the buffer.
+*/
+
+#define min(_x, _y) ( ((_x) < (_y)) ? (_x) : (_y) )
+
+NTSTATUS
+cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer, IN OUT PULONG ReturnLength)
+{
+    FUNC_ENTER();
+
+    while (InterlockedExchange(&DbgMemoryBufferSpinLock, 1) == 0)
+        ;
+
+    if (DbgMemoryBuffer)
+    {
+        PCHAR writePosition;
+        ULONG stillToWrite;
+        ULONG writtenBytes;
+
+        writePosition = ReturnBuffer;
+        stillToWrite = *ReturnLength;
+        writtenBytes = 0;
+
+
+        if (stillToWrite > DbgNextWriteMemoryBuffer)
+        {
+            ULONG lengthBeforeWrapAround;
+
+            //! \todo
+
+            // First of all, find out if there are any "old" entries
+            // from before the wrap-around
+
+            lengthBeforeWrapAround = strlen(&DbgMemoryBuffer[DbgNextWriteMemoryBuffer+1]) + 1;
+
+            if (lengthBeforeWrapAround > 1)
+            {
+                ULONG lengthToCopy;
+
+                lengthToCopy = stillToWrite - DbgNextWriteMemoryBuffer + 1;
+
+                lengthToCopy = min(lengthToCopy, lengthBeforeWrapAround);
+
+                RtlCopyMemory(writePosition, 
+                    &DbgMemoryBuffer[DbgNextWriteMemoryBuffer+lengthBeforeWrapAround - lengthToCopy],
+                    lengthToCopy);
+
+                writePosition += lengthToCopy;
+                writtenBytes += lengthToCopy;
+                stillToWrite -= lengthToCopy;
+
+                if (stillToWrite > 0)
+                {
+                    *writePosition++ = 13;
+                    ++writtenBytes;
+                    --stillToWrite;
+                }
+            }
+        }
+
+        stillToWrite = min(stillToWrite, DbgNextWriteMemoryBuffer);
+
+        RtlCopyMemory(writePosition,
+            &DbgMemoryBuffer[DbgNextWriteMemoryBuffer - stillToWrite],
+            stillToWrite);
+
+        writtenBytes += stillToWrite;
+
+
+        *ReturnLength = writtenBytes;
+    }
+
+    InterlockedExchange(&DbgMemoryBufferSpinLock, 0);
+
+    FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
 
 #endif

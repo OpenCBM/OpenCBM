@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: debug.h,v 1.3 2004-11-21 15:29:40 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -79,6 +79,13 @@
        /*! debugging flag: show DPC processing */
        #define DBGF_DPC     0x00080000
 
+
+       /*! debugging flag: output debugging info debug into Memory Buffer */
+       #define DBGF_DBGMEMBUF 0x00020000
+
+       /*! debugging flag: output debugging info via DbgPrint */
+       #define DBGF_DBGPRINT 0x00010000
+
 #endif // #ifdef DBG_KERNELMODE
 
        /*! debugging flag: show parallel port acquisition related output */
@@ -132,6 +139,9 @@
 //                            | DBGF_IRPPATH
 //                            | DBGF_IRP
 //                            | DBGF_DPC
+                              | DBGF_DBGMEMBUF
+                              | DBGF_DBGPRINT
+
 #endif // #ifdef DBG_KERNELMODE
 //                            | DBGF_PPORT
 //                            | DBGF_SUCCESS
@@ -235,27 +245,29 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
 
        /* Some makros for handling the various debug conditions */
 
-       #define ISDBG_BREAK()   (DbgFlags & DBGF_BREAK)
-       #define ISDBG_ENTER()   (DbgFlags & DBGF_ENTER)
-       #define ISDBG_LEAVE()   (DbgFlags & DBGF_LEAVE)
+       #define ISDBG_BREAK()          (DbgFlags & DBGF_BREAK)
+       #define ISDBG_ENTER()          (DbgFlags & DBGF_ENTER)
+       #define ISDBG_LEAVE()          (DbgFlags & DBGF_LEAVE)
        #define ISDBG_LEAVE_FAILURE()  (DbgFlags & (DBGF_LEAVE|DBGF_LEAVE_FAILURE))
-       #define ISDBG_PARAM()   (DbgFlags & DBGF_PARAM)
+       #define ISDBG_PARAM()          (DbgFlags & DBGF_PARAM)
 #ifdef DBG_KERNELMODE
-       #define ISDBG_IEC()     (DbgFlags & DBGF_IEC)
-       #define ISDBG_IRQ()     (DbgFlags & DBGF_IRQ)
-       #define ISDBG_ASSERTIRQL()  (DbgFlags & DBGF_ASSERTIRQL)
-       #define ISDBG_PORT()    (DbgFlags & DBGF_PORT)
-       #define ISDBG_THREAD()  (DbgFlags & DBGF_THREAD)
-       #define ISDBG_IRPPATH() (DbgFlags & DBGF_IRPPATH)
-       #define ISDBG_IRP()     (DbgFlags & DBGF_IRP)
-       #define ISDBG_DPC()     (DbgFlags & DBGF_DPC)
+       #define ISDBG_IEC()            (DbgFlags & DBGF_IEC)
+       #define ISDBG_IRQ()            (DbgFlags & DBGF_IRQ)
+       #define ISDBG_ASSERTIRQL()     (DbgFlags & DBGF_ASSERTIRQL)
+       #define ISDBG_PORT()           (DbgFlags & DBGF_PORT)
+       #define ISDBG_THREAD()         (DbgFlags & DBGF_THREAD)
+       #define ISDBG_IRPPATH()        (DbgFlags & DBGF_IRPPATH)
+       #define ISDBG_IRP()            (DbgFlags & DBGF_IRP)
+       #define ISDBG_DPC()            (DbgFlags & DBGF_DPC)
+       #define ISDBG_DBGMEMBUF()      (DbgFlags & DBGF_DBGMEMBUF)
+       #define ISDBG_DBGPRINT()       (DbgFlags & DBGF_DBGPRINT)
 #endif // #ifdef DBG_KERNELMODE
-       #define ISDBG_PPORT()   (DbgFlags & DBGF_PPORT)
-       #define ISDBG_SUCCESS() (DbgFlags & DBGF_SUCCESS)
-       #define ISDBG_WARN()    (DbgFlags & DBGF_WARNING)
-       #define ISDBG_ERROR()   (DbgFlags & DBGF_ERROR)
-       #define ISDBG_ASSERT()  (DbgFlags & DBGF_ASSERT)
-       #define ISDBG_PANIC()   (1)
+       #define ISDBG_PPORT()          (DbgFlags & DBGF_PPORT)
+       #define ISDBG_SUCCESS()        (DbgFlags & DBGF_SUCCESS)
+       #define ISDBG_WARN()           (DbgFlags & DBGF_WARNING)
+       #define ISDBG_ERROR()          (DbgFlags & DBGF_ERROR)
+       #define ISDBG_ASSERT()         (DbgFlags & DBGF_ASSERT)
+       #define ISDBG_PANIC()          (1)
 
 /* Now, abstract from some differences between user-mode and kernel-mode */
 
@@ -266,7 +278,15 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
               extern VOID DbgOutputMemoryBuffer(const char *String);
 
               /*! This macro is called to output the buffer */
-              #define _DBG_PERFORM(_xxx) DbgOutputMemoryBuffer(_xxx); DbgPrint("%s", _xxx); 
+              #define _DBG_PERFORM(_xxx) \
+                    if (ISDBG_DBGMEMBUF()) \
+                    { \
+                        DbgOutputMemoryBuffer(_xxx); \
+                    } \
+                    if (ISDBG_DBGPRINT()) \
+                    { \
+                        DbgPrint("%s", _xxx); \
+                    }
 
               /*! What has to be defined at the start of each function? */
               #define FUNC_DEF           ULONG DebugBufferNo = 0;
