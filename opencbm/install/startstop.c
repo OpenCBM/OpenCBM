@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.3 2004-11-16 19:54:34 strik Exp $ \n
+** \version $Id: startstop.c,v 1.4 2004-11-17 20:30:12 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -113,7 +113,7 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version)
     this function returns TRUE.
 
 */
-BOOL
+static BOOL
 CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 {
     ULONG instcbmVersion;
@@ -423,12 +423,13 @@ CbmCheckCorrectInstallation(VOID)
                     printf("Could not get an interrupt. Please try again after a reboot.\n");
                 }
             }
-        }
-    }
+            else
+            {
+                // no problem, we can stop the loop
 
-    if (CheckVersions(&outBuffer))
-    {
-        error = TRUE;
+                break;
+            }
+        }
     }
 
     // If the driver is set to be started automatically, restart it now
@@ -438,6 +439,10 @@ CbmCheckCorrectInstallation(VOID)
         cbm_i_driver_start();
     }
 
+    if (CheckVersions(&outBuffer))
+    {
+        error = TRUE;
+    }
 
     FUNC_LEAVE_BOOL(error);
 }

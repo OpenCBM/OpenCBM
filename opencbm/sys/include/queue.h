@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/queue.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: queue.h,v 1.1 2004-11-07 11:05:13 strik Exp $ \n
+** \version $Id: queue.h,v 1.2 2004-11-17 20:30:12 strik Exp $ \n
 ** \n
 ** \brief Definitions for the queueing functions
 **
@@ -52,6 +52,14 @@ struct QUEUE
 
     /*! \brief signal that the queue is not empty */
     KEVENT NotEmptyEvent;
+
+#ifdef USE_FAST_START_THREAD
+
+    /*! \brief Signal to the caller of the QUEUE that it
+     * can continue */
+    KEVENT BackSignalEvent;
+
+#endif // #ifdef USE_FAST_START_THREAD
 
     /*! \brief pointer to the StartIo function to be called */
     PCBMDRIVER_STARTIO DriverStartIo;

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/queue.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: queue.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: queue.c,v 1.2 2004-11-17 20:30:12 strik Exp $ \n
 ** \n
 ** \brief Functions for queueung IRPs
 **
@@ -383,9 +383,17 @@ QueueInit(PQUEUE Queue, PCBMDRIVER_STARTIO DriverStartIo)
     // can be run at arbitrary IRQL
     InitializeListHead(&Queue->IrpListHead);
 
-    /* Initialize the event which is used to wake up the thread */
+    // Initialize the event which is used to wake up the thread
     DBG_IRQL( == PASSIVE_LEVEL);
     KeInitializeEvent(&Queue->NotEmptyEvent, SynchronizationEvent, FALSE);
+
+#ifdef USE_FAST_START_THREAD
+
+    // Initialize the event which is used to wake up "the caller of the thread"
+    DBG_IRQL( == PASSIVE_LEVEL);
+    KeInitializeEvent(&Queue->BackSignalEvent, SynchronizationEvent, FALSE);
+
+#endif // #ifdef USE_FAST_START_THREAD
 
     // Initialize the cancel-safe queue
     // no IRQL restrictions apply!
@@ -801,6 +809,15 @@ QueuePoll(PQUEUE Queue, PDEVICE_OBJECT Fdo)
             FALSE,
             NULL);
 
+#ifdef USE_FAST_START_THREAD
+
+        // Signal to the caller that it can continue
+
+        DBG_IRQL( <= DISPATCH_LEVEL);
+        KeSetEvent(&Queue->BackSignalEvent, IO_NO_INCREMENT, FALSE);
+
+#endif USE_FAST_START_THREAD
+
         // Get the next IRP from the QUEUE
         // Remember: There might not be any IRP on the
         // QUEUE. The caller has to handle this state
@@ -846,8 +863,25 @@ QueueSignal(PQUEUE Queue)
 
     // Wake up the waiting thread
 
+#ifdef USE_FAST_START_THREAD
+
+    DBG_IRQL( <= DISPATCH_LEVEL);
+    KeSetEvent(&Queue->NotEmptyEvent, IO_NO_INCREMENT, TRUE);
+
+    DBG_IRQL( < DISPATCH_LEVEL);
+    KeWaitForSingleObject(&Queue->BackSignalEvent,
+        Executive,
+        KernelMode,
+        FALSE,
+        NULL);
+
+#else // #ifdef USE_FAST_START_THREAD
+
     DBG_IRQL( <= DISPATCH_LEVEL);
     KeSetEvent(&Queue->NotEmptyEvent, IO_NO_INCREMENT, FALSE);
+
+#endif // #ifdef USE_FAST_START_THREAD
+
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }

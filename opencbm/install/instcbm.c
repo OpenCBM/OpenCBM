@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.3 2004-11-16 19:54:34 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.4 2004-11-17 20:30:12 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -202,7 +202,7 @@ usage(VOID)
             "                  specify this option, you can use the driver as normal\n"
             "                  user, you do not need administrator rights.\n"
             "                  Handle with care, have a look at the documentation\n"
-            "                 .before using this option!\n"
+            "                  before using this option!\n"
             "\n");
 
     FUNC_LEAVE();
