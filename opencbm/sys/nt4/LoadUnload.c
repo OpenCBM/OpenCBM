@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.4 2004-11-21 15:23:35 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.5 2004-11-21 16:29:09 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **
@@ -268,6 +268,10 @@ DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegistryPath)
     NTSTATUS ntStatus;
 
     FUNC_ENTER();
+
+    // Initialize the debugging system
+
+    DBG_INIT();
 
     // Initialize the mutex which should prevent premature unloading
 

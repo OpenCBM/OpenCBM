@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.3 2004-11-21 15:29:40 strik Exp $ \n
+** \version $Id: debug.h,v 1.4 2004-11-21 16:29:09 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -273,6 +273,7 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
 
 #ifdef DBG_KERNELMODE
 
+              extern VOID DbgInit(VOID);
               extern VOID DbgAllocateMemoryBuffer(VOID);
               extern VOID DbgFreeMemoryBuffer(VOID);
               extern VOID DbgOutputMemoryBuffer(const char *String);
@@ -406,6 +407,11 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
        #define DBGDO( _xxx ) _xxx
 
        #ifdef DBG_KERNELMODE
+
+              //! Initialize the debugging system
+              #define DBG_INIT() DbgInit()
+
+
               /*! Output if DBGF_IEC is defined */
               #define DBG_IEC(     _xxx ) { if (ISDBG_IEC())  {  DBGO( _xxx ); } }
               /*! Output if DBGF_IRQ is defined */
@@ -499,6 +505,9 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
        #define DBG_VERIFY(  _xxx ) _xxx
 
        #ifdef DBG_KERNELMODE
+
+              //! We do not need to initialize the debugging system
+              #define DBG_INIT()
 
               //! On release builds, a dummy
               #define DBG_IEC(     _xxx )

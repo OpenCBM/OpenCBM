@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.5 2004-11-21 15:42:53 strik Exp $ \n
+** \version $Id: debug.c,v 1.6 2004-11-21 16:29:09 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -1025,10 +1025,28 @@ ULONG DbgKeGetCurrentProcessorNumber()
 static PCHAR DbgMemoryBuffer = NULL;
 static ULONG DbgNextWriteMemoryBuffer = 0;
 
-/* as we are not allowed to use a spin lock at elevated IRQL, define our own one */
-static LONG DbgMemoryBufferSpinLock = 0;
+static KSPIN_LOCK DbgMemoryBufferSpinLock;
+static KIRQL DbgMemoryBufferSpinLockIrql;
 
 #define DBG_SIZE_MEMORY_BUFFER 0x20000
+
+static VOID
+DbgBufferSynchronizeStart(VOID)
+{
+    KeAcquireSpinLock(&DbgMemoryBufferSpinLock, &DbgMemoryBufferSpinLockIrql);
+}
+
+static VOID
+DbgBufferSynchronizeStop(VOID)
+{
+    KeReleaseSpinLock(&DbgMemoryBufferSpinLock, DbgMemoryBufferSpinLockIrql);
+}
+
+VOID
+DbgInit(VOID)
+{
+    KeInitializeSpinLock(&DbgMemoryBufferSpinLock);
+}
 
 /*! \brief Get storage area for debugging output
 
@@ -1038,8 +1056,7 @@ static LONG DbgMemoryBufferSpinLock = 0;
 VOID
 DbgAllocateMemoryBuffer(VOID)
 {
-    while (InterlockedExchange(&DbgMemoryBufferSpinLock, 1) == 0)
-        ;
+    DbgBufferSynchronizeStart();
 
     DbgMemoryBuffer = ExAllocatePoolWithTag(NonPagedPool,
         DBG_SIZE_MEMORY_BUFFER + 1, MTAG_DBGBUFFER);
@@ -1051,7 +1068,7 @@ DbgAllocateMemoryBuffer(VOID)
 
     DbgNextWriteMemoryBuffer = 0;
 
-    InterlockedExchange(&DbgMemoryBufferSpinLock, 0);
+    DbgBufferSynchronizeStop();
 }
 
 /*! \brief Free storage area for debugging output
@@ -1061,8 +1078,7 @@ DbgAllocateMemoryBuffer(VOID)
 VOID
 DbgFreeMemoryBuffer(VOID)
 {
-    while (InterlockedExchange(&DbgMemoryBufferSpinLock, 1) == 0)
-        ;
+    DbgBufferSynchronizeStart();
 
     if (DbgMemoryBuffer)
     {
@@ -1070,7 +1086,7 @@ DbgFreeMemoryBuffer(VOID)
         DbgMemoryBuffer = NULL;
     }
 
-    InterlockedExchange(&DbgMemoryBufferSpinLock, 0);
+    DbgBufferSynchronizeStop();
 }
 
 /*! \brief Output into the debugging buffer
@@ -1085,8 +1101,7 @@ DbgFreeMemoryBuffer(VOID)
 VOID
 DbgOutputMemoryBuffer(const char *String)
 {
-    while (InterlockedExchange(&DbgMemoryBufferSpinLock, 1) == 0)
-        ;
+    DbgBufferSynchronizeStart();
 
     if (DbgMemoryBuffer)
     {
@@ -1139,7 +1154,7 @@ DbgOutputMemoryBuffer(const char *String)
         
     }
 
-    InterlockedExchange(&DbgMemoryBufferSpinLock, 0);
+    DbgBufferSynchronizeStop();
 }
 
 /*! \brief Give the debug buffer contents to the installer
@@ -1172,8 +1187,7 @@ cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer, IN OUT PULO
 {
     FUNC_ENTER();
 
-    while (InterlockedExchange(&DbgMemoryBufferSpinLock, 1) == 0)
-        ;
+    DbgBufferSynchronizeStart();
 
     if (DbgMemoryBuffer)
     {
@@ -1234,7 +1248,7 @@ cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer, IN OUT PULO
         *ReturnLength = writtenBytes;
     }
 
-    InterlockedExchange(&DbgMemoryBufferSpinLock, 0);
+    DbgBufferSynchronizeStop();
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
