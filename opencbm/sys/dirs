@@ -1,4 +1,5 @@
 DIRS= \
+	vdd \
 	wdm \
 	nt4 \
 	libcommon \

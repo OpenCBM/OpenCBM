@@ -91,11 +91,11 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\i_opencbm.c
+SOURCE=..\cbm.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\opencbm.c
+SOURCE=.\i_opencbm.c
 # End Source File
 # Begin Source File
 
@@ -115,7 +115,7 @@ SOURCE=..\..\include\debug.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\i_opencbm.h
+SOURCE=.\i_opencbm.h
 # End Source File
 # Begin Source File
 

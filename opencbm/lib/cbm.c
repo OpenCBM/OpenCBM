@@ -4,7 +4,7 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999-2004 Michael Klein <michael.klein@puffin.lb.shuttle.de>
  *  Copyright 2001-2004 Spiro Trikaliotis
  *
  *  Parts are Copyright
@@ -13,13 +13,11 @@
 */
 
 /*! ************************************************************** 
-** \file dll/opencbm.c \n
-** \author Spiro Trikaliotis \n
-** \version $Id: opencbm.c,v 1.6 2004-12-13 18:19:55 strik Exp $ \n
-** \authors Based on code from
-**    Michael Klein <michael.klein@puffin.lb.shuttle.de>
+** \file lib/cbm.c \n
+** \author Michael Klein, Spiro Trikaliotis \n
+** \version $Id: cbm.c,v 1.1 2004-12-22 14:43:21 strik Exp $ \n
 ** \n
-** \brief DLL for accessing the driver
+** \brief Shared library / DLL for accessing the driver
 **
 ****************************************************************/
 
@@ -856,6 +854,9 @@ cbm_iec_release(CBM_FILE HandleDevice, int Line)
    If zero, then wait for this line to be deactivated. \n
    If not zero, then wait for this line to be activated.
 
+ \return
+   The state of the IEC bus on return (like cbm_iec_poll).
+
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
 
@@ -893,6 +894,10 @@ cbm_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 
    The line to be tested. This must be exactly one of
    IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
+
+ \return
+
+   1 if the line is set, 0 if it is not
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.

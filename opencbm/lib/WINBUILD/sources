@@ -12,6 +12,6 @@ DLLENTRY=opencbm_init
 
 INCLUDES=../../include
 
-SOURCES=..\opencbm.c  \
-        ..\i_opencbm.c \
+SOURCES=../cbm.c \
+        i_opencbm.c \
         opencbm.rc

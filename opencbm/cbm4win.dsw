@@ -234,7 +234,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "opencbm"=.\dll\WINBUILD\opencbm.dsp - Package Owner=<4>
+Project: "opencbm"=.\lib\WINBUILD\opencbm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -283,6 +283,18 @@ Package=<4>
 ###############################################################################
 
 Project: "syswdm"=.\sys\wdm\syswdm.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "vdd"=.\sys\vdd\dll\WINBUILD\vdd.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

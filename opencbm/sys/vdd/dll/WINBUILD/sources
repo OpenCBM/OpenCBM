@@ -1,0 +1,19 @@
+TARGETNAME=OpenCbmVDD
+TARGETPATH=../../../../bin
+TARGETTYPE=DYNLINK
+TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
+           $(SDK_LIB_PATH)/user32.lib   \
+           $(SDK_LIB_PATH)/advapi32.lib \
+           $(SDK_LIB_PATH)/ntvdm.lib    \
+           ../../../../bin/i386/opencbm.lib
+
+DLLBASE=0x10000000
+
+DLLENTRY=VDDInitialize
+
+INCLUDES=../../../../include
+
+SOURCES=../vdd.c \
+        ../execute.c \
+        ../cbmfile.c \
+        vdd.rc

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file install/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.2 2004-11-21 15:29:40 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.3 2004-12-22 14:43:21 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the driver
 **
@@ -28,7 +28,7 @@
 // Include the functionality of the DLL into the install
 // Application
 
-#include "../dll/i_opencbm.c"
+#include "../lib/WINBUILD/i_opencbm.c"
 
 
 #if DBG
