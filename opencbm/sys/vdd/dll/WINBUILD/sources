@@ -11,7 +11,7 @@ DLLBASE=0x10000000
 
 DLLENTRY=VDDInitialize
 
-INCLUDES=../../../../include
+INCLUDES=../../../../include;../../../include
 
 SOURCES=../vdd.c \
         ../execute.c \

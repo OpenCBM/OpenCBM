@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/poll.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: poll.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: poll.c,v 1.2 2005-01-22 19:50:41 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -50,6 +50,7 @@ cbmiec_iec_poll(IN PDEVICE_EXTENSION Pdx, OUT PUCHAR Result)
     if((ch & PP_DATA_IN) == 0) *Result |= IEC_LINE_DATA;
     if((ch & PP_CLK_IN)  == 0) *Result |= IEC_LINE_CLOCK;
     if((ch & PP_ATN_IN)  == 0) *Result |= IEC_LINE_ATN;
+    if((ch & PP_RESET_IN)== 0) *Result |= IEC_LINE_RESET;
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/release.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: release.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: release.c,v 1.2 2005-01-22 19:50:41 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -32,7 +32,9 @@
    Pointer to the device extension.
 
  \param Line
-   Which line has to be released (one of IEC_DATA, IEC_CLOCK, IEC_ATN)
+   Which line has to be released (an OR between IEC_DATA, IEC_CLOCK, IEC_ATN,
+   and IEC_RESET)
+
 
  \return 
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
@@ -50,23 +52,19 @@ cbmiec_iec_release(IN PDEVICE_EXTENSION Pdx, IN USHORT Line)
 
     // Set the correct line as given by the call
 
-    switch (Line)
+    if (Line & !(IEC_LINE_DATA | IEC_LINE_CLOCK | IEC_LINE_ATN | IEC_LINE_RESET))
     {
-        case IEC_LINE_DATA:
-           CBMIEC_RELEASE(PP_DATA_OUT);
-           break;
-
-        case IEC_LINE_CLOCK:
-           CBMIEC_RELEASE(PP_CLK_OUT);
-           break;
-
-        case IEC_LINE_ATN:
-           CBMIEC_RELEASE(PP_ATN_OUT);
-           break;
-
-        default:
-           ntStatus = STATUS_INVALID_PARAMETER;
-           break;
+        // the was some bit set that is not recognized, return
+        // with an error
+        ntStatus = STATUS_INVALID_PARAMETER;
     }
+    else
+    {
+        if (Line & IEC_LINE_DATA)  CBMIEC_RELEASE(PP_DATA_OUT);
+        if (Line & IEC_LINE_CLOCK) CBMIEC_RELEASE(PP_CLK_OUT);
+        if (Line & IEC_LINE_ATN)   CBMIEC_RELEASE(PP_ATN_OUT);
+        if (Line & IEC_LINE_RESET) CBMIEC_RELEASE(PP_RESET_OUT);
+    }
+
     FUNC_LEAVE_NTSTATUS(ntStatus );
 }

@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/vdd.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.c,v 1.3 2005-01-06 21:00:16 strik Exp $ \n
+** \version $Id: vdd.c,v 1.4 2005-01-22 19:50:41 strik Exp $ \n
 ** \n
 ** \brief VDD for accessing the driver from DOS
 **
@@ -154,18 +154,6 @@ VDDDispatch(VOID)
 
     FUNC_ENTER();
 
-    FUNC_PARAM((DBG_PREFIX
-        "CALL:\n"
-        "EAX = %08x, EBX = %08x, ECX = %08x, EDX = %08x,\n"
-        "ESI = %08x, EDI = %08x, ESP = %08x, EBP = %08x,\n"
-        "CS = %04x, EIP = %08x,\n"
-        "DS = %04x,  ES = %04x,  SS = %04x.\n",
-        getEAX(), getEBX(), getECX(), getEDX(),
-        getESI(), getEDI(), getESP(), getEBP(),
-        getCS(), getEIP(),
-        getDS(), getES(), getSS()
-        ));
-
     functioncode = getDL();
 
     error = FALSE;
@@ -173,9 +161,10 @@ VDDDispatch(VOID)
     // convert to BX value into a CBM_FILE
     switch (functioncode)
     {
+    case FC_VDD_USLEEP:
     case FC_DRIVER_OPEN:
     case FC_GET_DRIVER_NAME:
-        // FC_DRIVER_OPEN and FC_GER_DRIVER_NAME are special,
+        // FC_VDD_USLEEP, FC_DRIVER_OPEN and FC_GET_DRIVER_NAME are special,
         // they do not have a BX input.
         break;
 
@@ -213,12 +202,15 @@ VDDDispatch(VOID)
         case FC_IEC_GET:         error = vdd_iec_get(cbmfile);       break;
         case FC_IEC_SET:         error = vdd_iec_set(cbmfile);       break;
         case FC_IEC_RELEASE:     error = vdd_iec_release(cbmfile);   break;
+        case FC_IEC_SETRELEASE:  error = vdd_iec_setrelease(cbmfile); break;
         case FC_IEC_WAIT:        error = vdd_iec_wait(cbmfile);      break;
         case FC_UPLOAD:          error = vdd_upload(cbmfile);        break;
         case FC_DEVICE_STATUS:   error = vdd_device_status(cbmfile); break; 
         case FC_EXEC_COMMAND:    error = vdd_exec_command(cbmfile);  break;
         case FC_IDENTIFY:        error = vdd_identify(cbmfile);      break;
         case FC_GET_DRIVER_NAME: error = vdd_get_driver_name();      break;
+
+        case FC_VDD_USLEEP:      error = vdd_usleep();               break;
 
         case FC_VDD_INSTALL_IOHOOK:   error = vdd_install_iohook(cbmfile);   break;
         case FC_VDD_UNINSTALL_IOHOOK: error = vdd_uninstall_iohook(cbmfile); break;
@@ -232,18 +224,6 @@ VDDDispatch(VOID)
     }
 
     setCF(error ? 1 : 0);
-
-    FUNC_PARAM((DBG_PREFIX
-        "RET:\n"
-        "EAX = %08x, EBX = %08x, ECX = %08x, EDX = %08x,\n"
-        "ESI = %08x, EDI = %08x, ESP = %08x, EBP = %08x,\n"
-        "CS = %04x, EIP = %08x,\n"
-        "DS = %04x,  ES = %04x,  SS = %04x.\n",
-        getEAX(), getEBX(), getECX(), getEDX(),
-        getESI(), getEDI(), getESP(), getEBP(),
-        getCS(), getEIP(),
-        getDS(), getES(), getSS()
-        ));
 
     FUNC_LEAVE();
 }

@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.4 2004-12-13 18:19:56 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.5 2005-01-22 19:50:40 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -177,6 +177,8 @@ typedef CBMT_LINE       CBMT_IEC_SET_IN;
 typedef CBMT_LINE       CBMT_IEC_RELEASE_IN;
 /*! Output buffer for GET_EOI */
 typedef CBMT_BOOLEAN    CBMT_GET_EOI_OUT;
+/*! Input buffer for IEC_SET */
+typedef CBMT_LINE_STATE CBMT_IEC_SETRELEASE_IN;
 
 
 /*! BASE number of the custom IOCTL */
@@ -228,6 +230,9 @@ typedef CBMT_BOOLEAN    CBMT_GET_EOI_OUT;
 //! IOCTL reading the debug buffer of the driver; ONLY FOR USE OF INSTCBM!
 #define CBMCTRL_I_READDBG   _CBMIO(CBMCTRL_BASE, 17) // -                    char array which will be filled
 #endif // #if DBG
+
+//! IOCTL for setting and releasing IEC lines at once
+#define CBMCTRL_IEC_SETRELEASE _CBMIO(CBMCTRL_BASE, 18) // CBMT_IEC_SETRELEASE_IN -
 
 /* these are the return codes of CBMCTRL_I_INSTALL: */
 

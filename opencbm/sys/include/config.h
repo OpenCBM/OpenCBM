@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file config.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: config.h,v 1.4 2004-11-21 15:42:53 strik Exp $ \n
+** \version $Id: config.h,v 1.5 2005-01-22 19:50:41 strik Exp $ \n
 ** \n
 ** \brief Definitions for the configuration of the cbm4win driver
 **
@@ -26,3 +26,7 @@
 /*! If this is defined, the QUEUE uses an implementation which
 changes fast to the working thread */
 #define USE_FAST_START_THREAD 1
+
+/*! If this is defined, we have TEST support for setting the
+    BIDIR bit with cbm_iec_setrelease().*/
+#define TEST_BIDIR 1

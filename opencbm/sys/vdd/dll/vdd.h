@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/vdd.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.h,v 1.3 2005-01-06 21:00:16 strik Exp $ \n
+** \version $Id: vdd.h,v 1.4 2005-01-22 19:50:42 strik Exp $ \n
 ** \n
 ** \brief Function prototypes for the VDD
 **
@@ -50,7 +50,9 @@ enum FUNCTIONCODE
     FC_IDENTIFY,
     FC_GET_DRIVER_NAME,
     FC_VDD_INSTALL_IOHOOK,
-    FC_VDD_UNINSTALL_IOHOOK
+    FC_VDD_UNINSTALL_IOHOOK,
+    FC_VDD_USLEEP,
+    FC_IEC_SETRELEASE
 } FUNCTIONCODE;
 
 extern HANDLE vdd_handle;
@@ -73,6 +75,7 @@ extern BOOLEAN vdd_pp_write(CBM_FILE);
 extern BOOLEAN vdd_iec_poll(CBM_FILE);
 extern BOOLEAN vdd_iec_set(CBM_FILE);
 extern BOOLEAN vdd_iec_release(CBM_FILE);
+extern BOOLEAN vdd_iec_setrelease(CBM_FILE);
 extern BOOLEAN vdd_iec_wait(CBM_FILE);
 extern BOOLEAN vdd_iec_get(CBM_FILE);
 extern BOOLEAN vdd_upload(CBM_FILE);
@@ -84,6 +87,8 @@ extern BOOLEAN vdd_get_driver_name(VOID);
 extern BOOLEAN vdd_install_iohook(CBM_FILE);
 extern BOOLEAN vdd_uninstall_iohook(CBM_FILE);
 extern USHORT  vdd_uninstall_iohook_internal(VOID);
+
+extern BOOLEAN vdd_usleep(VOID);
 
 extern CBM_FILE vdd_cbmfile_get(WORD);
 extern WORD     vdd_cbmfile_store(CBM_FILE);

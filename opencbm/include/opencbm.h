@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.6 2005-01-06 21:00:15 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.7 2005-01-22 19:50:40 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -58,8 +58,9 @@ extern "C" {
 
 extern int vdd_init(void);
 extern void vdd_uninit(void);
-extern int vdd_install_iohook(CBM_FILE f, int IoBaseAddress);
+extern int vdd_install_iohook(CBM_FILE f, int IoBaseAddress, int CableType);
 extern int vdd_uninstall_iohook(CBM_FILE f);
+extern void vdd_usleep(CBM_FILE f, unsigned int howlong);
 #else
 
   /* we have linux */
@@ -118,6 +119,7 @@ EXTERN int CBMAPIDECL cbm_iec_poll(CBM_FILE f);
 EXTERN int CBMAPIDECL cbm_iec_get(CBM_FILE f, int line);
 EXTERN void CBMAPIDECL cbm_iec_set(CBM_FILE f, int line);
 EXTERN void CBMAPIDECL cbm_iec_release(CBM_FILE f, int line);
+EXTERN void CBMAPIDECL cbm_iec_setrelease(CBM_FILE f, int mask, int line);
 EXTERN int CBMAPIDECL cbm_iec_wait(CBM_FILE f, int line, int state);
 
 EXTERN int CBMAPIDECL cbm_upload(CBM_FILE f, __u_char dev, int adr, const void *prog, size_t size);

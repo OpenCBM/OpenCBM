@@ -162,6 +162,10 @@ SOURCE=.\set.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\setrelease.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\talk.c
 # End Source File
 # Begin Source File

@@ -17,7 +17,7 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/opencbn.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: OPENCBM.C,v 1.3 2005-01-06 21:00:15 strik Exp $ \n
+** \version $Id: OPENCBM.C,v 1.4 2005-01-22 19:50:41 strik Exp $ \n
 ** \n
 ** \brief Library for accessing the driver from DOS
 **
@@ -50,7 +50,9 @@ typedef unsigned int WORD;
         CbmDispatchCall(_no_); mov [retVal],ax
 
 
-static WORD VDD_HANDLE = -1;
+#define INVALID_HANDLE -1
+
+static WORD VDD_HANDLE = INVALID_HANDLE;
 
 static int vdd_initialized = 0;
 
@@ -61,7 +63,6 @@ vdd_init(void)
     static const char InitFunc[] = "VDDRegisterInit";
     static const char DispFunc[] = "VDDDispatch";
 
-    WORD retVal;
     WORD error;
 
     if (vdd_initialized)
@@ -99,10 +100,10 @@ vdd_init(void)
         case 2: printf("vdd_init(): Dispatch routine not found!\n"); break;
         case 3: printf("vdd_init(): Init routine not found!\n"); break;
         case 4: printf("vdd_init(): Insufficient memory!\n"); break;
-        default: printf("vdd_init(): unknown error reason: %u\n", retVal); break;
+        default: printf("vdd_init(): unknown error reason: %u\n", VDD_HANDLE); break;
         }
 
-        VDD_HANDLE = -1;
+        VDD_HANDLE = INVALID_HANDLE;
     }
     else
     {
@@ -125,7 +126,7 @@ vdd_uninit(void)
             UnRegisterModule
         }
 
-        VDD_HANDLE = -1;
+        VDD_HANDLE = INVALID_HANDLE;
     }
 }
 
@@ -137,7 +138,7 @@ cbm_driver_open(CBM_FILE *f, int port)
 
     vdd_init();
 
-    if (port < 256)
+    if (VDD_HANDLE != INVALID_HANDLE && port < 256)
     {
         asm {
             mov dh,byte ptr [port]
@@ -465,7 +466,9 @@ static char GetDriverName_Portname[GETDRIVERNAME_PORTNAME_MAXLENGTH];
 const char *
 cbm_get_driver_name(int port)
 {
-    if (port<256)
+    vdd_init();
+
+    if (VDD_HANDLE != INVALID_HANDLE && port < 256)
     {
         asm {
             mov dh,byte ptr [port]
@@ -485,12 +488,13 @@ cbm_get_driver_name(int port)
 }
 
 int
-vdd_install_iohook(CBM_FILE f, int IoBaseAddress)
+vdd_install_iohook(CBM_FILE f, int IoBaseAddress, int CableType)
 {
     WORD retVal;
 
     asm {
         mov cx,[IoBaseAddress]
+        mov dh,byte ptr [CableType]
         CbmDispatchCallRetVal(25)
     }
     return retVal;
@@ -505,4 +509,23 @@ vdd_uninstall_iohook(CBM_FILE f)
         CbmDispatchCallRetVal(26)
     }
     return retVal;
+}
+
+void
+vdd_usleep(CBM_FILE f, unsigned int howlong)
+{
+    asm {
+        mov cx,[howlong]
+        CbmDispatchCall(27)
+    }
+}
+
+void
+cbm_iec_setrelease(CBM_FILE f, int mask, int line)
+{
+    asm {
+        mov ch,byte ptr [mask]
+        mov cl,byte ptr [line]
+        CbmDispatchCall(28)
+    }
 }

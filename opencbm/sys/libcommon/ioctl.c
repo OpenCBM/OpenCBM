@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.3 2004-12-13 18:19:56 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.4 2005-01-22 19:50:41 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -220,6 +220,12 @@ cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
             fastStart = TRUE;
             break;
 
+        case CBMCTRL_IEC_SETRELEASE:
+            DBG_IRP(CBMCTRL_IEC_SETRELEASE);
+            ntStatus = cbm_checkinputbuffer(irpSp, sizeof(CBMT_IEC_SETRELEASE_IN), STATUS_SUCCESS);
+            fastStart = TRUE;
+            break;
+
         case CBMCTRL_IEC_WAIT:
             DBG_IRP(CBMCTRL_IEC_WAIT);
             ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_IEC_WAIT_OUT), 
@@ -402,6 +408,13 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
         case CBMCTRL_IEC_RELEASE:
             DBG_IRP(CBMCTRL_IEC_RELEASE);
             ntStatus = cbmiec_iec_release(Pdx, INPUTVALUE(CBMT_IEC_RELEASE_IN)->Line);
+            break;
+
+        case CBMCTRL_IEC_SETRELEASE:
+            DBG_IRP(CBMCTRL_IEC_SETRELEASE);
+            ntStatus = cbmiec_iec_setrelease(Pdx,
+                            INPUTVALUE(CBMT_IEC_SETRELEASE_IN)->State,
+                            INPUTVALUE(CBMT_IEC_SETRELEASE_IN)->Line);
             break;
 
         case CBMCTRL_IEC_WAIT:

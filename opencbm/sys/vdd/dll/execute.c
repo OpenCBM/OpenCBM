@@ -10,14 +10,18 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.4 2005-01-06 21:00:16 strik Exp $ \n
+** \version $Id: execute.c,v 1.5 2005-01-22 19:50:41 strik Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **
 ****************************************************************/
 
+#include "config.h"
+
 #include <windows.h>
 #include <vddsvc.h>
+
+#include "arch.h"
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
@@ -33,6 +37,8 @@
 #include "vdd.h"
 #include "opencbm.h"
 
+
+#define NEW_IMPLEMENTATION_WITH_SETRELEASE
 
 /*-------------------------------------------------------------------*/
 /*--------- HELPER FUNCTIONS ----------------------------------------*/
@@ -723,6 +729,40 @@ vdd_iec_release(CBM_FILE HandleDevice)
     FUNC_LEAVE_BOOL(FALSE);
 }
 
+/*! \brief Activate a line on the IEC serial bus
+
+ This function activates (sets to 0V) a line on the IEC serial bus.
+
+ \param HandleDevice (BX)
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Mask (CH)
+   The mask of which lines have to be altered at all. Any line
+   not mentioned here is left untouched. This has to be a bitwise
+   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
+
+ \param Line (CL)
+   If a line has been set in Mask, the corresponding bit here decides
+   if that line is to be set (in this case, it is ORed to this value)
+   or released (in this case, the corresponding bit here is 0).
+
+ If vdd_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ \bug
+   This function can't signal an error, thus, be careful!
+*/
+
+BOOLEAN
+vdd_iec_setrelease(CBM_FILE HandleDevice)
+{
+    FUNC_ENTER();
+
+    cbm_iec_setrelease(HandleDevice, getCH(), getCL());
+
+    FUNC_LEAVE_BOOL(FALSE);
+}
+
 /*! \brief Wait for a line to have a specific state
 
  This function waits for a line to enter a specific state
@@ -971,26 +1011,65 @@ static BYTE vdd_iohook_lastwrittencontrolregister = 0xFF;
 
 
 /* lpt output lines for XE cables */
-#define PP_XE_ATN_OUT    0x01 //!< The ATN OUT bit
-#define PP_XE_CLK_OUT    0x02 //!< The CLOCK OUT bit
-#define PP_XE_RESET_OUT  0x04 //!< The RESET OUT bit
-#define PP_XE_DATA_OUT   0x08 //!< The DATA OUT bit
+#define PP_XE_ATN_OUT    0x01 //!< The ATN OUT bit for XE cables
+#define PP_XE_CLK_OUT    0x02 //!< The CLOCK OUT bit for XE cables
+#define PP_XE_RESET_OUT  0x04 //!< The RESET OUT bit for XE cables
+#define PP_XE_DATA_OUT   0x08 //!< The DATA OUT bit for XE cables
+#define PP_XE_OUTEOR     0x00 //!< eor mask for output for XE cables
 
 /* lpt input lines for XE cables */
-#define PP_XE_ATN_IN     0x10 //!< The ATN IN bit
-#define PP_XE_CLK_IN     0x20 //!< The CLOCK IN bit
-#define PP_XE_RESET_IN   0x40 //!< The RESET IN bit
-#define PP_XE_DATA_IN    0x80 //!< The DATA IN bit
+#define PP_XE_ATN_IN     0x10 //!< The ATN IN bit for XE cables
+#define PP_XE_CLK_IN     0x20 //!< The CLOCK IN bit for XE cables
+#define PP_XE_RESET_IN   0x40 //!< The RESET IN bit for XE cables
+#define PP_XE_DATA_IN    0x80 //!< The DATA IN bit for XE cables
+
+
+/* lpt output lines for XM cables */
+#define PP_XM_ATN_OUT    PP_XE_ATN_OUT   //!< The ATN OUT bit for XM cables
+#define PP_XM_CLK_OUT    PP_XE_CLK_OUT   //!< The CLOCK OUT bit for XM cables
+#define PP_XM_DATA_OUT   PP_XE_RESET_OUT //!< The DATA OUT bit for XM cables
+#define PP_XM_RESET_OUT  PP_XE_DATA_OUT  //!< The RESET OUT bit for XM cables
+#define PP_XM_OUTEOR     0x00            //!< eor mask for output for XM cables
+
+/* lpt input lines for XM cables */
+#define PP_XM_ATN_IN     PP_XE_ATN_IN   //!< The ATN IN bit for XM cables
+#define PP_XM_CLK_IN     PP_XE_CLK_IN   //!< The CLOCK IN bit for XM cables
+#define PP_XM_DATA_IN    PP_XE_RESET_IN //!< The DATA IN bit for XM cables
+#define PP_XM_RESET_IN   PP_XE_DATA_IN  //!< The RESET IN bit for XM cables
+
+
+/* lpt output lines for XM cables */
+#define PP_XA_ATN_OUT    PP_XM_ATN_OUT   //!< The ATN OUT bit for XM cables
+#define PP_XA_CLK_OUT    PP_XM_CLK_OUT   //!< The CLOCK OUT bit for XM cables
+#define PP_XA_DATA_OUT   PP_XM_DATA_OUT  //!< The DATA OUT bit for XM cables
+#define PP_XA_RESET_OUT  PP_XM_RESET_OUT //!< The RESET OUT bit for XM cables
+#define PP_XA_OUTEOR     0x0F            //!< eor mask for output for XA cables
+
+/* lpt input lines for XM cables */
+#define PP_XA_ATN_IN     PP_XM_ATN_IN   //!< The ATN IN bit for XM cables
+#define PP_XA_CLK_IN     PP_XM_CLK_IN   //!< The CLOCK IN bit for XM cables
+#define PP_XA_DATA_IN    PP_XM_DATA_IN  //!< The DATA IN bit for XM cables
+#define PP_XA_RESET_IN   PP_XM_RESET_IN //!< The RESET IN bit for XM cables
+
+
+static unsigned char pp_atn_out;
+static unsigned char pp_clk_out;
+static unsigned char pp_data_out;
+static unsigned char pp_reset_out;
+static unsigned char pp_outeor;
+
+static unsigned char pp_atn_in;
+static unsigned char pp_clk_in;
+static unsigned char pp_data_in;
+static unsigned char pp_reset_in;
 
 /*
  The following accesses are supported:
  - +0: Data register (read and write)
  - +1: STATUS register (read only, for input)
- - +2: Contrlol register (write only, for output)
-
- XA: 0xcb  11001011
- XM: 0xc4  11000100
+ - +2: Control register (write only, for output)
 */
+
 static VOID
 vdd_iohook_inb(WORD iport,BYTE *data)
 {
@@ -1011,15 +1090,15 @@ vdd_iohook_inb(WORD iport,BYTE *data)
 
         if (value & IEC_DATA)
         {
-            ret |= PP_XE_DATA_IN;
+            ret |= pp_data_in;
         }
         if (value & IEC_CLOCK)
         {
-            ret |= PP_XE_CLK_IN;
+            ret |= pp_clk_in;
         }
         if (value & IEC_ATN)
         {
-            ret |= PP_XE_ATN_IN;
+            ret |= pp_atn_in;
         }
 
         // as the one line is inverted by the parallel port, behave the same
@@ -1028,7 +1107,7 @@ vdd_iohook_inb(WORD iport,BYTE *data)
     else if (iport == VddIoPortRange.First + 2)
     {
         // reading the control register: Gives the last written state
-        *data = 0x04 ^ vdd_iohook_lastwrittencontrolregister;
+        *data = vdd_iohook_lastwrittencontrolregister & 0xDF | 0xC0;
     }
     else DBG_ERROR((DBG_PREFIX "Access to unknown address %08x", iport));
 }
@@ -1049,38 +1128,70 @@ vdd_iohook_outb(WORD iport,BYTE data)
     {
         // writing the control register
 
+#ifdef NEW_IMPLEMENTATION_WITH_SETRELEASE
+
+        BYTE mask = IEC_ATN | IEC_CLOCK | IEC_DATA | IEC_RESET;
+        BYTE line = 0;
+
+        vdd_iohook_lastwrittencontrolregister = data;
+
+        data ^= 0x04 ^ pp_outeor;
+
+        if (data & pp_atn_out)   line |= IEC_ATN;
+        if (data & pp_data_out)  line |= IEC_DATA;
+        if (data & pp_clk_out)   line |= IEC_CLOCK;
+        if (data & pp_reset_out) line |= IEC_RESET;
+
+ #ifdef TEST_BIDIR
+
+        mask |= 0x10;
+
+        if (data & 0x10)
+        {
+            line |= 0x10;
+        }
+
+ #endif // #ifdef TEST_BIDIR
+
+        cbm_iec_setrelease(VddCbmFileForIoHook, mask, line);
+
+#else // #ifdef NEW_IMPLEMENTATION_WITH_SETRELEASE
+
         BYTE ret = data ^ vdd_iohook_lastwrittencontrolregister;
 
         vdd_iohook_lastwrittencontrolregister = data;
 
-        data ^= 0x04;
+        data ^= 0x04 ^ pp_outeor;
 
-        if (ret & PP_XE_ATN_OUT)
+        if (ret & pp_atn_out)
         {
             // ATN was changed
-            ((data & PP_XE_ATN_OUT) ? cbm_iec_set : cbm_iec_release)
+            ((data & pp_atn_out) ? cbm_iec_set : cbm_iec_release)
                 (VddCbmFileForIoHook, IEC_ATN);
         }
-        if (ret & PP_XE_CLK_OUT)
+        if (ret & pp_clk_out)
         {
             // CLOCK was changed
-            ((data & PP_XE_CLK_OUT) ? cbm_iec_set : cbm_iec_release)
+            ((data & pp_clk_out) ? cbm_iec_set : cbm_iec_release)
                 (VddCbmFileForIoHook, IEC_CLOCK);
         }
-        if (ret & PP_XE_DATA_OUT)
+        if (ret & pp_data_out)
         {
             // DATA was changed
-            ((data & PP_XE_DATA_OUT) ? cbm_iec_set : cbm_iec_release)
+            ((data & pp_data_out) ? cbm_iec_set : cbm_iec_release)
                 (VddCbmFileForIoHook, IEC_DATA);
         }
-        if (ret & PP_XE_RESET_OUT)
+        if (ret & pp_reset_out)
         {
             // RESET was changed: Only process it if it was set
-            if (data & PP_XE_RESET_OUT)
+            if (data & pp_reset_out)
             {
                 cbm_reset(VddCbmFileForIoHook);
             }
         }
+
+#endif // #ifdef NEW_IMPLEMENTATION_WITH_SETRELEASE
+
     }
     else DBG_ERROR((DBG_PREFIX "Access to unknown address %08x", iport));
 }
@@ -1097,6 +1208,10 @@ vdd_iohook_outb(WORD iport,BYTE data)
  \param IoBaseAddress (CX)
    The I/O base address on which to install the I/O hook
 
+ \param CableType (DH)
+   Decides if the emulated cable should be an XE cable (1), XM cable (2),
+   or an XA cable (3).
+
  \return (AX)
    Returns the I/O base address on which the I/O hook has been installed.\n
    If the hook could not be installed, this return value is zero.
@@ -1108,11 +1223,11 @@ vdd_iohook_outb(WORD iport,BYTE data)
 BOOLEAN
 vdd_install_iohook(CBM_FILE HandleDevice)
 {
-    UINT where = getCX();
+    BOOLEAN error;
 
     FUNC_ENTER();
 
-    DBG_PRINT((DBG_PREFIX "Entering vdd_install_iohook, installing at 0x%08X", where));
+    error = FALSE;
 
     /* assume that the hook is already installed, thus,
      * we cannot install the hook again
@@ -1124,29 +1239,66 @@ vdd_install_iohook(CBM_FILE HandleDevice)
         VddIoPortRange.First = getCX();
         VddIoPortRange.Last = VddIoPortRange.First + 2;
 
-        DBG_PRINT((DBG_PREFIX "trying to install from 0x%08x to 0x%08x, Handle = 0x%08x",
-            VddIoPortRange.First, VddIoPortRange.Last, vdd_handle));
-
         RtlZeroMemory(&VddIoPortHandlers, sizeof(VddIoPortHandlers));
         VddIoPortHandlers.inb_handler = vdd_iohook_inb;
         VddIoPortHandlers.outb_handler = vdd_iohook_outb;
 
         if (VDDInstallIOHook(vdd_handle, 1, &VddIoPortRange, &VddIoPortHandlers))
         {
-            DBG_PRINT((DBG_PREFIX "SUCCESS!"));
             // we had success
             VddIoHookInstalled = TRUE;
             setAX(VddIoPortRange.First);
 
             VddCbmFileForIoHook = HandleDevice;
-        }
-        else
-        {
-            DBG_PRINT((DBG_PREFIX "FAILED!"));
+
+            // pre-occupy the variables for the cable type
+
+            switch (getDH())
+            {
+            case 1: // XE cable
+                pp_atn_out   = PP_XE_ATN_OUT;
+                pp_clk_out   = PP_XE_CLK_OUT;
+                pp_data_out  = PP_XE_DATA_OUT;
+                pp_reset_out = PP_XE_RESET_OUT;
+                pp_outeor    = PP_XE_OUTEOR;
+                pp_atn_in    = PP_XE_ATN_IN;
+                pp_clk_in    = PP_XE_CLK_IN;
+                pp_data_in   = PP_XE_DATA_IN;
+                pp_reset_in  = PP_XE_RESET_IN;
+                break;
+
+            case 2: // XM cable
+                pp_atn_out   = PP_XM_ATN_OUT;
+                pp_clk_out   = PP_XM_CLK_OUT;
+                pp_data_out  = PP_XM_DATA_OUT;
+                pp_reset_out = PP_XM_RESET_OUT;
+                pp_outeor    = PP_XM_OUTEOR;
+                pp_atn_in    = PP_XM_ATN_IN;
+                pp_clk_in    = PP_XM_CLK_IN;
+                pp_data_in   = PP_XM_DATA_IN;
+                pp_reset_in  = PP_XM_RESET_IN;
+                break;
+
+            case 3: // XA cable
+                pp_atn_out   = PP_XA_ATN_OUT;
+                pp_clk_out   = PP_XA_CLK_OUT;
+                pp_data_out  = PP_XA_DATA_OUT;
+                pp_reset_out = PP_XA_RESET_OUT;
+                pp_outeor    = PP_XA_OUTEOR;
+                pp_atn_in    = PP_XA_ATN_IN;
+                pp_clk_in    = PP_XA_CLK_IN;
+                pp_data_in   = PP_XA_DATA_IN;
+                pp_reset_in  = PP_XA_RESET_IN;
+                break;
+
+            default:
+                error = TRUE;
+                break;
+            }
         }
     }
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOL(error);
 }
 
 /*! \brief Uninstall the I/O hook
@@ -1213,6 +1365,29 @@ vdd_uninstall_iohook(CBM_FILE HandleDevice)
     DBG_PRINT((DBG_PREFIX "Entering vdd_uninstall_iohook"));
 
     setAX(vdd_uninstall_iohook_internal());
+
+    FUNC_LEAVE_BOOL(FALSE);
+}
+
+/*! \brief Sleep some microseconds
+
+ This function allows the DOS box to sleep a specified amount of
+ microseconds.
+
+ \param Microseconds (CX)
+   The number of microseconds to sleep.
+
+ This function only guarantees that the function sleeps *at* *least*
+ the specified amount of microseconds! Because of the scheduler, we
+ cannot know when the caller will get control back.
+*/
+
+BOOLEAN
+vdd_usleep(VOID)
+{
+    FUNC_ENTER();
+
+    arch_usleep(getCX());
 
     FUNC_LEAVE_BOOL(FALSE);
 }

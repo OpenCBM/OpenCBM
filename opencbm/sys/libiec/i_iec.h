@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.3 2004-11-24 20:08:19 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.4 2005-01-22 19:50:41 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -52,6 +52,7 @@
 #define PP_ATN_IN     0x10 //!< The ATN IN bit
 #define PP_CLK_IN     0x20 //!< The CLOCK IN bit
 #define PP_DATA_IN    0x40 //!< The DATA IN bit
+#define PP_RESET_IN   0x80 //!< The RESET IN bit
 
 /*! Get the address of the parallel port DATA register out of the Pdx info */
 #define PAR_PORT (Pdx->PortInfo->Controller + PARALLEL_DATA_OFFSET)

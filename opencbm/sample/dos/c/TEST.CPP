@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/test.cpp \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: TEST.CPP,v 1.3 2005-01-06 21:00:16 strik Exp $ \n
+** \version $Id: TEST.CPP,v 1.4 2005-01-22 19:50:41 strik Exp $ \n
 ** \n
 ** \brief Some tests for the DOS API
 **
@@ -225,7 +225,11 @@ int main(int argc, char **argv)
 
     printf("VDDTEST " __DATE__ " " __TIME__ ", using drive %u\n", drive);
 
-    vdd_init();
+    if (vdd_init())
+    {
+        printf("Could not initialize the VDD, aborting!\n");
+        exit(1);
+    }
 
     drivername = cbm_get_driver_name(0);
     printf("cbm_get_driver_name() returned %s.\n", drivername);
@@ -276,7 +280,7 @@ int main(int argc, char **argv)
         unsigned int base = 0x0fc0;
 
         printf("trying to install iohook at 0x%08x ", base);
-        if (vdd_install_iohook(f, base))
+        if (vdd_install_iohook(f, base, 1))
         {
             int i;
 
