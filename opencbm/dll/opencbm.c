@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file dll/opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm.c,v 1.3 2004-11-18 19:38:43 strik Exp $ \n
+** \version $Id: opencbm.c,v 1.4 2004-11-24 20:08:18 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -919,8 +919,6 @@ cbm_iec_get(CBM_FILE HandleDevice, int Line)
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
-
- \todo Test and debug this function. DON'T USE IT!
 */
 
 int CBMAPIDECL

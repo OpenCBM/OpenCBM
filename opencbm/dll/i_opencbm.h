@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.3 2004-11-16 19:54:33 strik Exp $ \n
+** \version $Id: i_opencbm.h,v 1.4 2004-11-24 20:08:18 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **
@@ -49,6 +49,7 @@ extern BOOL cbm_i_driver_start(VOID);
 extern BOOL cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen);
 
 EXTERN BOOL CBMAPIDECL cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen);
+/*! Function pointer for the cbm_i_driver_install() function */
 typedef BOOL (*P_CBM_I_DRIVER_INSTALL)(OUT PULONG Buffer, IN ULONG BufferLen);
 
 extern LONG RegGetDWORD(IN HKEY RegKey, IN char *SubKey, OUT LPDWORD Value);

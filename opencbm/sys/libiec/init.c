@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: init.c,v 1.3 2004-11-24 20:08:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -60,12 +60,12 @@ cbmiec_timeouts_init(IN PHANDLE HKey)
 
     // receive related
 
-    READ_TIMEOUT_VALUE(T_1_RECV_WAIT_CLK_LOW_DATA_READY,            20); // us
+    READ_TIMEOUT_VALUE(T_1_RECV_WAIT_CLK_LOW_DATA_READY_GRANU,      20); // us
     READ_TIMEOUT_VALUE(T_2_Times,                                   80); //! x T_2, \todo 40
     READ_TIMEOUT_VALUE(T_2_RECV_WAIT_CLK_HIGH_T_NE,                 10); // us
     READ_TIMEOUT_VALUE(T_3_RECV_EOI_RECOGNIZED,                     70); // us
     READ_TIMEOUT_VALUE(T_4_Times,                                  200); //! x T_4, \todo 100
-    READ_TIMEOUT_VALUE(T_4_RECV_WAIT_CLK_HIGH_AFTER_EOI,            20); // us
+    READ_TIMEOUT_VALUE(T_4_RECV_WAIT_CLK_HIGH_AFTER_EOI_GRANU,      20); // us
     READ_TIMEOUT_VALUE(T_5_Times,                                 5000); // 500 //! x T_5, \todo Was 200
     READ_TIMEOUT_VALUE(T_5_RECV_BIT_WAIT_CLK_HIGH,                   1); // 10  //! us  \todo Was 10
     READ_TIMEOUT_VALUE(T_6_Times,                                  100); // x T_6

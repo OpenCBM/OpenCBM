@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.3 2004-11-24 20:08:19 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -74,86 +74,90 @@
 #define CBMIEC_GET(_line)             ((READ_PORT_UCHAR(IN_PORT)&_line)==0?1:0)
 
 
-/*! The various timeouts of the IEC bus protocol
- * \todo Rename the timeout values so that the name does have more meaning.
- */
+/*! The various timeouts of the IEC bus protocol */
 typedef
 struct IEC_TIMEOUTS
 {
-    //!< = 100 us: How long is a RESET being held?
+    //! = 100 us: How long is a RESET being held?
     ULONG T_holdreset;
-    //!< = 5 s: How long to delay after a RESET
+    //! = 5 s: How long to delay after a RESET
     ULONG T_afterreset;
 
     //! = 10 us: Graunularity of wait_for_listener() polls
     ULONG T_WaitForListener_Granu_T_H;
 
-    //! = 20 us: \todo Document and rename timeout
-    ULONG T_1_RECV_WAIT_CLK_LOW_DATA_READY;
+    //! = 20 us: Starting reception, granularity for the wait until CLK is low
+    ULONG T_1_RECV_WAIT_CLK_LOW_DATA_READY_GRANU;
 
-    //! x T_2 is 40: \todo Document and rename timeout
+    //! x T_2 is 40
     ULONG T_2_Times;
-    //! = 10 us: \todo Document and rename timeout
+
+    //! = 10 us: Granularity: How long do we wait for the data of the other site
     ULONG T_2_RECV_WAIT_CLK_HIGH_T_NE;
 
-    //! = 70 us: \todo Document and rename timeout
+    //! = 70 us: How long to set DATA to ack an EOI
     ULONG T_3_RECV_EOI_RECOGNIZED;
 
-    //! x T_4, is 100: \todo Document and rename timeout
+    //! x T_4, is 100: Wait for CLK high after an EOI
     ULONG T_4_Times;
 
-    //! = 20 us: \todo Document and rename timeout
-    ULONG T_4_RECV_WAIT_CLK_HIGH_AFTER_EOI;
+    //! = 20 us: Granularity: Wait for CLK high after an EOI
+    ULONG T_4_RECV_WAIT_CLK_HIGH_AFTER_EOI_GRANU;
 
-    //! x T_5, is 200: \todo Document and rename timeout
+    //! x T_5, is 200: How long to wait for CLK high (=active) for every single bit
     ULONG T_5_Times;
-    //! = 10 us: \todo Document and rename timeout
+
+    //! = 10 us: Granularity: How long to wait for CLK high (=active) for every single bit
     ULONG T_5_RECV_BIT_WAIT_CLK_HIGH;
 
-    //! x T_6, is 100: \todo Document and rename timeout
+    //! x T_6, is 100: How long to wait for CLK low again (=inactive) after every single bit
     ULONG T_6_Times;
-    //! = 20 us: \todo Document and rename timeout
+
+    //! = 20 us: How long to wait for CLK low again (=inactive) after every single bit
     ULONG T_6_RECV_BIT_WAIT_CLK_LOW;
 
-    //! = 70 us: \todo Document and rename timeout
+    //! = 70 us: Inter-byte delay on reception
     ULONG T_7_RECV_INTER_BYTE_DELAY;
 
-    //! = 20 us: \todo Document and rename timeout
+    //! = 20 us: For cbmiec_iec_wait(): Granularity (long)
     ULONG T_8_IEC_WAIT_LONG_DELAY;
-    //! = 10 us: \todo Document and rename timeout
+
+    //! = 10 us: For cbmiec_iec_wait(): Granularity (short)
     ULONG T_8_IEC_WAIT_SHORT_DELAY;
     
-    //! x T_9a, is 100: \todo Document and rename timeout
+    //! x T_9a, is 100: On send, how long to wait for driver to set DATA
     ULONG T_9_Times;
-    //! = 10 us: \todo Document and rename timeout
+
+    //! = 10 us: Granularity: On send, how long to wait for driver to set DATA
     ULONG T_9_SEND_WAIT_DEVICES_T_AT;
 
-    //! = 20 us: \todo Document and rename timeout
+    //! = 20 us: Extra wait before sending 1st byte
     ULONG T_10_SEND_BEFORE_1ST_BYTE;
 
-    //! = 50 us: \todo Document and rename timeout Time between T_AT and T_H
+    //! = 50 us: Extra wait before sending of every single byte
     ULONG T_11_SEND_BEFORE_BYTE_DELAY;
 
-    //! = 100 us: \todo Document and rename timeout
+    //! = 100 us: Extra wait after sending every single byte
     ULONG T_12_SEND_AFTER_BYTE_DELAY;
 
-    //! = 20 us: \todo Document and rename timeout
+    //! = 20 us: On listener-talker-turnaround, how long to wait until CLK is released
     ULONG T_13_SEND_TURN_AROUND_LISTENER_TALKER_T_TK;
     
-    //! = 100 us: \todo Document and rename timeout
+    //! = 100 us: Extra wait after sending a block
     ULONG T_14_SEND_AT_END_DELAY;
 
     // sendbyte related:
 
-    //! = 70 us: \todo Document and rename timeout
+    //! = 70 us: Inter-bit wait time while sending a byte
     ULONG T_15_SEND_BEFORE_BIT_DELAY_T_S;
 
-    //! = 20 us: \todo Document and rename timeout
+    //! = 20 us: How long to hold CLK low for every bit while sending
     ULONG T_16_SEND_BIT_TIME_T_V;
 
-    //! x T_17, is 20: \todo Document and rename timeout
+    //! x T_17, is 20: How long to wait for a frame handshake after sending a byte
     ULONG T_17_Times;
-    //! = 100 us: \todo Document and rename timeout
+
+    //! = 100 us: Granularity: How long to wait for a frame handshake after sending a byte
     ULONG T_17_SEND_FRAME_HANDSHAKE_T_F;
 
 } IEC_TIMEOUTS;

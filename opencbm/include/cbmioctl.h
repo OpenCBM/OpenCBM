@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.2 2004-11-21 15:29:40 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.3 2004-11-24 20:08:18 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -140,8 +140,15 @@ struct CBMT_BOOLEAN
 typedef
 struct CBMT_I_INSTALL_OUT
 {
+    /*! Flags: Is the installation correct, or are there errors?
+     * cf. CBM_I_DRIVER_INSTALL_xxx constants
+     */
     ULONG ErrorFlags;
+
+    /*! The version of the DLL */
     ULONG DllVersion;
+
+    /*! The version of the driver */
     ULONG DriverVersion;
 
 } CBMT_I_INSTALL_OUT, *PCBMT_I_INSTALL_OUT;

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.3 2004-11-24 20:08:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -75,7 +75,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
         i = 0;
         while (CBMIEC_GET(PP_CLK_IN))
         {
-            cbmiec_schedule_timeout(libiec_global_timeouts.T_1_RECV_WAIT_CLK_LOW_DATA_READY);
+            cbmiec_schedule_timeout(libiec_global_timeouts.T_1_RECV_WAIT_CLK_LOW_DATA_READY_GRANU);
 
             if (QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
             {
@@ -121,7 +121,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
         for (i = 0; (i < libiec_global_timeouts.T_4_Times) && !(ok=CBMIEC_GET(PP_CLK_IN)); i++)
         {
             DBG_IEC((DBG_PREFIX "Wait after EOI"));
-            cbmiec_udelay(libiec_global_timeouts.T_4_RECV_WAIT_CLK_HIGH_AFTER_EOI);
+            cbmiec_udelay(libiec_global_timeouts.T_4_RECV_WAIT_CLK_HIGH_AFTER_EOI_GRANU);
         }
 
 #if DBG

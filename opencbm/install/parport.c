@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file parport.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: parport.c,v 1.1 2004-11-07 11:05:12 strik Exp $ \n
+** \version $Id: parport.c,v 1.2 2004-11-24 20:08:18 strik Exp $ \n
 ** \n
 ** \brief Program to handle the parallel port for the OPENCBM driver
 **
@@ -60,16 +60,29 @@ typedef CMAPI CONFIGRET (*P_CM_Get_Device_ID_ExA)(
     IN DEVINST dnDevInst, OUT PTCHAR Buffer, IN ULONG BufferLen,
     IN ULONG ulFlags, IN HMACHINE hMachine);
 
+/*! Pointer to the SetupDiGetDeviceInfoListDetailA function.
+ * As this function is not supported on NT4, we have to dynamically get its address,
+ * because our driver would refuse to load on NT4 else.
+ */
 typedef WINSETUPAPI BOOL (*P_SetupDiGetDeviceInfoListDetailA)(
     IN HDEVINFO DeviceInfoSet, OUT PSP_DEVINFO_LIST_DETAIL_DATA  DeviceInfoSetDetailData);
 
-
+/*! This structure encapsulates some functions which are available on Win 2000
+ * and XP, but not on Win NT
+ */
 typedef
 struct {
+
+    /*! Handle for the module for the setupapi.dll */
     HMODULE                           HandleSetupApiDll;
+
+    /*! Pointer to the CM_Get_Device_ID_Ex(A) function */
     P_CM_Get_Device_ID_ExA            CM_Get_Device_ID_ExA_p;
+
+    /*! Pointer to the SetupDiGetDeviceInfoListDetail(A) function  */
     P_SetupDiGetDeviceInfoListDetailA SetupDiGetDeviceInfoListDetailA_p;
-} SETUPAPI, *PSETUPAPI;
+
+} SETUPAPI, *PSETUPAPI; /*!< PSETUPAPI is a pointer to SETUAPI */
 
 static VOID
 FreeDynamicalAddresses(PSETUPAPI SetupApi)
@@ -85,6 +98,7 @@ FreeDynamicalAddresses(PSETUPAPI SetupApi)
     FUNC_LEAVE();
 }
 
+/*! Get the address of the given function from the DLL */
 #define GET_PROC_ADDRESS(_xxx) \
     if (SetupApi && SetupApi->HandleSetupApiDll) \
     { \

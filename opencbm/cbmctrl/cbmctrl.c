@@ -4,18 +4,16 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999-2004 Michael Klein <michael.klein@puffin.lb.shuttle.de>
  *  Modifications for cbm4win Copyright 2001-2004 Spiro Trikaliotis
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "$Id: cbmctrl.c,v 1.3 2004-11-16 19:54:33 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.4 2004-11-24 20:08:18 strik Exp $";
 #endif
 
 #include "opencbm.h"
-
-// #define USE_BUFFERED_READ 1
 
 #ifndef WIN32
         #include <ctype.h>
@@ -36,9 +34,9 @@ typedef int (*mainfunc)(CBM_FILE fd, char *argv[]);
     #include <fcntl.h>
 #endif
 
-UCHAR atoc(const char *str)
+unsigned char atoc(const char *str)
 {
-    return (UCHAR) atoi(str);
+    return (unsigned char) atoi(str);
 }
 
 /*
@@ -103,13 +101,13 @@ static int do_close(CBM_FILE fd, char *argv[])
 static int do_status(CBM_FILE fd, char *argv[])
 {
     unsigned char buf[40];
-    UCHAR unit;
+    unsigned char unit;
     int rv;
 
     unit = atoc(argv[0]);
 
     rv = cbm_device_status(fd, unit, buf, sizeof(buf));
-    fprintf(stderr, cbm_petscii2ascii(buf));
+    fprintf(stderr, "%s", cbm_petscii2ascii(buf));
 
     return (rv == 99) ? 1 : 0;
 }
@@ -130,63 +128,6 @@ static int do_command(CBM_FILE fd, char *argv[])
     return rv;
 }
 
-#ifdef USE_BUFFERED_READ
-
-static int buffered_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
-{
-    // quick 'n' dirty
-
-#define BUFFER_SIZE 256
-
-
-    static size_t already_read = 0;
-    static char buffer[BUFFER_SIZE];
-
-    if (Count > already_read)
-    {
-        // we are in troubles... ;-)
-        int newcount;
-            
-        newcount = cbm_raw_read(HandleDevice, &buffer[already_read], BUFFER_SIZE-already_read);
-
-        if (newcount >= 0)
-        {
-            already_read += newcount;
-        }
-
-        if (already_read == 0)
-        {
-            return -1;
-        }
-    }
-
-    if (Count > already_read)
-    {
-        Count = already_read;
-    }
-
-    if (Count)
-    {
-        memcpy(Buffer, buffer, Count);
-
-        already_read -= Count;
-
-        if (already_read)
-        {
-            memmove(buffer, &buffer[Count], already_read);
-        }
-    }
-
-    return Count;
-}
-
-#else // #ifdef USE_BUFFERED_READ
-
-    #define buffered_read(_x_, _y_, _z_) cbm_raw_read(_x_, _y_, _z_)
-
-#endif // #ifdef USE_BUFFERED_READ
-
-
 /*
  * display directory
  */
@@ -194,7 +135,7 @@ static int do_dir(CBM_FILE fd, char *argv[])
 {
     unsigned char c, buf[40];
     int rv;
-    UCHAR unit;
+    unsigned char unit;
 
     unit = atoc(argv[0]);
     rv = cbm_open(fd, unit, 0, "$", strlen("$"));
@@ -203,14 +144,14 @@ static int do_dir(CBM_FILE fd, char *argv[])
         if (cbm_device_status(fd, unit, buf, sizeof(buf)) == 0)
         {
             cbm_talk(fd, unit, 0);
-            if (buffered_read(fd, buf, 2) == 2)
+            if (cbm_raw_read(fd, buf, 2) == 2)
             {
-                while (buffered_read(fd, buf, 2) == 2)
+                while (cbm_raw_read(fd, buf, 2) == 2)
                 {
-                    if (buffered_read(fd, buf, 2) == 2)
+                    if (cbm_raw_read(fd, buf, 2) == 2)
                     {
                         printf("%u ", buf[0] | (buf[1] << 8));
-                        while ((buffered_read(fd, &c, 1) == 1) && c)
+                        while ((cbm_raw_read(fd, &c, 1) == 1) && c)
                         {
                             putchar(cbm_petscii2ascii_c(c));
                         }
@@ -236,8 +177,8 @@ static int do_dir(CBM_FILE fd, char *argv[])
  */
 static int do_download(CBM_FILE fd, char *argv[])
 {
-    UCHAR unit;
-    USHORT c;
+    unsigned char unit;
+    unsigned short c;
     int addr, count, i, rv = 0;
     char *tail, buf[32], cmd[7];
     FILE *f;
@@ -260,19 +201,19 @@ static int do_download(CBM_FILE fd, char *argv[])
 
     if (argv[3] && strcmp(argv[3],"-") != 0)
     {
-        // a filename (other than simply "-") was given, open that file
+        /* a filename (other than simply "-") was given, open that file */
 
         f = fopen(argv[3], "wb");
     }
     else
     {
-        // no filename was given, open stdout in binary mode
+        /* no filename was given, open stdout in binary mode */
 
         f = fdopen(fileno(stdout), "wb");
 
 #ifdef WIN32
 
-        // set binary mode for output stream
+        /* set binary mode for output stream */
 
         _setmode(fileno(stdout), _O_BINARY);
 #endif
@@ -280,7 +221,8 @@ static int do_download(CBM_FILE fd, char *argv[])
 
     if (!f)
     {
-        unix_error(0, get_errno(), "could not open output file", argv[3] ? argv[3] : "stdout");
+        unix_error(0, get_errno(), "could not open output file: %s",
+              (argv[3] && strcmp(argv[3], "-") != 0) ? argv[3] : "stdout");
         return 1;
     }
 
@@ -295,12 +237,14 @@ static int do_download(CBM_FILE fd, char *argv[])
         cbm_listen(fd, unit, 15);
         rv = cbm_raw_write(fd, cmd, 6) == 6 ? 0 : 1;
         cbm_unlisten(fd);
-        if (rv == 0) {
+        if (rv == 0)
+        {
             addr += c;
             cbm_talk(fd, unit, 15);
             rv = cbm_raw_read(fd, buf, c) == c ? 0 : 1;
             cbm_untalk(fd);
-            if (rv == 0) {
+            if (rv == 0)
+            {
                 fwrite(buf, 1, c, f);
             }
         }
@@ -314,7 +258,7 @@ static int do_download(CBM_FILE fd, char *argv[])
  */
 static int do_upload(CBM_FILE fd, char *argv[])
 {
-    UCHAR unit;
+    unsigned char unit;
     int addr;
     size_t size;
     char *tail, *fn;
@@ -326,7 +270,8 @@ static int do_upload(CBM_FILE fd, char *argv[])
     unit = atoc(argv[0]);
 
     addr = strtoul(argv[1], &tail, 0);
-    if (addr < -1 || addr > 0xffff || *tail) {
+    if (addr < -1 || addr > 0xffff || *tail)
+    {
         unix_error(0, 0, "invalid address: %s", argv[1]);
         return 1;
     }
@@ -362,13 +307,14 @@ static int do_upload(CBM_FILE fd, char *argv[])
     if (addr == -1)
     {
         /* read address from file */
-        if (fread(addr_buf, 2, 1, f) != 1) {
+        if (fread(addr_buf, 2, 1, f) != 1)
+        {
             unix_error(0, get_errno(), "could not read %s", fn);
             if (f != stdin) fclose(f);
             return 1;
         }
 
-        /* don't assume a particular endianess, although the cbm4linux 
+        /* don't assume a particular endianess, although the cbm4linux
          * package is only i386 for now  */
         addr = addr_buf[0] | (addr_buf[1] << 8);
     }
@@ -405,7 +351,7 @@ static int do_upload(CBM_FILE fd, char *argv[])
 static int do_detect(CBM_FILE fd, char *argv[])
 {
     unsigned int num_devices;
-    UCHAR device;
+    unsigned char device;
     const char *type_str;
 
     num_devices = 0;

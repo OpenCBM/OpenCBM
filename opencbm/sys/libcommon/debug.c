@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.6 2004-11-21 16:29:09 strik Exp $ \n
+** \version $Id: debug.c,v 1.7 2004-11-24 20:08:19 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -24,6 +24,21 @@
 // #include <wdm.h>
 #include <ntddk.h>
 #include "cbm4win_common.h"
+
+/*! find the minimum of both parameters */
+#define min(_x, _y) ( ((_x) < (_y)) ? (_x) : (_y) )
+
+#if 0
+    #define REPORT_BUG(_no, _a, _b, _c, _d, _str) KeBugCheckEx(_no, _a, _b, _c, _d)
+#else
+    #define REPORT_BUG(_no, _a, _b, _c, _d, _str) \
+        DbgPrint("--- REPORT_BUG: %04x (%08x, %08x, %08x, %08x). '%s' " \
+        "in %s, %s(), line %s\n", \
+        _no, _a, _b, _c, _d, _str, \
+        __FILE__, __FUNCTION__, __LINE__);
+#endif
+
+
 
 /*! one descriptional entry for the NTSTATUS codes */
 typedef
@@ -1022,30 +1037,133 @@ ULONG DbgKeGetCurrentProcessorNumber()
 
 #if DBG
 
-static PCHAR DbgMemoryBuffer = NULL;
-static ULONG DbgNextWriteMemoryBuffer = 0;
+// #define USE_SPINLOCK 1
+
+#define USE_IRQL_ELEVATION 1
+
+static volatile PCHAR DbgMemoryBuffer = NULL;
+static volatile ULONG DbgNextWriteMemoryBuffer = 0;
+
+#ifdef USE_SPINLOCK
 
 static KSPIN_LOCK DbgMemoryBufferSpinLock;
 static KIRQL DbgMemoryBufferSpinLockIrql;
 
-#define DBG_SIZE_MEMORY_BUFFER 0x20000
+#else // #ifdef USE_SPINLOCK
+
+static LONG DbgMemoryBufferSpinLock = 0;
+static LONG DbgMemoryBufferUsageCounter = 0;
+
+#ifdef USE_IRQL_ELEVATION
+    static KIRQL DbgMemoryBufferIrql;
+#endif
+
+#endif // #ifdef USE_SPINLOCK
+
+#define DBG_SIZE_MEMORY_BUFFER 0x20000u
+
+/*! \brief Start access to the debug memory buffer.
+
+ This function synchronizes the access to the debug memory
+ buffer. It obtains a lock which allows the caller to safely
+ access the debug memory buffer.
+
+ When the caller has completed, it has to call
+ DbgBufferSynchronizeStop().
+
+ \todo
+
+    If we do not use the spinlock for synchronizing
+    access, this functions seems not to work at all!
+*/
 
 static VOID
 DbgBufferSynchronizeStart(VOID)
 {
+    LONG tmp;
+
+#ifdef USE_SPINLOCK
+
     KeAcquireSpinLock(&DbgMemoryBufferSpinLock, &DbgMemoryBufferSpinLockIrql);
+
+#else // #ifdef USE_SPINLOCK
+
+    #ifdef USE_IRQL_ELEVATION
+
+        if (DbgMemoryBufferIrql != PASSIVE_LEVEL)
+        {
+            REPORT_BUG(0x133, DbgMemoryBufferUsageCounter,
+                DbgMemoryBufferSpinLock, DbgMemoryBufferIrql, 0,
+                "Not IRQL == PASSIVE_LEVEL");
+        }
+
+        KeRaiseIrql(DISPATCH_LEVEL, &DbgMemoryBufferIrql);
+
+    #endif // #ifdef USE_IRQL_ELEVATION
+
+    while (InterlockedExchange(&DbgMemoryBufferSpinLock, 1) == 0)
+        ;
+
+    tmp = InterlockedIncrement(&DbgMemoryBufferUsageCounter);
+    if (tmp != 1)
+    {
+        REPORT_BUG(0x130, tmp, DbgMemoryBufferSpinLock, 0, 0,
+            "Usage counter bigger than 1 after incrementing!");
+    }
+
+#endif // #ifdef USE_SPINLOCK
 }
+
+/*! \brief End access to the debug memory buffer.
+
+ This function ends the access to the debug memory
+ buffer, which has previously been allocated by
+ DbgBufferSynchronizeStart().
+*/
 
 static VOID
 DbgBufferSynchronizeStop(VOID)
 {
+    LONG tmp;
+
+#ifdef USE_SPINLOCK
+
     KeReleaseSpinLock(&DbgMemoryBufferSpinLock, DbgMemoryBufferSpinLockIrql);
+
+#else // #ifdef USE_SPINLOCK
+
+    tmp = InterlockedDecrement(&DbgMemoryBufferUsageCounter);
+    if (tmp != 0)
+    {
+        REPORT_BUG(0x131, tmp, DbgMemoryBufferSpinLock, 0, 0,
+            "Usage counter not null after decrementing!");
+    }
+
+    tmp = InterlockedExchange(&DbgMemoryBufferSpinLock, 0);
+    if (tmp != 1)
+    {
+        REPORT_BUG(0x132, DbgMemoryBufferUsageCounter, tmp, 0, 0,
+            "(own) Spinlock not 1 before releasing.");
+    }
+
+    #ifdef USE_IRQL_ELEVATION
+
+        KeLowerIrql(DbgMemoryBufferIrql);
+        DbgMemoryBufferIrql = PASSIVE_LEVEL;
+
+    #endif // #ifdef USE_IRQL_ELEVATION
+
+#endif // #ifdef USE_SPINLOCK
 }
 
 VOID
 DbgInit(VOID)
 {
+#ifdef USE_SPINLOCK
+
     KeInitializeSpinLock(&DbgMemoryBufferSpinLock);
+
+#endif // #ifdef USE_SPINLOCK
 }
 
 /*! \brief Get storage area for debugging output
@@ -1097,6 +1215,12 @@ DbgFreeMemoryBuffer(VOID)
  \param String:
 
     Pointer to the string which is to be output
+
+ \todo
+
+    More debugging for the sanity checks to find the
+    cause why DbgBufferSynchronizeStart() does not work
+    without using the SpinLock.
 */
 VOID
 DbgOutputMemoryBuffer(const char *String)
@@ -1105,53 +1229,146 @@ DbgOutputMemoryBuffer(const char *String)
 
     if (DbgMemoryBuffer)
     {
+        PCHAR localMemoryBuffer;
+        ULONG localNextWriteMemoryBuffer;
         ULONG strLength;
+
+        localMemoryBuffer = DbgMemoryBuffer;
+        localNextWriteMemoryBuffer = DbgNextWriteMemoryBuffer;
 
         if (DbgNextWriteMemoryBuffer > DBG_SIZE_MEMORY_BUFFER)
         {
-            KeBugCheckEx(0x123, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, -1, 0);
+            REPORT_BUG(0x123, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, -1, 0,
+                "DbgNextWriteMemoryBuffer already out of buffer!");
         }
         
         strLength = strlen(String) + 1;
 
         if (strLength >= 200)
         {
-            KeBugCheckEx(0x123, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, strLength, 0);
+            REPORT_BUG(0x123, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER,
+                strLength, 0, "string too long");
         }
-        
+
+        // Sanity check
+
+        if ((localMemoryBuffer != DbgMemoryBuffer) 
+            || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
+        {
+            REPORT_BUG(0x140, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+                localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
+                "local copies do not match the global ones (1)");
+        }
+
         // Does the string fit into the buffer?
 
         if (DbgNextWriteMemoryBuffer + strLength > DBG_SIZE_MEMORY_BUFFER)
         {
             if (DBG_SIZE_MEMORY_BUFFER - DbgNextWriteMemoryBuffer >= strLength)
             {
-                KeBugCheckEx(0x124, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, strLength, 0);
+                REPORT_BUG(0x124, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER,
+                    strLength, 0, "");
+            }
+
+            // Sanity check
+
+            if ((localMemoryBuffer != DbgMemoryBuffer) 
+                || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
+            {
+                REPORT_BUG(0x141, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+                    localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
+                    "local copies do not match the global ones (2)");
             }
 
             RtlZeroMemory(&DbgMemoryBuffer[DbgNextWriteMemoryBuffer],
                 DBG_SIZE_MEMORY_BUFFER - DbgNextWriteMemoryBuffer);
 
+            // Sanity check
+
+            if ((localMemoryBuffer != DbgMemoryBuffer) 
+                || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
+            {
+                REPORT_BUG(0x142, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+                    localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
+                    "local copies do not match the global ones (3)");
+            }
+
             DbgNextWriteMemoryBuffer = 0;
+            localNextWriteMemoryBuffer = 0;
+        }
+
+        // Sanity check
+
+        if ((localMemoryBuffer != DbgMemoryBuffer) 
+            || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
+        {
+            REPORT_BUG(0x143, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+                localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
+                "local copies do not match the global ones (4)");
         }
 
         if (DbgNextWriteMemoryBuffer > DBG_SIZE_MEMORY_BUFFER)
         {
-            KeBugCheckEx(0x125, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, strLength, 0);
+            REPORT_BUG(0x125, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER,
+                strLength, 0,
+                "String does not fit in the buffer (but should have fitted!)");
         }
         
+        // Sanity check
+
+        if ((localMemoryBuffer != DbgMemoryBuffer) 
+            || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
+        {
+            REPORT_BUG(0x144, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+                localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
+                "local copies do not match the global ones (5)");
+        }
+
         if (DbgNextWriteMemoryBuffer > 0)
         {
             DbgMemoryBuffer[DbgNextWriteMemoryBuffer-1] = 13;
         }
 
+        // Sanity check
+
+        if ((localMemoryBuffer != DbgMemoryBuffer) 
+            || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
+        {
+            REPORT_BUG(0x145, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+                localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
+                "local copies do not match the global ones (6)");
+        }
+
         RtlCopyMemory(&DbgMemoryBuffer[DbgNextWriteMemoryBuffer], String, strLength);
         DbgNextWriteMemoryBuffer += strLength;
+        localNextWriteMemoryBuffer += strLength;
+
+        // Sanity check
+
+        if ((localMemoryBuffer != DbgMemoryBuffer) 
+            || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
+        {
+            REPORT_BUG(0x146, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+                localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
+                "local copies do not match the global ones (7)");
+        }
 
         if (DbgNextWriteMemoryBuffer > DBG_SIZE_MEMORY_BUFFER)
         {
-            KeBugCheckEx(0x126, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER, strLength, 0);
+            REPORT_BUG(0x126, DbgNextWriteMemoryBuffer, DBG_SIZE_MEMORY_BUFFER,
+                strLength, 0,
+                "DbgNextWriteMemoryBuffer out of buffer after write!");
         }
         
+        // Sanity check
+
+        if ((localMemoryBuffer != DbgMemoryBuffer) 
+            || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
+        {
+            REPORT_BUG(0x147, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+                localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
+                "local copies do not match the global ones (8)");
+        }
     }
 
     DbgBufferSynchronizeStop();
@@ -1180,10 +1397,9 @@ DbgOutputMemoryBuffer(const char *String)
  This function copies the last ReturnLength bytes into the buffer.
 */
 
-#define min(_x, _y) ( ((_x) < (_y)) ? (_x) : (_y) )
-
 NTSTATUS
-cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer, IN OUT PULONG ReturnLength)
+cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer,
+                   IN OUT PULONG ReturnLength)
 {
     FUNC_ENTER();
 
@@ -1209,7 +1425,8 @@ cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer, IN OUT PULO
             // First of all, find out if there are any "old" entries
             // from before the wrap-around
 
-            lengthBeforeWrapAround = strlen(&DbgMemoryBuffer[DbgNextWriteMemoryBuffer+1]) + 1;
+            lengthBeforeWrapAround = 
+                strlen(&DbgMemoryBuffer[DbgNextWriteMemoryBuffer+1]) + 1;
 
             if (lengthBeforeWrapAround > 1)
             {
@@ -1220,7 +1437,9 @@ cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer, IN OUT PULO
                 lengthToCopy = min(lengthToCopy, lengthBeforeWrapAround);
 
                 RtlCopyMemory(writePosition, 
-                    &DbgMemoryBuffer[DbgNextWriteMemoryBuffer+lengthBeforeWrapAround - lengthToCopy],
+                    &DbgMemoryBuffer[DbgNextWriteMemoryBuffer 
+                                     + lengthBeforeWrapAround 
+                                     - lengthToCopy],
                     lengthToCopy);
 
                 writePosition += lengthToCopy;

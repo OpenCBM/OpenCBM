@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawwrite.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: i_rawwrite.c,v 1.3 2004-11-24 20:08:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -82,7 +82,7 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
     CBMIEC_SET(PP_CLK_OUT);
     CBMIEC_RELEASE(PP_DATA_OUT);
 
-    // Wait for DATA be set by the drive(s)
+    // Wait for DATA to be set by the drive(s)
 
     for(i=0; (i<libiec_global_timeouts.T_9_Times) && !CBMIEC_GET(PP_DATA_IN); i++)
     {

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.1 2004-11-07 11:05:12 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.2 2004-11-24 20:08:18 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -109,16 +109,14 @@ EXTERN int CBMAPIDECL cbm_device_status(CBM_FILE f, __u_char dev, void *buf, siz
 EXTERN int CBMAPIDECL cbm_exec_command(CBM_FILE f, __u_char dev, const void *cmd, size_t len);
 
 EXTERN int CBMAPIDECL cbm_identify(CBM_FILE f, __u_char drv,
-                              enum cbm_device_type_e *t,
-                              const char **type_str);
+                                   enum cbm_device_type_e *t,
+                                   const char **type_str);
 
 
 EXTERN char CBMAPIDECL cbm_petscii2ascii_c(char character);
 EXTERN char CBMAPIDECL cbm_ascii2petscii_c(char character);
 EXTERN char * CBMAPIDECL cbm_petscii2ascii(char *str);
 EXTERN char * CBMAPIDECL cbm_ascii2petscii(char *str);
-
-EXTERN BOOL CBMAPIDECL cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen);
 
 #ifdef __cplusplus
 }
