@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.1 2004-12-22 14:43:22 strik Exp $ \n
+** \version $Id: execute.c,v 1.2 2004-12-22 14:57:04 strik Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **
@@ -254,7 +254,7 @@ vdd_raw_read(CBM_FILE HandleDevice)
 {
     FUNC_CHECKEDBUFFERACCESS(getDI(), getCX());
 
-    CHECKEDBUFFERACCESS(cbm_raw_write(HandleDevice, buffer, length));
+    CHECKEDBUFFERACCESS(cbm_raw_read(HandleDevice, buffer, length));
 }
 
 /*! \brief Send a LISTEN on the IEC serial bus
@@ -289,7 +289,7 @@ vdd_listen(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    retAX(cbm_listen(HandleDevice, getDH(), getDL()));
+    retAX(cbm_listen(HandleDevice, getDH(), getCL()));
 
     FUNC_LEAVE_BOOL(FALSE);
 }
@@ -326,7 +326,7 @@ vdd_talk(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    retAX(cbm_talk(HandleDevice, getDH(), getDL()));
+    retAX(cbm_talk(HandleDevice, getDH(), getCL()));
 
     FUNC_LEAVE_BOOL(FALSE);
 }

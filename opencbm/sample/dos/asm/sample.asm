@@ -1,13 +1,26 @@
-        name    dossample
-        title   'DOSSAMPLE - Sample for calling the opencbm VDD'
+	name    dossample
+	title   'DOSSAMPLE - Sample for calling the opencbm VDD'
 
 _TEXT   segment byte public 'CODE'
 
-        assume  cs:_TEXT,ds:_TEXT,es:NOTHING
+	assume  cs:_TEXT,ds:_TEXT,es:NOTHING
 
-        org     100h
+	org     100h
 
-        include isvbop.inc
+; the following macros (RegisterModule, UnRegisterModule,
+; DispatchCall) are taken from the DDK's isvbop.inc file
+
+RegisterModule macro
+	db 0c4h, 0c4h, 58h, 0
+endm
+
+UnRegisterModule macro
+	db 0c4h, 0c4h, 58h, 1
+endm
+
+DispatchCall macro
+	db 0c4h, 0c4h, 58h, 2
+endm
 
 vdd_call1 macro A
 
@@ -65,6 +78,14 @@ cbmfile   DW    ?
 
 endm
 
+
+vdd_uninit macro
+
+    mov AX,[hVDD]
+    UnRegisterModule
+
+endm
+
 Error Macro NR,TEXT
 
     jc ErrorText&NR
@@ -95,6 +116,8 @@ Start proc near
     Error 3,<vdd_driver_close failed>
 
 Quit:
+    vdd_uninit
+
     mov ah,4ch
     int 21h
 

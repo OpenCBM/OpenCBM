@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.3 2004-12-13 18:19:56 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.4 2004-12-22 14:57:04 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -43,6 +43,18 @@ extern "C" {
 #define CBMAPIDECL __cdecl /*!< On Windows, we need c-type function declarations */
 # define __u_char unsigned char /*!< __u_char as unsigned char */
 # define CBM_FILE HANDLE /*!< The "file descriptor" for an opened driver */
+
+#elif defined(__MSDOS__)
+
+  /* we have MS-DOS */
+
+#include <stdlib.h>
+                                                         
+# define EXTERN extern /*!< EXTERN is not defined on MS-DOS */
+# define CBMAPIDECL /*!< CBMAPIDECL is a dummy on MS-DOS */
+# define WINAPI /*!< WINAPI is a dummy on MS-DOS */
+# define CBM_FILE int /*!< The "file descriptor" for an opened driver */
+# define __u_char unsigned char /*!< __u_char as unsigned char */
 
 #else
 
