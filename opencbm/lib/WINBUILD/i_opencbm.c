@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.2 2004-12-22 18:00:18 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.3 2005-02-13 17:58:12 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -23,8 +23,6 @@
 **        and the install functions
 **
 ****************************************************************/
-
-// #define UNICODE 1
 
 #include <windows.h>
 #include <windowsx.h>
@@ -48,6 +46,7 @@
 #include "i_opencbm.h"
 
 #include "version.h"
+#include "archlib.h"
 
 
 /*-------------------------------------------------------------------*/
@@ -228,7 +227,7 @@ cbm_i_get_debugging_flags(VOID)
 */
 
 const char *
-cbm_i_get_driver_name(int PortNumber)
+cbmarch_get_driver_name(int PortNumber)
 {
     //! \todo do not hard-code the driver name
     static char driverName[] = "\\\\.\\opencbm0";
@@ -279,7 +278,7 @@ cbm_i_get_driver_name(int PortNumber)
 */
 
 int
-cbm_i_driver_open(CBM_FILE *HandleDevice, int PortNumber)
+cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 {
     const char *driverName;
 
@@ -287,7 +286,7 @@ cbm_i_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 
     // Get the name of the driver to be opened
 
-    driverName = cbm_i_get_driver_name(PortNumber);
+    driverName = cbmarch_get_driver_name(PortNumber);
 
     if (driverName == NULL)
     {
@@ -328,7 +327,7 @@ cbm_i_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 */
 
 void
-cbm_i_driver_close(CBM_FILE HandleDevice)
+cbmarch_driver_close(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
@@ -585,11 +584,11 @@ cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
 
     outBuffer = (PCBMT_I_INSTALL_OUT) Buffer;
 
-    if (cbm_i_driver_open(&HandleDevice, 0) == 0)
+    if (cbmarch_driver_open(&HandleDevice, 0) == 0)
     {
         outBuffer->ErrorFlags = CBM_I_DRIVER_INSTALL_0_IOCTL_FAILED;
         cbm_ioctl(HandleDevice, CBMCTRL(I_INSTALL), NULL, 0, Buffer, BufferLen);
-        cbm_i_driver_close(HandleDevice);
+        cbmarch_driver_close(HandleDevice);
     }
     else
     {

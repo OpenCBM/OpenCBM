@@ -13,7 +13,8 @@ C_DEFINES = $(C_DEFINES) /DHAVE_STRING_H=1
 
 
 
-SOURCES=../error.c \
+SOURCES=../debug.c \
+        ../error.c \
         ../file.c \
         ../getopt.c \
         ../getopt1.c \

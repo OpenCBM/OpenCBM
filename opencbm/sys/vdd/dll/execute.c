@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.5 2005-01-22 19:50:41 strik Exp $ \n
+** \version $Id: execute.c,v 1.6 2005-02-13 17:58:12 strik Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **
@@ -25,9 +25,6 @@
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
-
-/*! Mark: We are building the DLL */
-#define DBG_DLL
 
 /*! The name of the executable */
 #define DBG_PROGNAME "OPENCBMVDD.DLL"

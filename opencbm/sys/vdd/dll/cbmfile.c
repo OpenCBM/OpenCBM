@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/cbmfile.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmfile.c,v 1.2 2004-12-22 18:00:21 strik Exp $ \n
+** \version $Id: cbmfile.c,v 1.3 2005-02-13 17:58:12 strik Exp $ \n
 ** \n
 ** \brief Function for handling the CBM_FILE to BX conversions
 **
@@ -20,9 +20,6 @@
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
-
-/*! Mark: We are building the DLL */
-#define DBG_DLL
 
 /*! The name of the executable */
 #define DBG_PROGNAME "OPENCBMVDD.DLL"

@@ -4,168 +4,188 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
  *  Copyright 2001-2005 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
-** \file lib/cbm.c \n
+** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.4 2005-02-13 17:58:12 strik Exp $ \n
+** \version $Id: archlib.c,v 1.1 2005-02-13 17:58:12 strik Exp $ \n
 ** \n
-** \brief Shared library / DLL for accessing the driver
+** \brief Shared library / DLL for accessing the driver, windows specific code
 **
 ****************************************************************/
+
+#include <windows.h>
+#include <windowsx.h>
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
 
+/*! Mark: We are building the DLL */
+#define DBG_DLL
+
 /*! The name of the executable */
 #define DBG_PROGNAME "OPENCBM.DLL"
 
+/*! This file is "like" debug.c, that is, define some variables */
+#define DBG_IS_DEBUG_C
+
 #include "debug.h"
+
+#include <winioctl.h>
+#include "cbmioctl.h"
 
 #include <stdlib.h>
 
 //! mark: We are building the DLL */
 #define DLL
-#include "opencbm.h"
+#include "i_opencbm.h"
 #include "archlib.h"
 
 
-// #define DBG_DUMP_RAW_READ
-// #define DBG_DUMP_RAW_WRITE
+/*! \brief DLL initialization und unloading
 
-/*-------------------------------------------------------------------*/
-/*--------- DEBUGGING FUNCTIONS -------------------------------------*/
+ This function is called whenever the DLL is loaded or unloaded.
+ It ensures that the driver is loaded to be able to call its
+ functions.
+
+ \param Module
+   Handle of the module; this is not used.
+
+ \param Reason
+   DLL_PROCESS_ATTACH if the DLL is loaded,
+   DLL_PROCESS_DETACH if it is unloaded.
+
+ \param Reserved
+   Not used.
+
+ \return 
+   Returns TRUE on success, else FALSE.
+
+ If this function returns FALSE, windows reports that loading the DLL
+ was not successful. If the DLL is linked statically, the executable
+ refuses to load with STATUS_DLL_INIT_FAILED (0xC0000142)
+*/
+
+BOOL
+opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
+{
+    static BOOL bIsOpen = FALSE;
+    BOOLEAN Status = TRUE;
+
+    FUNC_ENTER();
 
 #if DBG
 
-#include <stdio.h>
-
-static void 
-memdump(IN const char *Where, IN const unsigned char *InputBuffer, IN const size_t Count)
-{
-    unsigned i;
-    char outputBufferChars[17];
-    char outputBuffer[100];
-    char *p;
-
-    p = outputBuffer;
-
-    DBG_PRINT((DBG_PREFIX "%s: (0x%04x)", Where, (unsigned) Count));
-
-    for (i=0; i<Count; i++) 
+    if (Reason == DLL_PROCESS_ATTACH)
     {
-        p += sprintf(p, "%02x ", (unsigned) InputBuffer[i]);
+        // Read the debugging flags from the registry
 
-        if (i % 16 == 7)
-        {
-            p += sprintf(p, "- ");
-        }
-
-        outputBufferChars[i % 16] = isprint(InputBuffer[i]) ? InputBuffer[i] : '.';
-
-        if (i % 16 == 15)
-        {
-            outputBufferChars[(i % 16) + 1] = 0;
-            DBG_PRINT((DBG_PREFIX "%04x: %-50s  %s",
-                (unsigned) i & 0xfff0, outputBuffer, outputBufferChars));
-            p = outputBuffer;
-        }
+        cbm_i_get_debugging_flags();
     }
 
-    if (i % 16 != 0)
+#endif
+
+    /* make sure the definitions in opencbm.h and cbmioctl.h
+     * match each other! 
+     * Since we are the only instance which includes both files,
+     * we are the only one which can ensure this.
+     */
+
+    DBG_ASSERT(IEC_LINE_CLOCK == IEC_CLOCK);
+    DBG_ASSERT(IEC_LINE_RESET == IEC_RESET);
+    DBG_ASSERT(IEC_LINE_DATA == IEC_DATA);
+    DBG_ASSERT(IEC_LINE_ATN == IEC_ATN);
+
+    switch (Reason) 
     {
-        outputBufferChars[i % 16] = 0;
-        DBG_PRINT((DBG_PREFIX "%04x: %-50s  %s",
-            (unsigned) i & 0xfff0, outputBuffer, outputBufferChars));
+        case DLL_PROCESS_ATTACH:
+
+            if (IsDriverStartedAutomatically())
+            {
+                // the driver is started automatically, do not try
+                // to start it
+
+                Status = TRUE;
+                break;
+            }
+
+            if (bIsOpen)
+            {
+                DBG_ERROR((DBG_PREFIX "No multiple instances are allowed!"));
+                Status = FALSE;
+            }
+            else
+            {
+                Status  = TRUE;
+                bIsOpen = cbm_i_driver_start();
+            }
+            break;
+
+        case DLL_PROCESS_DETACH:
+
+            if (IsDriverStartedAutomatically())
+            {
+                // the driver is started automatically, do not try
+                // to stop it
+
+                Status = TRUE;
+                break;
+            }
+
+            if (!bIsOpen)
+            {
+                DBG_ERROR((DBG_PREFIX "Driver is not running!"));
+                Status = FALSE; // is ignored anyway, but...
+            }
+            else
+            {
+                // it is arguable if the driver should be stopped
+                // whenever the DLL is unloaded.
+
+                cbm_i_driver_stop();
+                bIsOpen = FALSE;
+            }
+            break;
+
+        default:
+            break;
+
     }
-}
-#endif // #if DBG
 
-/*-------------------------------------------------------------------*/
-/*--------- DRIVER HANDLING -----------------------------------------*/
-
-/*! \brief Get the name of the driver for a specific parallel port
-
- Get the name of the driver for a specific parallel port.
-
- \param PortNumber
-   The port number for the driver to open. 0 means "default" driver, while
-   values != 0 enumerate each driver.
-
- \return 
-   Returns a pointer to a null-terminated string containing the
-   driver name, or NULL if an error occurred.
-
- \bug
-   PortNumber is not allowed to exceed 10. 
-*/
-
-const char * CBMAPIDECL
-cbm_get_driver_name(int PortNumber)
-{
-    FUNC_ENTER();
-
-    FUNC_LEAVE_STRING(cbmarch_get_driver_name(PortNumber));
+    FUNC_LEAVE_BOOL(Status);
 }
 
-/*! \brief Opens the driver
+/*! \brief Complete driver installation, "external version"
 
- This function Opens the driver.
+ This function performs anything that is needed to successfully
+ complete the driver installation.
 
- \param HandleDevice  
-   Pointer to a CBM_FILE which will contain the file handle of the driver.
+ \param Buffer
+   Pointer to a buffer which will return the install information
 
- \param PortNumber
-   The port number of the driver to open. 0 means "default" driver, while
-   values != 0 enumerate each driver.
+ \param BufferLen
+   The length of the buffer Buffer points to (in bytes).
 
  \return
-   ==0: This function completed successfully
-   !=0: otherwise
+   FALSE on success, TRUE on error
 
- PortNumber is not allowed to exceed 10. 
+ This function is for use of the installation routines only!
 
- cbm_driver_open() should be balanced with cbm_driver_close().
+ This version of this function is for exporting out of the DLL.
 */
 
-int CBMAPIDECL 
-cbm_driver_open(CBM_FILE *HandleDevice, int PortNumber)
+BOOL CBMAPIDECL
+cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_driver_open(HandleDevice, PortNumber));
+    FUNC_LEAVE_INT(cbm_i_i_driver_install(Buffer, BufferLen));
 }
 
-/*! \brief Closes the driver
-
- Closes the driver, which has be opened with cbm_driver_open() before.
-
- \param HandleDevice  
-   A CBM_FILE which contains the file handle of the driver.
-
- cbm_driver_close() should be called to balance a previous call to
- cbm_driver_open(). 
- 
- If cbm_driver_open() did not succeed, it is illegal to 
- call cbm_driver_close().
-*/
-
-void CBMAPIDECL
-cbm_driver_close(CBM_FILE HandleDevice)
-{
-    FUNC_ENTER();
-
-    cbmarch_driver_close(HandleDevice);
-
-    FUNC_LEAVE();
-}
-
-/*-------------------------------------------------------------------*/
-/*--------- BASIC I/O -----------------------------------------------*/
 
 /*! \brief Write data to the IEC serial bus
 
@@ -191,18 +211,23 @@ cbm_driver_close(CBM_FILE HandleDevice)
  call this function.
 */
 
-int CBMAPIDECL 
-cbm_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
+int
+cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
+    DWORD BytesWritten;
+
     FUNC_ENTER();
 
-#ifdef DBG_DUMP_RAW_WRITE
-    memdump("cbm_raw_write", Buffer, Count);
-#endif
+    WriteFile(
+        HandleDevice,
+        Buffer,
+        Count,
+        &BytesWritten,
+        NULL
+        );
 
-    FUNC_LEAVE_INT(cbmarch_raw_write(HandleDevice,Buffer, Count));
+    FUNC_LEAVE_INT(BytesWritten);
 }
-
 
 /*! \brief Read data from the IEC serial bus
 
@@ -227,21 +252,26 @@ cbm_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
  call this function.
 */
 
-int CBMAPIDECL 
-cbm_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
+int
+cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
+    DWORD bytesToRead = Count;
     DWORD bytesRead;
 
     FUNC_ENTER();
 
-    bytesRead = cbmarch_raw_read(HandleDevice, Buffer, Count);
-
-#ifdef DBG_DUMP_RAW_READ
-    memdump("cbm_raw_read", Buffer, bytesRead);
-#endif
+    ReadFile(
+        HandleDevice,
+        Buffer,
+        bytesToRead,
+        &bytesRead,
+        NULL
+        );
 
     FUNC_LEAVE_INT(bytesRead);
 }
+
+
 
 /*! \brief Send a LISTEN on the IEC serial bus
 
@@ -266,12 +296,21 @@ cbm_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
  call this function.
 */
 
-int CBMAPIDECL 
-cbm_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+int
+cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
+    CBMT_LISTEN_IN parameter;
+    int returnValue;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_listen(HandleDevice, DeviceAddress, SecondaryAddress));
+    parameter.PrimaryAddress = DeviceAddress;
+    parameter.SecondaryAddress = SecondaryAddress;
+
+    returnValue = cbm_ioctl(HandleDevice, CBMCTRL(LISTEN), &parameter, sizeof(parameter), NULL, 0)
+        ? 0 : 1;
+
+    FUNC_LEAVE_INT(returnValue);
 }
 
 /*! \brief Send a TALK on the IEC serial bus
@@ -297,12 +336,21 @@ cbm_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddr
  call this function.
 */
 
-int CBMAPIDECL 
-cbm_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+int
+cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
+    CBMT_TALK_IN parameter;
+    int returnValue;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_talk(HandleDevice, DeviceAddress, SecondaryAddress));
+    parameter.PrimaryAddress = DeviceAddress;
+    parameter.SecondaryAddress = SecondaryAddress;
+
+    returnValue = cbm_ioctl(HandleDevice, CBMCTRL(TALK), &parameter, sizeof(parameter), NULL, 0)
+        ? 0 : 1;
+
+    FUNC_LEAVE_INT(returnValue);
 }
 
 /*! \brief Open a file on the IEC serial bus
@@ -319,13 +367,6 @@ cbm_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
  \param SecondaryAddress
    The secondary address for the device on the IEC serial bus.
 
- \param Filename
-   The filename of the file to be opened
-
- \param FilenameLength
-   The size of the Filename. If zero, the Filename has to be
-   a null-terminated string.
-
  \return
    0 means success, else failure
 
@@ -333,34 +374,20 @@ cbm_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
  call this function.
 */
 
-int CBMAPIDECL 
-cbm_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress, 
-         const void *Filename, size_t FilenameLength)
+int
+cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
+    CBMT_OPEN_IN parameter;
     int returnValue;
 
     FUNC_ENTER();
 
-    if (cbmarch_open(HandleDevice, DeviceAddress, SecondaryAddress) == 0)
+    parameter.PrimaryAddress = DeviceAddress;
+    parameter.SecondaryAddress = SecondaryAddress;
+
+    if (cbm_ioctl(HandleDevice, CBMCTRL(OPEN), &parameter, sizeof(parameter), NULL, 0))
     {
         returnValue = 0;
-
-        if(Filename != NULL)
-        {
-            if (FilenameLength == 0)
-            {
-                DBG_WARN((DBG_PREFIX "*** FilenameLength of 0 encountered!"));
-                FilenameLength = strlen(Filename);
-            }
-
-            if (FilenameLength > 0)
-            {
-                returnValue = 
-                    (size_t) (cbm_raw_write(HandleDevice, Filename, FilenameLength))
-                    != FilenameLength;
-            }
-            cbm_unlisten(HandleDevice);
-        }
     }
     else
     {
@@ -391,12 +418,22 @@ cbm_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
  call this function.
 */
 
-int CBMAPIDECL
-cbm_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+int
+cbmarch_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
+    CBMT_CLOSE_IN parameter;
+    int returnValue;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_close(HandleDevice, DeviceAddress, SecondaryAddress));
+    parameter.PrimaryAddress = DeviceAddress;
+    parameter.SecondaryAddress = SecondaryAddress;
+
+    returnValue = 
+        cbm_ioctl(HandleDevice, CBMCTRL(CLOSE), &parameter, sizeof(parameter), NULL, 0)
+        ? 0 : 1;
+
+    FUNC_LEAVE_INT(returnValue);
 }
 
 /*! \brief Send an UNLISTEN on the IEC serial bus
@@ -419,12 +456,16 @@ cbm_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddre
  call this function.
 */
 
-int CBMAPIDECL
-cbm_unlisten(CBM_FILE HandleDevice)
+int
+cbmarch_unlisten(CBM_FILE HandleDevice)
 {
+    int returnValue;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_unlisten(HandleDevice));
+    returnValue = cbm_ioctl(HandleDevice, CBMCTRL(UNLISTEN), NULL, 0, NULL, 0) ? 0 : 1;
+
+    FUNC_LEAVE_INT(returnValue);
 }
 
 /*! \brief Send an UNTALK on the IEC serial bus
@@ -447,12 +488,16 @@ cbm_unlisten(CBM_FILE HandleDevice)
  call this function.
 */
 
-int CBMAPIDECL
-cbm_untalk(CBM_FILE HandleDevice)
+int
+cbmarch_untalk(CBM_FILE HandleDevice)
 {
+    int returnValue;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_untalk(HandleDevice));
+    returnValue = cbm_ioctl(HandleDevice, CBMCTRL(UNTALK), NULL, 0, NULL, 0) ? 0 : 1;
+
+    FUNC_LEAVE_INT(returnValue);
 }
 
 
@@ -476,12 +521,16 @@ cbm_untalk(CBM_FILE HandleDevice)
  call this function.
 */
 
-int CBMAPIDECL 
-cbm_get_eoi(CBM_FILE HandleDevice)
+int
+cbmarch_get_eoi(CBM_FILE HandleDevice)
 {
+    CBMT_GET_EOI_OUT result;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_get_eoi(HandleDevice));
+    cbm_ioctl(HandleDevice, CBMCTRL(GET_EOI), NULL, 0, &result, sizeof(result));
+
+    FUNC_LEAVE_INT(result.Decision);
 }
 
 /*! \brief Reset the EOI flag
@@ -499,12 +548,16 @@ cbm_get_eoi(CBM_FILE HandleDevice)
  call this function.
 */
 
-int CBMAPIDECL 
-cbm_clear_eoi(CBM_FILE HandleDevice)
+int
+cbmarch_clear_eoi(CBM_FILE HandleDevice)
 {
+    int returnValue;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_clear_eoi(HandleDevice));
+    returnValue = cbm_ioctl(HandleDevice, CBMCTRL(CLEAR_EOI), NULL, 0, NULL, 0);
+
+    FUNC_LEAVE_INT(returnValue);
 }
 
 /*! \brief RESET all devices
@@ -528,12 +581,16 @@ cbm_clear_eoi(CBM_FILE HandleDevice)
  call this function.
 */
 
-int CBMAPIDECL
-cbm_reset(CBM_FILE HandleDevice)
+int
+cbmarch_reset(CBM_FILE HandleDevice)
 {
+    USHORT returnValue;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_reset(HandleDevice));
+    returnValue = cbm_ioctl(HandleDevice, CBMCTRL(RESET), NULL, 0, NULL, 0) ? 0 : 1;
+
+    FUNC_LEAVE_INT(returnValue);
 }
 
 
@@ -561,12 +618,16 @@ cbm_reset(CBM_FILE HandleDevice)
    This function can't signal an error, thus, be careful!
 */
 
-__u_char CBMAPIDECL 
-cbm_pp_read(CBM_FILE HandleDevice)
+__u_char
+cbmarch_pp_read(CBM_FILE HandleDevice)
 {
+    CBMT_PP_READ_OUT result;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_UCHAR(cbmarch_pp_read(HandleDevice));
+    cbm_ioctl(HandleDevice, CBMCTRL(PP_READ), NULL, 0, &result, sizeof(result));
+
+    FUNC_LEAVE_UCHAR(result.Byte);
 }
 
 /*! \brief Write a byte to a XP1541/XP1571 cable
@@ -592,12 +653,16 @@ cbm_pp_read(CBM_FILE HandleDevice)
    This function can't signal an error, thus, be careful!
 */
 
-void CBMAPIDECL 
-cbm_pp_write(CBM_FILE HandleDevice, __u_char Byte)
+void
+cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 {
+    CBMT_PP_WRITE_IN parameter;
+
     FUNC_ENTER();
 
-    cbmarch_pp_write(HandleDevice, Byte);
+    parameter.Byte = (UCHAR) Byte;
+
+    cbm_ioctl(HandleDevice, CBMCTRL(PP_WRITE), &parameter, sizeof(parameter), NULL, 0);
 
     FUNC_LEAVE();
 }
@@ -623,12 +688,16 @@ cbm_pp_write(CBM_FILE HandleDevice, __u_char Byte)
    This function can't signal an error, thus, be careful!
 */
 
-int CBMAPIDECL
-cbm_iec_poll(CBM_FILE HandleDevice)
+int
+cbmarch_iec_poll(CBM_FILE HandleDevice)
 {
+    CBMT_IEC_POLL_OUT result;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_iec_poll(HandleDevice));
+    cbm_ioctl(HandleDevice, CBMCTRL(IEC_POLL), NULL, 0, &result, sizeof(result));
+
+    FUNC_LEAVE_INT(result.Line);
 }
 
 
@@ -650,12 +719,16 @@ cbm_iec_poll(CBM_FILE HandleDevice)
    This function can't signal an error, thus, be careful!
 */
 
-void CBMAPIDECL
-cbm_iec_set(CBM_FILE HandleDevice, int Line)
+void
+cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
 {
+    CBMT_IEC_SET_IN parameter;
+
     FUNC_ENTER();
  
-    cbmarch_iec_set(HandleDevice, Line);
+    parameter.Line = (UCHAR) Line;
+
+    cbm_ioctl(HandleDevice, CBMCTRL(IEC_SET), &parameter, sizeof(parameter), NULL, 0);
 
     FUNC_LEAVE();
 }
@@ -678,19 +751,24 @@ cbm_iec_set(CBM_FILE HandleDevice, int Line)
    This function can't signal an error, thus, be careful!
 */
 
-void CBMAPIDECL
-cbm_iec_release(CBM_FILE HandleDevice, int Line)
+void
+cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
 {
+    CBMT_IEC_RELEASE_IN parameter;
+
     FUNC_ENTER();
- 
-    cbmarch_iec_release(HandleDevice, Line);
+
+    parameter.Line = (UCHAR) Line;
+
+    cbm_ioctl(HandleDevice, CBMCTRL(IEC_RELEASE), &parameter, sizeof(parameter), NULL, 0);
 
     FUNC_LEAVE();
 }
 
 /*! \brief Activate a line on the IEC serial bus
 
- This function activates (sets to 0V) a line on the IEC serial bus.
+ This function activates (sets to 0V) and deactivates 
+ lines on the IEC serial bus in one call.
 
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
@@ -712,12 +790,17 @@ cbm_iec_release(CBM_FILE HandleDevice, int Line)
    This function can't signal an error, thus, be careful!
 */
 
-void CBMAPIDECL
-cbm_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line)
+void
+cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line)
 {
+    CBMT_IEC_SETRELEASE_IN parameter;
+
     FUNC_ENTER();
  
-    cbmarch_iec_setrelease(HandleDevice, Mask, Line);
+    parameter.State = (UCHAR) Mask;
+    parameter.Line = (UCHAR) Line;
+
+    cbm_ioctl(HandleDevice, CBMCTRL(IEC_SETRELEASE), &parameter, sizeof(parameter), NULL, 0);
 
     FUNC_LEAVE();
 }
@@ -748,170 +831,20 @@ cbm_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line)
    This function can't signal an error, thus, be careful!
 */
 
-int CBMAPIDECL
-cbm_iec_wait(CBM_FILE HandleDevice, int Line, int State)
+int
+cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
-    FUNC_ENTER();
-
-    FUNC_LEAVE_INT(cbmarch_iec_wait(HandleDevice, Line, State));
-}
-
-/*! \brief Get the (logical) state of a line on the IEC serial bus
-
- This function gets the (logical) state of a line on the IEC serial bus.
-
- \param HandleDevice
-   A CBM_FILE which contains the file handle of the driver.
-
- \param Line
-   The line to be tested. This must be exactly one of
-   IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
-
- \return
-   1 if the line is set, 0 if it is not
-
- If cbm_driver_open() did not succeed, it is illegal to 
- call this function.
-
- \bug
-   This function can't signal an error, thus, be careful!
-*/
-
-int CBMAPIDECL
-cbm_iec_get(CBM_FILE HandleDevice, int Line)
-{
-    FUNC_ENTER();
-    FUNC_LEAVE_INT((cbmarch_iec_poll(HandleDevice)&Line) != 0 ? 1 : 0);
-}
-
-
-/*-------------------------------------------------------------------*/
-/*--------- HELPER FUNCTIONS ----------------------------------------*/
-
-
-/*! \brief Read the drive status from a floppy
-
- This function reads the drive status of a connected
- floppy drive.
-
- \param HandleDevice
-   A CBM_FILE which contains the file handle of the driver.
-
- \param DeviceAddress
-   The address of the device on the IEC serial bus. This
-   is known as primary address, too.
-
- \param Buffer
-   Pointer to a buffer which will hold the drive's status after
-   successfull calling,
-
- \param BufferLength
-   The length of the buffer pointed to by Buffer in bytes.
-
- \return
-   Returns the int representation of the drive status,
-   that is, the numerical value of the first return
-   value from the drive. This is the error number.
-
- This function will never write more than BufferLength bytes.
- Nevertheless, the buffer will always be terminated with
- a trailing zero.
-
- If an error occurs, this function returns a
- "99, DRIVER ERROR,00,00\r" and the value 99.
-
- If cbm_driver_open() did not succeed, it is illegal to 
- call this function.
-*/
-
-int CBMAPIDECL
-cbm_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress, 
-                  void *Buffer, size_t BufferLength)
-{
-    int retValue;
+    CBMT_IEC_WAIT_IN parameter;
+    CBMT_IEC_WAIT_OUT result;
 
     FUNC_ENTER();
 
-    DBG_ASSERT(Buffer && (BufferLength > 0));
+    parameter.Line = (UCHAR) Line;
+    parameter.State = (UCHAR) State;
 
-    // Pre-occupy return value
+    cbm_ioctl(HandleDevice, CBMCTRL(IEC_WAIT), 
+        &parameter, sizeof(parameter), 
+        &result, sizeof(result));
 
-    retValue = 99;
-
-    if (Buffer && (BufferLength > 0))
-    {
-        char *bufferToWrite = Buffer;
-
-        // make sure we have a trailing zero at the end of the buffer:
-
-        bufferToWrite[--BufferLength] = '\0';
-
-        // pre-occupy buffer with the error value
-
-        strncpy(bufferToWrite, "99, DRIVER ERROR,00,00\r", BufferLength);
-
-        // Now, ask the drive for its error status:
-
-        if (cbmarch_talk(HandleDevice, DeviceAddress, 15) == 0)
-        {
-            unsigned bytesRead = cbm_raw_read(HandleDevice, bufferToWrite, BufferLength);
-
-            DBG_ASSERT(bytesRead >= 0);
-            DBG_ASSERT(bytesRead <= BufferLength);
-
-            // make sure we have a trailing zero at the end of the status:
-
-            bufferToWrite[bytesRead] = '\0';
-
-            cbmarch_untalk(HandleDevice);
-        }
-
-        retValue = atoi(bufferToWrite);
-    }
-
-    FUNC_LEAVE_INT(retValue);
-}
-
-/*! \brief Executes a command in the floppy drive.
-
- This function Executes a command in the connected floppy drive.
-
- \param HandleDevice
-   A CBM_FILE which contains the file handle of the driver.
-
- \param DeviceAddress
-   The address of the device on the IEC serial bus. This
-   is known as primary address, too.
-
- \param Command
-   Pointer to a string which holds the command to be executed.
-
- \param Size
-   The length of the command in bytes. If zero, the Command
-   has to be a null-terminated string.
-
- \return
-   0 on success.
-
- If cbm_driver_open() did not succeed, it is illegal to 
- call this function.
-*/
-
-int CBMAPIDECL
-cbm_exec_command(CBM_FILE HandleDevice, __u_char DeviceAddress, 
-                 const void *Command, size_t Size)
-{
-    int rv;
-
-    FUNC_ENTER();
-    rv = cbmarch_listen(HandleDevice, DeviceAddress, 15);
-    if(rv == 0) {
-        if(Size == 0) {
-            Size = (USHORT) strlen(Command);
-        }
-        rv = (size_t) cbmarch_raw_write(HandleDevice, Command, Size) != Size;
-        cbmarch_unlisten(HandleDevice);
-    }
-
-    FUNC_LEAVE_INT(rv);
+    FUNC_LEAVE_INT(result.Line);
 }

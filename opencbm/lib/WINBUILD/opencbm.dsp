@@ -91,7 +91,15 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\archlib.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\cbm.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\detect.c
 # End Source File
 # Begin Source File
 
@@ -101,10 +109,22 @@ SOURCE=.\i_opencbm.c
 
 SOURCE=.\opencbm.def
 # End Source File
+# Begin Source File
+
+SOURCE=..\petscii.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\upload.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=..\archlib.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\include\cbmioctl.h

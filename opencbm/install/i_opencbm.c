@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file install/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.3 2004-12-22 14:43:21 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.4 2005-02-13 17:58:11 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the driver
 **
@@ -52,13 +52,13 @@ CbmOutputDebuggingBuffer(VOID)
 
     FUNC_ENTER();
 
-    if (cbm_i_driver_open(&HandleDevice, 0) == 0)
+    if (cbmarch_driver_open(&HandleDevice, 0) == 0)
     {
         PCHAR p = buffer;
         PCHAR endLine;
 
         cbm_ioctl(HandleDevice, CBMCTRL(I_READDBG), NULL, 0, buffer, sizeof(buffer));
-        cbm_i_driver_close(HandleDevice);
+        cbmarch_driver_close(HandleDevice);
 
         printf("Output of the debugging buffer:\n\n");
 

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.9 2004-12-22 18:00:21 strik Exp $ \n
+** \version $Id: debug.c,v 1.10 2005-02-13 17:58:12 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -19,11 +19,13 @@
 
 /*! Mark: This file is DEBUG.C, thus, some variables and functions
  * should not be defined as "extern"  */
-#define DBG_IS_DEBUG_C
+// #define DBG_IS_DEBUG_C
 
 // #include <wdm.h>
 #include <ntddk.h>
 #include "cbm4win_common.h"
+
+#include "../../arch/windows/debug.c"
 
 /*! find the minimum of both parameters */
 #define min(_x, _y) ( ((_x) < (_y)) ? (_x) : (_y) )
