@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: debug.c,v 1.3 2004-11-16 19:54:34 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -1042,11 +1042,11 @@ DbgAllocateMemoryBuffer(VOID)
         ;
 
     DbgMemoryBuffer = ExAllocatePoolWithTag(NonPagedPool,
-        DBG_SIZE_MEMORY_BUFFER, MTAG_DBGBUFFER);
+        DBG_SIZE_MEMORY_BUFFER + 1, MTAG_DBGBUFFER);
 
     if (DbgMemoryBuffer)
     {
-        RtlZeroMemory(DbgMemoryBuffer, DBG_SIZE_MEMORY_BUFFER);
+        RtlZeroMemory(DbgMemoryBuffer, DBG_SIZE_MEMORY_BUFFER + 1);
     }
 
     DbgNextWriteMemoryBuffer = 0;
@@ -1102,6 +1102,11 @@ DbgOutputMemoryBuffer(const char *String)
                 DBG_SIZE_MEMORY_BUFFER - DbgNextWriteMemoryBuffer);
 
             DbgNextWriteMemoryBuffer = 0;
+        }
+
+        if (DbgNextWriteMemoryBuffer > 0)
+        {
+            DbgMemoryBuffer[DbgNextWriteMemoryBuffer-1] = 13;
         }
 
         RtlCopyMemory(&DbgMemoryBuffer[DbgNextWriteMemoryBuffer], String, strLength);

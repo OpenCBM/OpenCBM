@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file dll/opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm.c,v 1.1 2004-11-07 11:05:11 strik Exp $ \n
+** \version $Id: opencbm.c,v 1.2 2004-11-16 19:54:33 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -1370,7 +1370,6 @@ cbm_ascii2petscii(char *Str)
     return Str;
 }
 
-
 /*! \brief DLL initialization und unloading
 
  This function is called whenever the DLL is loaded or unloaded.
@@ -1393,11 +1392,6 @@ cbm_ascii2petscii(char *Str)
  If this function returns FALSE, windows reports that loading the DLL
  was not successful. If the DLL is linked statically, the executable
  refuses to load with STATUS_DLL_INIT_FAILED (0xC0000142)
-
- \bug It should be determined if there is already an instance of the
- DLL running. bIsOpen is not enough for this! 
- This could be solved by only reporting success if the driver is not
- yet running.
 */
 
 BOOL
@@ -1433,6 +1427,16 @@ opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
     switch (Reason) 
     {
         case DLL_PROCESS_ATTACH:
+
+            if (IsDriverStartedAutomatically())
+            {
+                // the driver is started automatically, do not try
+                // to start it
+
+                Status = TRUE;
+                break;
+            }
+
             if (bIsOpen)
             {
                 DBG_ERROR((DBG_PREFIX "No multiple instances are allowed!"));
@@ -1446,6 +1450,16 @@ opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
             break;
 
         case DLL_PROCESS_DETACH:
+
+            if (IsDriverStartedAutomatically())
+            {
+                // the driver is started automatically, do not try
+                // to stop it
+
+                Status = TRUE;
+                break;
+            }
+
             if (!bIsOpen)
             {
                 DBG_ERROR((DBG_PREFIX "Driver is not running!"));

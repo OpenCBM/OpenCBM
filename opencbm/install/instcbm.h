@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.h,v 1.1 2004-11-07 11:05:12 strik Exp $ \n
+** \version $Id: instcbm.h,v 1.2 2004-11-16 19:54:34 strik Exp $ \n
 ** \n
 ** \brief Header for installation routines
 **
@@ -26,7 +26,7 @@
 
 extern PCHAR FormatErrorMessage(DWORD Error);
 
-extern BOOL CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe);
+extern BOOL CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart);
 extern BOOL CbmRemove(IN LPCTSTR DriverName);
 extern BOOL CbmCheckPresence(IN LPCTSTR DriverName);
 

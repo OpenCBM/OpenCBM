@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "$Id: cbmctrl.c,v 1.2 2004-11-15 16:11:52 strik Exp $";
+    "$Id: cbmctrl.c,v 1.3 2004-11-16 19:54:33 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -272,7 +272,7 @@ static int do_download(CBM_FILE fd, char *argv[])
 
 #ifdef WIN32
 
-        // set binary mode for input and output stream
+        // set binary mode for output stream
 
         _setmode(fileno(stdout), _O_BINARY);
 #endif
@@ -331,10 +331,17 @@ static int do_upload(CBM_FILE fd, char *argv[])
         return 1;
     }
 
-    if (strcmp(argv[2], "-") == 0)
+    if (!argv[2] || strcmp(argv[2], "-") == 0 || strcmp(argv[2], "") == 0)
     {
         fn = "(stdin)";
         f = stdin;
+
+#ifdef WIN32
+
+        // set binary mode for input stream
+
+        _setmode(fileno(stdin), _O_BINARY);
+#endif
     }
     else
     {
@@ -436,7 +443,7 @@ static struct prog prog_table[] =
     {"command" , do_command , 2, 2, "<device> <cmdstr>"               },
     {"dir"     , do_dir     , 1, 1, "<device>"                        },
     {"download", do_download, 3, 4, "<device> <adr> <count> [<file>]" },
-    {"upload"  , do_upload  , 3, 3, "<device> <adr> <file>"           },
+    {"upload"  , do_upload  , 2, 3, "<device> <adr> [<file>]"         },
     {"reset"   , do_reset   , 0, 0, ""                                },
     {"detect"  , do_detect  , 0, 0, ""                                },
     {NULL,NULL}

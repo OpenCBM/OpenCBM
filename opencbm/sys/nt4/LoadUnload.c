@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.3 2004-11-16 19:54:34 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **
@@ -267,10 +267,6 @@ DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegistryPath)
 
     DBG_PRINT((DBG_PREFIX "CBM4NT.SYS " __DATE__ " " __TIME__));
 
-	// Do initialization common to NT4 and WDM driver
-
-    ntStatus = DriverCommonInit(DriverObject, RegistryPath);
-
     // enumerate all parallel port drivers:
 
     ntStatus = ParPortEnumerateOpen(&enumerate);
@@ -292,6 +288,10 @@ DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegistryPath)
 
         ParPortEnumerateClose(enumerate);
     }
+
+    // Perform initialization common to NT4 and WDM driver
+
+    ntStatus = DriverCommonInit(DriverObject, RegistryPath);
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }

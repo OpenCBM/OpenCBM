@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file service.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: service.c,v 1.1 2004-11-07 11:05:12 strik Exp $ \n
+** \version $Id: service.c,v 1.2 2004-11-16 19:54:34 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the service control manager for the OPENCBM driver
 **
@@ -258,12 +258,17 @@ CreateDefaultRegistryKeys(IN ULONG DefaultLpt,
  \param ServiceExe
    The path to the executable which contains the logging texts
 
+ \param AutomaticStart
+   If set to TRUE, then the driver start type should be set
+   to "AUTOMATIC", that is, the driver is started on every boot.
+   If FALSE, it is put to "MANUAL".
+
  \return
    TRUE on success, else FALSE.
 */
 
 BOOL
-CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe)
+CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
 {
     SC_HANDLE scManager;
     SC_HANDLE scService;
@@ -281,7 +286,8 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe)
         // Create the service
 
         scService = CreateService(scManager, DriverName, DriverName, 
-           SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, SERVICE_DEMAND_START,
+           SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, 
+           AutomaticStart ? SERVICE_AUTO_START : SERVICE_DEMAND_START,
            SERVICE_ERROR_NORMAL, ServiceExe, 
            "Extended base", NULL, "+Parallel arbitrator\0Parport\0",
            NULL, NULL);
@@ -324,6 +330,13 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe)
         // event service
 
         success = CreateLogRegistryKeys(ServiceExe);
+
+        // If the driver is to be started automatically, start it now
+
+        if (AutomaticStart)
+        {
+            cbm_i_driver_start();
+        }
     }
     else
     {

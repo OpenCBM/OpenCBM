@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.3 2004-11-16 19:54:34 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -198,6 +198,11 @@ usage(VOID)
             "  -c, --check     only check if the installation is ok\n"
             "  -F, --forcent4  force NT4 driver on a Win 2000, XP, or newer systems\n" 
             "                  (NOT RECOMMENDED!)\n"
+            "  -A, --automatic automatically start the driver on system boot. If you\n"
+            "                  specify this option, you can use the driver as normal\n"
+            "                  user, you do not need administrator rights.\n"
+            "                  Handle with care, have a look at the documentation\n"
+            "                 .before using this option!\n"
             "\n");
 
     FUNC_LEAVE();
@@ -238,6 +243,9 @@ struct parameter_s
 
     /*! --lpt was given, the number which was there */
     ULONG Lpt;
+
+    /*! --automatic was given, start the driver automatically */
+    BOOL AutomaticStart;
 
 #if DBG
 
@@ -401,10 +409,11 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { "debugflags", required_argument, NULL, 'D' },
 #endif // #if DBG
         { "nocopy",     no_argument,       NULL, 'n' },
+        { "automatic",  no_argument,       NULL, 'A' },
         { NULL,         0,                 NULL, 0   }
     };
 
-    const char shortopts[] ="hrFl:nuD:c";
+    const char shortopts[] ="hrFl:nuD:cA";
 
     FUNC_ENTER();
 
@@ -499,6 +508,10 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
 
         case 'u':
             Parameter->Update = TRUE;
+            break;
+
+        case 'A':
+            Parameter->AutomaticStart = TRUE;
             break;
 
         default:
@@ -686,7 +699,8 @@ InstallDriver(parameter_t *Parameter)
 
             if (!driverLocalPath)
             {
-                DBG_PRINT((DBG_PREFIX "Could not allocate memory for driver path, exiting!"));
+                DBG_PRINT((DBG_PREFIX 
+                    "Could not allocate memory for driver path, exiting!"));
                 printf("Could not allocate memory for driver path, exiting!\n");
                 error = 5;
             }
@@ -727,7 +741,8 @@ InstallDriver(parameter_t *Parameter)
 
                 if (Parameter->NoCopy)
                 {
-                    CbmInstall(OPENCBM_DRIVERNAME, driverLocalPath);
+                    CbmInstall(OPENCBM_DRIVERNAME, driverLocalPath,
+                        Parameter->AutomaticStart);
                 }
                 else
                 {
@@ -754,7 +769,8 @@ InstallDriver(parameter_t *Parameter)
                             printf("\n");
                             strcpy(driverSystemPath, "System32\\DRIVERS\\");
                             strcat(driverSystemPath, driverToUse);
-                            CbmInstall(OPENCBM_DRIVERNAME, driverSystemPath);
+                            CbmInstall(OPENCBM_DRIVERNAME, driverSystemPath,
+                                Parameter->AutomaticStart);
                         }
                     }
 
@@ -872,8 +888,10 @@ main(int Argc, char **Argv)
             if (!NeededAccessRights())
             {
                 retValue = 3;
-                DBG_PRINT((DBG_PREFIX "You do not have necessary privileges. Please try as administrator."));
-                printf("You do not have necessary privileges. Please try as administrator.\n");
+                DBG_PRINT((DBG_PREFIX "You do not have necessary privileges. " 
+                    "Please try installing only as administrator."));
+                printf("You do not have necessary privileges.\n"
+                    "Please try installing only as administrator.\n");
             }
         }
 

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/thread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: thread.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: thread.c,v 1.2 2004-11-16 19:54:34 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
@@ -124,29 +124,32 @@ cbm_stop_thread(IN PDEVICE_EXTENSION Pdx)
     DBG_ASSERT(Pdx->ThreadHandle != 0);
     DBG_ASSERT(Pdx->Thread != 0);
 
-    PERF_EVENT_THREAD_STOP_SCHED();
+    if ((Pdx->ThreadHandle != 0) && (Pdx->Thread != 0))
+    {
+        PERF_EVENT_THREAD_STOP_SCHED();
 
-    // Signal the thread that it should QUIT
+        // Signal the thread that it should QUIT
 
-    Pdx->QuitThread = TRUE;
+        Pdx->QuitThread = TRUE;
 
-    // Wake up the thread so it can process the signalled QUIT event
+        // Wake up the thread so it can process the signalled QUIT event
 
-    QueueSignal(&Pdx->IrpQueue);
+        QueueSignal(&Pdx->IrpQueue);
 
-    // Now, wait until the thread has been stopped
+        // Now, wait until the thread has been stopped
 
-    KeWaitForSingleObject(Pdx->Thread, Executive, KernelMode, FALSE, NULL);
+        KeWaitForSingleObject(Pdx->Thread, Executive, KernelMode, FALSE, NULL);
 
-    // We're done, we do not need the thread's handle or object anymore
+        // We're done, we do not need the thread's handle or object anymore
 
-    ObDereferenceObject(Pdx->Thread);
-    ZwClose(Pdx->ThreadHandle);
+        ObDereferenceObject(Pdx->Thread);
+        ZwClose(Pdx->ThreadHandle);
 
-    // Mark that we do not have a thread anymore
+        // Mark that we do not have a thread anymore
 
-    Pdx->Thread = NULL;
-    Pdx->ThreadHandle = 0;
+        Pdx->Thread = NULL;
+        Pdx->ThreadHandle = 0;
+    }
 
     FUNC_LEAVE();
 }

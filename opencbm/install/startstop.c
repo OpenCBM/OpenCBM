@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: startstop.c,v 1.3 2004-11-16 19:54:34 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -430,6 +430,14 @@ CbmCheckCorrectInstallation(VOID)
     {
         error = TRUE;
     }
+
+    // If the driver is set to be started automatically, restart it now
+
+    if (IsDriverStartedAutomatically())
+    {
+        cbm_i_driver_start();
+    }
+
 
     FUNC_LEAVE_BOOL(error);
 }

@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file dll/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.3 2004-11-16 19:54:33 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -127,7 +127,7 @@ static int
 cbm_get_default_port(VOID)
 {
     DWORD ret;
-    HKEY RegKey;
+    HKEY regKey;
 
     FUNC_ENTER();
 
@@ -139,7 +139,7 @@ cbm_get_default_port(VOID)
                      CBM_REGKEY_SERVICE,
                      0,
                      KEY_QUERY_VALUE,
-                     &RegKey)
+                     &regKey)
        )
     {
         DBG_WARN((DBG_PREFIX "RegOpenKeyEx() failed!"));
@@ -148,7 +148,7 @@ cbm_get_default_port(VOID)
 
     // now, get the number of the port to use
 
-    if (RegGetDWORD(RegKey, CBM_REGKEY_SERVICE_DEFAULTLPT, &ret) != ERROR_SUCCESS)
+    if (RegGetDWORD(regKey, CBM_REGKEY_SERVICE_DEFAULTLPT, &ret) != ERROR_SUCCESS)
     {
         DBG_WARN((DBG_PREFIX "No " CBM_REGKEY_SERVICE "\\" CBM_REGKEY_SERVICE_DEFAULTLPT 
             " value, setting 0."));
@@ -157,7 +157,7 @@ cbm_get_default_port(VOID)
 
     // We're done, close the registry handle.
 
-    RegCloseKey(RegKey);
+    RegCloseKey(regKey);
 
     DBG_PPORT((DBG_PREFIX "RETURN: cbm_get_default_port() == %u", ret));
 
@@ -626,4 +626,56 @@ cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
         (  (outBuffer->ErrorFlags != CBM_I_DRIVER_INSTALL_0_IOCTL_FAILED)
         && (outBuffer->ErrorFlags != CBM_I_DRIVER_INSTALL_0_FAILED)
         ) ? FALSE : TRUE);
+}
+
+/*! \brief Is the driver started automatically?
+
+ This function finds out if the driver is started automatically
+ or manually.
+
+ \return 
+   Returns TRUE if driver is started automatically, FALSE if not.
+*/
+
+BOOL
+IsDriverStartedAutomatically(VOID)
+{
+    DWORD ret;
+    BOOL automaticStart;
+    HKEY regKey;
+
+    FUNC_ENTER();
+
+    automaticStart = FALSE;
+
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+                     CBM_REGKEY_SERVICE,
+                     0,
+                     KEY_QUERY_VALUE,
+                     &regKey)
+       )
+    {
+        DBG_WARN((DBG_PREFIX "RegOpenKeyEx() failed!"));
+        FUNC_LEAVE_BOOL(FALSE);
+    }
+
+    // now, get the number of the port to use
+
+    if (RegGetDWORD(regKey, "Start", &ret) != ERROR_SUCCESS)
+    {
+        DBG_ERROR((DBG_PREFIX "No " CBM_REGKEY_SERVICE "\\Start value!"));
+    }
+    else
+    {
+        if (ret == SERVICE_AUTO_START)
+        {
+            automaticStart = TRUE;
+        }
+    }
+
+    // We're done, close the registry handle.
+
+    RegCloseKey(regKey);
+
+    FUNC_LEAVE_BOOL(automaticStart);
 }
