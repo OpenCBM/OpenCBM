@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.4 2004-12-22 18:00:20 strik Exp $";
+    "@(#) $Id: pp.c,v 1.5 2005-01-06 21:00:15 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -168,7 +168,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
 static void close_disk(void)
 {
     pp_write_nohs(fd_cbm, 0, 0);
-    usleep(100);
+    arch_usleep(100);
     cbm_iec_wait(fd_cbm, IEC_DATA, 0);
 }
 

@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.4 2004-12-22 18:00:20 strik Exp $";
+    "@(#) $Id: s1.c,v 1.5 2005-01-06 21:00:15 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -153,7 +153,7 @@ static void close_disk(void)
 {
     s1_write_byte(fd_cbm, 0);
     s1_write_byte_nohs(fd_cbm, 0);
-    usleep(100);
+    arch_usleep(100);
 }
 
 static int send_track_map(unsigned char tr, const char *trackmap, unsigned char count)

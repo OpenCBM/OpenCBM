@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/vdd.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.c,v 1.2 2004-12-22 18:00:22 strik Exp $ \n
+** \version $Id: vdd.c,v 1.3 2005-01-06 21:00:16 strik Exp $ \n
 ** \n
 ** \brief VDD for accessing the driver from DOS
 **
@@ -49,6 +49,10 @@
 EXTERN BOOL VDDInitialize(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved);
 EXTERN VOID VDDRegisterInit(VOID);
 EXTERN VOID VDDDispatch(VOID);
+
+
+/*! The handle of the vdd (for being accessed by the I/O hook install functions */
+HANDLE vdd_handle;
 
 /*! \brief VDD blocking callback
 
@@ -97,10 +101,13 @@ VDDInitialize(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
     switch (Reason) 
     {
         case DLL_PROCESS_ATTACH:
-            VDDInstallUserHook(Module, NULL, NULL, VDDBlockHandler, NULL);
+            vdd_handle = Module;
+            VDDInstallUserHook(vdd_handle, NULL, NULL, VDDBlockHandler, NULL);
             break;
 
         case DLL_PROCESS_DETACH:
+            DBG_ASSERT(vdd_handle == Module);
+            vdd_uninstall_iohook_internal();
             VDDDeInstallUserHook(Module);
 
             // make sure all CBM_FILE handles are closed
@@ -212,6 +219,9 @@ VDDDispatch(VOID)
         case FC_EXEC_COMMAND:    error = vdd_exec_command(cbmfile);  break;
         case FC_IDENTIFY:        error = vdd_identify(cbmfile);      break;
         case FC_GET_DRIVER_NAME: error = vdd_get_driver_name();      break;
+
+        case FC_VDD_INSTALL_IOHOOK:   error = vdd_install_iohook(cbmfile);   break;
+        case FC_VDD_UNINSTALL_IOHOOK: error = vdd_uninstall_iohook(cbmfile); break;
 
         default:
             // this function is not implemented:

@@ -17,7 +17,7 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/opencbn.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: OPENCBM.C,v 1.2 2004-12-22 18:00:21 strik Exp $ \n
+** \version $Id: OPENCBM.C,v 1.3 2005-01-06 21:00:15 strik Exp $ \n
 ** \n
 ** \brief Library for accessing the driver from DOS
 **
@@ -482,4 +482,27 @@ cbm_get_driver_name(int port)
     }
 
     return GetDriverName_Portname;
+}
+
+int
+vdd_install_iohook(CBM_FILE f, int IoBaseAddress)
+{
+    WORD retVal;
+
+    asm {
+        mov cx,[IoBaseAddress]
+        CbmDispatchCallRetVal(25)
+    }
+    return retVal;
+}
+
+int
+vdd_uninstall_iohook(CBM_FILE f)
+{
+    WORD retVal;
+
+    asm {
+        CbmDispatchCallRetVal(26)
+    }
+    return retVal;
 }

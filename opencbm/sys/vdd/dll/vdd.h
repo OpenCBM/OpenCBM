@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/vdd.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.h,v 1.2 2004-12-22 18:00:22 strik Exp $ \n
+** \version $Id: vdd.h,v 1.3 2005-01-06 21:00:16 strik Exp $ \n
 ** \n
 ** \brief Function prototypes for the VDD
 **
@@ -48,8 +48,12 @@ enum FUNCTIONCODE
     FC_DEVICE_STATUS,
     FC_EXEC_COMMAND,
     FC_IDENTIFY,
-    FC_GET_DRIVER_NAME
+    FC_GET_DRIVER_NAME,
+    FC_VDD_INSTALL_IOHOOK,
+    FC_VDD_UNINSTALL_IOHOOK
 } FUNCTIONCODE;
+
+extern HANDLE vdd_handle;
 
 extern BOOLEAN vdd_driver_open(VOID);
 extern BOOLEAN vdd_driver_close(CBM_FILE);
@@ -76,6 +80,10 @@ extern BOOLEAN vdd_device_status(CBM_FILE);
 extern BOOLEAN vdd_exec_command(CBM_FILE);
 extern BOOLEAN vdd_identify(CBM_FILE);
 extern BOOLEAN vdd_get_driver_name(VOID);
+
+extern BOOLEAN vdd_install_iohook(CBM_FILE);
+extern BOOLEAN vdd_uninstall_iohook(CBM_FILE);
+extern USHORT  vdd_uninstall_iohook_internal(VOID);
 
 extern CBM_FILE vdd_cbmfile_get(WORD);
 extern WORD     vdd_cbmfile_store(CBM_FILE);

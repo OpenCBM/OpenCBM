@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.3 2004-12-22 18:00:22 strik Exp $ \n
+** \version $Id: execute.c,v 1.4 2005-01-06 21:00:16 strik Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **
@@ -956,4 +956,263 @@ vdd_identify(CBM_FILE HandleDevice)
     strncpy(buffer, string, length);
 
     CHECKEDBUFFERACCESS_EPILOG();
+}
+
+/*-------------------------------------------------------------------*/
+/*--------- FUNCTIONS FOR ACCESS IN THE I/O ADDRESS SPACE -----------*/
+
+static CBM_FILE VddCbmFileForIoHook;
+
+static BOOLEAN VddIoHookInstalled = FALSE;
+static VDD_IO_PORTRANGE VddIoPortRange;
+static VDD_IO_HANDLERS VddIoPortHandlers;
+
+static BYTE vdd_iohook_lastwrittencontrolregister = 0xFF;
+
+
+/* lpt output lines for XE cables */
+#define PP_XE_ATN_OUT    0x01 //!< The ATN OUT bit
+#define PP_XE_CLK_OUT    0x02 //!< The CLOCK OUT bit
+#define PP_XE_RESET_OUT  0x04 //!< The RESET OUT bit
+#define PP_XE_DATA_OUT   0x08 //!< The DATA OUT bit
+
+/* lpt input lines for XE cables */
+#define PP_XE_ATN_IN     0x10 //!< The ATN IN bit
+#define PP_XE_CLK_IN     0x20 //!< The CLOCK IN bit
+#define PP_XE_RESET_IN   0x40 //!< The RESET IN bit
+#define PP_XE_DATA_IN    0x80 //!< The DATA IN bit
+
+/*
+ The following accesses are supported:
+ - +0: Data register (read and write)
+ - +1: STATUS register (read only, for input)
+ - +2: Contrlol register (write only, for output)
+
+ XA: 0xcb  11001011
+ XM: 0xc4  11000100
+*/
+static VOID
+vdd_iohook_inb(WORD iport,BYTE *data)
+{
+    if (iport == VddIoPortRange.First)
+    {
+        // read the data port (XP15x1 part)
+        *data = cbm_pp_read(VddCbmFileForIoHook);
+    }
+    else if (iport == VddIoPortRange.First + 1)
+    {
+        UINT value;
+        BYTE ret;
+
+        // read the status register (for Input)
+        value = cbm_iec_poll(VddCbmFileForIoHook);
+
+        ret = 0;
+
+        if (value & IEC_DATA)
+        {
+            ret |= PP_XE_DATA_IN;
+        }
+        if (value & IEC_CLOCK)
+        {
+            ret |= PP_XE_CLK_IN;
+        }
+        if (value & IEC_ATN)
+        {
+            ret |= PP_XE_ATN_IN;
+        }
+
+        // as the one line is inverted by the parallel port, behave the same
+        *data = ret ^ 0x04;
+    }
+    else if (iport == VddIoPortRange.First + 2)
+    {
+        // reading the control register: Gives the last written state
+        *data = 0x04 ^ vdd_iohook_lastwrittencontrolregister;
+    }
+    else DBG_ERROR((DBG_PREFIX "Access to unknown address %08x", iport));
+}
+
+static VOID
+vdd_iohook_outb(WORD iport,BYTE data)
+{
+    if (iport == VddIoPortRange.First)
+    {
+        // write the data port (XP15x1 part)
+        cbm_pp_write(VddCbmFileForIoHook, data);
+    }
+    else if (iport == VddIoPortRange.First + 1)
+    {
+        DBG_ERROR((DBG_PREFIX "Writing the status register: UNSUPPORTED!"));
+    }
+    else if (iport == VddIoPortRange.First + 2)
+    {
+        // writing the control register
+
+        BYTE ret = data ^ vdd_iohook_lastwrittencontrolregister;
+
+        vdd_iohook_lastwrittencontrolregister = data;
+
+        data ^= 0x04;
+
+        if (ret & PP_XE_ATN_OUT)
+        {
+            // ATN was changed
+            ((data & PP_XE_ATN_OUT) ? cbm_iec_set : cbm_iec_release)
+                (VddCbmFileForIoHook, IEC_ATN);
+        }
+        if (ret & PP_XE_CLK_OUT)
+        {
+            // CLOCK was changed
+            ((data & PP_XE_CLK_OUT) ? cbm_iec_set : cbm_iec_release)
+                (VddCbmFileForIoHook, IEC_CLOCK);
+        }
+        if (ret & PP_XE_DATA_OUT)
+        {
+            // DATA was changed
+            ((data & PP_XE_DATA_OUT) ? cbm_iec_set : cbm_iec_release)
+                (VddCbmFileForIoHook, IEC_DATA);
+        }
+        if (ret & PP_XE_RESET_OUT)
+        {
+            // RESET was changed: Only process it if it was set
+            if (data & PP_XE_RESET_OUT)
+            {
+                cbm_reset(VddCbmFileForIoHook);
+            }
+        }
+    }
+    else DBG_ERROR((DBG_PREFIX "Access to unknown address %08x", iport));
+}
+
+
+/*! \brief Install the I/O hook
+
+ This function installs the I/O hook for accessing the VDD via IN
+ and OUT assembler instructions
+
+ \param HandleDevice (BX)
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param IoBaseAddress (CX)
+   The I/O base address on which to install the I/O hook
+
+ \return (AX)
+   Returns the I/O base address on which the I/O hook has been installed.\n
+   If the hook could not be installed, this return value is zero.
+
+ If vdd_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+BOOLEAN
+vdd_install_iohook(CBM_FILE HandleDevice)
+{
+    UINT where = getCX();
+
+    FUNC_ENTER();
+
+    DBG_PRINT((DBG_PREFIX "Entering vdd_install_iohook, installing at 0x%08X", where));
+
+    /* assume that the hook is already installed, thus,
+     * we cannot install the hook again
+     */
+    setAX(0);
+
+    if (!VddIoHookInstalled)
+    {
+        VddIoPortRange.First = getCX();
+        VddIoPortRange.Last = VddIoPortRange.First + 2;
+
+        DBG_PRINT((DBG_PREFIX "trying to install from 0x%08x to 0x%08x, Handle = 0x%08x",
+            VddIoPortRange.First, VddIoPortRange.Last, vdd_handle));
+
+        RtlZeroMemory(&VddIoPortHandlers, sizeof(VddIoPortHandlers));
+        VddIoPortHandlers.inb_handler = vdd_iohook_inb;
+        VddIoPortHandlers.outb_handler = vdd_iohook_outb;
+
+        if (VDDInstallIOHook(vdd_handle, 1, &VddIoPortRange, &VddIoPortHandlers))
+        {
+            DBG_PRINT((DBG_PREFIX "SUCCESS!"));
+            // we had success
+            VddIoHookInstalled = TRUE;
+            setAX(VddIoPortRange.First);
+
+            VddCbmFileForIoHook = HandleDevice;
+        }
+        else
+        {
+            DBG_PRINT((DBG_PREFIX "FAILED!"));
+        }
+    }
+
+    FUNC_LEAVE_BOOL(FALSE);
+}
+
+/*! \brief Uninstall the I/O hook
+
+ This function uninstalls the I/O hook for accessing the VDD via IN
+ and OUT assembler instructions
+
+ \param HandleDevice (BX)
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return (AX)
+   Returns the I/O base address on which the I/O hook was installed
+   before.\n
+   If no hook was installed, this return value is zero.
+
+ If vdd_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+USHORT
+vdd_uninstall_iohook_internal(VOID)
+{
+    USHORT ret;
+
+    FUNC_ENTER();
+
+    if (VddIoHookInstalled)
+    {
+        VDDDeInstallIOHook(vdd_handle, 1, &VddIoPortRange);
+
+        VddIoHookInstalled = FALSE;
+        ret = VddIoPortRange.First;
+    }
+    else
+    {
+        ret = 0;
+    }
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief Uninstall the I/O hook
+
+ This function uninstalls the I/O hook for accessing the VDD via IN
+ and OUT assembler instructions
+
+ \param HandleDevice (BX)
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return (AX)
+   Returns the I/O base address on which the I/O hook was installed
+   before.\n
+   If no hook was installed, this return value is zero.
+
+ If vdd_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+BOOLEAN
+vdd_uninstall_iohook(CBM_FILE HandleDevice)
+{
+    FUNC_ENTER();
+
+    DBG_PRINT((DBG_PREFIX "Entering vdd_uninstall_iohook"));
+
+    setAX(vdd_uninstall_iohook_internal());
+
+    FUNC_LEAVE_BOOL(FALSE);
 }

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.5 2004-12-22 18:00:17 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.6 2005-01-06 21:00:15 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -58,7 +58,8 @@ extern "C" {
 
 extern int vdd_init(void);
 extern void vdd_uninit(void);
-
+extern int vdd_install_iohook(CBM_FILE f, int IoBaseAddress);
+extern int vdd_uninstall_iohook(CBM_FILE f);
 #else
 
   /* we have linux */

@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/test.cpp \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: TEST.CPP,v 1.2 2004-12-22 18:00:21 strik Exp $ \n
+** \version $Id: TEST.CPP,v 1.3 2005-01-06 21:00:16 strik Exp $ \n
 ** \n
 ** \brief Some tests for the DOS API
 **
@@ -199,6 +199,7 @@ int main(int argc, char **argv)
     const char *drivername;
     enum cbm_device_type_e devicetype;
     int checklines = 0;
+    int checkiohook = 0;
 
     if (argc>1)
     {
@@ -210,6 +211,10 @@ int main(int argc, char **argv)
             {
             case '-':
                     checklines = 1;
+                    break;
+
+            case '+':
+                    checkiohook = 1;
                     break;
 
             default:
@@ -265,6 +270,39 @@ int main(int argc, char **argv)
     readfile(f, drive, "CBM4WIN.VDD,S,R");
 
     morse(f, drive);
+
+    if (checkiohook)
+    {
+        unsigned int base = 0x0fc0;
+
+        printf("trying to install iohook at 0x%08x ", base);
+        if (vdd_install_iohook(f, base))
+        {
+            int i;
+
+            printf("success\n");
+
+            for (i=0; i<15; i++)
+            {
+                outportb(base + 2, i);
+                sleep(1);
+            }
+
+            printf("trying to uninstall iohook ");
+            if (vdd_uninstall_iohook(f))
+            {
+                printf("success\n");
+            }
+            else
+            {
+                printf("FAILED\n");
+            }
+        }
+        else
+        {
+            printf("FAILED\n");
+        }
+    }
 
     cbm_driver_close(f);
     printf("cbm_driver_close success!\n");
