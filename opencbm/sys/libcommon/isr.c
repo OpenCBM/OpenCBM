@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/isr.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: isr.c,v 1.2 2004-11-21 16:29:09 strik Exp $ \n
+** \version $Id: isr.c,v 1.2.2.1 2005-02-25 14:11:10 strik Exp $ \n
 ** \n
 ** \brief The Interrupt Service Routine (ISR) for the parallel port
 **
@@ -38,21 +38,18 @@
 BOOLEAN
 cbm_isr(IN PKINTERRUPT Interrupt, IN PVOID Pdx)
 {
-#if 0
+    // Make sure we do not do any debugging outputs
+    // For this, this function ommits the FUNC_ENTER()
+    // FUNC_LEAVE() sandwich and makes sure the debugging
+    // flags are unset when calling the ISR routine.
 
-    // This implementation might cause erroneous behaviour,
-    // as we cannot guard the debugging memory functions
-    // against anything running at an IRQL > DISPATCH_LEVEL.
-
-    FUNC_ENTER();
-
-    // let the libiec library do the hard work
-
-    FUNC_LEAVE_BOOL(cbmiec_interrupt(Pdx));
-
-#else
+    // This is needed as we cannot guard the debugging memory
+    // functions against anything running at IRQL > DISPATCH_LEVEL.
 
     BOOLEAN result;
+
+#if DBG
+
     ULONG dbgFlagsOld;
 
     // Make sure we do not try to write into the debugging memory
@@ -67,15 +64,19 @@ cbm_isr(IN PKINTERRUPT Interrupt, IN PVOID Pdx)
 
     DbgFlags &= ~DBGF_DBGMEMBUF;
 
+#endif // #if DBG
+
     // let the libiec library do the hard work
 
     result = cbmiec_interrupt(Pdx);
+
+#if DBG
 
     // Restore the debugging flags
 
     DbgFlags = dbgFlagsOld;
 
-    return result;
+#endif // #if DBG
 
-#endif
+    return result;
 }

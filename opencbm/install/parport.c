@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file parport.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: parport.c,v 1.2 2004-11-24 20:08:18 strik Exp $ \n
+** \version $Id: parport.c,v 1.2.2.1 2005-02-25 14:11:09 strik Exp $ \n
 ** \n
 ** \brief Program to handle the parallel port for the OPENCBM driver
 **
@@ -118,6 +118,7 @@ GetDynamicalAddresses(PSETUPAPI SetupApi)
 {
     FUNC_ENTER();
 
+    DBG_ASSERT(SetupApi != NULL);
     DBG_ASSERT(SetupApi->HandleSetupApiDll == NULL);
     DBG_ASSERT(SetupApi->CM_Get_Device_ID_ExA_p == NULL);
 
