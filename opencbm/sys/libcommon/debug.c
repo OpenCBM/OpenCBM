@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.7 2004-11-24 20:08:19 strik Exp $ \n
+** \version $Id: debug.c,v 1.8 2004-11-25 19:54:25 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -33,7 +33,7 @@
 #else
     #define REPORT_BUG(_no, _a, _b, _c, _d, _str) \
         DbgPrint("--- REPORT_BUG: %04x (%08x, %08x, %08x, %08x). '%s' " \
-        "in %s, %s(), line %s\n", \
+        "in %s, %s(), line %u\n", \
         _no, _a, _b, _c, _d, _str, \
         __FILE__, __FUNCTION__, __LINE__);
 #endif
@@ -1037,9 +1037,9 @@ ULONG DbgKeGetCurrentProcessorNumber()
 
 #if DBG
 
-// #define USE_SPINLOCK 1
+#define USE_SPINLOCK 1
 
-#define USE_IRQL_ELEVATION 1
+// #define USE_IRQL_ELEVATION 1
 
 static volatile PCHAR DbgMemoryBuffer = NULL;
 static volatile ULONG DbgNextWriteMemoryBuffer = 0;
