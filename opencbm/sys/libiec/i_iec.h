@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -78,39 +78,83 @@
  * \todo Rename the timeout values so that the name does have more meaning.
  */
 typedef
-struct IEC_TIMEOUTS {
+struct IEC_TIMEOUTS
+{
+    //!< = 100 us: How long is a RESET being held?
+    ULONG T_holdreset;
+    //!< = 5 s: How long to delay after a RESET
+    ULONG T_afterreset;
 
-    ULONG T_holdreset;  //!< = 100 us: How long is a RESET being held?
-    ULONG T_afterreset; //!< = 5 s: How long to delay after a RESET
-    ULONG T_1;          //!< = 20 us: \todo Document and rename timeout
-    ULONG T_2_Times;    //!< x T_2 is 40: \todo Document and rename timeout
-    ULONG T_2;          //!< = 10 us: \todo Document and rename timeout
-    ULONG T_3;          //!< = 70 us: \todo Document and rename timeout
-    ULONG T_4_Times;    //!< x T_4, is 100: \todo Document and rename timeout
-    ULONG T_4;          //!< = 20 us: \todo Document and rename timeout
-    ULONG T_5_Times;    //!< x T_5, is 200: \todo Document and rename timeout
-    ULONG T_5;          //!< = 10 us: \todo Document and rename timeout
-    ULONG T_6_Times;    //!< x T_6, is 100: \todo Document and rename timeout
-    ULONG T_6;          //!< = 20 us: \todo Document and rename timeout
-    ULONG T_7;          //!< = 70 us: \todo Document and rename timeout
+    //! = 10 us: Graunularity of wait_for_listener() polls
+    ULONG T_WaitForListener_Granu_T_H;
 
-    ULONG T_8;          //!< = 20 us: \todo Document and rename timeout
-    ULONG T_9;          //!< = 10 us: \todo Document and rename timeout
-    ULONG T_9a_Times;   //!< x T_9a, is 100: \todo Document and rename timeout
-    ULONG T_9a;         //!< = 10 us: \todo Document and rename timeout
-    ULONG T_10;         //!< = 20 us: \todo Document and rename timeout
-    ULONG T_11;         //!< = 50 us: \todo Document and rename timeout
-    ULONG T_12;         //!< = 100 us: \todo Document and rename timeout
-    ULONG T_13;         //!< = 20 us: \todo Document and rename timeout
-    ULONG T_14;         //!< = 100 us: \todo Document and rename timeout
+    //! = 20 us: \todo Document and rename timeout
+    ULONG T_1_RECV_WAIT_CLK_LOW_DATA_READY;
+
+    //! x T_2 is 40: \todo Document and rename timeout
+    ULONG T_2_Times;
+    //! = 10 us: \todo Document and rename timeout
+    ULONG T_2_RECV_WAIT_CLK_HIGH_T_NE;
+
+    //! = 70 us: \todo Document and rename timeout
+    ULONG T_3_RECV_EOI_RECOGNIZED;
+
+    //! x T_4, is 100: \todo Document and rename timeout
+    ULONG T_4_Times;
+
+    //! = 20 us: \todo Document and rename timeout
+    ULONG T_4_RECV_WAIT_CLK_HIGH_AFTER_EOI;
+
+    //! x T_5, is 200: \todo Document and rename timeout
+    ULONG T_5_Times;
+    //! = 10 us: \todo Document and rename timeout
+    ULONG T_5_RECV_BIT_WAIT_CLK_HIGH;
+
+    //! x T_6, is 100: \todo Document and rename timeout
+    ULONG T_6_Times;
+    //! = 20 us: \todo Document and rename timeout
+    ULONG T_6_RECV_BIT_WAIT_CLK_LOW;
+
+    //! = 70 us: \todo Document and rename timeout
+    ULONG T_7_RECV_INTER_BYTE_DELAY;
+
+    //! = 20 us: \todo Document and rename timeout
+    ULONG T_8_IEC_WAIT_LONG_DELAY;
+    //! = 10 us: \todo Document and rename timeout
+    ULONG T_8_IEC_WAIT_SHORT_DELAY;
+    
+    //! x T_9a, is 100: \todo Document and rename timeout
+    ULONG T_9_Times;
+    //! = 10 us: \todo Document and rename timeout
+    ULONG T_9_SEND_WAIT_DEVICES_T_AT;
+
+    //! = 20 us: \todo Document and rename timeout
+    ULONG T_10_SEND_BEFORE_1ST_BYTE;
+
+    //! = 50 us: \todo Document and rename timeout Time between T_AT and T_H
+    ULONG T_11_SEND_BEFORE_BYTE_DELAY;
+
+    //! = 100 us: \todo Document and rename timeout
+    ULONG T_12_SEND_AFTER_BYTE_DELAY;
+
+    //! = 20 us: \todo Document and rename timeout
+    ULONG T_13_SEND_TURN_AROUND_LISTENER_TALKER_T_TK;
+    
+    //! = 100 us: \todo Document and rename timeout
+    ULONG T_14_SEND_AT_END_DELAY;
 
     // sendbyte related:
-    ULONG T_15;         //!< = 70 us: \todo Document and rename timeout
-    ULONG T_16;         //!< = 20 us: \todo Document and rename timeout
-    ULONG T_17_Times;   //!< x T_17, is 20: \todo Document and rename timeout
-    ULONG T_17;         //!< = 100 us: \todo Document and rename timeout
 
-    ULONG T_WaitForListener_Granu; //!< = 10 us: Graunularity of wait_for_listener() polls
+    //! = 70 us: \todo Document and rename timeout
+    ULONG T_15_SEND_BEFORE_BIT_DELAY_T_S;
+
+    //! = 20 us: \todo Document and rename timeout
+    ULONG T_16_SEND_BIT_TIME_T_V;
+
+    //! x T_17, is 20: \todo Document and rename timeout
+    ULONG T_17_Times;
+    //! = 100 us: \todo Document and rename timeout
+    ULONG T_17_SEND_FRAME_HANDSHAKE_T_F;
 
 } IEC_TIMEOUTS;
 

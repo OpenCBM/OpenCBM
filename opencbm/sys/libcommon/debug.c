@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: debug.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -1018,3 +1018,97 @@ ULONG DbgKeGetCurrentProcessorNumber()
 {
     return KeGetCurrentProcessorNumber();
 }
+
+
+#if DBG
+
+static char *DbgMemoryBuffer = NULL;
+static int DbgNextWriteMemoryBuffer = 0;
+
+/* as we are not allowed to use a spin lock at elevated IRQL, define our own one */
+static LONG DbgMemoryBufferSpinLock = 0;
+
+#define DBG_SIZE_MEMORY_BUFFER 0x20000
+
+/*! \brief Get storage area for debugging output
+
+ This function allocates memory for the debugging output
+ storage.
+*/
+VOID
+DbgAllocateMemoryBuffer(VOID)
+{
+    while (InterlockedExchange(&DbgMemoryBufferSpinLock, 1) == 0)
+        ;
+
+    DbgMemoryBuffer = ExAllocatePoolWithTag(NonPagedPool,
+        DBG_SIZE_MEMORY_BUFFER, MTAG_DBGBUFFER);
+
+    if (DbgMemoryBuffer)
+    {
+        RtlZeroMemory(DbgMemoryBuffer, DBG_SIZE_MEMORY_BUFFER);
+    }
+
+    DbgNextWriteMemoryBuffer = 0;
+
+    InterlockedExchange(&DbgMemoryBufferSpinLock, 0);
+}
+
+/*! \brief Free storage area for debugging output
+
+ This function frees the memory of the debugging output.
+*/
+VOID
+DbgFreeMemoryBuffer(VOID)
+{
+    while (InterlockedExchange(&DbgMemoryBufferSpinLock, 1) == 0)
+        ;
+
+    if (DbgMemoryBuffer)
+    {
+        ExFreePool(DbgMemoryBuffer);
+        DbgMemoryBuffer = NULL;
+    }
+
+    InterlockedExchange(&DbgMemoryBufferSpinLock, 0);
+}
+
+/*! \brief Output into the debugging buffer
+
+ This function outputs a string into the debugging
+ output buffer.
+
+ \param String:
+
+    Pointer to the string which is to be output
+*/
+VOID
+DbgOutputMemoryBuffer(const char *String)
+{
+    while (InterlockedExchange(&DbgMemoryBufferSpinLock, 1) == 0)
+        ;
+
+    if (DbgMemoryBuffer)
+    {
+        int strLength;
+        
+        strLength = strlen(String) + 1;
+        
+        // Does the string fit into the buffer?
+
+        if (DbgNextWriteMemoryBuffer + strLength >= DBG_SIZE_MEMORY_BUFFER)
+        {
+            RtlZeroMemory(&DbgMemoryBuffer[DbgNextWriteMemoryBuffer],
+                DBG_SIZE_MEMORY_BUFFER - DbgNextWriteMemoryBuffer);
+
+            DbgNextWriteMemoryBuffer = 0;
+        }
+
+        RtlCopyMemory(&DbgMemoryBuffer[DbgNextWriteMemoryBuffer], String, strLength);
+        DbgNextWriteMemoryBuffer += strLength;
+    }
+
+    InterlockedExchange(&DbgMemoryBufferSpinLock, 0);
+}
+
+#endif

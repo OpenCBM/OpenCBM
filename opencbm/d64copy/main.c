@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.1 2004-11-07 11:05:11 strik Exp $";
+    "@(#) $Id: main.c,v 1.2 2004-11-15 16:11:52 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -70,7 +70,8 @@ static void help()
 "                           `original' and `serial1' should work in any case;\n"
 "                           `serial2' won't work if more than one device is\n"
 "                           connected to the IEC bus;\n"
-"                           `parallel' needs a XP1541 cable\n"
+"                           `parallel' needs a XP1541/XP1571 cable in addition"
+"                           to the serial one.\n"
 "\n"
 "  -i, --interleave=VALUE   set interleave value; ignored when reading with\n"
 "                           warp mode; default values are:\n"
@@ -235,7 +236,8 @@ int __cdecl main(int argc, char *argv[])
         { "drive-type" , required_argument, NULL, 'd' },
         { "retry-count", required_argument, NULL, 'r' },
         { "two-sided"  , no_argument      , NULL, '2' },
-        { "error-map"  , required_argument, NULL, 'E' }
+        { "error-map"  , required_argument, NULL, 'E' },
+        { NULL         , 0                , NULL, 0   }
     };
 
     const char shortopts[] ="hVwqbBt:i:s:e:d:r:2vnE:";

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawwrite.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: i_rawwrite.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -70,22 +70,28 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
     ret = InterlockedExchange(&Pdx->IrqCount, 0);
     DBG_ASSERT(ret == 0);
 
-    DBG_IEC(("About to send %d bytes%s", Count, Atn ? " with ATN" : ""));
+    DBG_IEC((DBG_PREFIX "About to send %d bytes%s", Count, Atn ? " with ATN" : ""));
 
     if (Atn)
     {
         CBMIEC_SET(PP_ATN_OUT);
     }
 
+    // Signal: We have something to send
+
     CBMIEC_SET(PP_CLK_OUT);
     CBMIEC_RELEASE(PP_DATA_OUT);
 
-    for(i=0; (i<libiec_global_timeouts.T_9a_Times) && !CBMIEC_GET(PP_DATA_IN); i++)
+    // Wait for DATA be set by the drive(s)
+
+    for(i=0; (i<libiec_global_timeouts.T_9_Times) && !CBMIEC_GET(PP_DATA_IN); i++)
     {
-        cbmiec_udelay(libiec_global_timeouts.T_9a);
+        cbmiec_udelay(libiec_global_timeouts.T_9_SEND_WAIT_DEVICES_T_AT);
     }
 
     // cbmiec_show_state(Pdx,"!GET(PP_DATA_IN)");
+
+    // If DATA was not set, there is no device present
 
     if(!CBMIEC_GET(PP_DATA_IN))
     {
@@ -95,7 +101,7 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
     }
     else
     {
-        cbmiec_schedule_timeout(libiec_global_timeouts.T_10);
+        cbmiec_schedule_timeout(libiec_global_timeouts.T_10_SEND_BEFORE_1ST_BYTE);
     }
 
     while(sent < Count && ntStatus == STATUS_SUCCESS)
@@ -105,7 +111,7 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
         PERF_EVENT_WRITE_BYTE_NO(sent);
         PERF_EVENT_WRITE_BYTE(c);
 
-        cbmiec_udelay(libiec_global_timeouts.T_11);
+        cbmiec_udelay(libiec_global_timeouts.T_11_SEND_BEFORE_BYTE_DELAY);
 
         if(CBMIEC_GET(PP_DATA_IN))
         {
@@ -127,7 +133,7 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
                 if(cbmiec_send_byte(Pdx,c))
                 {
                     sent++;
-                    cbmiec_udelay(libiec_global_timeouts.T_12);
+                    cbmiec_udelay(libiec_global_timeouts.T_12_SEND_AFTER_BYTE_DELAY);
                 }
                 else
                 {
@@ -156,14 +162,14 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
 
     if (ntStatus == STATUS_SUCCESS && Talk)
     {
-        // Turn-Around listener to talker
+        // Talk-attention turn around (reverse Talker and Listener)
 
         cbmiec_block_irq();
 
         CBMIEC_SET(PP_DATA_OUT);
         CBMIEC_RELEASE(PP_ATN_OUT);
 
-        cbmiec_udelay(libiec_global_timeouts.T_13);
+        cbmiec_udelay(libiec_global_timeouts.T_13_SEND_TURN_AROUND_LISTENER_TALKER_T_TK);
 
         CBMIEC_RELEASE(PP_CLK_OUT);
 
@@ -173,7 +179,7 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
     {
         CBMIEC_RELEASE(PP_ATN_OUT);
     }
-    cbmiec_udelay(libiec_global_timeouts.T_14);
+    cbmiec_udelay(libiec_global_timeouts.T_14_SEND_AT_END_DELAY);
 
     DBG_ASSERT(Sent != NULL);
     *Sent = sent;

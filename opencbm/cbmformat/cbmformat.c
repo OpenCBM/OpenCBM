@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmformat.c,v 1.1 2004-11-07 11:05:11 strik Exp $";
+    "@(#) $Id: cbmformat.c,v 1.2 2004-11-15 16:11:52 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -73,7 +73,8 @@ int _cdecl main(int argc, char *argv[])
         { "progress"   , no_argument      , NULL, 'p' },
 
         /* undocumented */
-        { "end-track"  , required_argument, NULL, 't' }
+        { "end-track"  , required_argument, NULL, 't' },
+        { NULL         , 0                , NULL, 0   }
     };
 
     const char shortopts[] ="hVnxospt:";

@@ -117,7 +117,7 @@ void unix_error(int AUnused, unsigned int ErrorCode, const char *Format, ...)
 
     ErrorMessageBuffer[n] = 0;
 
-    printf(ErrorMessageBuffer);
+    fprintf(stderr, "\nAUnused = %u, ErrorCode = %u: %s\n", AUnused, ErrorCode, ErrorMessageBuffer);
 
 #if DBG
 

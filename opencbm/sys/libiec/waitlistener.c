@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/waitlistener.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: waitlistener.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: waitlistener.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -147,7 +147,7 @@ cbmiec_wait_for_listener(IN PDEVICE_EXTENSION Pdx, IN BOOLEAN SendEoi)
 
         while (!QueueShouldCancelCurrentIrp(&Pdx->IrpQueue) && Pdx->IrqCount)
         {
-            cbmiec_schedule_timeout(libiec_global_timeouts.T_WaitForListener_Granu);
+            cbmiec_schedule_timeout(libiec_global_timeouts.T_WaitForListener_Granu_T_H);
         }
 #endif
 

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -75,7 +75,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
         i = 0;
         while (CBMIEC_GET(PP_CLK_IN))
         {
-            cbmiec_schedule_timeout(libiec_global_timeouts.T_1);
+            cbmiec_schedule_timeout(libiec_global_timeouts.T_1_RECV_WAIT_CLK_LOW_DATA_READY);
 
             if (QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
             {
@@ -95,14 +95,14 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
 
         for(i = 0; (i < libiec_global_timeouts.T_2_Times) && !(ok=CBMIEC_GET(PP_CLK_IN)); i++)
         {
-            cbmiec_udelay(libiec_global_timeouts.T_2);
+            cbmiec_udelay(libiec_global_timeouts.T_2_RECV_WAIT_CLK_HIGH_T_NE);
         }
 
         // Did we get an answer?
 
         if (!ok)
         {
-            DBG_IEC(("Got an EOI"));
+            DBG_IEC((DBG_PREFIX "Got an EOI"));
 
             // No, so, the other device signals an EOI
 
@@ -111,7 +111,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
             // Tell the TALKer we recognized the EOI
 
             CBMIEC_SET(PP_DATA_OUT);
-            cbmiec_udelay(libiec_global_timeouts.T_3);
+            cbmiec_udelay(libiec_global_timeouts.T_3_RECV_EOI_RECOGNIZED);
             CBMIEC_RELEASE(PP_DATA_OUT);
         }
 
@@ -120,8 +120,8 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
 
         for (i = 0; (i < libiec_global_timeouts.T_4_Times) && !(ok=CBMIEC_GET(PP_CLK_IN)); i++)
         {
-            DBG_IEC(("Wait after EOI"));
-            cbmiec_udelay(libiec_global_timeouts.T_4);
+            DBG_IEC((DBG_PREFIX "Wait after EOI"));
+            cbmiec_udelay(libiec_global_timeouts.T_4_RECV_WAIT_CLK_HIGH_AFTER_EOI);
         }
 
 #if DBG
@@ -140,7 +140,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
 
             for (i = 0; (i < libiec_global_timeouts.T_5_Times) && !(ok=(CBMIEC_GET(PP_CLK_IN)==0)); i++)
             {
-                cbmiec_udelay(libiec_global_timeouts.T_5);
+                cbmiec_udelay(libiec_global_timeouts.T_5_RECV_BIT_WAIT_CLK_HIGH);
             }
 
             // Did we get a CLK pulse?
@@ -164,7 +164,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
 
                 for (i = 0; i < libiec_global_timeouts.T_6_Times && !(ok=CBMIEC_GET(PP_CLK_IN)); i++)
                 {
-                    cbmiec_udelay(libiec_global_timeouts.T_6);
+                    cbmiec_udelay(libiec_global_timeouts.T_6_RECV_BIT_WAIT_CLK_LOW);
                 }
 
 #if DBG
@@ -177,7 +177,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
             else
             {
                 // An error occurred, it does not make sense to get more bits 
-                DBG_ERROR((DBG_PREFIX "BREAKING OUT OF BIT-LOOP, no CLK pulse received"));
+                DBG_ERROR((DBG_PREFIX "BREAKING OUT OF BIT-LOOP, no CLK pulse received. Bit %u, Value = %u", (unsigned) bit, (unsigned) b));
                 break;
             }
         }
@@ -189,6 +189,12 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
             // set acknowledgement
             CBMIEC_SET(PP_DATA_OUT);
         }
+#if DBG
+        else
+        {
+            DBG_ERROR((DBG_PREFIX "!OK -> no ACK"));
+        }
+#endif // #if DBG
 
         // Our timing is not critical anymore, go back to the old IRQL
 
@@ -214,11 +220,11 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
 
             if (Count % 256)
             {
-                cbmiec_udelay(libiec_global_timeouts.T_7);
+                cbmiec_udelay(libiec_global_timeouts.T_7_RECV_INTER_BYTE_DELAY);
             }
             else
             {
-                cbmiec_schedule_timeout(libiec_global_timeouts.T_7);
+                cbmiec_schedule_timeout(libiec_global_timeouts.T_7_RECV_INTER_BYTE_DELAY);
             }
         }
     } while(received < Count && ok && !Pdx->Eoi);
@@ -237,7 +243,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT
             received, Count, ok, Pdx->Eoi));
 
         Pdx->Eoi = 0;
-        ntStatus = STATUS_UNEXPECTED_IO_ERROR;
+        ntStatus = STATUS_UNEXPECTED_NETWORK_ERROR;
     }
 
     DBG_ASSERT(Received != NULL);

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/memtags.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: memtags.h,v 1.1 2004-11-07 11:05:13 strik Exp $ \n
+** \version $Id: memtags.h,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \n
 ** \brief Define tags for ExAllocatePoolWithTag()
 **
@@ -37,3 +37,6 @@
 
 /*! memory tag for the perfeval functions */
 #define MTAG_PERFEVAL 'epTS'     // STpe
+
+/*! memory tag for the debug buffer */
+#define MTAG_DBGBUFFER 'bdTS'    // STdb

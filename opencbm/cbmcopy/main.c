@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.1 2004-11-07 11:04:54 strik Exp $";
+    "@(#) $Id: main.c,v 1.2 2004-11-15 16:11:51 strik Exp $";
 #endif
 
 #include <ctype.h>
@@ -94,7 +94,8 @@ static void help(const char *prog)
 "                             `serial1' should work in any case;\n"
 "                             `serial2' won't work if more than one device is\n"
 "                             connected to the IEC bus;\n"
-"                             `parallel' needs a XP1541/XP1571 cable\n"
+"                             `parallel' needs a XP1541/XP1571 cable in addition\n"
+"                             to the serial one.\n"
 "  -d, --drive-type=TYPE      specify drive type, one of:\n"
 "                               1541, 1570, 1571, 1581\n"
 "  -a, --address=ADDRESS      override file start address\n"
@@ -198,6 +199,7 @@ int __cdecl main(int argc, char **argv)
         { "output"          , required_argument, NULL, 'o' },
         { "raw"             , no_argument      , NULL, 'R' },
         { "address"         , no_argument      , NULL, 'a' },
+        { NULL              , 0                , NULL, 0   }
     };
 
     const char shortopts[] ="hVqvrwnt:d:f:o:Ra:";

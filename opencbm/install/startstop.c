@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.1 2004-11-07 11:05:12 strik Exp $ \n
+** \version $Id: startstop.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -117,6 +117,8 @@ BOOL
 CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 {
     ULONG instcbmVersion;
+    DWORD startMode;
+    DWORD lptPort;
     char dllPath[MAX_PATH] = "<unknown>";
     char driverPath[MAX_PATH] = "<unknown>";
     BOOL error;
@@ -124,6 +126,9 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
     FUNC_ENTER();
 
     error = FALSE;
+
+    startMode = -1;
+    lptPort = 0;
 
     // Try to find out the version and path of the DLL
 
@@ -264,6 +269,14 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
                 }
             }
 
+            // find out the start mode of the driver
+
+            RegGetDWORD(regKey, "Start", &startMode);
+
+            // find out the default lpt port of the driver
+
+            RegGetDWORD(regKey, CBM_REGKEY_SERVICE_DEFAULTLPT, &lptPort);
+
             // We're done, close the registry handle.
 
             RegCloseKey(regKey);
@@ -295,6 +308,51 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
     {
         error = TRUE;
         printf("There are mixed versions, THIS IS NOT RECOMMENDED!\n\n");
+    }
+
+    printf("Driver configuration:\n");
+    DBG_PRINT((DBG_PREFIX "Driver configuration:"));
+
+    printf("  Default port: ........ LPT%i\n", lptPort ? lptPort : 1);
+    DBG_PRINT((DBG_PREFIX "  Default port: ........ LPT%i", lptPort ? lptPort : 1));
+
+    {
+        const char *startModeName;
+
+        switch (startMode)
+        {
+            case -1:
+                startModeName = "NO ENTRY FOUND!";
+                break; 
+
+            case SERVICE_BOOT_START:
+                startModeName = "boot";
+                break;
+
+            case SERVICE_SYSTEM_START:
+                startModeName = "system";
+                break;
+
+            case SERVICE_AUTO_START:
+                startModeName = "auto";
+                break;
+
+            case SERVICE_DEMAND_START:
+                startModeName = "demand";
+                break;
+
+            case SERVICE_DISABLED:
+                startModeName = "disabled";
+                break;
+
+            default:
+                startModeName = "<UNKNOWN>";
+                break;
+        }
+
+        printf("  Driver start mode: ... %s (%i)\n\n", startModeName, startMode);
+        DBG_PRINT((DBG_PREFIX "  Driver start mode: ... %s (%i)", startModeName,
+            startMode));
     }
 
     FUNC_LEAVE_BOOL(error);

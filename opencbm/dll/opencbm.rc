@@ -8,4 +8,4 @@
 #define VER_INTERNALNAME_STR        "opencbm.dll"
 
 #include "srtcommon.ver"
-/* #include "common.ver" */
+#include "common.ver"

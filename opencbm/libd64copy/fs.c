@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: fs.c,v 1.1 2004-11-07 11:05:12 strik Exp $";
+    "@(#) $Id: fs.c,v 1.2 2004-11-15 16:11:52 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -217,7 +217,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
                 {
                     int s;
                     s = d64copy_sector_count(settings->two_sided, ++tr);
-                    if(fwrite(block, BLOCKSIZE, s, the_file) != s)
+                    if(fwrite(block, BLOCKSIZE, s, the_file) != (size_t)s)
                     {
                         message_cb(0, "could not write %s", name);
                         fclose(the_file);

@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.1 2004-11-07 11:05:12 strik Exp $ \n
+** \version $Id: debug.h,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -43,7 +43,7 @@
        /*! debugging flag: show entering of functions */
        #define DBGF_ENTER   0x40000000
 
-       /*! debugging flag: show leaving of functions without return value */
+       /*! debugging flag: show leaving of functions */
        #define DBGF_LEAVE   0x20000000
 
        /*! debugging flag: show leaving of functions with return value NTSTATUS, 
@@ -55,7 +55,7 @@
 
 #ifdef DBG_KERNELMODE
 
-       /*! debugging flag: show IRQ related output */
+       /*! debugging flag: show IEC related output */
        #define DBGF_IEC     0x04000000
 
        /*! debugging flag: show IRQ related output */
@@ -64,7 +64,7 @@
        /*! debugging flag: show ASSERTs for IRQL */
        #define DBGF_ASSERTIRQL  0x01000000
 
-       /*! debugging flag: show port accesses */
+       /*! debugging flag: show I/O port accesses */
        #define DBGF_PORT    0x00800000
 
        /*! debugging flag: show thread related debugging output */
@@ -73,18 +73,15 @@
        /*! debugging flag: show IRP path */
        #define DBGF_IRPPATH 0x00200000
 
-       /*! debugging flag: show IRP */
+       /*! debugging flag: show IRP processing */
        #define DBGF_IRP     0x00100000
 
-       /*! debugging flag: show IRP */
+       /*! debugging flag: show DPC processing */
        #define DBGF_DPC     0x00080000
-
-       /*! return the name of NTSTATUS values */
-       extern const UCHAR *DebugNtStatus(NTSTATUS Value);
 
 #endif // #ifdef DBG_KERNELMODE
 
-       /*! debugging flag: show parallel port related output */
+       /*! debugging flag: show parallel port acquisition related output */
        #define DBGF_PPORT   0x0010
 
        /*! debugging flag: show SUCCESS messages */
@@ -98,6 +95,15 @@
 
        /*! debugging flag: show ASSERTs */
        #define DBGF_ASSERT  0x0001
+
+
+#ifdef DBG_KERNELMODE
+
+       /*! return the name of NTSTATUS values */
+       extern const UCHAR *DebugNtStatus(NTSTATUS Value);
+
+#endif // #ifdef DBG_KERNELMODE
+
 
 #ifdef DBG_IS_DEBUG_C
 
@@ -255,8 +261,12 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
 
 #ifdef DBG_KERNELMODE
 
+              extern VOID DbgAllocateMemoryBuffer(VOID);
+              extern VOID DbgFreeMemoryBuffer(VOID);
+              extern VOID DbgOutputMemoryBuffer(const char *String);
+
               /*! This macro is called to output the buffer */
-              #define _DBG_PERFORM(_xxx) DbgPrint("%s", _xxx);
+              #define _DBG_PERFORM(_xxx) DbgOutputMemoryBuffer(_xxx); DbgPrint("%s", _xxx); 
 
               /*! What has to be defined at the start of each function? */
               #define FUNC_DEF           ULONG DebugBufferNo = 0;
@@ -377,7 +387,7 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
 
        #ifdef DBG_KERNELMODE
               /*! Output if DBGF_IEC is defined */
-              #define DBG_IEC(     _xxx ) { if (ISDBG_IEC())  {  DBGO(( DBG_PREFIX _xxx )); } }
+              #define DBG_IEC(     _xxx ) { if (ISDBG_IEC())  {  DBGO( _xxx ); } }
               /*! Output if DBGF_IRQ is defined */
               #define DBG_IRQ(     _xxx ) { if (ISDBG_IRQ())  {  DBGO(( DBG_PREFIX _xxx )); } }
               /*! Output if DBGF_PORT is defined */

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: init.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -49,38 +49,50 @@ cbmiec_timeouts_init(IN PHANDLE HKey)
 {
     HANDLE hKey;
 
-    READ_TIMEOUT_VALUE(T_holdreset,   100000); // 100 ms
-    READ_TIMEOUT_VALUE(T_afterreset, 2000000); // = 2 s
-    READ_TIMEOUT_VALUE(T_1,               20); // us
-    READ_TIMEOUT_VALUE(T_2_Times,         80); //! x T_2, \todo 40
-    READ_TIMEOUT_VALUE(T_2,               10); // us
-    READ_TIMEOUT_VALUE(T_3,               70); // us
-    READ_TIMEOUT_VALUE(T_4_Times,        200); //! x T_4, \todo 100
-    READ_TIMEOUT_VALUE(T_4,               20); // us
-    READ_TIMEOUT_VALUE(T_5_Times,        500); //! x T_5, \todo 200
-    READ_TIMEOUT_VALUE(T_5,               10); // us
-    READ_TIMEOUT_VALUE(T_6_Times,        100); // x T_6
-    READ_TIMEOUT_VALUE(T_6,               20); // us
-    READ_TIMEOUT_VALUE(T_7,               70); // us
+    // reset related
 
-    READ_TIMEOUT_VALUE(T_8,               20); // us
-    READ_TIMEOUT_VALUE(T_9,               10); // us
-    READ_TIMEOUT_VALUE(T_9a_Times,       100); // x T_9a
-    READ_TIMEOUT_VALUE(T_9a,              10); // us
-    READ_TIMEOUT_VALUE(T_10,              20); // us
-    READ_TIMEOUT_VALUE(T_11,              50); // us
-    READ_TIMEOUT_VALUE(T_12,             100); // us
-    READ_TIMEOUT_VALUE(T_13,              20); // us
-    READ_TIMEOUT_VALUE(T_14,             100); // us
+    READ_TIMEOUT_VALUE(T_holdreset,                             100000); // 100 ms
+    READ_TIMEOUT_VALUE(T_afterreset,                           2000000); // = 2 s
+
+    // wait for listener related
+
+    READ_TIMEOUT_VALUE(T_WaitForListener_Granu_T_H,                 10); // us
+
+    // receive related
+
+    READ_TIMEOUT_VALUE(T_1_RECV_WAIT_CLK_LOW_DATA_READY,            20); // us
+    READ_TIMEOUT_VALUE(T_2_Times,                                   80); //! x T_2, \todo 40
+    READ_TIMEOUT_VALUE(T_2_RECV_WAIT_CLK_HIGH_T_NE,                 10); // us
+    READ_TIMEOUT_VALUE(T_3_RECV_EOI_RECOGNIZED,                     70); // us
+    READ_TIMEOUT_VALUE(T_4_Times,                                  200); //! x T_4, \todo 100
+    READ_TIMEOUT_VALUE(T_4_RECV_WAIT_CLK_HIGH_AFTER_EOI,            20); // us
+    READ_TIMEOUT_VALUE(T_5_Times,                                 5000); // 500 //! x T_5, \todo Was 200
+    READ_TIMEOUT_VALUE(T_5_RECV_BIT_WAIT_CLK_HIGH,                   1); // 10  //! us  \todo Was 10
+    READ_TIMEOUT_VALUE(T_6_Times,                                  100); // x T_6
+    READ_TIMEOUT_VALUE(T_6_RECV_BIT_WAIT_CLK_LOW,                   20); // us
+    READ_TIMEOUT_VALUE(T_7_RECV_INTER_BYTE_DELAY,                   70); // us
+
+    // IEC_WAIT related
+
+    READ_TIMEOUT_VALUE(T_8_IEC_WAIT_LONG_DELAY,                     20); // us
+    READ_TIMEOUT_VALUE(T_8_IEC_WAIT_SHORT_DELAY,                    10); // us
+
+    // send related 
+
+    READ_TIMEOUT_VALUE(T_9_Times,                                  100); // x T_9
+    READ_TIMEOUT_VALUE(T_9_SEND_WAIT_DEVICES_T_AT,                  10); // us
+    READ_TIMEOUT_VALUE(T_10_SEND_BEFORE_1ST_BYTE,                   20); // us
+    READ_TIMEOUT_VALUE(T_11_SEND_BEFORE_BYTE_DELAY,                 50); // us
+    READ_TIMEOUT_VALUE(T_12_SEND_AFTER_BYTE_DELAY,                 100); // us
+    READ_TIMEOUT_VALUE(T_13_SEND_TURN_AROUND_LISTENER_TALKER_T_TK,  20); // us
+    READ_TIMEOUT_VALUE(T_14_SEND_AT_END_DELAY,                     100); // us
 
     // sendbyte related:
-    READ_TIMEOUT_VALUE(T_15,              70); // us
-    READ_TIMEOUT_VALUE(T_16,              20); // us
-    READ_TIMEOUT_VALUE(T_17_Times,        20); // x T_17
-    READ_TIMEOUT_VALUE(T_17,             100); // us
 
-    READ_TIMEOUT_VALUE(T_WaitForListener_Granu, 10); // us
-
+    READ_TIMEOUT_VALUE(T_15_SEND_BEFORE_BIT_DELAY_T_S,              70); // us
+    READ_TIMEOUT_VALUE(T_16_SEND_BIT_TIME_T_V,                      20); // us
+    READ_TIMEOUT_VALUE(T_17_Times,                                  20); // x T_17
+    READ_TIMEOUT_VALUE(T_17_SEND_FRAME_HANDSHAKE_T_F,              100); // us
 }
 #undef READ_TIMEOUT_VALUE
 

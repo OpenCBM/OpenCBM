@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **
@@ -217,6 +217,13 @@ DriverUnload(IN PDRIVER_OBJECT DriverObject)
 
     DriverCommonUninit();
 
+#if DBG
+
+    DBG_PRINT((DBG_PREFIX "About to call DbgFreeMemoryBuffer()"));
+    DbgFreeMemoryBuffer();
+
+#endif
+
     FUNC_LEAVE();
 }
 
@@ -249,6 +256,12 @@ DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegistryPath)
     NTSTATUS ntStatus;
 
     FUNC_ENTER();
+
+#if DBG
+
+    DbgAllocateMemoryBuffer();
+
+#endif
 
     // Output a status message
 

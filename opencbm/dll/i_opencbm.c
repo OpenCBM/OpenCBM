@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file dll/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.1 2004-11-07 11:05:11 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -53,7 +53,7 @@
 /*-------------------------------------------------------------------*/
 /*--------- REGISTRY FUNCTIONS --------------------------------------*/
 
-/*! \internal \brief Get a DWORD value from the registry
+/*! \brief Get a DWORD value from the registry
 
  This function gets a DWORD value in the registry. It is a simple
  wrapper for convenience.
@@ -78,7 +78,7 @@
  If this function returns -1, the given Value will not be changed at all!
 */
 
-static LONG
+LONG
 RegGetDWORD(IN HKEY RegKey, IN char *SubKey, OUT LPDWORD Value)
 {
     DWORD valueLen;

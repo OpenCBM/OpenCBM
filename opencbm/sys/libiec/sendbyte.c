@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/sendbyte.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: sendbyte.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: sendbyte.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -54,14 +54,14 @@ cbmiec_send_byte(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
     {
         PERF_EVENT_WRITE_BIT_NO(i);
 
-        cbmiec_udelay(libiec_global_timeouts.T_15);
+        cbmiec_udelay(libiec_global_timeouts.T_15_SEND_BEFORE_BIT_DELAY_T_S);
 
         if(!((Byte>>i) & 1))
         {
             CBMIEC_SET(PP_DATA_OUT);
         }
         CBMIEC_RELEASE(PP_CLK_OUT);
-        cbmiec_udelay(libiec_global_timeouts.T_16);
+        cbmiec_udelay(libiec_global_timeouts.T_16_SEND_BIT_TIME_T_V);
         CBMIEC_SET_RELEASE(PP_CLK_OUT, PP_DATA_OUT);
     }
 
@@ -69,7 +69,7 @@ cbmiec_send_byte(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
 
     for(i=0; (i<libiec_global_timeouts.T_17_Times) && !(ack=CBMIEC_GET(PP_DATA_IN)); i++)
     {
-        cbmiec_udelay(libiec_global_timeouts.T_17);
+        cbmiec_udelay(libiec_global_timeouts.T_17_SEND_FRAME_HANDSHAKE_T_F);
     }
 
     DBG_SUCCESS((DBG_PREFIX "ack=%s", ack ? "TRUE" : "FALSE" ));

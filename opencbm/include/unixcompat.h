@@ -38,3 +38,5 @@ extern char *unix_strerror(unsigned int ErrorCode);
 
 #include <io.h>
 #define ftruncate(_x, _y) _chsize(_x, _y)
+
+#define fdopen(_x, _y) _fdopen(_x, _y)

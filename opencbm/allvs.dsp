@@ -28,7 +28,7 @@ CFG=allvs - Win32 Debug
 
 !IF  "$(CFG)" == "allvs - Win32 Release"
 
-# PROP BASE Use_MFC
+# PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
@@ -37,7 +37,7 @@ CFG=allvs - Win32 Debug
 # PROP BASE Target_File "allvs.exe"
 # PROP BASE Bsc_Name "allvs.bsc"
 # PROP BASE Target_Dir ""
-# PROP Use_MFC
+# PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
@@ -49,7 +49,7 @@ CFG=allvs - Win32 Debug
 
 !ELSEIF  "$(CFG)" == "allvs - Win32 Debug"
 
-# PROP BASE Use_MFC
+# PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
@@ -58,7 +58,7 @@ CFG=allvs - Win32 Debug
 # PROP BASE Target_File "allvs.exe"
 # PROP BASE Bsc_Name "allvs.bsc"
 # PROP BASE Target_Dir ""
-# PROP Use_MFC
+# PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""

@@ -10,14 +10,12 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "$Id: cbmctrl.c,v 1.1 2004-11-07 11:05:10 strik Exp $";
+    "$Id: cbmctrl.c,v 1.2 2004-11-15 16:11:52 strik Exp $";
 #endif
 
 #include "opencbm.h"
 
 // #define USE_BUFFERED_READ 1
-/*! use a file for cbmctrl_download() */
-#define CBMCTRL_DOWNLOAD_FILE 1
 
 #ifndef WIN32
         #include <ctype.h>
@@ -35,6 +33,7 @@ typedef int (*mainfunc)(CBM_FILE fd, char *argv[]);
 
 #ifdef WIN32
     #include "unixcompat.h"
+    #include <fcntl.h>
 #endif
 
 UCHAR atoc(const char *str)
@@ -233,17 +232,15 @@ static int do_dir(CBM_FILE fd, char *argv[])
 }
 
 /*
- * read device memory, dump to stdout
+ * read device memory, dump to stdout or a file
  */
 static int do_download(CBM_FILE fd, char *argv[])
 {
     UCHAR unit;
     USHORT c;
-    int addr, count, i, j, rv = 0;
+    int addr, count, i, rv = 0;
     char *tail, buf[32], cmd[7];
-#ifdef CBMCTRL_DOWNLOAD_FILE
     FILE *f;
-#endif /* #ifdef CBMCTRL_DOWNLOAD_FILE */
 
     unit = atoc(argv[0]);
 
@@ -261,13 +258,31 @@ static int do_download(CBM_FILE fd, char *argv[])
         return 1;
     }
 
-#ifdef CBMCTRL_DOWNLOAD_FILE
-    f = fopen(argv[3], "wb");
-    if (f == NULL) {
-        unix_error(0, get_errno(), "could not open %s", argv[2]);
+    if (argv[3] && strcmp(argv[3],"-") != 0)
+    {
+        // a filename (other than simply "-") was given, open that file
+
+        f = fopen(argv[3], "wb");
+    }
+    else
+    {
+        // no filename was given, open stdout in binary mode
+
+        f = fdopen(fileno(stdout), "wb");
+
+#ifdef WIN32
+
+        // set binary mode for input and output stream
+
+        _setmode(fileno(stdout), _O_BINARY);
+#endif
+    }
+
+    if (!f)
+    {
+        unix_error(0, get_errno(), "could not open output file", argv[3] ? argv[3] : "stdout");
         return 1;
     }
-#endif /* #ifdef CBMCTRL_DOWNLOAD_FILE */
 
     for (i = 0; (rv == 0) && (i < count); i+=32)
     {
@@ -286,19 +301,11 @@ static int do_download(CBM_FILE fd, char *argv[])
             rv = cbm_raw_read(fd, buf, c) == c ? 0 : 1;
             cbm_untalk(fd);
             if (rv == 0) {
-#ifdef CBMCTRL_DOWNLOAD_FILE
-                fwrite(buf, c, 1, f);
-#else /* #ifdef CBMCTRL_DOWNLOAD_FILE */
-                for (j = 0; j < c; j++) {
-                    putchar(buf[j]);
-                }
-#endif /* #ifdef CBMCTRL_DOWNLOAD_FILE */
+                fwrite(buf, 1, c, f);
             }
         }
     }
-#ifdef CBMCTRL_DOWNLOAD_FILE
     fclose(f);
-#endif /* #ifdef CBMCTRL_DOWNLOAD_FILE */
     return rv;
 }
 
@@ -308,9 +315,11 @@ static int do_download(CBM_FILE fd, char *argv[])
 static int do_upload(CBM_FILE fd, char *argv[])
 {
     UCHAR unit;
-    int addr, size, rv = 0;
-    char *tail, *buf;
+    int addr;
+    size_t size;
+    char *tail, *fn;
     unsigned char addr_buf[2];
+    unsigned char buf[65537];
     struct _stat statrec;
     FILE *f;
 
@@ -322,58 +331,65 @@ static int do_upload(CBM_FILE fd, char *argv[])
         return 1;
     }
 
-    if (stat(argv[2], &statrec)) {
-        unix_error(0, get_errno(), "could not stat %s", argv[2]);
-        return 1;
+    if (strcmp(argv[2], "-") == 0)
+    {
+        fn = "(stdin)";
+        f = stdin;
     }
-
-    size = statrec.st_size;
-    if (size <= ((addr >= 0) ? 0 : 2)) {
-        unix_error(0, 0, "empty program: %s", argv[2]);
-        return 1;
-    }
-
-    f = fopen(argv[2], "rb");
-    if (f == NULL) {
-        unix_error(0, get_errno(), "could not open %s", argv[2]);
-        return 1;
-    }
-
-    if (addr == -1) {
-        /* read address from file */
-        if (fread(addr_buf, 2, 1, f) != 1) {
-            unix_error(0, get_errno(), "could not read %s", argv[2]);
-            fclose(f);
+    else
+    {
+        fn = argv[2];
+        f = fopen(argv[2], "rb");
+        if(f == NULL)
+        {
+            unix_error(0, errno, "could not open %s", fn);
             return 1;
         }
-        size -= 2;
+        if(stat(argv[2], &statrec))
+        {
+            unix_error(0, errno, "could not stat %s", fn);
+            return 1;
+        }
+    }
+
+    if (addr == -1)
+    {
+        /* read address from file */
+        if (fread(addr_buf, 2, 1, f) != 1) {
+            unix_error(0, get_errno(), "could not read %s", fn);
+            if (f != stdin) fclose(f);
+            return 1;
+        }
+
         /* don't assume a particular endianess, although the cbm4linux 
          * package is only i386 for now  */
         addr = addr_buf[0] | (addr_buf[1] << 8);
     }
 
-    if (addr + size > 0x10000) {
-        unix_error(0, 0, "program too big: %s", argv[2]);
-        fclose(f);
+    size = fread(buf, 1, sizeof(buf), f);
+    if(ferror(f))
+    {
+        unix_error(0, 0, "could not read %s", fn);
+        if (f != stdin) fclose(f);
+        return 1;
+    }
+    else if (size == 0 && feof(f))
+    {
+        unix_error(0, 0, "no data: %s", fn);
+        if(f != stdin) fclose(f);
         return 1;
     }
 
-    buf = malloc(size);
-    if (buf == NULL) abort();
-
-    if (fread(buf, size, 1, f) != 1) {
-        unix_error(0, get_errno(), "could not read %s", argv[2]);
-        free(buf);
-        fclose(f);
+    if(addr + size > 0x10000)
+    {
+        unix_error(0, 0, "program too big: %s", fn);
+        if (f != stdin) fclose(f);
         return 1;
     }
 
-    fclose(f);
+    if (f != stdin) fclose(f);
 
-    rv = (cbm_upload(fd, unit, addr, buf, size) == size) ? 0 : 1;
-
-    free(buf);
-    return rv;
+    return (cbm_upload(fd, unit, addr, buf, size) == (int)size) ? 0 : 1;
 }
 
 /*
@@ -403,29 +419,26 @@ struct prog
 {
     char    *name;
     mainfunc prog;
-    int      req_args;
+    int      req_args_min;
+    int      req_args_max;
     char    *arglist;
 };
 
 static struct prog prog_table[] =
 {
-    {"listen"  , do_listen  , 2, "<device> <secadr>"               },
-    {"talk"    , do_talk    , 2, "<device> <secadr>"               },
-    {"unlisten", do_unlisten, 0, ""                                },
-    {"untalk"  , do_untalk  , 0, ""                                },
-    {"open"    , do_open    , 3, "<device> <secadr> <filename>"    },
-    {"close"   , do_close   , 2, "<device> <secadr>"               },
-    {"status"  , do_status  , 1, "<device>"                        },
-    {"command" , do_command , 2, "<device> <cmdstr>"               },
-    {"dir"     , do_dir     , 1, "<device>"                        },
-#ifdef CBMCTRL_DOWNLOAD_FILE
-    {"download", do_download, 4, "<device> <adr> <count> <file>"   },
-#else /* #ifdef CBMCTRL_DOWNLOAD_FILE */
-    {"download", do_download, 3, "<device> <adr> <count>"          },
-#endif /* #ifdef CBMCTRL_DOWNLOAD_FILE */
-    {"upload"  , do_upload  , 3, "<device> <adr> <file>"           },
-    {"reset"   , do_reset   , 0, ""                                },
-    {"detect"  , do_detect  , 0, ""                                },
+    {"listen"  , do_listen  , 2, 2, "<device> <secadr>"               },
+    {"talk"    , do_talk    , 2, 2, "<device> <secadr>"               },
+    {"unlisten", do_unlisten, 0, 0, ""                                },
+    {"untalk"  , do_untalk  , 0, 0, ""                                },
+    {"open"    , do_open    , 3, 3, "<device> <secadr> <filename>"    },
+    {"close"   , do_close   , 2, 2, "<device> <secadr>"               },
+    {"status"  , do_status  , 1, 1, "<device>"                        },
+    {"command" , do_command , 2, 2, "<device> <cmdstr>"               },
+    {"dir"     , do_dir     , 1, 1, "<device>"                        },
+    {"download", do_download, 3, 4, "<device> <adr> <count> [<file>]" },
+    {"upload"  , do_upload  , 3, 3, "<device> <adr> <file>"           },
+    {"reset"   , do_reset   , 0, 0, ""                                },
+    {"detect"  , do_detect  , 0, 0, ""                                },
     {NULL,NULL}
 };
 
@@ -450,7 +463,7 @@ int __cdecl main(int argc, char *argv[])
     p = argc < 2 ? NULL : find_main(argv[1]);
     if (p)
     {
-        if (p->req_args == argc-2)
+        if ((p->req_args_min <= argc-2) && (p->req_args_max >= argc-2))
         {
             CBM_FILE fd;
             int rv;
@@ -460,7 +473,7 @@ int __cdecl main(int argc, char *argv[])
             if (rv == 0)
             {
                 rv = p->prog(fd, &argv[2]) != 0;
-                if (get_errno())
+                if (rv && get_errno())
                 {
                     unix_error(0, get_errno(), "%s", argv[1]);
                 }

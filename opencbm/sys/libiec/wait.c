@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/wait.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: wait.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: wait.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -73,6 +73,8 @@ cbmiec_iec_wait(IN PDEVICE_EXTENSION Pdx, IN UCHAR Line, IN UCHAR State, OUT PUC
            FUNC_LEAVE_NTSTATUS_CONST(STATUS_INVALID_PARAMETER);
     }
 
+    // For which state do we have to wait: Set (= mask) or unset
+
     State = State ? mask : 0;
 
     i = 0;
@@ -81,7 +83,7 @@ cbmiec_iec_wait(IN PDEVICE_EXTENSION Pdx, IN UCHAR Line, IN UCHAR State, OUT PUC
     {
         if(i >= 20)
         {
-            cbmiec_schedule_timeout(libiec_global_timeouts.T_8);
+            cbmiec_schedule_timeout(libiec_global_timeouts.T_8_IEC_WAIT_LONG_DELAY);
 
             if (QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
             {
@@ -91,7 +93,7 @@ cbmiec_iec_wait(IN PDEVICE_EXTENSION Pdx, IN UCHAR Line, IN UCHAR State, OUT PUC
         else
         {
             i++;
-            cbmiec_udelay(libiec_global_timeouts.T_9);
+            cbmiec_udelay(libiec_global_timeouts.T_8_IEC_WAIT_SHORT_DELAY);
         }
     }
 

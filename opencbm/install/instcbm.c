@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.1 2004-11-07 11:05:12 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -293,7 +293,6 @@ struct parameter_s
 static BOOL
 processNumber(const PCHAR Argument, PCHAR *NextChar, PBOOL ParameterGiven, PULONG ParameterValue)
 {
-    ULONG result;
     PCHAR p;
     BOOL error;
     int base;
@@ -401,7 +400,8 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
 #if DBG
         { "debugflags", required_argument, NULL, 'D' },
 #endif // #if DBG
-        { "nocopy",     no_argument,       NULL, 'n' }
+        { "nocopy",     no_argument,       NULL, 'n' },
+        { NULL,         0,                 NULL, 0   }
     };
 
     const char shortopts[] ="hrFl:nuD:c";
@@ -596,7 +596,6 @@ RemoveDriver(parameter_t *Parameter)
 static int
 CheckDriver(parameter_t *Parameter)
 {
-    char buffer[1024];
     int error;
 
     FUNC_ENTER();
@@ -807,7 +806,6 @@ static BOOL
 NeededAccessRights(VOID)
 {
     SC_HANDLE scManager;
-    int retValue;
 
     FUNC_ENTER();
 
