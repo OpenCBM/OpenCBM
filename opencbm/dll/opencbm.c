@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file dll/opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm.c,v 1.2 2004-11-16 19:54:33 strik Exp $ \n
+** \version $Id: opencbm.c,v 1.3 2004-11-18 19:38:43 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -397,7 +397,8 @@ cbm_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
 
  \param FilenameLength
 
-   The size of the Filename
+   The size of the Filename. If zero, the Filename has to be
+   a null-terminated string.
 
  \return
 
@@ -1090,7 +1091,8 @@ cbm_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
  \param Size
 
-   The length of the command in bytes.
+   The length of the command in bytes. If zero, the Command
+   has to be a null-terminated string.
 
  \return
 
