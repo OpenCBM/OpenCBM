@@ -1,0 +1,247 @@
+/*
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
+ *
+ *  Copyright 1999-2004 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 2001-2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *
+ */
+
+/*! ************************************************************** 
+** \file sys/libiec/i_rawread.c \n
+** \author Spiro Trikaliotis \n
+** \version $Id: i_rawread.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \authors Based on code from
+**    Michael Klein <michael.klein@puffin.lb.shuttle.de>
+** \n
+** \brief Read some bytes from the IEC bus, internal version
+**
+****************************************************************/
+
+#include <wdm.h>
+#include "cbm4win_common.h"
+#include "i_iec.h"
+
+/*! \brief Read some bytes from the IEC bus
+
+ \param Pdx
+   Pointer to the device extension.
+
+ \param Buffer
+   Pointer to a buffer where the read bytes are written to.
+
+ \param Count
+   Maximum number of characters to read from the bus.
+
+ \param Received
+   Pointer to the variable which will hold the read bytes.
+
+ \return 
+   If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
+   returns one of the error status values.
+*/
+NTSTATUS
+cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT USHORT *Received)
+{
+    NTSTATUS ntStatus;
+    BOOLEAN ok;
+    USHORT received;
+    USHORT bit;
+    USHORT b;
+    USHORT i;
+    ULONG flags;
+
+    FUNC_ENTER();
+
+    ok = TRUE;
+    received = 0;
+
+    // If there was an eoi already, we are ready
+
+    if (Pdx->Eoi)
+    {
+        *Received = 0;
+        FUNC_LEAVE_NTSTATUS_CONST(STATUS_END_OF_FILE);
+    }
+
+    // loop until we have read all bytes, or there was an eoi or an error
+
+    do
+    {
+        PERF_EVENT_READ_BYTE_NO(received);
+
+        i = 0;
+        while (CBMIEC_GET(PP_CLK_IN))
+        {
+            cbmiec_schedule_timeout(libiec_global_timeouts.T_1);
+
+            if (QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
+            {
+                FUNC_LEAVE_NTSTATUS_CONST(STATUS_TIMEOUT);
+            }
+        }
+
+        // As we need very exact timing, don't allow anyone to disturb us
+
+        cbmiec_block_irq();
+
+        // Signal "We're ready for reading" to the other side
+
+        CBMIEC_RELEASE(PP_DATA_OUT);
+
+        // Wait up to 400 us for a reply of the other side (TALKer)
+
+        for(i = 0; (i < libiec_global_timeouts.T_2_Times) && !(ok=CBMIEC_GET(PP_CLK_IN)); i++)
+        {
+            cbmiec_udelay(libiec_global_timeouts.T_2);
+        }
+
+        // Did we get an answer?
+
+        if (!ok)
+        {
+            DBG_IEC(("Got an EOI"));
+
+            // No, so, the other device signals an EOI
+
+            Pdx->Eoi = TRUE;
+
+            // Tell the TALKer we recognized the EOI
+
+            CBMIEC_SET(PP_DATA_OUT);
+            cbmiec_udelay(libiec_global_timeouts.T_3);
+            CBMIEC_RELEASE(PP_DATA_OUT);
+        }
+
+        // Now, wait up to 2 ms for the TALKer 
+        // If we did an non-EOI answer, this loop will not be executed at all
+
+        for (i = 0; (i < libiec_global_timeouts.T_4_Times) && !(ok=CBMIEC_GET(PP_CLK_IN)); i++)
+        {
+            DBG_IEC(("Wait after EOI"));
+            cbmiec_udelay(libiec_global_timeouts.T_4);
+        }
+
+#if DBG
+        if (!ok)
+        {
+            DBG_ERROR((DBG_PREFIX "NOT OK after Wait after EOI"));
+        }
+#endif // #if DBG
+
+        for (bit = b = 0; (bit < 8) && ok; bit++)
+        {
+            PERF_EVENT_READ_BIT_NO(bit);
+
+            // Wait for CLK to be activated 
+            // For this to occur, wait up to 200*T_5 (=2ms)
+
+            for (i = 0; (i < libiec_global_timeouts.T_5_Times) && !(ok=(CBMIEC_GET(PP_CLK_IN)==0)); i++)
+            {
+                cbmiec_udelay(libiec_global_timeouts.T_5);
+            }
+
+            // Did we get a CLK pulse?
+
+            if (ok)
+            {
+                // Yes, shift the data to the right
+
+                b >>= 1;
+
+                // If the DATA pin is 0, we got a "1" bit; else, it is a "0"
+
+                if (CBMIEC_GET(PP_DATA_IN) == 0)
+                {
+                    // Set the highest bit (bits are given in LSB first
+                    b |= 0x80;
+                }
+
+                // Wait for CLK to be deactivated again
+                // For this to occur, wait up to 100 * T_6 (=2ms)
+
+                for (i = 0; i < libiec_global_timeouts.T_6_Times && !(ok=CBMIEC_GET(PP_CLK_IN)); i++)
+                {
+                    cbmiec_udelay(libiec_global_timeouts.T_6);
+                }
+
+#if DBG
+                if (!ok)
+                {
+                    DBG_ERROR((DBG_PREFIX "CLK WAS NOT DEACTIVATED AGAIN"));
+                }
+#endif // #if DBG
+            }
+            else
+            {
+                // An error occurred, it does not make sense to get more bits 
+                DBG_ERROR((DBG_PREFIX "BREAKING OUT OF BIT-LOOP, no CLK pulse received"));
+                break;
+            }
+        }
+
+        // If everything went fine, acknowledge the byte
+
+        if (ok)
+        {
+            // set acknowledgement
+            CBMIEC_SET(PP_DATA_OUT);
+        }
+
+        // Our timing is not critical anymore, go back to the old IRQL
+
+        cbmiec_release_irq();
+
+        // If everything went fine, remember the read byte
+
+        if (ok)
+        {
+            PERF_EVENT_READ_BYTE(b);
+
+            // One more byte has been received
+
+            received++;
+
+            // Store the received byte into the buffer
+
+            *Buffer++ = (UCHAR) b;
+
+            // Wait 70us between two bytes. Anyway, as we don't
+            // want to monopolize the complete CPU, schedule a
+            // timeout every 256 bytes.
+
+            if (Count % 256)
+            {
+                cbmiec_udelay(libiec_global_timeouts.T_7);
+            }
+            else
+            {
+                cbmiec_schedule_timeout(libiec_global_timeouts.T_7);
+            }
+        }
+    } while(received < Count && ok && !Pdx->Eoi);
+
+
+    if (ok) 
+    {
+        DBG_SUCCESS((DBG_PREFIX "received=%d, count=%d, ok=%d, eoi=%d",
+            received, Count, ok, Pdx->Eoi));
+
+        ntStatus = STATUS_SUCCESS;
+    }
+    else
+    {
+        DBG_ERROR((DBG_PREFIX "I/O error: received=%d, count=%d, ok=%d, eoi=%d",
+            received, Count, ok, Pdx->Eoi));
+
+        Pdx->Eoi = 0;
+        ntStatus = STATUS_UNEXPECTED_IO_ERROR;
+    }
+
+    DBG_ASSERT(Received != NULL);
+    *Received = received;
+
+    FUNC_LEAVE_NTSTATUS(ntStatus);
+}

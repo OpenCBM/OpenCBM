@@ -1,0 +1,191 @@
+
+; This program is heavily based on Joe Forster/STAs <sta@c64.org>
+; StarCommander Turbo routines.
+;
+; "$Id: cbmformat.a65,v 1.1 2004-11-07 11:05:11 strik Exp $"
+
+  	* = $0500
+
+	lda #$04
+	sta $31
+	ldy $0206
+	beq l1510
+	ldy #$00
+	lda #$4b
+	sta ($30),y
+	iny
+l1510	tya
+l1511	sta ($30),y
+	iny
+	bne l1511
+	tya
+l1517	eor ($30),y
+	iny
+	bne l1517
+	sta $3a
+	jsr $f78f
+	ldy #$ba
+l1523	lda $0100,y
+	sta $0700,y
+	iny
+	bne l1523
+l152c	jsr status
+	lda $1c00
+	and #$10
+	beq l1567
+	lda #$ce
+	sta $1c0c
+	lda #$ff
+	sta $1c03
+	ldy #$00
+	lda #$55
+	jsr l162d
+	jsr l1570
+	inc $0a
+	lda $0a
+	cmp $0205
+	bcs l1564
+	inc $22
+	ldy #$02
+l1554	jsr $fa63
+	ldx #$80
+l1559	jsr $fef3
+	dex
+	bne l1559
+	dey
+	bne l1554
+	beq l152c
+l1564	lda #$01
+	.byte $2c
+l1567	lda #$08
+	jmp $f969
+	.byte $0
+l1570	lda $0a
+	cmp $fed7
+	bcc l157d
+	ldx #$00
+	lda #$11
+	bcs l1580
+l157d	jsr $f24b
+l1580	sta $43
+	lda $1c00
+	and #$9f
+	ora l1638,x
+	sta $1c00
+	lda l163c,x
+	sta $90
+	ldy #$00
+	sty $0b 
+l1596	lda $39
+	sta $0300,y
+	lda $0b
+	sta $0302,y
+	lda $0a
+	sta $0303,y
+	lda $17
+	sta $0304,y
+	lda $16
+	sta $0305,y
+	lda #$0f
+	sta $0306,y
+	sta $0307,y
+	lda $0302,y
+	eor $0303,y
+	eor $0304,y
+	eor $0305,y
+	sta $0301,y
+	tya
+	clc
+	adc #$8
+	tay
+	inc $0b
+	lda $0b
+	cmp $43
+	bcc l1596
+	lda #$3
+	sta $31
+	jsr $fe30
+	ldy #$ba
+	jsr $fde5
+	jsr $fdf5
+	lda #$00
+	sta $32
+l15e6	ldy $90
+	jsr l1624
+	ldx #$a
+	ldy $32
+l15ef	bvc l15ef
+	clv
+	lda $0300,y
+	sta $1c01
+	iny
+	dex
+	bne l15ef
+	sty $32
+	ldy #$9
+	jsr l1624
+	ldy #$bb
+l1605	bvc l1605
+	clv
+	lda $0700,y
+	sta $1c01
+	iny
+	bne l1605
+l1611	bvc l1611
+	clv
+	lda $0400,y
+	sta $1c01
+	iny
+	bne l1611
+	dec $0b
+	bne l15e6
+	jmp $fe00
+l1624	lda #$55
+	jsr l162d
+	ldy #$05
+	lda #$ff
+l162d	bvc l162d
+	clv
+	sta $1c01
+	dey
+	bne l162d
+	rts
+	.byte $0
+l1638	.byte $0,$20,$40,$60
+l163c   .byte $a,$c,$12,$8
+	lda #$0b
+	sta $022a
+	jsr $c1ee
+	jsr $c312
+	lda $e2
+	jsr $c388
+	ldy $27b
+	lda $0200,y
+	sta $16
+	lda $0201,y
+	sta $17
+	lda #$01
+	sta $0a
+	ldx #$02
+	stx $f9
+	lda $0207
+	beq l166f
+	lda #$c0
+	jsr $d58c
+l166f	lda #$e0
+	jsr $d58c
+	jsr $d042
+	jmp $ee40
+
+status	lda $0208
+	beq back
+	asl
+	sta $1800	; set data out
+	asl
+	bit $1800
+	beq *-3
+	ldy #$00
+	sty $1800
+	bit $1800
+	bne *-3
+back	rts

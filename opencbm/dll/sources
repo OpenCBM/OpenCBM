@@ -1,0 +1,17 @@
+TARGETNAME=opencbm
+TARGETPATH=..\bin
+TARGETTYPE=DYNLINK
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+           $(SDK_LIB_PATH)\user32.lib   \
+           $(SDK_LIB_PATH)\advapi32.lib
+
+
+DLLBASE=0x10000000
+
+DLLENTRY=opencbm_init
+
+INCLUDES=..\include
+
+SOURCES=opencbm.c  \
+        i_opencbm.c \
+        opencbm.rc

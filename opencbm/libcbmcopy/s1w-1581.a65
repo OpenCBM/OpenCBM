@@ -1,0 +1,64 @@
+
+; This program is free software; you can redistribute it and/or
+; modify it under the terms of the GNU General Public License
+; as published by the Free Software Foundation; either version
+; 2 of the License, or (at your option) any later version.
+;
+; Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+;
+; "$Id: s1w-1581.a65,v 1.1 2004-11-07 11:05:12 strik Exp $"
+
+	*=$0680
+
+	port	= $4001
+	zp	= $66	; temp
+	db      = $54
+
+	jmp data_1	; init
+	rts		; trap error
+	nop
+	nop
+	jmp noerr	; no error
+
+	ldx #$08	; get byte
+read0	lda #$04
+read1	and port
+	bne read1
+	ora #$10
+	sta port
+	lda port
+	and #$01
+	sta zp
+	lsr
+	rol db
+	lda #$18
+	sta port
+read2	lda port
+	and #$01
+	cmp zp
+	beq read2
+	lda #$10
+	sta port
+	lda #$04
+read3	bit port
+	beq read3
+	jsr data_1
+	dex
+	bne read0
+	lda db
+	rts
+
+data_1	lda #$12	; init
+	sta port
+	rts
+
+noerr	lda #$18
+	sta port
+	lda #$01
+	bit port
+	beq *-3
+	jsr data_1
+	lda #$04
+	bit port
+	beq *-3
+	rts

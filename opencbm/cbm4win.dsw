@@ -1,0 +1,293 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "all"=.\all.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "allvs"=.\allvs.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name cbmcopy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name cbmctrl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name cbmformat
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name d64copy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name demoflash
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name demomorse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name install
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libcbmcopy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libd64copy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name unixcompat
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "cbmcopy"=.\cbmcopy\cbmcopy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libcbmcopy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name unixcompat
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "cbmctrl"=.\cbmctrl\cbmctrl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name unixcompat
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "cbmformat"=.\cbmformat\cbmformat.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name unixcompat
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "d64copy"=.\d64copy\d64copy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libd64copy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name unixcompat
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "demoflash"=.\demo\flash\demoflash.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "demomorse"=.\demo\morse\demomorse.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "install"=.\install\install.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libcbmcopy"=.\libcbmcopy\libcbmcopy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libd64copy"=.\libd64copy\libd64copy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "opencbm"=.\dll\opencbm.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "syslibcommon"=.\sys\libcommon\syslibcommon.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "syslibiec"=.\sys\libiec\syslibiec.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "sysnt4"=.\sys\nt4\sysnt4.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "syswdm"=.\sys\wdm\syswdm.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "unixcompat"=.\unixcompat\unixcompat.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

@@ -1,0 +1,22 @@
+TARGETNAME=cbm4wdm
+TARGETPATH=..\..\bin
+TARGETTYPE=DRIVER
+USE_PDB=1
+
+!if "$(DDK_TARGET_OS)"!="WinXP"
+C_DEFINES=$(C_DEFINES) -DCSQ_STATIC=1
+TARGETLIBS=	$(DDK_LIB_PATH)\csq.lib \
+!else
+TARGETLIBS= \
+!endif
+		..\..\bin\*\libiec.lib \
+		..\..\bin\*\libcommon.lib
+
+BROWSER_INFO=1
+BROWSERFILE=wdmdriver.bsc -n
+
+INCLUDES=..\include;..\..\include;..\libcommon
+
+SOURCES= 	LoadUnload.c \
+		PortEnum.c \
+		cbm4wdm.rc

@@ -1,0 +1,32 @@
+#! /bin/sh
+
+CC65PATH=
+
+CL65=$CC65PATH\cl65
+LD65=$CC65PATH\ld65
+OD=od
+SED=sed
+
+CA65_FLAGS="--feature labels_without_colons --feature pc_assignment --feature loose_char_term"
+
+func()
+{
+	for A in *; do
+		if [ -d $A ]; then
+			cd $A
+			for B in *.a65; do
+				if [ "$B" != "*.a65" ]; then
+					WHICHFILE=`echo $B|sed 's/\.a65//'`
+
+					$CL65 -c $CA65_FLAGS -o $WHICHFILE.tmp $WHICHFILE.a65
+					test -s $WHICHFILE.tmp && $LD65 --target none -o $WHICHFILE.o65 $WHICHFILE.tmp && rm $WHICHFILE.tmp
+					test -s $WHICHFILE.o65 && $OD -w8 -txC -v -An $WHICHFILE.o65|$SED 's/\([0-9a-f]\{2\}\) */0x\1,/g; $s/,$//' > $WHICHFILE.inc && rm $WHICHFILE.o65
+				fi
+			done
+			func
+			cd ..
+		fi
+	done
+}
+
+func

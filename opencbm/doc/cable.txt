@@ -1,0 +1,97 @@
+
+A   standard   X(E)1541  cable  won't work with _this_ driver. In
+fact, there will probably never be a multitasking OS which  works
+with  one   of  these, that's why we call it XM1541, M for Multi­
+tasking. Anyway, if you have a XE1541, the necessary modification
+is simple:
+
+         Exchange pins 5 & 6 on the Commodore DIN plug
+         ---------------------------------------------
+
+The ACK line is the only line on a PC parallel port that can gen­
+erate a hardware interrupt. This way, we get  an  interrupt  when
+the  device  releases the DATA line to signal "ready to receive".
+Without an interrupt, you would have  to  poll  for  this  signal
+about  every  100us,  which  is inacceptable for any multitasking
+system.
+
+Be sure to have your parallel port configured to use an IRQ, usu­
+ally 7 or 5, but both are often also used by soundcards.
+
+(ASCII art taken from the StarCommander README :))
+
+
+The PC parallel plug (male DB-25 connector):
+
+        PaperEnd   Busy
+    SelectIn   |   |   Ack        Data 7 - Data 0       Strobe
+           |   |   |   |   +-------------+-------------+   |
+           V   V   V   V   |                           |   V
+        +------------------------------------------------------+
+        | 13  12  11  10   9   8   7   6   5   4   3   2   1   |
+        |  o   o   o   o   o   o   o   o   o   o   o   o   o   |
+        +-+                                                  +-+
+          |  o   o   o   o   o   o   o   o   o   o   o   o   |
+          | 25  24  23  22  21  20  19  18  17  16  15  14   |
+          +--------------------------------------------------+
+             |                           |   ^   ^   ^   ^
+             +-------------+-------------+   |   |   |   |
+                        Ground          Select   |   |   AutoFeed
+                                              Init   Error
+
+The Commodore drive serial bus plug (male 6-pin DIN connector):
+
+                                 Reset
+                                   |
+                                   V
+                          +-------+ +-------+
+                        +-+       +-+       +-+
+                        |     5         1     |
+               Data --> |     o    6    o     | <-- SrqIn
+                        |          o          |
+                        |     4         2     |
+                Clk --> |     o    3    o     | <-- Gnd
+                        |          o          |
+                        +-+                 +-+
+                          +-----------------+
+                                   ^
+                                   |
+                                  Atn
+
+
+This is the XE1541 cable (won't work with this driver):
+
+    CBM drive serial port   PC parallel port
+
+        2  Gnd ---------- 18-25  Ground
+        3  Atn --------+---- 13  SelectIn
+                       +->|-- 1  Strobe
+        4  Clk --------+---- 12  PaperEnd
+                       +->|- 14  AutoFeed
+        5  Data -------+---- 11  Busy
+                       +->|- 17  SelectIn
+        6  Reset ------+---- 10  Ack
+                       +->|- 16  Init
+
+
+This is the XM1541 (pins 5 & 6 on the CBM end exchanged)
+
+    CBM drive serial port   PC parallel port
+
+        2  Gnd ---------- 18-25  Ground
+        3  Atn --------+---- 13  SelectIn
+                       +->|-- 1  Strobe
+        4  Clk --------+---- 12  PaperEnd
+                       +->|- 14  AutoFeed
+        6  Reset ------+---- 11  Busy	
+                       +->|- 17  SelectIn
+        5  Data -------+---- 10  Ack
+                       +->|- 16  Init
+
+
+For more information about the different cables, please check out
+the StarCommander homepage on <http://sta.c64.org/sc.html>
+
+
+Have fun,
+Michael Klein <nip@c64.org>

@@ -1,0 +1,39 @@
+TARGETNAME=libiec
+TARGETPATH=..\..\bin
+TARGETTYPE=DRIVER_LIBRARY
+USE_PDB=1
+
+BROWSER_INFO=1
+BROWSERFILE=libiec.bsc -n
+
+!if "$(DDK_TARGET_OS)"!="WinXP"
+C_DEFINES=$(C_DEFINES) -DCSQ_STATIC=1
+!endif
+
+INCLUDES=..\include;..\..\include;..\libcommon
+
+SOURCES= 	init.c \
+		debug.c \
+		eoi.c \
+		i_rawread.c \
+		i_rawwrite.c \
+		interrupt.c \
+		dpc.c \
+		listen.c \
+		openclose.c \
+		poll.c \
+		ppread.c \
+		ppwrite.c \
+		rawread.c \
+		rawwrite.c \
+		release.c \
+		releasebus.c \
+		reset.c \
+		sendbyte.c \
+		set.c \
+		talk.c \
+		unlisten.c \
+		untalk.c \
+		util.c \
+		wait.c \
+		waitlistener.c

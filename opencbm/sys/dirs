@@ -1,0 +1,5 @@
+DIRS= \
+	wdm \
+	nt4 \
+	libcommon \
+	libiec

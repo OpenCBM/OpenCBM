@@ -1,0 +1,12 @@
+DIRS= \
+	cbmformat \
+	unixcompat \
+	libcbmcopy \
+	cbmcopy \
+	libd64copy \
+	d64copy \
+	cbmctrl \
+	install \
+	dll \
+	demo \
+	sys

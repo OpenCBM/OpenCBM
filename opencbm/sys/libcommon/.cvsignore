@@ -1,0 +1,14 @@
+Debug
+Release
+cbmlog.rc
+cbmlog.h
+*.bin
+objchk*
+objfre*
+obj*
+*.bsc
+build*.log
+build*.wrn
+build*.err
+*.bsc
+*.plg

@@ -1,0 +1,18 @@
+
+TARGETNAME=cbmformat
+TARGETPATH=..\bin
+TARGETTYPE=PROGRAM
+
+TARGETLIBS=..\bin\*\opencbm.lib         \
+           ..\bin\*\unixcompat.lib      \
+           $(SDK_LIB_PATH)\kernel32.lib \
+           $(SDK_LIB_PATH)\user32.lib   \
+           $(SDK_LIB_PATH)\advapi32.lib
+
+INCLUDES=..\include;..\unixcompat
+
+SOURCES=cbmformat.c \
+        cbmformat.rc
+
+UMTYPE=console
+#UMBASE=0x100000

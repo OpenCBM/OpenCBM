@@ -1,0 +1,31 @@
+TARGETNAME=libcommon
+TARGETPATH=..\..\bin
+TARGETTYPE=DRIVER_LIBRARY
+USE_PDB=1
+
+BROWSER_INFO=1
+BROWSERFILE=libcommon.bsc -n
+
+!if "$(DDK_TARGET_OS)"!="WinXP"
+C_DEFINES=$(C_DEFINES) -DCSQ_STATIC=1
+!endif
+
+INCLUDES=..\include;..\..\include
+
+SOURCES= 	openclose.c \
+		init.c \
+		install.c \
+		thread.c \
+		startio.c \
+		readwrite.c \
+		ioctl.c \
+		debug.c \
+		util.c \
+		util-reg.c \
+		PortAccess.c \
+		isr.c \
+		cleanup.c \
+		perfeval.c \
+		queue.c
+
+NTTARGETFILE0=cbmlog.h
