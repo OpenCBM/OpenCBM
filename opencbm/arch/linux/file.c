@@ -5,13 +5,7 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
- *
  */
-
-#include <windows.h>
-
-#include <stdarg.h>
-#include <stdio.h>
 
 #include "arch.h"
 
@@ -37,10 +31,10 @@
 
 int arch_filesize(const char *Filename, off_t *Filesize)
 {
-    struct _stat statrec;
+    struct stat statrec;
     size_t ret;
 
-    ret = _stat(Filename, &statrec);
+    ret = stat(Filename, &statrec);
     
     if (ret == 0)
     {

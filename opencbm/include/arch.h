@@ -1,6 +1,8 @@
 #ifndef CBM_ARCH_H
 #define CBM_ARCH_H
 
+#include <sys/types.h> /* for off_t */
+
 #ifdef WIN32
 # include "version.h"
 
@@ -47,6 +49,7 @@
 
 #ifdef WIN32
 # include <stdlib.h> /* for getenv */
+
 /* Make sure that getenv() will not be defined with a prototype
    in arch/windows/getopt.c, which would result in a compiler error 
    "error C2373: 'getenv' : redefinition; different type modifiers".
@@ -56,7 +59,7 @@
 
 #define arch_unlink(_x) ARCH_CBM_LINUX_WIN(unlink(_x), _unlink(_x))
 
-int arch_filesize(const char *Filename, size_t *Filesize);
+int arch_filesize(const char *Filename, off_t *Filesize);
 
 #define arch_strdup(_x) ARCH_CBM_LINUX_WIN(strdup(_x), _strdup(_x))
 

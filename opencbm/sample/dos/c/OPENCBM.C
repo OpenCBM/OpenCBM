@@ -17,7 +17,7 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/opencbn.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: OPENCBM.C,v 1.4 2005-01-22 19:50:41 strik Exp $ \n
+** \version $Id: OPENCBM.C,v 1.5 2005-02-08 19:38:54 strik Exp $ \n
 ** \n
 ** \brief Library for accessing the driver from DOS
 **
@@ -85,7 +85,7 @@ vdd_init(void)
         mov [VDD_HANDLE],ax
 
         /* make sure we notice of an error occurred */
-        xor ax,ax
+        mov ax,0
         adc ax,0
         mov [error],ax
 
