@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file install/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.2 2004-11-21 15:29:40 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.2.2.1 2005-02-18 11:05:41 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the driver
 **
@@ -46,13 +46,15 @@
 VOID
 CbmOutputDebuggingBuffer(VOID)
 {
-    CHAR buffer[0x20000];
+    CHAR *buffer;
 
     CBM_FILE HandleDevice;
 
     FUNC_ENTER();
 
-    if (cbm_i_driver_open(&HandleDevice, 0) == 0)
+    buffer = malloc(0x20000);
+
+    if (buffer && cbm_i_driver_open(&HandleDevice, 0) == 0)
     {
         PCHAR p = buffer;
         PCHAR endLine;
@@ -74,6 +76,11 @@ CbmOutputDebuggingBuffer(VOID)
             p = endLine + 1;
 
         } while (endLine);
+    }
+
+    if (buffer)
+    {
+        free(buffer);
     }
 
     FUNC_LEAVE();

@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.1 2004-11-07 11:05:12 strik Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.1.2.1 2005-02-18 11:05:41 strik Exp $";
 #endif
 
 #include <stdio.h>
@@ -218,6 +218,12 @@ static int cbmcopy_read(CBM_FILE fd,
             c = trf->read_byte( fd );
             i = (c == 0xff) ? 0xfe : c;
             *filedata_size += i;
+
+            /* @SRT: FIXME! the next statement is dangerous: If there 
+             * is no memory block large enough for reallocating, the
+             * memory block is not freed, but realloc() returns NULL,
+             * thus, we have a memory leak.
+             */
             *filedata = realloc(*filedata, *filedata_size);
             if(*filedata)
             {
