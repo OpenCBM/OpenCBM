@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.2 2004-11-24 20:08:18 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.3 2004-12-13 18:19:56 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -91,6 +91,7 @@ EXTERN int CBMAPIDECL cbm_unlisten(CBM_FILE f);
 EXTERN int CBMAPIDECL cbm_untalk(CBM_FILE f);
 
 EXTERN int CBMAPIDECL cbm_get_eoi(CBM_FILE f);
+EXTERN int CBMAPIDECL cbm_clear_eoi(CBM_FILE f);
 
 EXTERN int CBMAPIDECL cbm_reset(CBM_FILE f);
 

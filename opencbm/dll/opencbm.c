@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file dll/opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm.c,v 1.5 2004-11-27 19:36:03 strik Exp $ \n
+** \version $Id: opencbm.c,v 1.6 2004-12-13 18:19:55 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -595,6 +595,35 @@ cbm_get_eoi(CBM_FILE HandleDevice)
     FUNC_LEAVE_INT(result.Decision);
 }
 
+/*! \brief Reset the EOI flag
+
+ This function resets the EOI ("End of Information") flag
+ which might be still set after reading the IEC serial bus.
+
+ \param HandleDevice
+  
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+
+   0 on success, != 0 means an error has occured.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+int CBMAPIDECL 
+cbm_clear_eoi(CBM_FILE HandleDevice)
+{
+    int returnValue;
+
+    FUNC_ENTER();
+
+    returnValue = cbm_ioctl(HandleDevice, CBMCTRL(CLEAR_EOI), NULL, 0, NULL, 0);
+
+    FUNC_LEAVE_INT(returnValue);
+}
+
 /*! \brief RESET all devices
 
  This function performs a hardware RESET of all devices on
@@ -752,7 +781,7 @@ cbm_iec_poll(CBM_FILE HandleDevice)
 
  \param Line
 
-   The line to be activated. This must be one of
+   The line to be activated. This must be exactly one of
    IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
 
  If cbm_driver_open() did not succeed, it is illegal to 
@@ -786,7 +815,7 @@ cbm_iec_set(CBM_FILE HandleDevice, int Line)
 
  \param Line
 
-   The line to be deactivated. This must be one of
+   The line to be deactivated. This must be exactly one of
    IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
 
  If cbm_driver_open() did not succeed, it is illegal to 
@@ -820,7 +849,7 @@ cbm_iec_release(CBM_FILE HandleDevice, int Line)
    A CBM_FILE which contains the file handle of the driver.
 
  \param Line
-   The line to be deactivated. This must be one of
+   The line to be deactivated. This must be exactly one of
    IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
 
  \param State
@@ -862,7 +891,7 @@ cbm_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 
  \param Line
 
-   The line to be tested. This must be one of
+   The line to be tested. This must be exactly one of
    IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
 
  If cbm_driver_open() did not succeed, it is illegal to 

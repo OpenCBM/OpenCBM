@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.2 2004-11-21 15:29:41 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.3 2004-12-13 18:19:56 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -181,6 +181,12 @@ cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
         case CBMCTRL_GET_EOI:
             DBG_IRP(CBMCTRL_GET_EOI);
             ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_GET_EOI_OUT), STATUS_SUCCESS);
+            fastStart = TRUE;
+            break;
+
+        case CBMCTRL_CLEAR_EOI:
+            DBG_IRP(CBMCTRL_CLEAR_EOI);
+            ntStatus = STATUS_SUCCESS;
             fastStart = TRUE;
             break;
 
@@ -363,6 +369,11 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
             DBG_IRP(CBMCTRL_GET_EOI);
             returnLength = sizeof(CBMT_GET_EOI_OUT);
             ntStatus = cbmiec_get_eoi(Pdx, &(OUTPUTVALUE(CBMT_GET_EOI_OUT)->Decision));
+            break;
+
+        case CBMCTRL_CLEAR_EOI:
+            DBG_IRP(CBMCTRL_CLEAR_EOI);
+            ntStatus = cbmiec_clear_eoi(Pdx);
             break;
 
         case CBMCTRL_PP_READ:

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/eoi.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: eoi.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: eoi.c,v 1.2 2004-12-13 18:19:56 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -45,6 +45,27 @@ cbmiec_get_eoi(IN PDEVICE_EXTENSION Pdx, OUT PBOOLEAN Result)
     // give back if we encountered an EOI
 
     *Result = Pdx->Eoi ? TRUE : FALSE;
+
+    FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
+}
+
+/*! \brief Reset the EOI state
+
+ \param Pdx
+   Pointer to the device extension.
+ 
+ \return 
+   If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
+   returns one of the error status values.
+*/
+NTSTATUS
+cbmiec_clear_eoi(IN PDEVICE_EXTENSION Pdx)
+{
+    FUNC_ENTER();
+
+    // reset the EOI state
+
+    Pdx->Eoi = FALSE;
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }

@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.3 2004-11-24 20:08:18 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.4 2004-12-13 18:19:56 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -205,6 +205,8 @@ typedef CBMT_BOOLEAN    CBMT_GET_EOI_OUT;
 #define CBMCTRL_RESET       _CBMIO(CBMCTRL_BASE, 6)  // -                    -
 //! IOCTL for getting the EOI state
 #define CBMCTRL_GET_EOI     _CBMIO(CBMCTRL_BASE, 7)  // -                    CBMT_GET_EOI_OUT
+//! IOCTL for resetting the EOI state
+#define CBMCTRL_CLEAR_EOI   _CBMIO(CBMCTRL_BASE, 8)  // -                    -
 
 //! IOCTL for reading the PP values
 #define CBMCTRL_PP_READ     _CBMIO(CBMCTRL_BASE, 10) // -                    CBMT_PP_READ_OUT

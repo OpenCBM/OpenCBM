@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.1 2004-11-07 11:05:13 strik Exp $ \n
+** \version $Id: iec.h,v 1.2 2004-12-13 18:19:56 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -54,6 +54,9 @@ cbmiec_close(IN PDEVICE_EXTENSION Pdx, IN UCHAR DeviceAddress, IN UCHAR Secondar
 
 extern NTSTATUS
 cbmiec_get_eoi(IN PDEVICE_EXTENSION Pdx, OUT PBOOLEAN Result);
+
+extern NTSTATUS
+cbmiec_clear_eoi(IN PDEVICE_EXTENSION Pdx);
 
 extern NTSTATUS
 cbmiec_iec_wait(IN PDEVICE_EXTENSION Pdx, IN UCHAR Line, IN UCHAR State, OUT PUCHAR Result);
