@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.3 2004-11-16 19:54:34 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.4 2004-11-21 15:23:35 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **
@@ -161,6 +161,8 @@ AddDevice(IN PDRIVER_OBJECT DriverObject, IN PDEVICE_OBJECT PdoUNUSED, IN PCWSTR
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }
 
+static KMUTEX MutexDriverLoadUnload;
+
 /*! \brief Unload routine of the driver
 
  DriverUnload performs any operations that are necessary before the system unloads the driver.
@@ -179,6 +181,12 @@ DriverUnload(IN PDRIVER_OBJECT DriverObject)
     PDEVICE_OBJECT currentDevice;
 
     FUNC_ENTER();
+
+    // Obtain the mutex that prevents premature unloading
+
+    DBG_IRQL( < DISPATCH_LEVEL);
+    KeWaitForMutexObject(&MutexDriverLoadUnload, Executive, KernelMode,
+        FALSE, NULL);
 
     // Make sure every device object is deleted
 
@@ -219,10 +227,14 @@ DriverUnload(IN PDRIVER_OBJECT DriverObject)
 
 #if DBG
 
-    DBG_PRINT((DBG_PREFIX "About to call DbgFreeMemoryBuffer()"));
     DbgFreeMemoryBuffer();
 
 #endif
+
+    // From now on, it is legal to be unloaded
+
+    DBG_IRQL( <= DISPATCH_LEVEL);
+    KeReleaseMutex(&MutexDriverLoadUnload, FALSE);
 
     FUNC_LEAVE();
 }
@@ -257,6 +269,16 @@ DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegistryPath)
 
     FUNC_ENTER();
 
+    // Initialize the mutex which should prevent premature unloading
+
+    KeInitializeMutex(&MutexDriverLoadUnload, 0);
+
+    // Now, obtain that mutex as first operation
+
+    DBG_IRQL( < DISPATCH_LEVEL);
+    KeWaitForMutexObject(&MutexDriverLoadUnload, Executive, KernelMode,
+        FALSE, NULL);
+
 #if DBG
 
     DbgAllocateMemoryBuffer();
@@ -266,6 +288,10 @@ DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegistryPath)
     // Output a status message
 
     DBG_PRINT((DBG_PREFIX "CBM4NT.SYS " __DATE__ " " __TIME__));
+
+    // Perform initialization common to NT4 and WDM driver
+
+    ntStatus = DriverCommonInit(DriverObject, RegistryPath);
 
     // enumerate all parallel port drivers:
 
@@ -289,9 +315,10 @@ DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegistryPath)
         ParPortEnumerateClose(enumerate);
     }
 
-    // Perform initialization common to NT4 and WDM driver
+    // From now on, it is legal to be unloaded
 
-    ntStatus = DriverCommonInit(DriverObject, RegistryPath);
+    DBG_IRQL( <= DISPATCH_LEVEL);
+    KeReleaseMutex(&MutexDriverLoadUnload, FALSE);
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }

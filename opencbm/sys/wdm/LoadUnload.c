@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/wdm/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.4 2004-11-17 20:30:12 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.5 2004-11-21 15:23:35 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **
@@ -241,7 +241,6 @@ DriverUnload(IN PDRIVER_OBJECT DriverObject)
 
 #if DBG
 
-    DBG_PRINT((DBG_PREFIX "About to call DbgFreeMemoryBuffer()"));
     DbgFreeMemoryBuffer();
 
 #endif

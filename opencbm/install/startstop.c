@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.4 2004-11-17 20:30:12 strik Exp $ \n
+** \version $Id: startstop.c,v 1.5 2004-11-21 15:23:35 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -97,8 +97,6 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version)
     buffer[sizeof(buffer)] = 0;
 
     OutputPathString(Text, buffer);
-//    DBG_PRINT((DBG_PREFIX "%s%s", Text, buffer));
-//    printf("%s%s\n", Text, buffer);
 
     FUNC_LEAVE();
 }
@@ -420,7 +418,8 @@ CbmCheckCorrectInstallation(VOID)
                 else
                 {
                     DBG_PRINT((DBG_PREFIX "No interrupt available."));
-                    printf("Could not get an interrupt. Please try again after a reboot.\n");
+                    printf("\n*** Could not get an interrupt. Please try again after a reboot.\n");
+                    error = TRUE;
                 }
             }
             else

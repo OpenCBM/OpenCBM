@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file dll/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.3 2004-11-16 19:54:33 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.4 2004-11-21 15:23:35 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -87,6 +87,8 @@ RegGetDWORD(IN HKEY RegKey, IN char *SubKey, OUT LPDWORD Value)
     DWORD rc;
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "Subkey = '%s'", SubKey));
 
     valueLen = sizeof(value);
 

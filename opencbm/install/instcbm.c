@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.4 2004-11-17 20:30:12 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.5 2004-11-21 15:23:35 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -170,11 +170,9 @@ GetOsVersion(VOID)
             break;
         }
 
-/*
-        DBG_PRINT((DBG_PREFIX "OS VERSION: %u.%u.%u %s (%s)",
+        DBG_SUCCESS((DBG_PREFIX "OS VERSION: %u.%u.%u %s (%s)",
             ovi.dwMajorVersion, ovi.dwMinorVersion, ovi.dwBuildNumber,
             platform, ovi.szCSDVersion));
-*/
     }
 
     FUNC_LEAVE_TYPE(retValue, osversion_t, "%u");
@@ -255,11 +253,17 @@ struct parameter_s
     /*! --debugflags, a second parameter (for the DLL) was given */
     BOOL DebugFlagsDllWereGiven;
 
+    /*! --debugflags, a third parameter (for INSTCBM itself) was given */
+    BOOL DebugFlagsInstallWereGiven;
+
     /*! if --debugflags was given: the number which was there */
     ULONG DebugFlagsDriver;
 
-    /*! if --debugflags was given: the number which was there */
+    /*! if --debugflags with 2 parameters was given: the number which was there */
     ULONG DebugFlagsDll;
+
+    /*! if --debugflags with 3 parameters was given: the number which was there */
+    ULONG DebugFlagsInstall;
 
 #endif // #if DBG
 
@@ -498,9 +502,25 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
 
                 if (!error && next && *next)
                 {
-                    error = processNumber(next, NULL, &Parameter->DebugFlagsDllWereGiven,
+                    error = processNumber(next, &next, &Parameter->DebugFlagsDllWereGiven,
                         &Parameter->DebugFlagsDll);
                 }
+
+                if (!error && next && *next)
+                {
+                    error = processNumber(next, NULL, &Parameter->DebugFlagsInstallWereGiven,
+                        &Parameter->DebugFlagsInstall);
+
+                    if (!error && Parameter->DebugFlagsInstallWereGiven)
+                    {
+                        DbgFlags = Parameter->DebugFlagsInstall;
+                    }
+                }
+                DBG_PRINT((DBG_PREFIX "error = %s, 1st = %08x (%s), 2nd = %08x (%s), 3rd = %08x (%s)",
+                    error ? "TRUE" : "FALSE", 
+                    Parameter->DebugFlagsDriver, Parameter->DebugFlagsDriverWereGiven ? "TRUE" : "FALSE", 
+                    Parameter->DebugFlagsDll, Parameter->DebugFlagsDllWereGiven ? "TRUE" : "FALSE",
+                    Parameter->DebugFlagsInstall, Parameter->DebugFlagsInstallWereGiven ? "TRUE" : "FALSE"));
             }
             break;
 
@@ -620,6 +640,10 @@ CheckDriver(parameter_t *Parameter)
 
     if (CbmCheckCorrectInstallation())
     {
+        DBG_PRINT((DBG_PREFIX "There were errors in the current configuration."
+            "Please fix them before trying to use the driver!"));
+        printf("*** There were errors in the current configuration.\n"
+            "*** Please fix them before trying to use the driver!");
         error = 11;
     }
     else
