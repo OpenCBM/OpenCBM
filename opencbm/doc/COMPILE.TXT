@@ -107,6 +107,24 @@ to build the tools in every scenario.
     bin\i386 directory.
 
 
+4. BUILDING THE ASSEMBLER FILES
+
+Intentionally, I left one step out in the discussion above. If you want to
+change the drive code, that is, the 6502 assembler files, these files are NOT
+automatically recompiled.
+
+To be able to compile them, you need:
+
+- the CC65 package (http://www.cc65.org/)
+- a cygwin install, or a unix box. In particular, you need a "bash" shell, as
+  well as the "od" and "sed" tools
+
+Just install the CC65 package and run the buildinc bash script from the cbm4win
+source directory to recompile all assembler files. This will be included in the
+generic build process in the future.
+
+
+
 If you manage to compile cbm4win with another compiler, feel free tell me.
 
 Happy compiling!
