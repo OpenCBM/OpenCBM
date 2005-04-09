@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.1 2005-03-02 18:17:21 strik Exp $ \n
+** \version $Id: cbm_driver.h,v 1.2 2005-04-09 15:24:33 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **
@@ -98,6 +98,9 @@ struct _DEVICE_EXTENSION {
      * =0 means that the interrupt is not interesting for us.
      */
     ULONG IrqCount;
+
+    /*! FLAG: We are running on an SMP or an HT machine */
+    BOOLEAN IsSMP;
 
     // IEC related vars:
 

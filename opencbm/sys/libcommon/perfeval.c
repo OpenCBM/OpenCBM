@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/perfeval.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.c,v 1.2 2005-03-02 18:17:21 strik Exp $ \n
+** \version $Id: perfeval.c,v 1.3 2005-04-09 15:24:33 strik Exp $ \n
 ** \n
 ** \brief Functions for performance evaluation purposes - KERNEL version
 **
@@ -186,6 +186,8 @@ PerfEvent(IN ULONG Event, IN ULONG Data)
         if (currentEntry < MAX_PERFORMANCE_EVAL_ENTRIES)
         {
             PerformanceEvalEntries[currentEntry].Timestamp = RDTSC();
+            PerformanceEvalEntries[currentEntry].Processor = DbgKeGetCurrentProcessorNumber();
+            PerformanceEvalEntries[currentEntry].PeThread  = PsGetCurrentThread();
             PerformanceEvalEntries[currentEntry].Event = Event;
             PerformanceEvalEntries[currentEntry].Data = Data;
         }
@@ -266,12 +268,15 @@ PerfSynchronize(VOID)
             sTime = (ULONG) ((tempTimeAbs / 1000000) % 1000);
 
             DBG_PRINT((DBG_PREFIX 
-                "%6u - Time: %3u.%03u.%03u us (+%7I64u us) - Event = %08x, Data = %08x",
+                "%6u - Time: %3u.%03u.%03u us (+%7I64u us) - Event = %08x, Data = %08x"
+                " on processur %u in thread %p",
                 i,
                 sTime, msTime, usTime,
                 tempTimeRel,
                 PerformanceEvalEntries[i].Event,
-                PerformanceEvalEntries[i].Data));
+                PerformanceEvalEntries[i].Data,
+                PerformanceEvalEntries[i].Processor,
+                PerformanceEvalEntries[i].PeThread));
         }
 
         // make sure we start storing the performance values 
@@ -318,7 +323,7 @@ PerfSynchronize(VOID)
         {
             PERFEVAL_FILE_HEADER fileHeader;
 
-            fileHeader.FileVersion = 1;
+            fileHeader.FileVersion = 2;
             fileHeader.ProcessorFrequency = ProcessorFrequency;
             fileHeader.CountEntries = CurrentPerformanceEvalEntry + 1;
 
@@ -334,7 +339,8 @@ PerfSynchronize(VOID)
                 NULL,
                 NULL);
 
-            DBG_PRINT_FILE((DBG_PREFIX "ZwWriteFile (header) returned %s", DebugNtStatus(ntStatus)));
+            DBG_PRINT_FILE((DBG_PREFIX "ZwWriteFile (header) returned %s",
+                DebugNtStatus(ntStatus)));
 
             ntStatus = ZwWriteFile(fileHandle, 
                 NULL, // event
@@ -346,11 +352,13 @@ PerfSynchronize(VOID)
                 NULL,
                 NULL);
 
-            DBG_PRINT_FILE((DBG_PREFIX "ZwWriteFile (data) returned %s", DebugNtStatus(ntStatus)));
+            DBG_PRINT_FILE((DBG_PREFIX "ZwWriteFile (data) returned %s",
+                DebugNtStatus(ntStatus)));
 
             ntStatus = ZwClose(fileHandle);
 
-            DBG_PRINT_FILE((DBG_PREFIX "ZwCloseFile returned %s", DebugNtStatus(ntStatus)));
+            DBG_PRINT_FILE((DBG_PREFIX "ZwCloseFile returned %s",
+                DebugNtStatus(ntStatus)));
 
             // make sure we start storing the performance values 
             // at the beginning again

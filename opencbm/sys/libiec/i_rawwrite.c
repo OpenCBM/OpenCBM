@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawwrite.c,v 1.4 2005-03-02 18:17:22 strik Exp $ \n
+** \version $Id: i_rawwrite.c,v 1.5 2005-04-09 15:24:33 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -67,10 +67,14 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
 
     Pdx->Eoi = 0;
 
+    PERF_EVENT_VERBOSE(0x1010, 0);
+
     ret = InterlockedExchange(&Pdx->IrqCount, 0);
     DBG_ASSERT(ret == 0);
 
     DBG_IEC((DBG_PREFIX "About to send %d bytes%s", Count, Atn ? " with ATN" : ""));
+
+    PERF_EVENT_VERBOSE(0x1011, 0);
 
     if (Atn)
     {
@@ -84,10 +88,14 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
 
     // Wait for DATA to be set by the drive(s)
 
+    PERF_EVENT_VERBOSE(0x1012, 0);
+
     for(i=0; (i<libiec_global_timeouts.T_9_Times) && !CBMIEC_GET(PP_DATA_IN); i++)
     {
         cbmiec_udelay(libiec_global_timeouts.T_9_SEND_WAIT_DEVICES_T_AT);
     }
+
+    PERF_EVENT_VERBOSE(0x1013, 0);
 
     // cbmiec_show_state(Pdx,"!GET(PP_DATA_IN)");
 
@@ -95,14 +103,25 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
 
     if(!CBMIEC_GET(PP_DATA_IN))
     {
+        PERF_EVENT_VERBOSE(0x1014, 1);
         DBG_ERROR((DBG_PREFIX "no devices found!"));
         CBMIEC_RELEASE(PP_CLK_OUT | PP_ATN_OUT);
         ntStatus = STATUS_NO_SUCH_DEVICE;
     }
     else
     {
-        cbmiec_schedule_timeout(libiec_global_timeouts.T_10_SEND_BEFORE_1ST_BYTE);
+        PERF_EVENT_VERBOSE(0x1014, 0);
+        if (Pdx->IsSMP)
+        {
+            cbmiec_udelay(libiec_global_timeouts.T_10_SEND_BEFORE_1ST_BYTE);
+        }
+        else
+        {
+            cbmiec_schedule_timeout(libiec_global_timeouts.T_10_SEND_BEFORE_1ST_BYTE);
+        }
     }
+
+    PERF_EVENT_VERBOSE(0x1015, 0);
 
     while(sent < Count && ntStatus == STATUS_SUCCESS)
     {
@@ -111,7 +130,11 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
         PERF_EVENT_WRITE_BYTE_NO(sent);
         PERF_EVENT_WRITE_BYTE(c);
 
+        PERF_EVENT_VERBOSE(0x1016, sent);
+
         cbmiec_udelay(libiec_global_timeouts.T_11_SEND_BEFORE_BYTE_DELAY);
+
+        PERF_EVENT_VERBOSE(0x1017, sent);
 
         if(CBMIEC_GET(PP_DATA_IN))
         {
@@ -121,24 +144,36 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
             // Anyway, if we are sending with ATN asserted, then
             // no EOI signaling is allowed.
 
+            PERF_EVENT_VERBOSE(0x1018, sent);
+
             cbmiec_wait_for_listener(Pdx, 
                 ((sent == (Count-1)) && (Atn == 0)) ? TRUE : FALSE);
 
+            PERF_EVENT_VERBOSE(0x1019, sent);
+
             if(QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
             {
+                PERF_EVENT_VERBOSE(0x1020, 1);
+
                 ntStatus = STATUS_CANCELLED;
             }
             else
             {
+                PERF_EVENT_VERBOSE(0x1020, 0);
+
                 if(cbmiec_send_byte(Pdx,c))
                 {
                     sent++;
+                    PERF_EVENT_VERBOSE(0x1021, 0);
                     cbmiec_udelay(libiec_global_timeouts.T_12_SEND_AFTER_BYTE_DELAY);
+                    PERF_EVENT_VERBOSE(0x1022, 0);
                 }
                 else
                 {
+                    PERF_EVENT_VERBOSE(0x1021, 1);
                     DBG_ERROR((DBG_PREFIX "I/O error on cbmiec_send_byte()"));
                     ntStatus = STATUS_NO_SUCH_DEVICE;
+                    PERF_EVENT_VERBOSE(0x1022, 1);
                 }
             }
         }
@@ -164,22 +199,36 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, USHORT Count, USH
     {
         // Talk-attention turn around (reverse Talker and Listener)
 
+        PERF_EVENT_VERBOSE(0x1030, 0);
+
         cbmiec_block_irq();
+
+        PERF_EVENT_VERBOSE(0x1031, 0);
 
         CBMIEC_SET(PP_DATA_OUT);
         CBMIEC_RELEASE(PP_ATN_OUT);
 
+        PERF_EVENT_VERBOSE(0x1032, 0);
+
         cbmiec_udelay(libiec_global_timeouts.T_13_SEND_TURN_AROUND_LISTENER_TALKER_T_TK);
+
+        PERF_EVENT_VERBOSE(0x1033, 0);
 
         CBMIEC_RELEASE(PP_CLK_OUT);
 
+        PERF_EVENT_VERBOSE(0x1034, 0);
+
         cbmiec_release_irq();
+
+        PERF_EVENT_VERBOSE(0x1035, 0);
     }
     else
     {
         CBMIEC_RELEASE(PP_ATN_OUT);
     }
+    PERF_EVENT_VERBOSE(0x1036, 0);
     cbmiec_udelay(libiec_global_timeouts.T_14_SEND_AT_END_DELAY);
+    PERF_EVENT_VERBOSE(0x1037, 0);
 
     DBG_ASSERT(Sent != NULL);
     *Sent = sent;

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/isr.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: isr.c,v 1.3 2005-03-02 18:17:21 strik Exp $ \n
+** \version $Id: isr.c,v 1.4 2005-04-09 15:24:33 strik Exp $ \n
 ** \n
 ** \brief The Interrupt Service Routine (ISR) for the parallel port
 **
@@ -68,7 +68,9 @@ cbm_isr(IN PKINTERRUPT Interrupt, IN PVOID Pdx)
 
     // let the libiec library do the hard work
 
+    PERF_EVENT_VERBOSE(0x2000, 0);
     result = cbmiec_interrupt(Pdx);
+    PERF_EVENT_VERBOSE(0x2001, 0);
 
 #if DBG
 
