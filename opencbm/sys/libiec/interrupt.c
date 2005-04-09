@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/interrupt.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: interrupt.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: interrupt.c,v 1.1.2.1 2005-04-09 15:10:57 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -45,6 +45,8 @@ cbmiec_interrupt(IN PDEVICE_EXTENSION Pdx)
 
     FUNC_ENTER();
 
+    PERF_EVENT_VERBOSE(0x2010, 0);
+
     /* acknowledge the interrupt */
     irqResult = READ_PORT_UCHAR(IN_PORT); 
     DBG_PPORT((DBG_PREFIX "irqResult before:     %02x", irqResult));
@@ -69,8 +71,10 @@ cbmiec_interrupt(IN PDEVICE_EXTENSION Pdx)
 
         if (Pdx->IrqCount != 0)
         {
+            PERF_EVENT_VERBOSE(0x2011, 0);
             if (InterlockedDecrement(&Pdx->IrqCount) == 0)
             {
+                PERF_EVENT_VERBOSE(0x2012, 0);
                 CBMIEC_SET(PP_CLK_OUT);
                 DBG_SUCCESS((DBG_PREFIX "continue to send"));
 
@@ -81,6 +85,7 @@ cbmiec_interrupt(IN PDEVICE_EXTENSION Pdx)
 
                 DBG_IRQL( >= DISPATCH_LEVEL); // in fact, at DIRQL
                 IoRequestDpc(Pdx->Fdo, Pdx->IrpQueue.CurrentIrp, NULL);
+                PERF_EVENT_VERBOSE(0x2013, 0);
 
 #endif // #ifdef USE_DPC
 
@@ -88,6 +93,7 @@ cbmiec_interrupt(IN PDEVICE_EXTENSION Pdx)
         }
         else
         {
+            PERF_EVENT_VERBOSE(0x2014, Pdx->IrqCount);
             DBG_ERROR((DBG_PREFIX "****************************************************"));
             DBG_ERROR((DBG_PREFIX "Interrupt occurred, BUT ALREADY IRQCOUNT=0! ********"));
             DBG_ERROR((DBG_PREFIX "****************************************************"));
@@ -103,6 +109,8 @@ cbmiec_interrupt(IN PDEVICE_EXTENSION Pdx)
 
     irqResult = READ_PORT_UCHAR(IN_PORT); 
     DBG_PPORT((DBG_PREFIX "irqResult afterwards: %02x", irqResult));
+
+    PERF_EVENT_VERBOSE(0x2015, 0);
 
     FUNC_LEAVE_BOOL(isMyInt);
 }

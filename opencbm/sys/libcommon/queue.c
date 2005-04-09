@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/queue.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: queue.c,v 1.3 2004-11-21 15:42:53 strik Exp $ \n
+** \version $Id: queue.c,v 1.3.2.1 2005-04-09 15:10:57 strik Exp $ \n
 ** \n
 ** \brief Functions for queueung IRPs
 **
@@ -51,6 +51,8 @@ InsertIrp(IN PIO_CSQ Csq, IN PIRP Irp)
 
     FUNC_ENTER();
 
+    PERF_EVENT_VERBOSE(0x3000, (ULONG)Irp);
+
     // Get the QUEUE object which contains this CSQ
 
     // no IRQL restrictions apply
@@ -60,6 +62,8 @@ InsertIrp(IN PIO_CSQ Csq, IN PIRP Irp)
 
     // no IRQL restrictions apply
     InsertTailList(&queue->IrpListHead, &Irp->Tail.Overlay.ListEntry);
+
+    PERF_EVENT_VERBOSE(0x3001, 0);
 
     FUNC_LEAVE();
 }
@@ -91,10 +95,14 @@ RemoveIrp(IN PIO_CSQ Csq, IN PIRP Irp)
 
     UNREFERENCED_PARAMETER(Csq);
 
+    PERF_EVENT_VERBOSE(0x3010, (ULONG)Irp);
+
     // Remove the IRP from the CSQ/QUEUE
 
     // no IRQL restrictions apply
     RemoveEntryList(&Irp->Tail.Overlay.ListEntry);
+
+    PERF_EVENT_VERBOSE(0x3011, 0);
 
     FUNC_LEAVE();
 }
@@ -463,9 +471,13 @@ QueueStartPacket(PQUEUE Queue, PIRP Irp, BOOLEAN FastStart, PDEVICE_OBJECT Fdo)
     {
         // No: Process the IRP
 
+        PERF_EVENT_VERBOSE(0x3020, (ULONG)Irp);
+
         if (FastStart)
         {
             DBG_ASSERT(Fdo != NULL);
+
+            PERF_EVENT_VERBOSE(0x3021, (ULONG)Irp);
 
             // The caller has chosen FastStart.
             // This means that he wants to IRP to be executed
@@ -484,7 +496,11 @@ QueueStartPacket(PQUEUE Queue, PIRP Irp, BOOLEAN FastStart, PDEVICE_OBJECT Fdo)
 
                 // Immediately execute this IRP
 
+                PERF_EVENT_VERBOSE(0x3022, (ULONG)Irp);
+
                 ntStatus = Queue->DriverStartIo(Fdo, Irp);
+
+                PERF_EVENT_VERBOSE(0x3023, 0);
             }
             else
             {
@@ -502,6 +518,8 @@ QueueStartPacket(PQUEUE Queue, PIRP Irp, BOOLEAN FastStart, PDEVICE_OBJECT Fdo)
         {
             // No: Add the IRP to the Queue
 
+            PERF_EVENT_VERBOSE(0x3024, (ULONG)Irp);
+
             // First of all, since we will pend the IRP later,
             // mark it pending to prevent the race condition
 
@@ -513,10 +531,14 @@ QueueStartPacket(PQUEUE Queue, PIRP Irp, BOOLEAN FastStart, PDEVICE_OBJECT Fdo)
             // no IRQL restrictions apply!
             IoCsqInsertIrp(&Queue->IrpQueue, Irp, NULL);
 
+            PERF_EVENT_VERBOSE(0x3025, 0);
+
             // Wake up the waiting thread which can execute
             // the queued IRP
 
             QueueSignal(Queue);
+
+            PERF_EVENT_VERBOSE(0x3026, 0);
 
             // Return to the caller that the IRP has been pended.
             // This tells the caller that it has to wait until the
@@ -566,6 +588,8 @@ QueueRemoveNextIrp(PQUEUE Queue)
     // Just let the CSQ perform all the necessary steps
 
     irp = IoCsqRemoveNextIrp(&Queue->IrpQueue, NULL);
+
+    PERF_EVENT_VERBOSE(0x3030, (ULONG)irp);
 
     FUNC_LEAVE_PTR(irp, PIRP);
 }
@@ -797,11 +821,17 @@ QueuePoll(PQUEUE Queue, PDEVICE_OBJECT Fdo)
 
     // First, check if there is an IRP in the QUEUE
 
+    PERF_EVENT_VERBOSE(0x3040, 0);
+
     irp = QueueRemoveNextIrp(Queue);
+
+    PERF_EVENT_VERBOSE(0x3041, (ULONG)irp);
 
     if (!irp)
     {
         // There is no IRP in the QUEUE, wait for a new one
+
+        PERF_EVENT_VERBOSE(0x3042, (ULONG)irp);
 
         KeWaitForSingleObject(&Queue->NotEmptyEvent,
             Executive,
@@ -809,12 +839,16 @@ QueuePoll(PQUEUE Queue, PDEVICE_OBJECT Fdo)
             FALSE,
             NULL);
 
+        PERF_EVENT_VERBOSE(0x3043, (ULONG)irp);
+
 #ifdef USE_FAST_START_THREAD
 
         // Signal to the caller that it can continue
 
         DBG_IRQL( <= DISPATCH_LEVEL);
         KeSetEvent(&Queue->BackSignalEvent, IO_NO_INCREMENT, FALSE);
+
+        PERF_EVENT_VERBOSE(0x3044, (ULONG)irp);
 
 #endif USE_FAST_START_THREAD
 
@@ -824,6 +858,8 @@ QueuePoll(PQUEUE Queue, PDEVICE_OBJECT Fdo)
         // properly.
 
         irp = QueueRemoveNextIrp(Queue);
+
+        PERF_EVENT_VERBOSE(0x3045, (ULONG)irp);
     }
 
     // If there is an IRP, execute and complete that
@@ -874,6 +910,8 @@ QueueSignal(PQUEUE Queue)
     // The fast start of the thread is only allowed if we are running
     // at PASSIVE_LEVEL.
 
+    PERF_EVENT_VERBOSE(0x3050, 0);
+
     if (KeGetCurrentIrql() == PASSIVE_LEVEL)
     {
         // Make sure the "backsignal event" is not set before we start the thread
@@ -881,6 +919,7 @@ QueueSignal(PQUEUE Queue)
         DBG_IRQL( <= DISPATCH_LEVEL);
         KeClearEvent(&Queue->BackSignalEvent);
 
+        PERF_EVENT_VERBOSE(0x3051, 0);
 
         // Initialize the timeout value
 
@@ -891,6 +930,8 @@ QueueSignal(PQUEUE Queue)
 
         DBG_IRQL( == PASSIVE_LEVEL);
         KeSetEvent(&Queue->NotEmptyEvent, IO_NO_INCREMENT, TRUE);
+
+        PERF_EVENT_VERBOSE(0x3052, 0);
 
         // Make sure the other thread is scheduled by waiting for the
         // "back event"
@@ -905,13 +946,19 @@ QueueSignal(PQUEUE Queue)
             KernelMode,
             FALSE,
             &timeout);
+
+        PERF_EVENT_VERBOSE(0x3053, 0);
     }
     else
     {
         // As no fast start is allowed, just signal the thread
 
+        PERF_EVENT_VERBOSE(0x3054, 0);
+
         DBG_IRQL( <= DISPATCH_LEVEL);
         KeSetEvent(&Queue->NotEmptyEvent, IO_NO_INCREMENT, FALSE);
+
+        PERF_EVENT_VERBOSE(0x3055, 0);
     }
 
 #else // #ifdef USE_FAST_START_THREAD

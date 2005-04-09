@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: rawwrite.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: rawwrite.c,v 1.1.2.1 2005-04-09 15:10:57 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -57,6 +57,8 @@ cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx,
 
     FUNC_ENTER();
 
+    PERF_EVENT_VERBOSE(0x1000, 0);
+
     FUNC_PARAM((DBG_PREFIX "Buffer = 0x%p, Size = 0x%04x", Buffer, Size));
 
 #if DBG
@@ -66,7 +68,11 @@ cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx,
     }
 #endif
 
+    PERF_EVENT_VERBOSE(0x1001, 0);
+
     ntStatus = cbmiec_i_raw_write(Pdx, Buffer, Size, Written, 0, 0);
+
+    PERF_EVENT_VERBOSE(0x1002, 0);
 
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }

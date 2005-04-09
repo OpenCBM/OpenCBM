@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/cbm4win_common.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm4win_common.h,v 1.2 2004-11-21 15:29:40 strik Exp $ \n
+** \version $Id: cbm4win_common.h,v 1.2.2.1 2005-04-09 15:10:56 strik Exp $ \n
 ** \n
 ** \brief Definitions for the cbm4win driver
 **
@@ -158,6 +158,9 @@ struct _DEVICE_EXTENSION {
 
     /*! FLAG: The interrupt for the parallel port has been allocated */
     BOOLEAN ParallelPortAllocatedInterrupt;
+
+    /*! FLAG: We are running on an SMP or an HT machine */
+    BOOLEAN IsSMP;
 
     // IEC related vars:
 

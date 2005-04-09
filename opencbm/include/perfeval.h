@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/perfeval.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.h,v 1.1 2004-11-07 11:05:12 strik Exp $ \n
+** \version $Id: perfeval.h,v 1.1.2.1 2005-04-09 15:10:55 strik Exp $ \n
 ** \n
 ** \brief Functions and macros for performance evaluation purposes
 **
@@ -27,6 +27,12 @@ PERFORMANCE_EVAL_ENTRY
     /*! the RDTSC timestamp */
     __int64 Timestamp;
 
+    /*! The processor on which this event occurred. New in v2 */
+    ULONG Processor;
+
+    /*! The thread which is executing this event. New in v2 */
+    PETHREAD PeThread;
+
     /*! The event which is logged */
     ULONG Event;
  
@@ -44,6 +50,13 @@ extern VOID PerfSave(VOID);
 
 /*! Call PerfEvent() if performance evaluation is selected */
 #define PERF_EVENT(_Event_, _Data_) PerfEvent(_Event_, _Data_)
+
+/*! Only define this non-empty if you want very verbose performance data */
+#if 0
+  #define PERF_EVENT_VERBOSE(_Event_, _Data_) PERF_EVENT(_Event_, _Data_)
+#else
+  #define PERF_EVENT_VERBOSE(_Event_, _Data_)
+#endif
 
 /*! Call PerfSave() if performance evaluation is selected */
 #define PERF_SAVE() PerfSave()

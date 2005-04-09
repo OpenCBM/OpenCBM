@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.1 2004-11-07 11:05:14 strik Exp $ \n
+** \version $Id: init.c,v 1.1.2.1 2005-04-09 15:10:56 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
@@ -277,6 +277,10 @@ AddDeviceCommonInit(IN PDEVICE_OBJECT Fdo, IN PUNICODE_STRING DeviceName,
     parallelPortName.Buffer = (PWSTR) ParallelPortName;
     parallelPortName.Length = (USHORT) wcslen(ParallelPortName) * sizeof(WCHAR);
     parallelPortName.MaximumLength = parallelPortName.Length;
+
+    // Mark if we are running on an machine with more than one processor
+
+    pdx->IsSMP = (*KeNumberProcessors > 1) ? TRUE : FALSE;
 
     // Initialize the parallel port information
 

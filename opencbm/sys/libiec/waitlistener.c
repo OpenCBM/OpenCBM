@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/waitlistener.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: waitlistener.c,v 1.2 2004-11-15 16:11:52 strik Exp $ \n
+** \version $Id: waitlistener.c,v 1.2.2.1 2005-04-09 15:10:57 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -84,6 +84,8 @@ cbmiec_wait_for_listener(IN PDEVICE_EXTENSION Pdx, IN BOOLEAN SendEoi)
 
     FUNC_ENTER();
 
+    PERF_EVENT_VERBOSE(0x1100, NumberOfAcks);
+
     // This function has two incarnations. The first one
     // is used if we have successfully allocated the interrupt.
     // In this case, we just wait until the ISR has done the
@@ -95,13 +97,17 @@ cbmiec_wait_for_listener(IN PDEVICE_EXTENSION Pdx, IN BOOLEAN SendEoi)
 
     if (Pdx->ParallelPortAllocatedInterrupt)
     {
+        LONG ret;
+
         // This is implementation 1. It needs a working
         // ISR. The main work is done there
 
         // Tell the ISR how many interrupts to wait for
 
-        LONG ret = InterlockedExchange(&Pdx->IrqCount, NumberOfAcks);
+        PERF_EVENT_VERBOSE(0x1101, NumberOfAcks);
+        ret = InterlockedExchange(&Pdx->IrqCount, NumberOfAcks);
         DBG_ASSERT(ret==0);
+        PERF_EVENT_VERBOSE(0x1102, ret);
 
         // in the sequel, allow interrupts to occur
 
@@ -122,18 +128,23 @@ cbmiec_wait_for_listener(IN PDEVICE_EXTENSION Pdx, IN BOOLEAN SendEoi)
         // set the cancel routine which will wake us up if we do not get
         // an IRQ, and a cancellation is requested
 
+        PERF_EVENT_VERBOSE(0x1103, 0);
         DBG_VERIFY(IoSetCancelRoutine(Pdx->IrpQueue.CurrentIrp, WaitCancelRoutine) DBGDO(== NULL));
 
         // Now, wait until we have been signalled
 
+        PERF_EVENT_VERBOSE(0x1104, 0);
         DBG_DPC((DBG_PREFIX "CALL KeWaitForSingleObject()"));
         KeWaitForSingleObject(&Pdx->EventWaitForListener, Executive, KernelMode, FALSE, NULL);
         DBG_DPC((DBG_PREFIX "RETURN from KeWaitForSingleObject()"));
+
+        PERF_EVENT_VERBOSE(0x1105, 0);
 
         // we do not need the cancel routine anymore:
 
         if (IoSetCancelRoutine(Pdx->IrpQueue.CurrentIrp, NULL) == NULL)
         {
+            PERF_EVENT_VERBOSE(0x1106, -1);
             // the cancel routine was called!
 
             // Make sure the IrqCount is resetted to zero.
@@ -213,5 +224,6 @@ cbmiec_wait_for_listener(IN PDEVICE_EXTENSION Pdx, IN BOOLEAN SendEoi)
         cbmiec_release_irq();
     }
 
+    PERF_EVENT_VERBOSE(0x1107, 0);
     FUNC_LEAVE();
 }
