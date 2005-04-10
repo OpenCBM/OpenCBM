@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.5.2.2 2005-04-10 10:34:29 strik Exp $ \n
+** \version $Id: startstop.c,v 1.5.2.3 2005-04-10 11:08:56 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -83,27 +83,24 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
 
     if (Version != 0)
     {
-        if (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version) == 0)
+        char bugfixVersion[2] = "";
+
+        if (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) != 0)
         {
-            _snprintf(buffer, sizeof(buffer)-1,
-                "%u.%u.%u%c",
-                (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_MAJOR(Version),
-                (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_MINOR(Version),
-                (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_SUBMINOR(Version),
-                (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) == 0 ? ' ' :
-                    (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx)-1+'a')));
+            bugfixVersion[0] = 
+                (char) (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) + 'a' - 1);
+            bugfixVersion[1] = 0;
         }
-        else
-        {
-            _snprintf(buffer, sizeof(buffer)-1,
-                "%u.%u.%u%c.%u (Development)",
-                (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_MAJOR(Version),
-                (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_MINOR(Version),
-                (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_SUBMINOR(Version),
-                (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) == 0 ? ' ' :
-                    (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx)-1+'a')),
-                (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version));
-        }
+
+        _snprintf(buffer, sizeof(buffer)-1,
+            (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version) 
+                ? "%u.%u.%u%s.%u (Development)" 
+                : "%u.%u.%u%s"),
+            (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_MAJOR(Version),
+            (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_MINOR(Version),
+            (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_SUBMINOR(Version),
+            bugfixVersion,
+            (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version));
     }
     else
     {
