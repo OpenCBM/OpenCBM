@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.2 2004-11-15 16:11:52 strik Exp $";
+    "@(#) $Id: main.c,v 1.2.2.1 2005-04-14 17:51:19 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -125,6 +125,7 @@ static void __cdecl reset(int dummy)
 {
     fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
     sleep(1);
+    d64copy_cleanup();
     cbm_reset(fd_cbm);
     cbm_driver_close(fd_cbm);
     exit(1);

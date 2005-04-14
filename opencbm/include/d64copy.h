@@ -7,7 +7,7 @@
  *  Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
-/* $Id: d64copy.h,v 1.1 2004-11-07 11:05:12 strik Exp $ */
+/* $Id: d64copy.h,v 1.1.2.1 2005-04-14 17:51:20 strik Exp $ */
 
 #ifndef D64COPY_H
 #define D64COPY_H
@@ -110,6 +110,8 @@ extern int d64copy_write_image(CBM_FILE cbm_fd,
                                int dst_drive,
                                d64copy_message_cb msg_cb,
                                d64copy_status_cb status_cb);
+
+extern void d64copy_cleanup(void);
 
 #ifdef __cplusplus
 }
