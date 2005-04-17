@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.6 2005-02-13 17:58:12 strik Exp $ \n
+** \version $Id: execute.c,v 1.7 2005-04-17 15:32:19 strik Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **
@@ -97,7 +97,7 @@ release_vdm_address(WORD Offset, WORD Length, PVOID Buffer)
 \
         retAX(ret); \
     } \
-    FUNC_LEAVE_BOOL(error);
+    FUNC_LEAVE_BOOLEAN(error);
 
 #define CHECKEDBUFFERACCESS(_func_) \
         CHECKEDBUFFERACCESS_PROLOG(); \
@@ -154,7 +154,7 @@ vdd_driver_open(VOID)
     setBX(translatedhandle);
     retAX(retValue ? 1 : 0);
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Closes the driver
@@ -178,7 +178,7 @@ vdd_driver_close(CBM_FILE HandleDevice)
 
     cbm_driver_close(HandleDevice);
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 
@@ -321,7 +321,7 @@ vdd_listen(CBM_FILE HandleDevice)
 
     retAX(cbm_listen(HandleDevice, getCH(), getCL()));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Send a TALK on the IEC serial bus
@@ -354,7 +354,7 @@ vdd_talk(CBM_FILE HandleDevice)
 
     retAX(cbm_talk(HandleDevice, getCH(), getCL()));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Open a file on the IEC serial bus
@@ -421,7 +421,7 @@ vdd_close(CBM_FILE HandleDevice)
 
     retAX(cbm_close(HandleDevice, getCH(), getCL()));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Send an UNLISTEN on the IEC serial bus
@@ -451,7 +451,7 @@ vdd_unlisten(CBM_FILE HandleDevice)
 
     retAX(cbm_unlisten(HandleDevice));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Send an UNTALK on the IEC serial bus
@@ -481,7 +481,7 @@ vdd_untalk(CBM_FILE HandleDevice)
 
     retAX(cbm_untalk(HandleDevice));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 
@@ -512,7 +512,7 @@ vdd_get_eoi(CBM_FILE HandleDevice)
 
     retAX(cbm_get_eoi(HandleDevice));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Reset the EOI flag
@@ -537,7 +537,7 @@ vdd_clear_eoi(CBM_FILE HandleDevice)
 
     retAX(cbm_clear_eoi(HandleDevice));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief RESET all devices
@@ -568,7 +568,7 @@ vdd_reset(CBM_FILE HandleDevice)
 
     retAX(cbm_reset(HandleDevice));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 
@@ -604,7 +604,7 @@ vdd_pp_read(CBM_FILE HandleDevice)
 
     setAX(cbm_pp_read(HandleDevice));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Write a byte to a XP1541/XP1571 cable
@@ -635,7 +635,7 @@ vdd_pp_write(CBM_FILE HandleDevice)
 
     cbm_pp_write(HandleDevice, getCL());
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Read status of all bus lines.
@@ -666,7 +666,7 @@ vdd_iec_poll(CBM_FILE HandleDevice)
 
     retAX(cbm_iec_poll(HandleDevice));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 
@@ -695,7 +695,7 @@ vdd_iec_set(CBM_FILE HandleDevice)
 
     cbm_iec_set(HandleDevice, getCL());
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Deactivate a line on the IEC serial bus
@@ -723,7 +723,7 @@ vdd_iec_release(CBM_FILE HandleDevice)
 
     cbm_iec_release(HandleDevice, getCL());
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Activate a line on the IEC serial bus
@@ -757,7 +757,7 @@ vdd_iec_setrelease(CBM_FILE HandleDevice)
 
     cbm_iec_setrelease(HandleDevice, getCH(), getCL());
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Wait for a line to have a specific state
@@ -793,7 +793,7 @@ vdd_iec_wait(CBM_FILE HandleDevice)
 
     retAX(cbm_iec_wait(HandleDevice, getCL(), getCH()));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Get the (logical) state of a line on the IEC serial bus
@@ -824,7 +824,7 @@ vdd_iec_get(CBM_FILE HandleDevice)
 
     retAX(cbm_iec_get(HandleDevice, getCL()));
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 
@@ -1295,7 +1295,7 @@ vdd_install_iohook(CBM_FILE HandleDevice)
         }
     }
 
-    FUNC_LEAVE_BOOL(error);
+    FUNC_LEAVE_BOOLEAN(error);
 }
 
 /*! \brief Uninstall the I/O hook
@@ -1334,7 +1334,7 @@ vdd_uninstall_iohook_internal(VOID)
         ret = 0;
     }
 
-    FUNC_LEAVE_INT(ret);
+    FUNC_LEAVE_USHORT(ret);
 }
 
 /*! \brief Uninstall the I/O hook
@@ -1363,7 +1363,7 @@ vdd_uninstall_iohook(CBM_FILE HandleDevice)
 
     setAX(vdd_uninstall_iohook_internal());
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
 /*! \brief Sleep some microseconds
@@ -1386,5 +1386,5 @@ vdd_usleep(VOID)
 
     arch_usleep(getCX());
 
-    FUNC_LEAVE_BOOL(FALSE);
+    FUNC_LEAVE_BOOLEAN(FALSE);
 }

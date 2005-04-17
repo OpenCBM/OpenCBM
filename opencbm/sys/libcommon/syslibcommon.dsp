@@ -174,7 +174,7 @@ SOURCE=..\include\memtags.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\include\perfeval.h
+SOURCE=..\..\include\WINDOWS\perfeval.h
 # End Source File
 # Begin Source File
 

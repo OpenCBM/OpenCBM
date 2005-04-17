@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.4 2005-03-02 18:17:20 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.5 2005-04-17 15:32:18 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -605,6 +605,14 @@ cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
         outBuffer->DllVersion =
             CBMT_I_INSTALL_OUT_MAKE_VERSION(CBM4WIN_VERSION_MAJOR, CBM4WIN_VERSION_MINOR,
                                             CBM4WIN_VERSION_SUBMINOR, CBM4WIN_VERSION_DEVEL);
+    }
+
+    // if there is even room for the dll version extension, set the dll version extension
+
+    if (BufferLen >= sizeof(outBuffer->DllVersionEx) + offsetof(CBMT_I_INSTALL_OUT, DllVersionEx))
+    {
+        outBuffer->DllVersionEx =
+            CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(CBM4WIN_VERSION_BUGFIX);
     }
 
     FUNC_LEAVE_INT(

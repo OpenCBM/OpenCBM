@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.2 2005-03-02 18:17:21 strik Exp $ \n
+** \version $Id: PortAccess.c,v 1.3 2005-04-17 15:32:19 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -428,7 +428,7 @@ ParPortGetPnpInformation(PDEVICE_EXTENSION Pdx, PPARALLEL_PNP_INFORMATION PnpInf
         DBG_PPORT_VERBOSE(PWSTR, PortName, "%ws")
     }
 
-    FUNC_LEAVE_BOOL(success);
+    FUNC_LEAVE_BOOLEAN(success);
 }
 #undef DBG_PPORT_VERBOSE
 

@@ -3,6 +3,8 @@
 
 #include <sys/types.h> /* for off_t */
 
+#define ARCH_EMPTY
+
 #ifdef WIN32
 # include "version.h"
 
@@ -65,18 +67,13 @@ int arch_filesize(const char *Filename, off_t *Filesize);
 
 #define arch_fileno(_x) ARCH_CBM_LINUX_WIN(fileno(_x), _fileno(_x))
 
-#define arch_setbinmode(_x) ARCH_CBM_LINUX_WIN(/* already in bin mode */, _setmode(_x, _O_BINARY))
+#define arch_setbinmode(_x) ARCH_CBM_LINUX_WIN(ARCH_EMPTY/* already in bin mode */, _setmode(_x, _O_BINARY))
 
 #define arch_ftruncate(_x, _y) ARCH_CBM_LINUX_WIN(ftruncate(_x, _y), _chsize(_x, _y))
 
 #define arch_fdopen(_x, _y) ARCH_CBM_LINUX_WIN(fdopen(_x, _y), _fdopen(_x, _y))
 
-#ifdef WIN32
-# define ARCH_MAINDECL   __cdecl
-# define ARCH_SIGNALDECL __cdecl
-#else
-# define ARCH_MAINDECL   /* no decl needed */
-# define ARCH_SIGNALDECL /* no decl needed */
-#endif
+#define ARCH_MAINDECL   ARCH_CBM_LINUX_WIN(ARCH_EMPTY, __cdecl)
+#define ARCH_SIGNALDECL ARCH_CBM_LINUX_WIN(ARCH_EMPTY, __cdecl)
 
 #endif /* #ifndef CBM_ARCH_H */

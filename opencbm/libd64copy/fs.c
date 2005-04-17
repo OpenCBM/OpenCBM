@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: fs.c,v 1.5 2005-03-02 18:17:21 strik Exp $";
+    "@(#) $Id: fs.c,v 1.6 2005-04-17 15:32:18 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -45,17 +45,43 @@ static int read_block(__u_char tr, __u_char se, char *block)
     return 1;
 }
 
+/*
+ * Variables to make sure writing the block is an atomary process
+ */
+static int atom_execute = 0;
+static __u_char atom_tr;
+static __u_char atom_se;
+static const char *atom_blk;
+static int atom_size;
+static int atom_read_status;
+
 static int write_block(__u_char tr, __u_char se, const char *blk, int size, int read_status)
 {
     long ofs;
+    int ret;
+
+    atom_tr = tr;
+    atom_se = se;
+    atom_blk = blk;
+    atom_size = size;
+    atom_read_status = read_status;
+
+    atom_execute = 1;
 
     ofs = block_offset(tr, se);
     if(fseek(the_file, ofs, SEEK_SET) == 0)
     {
         error_map[ofs / BLOCKSIZE] = (char) read_status;
-        return fwrite(blk, size, 1, the_file) != 1;
+        ret = fwrite(blk, size, 1, the_file) != 1;
     }
-    return 1;
+    else
+    {
+        ret = 1;
+    }
+
+    atom_execute = 0;
+
+    return ret;
 }
 
 static int open_disk(CBM_FILE fd, d64copy_settings *settings,
@@ -237,6 +263,16 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
 static void close_disk(void)
 {
     int i, has_errors = 0;
+
+    /* if writing the block was interrupted, make sure it is
+     * redone before closing the disk 
+     */
+
+    if (atom_execute)
+    {
+        atom_execute = 0;
+        write_block(atom_tr, atom_se, atom_blk, atom_size, atom_read_status);
+    }
 
     switch(fs_settings->error_mode)
     {

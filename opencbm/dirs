@@ -1,4 +1,5 @@
 DIRS= \
+	rpm1541 \
 	arch \
 	cbmformat \
 	libcbmcopy \

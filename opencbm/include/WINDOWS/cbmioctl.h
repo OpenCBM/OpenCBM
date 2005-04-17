@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.1 2005-03-02 18:17:20 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.2 2005-04-17 15:32:17 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -136,6 +136,14 @@ struct CBMT_BOOLEAN
 #define CBMT_I_INSTALL_OUT_MAKE_VERSION(_x, _y, _z, _w) \
     (((((_x) << 8 | (_y)) << 8 | (_z)) << 8 | (_w)))
 
+
+/*! the bugfix number in the version extension */
+#define CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(_x) (((_x) >>  0) & 0xFF)
+
+/*! Build such a version extension */
+#define CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(_w) \
+    (_w)
+
 /*! Output buffer for I_INSTALL */
 typedef
 struct CBMT_I_INSTALL_OUT
@@ -150,6 +158,12 @@ struct CBMT_I_INSTALL_OUT
 
     /*! The version of the driver */
     ULONG DriverVersion;
+
+    /*! The version extension of the DLL */
+    ULONG DllVersionEx;
+
+    /*! The version extension of the driver */
+    ULONG DriverVersionEx;
 
 } CBMT_I_INSTALL_OUT, *PCBMT_I_INSTALL_OUT;
 

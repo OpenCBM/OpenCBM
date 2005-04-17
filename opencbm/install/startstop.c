@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.7 2005-03-02 18:17:20 strik Exp $ \n
+** \version $Id: startstop.c,v 1.8 2005-04-17 15:32:17 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -57,7 +57,7 @@ OutputPathString(IN PCHAR Text, IN PCHAR Path)
     FUNC_LEAVE();
 }
 
-/*! \brief Output a version string
+/*! \internal \brief Output a version string
 
  \param Text
    Pointer to a string that will be printed before
@@ -68,8 +68,8 @@ OutputPathString(IN PCHAR Text, IN PCHAR Path)
    CBMT_I_INSTALL_OUT_MAKE_VERSION()
 
 */
-VOID
-OutputVersionString(IN PCHAR Text, IN ULONG Version)
+static VOID
+OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
 {
     char buffer[100];
 
@@ -77,11 +77,23 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version)
 
     if (Version != 0)
     {
+        char bugfixVersion[2] = "";
+
+        if (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) != 0)
+        {
+            bugfixVersion[0] = 
+                (char) (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) + 'a' - 1);
+            bugfixVersion[1] = 0;
+        }
+
         _snprintf(buffer, sizeof(buffer)-1,
-            CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version) ? "%u.%u.%u.%u (Development)" : "%u.%u.%u",
+            (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version) 
+                ? "%u.%u.%u%s.%u (Development)" 
+                : "%u.%u.%u%s"),
             (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_MAJOR(Version),
             (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_MINOR(Version),
             (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_SUBMINOR(Version),
+            bugfixVersion,
             (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version));
     }
     else
@@ -109,6 +121,7 @@ static BOOL
 CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 {
     ULONG instcbmVersion;
+    ULONG instcbmVersionEx;
     DWORD startMode;
     DWORD lptPort;
     char dllPath[MAX_PATH] = "<unknown>";
@@ -147,9 +160,12 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
             {
                 p_cbm_i_driver_install((PULONG) &dllInstallOutBuffer, sizeof(dllInstallOutBuffer));
 
-                if (InstallOutBuffer->DriverVersion == dllInstallOutBuffer.DriverVersion)
+                if (   (InstallOutBuffer->DriverVersion == dllInstallOutBuffer.DriverVersion)
+                    && (InstallOutBuffer->DriverVersionEx == dllInstallOutBuffer.DriverVersionEx)
+                   )
                 {
-                    InstallOutBuffer->DllVersion = dllInstallOutBuffer.DllVersion;
+                    InstallOutBuffer->DllVersion   = dllInstallOutBuffer.DllVersion;
+                    InstallOutBuffer->DllVersionEx = dllInstallOutBuffer.DllVersionEx;
                 }
                 else
                 {
@@ -278,24 +294,31 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 
     printf("\n\nThe following configuration is used:\n\n");
 
-    instcbmVersion = 
+    instcbmVersion =
         CBMT_I_INSTALL_OUT_MAKE_VERSION(CBM4WIN_VERSION_MAJOR,
                                         CBM4WIN_VERSION_MINOR,
                                         CBM4WIN_VERSION_SUBMINOR,
                                         CBM4WIN_VERSION_DEVEL);
 
-    OutputVersionString("INSTCBM version: ", instcbmVersion);
+    instcbmVersionEx =
+        CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(CBM4WIN_VERSION_BUGFIX);
 
-    OutputVersionString("Driver version:  ", InstallOutBuffer->DriverVersion);
+    OutputVersionString("INSTCBM version: ", instcbmVersion, instcbmVersionEx);
+
+    OutputVersionString("Driver version:  ", InstallOutBuffer->DriverVersion,
+        InstallOutBuffer->DriverVersionEx);
     OutputPathString   ("Driver path:     ", driverPath);
-    OutputVersionString("DLL version:     ", InstallOutBuffer->DllVersion);
+    OutputVersionString("DLL version:     ", InstallOutBuffer->DllVersion,
+        InstallOutBuffer->DllVersionEx);
     OutputPathString   ("DLL path:        ", dllPath);
 
     printf("\n");
 
-    if ( (InstallOutBuffer->DriverVersion != InstallOutBuffer->DllVersion)
-        || (instcbmVersion != InstallOutBuffer->DllVersion)
-        || (instcbmVersion != InstallOutBuffer->DriverVersion))
+    if (   (instcbmVersion   != InstallOutBuffer->DllVersion)
+        || (instcbmVersionEx != InstallOutBuffer->DllVersionEx)
+        || (instcbmVersion   != InstallOutBuffer->DriverVersion)
+        || (instcbmVersionEx != InstallOutBuffer->DriverVersionEx)
+       )
     {
         error = TRUE;
         printf("There are mixed versions, THIS IS NOT RECOMMENDED!\n\n");

@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.2 2004-12-07 19:44:48 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.3 2005-04-17 15:32:18 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -100,6 +100,13 @@ static const struct drive_prog
 
 static const int default_interleave[] = { 17, 4, 13, 7 };
 static const int warp_write_interleave[] = { 0, 6, 12, 4 };
+
+
+/*
+ * Variables to make sure writing a block is an atomary process
+ */
+static int atom_mustcleanup = 0;
+static const transfer_funcs *atom_dst;
 
 
 static int send_turbo(CBM_FILE fd, unsigned char drv, int write, int warp, int drv_type)
@@ -660,7 +667,6 @@ int d64copy_get_transfer_mode_index(const char *name)
     return -1;
 }
 
-
 int d64copy_read_image(CBM_FILE cbm_fd,
                        d64copy_settings *settings,
                        int src_drive,
@@ -670,6 +676,7 @@ int d64copy_read_image(CBM_FILE cbm_fd,
 {
     const transfer_funcs *src;
     const transfer_funcs *dst;
+    int ret;
 
     message_cb = msg_cb;
     status_cb = stat_cb;
@@ -677,8 +684,15 @@ int d64copy_read_image(CBM_FILE cbm_fd,
     src = transfers[settings->transfer_mode].trf;
     dst = &d64copy_fs_transfer;
 
-    return copy_disk(cbm_fd, settings,
+    atom_dst = dst;
+    atom_mustcleanup = 1;
+
+    ret = copy_disk(cbm_fd, settings,
             src, (void*)src_drive, dst, (void*)dst_image, (unsigned char) src_drive);
+
+    atom_mustcleanup = 0;
+
+    return ret;
 }
 
 int d64copy_write_image(CBM_FILE cbm_fd,
@@ -699,4 +713,17 @@ int d64copy_write_image(CBM_FILE cbm_fd,
 
     return copy_disk(cbm_fd, settings,
             src, (void*)src_image, dst, (void*)dst_drive, (unsigned char) dst_drive);
+}
+
+void d64copy_cleanup(void)
+{
+    /* if we were interrupted writing to the fs, make sure to
+     * write anything that has already been started
+     */
+
+    if (atom_mustcleanup)
+    {
+        atom_dst->close_disk();
+        atom_mustcleanup = 0;
+    }
 }

@@ -56,6 +56,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name arch
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name demorpm1541
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -186,6 +189,24 @@ Package=<4>
 
 ###############################################################################
 
+Project: "demorpm1541"=..\demo\rpm1541\WINBUILD\demorpm1541.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "install"=..\install\WINBUILD\install.dsp - Package Owner=<4>
 
 Package=<5>
@@ -242,6 +263,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
 }}}
 
 ###############################################################################

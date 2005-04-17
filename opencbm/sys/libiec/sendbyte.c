@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/sendbyte.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: sendbyte.c,v 1.4 2005-04-09 15:24:33 strik Exp $ \n
+** \version $Id: sendbyte.c,v 1.5 2005-04-17 15:32:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -92,5 +92,5 @@ cbmiec_send_byte(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
 
     DBG_SUCCESS((DBG_PREFIX "ack=%s", ack ? "TRUE" : "FALSE" ));
 
-    FUNC_LEAVE_BOOL(ack);
+    FUNC_LEAVE_BOOLEAN(ack);
 }

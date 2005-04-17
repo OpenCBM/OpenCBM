@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/queue.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: queue.c,v 1.5 2005-04-09 15:24:33 strik Exp $ \n
+** \version $Id: queue.c,v 1.6 2005-04-17 15:32:19 strik Exp $ \n
 ** \n
 ** \brief Functions for queueung IRPs
 **
@@ -680,7 +680,7 @@ QueueIsStalled(PQUEUE Queue)
 
     Ret = Queue->IsStalled ? TRUE : FALSE;
 
-    FUNC_LEAVE_BOOL(Ret);
+    FUNC_LEAVE_BOOLEAN(Ret);
 }
 
 /*! \brief Check if a QUEUE is in DROPPING state.
@@ -719,7 +719,7 @@ QueueIsDropping(PQUEUE Queue)
 
     Ret = Queue->IsDropping ? TRUE : FALSE;
 
-    FUNC_LEAVE_BOOL(Ret);
+    FUNC_LEAVE_BOOLEAN(Ret);
 }
 
 #endif // #if DBG
@@ -1040,5 +1040,5 @@ QueueShouldCancelCurrentIrp(PQUEUE Queue)
 
     // Check if the Cancel field of the current IRP has been set
 
-    FUNC_LEAVE_BOOL(Queue->CurrentIrp->Cancel ? TRUE : FALSE);
+    FUNC_LEAVE_BOOLEAN(Queue->CurrentIrp->Cancel ? TRUE : FALSE);
 }

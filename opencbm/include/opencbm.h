@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.7 2005-01-22 19:50:40 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.8 2005-04-17 15:32:17 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -43,6 +43,7 @@ extern "C" {
 #define CBMAPIDECL __cdecl /*!< On Windows, we need c-type function declarations */
 # define __u_char unsigned char /*!< __u_char as unsigned char */
 # define CBM_FILE HANDLE /*!< The "file descriptor" for an opened driver */
+# define CBM_FILE_INVALID INVALID_HANDLE_VALUE
 
 #elif defined(__MSDOS__)
 
@@ -54,6 +55,7 @@ extern "C" {
 # define CBMAPIDECL /*!< CBMAPIDECL is a dummy on MS-DOS */
 # define WINAPI /*!< WINAPI is a dummy on MS-DOS */
 # define CBM_FILE int /*!< The "file descriptor" for an opened driver */
+# define CBM_FILE_INVALID ((CBM_FILE)-1)
 # define __u_char unsigned char /*!< __u_char as unsigned char */
 
 extern int vdd_init(void);
@@ -69,6 +71,7 @@ extern void vdd_usleep(CBM_FILE f, unsigned int howlong);
 # define CBMAPIDECL /*!< CBMAPIDECL is a dummy on Linux */
 # define WINAPI /*!< WINAPI is a dummy on Linux */
 # define CBM_FILE int /*!< The "file descriptor" for an opened driver */
+# define CBM_FILE_INVALID ((CBM_FILE)-1)
 
 #endif
 
