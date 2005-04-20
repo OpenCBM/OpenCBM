@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/cbm4win_common.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm4win_common.h,v 1.2.2.1 2005-04-09 15:10:56 strik Exp $ \n
+** \version $Id: cbm4win_common.h,v 1.2.2.2 2005-04-20 14:49:19 strik Exp $ \n
 ** \n
 ** \brief Definitions for the cbm4win driver
 **
@@ -216,7 +216,7 @@ cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer, IN OUT PULO
 #endif // #if DBG
 
 extern VOID
-cbm_init_registry(IN PUNICODE_STRING RegistryPath);
+cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx);
 
 extern NTSTATUS
 cbm_startio(IN PDEVICE_OBJECT Fdo, IN PIRP Irp);
