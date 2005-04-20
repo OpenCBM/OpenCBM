@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file dll/opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm.c,v 1.5 2004-11-27 19:36:03 strik Exp $ \n
+** \version $Id: opencbm.c,v 1.5.2.1 2005-04-20 14:46:57 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -27,6 +27,8 @@
 
 #include <windows.h>
 #include <windowsx.h>
+
+#include <mmsystem.h>
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
@@ -1370,6 +1372,58 @@ cbm_ascii2petscii(char *Str)
     return Str;
 }
 
+/*! \internal \brief Start fast scheduling
+
+ The cbm4win driver is very timing sensitive. Because of this, it is
+ very important that the scheduling is done as fast as possible.
+
+ Unfortunately, Windows has a varying scheduling granularity. Normally,
+ it is in the order of 5 us to 20 us, but it can even grow much larger,
+ for example, on an NT4 system or an an SMP or HT machine.
+
+ fastschedule_start() uses a function from mmsystem.h which tells
+ Windows to schedule with a much lower granularity. In this case, we ask
+ Windows to use a granularity of 1 us.
+
+ Note that this has a negative impact on the overall performance of the
+ system, as more scheduling decisions have to be taken by the system.
+ Anyway, it has a very positive impact for cbm4win.
+ 
+ Note: Every call to fastschedule_start() has to be balanced with an
+ appropriate call to fastschedule_stop() 
+*/
+
+static void
+fastschedule_start(void)
+{
+    FUNC_ENTER();
+
+    if (timeBeginPeriod(1) != TIMERR_NOERROR)
+    {
+        DBG_WARN((DBG_PREFIX "Unable to decrease scheduling period."));
+    }
+ 
+    FUNC_LEAVE();
+}
+
+/*! \internal \brief End fast scheduling
+
+ For an explanation of this function, see fastschedule_start().
+*/
+
+static void
+fastschedule_stop(void)
+{
+    FUNC_ENTER();
+
+    if (timeEndPeriod(1) != TIMERR_NOERROR)
+    {
+        DBG_WARN((DBG_PREFIX "Unable to restore scheduling period."));
+    }
+
+    FUNC_LEAVE();
+}
+
 /*! \brief DLL initialization und unloading
 
  This function is called whenever the DLL is loaded or unloaded.
@@ -1434,18 +1488,25 @@ opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
                 // to start it
 
                 Status = TRUE;
-                break;
-            }
-
-            if (bIsOpen)
-            {
-                DBG_ERROR((DBG_PREFIX "No multiple instances are allowed!"));
-                Status = FALSE;
             }
             else
             {
-                Status  = TRUE;
-                bIsOpen = cbm_i_driver_start();
+                if (bIsOpen)
+                {
+                    DBG_ERROR((DBG_PREFIX "No multiple instances are allowed!"));
+                    Status = FALSE;
+                }
+                else
+                {
+                    Status  = TRUE;
+                    bIsOpen = cbm_i_driver_start();
+                }
+            }
+
+            /* If the DLL loaded successfully, ask for fast scheduling */
+            if (Status)
+            {
+                fastschedule_start();
             }
             break;
 
@@ -1457,21 +1518,28 @@ opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
                 // to stop it
 
                 Status = TRUE;
-                break;
-            }
-
-            if (!bIsOpen)
-            {
-                DBG_ERROR((DBG_PREFIX "Driver is not running!"));
-                Status = FALSE; // is ignored anyway, but...
             }
             else
             {
-                // it is arguable if the driver should be stopped
-                // whenever the DLL is unloaded.
+                if (!bIsOpen)
+                {
+                    DBG_ERROR((DBG_PREFIX "Driver is not running!"));
+                    Status = FALSE;
+                }
+                else
+                {
+                    // it is arguable if the driver should be stopped
+                    // whenever the DLL is unloaded.
 
-                cbm_i_driver_stop();
-                bIsOpen = FALSE;
+                    cbm_i_driver_stop();
+                    bIsOpen = FALSE;
+                }
+            }
+
+            /* If the DLL unloaded successfully, we do not need fast scheduling anymore. */
+            if (Status)
+            {
+                fastschedule_stop();
             }
             break;
 
