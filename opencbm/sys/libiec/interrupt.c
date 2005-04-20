@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/interrupt.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: interrupt.c,v 1.1.2.1 2005-04-09 15:10:57 strik Exp $ \n
+** \version $Id: interrupt.c,v 1.1.2.2 2005-04-20 14:44:02 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -112,5 +112,5 @@ cbmiec_interrupt(IN PDEVICE_EXTENSION Pdx)
 
     PERF_EVENT_VERBOSE(0x2015, 0);
 
-    FUNC_LEAVE_BOOL(isMyInt);
+    FUNC_LEAVE_BOOLEAN(isMyInt);
 }

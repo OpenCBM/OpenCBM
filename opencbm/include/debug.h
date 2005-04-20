@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.4 2004-11-21 16:29:09 strik Exp $ \n
+** \version $Id: debug.h,v 1.4.2.1 2005-04-20 14:44:01 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -362,26 +362,30 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
        #define FUNC_PARAM( _xxx )       { if (ISDBG_PARAM()) { _DBG_START(); _DBGO(( DBG_PREFIX "Parameter for %s: ", __FUNCTION__ )); _DBGO( _xxx ); _DBG_END() } }
 
        /*! leave the function with a return value of type BOOL */
-       #define FUNC_LEAVE_BOOL(   _xxx ) { if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with BOOL=%s",   __FUNCTION__, (_xxx)?"TRUE":"FALSE" )); } return _xxx; }
+       #define FUNC_LEAVE_BOOL(   _xxx ) { const BOOL    _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with BOOL=%s",   __FUNCTION__, (_OUT_)?"TRUE":"FALSE" )); } return _OUT_; }
+       /*! leave the function with a return value of type BOOL */
+       #define FUNC_LEAVE_BOOLEAN(_xxx ) { const BOOLEAN _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with BOOL=%s",   __FUNCTION__, (_OUT_)?"TRUE":"FALSE" )); } return _OUT_; }
        /*! leave the function with a return value of type INT */
-       #define FUNC_LEAVE_INT(    _xxx ) { if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with INT=%u (%d)",    __FUNCTION__, (unsigned)(_xxx), (signed)(_xxx) )); }      return _xxx; }
+       #define FUNC_LEAVE_INT(    _xxx ) { const int     _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with INT=%u (%d)",    __FUNCTION__, (unsigned)(_OUT_), (signed)(_OUT_) )); }      return _OUT_; }
+       /*! leave the function with a return value of type INT */
+       #define FUNC_LEAVE_USHORT( _xxx ) { const USHORT  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with INT=%u (%d)",    __FUNCTION__, (unsigned)(_OUT_), (signed)(_OUT_) )); }      return _OUT_; }
        /*! leave the function with a return value of type UCHAR */
-       #define FUNC_LEAVE_UCHAR(  _xxx ) { if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with UCHAR=%u",  __FUNCTION__, (unsigned)(_xxx) )); }      return _xxx; }
+       #define FUNC_LEAVE_UCHAR(  _xxx ) { const UCHAR   _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with UCHAR=%u",  __FUNCTION__, (unsigned)(_OUT_) )); }      return _OUT_; }
        /*! leave the function with a return value of type HANDLE */
-       #define FUNC_LEAVE_HANDLE( _xxx ) { if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with HANDLE=%u", __FUNCTION__, (unsigned)(_xxx) )); }      return _xxx; }
+       #define FUNC_LEAVE_HANDLE( _xxx ) { const HANDLE  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with HANDLE=%u", __FUNCTION__, (unsigned)(_OUT_) )); }      return _OUT_; }
        /*! leave the function with a return value of type STRING */
-       #define FUNC_LEAVE_STRING( _xxx ) { if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with '%s'",      __FUNCTION__,           (_xxx) )); }      return _xxx; }
+       #define FUNC_LEAVE_STRING( _xxx ) { const char *  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with '%s'",      __FUNCTION__,           (_OUT_) )); }      return _OUT_; }
        /*! leave the function with a return value of type ULONG */
-       #define FUNC_LEAVE_ULONG(  _xxx ) { if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with ULONG=%ul", __FUNCTION__, (ULONG)   (_xxx) )); }      return _xxx; }
+       #define FUNC_LEAVE_ULONG(  _xxx ) { const ULONG   _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with ULONG=%ul", __FUNCTION__, (ULONG)   (_OUT_) )); }      return _OUT_; }
        /*! leave the function with a return value of type ULONG */
-       #define FUNC_LEAVE_TYPE(  _xxx, _TYPE, _FORMAT) { if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with " #_TYPE "=" _FORMAT, __FUNCTION__, (_xxx) )); }      return _xxx; }
+       #define FUNC_LEAVE_TYPE(  _xxx, _TYPE, _FORMAT) { _TYPE _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with " #_TYPE "=" _FORMAT, __FUNCTION__, (_OUT_) )); }      return _OUT_; }
        #define FUNC_LEAVE_PTR(  _xxx, _TYPE )  FUNC_LEAVE_TYPE( _xxx, _TYPE, "0x%p")
 
        #ifdef DBG_KERNELMODE
               /*! leave the function with a return value of type NTSTATUS (no look-up needed) */
               #define FUNC_LEAVE_NTSTATUS_CONST( _xxx ) { if (ISDBG_LEAVE() || (ISDBG_LEAVE_FAILURE() && (_xxx != STATUS_SUCCESS))) { DBGO(( DBG_PREFIX "Leaving  %s with NTSTATUS=%s", __FUNCTION__, #_xxx )); } return _xxx; }
               /*! leave the function with a return value of type NTSTATUS (look-up needed) */
-              #define FUNC_LEAVE_NTSTATUS(       _xxx ) { if (ISDBG_LEAVE() || (ISDBG_LEAVE_FAILURE() && (_xxx != STATUS_SUCCESS))) { DBGO(( DBG_PREFIX "Leaving  %s with NTSTATUS=%s", __FUNCTION__, DebugNtStatus(_xxx) )); } return _xxx; }
+              #define FUNC_LEAVE_NTSTATUS(       _xxx ) { NTSTATUS _OUT_ = _xxx; if (ISDBG_LEAVE() || (ISDBG_LEAVE_FAILURE() && (_xxx != STATUS_SUCCESS))) { DBGO(( DBG_PREFIX "Leaving  %s with NTSTATUS=%s", __FUNCTION__, DebugNtStatus(_OUT_) )); } return _OUT_; }
               /*! Output if DBGF_ASSERTIRQL is defined */
               #define DBG_IRQL(  _xxx ) { if (!(KeGetCurrentIrql() _xxx)) if (ISDBG_ASSERTIRQL()) { DBGO(( DBG_PREFIX "***IRQL ASSERTION FAILED!***: '%s' in %s:%s(%u)", #_xxx, __FILE__, __FUNCTION__, __LINE__ )); DBG_BREAKPOINT(); } }
        #endif
@@ -446,7 +450,13 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
        #define FUNC_LEAVE_BOOL(   _xxx ) return _xxx
 
        //! On release builds, a dummy
+       #define FUNC_LEAVE_BOOLEAN(   _xxx ) return _xxx
+
+       //! On release builds, a dummy
        #define FUNC_LEAVE_INT(    _xxx ) return _xxx
+
+       //! On release builds, a dummy
+       #define FUNC_LEAVE_USHORT(  _xxx ) return _xxx
 
        //! On release builds, a dummy
        #define FUNC_LEAVE_UCHAR(  _xxx ) return _xxx
