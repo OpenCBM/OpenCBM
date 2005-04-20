@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: rpm1541.c,v 1.1 2005-04-17 15:32:18 strik Exp $";
+    "@(#) $Id: rpm1541.c,v 1.1 2005-04-20 14:09:58 strik Exp $";
 #endif
 
 
