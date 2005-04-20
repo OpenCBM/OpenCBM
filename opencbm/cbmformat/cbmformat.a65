@@ -2,7 +2,7 @@
 ; This program is heavily based on Joe Forster/STAs <sta@c64.org>
 ; StarCommander Turbo routines.
 ;
-; "$Id: cbmformat.a65,v 1.2 2005-04-17 15:32:17 strik Exp $"
+; "$Id: cbmformat.a65,v 1.3 2005-04-20 14:24:06 strik Exp $"
 
 
 JOB_BUMP	= $C0 ; bump the head
@@ -10,6 +10,7 @@ JOB_EXEC2	= $E0 ; execute after drive runs
 
 CMDNUM_NEW	= $0B ; command number for "NEW" command
 
+JOB2	= $02 ; job code for buffer 2
 TRACK2	= $0A ; track for buffer 2 ($0500-$05FF)
 SECTOR2	= $0B ; sector for buffer 2 ($0500-$05FF)
 HDRID1	= $16 ; 1st character of disc ID
@@ -40,6 +41,7 @@ DC_DATA	= $1C01
 DC_DATADDR	= $1C03
 DC_PCR	= $1C0C
 
+ERROUT	= $C1C8
 TAGCMD	= $C1EE ;
 ONEDRV	= $C312
 SETDRIVENUM	= $C388
@@ -62,7 +64,7 @@ StartTrack = 1
 Security = 2
 MinGAP = 5
 
-DebugFormat = 1
+; DebugFormat = 1
 ; DebugVICE = 1
 TryGoodGaps = 1
 
@@ -70,7 +72,7 @@ TryGoodGaps = 1
 .ifdef DebugVICE
 
 	* = BUFFER2 - 2
-	.byte 0, $C0
+	.byte 0, 5
 
 .else
 
@@ -79,7 +81,87 @@ TryGoodGaps = 1
 .endif
 
 	jmp JobRoutine
-	jmp Start
+
+; here is the program entry
+
+; the command-line has the following format:
+;        M-E<StartLow><StartHigh><Tracks+1><Orig><Bump><ShowProgress>0:<Name>,<ID1><ID2>
+;                                                                     1 1 
+; Byte:  012    3         4          5        6    7         8       90 1..x x  x    x
+;                                                                            +  +    +
+;                                                                            1  2    3
+
+Start	lda #CMDNUM_NEW	; set the command number for "new" command
+	sta CMDNUM	; 
+
+	jsr TAGCMD
+	jsr ONEDRV
+	lda FILDRV
+	jsr SETDRIVENUM
+
+	; set the header id into appropriate zp locations
+	ldy FILTBL
+	lda CMDBUF,y
+	sta HDRID1
+	lda CMDBUF+1,y
+	sta HDRID2
+
+	; set track number to start with in buffer #2
+	lda #StartTrack
+	sta TRACK2
+
+	ldx #$02
+	stx JOBNUM
+
+	; execute bump if it was given on the command line
+	lda CMDBUF+7	; get bump value
+	beq NoBump	; if 0, do not execute a bump
+	lda #JOB_BUMP
+	jsr DOJOB	; execute the job in A
+
+	; execute program in buffer #2
+NoBump	lda #JOB_EXEC2
+	jsr DOJOB
+
+	; if an error occurred, process that error
+	lda JOB2
+	cmp #1
+	bne ErrorOccurred
+
+.ifdef DebugFormat
+
+; ------ only for debugging @@@
+	ldx #79
+L1	lda StTry,x
+	sta $0300,x
+	dex
+	bpl L1
+; ------
+
+.endif
+
+	jsr INITDR	; @@@
+	jmp WRITEBAM	; write BAM and quit
+	; -------------------------------------
+
+ErrorOccurred
+
+.ifdef DebugFormat
+
+; ------ only for debugging @@@
+	ldx #79
+L2	lda StTry,x
+	sta $0300,x
+	dex
+	bpl L2
+; ------
+
+.endif
+
+	lda JOB2
+;	sec		; here, carry is set ("bcs ErrorOccurred")
+	adc #$20-2-1
+	jmp ERROUT
 
 ; This is the IRQ routine
 JobRoutine
@@ -141,6 +223,8 @@ NxtTrk	jsr status	; perform handshake for next sector if needed
 	jsr BegWrt	; set write mode, start overwriting
 	jsr FrmtTrk	; Format the track
 
+	bcs JobErr
+
 	inc TRACK2	; Increment track number
 
 	lda TRACK2
@@ -169,7 +253,7 @@ RetOk	lda #$01
 	.byte $2c
 
 WrtPrtc	lda #$08
-	jmp ERRR
+JobErr	jmp ERRR
 
 
 ; Format one track
@@ -360,7 +444,7 @@ SyncFnd	clv		; allow for accounting the next byte
 
 	sty HDRPNT	; remember the additional GAP we want to add
 
-	ldx #$0A	; read 10 byte
+	ldx #10		; read 10 byte
 	ldy #0		; where to start with data reading
 
 
@@ -375,13 +459,13 @@ CmpByte	bvc CmpByte	; wait for end of byte
 
 	; check if there are more byte left than there are sectors
 	lda HDRPNT
-;	beq Ret
+;	beq Verify
 	bpl SyncAdd
 
 	; now, check how much byte are missing for a complete gap.
 	; if it is not too much, do not do anything
 	cpx #Security
-	bcc Ret
+	bcc Verify
 
 	; the GAP was too big. Now, half it (and make sure it is not zero)
 Smaller	lda GAPLEN
@@ -391,9 +475,9 @@ Smaller	lda GAPLEN
 	bne StoreGap
 
 SyncAdd
-	; if the additional gap is smaller one or less, ignore it
+	; if the additional gap is one or less, ignore it
 	cmp #2
-	bcc Ret
+	bcc Verify
 
 	; add the additional gap the the gap already used
 	clc
@@ -428,8 +512,86 @@ BlkWrt	bvc BlkWrt	; wait for end of previous byte
 	clv
 	dey		; another one? than write that
 	bne BlkWrt
+	rts
 
-Ret	rts
+Verify
+	ldx SECTR	; get the number of sectors to check
+	dex		; the first track has already been (partially) processed
+	stx SECTOR2
+
+	ldy #10
+	sty HDRPNT	; where to start reading sector info
+
+	bne VerData	; skip finding the block header
+	; ----------------
+
+	; verify the next sector
+VerNxtSec
+	lda DC_SETTINGS
+	bmi VerNxtSec	; wait for sync mark
+
+	clv
+	LDA DC_DATA	; clear the value from the buffer
+	
+	ldx #10		; read 10 byte
+	ldy HDRPNT	; where to start with data reading
+
+VerHdr	bvc VerHdr	; wait for end of byte
+	clv
+	lda DC_DATA	; read data from DC
+	cmp BUFFER0,y	; compare with the expected data
+	bne VerErrorHdr	; we found a wrong sync, we have a problem
+	iny
+	dex
+	bne VerHdr
+
+	sty HDRPNT
+
+VerData
+	lda DC_SETTINGS
+	bmi VerData	; wait for sync mark
+
+	clv
+	lda DC_DATA
+
+	ldy #$bb
+
+VerDt0	bvc VerDt0
+	clv
+	lda DC_DATA
+	cmp BUFFER4,y
+	bne VerErrorData
+	iny
+	bne VerDt0
+
+VerDt1	bvc VerDt1
+	clv
+	lda DC_DATA
+	cmp BUFFER1,y
+	bne VerErrorData
+	iny
+	bne VerDt1
+
+	dec SECTOR2
+	bne VerNxtSec
+
+	clc
+	rts
+
+VerOut
+	lda #8
+
+	.byte $2c
+
+VerErrorHdr
+	lda #9
+
+	.byte $2c
+
+VerErrorData
+	lda #5
+	sec
+	rts
 
 BegWrt	; set R/W head into write mode
 
@@ -456,66 +618,6 @@ SpdGAP	.byte 7,9,15,5
 SpdTrk	.byte 31, 25, 18, 1
 
 .endif
-
-
-; here is the program entry
-
-; the command-line has the following format:
-;        M-E<StartLow><StartHigh><Tracks+1><Orig><Bump><ShowProgress>0:<Name>,<ID1><ID2>
-;                                                                     1 1 
-; Byte:  012    3         4          5        6    7         8       90 1..x x  x    x
-;                                                                            +  +    +
-;                                                                            1  2    3
-
-; StGap
-
-Start	lda #CMDNUM_NEW	; set the command number for "new" command
-	sta CMDNUM	; 
-
-	jsr TAGCMD
-	jsr ONEDRV
-	lda FILDRV
-	jsr SETDRIVENUM
-
-	; set the header id into appropriate zp locations
-	ldy FILTBL
-	lda CMDBUF,y
-	sta HDRID1
-	lda CMDBUF+1,y
-	sta HDRID2
-
-	; set track number to start with in buffer #2
-	lda #StartTrack
-	sta TRACK2
-
-	ldx #$02
-	stx JOBNUM
-
-	; execute bump if it was given on the command line
-	lda CMDBUF+7	; get bump value
-	beq NoBump	; if 0, do not execute a bump
-	lda #JOB_BUMP
-	jsr DOJOB	; execute the job in A
-
-	; execute program in buffer #2
-NoBump	lda #JOB_EXEC2
-	jsr DOJOB
-
-.ifdef DebugFormat
-
-; ------ only for debugging @@@
-	ldx #79
-L1	lda StTry,x
-	sta $0506,x
-	dex
-	bpl L1
-; ------
-
-.endif
-
-	jsr INITDR	; @@@
-	jmp WRITEBAM	; write BAM and quit
-	; -------------------------------------
 
 	; wait for handshake if ShowProgress is active
 	; this allows the PC to update the progress indicator

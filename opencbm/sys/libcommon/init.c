@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.3 2005-04-09 15:24:33 strik Exp $ \n
+** \version $Id: init.c,v 1.4 2005-04-20 14:24:07 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
@@ -38,15 +38,22 @@ static UNICODE_STRING ServiceKeyRegistryPath;
    path that was given the last time this function was
    called.
 
+ \param Pdx
+   Pointer to the device extension of the device to be
+   updated.
+
  The RegistryPath parameter can be NULL, but this is only
  allowed on first call.
+
+ Pdx can be NULL, too. If it is NULL, no device-specific
+ data is read at all.
 
  If RegistryPath is not NULL, some memory is allocated.
  This has to be freed by calling DriverCommonUninit().
 */
 
 VOID
-cbm_init_registry(IN PUNICODE_STRING RegistryPath)
+cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx)
 {
     NTSTATUS ntStatus;
 
@@ -96,6 +103,10 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath)
 
         if (NT_SUCCESS(ntStatus))
         {
+            // the cable type
+
+            ULONG iecCable = IEC_CABLETYPE_AUTO;
+
 #if DBG
             // In debugging versions, make sure the DebugFlags
             // are read from the registry
@@ -103,6 +114,15 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath)
             cbm_registry_read_ulong(hKey, L"DebugFlags", &DbgFlags);
 
 #endif // #if DBG
+
+            if (Pdx)
+            {
+                // update the cable type
+
+                cbm_registry_read_ulong(hKey, L"CableType", &iecCable);
+
+                cbmiec_set_cabletype(Pdx, iecCable);
+            }
 
             // initialize the libiec library
 
@@ -158,7 +178,7 @@ DriverCommonInit(IN PDRIVER_OBJECT Driverobject, IN PUNICODE_STRING RegistryPath
 
     // Initialize the settings from the registry
 
-    cbm_init_registry(RegistryPath);
+    cbm_init_registry(RegistryPath, NULL);
 
     // set the function pointers to our driver
 

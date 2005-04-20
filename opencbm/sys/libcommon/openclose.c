@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.2 2005-03-02 18:17:21 strik Exp $ \n
+** \version $Id: openclose.c,v 1.3 2005-04-20 14:24:07 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **
@@ -83,7 +83,7 @@ cbm_createopenclose(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
          * reloaded!
          */
 
-        cbm_init_registry(NULL);
+        cbm_init_registry(NULL, pdx);
 
         switch (irpSp->MajorFunction)
         {

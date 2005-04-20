@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmformat.c,v 1.4 2005-04-17 15:32:17 strik Exp $";
+    "@(#) $Id: cbmformat.c,v 1.5 2005-04-20 14:24:06 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -125,6 +125,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     CBM_FILE fd;
     unsigned char drive, tracks = 35, bump = 1, orig = 0, show_progress = 0;
     char cmd[40], c, name[20], *arg;
+    int error = 0;
 
     struct option longopts[] =
     {
@@ -231,7 +232,14 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             printf("\n");
         }
 
-        if(tracks > 35)
+        error = cbm_device_status(fd, drive, cmd, sizeof(cmd));
+
+        if(error && status)
+        {
+            printf("%s\n", cmd);
+        }
+
+        if(!error && (tracks > 35))
         {
             cbm_open(fd, drive, 2, "#", 1);
             cbm_exec_command(fd, drive, "U1:2 0 18 0", 11);
@@ -246,15 +254,16 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             cbm_exec_command(fd, drive, "U2:2 0 18 0", 11);
             cbm_close(fd, drive, 2);
         }
-        if(status)
+
+        if(!error && status)
         {
             cbm_device_status(fd, drive, cmd, sizeof(cmd));
             printf("%s\n", cmd);
         }
-/**/
+#if 0
         {
             unsigned char data[80];
-            if (cbm_download(fd, drive, 0x506, data, sizeof(data)) == sizeof(data))
+            if (cbm_download(fd, drive, 0x300, data, sizeof(data)) == sizeof(data))
             {
                 int i;
                 for (i=0; i < 40; i++)
@@ -267,7 +276,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                 fprintf(stderr, "error reading data!\n");
             }
         }
-/**/
+#endif
         cbm_driver_close(fd);
         return 0;
     }

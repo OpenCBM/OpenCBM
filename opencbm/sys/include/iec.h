@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.3 2005-01-22 19:50:41 strik Exp $ \n
+** \version $Id: iec.h,v 1.4 2005-04-20 14:24:07 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -20,7 +20,11 @@
 #ifndef CBMIEC_H
 #define CBMIEC_H
 
-#include "cbmioctl.h"
+typedef
+enum iec_cabletype
+{
+    IEC_CABLETYPE_AUTO = -1, IEC_CABLETYPE_XM = 0, IEC_CABLETYPE_XA = 1
+} IEC_CABLETYPE;
 
 extern NTSTATUS
 cbmiec_reset(IN PDEVICE_EXTENSION Pdx);
@@ -96,5 +100,8 @@ cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx, IN const PUCHAR Buffer, IN USHORT Buf
 
 extern NTSTATUS 
 cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx, OUT PUCHAR Buffer, IN USHORT BufferLength, OUT USHORT* Read);
+
+extern NTSTATUS
+cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType);
 
 #endif /* #ifndef CBMIEC_H */

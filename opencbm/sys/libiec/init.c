@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.4 2005-03-02 18:17:22 strik Exp $ \n
+** \version $Id: init.c,v 1.5 2005-04-20 14:24:23 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -117,18 +117,38 @@ static NTSTATUS
 cbmiec_testcable(PDEVICE_EXTENSION Pdx) 
 {
     const wchar_t *msgAuto = L"";
+    const wchar_t *msgCable;
     UCHAR in, out;
 
     FUNC_ENTER();
 
 /*! \todo Do a more sophisticated test for the cable */
 
-    if (Pdx->IecCable > 1)
+    switch (Pdx->IecCable)
     {
+    case IEC_CABLETYPE_XM:
+        /* FALL THROUGH */
+
+    case IEC_CABLETYPE_XA:
+        break;
+
+    default:
         in = CBMIEC_GET(PP_ATN_IN);
         out = (READ_PORT_UCHAR(OUT_PORT) & PP_ATN_OUT) ? 1 : 0;
-        Pdx->IecCable = (in != out) ? 1 : 0;
+        Pdx->IecCable = (in != out) ? IEC_CABLETYPE_XA : IEC_CABLETYPE_XM;
         msgAuto = L" (auto)";
+        break;
+    }
+
+    switch (Pdx->IecCable)
+    {
+    case IEC_CABLETYPE_XM:
+        msgCable = L"passive (XM1541)";
+        break;
+
+    case IEC_CABLETYPE_XA:
+        msgCable = L"active (XA1541)";
+        break;
     }
 
     Pdx->IecOutEor = Pdx->IecCable ? 0xcb : 0xc4;
@@ -137,9 +157,10 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
         Pdx->IecCable ? L"active (XA1541)" : L"passive (XM1541)",
         msgAuto));
 
-    LogErrorString(Pdx->Fdo, CBM_IEC_INIT, Pdx->IecCable ? L"XA1541" : L"XM1541", msgAuto);
+    LogErrorString(Pdx->Fdo, CBM_IEC_INIT, msgCable, msgAuto);
 
-    Pdx->IecOutBits = (READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor) & (PP_DATA_OUT|PP_CLK_OUT|PP_ATN_OUT|PP_RESET_OUT);
+    Pdx->IecOutBits = (READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor) 
+                      & (PP_DATA_OUT|PP_CLK_OUT|PP_ATN_OUT|PP_RESET_OUT);
 
 /*
     if (Pdx->IecOutBits & PP_RESET_OUT)
@@ -169,6 +190,26 @@ cbmiec_cleanup(IN PDEVICE_EXTENSION Pdx)
     FUNC_ENTER();
 
     cbmiec_release_bus(Pdx);
+
+    FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
+}
+
+/*! \brief Set the type of the IEC cable
+
+ This function sets the type of the IEC cable.
+
+ \param Pdx
+   Pointer to the device extension.
+
+ \param CableType
+   The type of the cable.
+*/
+NTSTATUS
+cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType)
+{
+    FUNC_ENTER();
+
+    Pdx->IecCable = CableType;
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
@@ -208,9 +249,6 @@ cbmiec_init(IN PDEVICE_EXTENSION Pdx)
     IoInitializeDpcRequest(Pdx->Fdo, cbmiec_dpc);
 
 #endif // #ifdef USE_DPC
-
-    /* auto-detect the cable */
-    Pdx->IecCable = 2;
 
     ntStatus = cbmiec_testcable(Pdx);
 
