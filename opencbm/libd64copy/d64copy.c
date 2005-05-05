@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.1.2.1 2005-04-14 17:51:21 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.1.2.2 2005-05-05 13:05:37 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -474,11 +474,6 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
                             if(++se >= sector_map[tr]) se = 0;
                         }
                         status.read_result = src->read_block(tr, se, block);
-                    }
-                    if(status.read_result && status.read_result < 20)
-                    {
-                        /* map job code to DOS code */
-                        status.read_result += 18;
                     }
 
                     if(settings->warp && dst->is_cbm_drive)
