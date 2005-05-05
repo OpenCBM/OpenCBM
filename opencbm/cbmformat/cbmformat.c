@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmformat.c,v 1.2 2004-11-15 16:11:52 strik Exp $";
+    "@(#) $Id: cbmformat.c,v 1.2.2.1 2005-05-05 13:07:33 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -42,6 +42,10 @@ static void help()
 "\n"
 "  -n, --no-bump    do not bump drive head\n"
 "  -x, --extended   format 40 track disk\n"
+"  -c, --clear      clear (demagnetize) this disk.\n"
+"                   this is highly recommended if this disk\n"
+"                   is used for the first time.\n"
+"  -v, --verify     verify each track after it is written\n"
 "  -o, --original   fill sectors with the original pattern (0x4b, 0x01...)\n"
 "                   instead of zeroes\n"
 "  -s, --status     display drive status after formatting\n"
@@ -60,7 +64,10 @@ int _cdecl main(int argc, char *argv[])
     int status = 0, id_ofs = 0, name_len, i;
     CBM_FILE fd;
     unsigned char drive, tracks = 35, bump = 1, orig = 0, show_progress = 0;
+    unsigned char verify = 0;
+    unsigned char demagnetize = 0;
     char cmd[40], c, name[20], *arg;
+    int error = 0;
 
     struct option longopts[] =
     {
@@ -71,13 +78,15 @@ int _cdecl main(int argc, char *argv[])
         { "original"   , no_argument      , NULL, 'o' },
         { "status"     , no_argument      , NULL, 's' },
         { "progress"   , no_argument      , NULL, 'p' },
+        { "verify"     , no_argument      , NULL, 'v' },
+        { "clear"      , no_argument      , NULL, 'c' },
 
         /* undocumented */
         { "end-track"  , required_argument, NULL, 't' },
         { NULL         , 0                , NULL, 0   }
     };
 
-    const char shortopts[] ="hVnxospt:";
+    const char shortopts[] ="hVnxospvct:";
 
     while ((c = (unsigned char) getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
@@ -96,6 +105,10 @@ int _cdecl main(int argc, char *argv[])
             case 'V': printf("cbmformat %s\n", VERSION);
                       return 0;
             case 'p': show_progress = 1;
+                      break;
+            case 'v': verify = 1;
+                      break;
+            case 'c': demagnetize = 1;
                       break;
             case 't': tracks = (unsigned char) atoi(optarg);
                       break;
@@ -142,12 +155,12 @@ int _cdecl main(int argc, char *argv[])
         arg++;
     }
     name[name_len] = 0;
-    
+
     if(cbm_driver_open(&fd, 0) == 0)
     {
         cbm_upload(fd, drive, 0x0500, dskfrmt, sizeof(dskfrmt));
-        sprintf(cmd, "M-E%c%c%c%c%c%c0:%s", 64, 6, tracks + 1, 
-                orig, bump, show_progress, name);
+        sprintf(cmd, "M-E%c%c%c%c%c%c%c%c0:%s", 3, 5, tracks + 1, 
+            orig, bump, show_progress, demagnetize, verify, name);
         cbm_exec_command(fd, drive, cmd, 11+strlen(name));
 
         if(show_progress)
@@ -167,7 +180,14 @@ int _cdecl main(int argc, char *argv[])
             printf("\n");
         }
 
-        if(tracks > 35)
+        error = cbm_device_status(fd, drive, cmd, sizeof(cmd));
+
+        if(error && status)
+        {
+            printf("%s\n", cmd);
+        }
+
+        if(!error && (tracks > 35))
         {
             cbm_open(fd, drive, 2, "#", 1);
             cbm_exec_command(fd, drive, "U1:2 0 18 0", 11);
@@ -182,7 +202,8 @@ int _cdecl main(int argc, char *argv[])
             cbm_exec_command(fd, drive, "U2:2 0 18 0", 11);
             cbm_close(fd, drive, 2);
         }
-        if(status)
+
+        if(!error && status)
         {
             cbm_device_status(fd, drive, cmd, sizeof(cmd));
             printf("%s\n", cmd);
