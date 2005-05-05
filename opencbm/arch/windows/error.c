@@ -118,7 +118,7 @@ void arch_error(int AUnused, unsigned int ErrorCode, const char *Format, ...)
 
         ErrorMessageBuffer[n] = 0;
 
-        fprintf(stderr, "\nAUnused = %u, ErrorCode = %u: %s\n", AUnused, ErrorCode, ErrorMessageBuffer);
+        fprintf(stderr, "%s\n", AUnused, ErrorCode, ErrorMessageBuffer);
 
 #if DBG
 

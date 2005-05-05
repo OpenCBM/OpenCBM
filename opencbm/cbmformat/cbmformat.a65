@@ -1,8 +1,22 @@
-
+; *
+; *	This program is free software; you can redistribute it and/or
+; *	modify it under the terms of the GNU General Public License
+; *	as published by the Free Software Foundation; either version
+; *	2 of the License, or (at your option) any later version.
+; *
+; *  Copyright      Joe Forster/STA <sta@c64.org>
+; *  Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+; *  Copyright 2005 Spiro Trikaliotis
+; *  Copyright 2005 Wolfgang Moser
+;
+; AGREEMENT: Joe Forster and the programmers of cbm4linux/cbm4win agreed
+;            to allow cross-using this routines, even for non-GPLed code
+;            (for example, but not limited to, the Star Commander).
+;
 ; This program is heavily based on Joe Forster/STAs <sta@c64.org>
 ; StarCommander Turbo routines.
 ;
-; "$Id: cbmformat.a65,v 1.3 2005-04-20 14:24:06 strik Exp $"
+; "$Id: cbmformat.a65,v 1.4 2005-05-05 13:26:46 strik Exp $"
 
 
 JOB_BUMP	= $C0 ; bump the head
@@ -26,6 +40,8 @@ FILDRV	= $E2 ; default flag, drive # (all 0 on 1541)
 JOBNUM	= $F9 ; current job number
 CMDNUM	= $22A ; command code number
 FILTBL	= $27B ; ???
+
+TmpGap	= $01b0
 
 STACK	= $0100
 CMDBUF	= $0200
@@ -54,31 +70,19 @@ ERRR	= $F969
 STPIN	= $FA63
 MOVUP	= $FDE5
 MOVOVR	= $FDF5
+TRACK_FF	= $FDA3
 KILL	= $FE00
+TRACK_55	= $FE0E
 FBTOG	= $FE30
+ZONESECTR = $fed1
 ZONEBOUNDARIES	= $FED7
 SLOWS	= $FEF3
-
 
 StartTrack = 1
 Security = 2
 MinGAP = 5
 
-; DebugFormat = 1
-; DebugVICE = 1
-TryGoodGaps = 1
-
-
-.ifdef DebugVICE
-
-	* = BUFFER2 - 2
-	.byte 0, 5
-
-.else
-
 	* = BUFFER2
-
-.endif
 
 	jmp JobRoutine
 
@@ -90,6 +94,16 @@ TryGoodGaps = 1
 ; Byte:  012    3         4          5        6    7         8       90 1..x x  x    x
 ;                                                                            +  +    +
 ;                                                                            1  2    3
+;
+; Note: progress.bit7: verify
+;       bump.bit7: demagnetize
+
+CMDBUF_TRACKS	= CMDBUF+5
+CMDBUF_ORIG	= CMDBUF+6
+CMDBUF_BUMP	= CMDBUF+7
+CMDBUF_PROGRESS	= CMDBUF+8
+CMDBUF_DEMAGNET	= CMDBUF+9
+CMDBUF_VERIFY	= CMDBUF+10
 
 Start	lda #CMDNUM_NEW	; set the command number for "new" command
 	sta CMDNUM	; 
@@ -114,7 +128,7 @@ Start	lda #CMDNUM_NEW	; set the command number for "new" command
 	stx JOBNUM
 
 	; execute bump if it was given on the command line
-	lda CMDBUF+7	; get bump value
+	lda CMDBUF_BUMP	; get bump value
 	beq NoBump	; if 0, do not execute a bump
 	lda #JOB_BUMP
 	jsr DOJOB	; execute the job in A
@@ -128,35 +142,11 @@ NoBump	lda #JOB_EXEC2
 	cmp #1
 	bne ErrorOccurred
 
-.ifdef DebugFormat
-
-; ------ only for debugging @@@
-	ldx #79
-L1	lda StTry,x
-	sta $0300,x
-	dex
-	bpl L1
-; ------
-
-.endif
-
 	jsr INITDR	; @@@
 	jmp WRITEBAM	; write BAM and quit
 	; -------------------------------------
 
 ErrorOccurred
-
-.ifdef DebugFormat
-
-; ------ only for debugging @@@
-	ldx #79
-L2	lda StTry,x
-	sta $0300,x
-	dex
-	bpl L2
-; ------
-
-.endif
 
 	lda JOB2
 ;	sec		; here, carry is set ("bcs ErrorOccurred")
@@ -171,19 +161,15 @@ JobRoutine
 	lda #>BUFFER1
 	sta BUFPTR+1
 
-.ifdef TryGoodGaps
-
-.else
 	; start with a gap which is most likely too small
 	lda #MinGAP
 	sta GAPLEN
-.endif
 
 	; set the value for an empty sector
 	; if <Orig> is set, it has the content $4B/$01/$01/.../$01;
 	; else, it is set to all 0.
 	
-	ldy CMDBUF+6	; get <Orig> parameter
+	ldy CMDBUF_ORIG	; get <Orig> parameter
 	beq NotOrig	; if 0, we do not need to set $4B/$01/.../$01 pattern
 
 	ldy #$00	; start with first byte
@@ -228,7 +214,7 @@ NxtTrk	jsr status	; perform handshake for next sector if needed
 	inc TRACK2	; Increment track number
 
 	lda TRACK2
-	cmp CMDBUF+5
+	cmp CMDBUF_TRACKS
 	bcs RetOk	; last track written, jump
 
 	; increment the track
@@ -260,8 +246,6 @@ JobErr	jmp ERRR
 
 FrmtTrk	lda TRACK2	; get track no
 
-.ifdef TryGoodGaps
-
 	ldx #3
 ZoneTrk	cmp SpdTrk,x
 	beq NewZone
@@ -270,39 +254,28 @@ ZoneTrk	cmp SpdTrk,x
 	bmi OldZone
 
 NewZone
-	lda SpdGAP,x
+	lda SpdADD,x
+;	sec		; here, carry is already set
+	adc GAPLEN
 	sta GAPLEN
+
 	lda DC_SETTINGS
 	and #$9f
 	ora SpdMask,x
 	sta DC_SETTINGS
 
-	lda $fed1,x
+	lda ZONESECTR,x
 	sta SECTR
 
 OldZone
 
-.else
+	lda CMDBUF_DEMAGNET	; get bump value
+	beq NoDemagnetize
 
-	; calculate the speed zone and number of sectors for this track
+	jsr TRACK_FF	; overwrite track with $ff
+	jsr TRACK_55	; overwrite track with $55
 
-	cmp ZONEBOUNDARIES	; is this track <= 35, that is, a standard one?
-	bcc StdTrk	; yes, jump
-
-	; set speed zone and no. of tracks for tracks > 35
-	lda #35		; pretend we were on track 35
-
-StdTrk	jsr MAXSEC	; get speed zone in X, sectors per track in A
-
-	sta SECTR
-
-	lda DC_SETTINGS
-	and #$9f
-	ora SpdMask,x
-	sta DC_SETTINGS
-
-.endif
-
+NoDemagnetize
 	; prepare the header infos for the track
 	ldy #$00	; start with sector 0
 	sty SECTOR2
@@ -353,19 +326,6 @@ PrepSec	lda HBID
 
 Restart
 
-.ifdef DebugFormat
-
-; this implementation is only for counting
-; the no. of writes and remembering the GAPs
-	ldx TRACK2
-	dex
-	inc StTry,x
-	lda GAPLEN
-	sta StGap,x
-
-; this is the "real" Restart:
-.endif
-
 	lda #$00
 	sta HDRPNT
 
@@ -377,13 +337,13 @@ NxtSec	ldy GAPLEN
 	ldx #$0A	; write 10 byte
 	ldy HDRPNT	; where to start with data
 
+SecNByt	lda BUFFER0,y	; write next byte
 SecByte	bvc SecByte	; wait for end of previous byte
 	clv
-	lda BUFFER0,y	; write next byte
 	sta DC_DATA	; to DC
 	iny
 	dex
-	bne SecByte
+	bne SecNByt
 
 	sty HDRPNT	; remember where to get the next hdr byte from
 
@@ -393,23 +353,28 @@ SecByte	bvc SecByte	; wait for end of previous byte
 
 	; write the data block
 	ldy #$bb
+NxtByt	lda BUFFER4,y
 DtaByt	bvc DtaByt
 	clv
-	lda BUFFER4,y
 	sta DC_DATA
 	iny
-	bne DtaByt
+	bne NxtByt
 
+NxtByt2	lda BUFFER1,y
 DtaByt2	bvc DtaByt2
 	clv
-	lda BUFFER1,y
 	sta DC_DATA
 	iny
-	bne DtaByt2
+	bne NxtByt2
 
 	; check if there is another sector to be written
 	dec SECTOR2
 	bne NxtSec	; another sector, process that one
+
+DtaByt3	bvc DtaByt3	; wait for the current byte to be written
+	clv
+DtaByt4	bvc DtaByt4	; wait for another byte to be written
+	clv
 
 	; put DC into read mode again and quit
 	jsr KILL
@@ -420,6 +385,8 @@ DtaByt2	bvc DtaByt2
 ;	ldy #0	; unnecessary
 
 	ldx GAPLEN
+	dex		; subtract 2 as we already have waited 2 additional bytes
+	dex
 
 	dey		; Y = -1; this is the marker that the GAP is too big
 
@@ -439,7 +406,9 @@ RdWait	lda DC_SETTINGS
 
 	; we have found a sync. First of all, clear the oldest entry from the
 	; input port so that we can get another one
-SyncFnd	clv		; allow for accounting the next byte
+SyncFnd	stx TmpGap	; store the remaining gap for later testing
+
+	clv		; allow for accounting the next byte
 	lda DC_DATA	; clear the value from the buffer
 
 	sty HDRPNT	; remember the additional GAP we want to add
@@ -464,6 +433,7 @@ CmpByte	bvc CmpByte	; wait for end of byte
 
 	; now, check how much byte are missing for a complete gap.
 	; if it is not too much, do not do anything
+	ldx TmpGap
 	cpx #Security
 	bcc Verify
 
@@ -515,8 +485,10 @@ BlkWrt	bvc BlkWrt	; wait for end of previous byte
 	rts
 
 Verify
+	lda CMDBUF_VERIFY	; check if we should verify
+	beq VerOk	; no, skip verify
+
 	ldx SECTR	; get the number of sectors to check
-	dex		; the first track has already been (partially) processed
 	stx SECTOR2
 
 	ldy #10
@@ -575,7 +547,7 @@ VerDt1	bvc VerDt1
 	dec SECTOR2
 	bne VerNxtSec
 
-	clc
+VerOk	clc
 	rts
 
 VerOut
@@ -608,20 +580,21 @@ BegWrt	; set R/W head into write mode
 	; speedzone masks for setting the correct data rate
 SpdMask	.byte $0,$20,$40,$60
 
-.ifdef TryGoodGaps
-
 	; inter sector gap for every speedzone
 ;SpdGAP	.byte $a,$c,$12,$8
-SpdGAP	.byte 7,9,15,5
+
+	; the differences in the inter sector gap for every speed zone
+	; relative to the speed zone before
+	; as carry is alway set when this add is performed,
+	; we subtract 1 from every value
+SpdADD	.byte -3-1, -5-1,9-1,0-1
 
 	; the tracks at which each zone starts
 SpdTrk	.byte 31, 25, 18, 1
 
-.endif
-
 	; wait for handshake if ShowProgress is active
 	; this allows the PC to update the progress indicator
-status	lda CMDBUF+8	; ShowProgress
+status	lda CMDBUF_PROGRESS	; ShowProgress
 	beq back	; if 0, do not handshake, thus quit
 	; here, A=1 is assumed
 
@@ -643,25 +616,3 @@ Clk1	bit BC_PB
 	bne Clk1
 
 back	rts
-
-.ifdef DebugFormat
-
-StTry	.byte 0,0,0,0,0	; -5
-	.byte 0,0,0,0,0	; -10
-	.byte 0,0,0,0,0	; -15
-	.byte 0,0,0,0,0	; -20
-	.byte 0,0,0,0,0 ; -25
-	.byte 0,0,0,0,0	; -30
-	.byte 0,0,0,0,0	; -35
-	.byte 0,0,0,0,0	; -40
-
-StGap	.byte 0,0,0,0,0	; -5
-	.byte 0,0,0,0,0 ; -10
-	.byte 0,0,0,0,0 ; -15
-	.byte 0,0,0,0,0 ; -20
-	.byte 0,0,0,0,0	; -25
-	.byte 0,0,0,0,0 ; -30
-	.byte 0,0,0,0,0 ; -35
-	.byte 0,0,0,0,0 ; -40
-
-.endif
