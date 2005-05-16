@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.3 2004-11-24 20:08:18 strik Exp $";
+    "@(#) $Id: main.c,v 1.3.2.1 2005-05-16 16:16:32 strik Exp $";
 #endif
 
 #include <ctype.h>
@@ -139,6 +139,35 @@ static void char_star_opt_once(const char **arg,
         exit(1);
     }
     *arg = optarg;
+}
+
+static void copy_filename_without_path(char *dest, const char *src, int length)
+{
+    char *p;
+    int posEndPath = -1;
+
+    // search for backslash (Windows)
+
+    p = strrchr(src, '\\');
+    if (p)
+    {
+        posEndPath = p - src;
+    }
+
+    // search for slash (Linux and Windows)
+
+    p = strrchr(src, '/');
+    if (p)
+    {
+        int posTmp = p - src;
+
+        if (posTmp > posEndPath)
+        {
+            posEndPath = posTmp;
+        }
+    }
+    strncpy(dest, &src[posEndPath+1], length);
+    dest[length] = 0;
 }
 
 
@@ -436,16 +465,15 @@ int __cdecl main(int argc, char **argv)
                                     auto_name, &auto_type,
                                     &filedata, &filesize, my_message_cb ) == 0)
                         {
-                            buf[16] = '\0';
                             if(output_name)
                             {
-                                strncpy(buf, output_name, 16);
+                                copy_filename_without_path(buf, output_name, 16);
                                 cbm_ascii2petscii(buf);
                             }
                             else
                             {
                                 /* no charset conversion */
-                                strncpy(buf, auto_name, 16);
+                                copy_filename_without_path(buf, auto_name, 16);
                             }
                             strcat(buf, ",x");
                             buf[strlen(buf)-1] =
@@ -498,8 +526,8 @@ int __cdecl main(int argc, char **argv)
             }
             else
             {
-                strncpy(buf, fname, 16);
-                buf[16] = '\0';
+                // check if there is a path specified. If so, do not copy that
+                copy_filename_without_path(buf, fname, 16);
                 cbm_ascii2petscii(buf);
 
                 if(output_name)
