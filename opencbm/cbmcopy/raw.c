@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: raw.c,v 1.1 2004-11-07 11:04:54 strik Exp $";
+    "@(#) $Id: raw.c,v 1.2 2005-05-16 16:20:16 strik Exp $";
 #endif
 
 #include <stdlib.h>
@@ -31,8 +31,19 @@ static int read(FILE *file, const char *fname, int entry,
                 cbmcopy_message_cb msg_cb)
 {
     char *tail;
+    char *tail2;
 
     tail = strrchr(fname, '/');
+    tail2 = strrchr(fname, '\\');
+
+    if (tail2)
+    {
+        if (tail2 > tail)
+        {
+            tail = tail2;
+        }
+    }
+
     strncpy(cbmname, tail ? tail+1 : fname, 16);
     for(tail = cbmname; *tail; tail++)
     {
