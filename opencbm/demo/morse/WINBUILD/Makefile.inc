@@ -1,4 +1,8 @@
-a65: ..\morse.inc
+a65:
+
+..\main.c: ..\morse.inc
+
+..\morse.inc: ..\morse.a65
 
 .SUFFIXES: .a65
 

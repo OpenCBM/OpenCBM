@@ -1,4 +1,8 @@
-a65: ..\rpm1541.inc
+a65:
+
+..\rpm1541.c: ..\rpm1541.inc
+
+..\rpm1541.inc: ..\rpm1541.a65
 
 .SUFFIXES: .a65
 
