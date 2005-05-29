@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmformat.c,v 1.6 2005-05-05 13:26:46 strik Exp $";
+    "@(#) $Id: cbmformat.c,v 1.7 2005-05-29 13:09:02 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -156,7 +156,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         cbm_upload(fd, drive, 0x0500, dskfrmt, sizeof(dskfrmt));
         sprintf(cmd, "M-E%c%c%c%c%c%c%c%c0:%s", 3, 5, tracks + 1, 
             orig, bump, show_progress, demagnetize, verify, name);
-        cbm_exec_command(fd, drive, cmd, 11+strlen(name));
+        cbm_exec_command(fd, drive, cmd, 13+strlen(name));
 
         if(show_progress)
         {
