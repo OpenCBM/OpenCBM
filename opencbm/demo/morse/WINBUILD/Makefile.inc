@@ -1,6 +1,6 @@
 a65:
 
-..\main.c: ..\morse.inc
+..\morse.c: ..\morse.inc
 
 ..\morse.inc: ..\morse.a65
 
