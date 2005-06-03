@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/petscii.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: petscii.c,v 1.1 2005-02-13 17:58:12 strik Exp $ \n
+** \version $Id: petscii.c,v 1.2 2005-06-03 12:06:36 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -29,6 +29,7 @@
 
 #include "debug.h"
 
+#include <ctype.h>
 #include <stdlib.h>
 
 //! mark: We are building the DLL */

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.5 2005-03-02 18:17:20 strik Exp $ \n
+** \version $Id: cbm.c,v 1.6 2005-06-03 12:06:36 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -27,6 +27,7 @@
 #include "debug.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 //! mark: We are building the DLL */
 #define DLL

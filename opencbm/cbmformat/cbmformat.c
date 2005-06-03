@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmformat.c,v 1.7 2005-05-29 13:09:02 strik Exp $";
+    "@(#) $Id: cbmformat.c,v 1.8 2005-06-03 12:06:35 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -62,7 +62,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     unsigned char verify = 0;
     unsigned char demagnetize = 0;
     char cmd[40], c, name[20], *arg;
-    int error = 0;
+    int err = 0;
 
     struct option longopts[] =
     {
@@ -175,14 +175,14 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             printf("\n");
         }
 
-        error = cbm_device_status(fd, drive, cmd, sizeof(cmd));
+        err = cbm_device_status(fd, drive, cmd, sizeof(cmd));
 
-        if(error && status)
+        if(err && status)
         {
             printf("%s\n", cmd);
         }
 
-        if(!error && (tracks > 35))
+        if(!err && (tracks > 35))
         {
             cbm_open(fd, drive, 2, "#", 1);
             cbm_exec_command(fd, drive, "U1:2 0 18 0", 11);
@@ -198,7 +198,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             cbm_close(fd, drive, 2);
         }
 
-        if(!error && status)
+        if(!err && status)
         {
             cbm_device_status(fd, drive, cmd, sizeof(cmd));
             printf("%s\n", cmd);
