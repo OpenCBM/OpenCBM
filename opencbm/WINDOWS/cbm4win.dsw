@@ -270,6 +270,21 @@ Package=<4>
 
 ###############################################################################
 
+Project: "opencbmvice"=..\lib\WINVICEBUILD\opencbmvice.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "syslibcommon"=..\sys\libcommon\syslibcommon.dsp - Package Owner=<4>
 
 Package=<5>
