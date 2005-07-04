@@ -255,7 +255,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "opencbm"=..\lib\WINBUILD\opencbm.dsp - Package Owner=<4>
+Project: "opencbm"=..\lib\WINVICEBUILD\opencbm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
