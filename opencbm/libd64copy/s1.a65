@@ -6,9 +6,11 @@
 ;
 ; Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ;
-; "$Id: s1.a65,v 1.1 2004-11-07 11:05:12 strik Exp $"
+; "$Id: s1.a65,v 1.2 2005-07-04 17:19:23 strik Exp $"
 
 	*=$0700
+
+TMP = $86
 
 	jmp gts		; get track/sector
 	jmp gbyte
@@ -33,10 +35,10 @@ gblk	jsr gbyte
 	bne gblk
 	rts
 
-sbyte	sta $14
+sbyte	sta TMP
 	ldx #$08
 write0	lda #$00
-	lsr $14
+	lsr TMP
 	rol
 	asl
 	asl
@@ -76,7 +78,7 @@ read1	and $1800
 	and #$01
 	sta $1d
 	lsr
-	rol $14
+	rol TMP
 	lda #$08
 	sta $1800
 read2	lda $1800
@@ -92,5 +94,5 @@ read3	bit $1800
 	sta $1800
 	dex
 	bne read0
-	lda $14
+	lda TMP
 	rts
