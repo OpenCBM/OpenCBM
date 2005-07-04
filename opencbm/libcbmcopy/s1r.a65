@@ -6,13 +6,13 @@
 ;
 ; Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ;
-; "$Id: s1r.a65,v 1.1 2004-11-07 11:05:12 strik Exp $"
+; "$Id: s1r.a65,v 1.1.2.1 2005-07-04 17:35:45 strik Exp $"
 
 	*=$0680
 
 	port = $1800
 	zp   = $1d	; temp
-	db   = $14
+	db   = $86
 
 	jmp init	; init
 	rts		; trap error

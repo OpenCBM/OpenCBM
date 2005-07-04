@@ -6,9 +6,11 @@
 ;
 ; Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ;
-; "$Id: s2.a65,v 1.1 2004-11-07 11:05:12 strik Exp $"
+; "$Id: s2.a65,v 1.1.2.1 2005-07-04 17:35:45 strik Exp $"
 
 	*=$0700
+
+TMP = $86
 
 	jmp gts		; get track/sector
 	jmp gbyte
@@ -45,17 +47,17 @@ sblk	lda ($30),y
 	bne sblk
 	rts
 
-sbyte	sta $14
+sbyte	sta TMP
 	ldx #$04
 write0	lda #$04
-	lsr $14
+	lsr TMP
 	rol
 	asl
 	sta $1800
 write1	lda $1800
 	bmi write1
 	lda #$02
-	lsr $14
+	lsr TMP
 	rol
 	asl
 	sta $1800
@@ -72,19 +74,19 @@ read0	lda $1800
 	bmi read0
 	lda $1800
 	lsr
-	ror $14
+	ror TMP
 	lda #$10
 	sta $1800
 read1	lda $1800
 	bpl read1
 	lda $1800
 	lsr
-	ror $14
+	ror TMP
 	lda #$08
 	sta $1800
 	dex
 	bne read0
-	lda $14
+	lda TMP
 	rts
 
 	do_read=*
