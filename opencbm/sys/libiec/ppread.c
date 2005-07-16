@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/ppread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ppread.c,v 1.2 2005-03-02 18:17:22 strik Exp $ \n
+** \version $Id: ppread.c,v 1.3 2005-07-16 17:20:42 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -26,7 +26,7 @@
 
 /*! \brief Read a byte from the X[M|A]P1541 cable
 
- This functions reads a byte from the parallel portion of
+ This function reads a byte from the parallel portion of
  the X[M|A]P1541 cable.
 
  \param Pdx

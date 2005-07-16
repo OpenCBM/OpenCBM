@@ -15,6 +15,7 @@ INCLUDES=../include;../include/WINDOWS;../../include;../../include/WINDOWS;../li
 SOURCES= 	init.c \
 		debug.c \
 		eoi.c \
+		checkdevice.c \
 		i_rawread.c \
 		i_rawwrite.c \
 		interrupt.c \

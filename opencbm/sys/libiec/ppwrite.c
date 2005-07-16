@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/ppwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ppwrite.c,v 1.2 2005-03-02 18:17:22 strik Exp $ \n
+** \version $Id: ppwrite.c,v 1.3 2005-07-16 17:20:42 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -26,7 +26,7 @@
 
 /*! \brief Write a byte to the X[M|A]P1541 cable
 
- This functions writes a byte to the parallel portion of
+ This function writes a byte to the parallel portion of
  the X[M|A]P1541 cable.
 
  \param Pdx

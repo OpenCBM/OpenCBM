@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/wait.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: wait.c,v 1.3 2005-03-02 18:17:22 strik Exp $ \n
+** \version $Id: wait.c,v 1.4 2005-07-16 17:20:42 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -26,7 +26,7 @@
 
 /*! \brief Wait for a line to have a specific value
 
- This functions waits until a listener is ready.
+ This function waits until a listener is ready.
 
  \param Pdx
    Pointer to the device extension.

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/util.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util.c,v 1.2 2005-03-02 18:17:22 strik Exp $ \n
+** \version $Id: util.c,v 1.3 2005-07-16 17:20:42 strik Exp $ \n
 ** \n
 ** \brief Some utility functions for the IEC library
 **
@@ -24,7 +24,7 @@
 
 /*! \brief Schedule a timeout
 
- This functions schedules a timeout.
+ This function schedules a timeout.
  Scheduling means that other threads have the opportunity to
  use the processor while we're waiting.
 
@@ -56,7 +56,7 @@ cbmiec_schedule_timeout(IN ULONG Howlong)
 
 /*! \brief Wait for a timeout
 
- This functions waits for a timeout.
+ This function waits for a timeout.
  Waiting means that we want to have an exact timing, so
  don't give away the processor.
 
@@ -92,7 +92,7 @@ DBGDO(static LONG i_blockirq_usage_count = 0;)
 
 /*! \brief Block all interrupts
 
- This functions blocks all interrupt, thus that we cannot
+ This function blocks all interrupt, thus that we cannot
  be interrupted while executing some critical things.
 
  This should not be used for big time periods.
@@ -112,7 +112,7 @@ cbmiec_block_irq(VOID)
 
 /*! \brief Release the interrupts
 
- This functions releases all interrupt, undoing a
+ This function releases all interrupt, undoing a
  previous cbmiec_block_irq() call.
 */
 VOID

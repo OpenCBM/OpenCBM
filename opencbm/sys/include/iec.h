@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.4 2005-04-20 14:24:07 strik Exp $ \n
+** \version $Id: iec.h,v 1.5 2005-07-16 17:20:41 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -25,6 +25,14 @@ enum iec_cabletype
 {
     IEC_CABLETYPE_AUTO = -1, IEC_CABLETYPE_XM = 0, IEC_CABLETYPE_XA = 1
 } IEC_CABLETYPE;
+
+typedef
+enum iec_checkdevice
+{
+    IEC_CHECKDEVICE_BUSFREE = 0,
+    IEC_CHECKDEVICE_NODEVICE = 1,
+    IEC_CHECKDEVICE_BUSBUSY = 2
+} IEC_CHECKDEVICE;
 
 extern NTSTATUS
 cbmiec_reset(IN PDEVICE_EXTENSION Pdx);
@@ -103,5 +111,8 @@ cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx, OUT PUCHAR Buffer, IN USHORT BufferLen
 
 extern NTSTATUS
 cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType);
+
+extern NTSTATUS
+cbmiec_check_device(IN PDEVICE_EXTENSION Pdx, OUT IEC_CHECKDEVICE *CheckDevice);
 
 #endif /* #ifndef CBMIEC_H */

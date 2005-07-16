@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/release.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: release.c,v 1.3 2005-03-02 18:17:22 strik Exp $ \n
+** \version $Id: release.c,v 1.4 2005-07-16 17:20:42 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -26,7 +26,7 @@
 
 /*! \brief Release a specific line on the IEC bus
 
- This functions releases a specific line on the IEC bus.
+ This function releases a specific line on the IEC bus.
 
  \param Pdx
    Pointer to the device extension.

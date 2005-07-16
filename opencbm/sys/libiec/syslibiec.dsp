@@ -13,7 +13,7 @@ CFG=syslibiec - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "syslibiec.mak" CFG="libiec - Win32 Debug"
+!MESSAGE NMAKE /f "syslibiec.mak" CFG="syslibiec - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -86,15 +86,19 @@ CFG=syslibiec - Win32 Debug
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\checkdevice.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\debug.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\eoi.c
+SOURCE=.\dpc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\dpc.c
+SOURCE=.\eoi.c
 # End Source File
 # Begin Source File
 

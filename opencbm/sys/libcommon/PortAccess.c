@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.3 2005-04-17 15:32:19 strik Exp $ \n
+** \version $Id: PortAccess.c,v 1.4 2005-07-16 17:20:41 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -373,7 +373,7 @@ ParPortDeinit(PDEVICE_EXTENSION Pdx)
    the result of the function
 
  \return
-   If the PNP information could be read, this functions returns TRUE.
+   If the PNP information could be read, this function returns TRUE.
    \nIf it could not be read, it returns FALSE.
 
  This function must be run at IRQL == PASSIVE_LEVEL.

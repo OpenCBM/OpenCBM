@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.11 2005-03-02 18:17:21 strik Exp $ \n
+** \version $Id: debug.c,v 1.12 2005-07-16 17:20:42 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -1076,7 +1076,7 @@ static LONG DbgMemoryBufferUsageCounter = 0;
  \todo
 
     If we do not use the spinlock for synchronizing
-    access, this functions seems not to work at all!
+    access, this function seems not to work at all!
 */
 
 static VOID

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file install/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.5 2005-03-02 18:17:20 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.6 2005-07-16 17:20:41 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the driver
 **
@@ -37,7 +37,7 @@
 
 /*! \brief Output contents of the debugging buffer
 
- This functions outputs the contents of the kernel-mode
+ This function outputs the contents of the kernel-mode
  debugging buffer to the screen.
 
  This function is for use of the installation routines only!

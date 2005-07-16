@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/reset.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: reset.c,v 1.2 2005-03-02 18:17:22 strik Exp $ \n
+** \version $Id: reset.c,v 1.3 2005-07-16 17:20:42 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -26,7 +26,7 @@
 
 /*! \brief Send a RESET to the IEC bus
 
- This functions sends a RESET on the IEC bus.
+ This function sends a RESET on the IEC bus.
 
  \param Pdx
    Pointer to the device extension.
@@ -47,8 +47,53 @@ cbmiec_reset(IN PDEVICE_EXTENSION Pdx)
     CBMIEC_RELEASE(PP_RESET_OUT);
 
     DBG_SUCCESS((DBG_PREFIX "sleeping after RESET..."));
+
+/*
     cbmiec_schedule_timeout(libiec_global_timeouts.T_afterreset);
     CBMIEC_SET(PP_CLK_OUT);
+*/
+    {
+        int i=1;
+
+        while (1) {
+            IEC_CHECKDEVICE check_device;
+
+            cbmiec_check_device(Pdx, &check_device);
+
+#if 0
+            switch (check_device)
+            {
+            case IEC_CHECKDEVICE_BUSFREE:
+                DBG_PRINT((DBG_PREFIX "%u: Bus is free!", i));
+                break;
+
+            case IEC_CHECKDEVICE_BUSBUSY:
+                DBG_PRINT((DBG_PREFIX "%u: Bus is busy.", i));
+                break;
+
+            case IEC_CHECKDEVICE_NODEVICE:
+                DBG_PRINT((DBG_PREFIX "%u: No device.", i));
+                break;
+
+            default:
+                DBG_PRINT((DBG_PREFIX "%u: UNKNOWN", i));
+                break;
+            }
+#endif
+
+            if (check_device == IEC_CHECKDEVICE_BUSFREE)
+                break;
+
+            ++i;
+
+            if (i == 1000)
+            {
+                DBG_PRINT((DBG_PREFIX "Quiting because i has reached %u", i));
+                break;
+            }
+            cbmiec_schedule_timeout(1000);
+        }
+    }
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
