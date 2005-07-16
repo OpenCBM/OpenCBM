@@ -4,8 +4,8 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 199x-2005 Joe Forster <sta@c64.org>
- *  Copyright 199x-2005 Wolfgang Moser
+ *  Copyright 1997-2005 Joe Forster <sta@c64.org>
+ *  Copyright 1997-2005 Wolfgang Moser <womo(at)d81(dot)de>
  *  Copyright      2005 Spiro Trikaliotis <cbm4win@trikaliotis.net>
  *
  */
@@ -13,8 +13,8 @@
 /*! ************************************************************** 
 ** \file sys/libiec/checkdevice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: checkdevice.c,v 1.1 2005-07-16 17:20:42 strik Exp $ \n
-** \authors Based on code from SC writen by 
+** \version $Id: checkdevice.c,v 1.2 2005-07-16 19:47:21 strik Exp $ \n
+** \authors Based on code from SC written by 
 **    Joe Forster & Wolfgang Moser
 ** \n
 ** \brief Fast IEC drive detection: Check if there is some device
@@ -35,6 +35,12 @@
 
  \param Pdx
    Pointer to the device extension.
+ 
+ \param CheckDevice:
+   Pointer to a IEC_CHECKDEVICE variable which will contain the status of the
+   bus: IEC_CHECKDEVICE_NODEVICE indicates that there is no device attached,
+   IEC_CHECKDEVICE_BUSBUSY indicates that the bus is still busy, and
+   IEC_CHECKDEVICE_BUSFREE indicates we are free to use the bus.
 
  \return 
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
