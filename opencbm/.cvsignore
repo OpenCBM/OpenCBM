@@ -1,5 +1,5 @@
 bin
-doxy
+.doxygen
 *.err
 *.log
 *.wrn
