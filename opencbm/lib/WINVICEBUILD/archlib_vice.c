@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archlib_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: archlib_vice.c,v 1.1 2005-07-01 12:22:16 strik Exp $ \n
+** \version $Id: archlib_vice.c,v 1.2 2005-07-20 16:37:12 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        This variant is for accessing VICE instead of a real device
@@ -88,20 +88,19 @@ DbgOut(const char * const Format, ...)
 static void
 DbgLineStatus(const unsigned char Value)
 {
+/**
     DbgOut("ATN OUT = %u, CLOCK OUT = %u, DATA OUT = %u, CLOCK IN = %u, DATA IN = %u",
         (Value & 0x08 ? 1 : 0),
         (Value & 0x10 ? 1 : 0),
         (Value & 0x20 ? 1 : 0),
         (Value & 0x40 ? 1 : 0),
         (Value & 0x80 ? 1 : 0));
+/**/
 }
 
-/**/
 static void
 send_and_wait(const unsigned int addr, const unsigned char *buffer, int size)
 {
-//    unsigned int address;
-
     FUNC_ENTER();
 
     vicewritememory(addr, size, buffer);
@@ -249,9 +248,6 @@ static unsigned char data_rawwrite[] = {
     0xE8,             // 2108 INX
     0x88,             // 2109 DEY
     0xD0, 0xF6,       // 210A BNE $2102
-//    0x20, 0x85, 0xEE, // 210C JSR $EE85 ; CLK = 1
-//    0x20, 0x8E, 0xEE, // 210C JSR $EE8E ; CLK = 0
-//    0x20, 0xA0, 0xEE, // 210F JSR $EEA0 ; DATA = 0
     0x4C, 0x00, 0x20  // 210C JMP $2000
 };
 static const addr_rawwrite = 0x2100;
@@ -850,11 +846,12 @@ cbmarch_iec_poll(CBM_FILE HandleDevice)
 
     line = vicereadregister(reg_a);
 
-    DbgOut("iec_poll = $%02x", line);
+//    DbgOut("iec_poll = $%02x", line);
     DbgLineStatus((unsigned char)(line ^ 0xc0));
 
-    if (!(line & VICE_CLK_IN))  result |= IEC_CLOCK;
-    if (!(line & VICE_DATA_IN)) result |= IEC_DATA;
+    if ( (line & VICE_CLK_IN))  result |= IEC_CLOCK;
+    if ( (line & VICE_DATA_IN)) result |= IEC_DATA;
+    if (!(line & VICE_ATN_OUT)) result |= IEC_ATN;
 
     FUNC_LEAVE_INT(result);
 }
@@ -959,8 +956,8 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line)
 
     FUNC_ENTER();
 
-    DbgOut("");
-    DbgOut("setrelease: Mask = %u, Line = %u", Mask, Line);
+//    DbgOut("");
+//    DbgOut("setrelease: Mask = %u, Line = %u", Mask, Line);
     cbmarch_iec_poll(HandleDevice);
 
     if (Mask & IEC_DATA)  mask |= VICE_DATA_OUT;
@@ -973,7 +970,7 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line)
 
     if (mask)
     {
-        DbgOut("iec_setrelease = mask = $%02x, line = $%02x", mask, line);
+//        DbgOut("iec_setrelease = mask = $%02x, line = $%02x", mask, line);
 
         vicepause();
         vicewriteregister(reg_a, mask ^ 0xff);

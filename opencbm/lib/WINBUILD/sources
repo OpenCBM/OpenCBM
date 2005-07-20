@@ -15,6 +15,7 @@ INCLUDES=../../include;../../include/WINDOWS;../
 
 SOURCES=../cbm.c \
 	../detect.c \
+	../detectxp1541.c \
 	../petscii.c \
 	../upload.c \
         i_opencbm.c \

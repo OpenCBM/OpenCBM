@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.6 2005-03-02 18:17:17 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.7 2005-07-20 16:37:12 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -337,10 +337,32 @@ static int do_detect(CBM_FILE fd, char *argv[])
 
     for( device = 8; device < 16; device++ )
     {
-        if( cbm_identify( fd, device, NULL, &type_str ) == 0 )
+        enum cbm_device_type_e device_type;
+        if( cbm_identify( fd, device, &device_type, &type_str ) == 0 )
         {
+            enum cbm_cable_type_e cable_type;
+            const char *cable_str = "(cannot determine cable type)";
+ 
             num_devices++;
-            printf( "%2d: %s\n", device, type_str );
+
+            if ( cbm_identify_xp1541( fd, device, &device_type, &cable_type ) == 0 )
+            {
+                switch (cable_type)
+                {
+                case cbm_ct_none:
+                    cable_str = "";
+                    break;
+
+                case cbm_ct_xp1541:
+                    cable_str = "(XP1541)";
+                    break;
+
+                case cbm_ct_unknown:
+                default:
+                    break;
+                }
+            }
+            printf( "%2d: %s %s\n", device, type_str, cable_str );
         }
     }
     arch_set_errno(0);

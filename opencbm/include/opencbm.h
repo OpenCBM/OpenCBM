@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.8 2005-04-17 15:32:17 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.9 2005-07-20 16:37:12 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -91,6 +91,14 @@ enum cbm_device_type_e
     cbm_dt_cbm1581       /*!< The device is a VIC 1581 */
 };
 
+/*! Specifies the type of a device for cbm_identify() */
+enum cbm_cable_type_e
+{
+    cbm_ct_unknown = -1, /*!< The device could not be identified */
+    cbm_ct_none,         /*!< The device does not have a parallel cable */
+    cbm_ct_xp1541        /*!< The device does have a parallel cable */
+};
+
 /*! \todo FIXME: port isn't used yet */
 EXTERN int CBMAPIDECL cbm_driver_open(CBM_FILE *f, int port);
 EXTERN void CBMAPIDECL cbm_driver_close(CBM_FILE f);
@@ -133,6 +141,11 @@ EXTERN int CBMAPIDECL cbm_exec_command(CBM_FILE f, __u_char dev, const void *cmd
 EXTERN int CBMAPIDECL cbm_identify(CBM_FILE f, __u_char drv,
                                    enum cbm_device_type_e *t,
                                    const char **type_str);
+
+EXTERN int CBMAPIDECL cbm_identify_xp1541(CBM_FILE HandleDevice,
+                                          __u_char DeviceAddress,
+                                          enum cbm_device_type_e *CbmDeviceType,
+                                          enum cbm_cable_type_e *CableType);
 
 
 EXTERN char CBMAPIDECL cbm_petscii2ascii_c(char character);
