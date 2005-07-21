@@ -7,7 +7,7 @@
  *  Copyright 2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
-/* $Id: cbmcopy.h,v 1.1 2004-11-07 11:05:12 strik Exp $ */
+/* $Id: cbmcopy.h,v 1.2 2005-07-21 17:39:20 strik Exp $ */
 
 #ifndef CBMCOPY_H
 #define CBMCOPY_H
@@ -45,6 +45,14 @@ extern char *cbmcopy_get_transfer_modes();
  * are possible
  */
 extern int cbmcopy_get_transfer_mode_index(const char *name);
+
+/*
+ * find out if "auto" transfer mode was specified. If yet, determine
+ * the best transfer mode we can use.
+ */
+extern int cbmcopy_check_auto_transfer_mode(CBM_FILE cbm_fd,
+                                            int auto_transfermode,
+                                            int drive);
 
 /*
  * returns malloc()'d pointer to default settings.

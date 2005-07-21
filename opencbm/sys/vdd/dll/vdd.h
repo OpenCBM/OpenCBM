@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/vdd.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.h,v 1.4 2005-01-22 19:50:42 strik Exp $ \n
+** \version $Id: vdd.h,v 1.5 2005-07-21 17:39:21 strik Exp $ \n
 ** \n
 ** \brief Function prototypes for the VDD
 **
@@ -52,7 +52,8 @@ enum FUNCTIONCODE
     FC_VDD_INSTALL_IOHOOK,
     FC_VDD_UNINSTALL_IOHOOK,
     FC_VDD_USLEEP,
-    FC_IEC_SETRELEASE
+    FC_IEC_SETRELEASE,
+    FC_IDENTIFY_XP1541
 } FUNCTIONCODE;
 
 extern HANDLE vdd_handle;
@@ -82,6 +83,7 @@ extern BOOLEAN vdd_upload(CBM_FILE);
 extern BOOLEAN vdd_device_status(CBM_FILE);
 extern BOOLEAN vdd_exec_command(CBM_FILE);
 extern BOOLEAN vdd_identify(CBM_FILE);
+extern BOOLEAN vdd_identify_xp1541(CBM_FILE);
 extern BOOLEAN vdd_get_driver_name(VOID);
 
 extern BOOLEAN vdd_install_iohook(CBM_FILE);

@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/vdd.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.c,v 1.4 2005-01-22 19:50:41 strik Exp $ \n
+** \version $Id: vdd.c,v 1.5 2005-07-21 17:39:21 strik Exp $ \n
 ** \n
 ** \brief VDD for accessing the driver from DOS
 **
@@ -208,6 +208,7 @@ VDDDispatch(VOID)
         case FC_DEVICE_STATUS:   error = vdd_device_status(cbmfile); break; 
         case FC_EXEC_COMMAND:    error = vdd_exec_command(cbmfile);  break;
         case FC_IDENTIFY:        error = vdd_identify(cbmfile);      break;
+        case FC_IDENTIFY_XP1541: error = vdd_identify_xp1541(cbmfile); break;
         case FC_GET_DRIVER_NAME: error = vdd_get_driver_name();      break;
 
         case FC_VDD_USLEEP:      error = vdd_usleep();               break;

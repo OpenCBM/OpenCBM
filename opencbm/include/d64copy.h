@@ -7,7 +7,7 @@
  *  Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
-/* $Id: d64copy.h,v 1.2 2005-04-17 15:32:17 strik Exp $ */
+/* $Id: d64copy.h,v 1.3 2005-07-21 17:39:20 strik Exp $ */
 
 #ifndef D64COPY_H
 #define D64COPY_H
@@ -85,6 +85,14 @@ extern char *d64copy_get_transfer_modes();
  * are possible
  */
 extern int d64copy_get_transfer_mode_index(const char *name);
+
+/*
+ * find out if "auto" transfer mode was specified. If yet, determine
+ * the best transfer mode we can use.
+ */
+extern int d64copy_check_auto_transfer_mode(CBM_FILE cbm_fd,
+                                            int auto_transfermode,
+                                            int drive);
 
 /*
  * returns malloc()'d pointer to default settings.

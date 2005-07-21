@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.6 2005-05-25 14:17:51 strik Exp $";
+    "@(#) $Id: main.c,v 1.7 2005-07-21 17:39:20 strik Exp $";
 #endif
 
 #include <ctype.h>
@@ -82,6 +82,7 @@ static void help(const char *prog)
 "  -n, --no-progress          do not display progress information\n"
 "\n"
 "  -t, --transfer=TRANSFER    set transfermode; valid modes:\n"
+"                             auto (default)\n"
 "                               serial1 or s1  (slowest)\n"
 "                               serial2 or s2\n"
 "                               parallel       (fastest)\n"
@@ -91,6 +92,7 @@ static void help(const char *prog)
 "                             connected to the IEC bus;\n"
 "                             `parallel' needs a XP1541/XP1571 cable in addition\n"
 "                             to the serial one.\n"
+"                             `auto' tries to determine the best option.\n"
 "  -d, --drive-type=TYPE      specify drive type, one of:\n"
 "                               1541, 1570, 1571, 1581\n"
 "  -a, --address=ADDRESS      override file start address\n"
@@ -396,6 +398,16 @@ int ARCH_MAINDECL main(int argc, char **argv)
     if(0 == rv)
     {
         fd_cbm = fd;
+
+        /*
+         * If the user specified auto transfer mode, find out
+         * which transfer mode to use.
+         */
+        settings->transfer_mode = 
+            cbmcopy_check_auto_transfer_mode(fd_cbm,
+                settings->transfer_mode,
+                drive);
+
         signal( SIGINT, reset );
 
         while(++optind < argc)

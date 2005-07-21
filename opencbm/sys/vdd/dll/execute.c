@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.7 2005-04-17 15:32:19 strik Exp $ \n
+** \version $Id: execute.c,v 1.8 2005-07-21 17:39:20 strik Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **
@@ -993,6 +993,54 @@ vdd_identify(CBM_FILE HandleDevice)
     strncpy(buffer, string, length);
 
     CHECKEDBUFFERACCESS_EPILOG();
+}
+
+/*! \brief Identify the cable connected to a specific floppy drive.
+
+ This function tries to identify if the given floppy drive has an
+ XP1541 cable connected.
+
+ \param HandleDevice (BX)
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param DeviceAddress (DH)
+   The address of the device on the IEC serial bus. This
+   is known as primary address, too.
+
+ \param CbmDeviceType (DI)
+   Enum which holds the type of the device. If this tells
+   that the device is unknown, this function calls
+   cbm_identify itself to find out the device type. If
+
+ \return CableType (DI)
+   An enum holds the cable type of the device.
+
+ \return
+   Carry is clear iff the drive could be contacted.
+   It does not mean that the device could be identified.
+
+ If vdd_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+BOOLEAN
+vdd_identify_xp1541(CBM_FILE HandleDevice)
+{
+    BOOLEAN error;
+    enum cbm_devicetype_e devicetype = getDI();
+    enum cbm_cabletype_e cabletype;
+
+    FUNC_ENTER();
+
+    devicetype = getDI();
+    error = cbm_identify_xp1541(HandleDevice, getDH(),
+        devicetype >= 0 ? &devicetype : NULL,
+        &cabletype) ? TRUE : FALSE;
+
+    setDI(devicetype);
+    retAX(error);
+
+    FUNC_LEAVE_BOOLEAN(error); 
 }
 
 /*-------------------------------------------------------------------*/

@@ -9,12 +9,13 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.2 2005-03-02 18:17:20 strik Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.3 2005-07-21 17:39:20 strik Exp $";
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "opencbm.h"
 #include "cbmcopy.h"
 
@@ -56,6 +57,7 @@ static struct _transfers
 }
 transfers[] =
 {
+    { &cbmcopy_s1_transfer, "auto", "a%1" },
     { &cbmcopy_s1_transfer, "serial1", "s1" },
     { &cbmcopy_s2_transfer, "serial2", "s2" },
     { &cbmcopy_pp_transfer, "parallel", "p%" },
@@ -321,6 +323,70 @@ int cbmcopy_get_transfer_mode_index(const char *name)
     return -1;
 }
 
+int cbmcopy_check_auto_transfer_mode(CBM_FILE cbm_fd, int auto_transfermode, int drive)
+{
+    int transfermode = auto_transfermode;
+
+    /* We assume auto is the first transfer mode */
+    assert(strcmp(transfers[0].name, "auto") == 0);
+
+    if (auto_transfermode == 0)
+    {
+        do {
+            enum cbm_cabletype_e cable_type;
+            unsigned char testdrive;
+
+            /*
+             * Test the cable
+             */
+
+            if (cbm_identify_xp1541(cbm_fd, (unsigned char)drive, NULL, &cable_type) == 0)
+            {
+                if (cable_type == cbm_ct_xp1541)
+                {
+                    /*
+                     * We have a parallel cable, use that
+                     */
+                    transfermode = cbmcopy_get_transfer_mode_index("parallel");
+                    break;
+                }
+            }
+
+            /*
+             * We do not have a parallel cable. Check if we are the only drive
+             * on the bus, so we can use serial2, at least.
+             */
+
+            for (testdrive = 4; testdrive < 31; ++testdrive)
+            {
+                enum cbm_devicetype device_type;
+
+                /* of course, the drive to be transfered to is present! */
+                if (testdrive == drive)
+                    continue;
+
+                if (cbm_identify(cbm_fd, testdrive, &device_type, NULL) == 0)
+                {
+                    /*
+                     * My bad, there is another drive -> only use serial1
+                     */
+                    transfermode = cbmcopy_get_transfer_mode_index("serial1");
+                    break;
+                }
+            }
+
+            /*
+             * If we reached here with transfermode 0, we are the only
+             * drive, thus, use serial2.
+             */
+            if (transfermode == 0)
+                transfermode = cbmcopy_get_transfer_mode_index("serial2");
+
+        } while (0);
+    }
+
+    return transfermode;
+}
 
 cbmcopy_settings *cbmcopy_get_default_settings(void)
 {

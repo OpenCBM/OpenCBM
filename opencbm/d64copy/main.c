@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.4 2005-04-17 15:32:17 strik Exp $";
+    "@(#) $Id: main.c,v 1.5 2005-07-21 17:39:20 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -57,6 +57,7 @@ static void help()
 "  -e, --end-track=TRACK    set end track (start <= end <= 42/70)\n"
 "\n"
 "  -t, --transfer=TRANSFER  set transfermode; valid modes:\n"
+"                             auto (default)\n"
 "                             original       (slowest)\n"
 "                             serial1 or s1\n"
 "                             serial2 or s2\n"
@@ -65,8 +66,9 @@ static void help()
 "                           `original' and `serial1' should work in any case;\n"
 "                           `serial2' won't work if more than one device is\n"
 "                           connected to the IEC bus;\n"
-"                           `parallel' needs a XP1541/XP1571 cable in addition"
+"                           `parallel' needs a XP1541/XP1571 cable in addition\n"
 "                           to the serial one.\n"
+"                           `auto' tries to determine the best option.\n"
 "\n"
 "  -i, --interleave=VALUE   set interleave value; ignored when reading with\n"
 "                           warp mode; default values are:\n"
@@ -354,6 +356,17 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     if(cbm_driver_open(&fd_cbm, 0) == 0)
     {
+        /*
+         * If the user specified auto transfer mode, find out
+         * which transfer mode to use.
+         */
+        settings->transfer_mode = 
+            d64copy_check_auto_transfer_mode(fd_cbm,
+                settings->transfer_mode,
+                atoi(src_is_cbm ? src_arg : dst_arg));
+
+        my_message_cb(3, "decided to use transfer mode %d", settings->transfer_mode );
+
         signal(SIGINT, reset);
 
         if(src_is_cbm)
