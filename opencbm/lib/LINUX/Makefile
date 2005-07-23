@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-03-02 18:17:20 strik Exp $
+# $Id: Makefile,v 1.2 2005-07-23 11:18:40 strik Exp $
 
 include ../LINUX/config.make
 
@@ -11,7 +11,7 @@ SHLIB   = libopencbm.so
 SHLIBV  = $(SHLIB).$(MAJ)
 SHLIBV3 = $(SHLIBV).$(MIN).$(REL)
 LIB     = libopencbm.a
-SRCS    = cbm.c detect.c petscii.c upload.c LINUX/archlib.c \
+SRCS    = cbm.c detect.c detectxp1541.c petscii.c upload.c LINUX/archlib.c \
 	  $(foreach t,cbmcopy pp s1 s2, $(LIBCBMCOPY)/$(t).c) \
 	  $(foreach t,d64copy fs gcr pp s1 s2 std, $(LIBD64COPY)/$(t).c)
 
@@ -99,6 +99,7 @@ $(LIBD64COPY)/std.o $(LIBD64COPY)/std.lo: \
   $(LIBD64COPY)/std.c ../include/opencbm.h \
   $(LIBD64COPY)/d64copy_int.h ../include/d64copy.h $(LIBD64COPY)/gcr.h
 detect.o detect.lo: detect.c ../include/opencbm.h
+detectxp1541.o detectxp1541.lo: detectxp1541.c ../include/opencbm.h
 petscii.o petscii.lo: petscii.c ../include/opencbm.h
 upload.o upload.lo: upload.c ../include/opencbm.h
 cbm.o cbm.lo: cbm.c ../include/opencbm.h ../include/LINUX/cbm_module.h

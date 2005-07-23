@@ -8,3 +8,4 @@ build*.log
 build*.err
 build*.wrn
 *.plg
+flash

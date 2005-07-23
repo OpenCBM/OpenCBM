@@ -7,3 +7,5 @@ build*.log
 build*.err
 build*.wrn
 *.plg
+*.lo
+*.so.*

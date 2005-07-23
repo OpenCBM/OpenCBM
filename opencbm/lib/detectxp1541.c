@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/detectxp1541.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: detectxp1541.c,v 1.2 2005-07-21 17:39:20 strik Exp $ \n
+** \version $Id: detectxp1541.c,v 1.3 2005-07-23 11:18:40 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Detect an XP1541/XP1571 parallel cable
@@ -191,7 +191,7 @@ cbm_identify_xp1541(CBM_FILE HandleDevice, __u_char DeviceAddress,
 {
     int xp15x1 = 0;
     int ret = 0;
-    enum device_type_e localDummyDeviceType = cbm_dt_unknown;
+    enum cbm_device_type_e localDummyDeviceType = cbm_dt_unknown;
 
     FUNC_ENTER();
  

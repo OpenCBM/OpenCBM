@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.5 2005-07-21 17:39:20 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.6 2005-07-23 11:18:40 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -674,7 +674,7 @@ int d64copy_check_auto_transfer_mode(CBM_FILE cbm_fd, int auto_transfermode, int
     if (auto_transfermode == 0)
     {
         do {
-            enum cbm_cabletype_e cable_type;
+            enum cbm_cable_type_e cable_type;
             unsigned char testdrive;
 
             /*
@@ -700,7 +700,7 @@ int d64copy_check_auto_transfer_mode(CBM_FILE cbm_fd, int auto_transfermode, int
 
             for (testdrive = 4; testdrive < 31; ++testdrive)
             {
-                enum cbm_devicetype device_type;
+                enum cbm_device_type_e device_type;
 
                 /* of course, the drive to be transfered to is present! */
                 if (testdrive == drive)
