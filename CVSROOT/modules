@@ -24,5 +24,11 @@
 # character to interpose another module into the current module.  This
 # can be useful for creating a module that consists of many directories
 # spread out over the entire source repository.
-cbm4win	cbm4win
+#
+opencbm    cbm4win
+#
+cbm4win	   cbm4win
+cbm4linux  cbm4win
+#
 c4w	-a cbm4win
+c4l     -a cbm4linux
