@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.1 2005-03-02 18:17:16 strik Exp $
+rem $Id: ddkbuild_start.bat,v 1.2 2005-07-27 17:35:53 strik Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -89,6 +89,9 @@ echo COPYTARGET="%COPYTARGET%"
 
 call %DDKBUILD% %CMDLINE%
 
+rem Copy the INF file into the bin directory
+copy ..\sys\wdm\*.inf ..\bin\i386
+
 if not exist build*.err (
 
 	rem If we are not called from the root, do not copy!
@@ -98,6 +101,8 @@ if not exist build*.err (
 			echo.
 			echo =============== copying files to target =============
 
+			xcopy /y ..\bin\i386\*.inf %COPYTARGET%
+			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy INF file to %COPYTARGET%"
 			xcopy /y ..\bin\i386\*.sys %COPYTARGET%
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy SYS files to %COPYTARGET%"
 			xcopy /y ..\bin\i386\*.exe %COPYTARGET%
