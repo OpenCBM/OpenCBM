@@ -13,7 +13,7 @@ CFG=syswdm - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "syswdm.mak" CFG="wdm - Win32 Debug"
+!MESSAGE NMAKE /f "syswdm.mak" CFG="syswdm - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -136,6 +136,10 @@ SOURCE=.\cbmlog.rc
 # Begin Source File
 
 SOURCE=.\.cvsignore
+# End Source File
+# Begin Source File
+
+SOURCE=.\cbm4win.inf
 # End Source File
 # Begin Source File
 
