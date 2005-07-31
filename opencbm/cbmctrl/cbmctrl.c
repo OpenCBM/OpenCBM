@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.7 2005-07-20 16:37:12 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.8 2005-07-31 08:39:47 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -22,6 +22,11 @@ static char *rcsid =
 typedef int (*mainfunc)(CBM_FILE fd, char *argv[]);
 
 #include "arch.h"
+
+static const unsigned char prog_tdchange[] = {
+#include "tdchange.inc"
+};
+
 
 /*
  * Simple wrapper for reset
@@ -369,6 +374,60 @@ static int do_detect(CBM_FILE fd, char *argv[])
     return num_devices > 0 ? 0 : 1;
 }
 
+/*
+ * wait until user changes the disk
+ */
+static int do_change(CBM_FILE fd, char *argv[])
+{
+    unsigned char unit;
+    int rv;
+
+    unit = arch_atoc(argv[0]);
+
+    do
+    {
+        rv = cbm_upload(fd, unit, 0x500, prog_tdchange, sizeof(prog_tdchange));
+    
+        if (rv != sizeof(prog_tdchange))
+        {
+            rv = 1;
+            break;
+        }
+
+        cbm_exec_command(fd, unit, "U3:", 0);
+        cbm_iec_release(fd, IEC_ATN | IEC_DATA | IEC_CLOCK | IEC_RESET);
+
+        /*
+         * Now, wait for the drive routine to signal its starting
+         */
+        cbm_iec_wait(fd, IEC_DATA, 1);
+
+        /*
+         * Now, wait until CLOCK is high, too, which tells us that
+         * a new disk has been successfully read.
+         */
+        cbm_iec_wait(fd, IEC_CLOCK, 1);
+
+        /*
+         * Signal: We recognized this
+         */
+        cbm_iec_set(fd, IEC_ATN);
+
+        /*
+         * Wait for routine ending.
+         */
+        cbm_iec_wait(fd, IEC_CLOCK, 0);
+
+        /*
+         * Release ATN again
+         */
+        cbm_iec_release(fd, IEC_ATN);
+
+    } while (0);
+
+    return rv;
+}
+
 struct prog
 {
     char    *name;
@@ -393,6 +452,7 @@ static struct prog prog_table[] =
     {"upload"  , do_upload  , 2, 3, "<device> <adr> [<file>]"         },
     {"reset"   , do_reset   , 0, 0, ""                                },
     {"detect"  , do_detect  , 0, 0, ""                                },
+    {"change"  , do_change  , 1, 1, "<device>"                        },
     {NULL,NULL}
 };
 

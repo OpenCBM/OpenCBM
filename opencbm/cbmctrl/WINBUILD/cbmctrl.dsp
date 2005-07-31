@@ -101,6 +101,18 @@ SOURCE=..\cbmctrl.c
 SOURCE=.\cbmctrl.rc
 # End Source File
 # End Group
+# Begin Group "CA65"
+
+# PROP Default_Filter "a65"
+# Begin Source File
+
+SOURCE=..\common.i65
+# End Source File
+# Begin Source File
+
+SOURCE=..\tdchange.a65
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\makefile

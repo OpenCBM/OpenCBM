@@ -8,7 +8,7 @@ OD=/usr/bin/od
 SED=/usr/bin/sed
 RM=/usr/bin/rm
 
-CA65_FLAGS="--feature labels_without_colons --feature pc_assignment --feature loose_char_term"
+CA65_FLAGS="--feature labels_without_colons --feature pc_assignment --feature loose_char_term --asm-include-dir .."
 
 funcbuildinc()
 {
