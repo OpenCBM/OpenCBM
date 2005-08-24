@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.7 2005-04-17 15:32:17 strik Exp $ \n
+** \version $Id: debug.h,v 1.8 2005-08-24 18:18:05 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -223,9 +223,8 @@ int __cdecl main(int argc, char *argv[])
        #define _DBGO(_xxx) DbgOutputIntoBuffer _xxx
 
 #ifdef DBG_KERNELMODE
-       ULONG DbgKeGetCurrentProcessorNumber();
 
-       #define _DBG_START() _DBG_START_ADD DbgBufferPos[DEBUG_BUFFER_NO] = 0; DbgOutputIntoBuffer(DBG_PREFIX "%s(%u,%02x)," __FUNCTION__ "(%u): ", DBG_PROGNAME, DbgKeGetCurrentProcessorNumber(), DebugBufferNo, __LINE__)
+       #define _DBG_START() _DBG_START_ADD DbgBufferPos[DEBUG_BUFFER_NO] = 0; DbgOutputIntoBuffer(DBG_PREFIX "%s(%u,%02x)," __FUNCTION__ "(%u): ", DBG_PROGNAME, CbmGetCurrentProcessorNumber(), DebugBufferNo, __LINE__)
 #else // #if DBG_KERNELMODE
        #define _DBG_START() _DBG_START_ADD DbgBufferPos[DEBUG_BUFFER_NO] = 0; DbgOutputIntoBuffer(DBG_PREFIX "%s," __FUNCTION__ "(%u): ", DBG_PROGNAME, __LINE__)
 #endif // #if DBG_KERNELMODE

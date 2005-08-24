@@ -306,7 +306,19 @@ Package=<4>
 
 ###############################################################################
 
-Project: "syswdm"=..\sys\wdm\syswdm.dsp - Package Owner=<4>
+Project: "sysw98"=..\sys\wdm\win98\sysw98.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "syswdm"=..\sys\wdm\win2000\syswdm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

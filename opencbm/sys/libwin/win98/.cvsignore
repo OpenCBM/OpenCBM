@@ -1,0 +1,11 @@
+Debug
+Release
+objchk*
+objfre*
+obj*
+*.bsc
+build*.log
+build*.wrn
+build*.err
+*.bsc
+*.plg

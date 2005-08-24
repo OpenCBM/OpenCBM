@@ -3,4 +3,5 @@ DIRS= \
 	wdm \
 	nt4 \
 	libcommon \
+	libwin \
 	libiec

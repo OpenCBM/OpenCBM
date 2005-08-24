@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archlib_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: archlib_vice.c,v 1.2 2005-07-20 16:37:12 strik Exp $ \n
+** \version $Id: archlib_vice.c,v 1.3 2005-08-24 18:18:05 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        This variant is for accessing VICE instead of a real device
@@ -259,7 +259,8 @@ cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 
     FUNC_ENTER();
 
-    DBG_ASSERT(Count < 256 && Count >= 0);
+    DBG_ASSERT(((signed int)Count) >= 0);
+    DBG_ASSERT(Count < 256);
 
     vicepause();
     vicewritememory(0x4000, Count, Buffer);
@@ -329,7 +330,8 @@ cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 
     FUNC_ENTER();
 
-    DBG_ASSERT(Count < 256 && Count >= 0);
+    DBG_ASSERT(((signed int)Count) >= 0);
+    DBG_ASSERT(Count < 256);
 
     vicepause();
     vicewriteregister(reg_y, Count);

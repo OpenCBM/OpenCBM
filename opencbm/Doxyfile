@@ -430,6 +430,7 @@ INPUT                  = cbmctrl/ \
                          sys/include/ \
                          sys/libcommon/ \
                          sys/libiec/ \
+                         sys/libwin/ \
                          sys/nt4/ \
                          sys/vdd/ \
                          sys/wdm/ \

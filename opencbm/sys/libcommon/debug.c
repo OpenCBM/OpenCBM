@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.12 2005-07-16 17:20:42 strik Exp $ \n
+** \version $Id: debug.c,v 1.13 2005-08-24 18:18:05 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -21,14 +21,16 @@
  * should not be defined as "extern"  */
 // #define DBG_IS_DEBUG_C
 
-// #include <wdm.h>
-#include <ntddk.h>
+#include <wdm.h>
+// #include <ntddk.h>
 #include "cbm_driver.h"
 
 #include "../../arch/windows/debug.c"
 
 /*! find the minimum of both parameters */
-#define min(_x, _y) ( ((_x) < (_y)) ? (_x) : (_y) )
+#ifndef min
+# define min(_x, _y) ( ((_x) < (_y)) ? (_x) : (_y) )
+#endif
 
 #if 0
     #define REPORT_BUG(_no, _a, _b, _c, _d, _str) KeBugCheckEx(_no, _a, _b, _c, _d)
@@ -1022,20 +1024,6 @@ DebugNtStatus(NTSTATUS Value)
 
     return "*UNKNOWN*";
 }
-
-/*! \brief Wrapper for KeGetCurrentProcessorNumber()
-
- See KeGetCurrentProcessorNumber()
- 
- This function is needed as KeGetCurrentProcessorNumber() is
- only defined in NTDDK.H, not in WDM.H. Anyway, for debugging
- purposes, we need to access it from anywhere..
-*/
-ULONG DbgKeGetCurrentProcessorNumber()
-{
-    return KeGetCurrentProcessorNumber();
-}
-
 
 #if DBG
 

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/perfeval.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.c,v 1.3 2005-04-09 15:24:33 strik Exp $ \n
+** \version $Id: perfeval.c,v 1.4 2005-08-24 18:18:05 strik Exp $ \n
 ** \n
 ** \brief Functions for performance evaluation purposes - KERNEL version
 **
@@ -186,7 +186,7 @@ PerfEvent(IN ULONG Event, IN ULONG Data)
         if (currentEntry < MAX_PERFORMANCE_EVAL_ENTRIES)
         {
             PerformanceEvalEntries[currentEntry].Timestamp = RDTSC();
-            PerformanceEvalEntries[currentEntry].Processor = DbgKeGetCurrentProcessorNumber();
+            PerformanceEvalEntries[currentEntry].Processor = CbmGetCurrentProcessorNumber();
             PerformanceEvalEntries[currentEntry].PeThread  = PsGetCurrentThread();
             PerformanceEvalEntries[currentEntry].Event = Event;
             PerformanceEvalEntries[currentEntry].Data = Data;
@@ -238,7 +238,9 @@ PerfSynchronize(VOID)
 
     // Make sure to only output the entries if there are some
 
-    if (PerformanceEvalEntries && CurrentPerformanceEvalEntry >= 0)
+    DBG_ASSERT(((LONG)CurrentPerformanceEvalEntry) >= 0);
+
+    if (PerformanceEvalEntries)
     {
 
 #ifdef PERFEVAL_WRITE_TO_MEMORY

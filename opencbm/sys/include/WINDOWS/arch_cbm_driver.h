@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.2 2005-04-20 14:24:07 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.3 2005-08-24 18:18:05 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **
@@ -223,3 +223,9 @@ cbm_registry_write_ulong(IN HANDLE HandleKey, IN PCWSTR KeyName, IN ULONG Value)
 
 extern NTSTATUS
 CbmOpenDeviceRegistryKey(IN PDEVICE_OBJECT a, IN ULONG b, IN ACCESS_MASK c, OUT PHANDLE d);
+
+extern ULONG
+CbmGetCurrentProcessorNumber(VOID);
+
+extern ULONG
+CbmGetNumberProcessors(VOID);

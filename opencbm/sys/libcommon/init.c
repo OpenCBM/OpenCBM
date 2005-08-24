@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.4 2005-04-20 14:24:07 strik Exp $ \n
+** \version $Id: init.c,v 1.5 2005-08-24 18:18:05 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
@@ -300,7 +300,16 @@ AddDeviceCommonInit(IN PDEVICE_OBJECT Fdo, IN PUNICODE_STRING DeviceName,
 
     // Mark if we are running on an machine with more than one processor
 
+/*
+#ifdef COMPILE_W98_API
+    pdx->IsSMP = 0;
+#elif COMPILE_W2K_API
     pdx->IsSMP = (*KeNumberProcessors > 1) ? TRUE : FALSE;
+#else
+    pdx->IsSMP = (KeNumberProcessors > 1) ? TRUE : FALSE;
+#endif
+*/
+    pdx->IsSMP = (CbmGetNumberProcessors() > 1) ? TRUE : FALSE;
 
     // Initialize the parallel port information
 

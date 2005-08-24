@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.2 2005-07-27 17:35:53 strik Exp $
+rem $Id: ddkbuild_start.bat,v 1.3 2005-08-24 18:18:05 strik Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -73,6 +73,8 @@ if %DDKBUILD_HOLLIS% EQU 1 (
 ) else (
 	set DDKBUILD=%DDKBUILD_CMD_OSR%
 	set TARGETSPEC=-WNET2K
+rem	set TARGETSPEC=-WNETXP
+rem	set TARGETSPEC=-WNET
 	set CHECKEDFREE=chk
 	if /i "%0" EQU ="fre" set CHECKEDFREE=fre
 )
