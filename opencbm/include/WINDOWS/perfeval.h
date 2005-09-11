@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/WINDOWS/perfeval.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.h,v 1.2 2005-04-09 15:24:33 strik Exp $ \n
+** \version $Id: perfeval.h,v 1.3 2005-09-11 13:32:33 strik Exp $ \n
 ** \n
 ** \brief Functions and macros for performance evaluation purposes
 **
@@ -34,15 +34,15 @@ PERFORMANCE_EVAL_ENTRY
     PETHREAD PeThread;
 
     /*! The event which is logged */
-    ULONG Event;
+    ULONG_PTR Event;
  
     /*! Additional data for the event */
-    ULONG Data;
+    ULONG_PTR Data;
 
 } PERFORMANCE_EVAL_ENTRY, *PPERFORMANCE_EVAL_ENTRY;
 
 extern VOID PerfInit(VOID);
-extern VOID PerfEvent(IN ULONG Event, IN ULONG Data);
+extern VOID PerfEvent(IN ULONG_PTR Event, IN ULONG_PTR Data);
 extern VOID PerfSave(VOID);
 
 /*! Call PerfInit() if performance evaluation is selected */

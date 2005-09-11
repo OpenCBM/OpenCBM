@@ -23,6 +23,8 @@
 # include <errno.h>
 # include <error.h>
 
+# define ULONG_PTR unsigned long
+
 #endif
 
 #include <string.h>

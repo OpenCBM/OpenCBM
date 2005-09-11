@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.4 2005-07-23 11:18:40 strik Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.5 2005-09-11 13:32:33 strik Exp $";
 #endif
 
 #include <stdio.h>
@@ -127,7 +127,7 @@ static int cbmcopy_read(CBM_FILE fd,
                         const unsigned char *cbmname,
                         int cbmname_len,
                         unsigned char **filedata,
-                        int *filedata_size,
+                        size_t *filedata_size,
                         cbmcopy_message_cb msg_cb,
                         cbmcopy_status_cb status_cb)
 {
@@ -526,7 +526,7 @@ int cbmcopy_read_file_ts(CBM_FILE fd,
                          int drive,
                          int track, int sector,
                          unsigned char **filedata,
-                         int *filedata_size,
+                         size_t *filedata_size,
                          cbmcopy_message_cb msg_cb,
                          cbmcopy_status_cb status_cb)
 {
@@ -545,7 +545,7 @@ int cbmcopy_read_file(CBM_FILE fd,
                       const unsigned char *cbmname,
                       int cbmname_len,
                       unsigned char **filedata,
-                      int *filedata_size,
+                      size_t *filedata_size,
                       cbmcopy_message_cb msg_cb,
                       cbmcopy_status_cb status_cb)
 {

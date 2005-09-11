@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.5 2005-03-02 18:17:21 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.6 2005-09-11 13:32:33 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -428,7 +428,7 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
         case CBMCTRL_I_INSTALL:
             DBG_IRP(CBMCTRL_I_INSTALL);
             returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
-            ntStatus = cbm_install(Pdx, OUTPUTVALUE(CBMT_I_INSTALL_OUT), &returnLength);
+            ntStatus = cbm_install(Pdx, OUTPUTVALUE(CBMT_I_INSTALL_OUT), (PULONG) &returnLength);
             break;
 
 #if DBG
@@ -436,7 +436,7 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
         case CBMCTRL_I_READDBG:
             DBG_IRP(CBMCTRL_I_READDBG);
             returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
-            ntStatus = cbm_dbg_readbuffer(Pdx, OUTPUTVALUE(CHAR), &returnLength);
+            ntStatus = cbm_dbg_readbuffer(Pdx, OUTPUTVALUE(CHAR), (PULONG) &returnLength);
             break;
 
 #endif // #if DBG

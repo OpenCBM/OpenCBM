@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.8 2005-08-24 18:18:05 strik Exp $ \n
+** \version $Id: debug.h,v 1.9 2005-09-11 13:32:33 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -115,6 +115,8 @@ int __cdecl main(int argc, char *argv[])
        /*! return the name of NTSTATUS values */
        extern const UCHAR *DebugNtStatus(NTSTATUS Value);
 
+#else
+       #define DbgBreakPoint DebugBreak
 #endif // #ifdef DBG_KERNELMODE
 
 
@@ -233,7 +235,7 @@ int __cdecl main(int argc, char *argv[])
        #define DBGO(_xxx) { _DBG_START(); _DBGO(_xxx); _DBG_END() }
 
        /*! set a hard-coded breakpoint */
-       #define DBG_BREAKPOINT() { if (ISDBG_BREAK()) { __asm int 3 }; }
+       #define DBG_BREAKPOINT() { if (ISDBG_BREAK()) { DbgBreakPoint(); }; }
 
        /*! enter a function */
        #define FUNC_ENTER()             FUNC_DEF { if (ISDBG_ENTER()) { DBGO(( DBG_PREFIX "Entering %s", __FUNCTION__ )); } }

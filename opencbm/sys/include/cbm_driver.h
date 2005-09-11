@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.2 2005-04-09 15:24:33 strik Exp $ \n
+** \version $Id: cbm_driver.h,v 1.3 2005-09-11 13:32:33 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **
@@ -31,11 +31,11 @@ typedef struct _DEVICE_EXTENSION DEVICE_EXTENSION, *PDEVICE_EXTENSION;
 /* The following defines are used if performance evaluation is selected. */
 
 /*! Performance evaluation: StartIo() is performed */
-#define PERF_EVENT_STARTIO(_x_)         PERF_EVENT(0x10, (ULONG) _x_)
+#define PERF_EVENT_STARTIO(_x_)         PERF_EVENT(0x10, (ULONG_PTR) _x_)
 /*! Performance evaluation: An IRP is completed */
-#define PERF_EVENT_COMPLETEIRP(_x_)     PERF_EVENT(0x11, (ULONG) _x_)
+#define PERF_EVENT_COMPLETEIRP(_x_)     PERF_EVENT(0x11, (ULONG_PTR) _x_)
 /*! Performance evaluation: An IRP is cancelled */
-#define PERF_EVENT_CANCELIRP(_x_)       PERF_EVENT(0x12, (ULONG) _x_)
+#define PERF_EVENT_CANCELIRP(_x_)       PERF_EVENT(0x12, (ULONG_PTR) _x_)
 
 /*! Performance evaluation: An IOCTL is queued */
 #define PERF_EVENT_IOCTL_QUEUE(_x_)     PERF_EVENT(0x20, _x_)

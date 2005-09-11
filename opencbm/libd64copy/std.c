@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: std.c,v 1.1 2004-11-07 11:05:12 strik Exp $";
+    "@(#) $Id: std.c,v 1.2 2005-09-11 13:32:33 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -77,7 +77,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
         return 99;
     }
 
-    drive = (int)arg;
+    drive = (unsigned char)(ULONG_PTR)arg;
 
     fd_cbm = fd;
 

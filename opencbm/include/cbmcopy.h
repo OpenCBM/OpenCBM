@@ -7,7 +7,7 @@
  *  Copyright 2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
-/* $Id: cbmcopy.h,v 1.2 2005-07-21 17:39:20 strik Exp $ */
+/* $Id: cbmcopy.h,v 1.3 2005-09-11 13:32:33 strik Exp $ */
 
 #ifndef CBMCOPY_H
 #define CBMCOPY_H
@@ -76,7 +76,7 @@ extern int cbmcopy_read_file(CBM_FILE cbm_fd,
                              const unsigned char *cbmname,
                              int cbmname_size,
                              unsigned char **filedata,
-                             int *filedata_size,
+                             size_t *filedata_size,
                              cbmcopy_message_cb msg_cb,
                              cbmcopy_status_cb status_cb);
 
@@ -85,7 +85,7 @@ extern int cbmcopy_read_file_ts(CBM_FILE cbm_fd,
                                 int drive,
                                 int track, int sector,
                                 unsigned char **filedata,
-                                int *filedata_size,
+                                size_t *filedata_size,
                                 cbmcopy_message_cb msg_cb,
                                 cbmcopy_status_cb status_cb);
 

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/perfeval.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.c,v 1.4 2005-08-24 18:18:05 strik Exp $ \n
+** \version $Id: perfeval.c,v 1.5 2005-09-11 13:32:33 strik Exp $ \n
 ** \n
 ** \brief Functions for performance evaluation purposes - KERNEL version
 **
@@ -81,11 +81,19 @@ static ULONG ProcessorFrequency = -1;
 
 __forceinline __int64 RDTSC(void)
 {
+#ifdef USE_RDTSC
     __asm {
         // RDTSC
         _emit 0x0F
         _emit 0x31
     }
+#else
+    LARGE_INTEGER li;
+
+    li = KeQueryPerformanceCounter(NULL);
+
+    return li.QuadPart;
+#endif
 }
 #pragma warning(pop)
 
@@ -112,6 +120,8 @@ PerfInit(VOID)
 
     if (PerformanceEvalEntries)
     {
+#ifdef USE_RDTSC
+
         UNICODE_STRING registryPath;
         NTSTATUS ntStatus;
         HANDLE handleRegistry;
@@ -136,6 +146,16 @@ PerfInit(VOID)
             ntStatus = cbm_registry_close(handleRegistry);
             DBG_PRINT_REG((DBG_PREFIX "cbm_registry_close() returned %s", DebugNtStatus(ntStatus)));
         }
+
+#else
+        LARGE_INTEGER li;
+
+        KeQueryPerformanceCounter(&li);
+
+        DBG_ASSERT(li.HighPart == 0);
+        ProcessorFrequency = li.LowPart;
+
+#endif
     }
 
     FUNC_LEAVE();
@@ -166,7 +186,7 @@ PerfInit(VOID)
 */
 
 VOID
-PerfEvent(IN ULONG Event, IN ULONG Data)
+PerfEvent(IN ULONG_PTR Event, IN ULONG_PTR Data)
 {
     ULONG currentEntry;
 

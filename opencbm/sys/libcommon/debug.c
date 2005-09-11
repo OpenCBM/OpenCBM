@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.13 2005-08-24 18:18:05 strik Exp $ \n
+** \version $Id: debug.c,v 1.14 2005-09-11 13:32:33 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -1243,7 +1243,7 @@ DbgOutputMemoryBuffer(const char *String)
         if ((localMemoryBuffer != DbgMemoryBuffer) 
             || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
         {
-            REPORT_BUG(0x140, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+            REPORT_BUG(0x140, (ULONG_PTR) localMemoryBuffer, (ULONG_PTR) DbgMemoryBuffer, 
                 localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
                 "local copies do not match the global ones (1)");
         }
@@ -1263,7 +1263,7 @@ DbgOutputMemoryBuffer(const char *String)
             if ((localMemoryBuffer != DbgMemoryBuffer) 
                 || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
             {
-                REPORT_BUG(0x141, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+                REPORT_BUG(0x141, (ULONG_PTR) localMemoryBuffer, (ULONG_PTR) DbgMemoryBuffer, 
                     localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
                     "local copies do not match the global ones (2)");
             }
@@ -1276,7 +1276,7 @@ DbgOutputMemoryBuffer(const char *String)
             if ((localMemoryBuffer != DbgMemoryBuffer) 
                 || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
             {
-                REPORT_BUG(0x142, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+                REPORT_BUG(0x142, (ULONG_PTR) localMemoryBuffer, (ULONG_PTR) DbgMemoryBuffer, 
                     localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
                     "local copies do not match the global ones (3)");
             }
@@ -1290,7 +1290,7 @@ DbgOutputMemoryBuffer(const char *String)
         if ((localMemoryBuffer != DbgMemoryBuffer) 
             || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
         {
-            REPORT_BUG(0x143, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+            REPORT_BUG(0x143, (ULONG_PTR) localMemoryBuffer, (ULONG_PTR) DbgMemoryBuffer, 
                 localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
                 "local copies do not match the global ones (4)");
         }
@@ -1307,7 +1307,7 @@ DbgOutputMemoryBuffer(const char *String)
         if ((localMemoryBuffer != DbgMemoryBuffer) 
             || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
         {
-            REPORT_BUG(0x144, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+            REPORT_BUG(0x144, (ULONG_PTR) localMemoryBuffer, (ULONG_PTR) DbgMemoryBuffer, 
                 localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
                 "local copies do not match the global ones (5)");
         }
@@ -1322,7 +1322,7 @@ DbgOutputMemoryBuffer(const char *String)
         if ((localMemoryBuffer != DbgMemoryBuffer) 
             || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
         {
-            REPORT_BUG(0x145, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+            REPORT_BUG(0x145, (ULONG_PTR) localMemoryBuffer, (ULONG_PTR) DbgMemoryBuffer, 
                 localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
                 "local copies do not match the global ones (6)");
         }
@@ -1336,7 +1336,7 @@ DbgOutputMemoryBuffer(const char *String)
         if ((localMemoryBuffer != DbgMemoryBuffer) 
             || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
         {
-            REPORT_BUG(0x146, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+            REPORT_BUG(0x146, (ULONG_PTR) localMemoryBuffer, (ULONG_PTR) DbgMemoryBuffer, 
                 localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
                 "local copies do not match the global ones (7)");
         }
@@ -1353,7 +1353,7 @@ DbgOutputMemoryBuffer(const char *String)
         if ((localMemoryBuffer != DbgMemoryBuffer) 
             || (localNextWriteMemoryBuffer != DbgNextWriteMemoryBuffer))
         {
-            REPORT_BUG(0x147, (ULONG) localMemoryBuffer, (ULONG) DbgMemoryBuffer, 
+            REPORT_BUG(0x147, (ULONG_PTR) localMemoryBuffer, (ULONG_PTR) DbgMemoryBuffer, 
                 localNextWriteMemoryBuffer, DbgNextWriteMemoryBuffer,
                 "local copies do not match the global ones (8)");
         }

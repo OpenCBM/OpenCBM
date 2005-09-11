@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.6 2005-07-23 11:18:40 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.7 2005-09-11 13:32:33 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -750,7 +750,7 @@ int d64copy_read_image(CBM_FILE cbm_fd,
     atom_mustcleanup = 1;
 
     ret = copy_disk(cbm_fd, settings,
-            src, (void*)src_drive, dst, (void*)dst_image, (unsigned char) src_drive);
+            src, (void*)(ULONG_PTR)src_drive, dst, (void*)dst_image, (unsigned char) src_drive);
 
     atom_mustcleanup = 0;
 
@@ -774,7 +774,7 @@ int d64copy_write_image(CBM_FILE cbm_fd,
     dst = transfers[settings->transfer_mode].trf;
 
     return copy_disk(cbm_fd, settings,
-            src, (void*)src_image, dst, (void*)dst_drive, (unsigned char) dst_drive);
+            src, (void*)src_image, dst, (void*)(ULONG_PTR)dst_drive, (unsigned char) dst_drive);
 }
 
 void d64copy_cleanup(void)
