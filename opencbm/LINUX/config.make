@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.1 2005-03-02 18:17:16 strik Exp $
+# $Id: config.make,v 1.1.4.1 2005-09-16 12:39:54 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -36,7 +36,8 @@ LDCONFIG     = /sbin/ldconfig
 #
 # location of the kernel source directory
 #
-KERNEL_SOURCE = /usr/src/linux
+KERNEL_SOURCE = /usr/src/linux                      # for kernel 2.4
+#KERNEL_SOURCE = /lib/modules/`uname -r`/build       # for kernel 2.6
 
 #
 # kernel driver compile flags.

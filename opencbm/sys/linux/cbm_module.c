@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.1 2005-03-02 18:17:22 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.1.4.1 2005-09-16 12:39:54 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -38,7 +38,7 @@ static char *rcsid =
 #include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/fs.h>
-#include <linux/interrupt.h>
+#include <linux/interrupt.h> /* cli() */
 #include <linux/kernel.h>
 #include <linux/miscdevice.h>
 #include <linux/sched.h>
@@ -48,6 +48,31 @@ static char *rcsid =
 #endif
 
 #include "cbm_module.h"
+
+
+
+/* Defines needed by mnib-routines: */
+#include <linux/spinlock.h> /* the spinlock-system, used for mnib */
+
+#define IRQSTOPVARS	unsigned long flags; spinlock_t mnib_lock = SPIN_LOCK_UNLOCKED;
+#define disable()	spin_lock_irqsave(&mnib_lock, flags)
+#define enable()	spin_unlock_irqrestore(&mnib_lock, flags)
+#define printf(x)	printk(x)
+#define msleep(x)	udelay(x) /* delay for x microseconds */
+
+/* forward references for mnib routines */
+unsigned char cbm_mnib_par_read(void);
+int cbm_mnib_par_write(unsigned char c);
+int cbm_mnib_read_track(unsigned char *buffer, int mode);
+int cbm_mnib_write_track(unsigned char *buffer, int length, int mode);
+void cbm_mnib_send_par_cmd(unsigned char cmd);
+int cbm_nib_read1(void);
+int cbm_nib_read2(void);
+int cbm_nib_write(char data, int toggle);
+
+/* Defines needed for mnib end */
+
+
 
 unsigned int port    = 0x378;           /* lpt port address             */
 
@@ -69,7 +94,6 @@ int reset            =  1;              /* >1 => force reset            */
 
 int hold_clk         =  1;              /* >0 => strict C64 behaviour   */
                                         /* =0 => release CLK when idle  */
-
 
 #ifdef KERNEL_VERSION
 # ifdef DIRECT_PORT_ACCESS
@@ -444,6 +468,13 @@ static int cbm_write(struct inode *inode, struct file *f, const char *buf, int c
 static int cbm_ioctl(struct inode *inode, struct file *f,
                      unsigned int cmd, unsigned long arg)
 {
+
+	/*linux mnib */
+	MNIB_RW_VALUE *user_val;
+	MNIB_RW_VALUE kernel_val;
+	/*linux mnib end*/
+
+
         unsigned char buf[2], c, talk, mask, state, i;
         int rv = 0;
 
@@ -593,9 +624,44 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                         }
                         XP_WRITE(arg);
                         return 0;
+
+
+/* and now the mnib-routines */
+
+
+                case CBMCTRL_MNIB_PAR_READ:
+			return cbm_mnib_par_read();
+
+                case CBMCTRL_MNIB_PAR_WRITE:
+			return cbm_mnib_par_write(arg);
+
+		case CBMCTRL_MNIB_READ_TRACK:
+			printf("MNIB_READ_TRACK");
+			user_val=(MNIB_RW_VALUE *) arg; // cast arg to structure pointer
+			/* copy the data to the kernel: */
+			if (copy_from_user(&kernel_val,		// kernel buffer
+						user_val,	// user buffer
+                           			sizeof(MNIB_RW_VALUE))) return -EFAULT;
+			/* verify if it's ok to write into the buffer */
+			if(access_ok(VERIFY_WRITE, kernel_val.buffer, 0x2000)==0) return -EFAULT;
+			/* and do it: */
+			return cbm_mnib_read_track(kernel_val.buffer, kernel_val.mode);
+			
+		case CBMCTRL_MNIB_WRITE_TRACK:
+			user_val=(MNIB_RW_VALUE *) arg; // cast arg to structure pointer
+			/* copy the data to the kernel: */
+			if (copy_from_user(&kernel_val,		// kernel buffer
+						user_val,	// user buffer
+                           			sizeof(MNIB_RW_VALUE))) return -EFAULT;
+			/* verify if it's ok to read from the buffer */
+			if(access_ok(VERIFY_READ, (void *)kernel_val.buffer, 0x2000)==0) return -EFAULT;
+			/* and do it: */
+			return cbm_mnib_write_track(kernel_val.buffer, kernel_val.length, kernel_val.mode);
         }
         return -EINVAL;
 }
+
+
 
 static int cbm_open(struct inode *inode, struct file *f)
 {
@@ -791,4 +857,269 @@ int cbm_init(void)
 #endif
 
         return 0;
+}
+
+
+
+
+/* 
+	And here are the functions, used by mnib 
+	(they are all called by the ioctl-function)
+*/
+
+int cbm_mnib_read_track(unsigned char *buffer, int mode)
+{
+	IRQSTOPVARS;
+
+	int	timeout = 0;
+	int i;
+	unsigned char byte;
+
+	/*linux fflush(stdin);
+	fflush(stdout); */
+
+	disable();
+
+	cbm_mnib_send_par_cmd(mode);
+	cbm_mnib_par_read();
+
+	for (i = 0; i < 0x2000; i += 2)
+	{
+		byte = cbm_nib_read1();
+		if (byte <= 0)
+		{
+			timeout = 1;
+			break;
+		}
+		buffer[i] = byte;
+
+	    byte = cbm_nib_read2();
+	    if (byte <= 0)
+	    {
+			timeout = 1;
+			break;
+		}
+		buffer[i+1] = byte;
+	}
+
+	if(!timeout)
+	{
+		cbm_mnib_par_read();
+		enable();
+		return 1;
+	}
+	else
+	{
+		enable();
+		printf("\ntimeout failure!");
+    	/*linux exit(0); */
+		return 0;
+	}
+}
+
+
+int cbm_mnib_write_track(unsigned char *buffer, int length, int mode)
+{
+	IRQSTOPVARS;
+
+	int i = 0;
+	int timeout = 0;
+
+
+	/*linux fflush(stdin);
+	fflush(stdout); */
+
+	disable();
+
+  	// send write command
+   	cbm_mnib_send_par_cmd(mode);
+	cbm_mnib_par_write(0);
+
+	for (i = 0; i < length; i++)
+	{
+		if(cbm_nib_write(buffer[i], i&1))
+		{
+			timeout = 1;
+			break;
+		}
+	}
+
+	if(!timeout)
+	{
+		cbm_nib_write(0, i&1);
+		cbm_mnib_par_read();
+		enable();
+		return 1;
+	}
+	else
+	{
+		enable();
+		printf("\ntimeout failure!");
+		return 0;
+	}
+}
+
+void cbm_mnib_send_par_cmd(unsigned char cmd)
+{
+    cbm_mnib_par_write(0x00);
+    cbm_mnib_par_write(0x55);
+    cbm_mnib_par_write(0xaa);
+    cbm_mnib_par_write(0xff);
+    cbm_mnib_par_write(cmd);
+}
+
+unsigned char cbm_mnib_par_read(void)
+{
+	int rv = 0;
+//	int j;
+
+	RELEASE(DATA_OUT|CLK_OUT);
+	SET(ATN_OUT);
+        msleep(20); /* 200? */
+        while(GET(DATA_IN));
+        /*linux rv = inportb(parport); */
+		if(!(out_bits & LP_BIDIR)) {
+        		XP_WRITE(0xff);
+                	SET(LP_BIDIR);
+	        }
+		rv=XP_READ();	
+        msleep(5);
+        RELEASE(ATN_OUT);
+        msleep(10);
+        while(!GET(DATA_IN));
+        return rv;
+
+	
+/* previous version: */			
+/**			RELEASE(DATA_OUT|CLK_OUT);
+                        SET(ATN_OUT);
+                        for (j=0; j < 20; j++) GET(DATA_IN);
+                        while(GET(DATA_IN));
+			// rv = inportb(parport);
+			// rv=XP_READ();
+				if(!(out_bits & LP_BIDIR)) {
+                            		XP_WRITE(0xff);
+                            		SET(LP_BIDIR);
+                        	}
+                        	rv=XP_READ();	
+                        for (j=0; j < 5; j++) GET(DATA_IN); // extra
+                        RELEASE(ATN_OUT);
+                        for (j=0; j < 20; j++) GET(DATA_IN);
+                        while(!GET(DATA_IN));
+                        return rv;
+**/
+}
+
+int cbm_mnib_par_write(unsigned char c)
+{
+//	int j,to;
+	RELEASE(DATA_OUT|CLK_OUT);
+	SET(ATN_OUT);
+	msleep(20);
+	// for (j=0; j < 20; j++) GET(DATA_IN);
+        while(GET(DATA_IN));
+	/*linux PARWRITE(); */
+		if(out_bits & LP_BIDIR) {
+        		RELEASE(LP_BIDIR);
+        	}
+        	XP_WRITE(c);
+        /*linux outportb(parport, arg); */
+	// for (j=0; j < 5; j++) GET(DATA_IN);
+        msleep(5);
+        RELEASE(ATN_OUT);
+        msleep(20);
+	// for (j=0; j < 20; j++) GET(DATA_IN);
+	while(!GET(DATA_IN));
+        /*linux PARREAD(); */
+		if(!(out_bits & LP_BIDIR)) {
+	        	XP_WRITE(0xff);
+			SET(LP_BIDIR);
+		}
+		XP_READ();
+	return 0;
+
+
+/* previous version: */
+/**
+	 		RELEASE(DATA_OUT|CLK_OUT);
+                        SET(ATN_OUT);
+                        for (j=0; j < 20; j++) GET(DATA_IN);
+                        while(GET(DATA_IN));
+			// outportb(parport, arg);
+			// XP_WRITE(arg);
+				if(out_bits & LP_BIDIR) {
+                            		RELEASE(LP_BIDIR);
+                        	}
+                        	XP_WRITE(c);
+                        for (j=0; j < 5; j++) GET(DATA_IN);
+                        RELEASE(ATN_OUT);
+                        for (j=0; j < 20; j++) GET(DATA_IN);
+                        while(!GET(DATA_IN));
+			// XP_READ();
+				if(!(out_bits & LP_BIDIR)) {
+                        	    	XP_WRITE(0xff);
+                            		SET(LP_BIDIR);
+                        	}
+                        	XP_READ();
+                        return 0;
+*/
+}
+
+
+int cbm_nib_read1(void)
+{
+	int to;
+	int j;
+	// PARREAD();
+	to = 0;
+	RELEASE(DATA_OUT);
+	for (j=0; j < 2; j++) GET(DATA_IN);
+	while (GET(DATA_IN))
+	if (to++ > 1000000) return (-1);
+	// if(mtimeout()) return (-1);
+	/*linux    return inportb(parport); */
+		return XP_READ();
+
+}
+
+
+int cbm_nib_read2(void)
+{
+	int to;
+	int j;
+	// PARREAD();
+	to = 0;
+	RELEASE(DATA_OUT);
+	for (j=0; j < 2; j++) GET(DATA_IN);
+	while (!GET(DATA_IN))
+	if (to++ > 1000000) return (-1);
+	// if(mtimeout()) return (-1);
+	/*linux return inportb(parport); */
+		return XP_READ();
+}
+
+
+int cbm_nib_write(char data, int toggle)
+{
+	int to=0;
+
+	//RELEASE(CLK_IN | DATA_OUT);
+	RELEASE(CLK_IN);
+
+	if (!toggle)
+	{
+		while (GET(DATA_IN))
+		if (to++ > 1000000) return 1;
+	}
+	else
+	{
+		while (!GET(DATA_IN))
+		if (to++ > 1000000) return 1;
+	}
+	/*linux outportb(parport, data); */
+		if(out_bits & LP_BIDIR) {
+			RELEASE(LP_BIDIR);
+		}
+		XP_WRITE(data);
+	return 0;
 }

@@ -21,6 +21,7 @@ SOURCES= 	init.c \
 		interrupt.c \
 		dpc.c \
 		listen.c \
+		mnib.c \
 		openclose.c \
 		poll.c \
 		ppread.c \

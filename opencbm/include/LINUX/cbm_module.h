@@ -7,7 +7,7 @@
  *  Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
-/* $Id: cbm_module.h,v 1.1 2005-03-02 18:17:19 strik Exp $ */
+/* $Id: cbm_module.h,v 1.1.4.1 2005-09-16 12:39:54 strik Exp $ */
 
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H
@@ -34,5 +34,17 @@
 #define CBMCTRL_IEC_RELEASE _IO(CBMCTRL_BASE, 14)
 #define CBMCTRL_IEC_WAIT    _IO(CBMCTRL_BASE, 15)
 #define CBMCTRL_IEC_SETRELEASE _IO(CBMCTRL_BASE, 16)
+
+/*linux constants needed by mnib */
+#define CBMCTRL_MNIB_PAR_READ    _IO(CBMCTRL_BASE, 17)
+#define CBMCTRL_MNIB_PAR_WRITE   _IO(CBMCTRL_BASE, 18)
+#define CBMCTRL_MNIB_READ_TRACK        _IO(CBMCTRL_BASE, 19)
+#define CBMCTRL_MNIB_WRITE_TRACK _IO(CBMCTRL_BASE, 20)
+
+typedef struct MNIB_RW_VALUE {     // all values needed by MNIB_READ_TRACK and MNIB_WRITE_TRACK
+       unsigned char *buffer;
+       int length;
+       int mode;
+} MNIB_RW_VALUE;
 
 #endif

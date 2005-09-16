@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.7 2005-08-24 18:18:05 strik Exp $ \n
+** \version $Id: cbm.c,v 1.7.2.1 2005-09-16 12:39:54 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -915,4 +915,116 @@ cbm_exec_command(CBM_FILE HandleDevice, __u_char DeviceAddress,
     }
 
     FUNC_LEAVE_INT(rv);
+}
+
+/*! \brief MNIB: Read from the parallel port
+
+ This function is a helper function for mnib:
+ It reads from the parallel port.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   The value read from the parallel port
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+__u_char CBMAPIDECL
+cbm_mnib_par_read(CBM_FILE HandleDevice)
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_UCHAR(cbmarch_mnib_par_read(HandleDevice));
+}
+
+/*! \brief MNIB: Write to the parallel port
+
+ This function is a helper function for mnib:
+ It writes to the parallel port.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Value
+   The value to be written to the parallel port
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+void CBMAPIDECL
+cbm_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
+{
+    FUNC_ENTER();
+
+    cbmarch_mnib_par_write(HandleDevice, Value);
+
+    FUNC_LEAVE();
+}
+
+/*! \brief MNIB: Read a complete track
+
+ This function is a helper function for mnib:
+ It reads a complete track from the disk
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which will hold the bytes read.
+
+ \param Length
+   The length of the Buffer.
+
+ \param Mode
+   \todo
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+int CBMAPIDECL
+cbm_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, __u_char Mode)
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(cbmarch_mnib_read_track(HandleDevice, Buffer, Length, Mode));
+}
+
+/*! \brief MNIB: Write a complete track
+
+ This function is a helper function for mnib:
+ It writes a complete track to the disk
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which hold the bytes to be written.
+
+ \param Length
+   The length of the Buffer.
+
+ \param Mode
+   \todo
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+int CBMAPIDECL
+cbm_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, __u_char Mode)
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(cbmarch_mnib_write_track(HandleDevice, Buffer, Length, Mode));
 }

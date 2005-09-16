@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.2 2005-04-17 15:32:18 strik Exp $ \n
+** \version $Id: archlib.c,v 1.2.4.1 2005-09-16 12:39:54 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -729,7 +729,7 @@ cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 
     FUNC_ENTER();
 
-    parameter.Byte = (UCHAR) Byte;
+    parameter.Byte = Byte;
 
     cbm_ioctl(HandleDevice, CBMCTRL(PP_WRITE), &parameter, sizeof(parameter), NULL, 0);
 

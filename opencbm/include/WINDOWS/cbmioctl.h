@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.2 2005-04-17 15:32:17 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.2.4.1 2005-09-16 12:39:54 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -69,10 +69,10 @@ struct CBMT_IECADDRESS
 {
     /*! The primary address a.k.a. device number of the drive to be accessed */
     UCHAR PrimaryAddress;
-    
+
     /*! The secondary address for the access */
     UCHAR SecondaryAddress;
-    
+
 } CBMT_IECADDRESS;
 
 /*! This type provides a single (raw) byte */
@@ -117,6 +117,28 @@ struct CBMT_BOOLEAN
     BOOLEAN Decision;
 
 } CBMT_BOOLEAN;
+
+/*! in for MNIB_READ_TRACK */
+typedef
+struct CBMT_MNIB_READ_TRACK_IN
+{
+    UCHAR Mode;
+} CBMT_MNIB_READ_TRACK_IN;
+
+/*! out for MNIB_READ_TRACK */
+typedef
+struct CBMT_MNIB_READ_TRACK_OUT
+{
+    UCHAR Buffer[1];
+} CBMT_MNIB_READ_TRACK_OUT;
+
+/*! in for MNIB_WRITE_TRACK */
+typedef
+struct CBMT_MNIB_WRITE_TRACK_IN
+{
+    UCHAR Mode;
+    UCHAR Buffer[0];
+} CBMT_MNIB_WRITE_TRACK_IN;
 
 /*! These macros define how to extract version information 
  * from CBMT_I_INSTALL_OUT.DriverVersion and/or .DllVersion
@@ -193,6 +215,10 @@ typedef CBMT_LINE       CBMT_IEC_RELEASE_IN;
 typedef CBMT_BOOLEAN    CBMT_GET_EOI_OUT;
 /*! Input buffer for IEC_SET */
 typedef CBMT_LINE_STATE CBMT_IEC_SETRELEASE_IN;
+/*! Output buffer for IEC_MNIB_PAR_READ */
+typedef CBMT_SINGLEBYTE CBMT_MNIB_PREAD_OUT;
+/*! Input buffer for IEC_MNIB_PAR_WRITE */
+typedef CBMT_SINGLEBYTE CBMT_MNIB_PWRITE_IN;
 
 
 /*! BASE number of the custom IOCTL */
@@ -247,6 +273,22 @@ typedef CBMT_LINE_STATE CBMT_IEC_SETRELEASE_IN;
 
 //! IOCTL for setting and releasing IEC lines at once
 #define CBMCTRL_IEC_SETRELEASE _CBMIO(CBMCTRL_BASE, 18) // CBMT_IEC_SETRELEASE_IN -
+
+//! IOCTL for reading from the parallel port (for controlling mnib)
+#define CBMCTRL_MNIB_PAR_READ \
+                            _CBMIO(CBMCTRL_BASE, 19) // CBMT_IEC_MNIB_PREAD_IN -
+
+//! IOCTL for writing to the parallel port (for controlling mnib)
+#define CBMCTRL_MNIB_PAR_WRITE \
+                            _CBMIO(CBMCTRL_BASE, 20) // -                    CBMT_IEC_MNIB_PWRITE_OUT
+
+//! IOCTL for reading a complete track (for mnib)
+#define CBMCTRL_MNIB_READ_TRACK \
+                            _CBMIO(CBMCTRL_BASE, 21) // CBMT_MNIB_READ_TRACK_IN  CBMT_MNIB_READ_TRACK_OUT
+
+//! IOCTL for writing a complete track (for mnib)
+#define CBMCTRL_MNIB_WRITE_TRACK \
+                            _CBMIO(CBMCTRL_BASE, 22) // CBMT_MNIB_WRITE_TRACK_IN -
 
 /* these are the return codes of CBMCTRL_I_INSTALL: */
 

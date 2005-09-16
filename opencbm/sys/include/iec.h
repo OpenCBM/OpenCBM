@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.5 2005-07-16 17:20:41 strik Exp $ \n
+** \version $Id: iec.h,v 1.5.4.1 2005-09-16 12:39:54 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -114,5 +114,17 @@ cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType);
 
 extern NTSTATUS
 cbmiec_check_device(IN PDEVICE_EXTENSION Pdx, OUT IEC_CHECKDEVICE *CheckDevice);
+
+extern NTSTATUS
+cbmiec_mnib_par_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Byte);
+
+extern NTSTATUS
+cbmiec_mnib_par_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte);
+
+extern NTSTATUS
+cbmiec_mnib_read_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, OUT UCHAR* Buffer, IN ULONG BufferLength);
+
+extern NTSTATUS
+cbmiec_mnib_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, IN UCHAR* Buffer, IN ULONG BufferLength);
 
 #endif /* #ifndef CBMIEC_H */

@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2004 Michael Klein <michael.klein@puffin.lb.shuttle.de>
- *  Copyright 2001-2004 Spiro Trikaliotis
+ *  Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 2001-2005 Spiro Trikaliotis
  */
 
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.9 2005-07-20 16:37:12 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.9.4.1 2005-09-16 12:39:54 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -152,6 +152,15 @@ EXTERN char CBMAPIDECL cbm_petscii2ascii_c(char character);
 EXTERN char CBMAPIDECL cbm_ascii2petscii_c(char character);
 EXTERN char * CBMAPIDECL cbm_petscii2ascii(char *str);
 EXTERN char * CBMAPIDECL cbm_ascii2petscii(char *str);
+
+/* functions specifically for mnib */
+
+EXTERN __u_char CBMAPIDECL cbm_mnib_par_read(CBM_FILE f);
+EXTERN void CBMAPIDECL cbm_mnib_par_write(CBM_FILE f, __u_char c);
+EXTERN int CBMAPIDECL cbm_mnib_read_track(CBM_FILE f, __u_char *buffer, unsigned int length, __u_char mode);
+EXTERN int CBMAPIDECL cbm_mnib_write_track(CBM_FILE f, __u_char *buffer, unsigned int length, __u_char mode);
+
+/* mnib functions end */
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,6 @@
 DIRS= \
 	arch \
+	mnib \
 	cbmformat \
 	libcbmcopy \
 	cbmcopy \
