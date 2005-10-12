@@ -1,5 +1,7 @@
-#ifndef __MNIB_H__
-#define __MNIB_H__
+/* MNIB
+ * Copyright 2001-2005 Markus Brenner <markus@brenner.de>
+ * and Pete Rittwage <peter@rittwage.com>
+ */
 
 #define FD 1                /* (unused) file number for cbm_routines */
 
@@ -63,6 +65,8 @@ unsigned int floppybytes;
 int disktype;
 int imagetype;
 int mode;
+int verbose;
+int auto_density_adjust;
 
 FILE *fplog;
 BYTE diskbuf[84 * 0x2000];
@@ -76,16 +80,16 @@ char diskid[3];
 int read_halftrack(CBM_FILE fd, int halftrack, BYTE *buffer);
 int paranoia_read_halftrack(CBM_FILE fd, int halftrack, BYTE *buffer);
 int read_d64(CBM_FILE fd, FILE *fpout);
-void readdisk(CBM_FILE fd, FILE *fpout, char *track_header);
+void read_nib(CBM_FILE fd, FILE *fpout, char *track_header);
 
 /* write.c */
-void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrdata);
+void write_halftrack(int halftrack, int density, int length, BYTE *gcrdata);
 void master_disk(CBM_FILE fd);
 void write_raw(CBM_FILE fd);
 void unformat_disk(CBM_FILE fd);
 void unformat_track(CBM_FILE fd, int track);
 void parse_disk(CBM_FILE fd, FILE *fpin, char *track_header);
-void write_d64(CBM_FILE fd, FILE *fpin);
+int write_d64(CBM_FILE fd, FILE *fpin);
 
 /* mnib.c  */
 int compare_extension(char *filename, char *extension);
@@ -107,11 +111,8 @@ void adjust_target(CBM_FILE fd);
 void file2disk(CBM_FILE fd, char *filename);
 void disk2file(CBM_FILE fd, char *filename);
 void usage(void);
-
-/* read.c */
-void read_nib(CBM_FILE fd, FILE *fpout, char *track_header);
+int main(int argc, char *argv[]);
 
 /*linux send_par_cmd is needed here, because we haven't it in the kernel */
 void send_par_cmd(CBM_FILE fd, BYTE cmd);
 
-#endif

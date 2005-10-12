@@ -1,6 +1,6 @@
 /* n2d.c - Converts mnib nibbler data to D64 image
 
-    (C) 2000-03 Markus Brenner <markus@brenner.de>
+    (C) 2000-05 Markus Brenner <markus@brenner.de>
 
     Based on code by Andreas Boose <boose@unixserv.rz.fh-hannover.de>
 
@@ -17,8 +17,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "gcr.h"
-#include "version.h"
+#include "../gcr.h"
+#include "../version.h"
+
+extern unsigned int capacity_min[];
+extern unsigned int capacity_max[];
+extern int speed_map_1541[];
+extern char sector_map_1541[];
 
 
 void usage(void)
@@ -44,9 +49,10 @@ int main(int argc, char **argv)
     BYTE *cycle_start; /* start position of cycle    */
     BYTE *cycle_stop;  /* stop  position of cycle +1 */
 
+
     fprintf(stdout,
         "\nn2d - converts a NIB type disk dump into a standard D64 disk image.\n"
-        "(C) 2000-03 Markus Brenner.\n"
+        "(C) 2000-05 Markus Brenner.\n"
         "Version "VERSION"\n\n");
 
     if (argc == 2)
@@ -119,10 +125,10 @@ int main(int argc, char **argv)
     blockindex = 0;
     save_errorinfo = 0;
     header_offset = 0x10; /* number of first nibble-track in nib image */
-    for (track = 0; track < 35; track++)
+    for (track = 1; track <= 35; track++)
     {
         /* Skip halftracks if present in image */
-        if (nib_header[header_offset] < (track + 1) * 2)
+        if (nib_header[header_offset] < (track * 2))
         {
             fseek(fp_nib, GCR_TRACK_LENGTH, SEEK_CUR);
             header_offset += 2;
@@ -136,20 +142,20 @@ int main(int argc, char **argv)
             goto fail;
         }
 
-        printf("\nTrack: %2d - Sector: ",track+1);
+        printf("\nTrack: %2d - Sector: ",track);
 
         cycle_start = gcr_track;
-
-        find_track_cycle(&cycle_start, &cycle_stop);
+        find_track_cycle(&cycle_start, &cycle_stop,
+        		capacity_min[speed_map_1541[track]], capacity_max[speed_map_1541[track]]);
 
         /* FIXME: maybe improve for cycle == NULL */
 
-        for (sector = 0; sector < sector_map_1541[track + 1]; sector++)
+        for (sector = 0; sector < sector_map_1541[track]; sector++)
         {
             printf("%d",sector);
 
             errorcode = convert_GCR_sector(cycle_start, cycle_stop,
-                                           rawdata, track + 1, sector, id);
+                                           rawdata, track, sector, id);
 
             errorinfo[blockindex] = errorcode;	/* OK by default */
             if (errorcode != OK) save_errorinfo = 1;

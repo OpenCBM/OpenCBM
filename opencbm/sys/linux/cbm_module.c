@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.1.4.1 2005-09-16 12:39:54 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.1.4.2 2005-10-12 15:10:01 tischuer Exp $";
 #endif
 
 #include <linux/config.h>
@@ -61,13 +61,12 @@ static char *rcsid =
 #define msleep(x)	udelay(x) /* delay for x microseconds */
 
 /* forward references for mnib routines */
-unsigned char cbm_mnib_par_read(void);
-int cbm_mnib_par_write(unsigned char c);
 int cbm_mnib_read_track(unsigned char *buffer, int mode);
 int cbm_mnib_write_track(unsigned char *buffer, int length, int mode);
-void cbm_mnib_send_par_cmd(unsigned char cmd);
-int cbm_nib_read1(void);
-int cbm_nib_read2(void);
+void cbm_mnib_send_cmd(unsigned char cmd);
+unsigned char cbm_mnib_par_read(void);
+int cbm_mnib_par_write(unsigned char c);
+int cbm_nib_read(int toggle);
 int cbm_nib_write(char data, int toggle);
 
 /* Defines needed for mnib end */
@@ -871,50 +870,27 @@ int cbm_mnib_read_track(unsigned char *buffer, int mode)
 {
 	IRQSTOPVARS;
 
-	int	timeout = 0;
-	int i;
-	unsigned char byte;
-
-	/*linux fflush(stdin);
-	fflush(stdout); */
+	int i, byte;
 
 	disable();
 
-	cbm_mnib_send_par_cmd(mode);
+	cbm_mnib_send_cmd(mode);
 	cbm_mnib_par_read();
 
-	for (i = 0; i < 0x2000; i += 2)
+	for (i = 0; i < 0x2000; i += 1)//2)
 	{
-		byte = cbm_nib_read1();
-		if (byte <= 0)
+		byte = cbm_nib_read(i&1);
+		if (byte == -1)
 		{
-			timeout = 1;
-			break;
+			enable();
+			return 0;
 		}
 		buffer[i] = byte;
-
-	    byte = cbm_nib_read2();
-	    if (byte <= 0)
-	    {
-			timeout = 1;
-			break;
-		}
-		buffer[i+1] = byte;
 	}
 
-	if(!timeout)
-	{
-		cbm_mnib_par_read();
-		enable();
-		return 1;
-	}
-	else
-	{
-		enable();
-		printf("\ntimeout failure!");
-    	/*linux exit(0); */
-		return 0;
-	}
+	cbm_mnib_par_read();
+	enable();
+	return 1;
 }
 
 
@@ -922,44 +898,30 @@ int cbm_mnib_write_track(unsigned char *buffer, int length, int mode)
 {
 	IRQSTOPVARS;
 
-	int i = 0;
-	int timeout = 0;
-
-
-	/*linux fflush(stdin);
-	fflush(stdout); */
+	int i;
 
 	disable();
 
   	// send write command
-   	cbm_mnib_send_par_cmd(mode);
+   	cbm_mnib_send_cmd(mode);
 	cbm_mnib_par_write(0);
 
 	for (i = 0; i < length; i++)
 	{
 		if(cbm_nib_write(buffer[i], i&1))
 		{
-			timeout = 1;
-			break;
+			// timeout
+			enable();
+    			return 0;
 		}
 	}
-
-	if(!timeout)
-	{
-		cbm_nib_write(0, i&1);
-		cbm_mnib_par_read();
-		enable();
-		return 1;
-	}
-	else
-	{
-		enable();
-		printf("\ntimeout failure!");
-		return 0;
-	}
+	cbm_nib_write(0, i&1);
+	cbm_mnib_par_read();
+	enable();
+	return 1;
 }
 
-void cbm_mnib_send_par_cmd(unsigned char cmd)
+void cbm_mnib_send_cmd(unsigned char cmd)
 {
     cbm_mnib_par_write(0x00);
     cbm_mnib_par_write(0x55);
@@ -971,7 +933,7 @@ void cbm_mnib_send_par_cmd(unsigned char cmd)
 unsigned char cbm_mnib_par_read(void)
 {
 	int rv = 0;
-//	int j;
+	int j;
 
 	RELEASE(DATA_OUT|CLK_OUT);
 	SET(ATN_OUT);
@@ -1012,11 +974,10 @@ unsigned char cbm_mnib_par_read(void)
 
 int cbm_mnib_par_write(unsigned char c)
 {
-//	int j,to;
+	int j,to;
 	RELEASE(DATA_OUT|CLK_OUT);
 	SET(ATN_OUT);
 	msleep(20);
-	// for (j=0; j < 20; j++) GET(DATA_IN);
         while(GET(DATA_IN));
 	/*linux PARWRITE(); */
 		if(out_bits & LP_BIDIR) {
@@ -1024,11 +985,9 @@ int cbm_mnib_par_write(unsigned char c)
         	}
         	XP_WRITE(c);
         /*linux outportb(parport, arg); */
-	// for (j=0; j < 5; j++) GET(DATA_IN);
         msleep(5);
         RELEASE(ATN_OUT);
         msleep(20);
-	// for (j=0; j < 20; j++) GET(DATA_IN);
 	while(!GET(DATA_IN));
         /*linux PARREAD(); */
 		if(!(out_bits & LP_BIDIR)) {
@@ -1062,58 +1021,49 @@ int cbm_mnib_par_write(unsigned char c)
                         	}
                         	XP_READ();
                         return 0;
-*/
+**/
 }
 
-
-int cbm_nib_read1(void)
+int cbm_nib_read(int toggle)
 {
-	int to;
-	int j;
-	// PARREAD();
-	to = 0;
+
+    int to = 0;
+
+	RELEASE(DATA_IN);  // not really needed?
+	
+	/*linux
 	RELEASE(DATA_OUT);
-	for (j=0; j < 2; j++) GET(DATA_IN);
-	while (GET(DATA_IN))
-	if (to++ > 1000000) return (-1);
-	// if(mtimeout()) return (-1);
-	/*linux    return inportb(parport); */
-		return XP_READ();
+	msleep(2);
+	 GET(DATA_IN); */
 
-}
-
-
-int cbm_nib_read2(void)
-{
-	int to;
-	int j;
-	// PARREAD();
-	to = 0;
-	RELEASE(DATA_OUT);
-	for (j=0; j < 2; j++) GET(DATA_IN);
-	while (!GET(DATA_IN))
-	if (to++ > 1000000) return (-1);
-	// if(mtimeout()) return (-1);
+	if(!toggle)
+	{
+	    while (GET(DATA_IN))
+	        if (to++ > 1000000) return (-1);
+	}
+	else
+	{
+	    while (!GET(DATA_IN))
+		    if (to++ > 1000000) return (-1);
+	}
 	/*linux return inportb(parport); */
 		return XP_READ();
 }
-
 
 int cbm_nib_write(char data, int toggle)
 {
 	int to=0;
 
-	//RELEASE(CLK_IN | DATA_OUT);
 	RELEASE(CLK_IN);
 
 	if (!toggle)
 	{
-		while (GET(DATA_IN))
+		while (GET(CLK_IN))
 		if (to++ > 1000000) return 1;
 	}
 	else
 	{
-		while (!GET(DATA_IN))
+		while (!GET(CLK_IN))
 		if (to++ > 1000000) return 1;
 	}
 	/*linux outportb(parport, data); */
@@ -1121,5 +1071,5 @@ int cbm_nib_write(char data, int toggle)
 			RELEASE(LP_BIDIR);
 		}
 		XP_WRITE(data);
-	return 0;
+	return 1;
 }

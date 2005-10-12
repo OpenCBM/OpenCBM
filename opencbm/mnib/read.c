@@ -1,3 +1,8 @@
+/* MNIB Read routines
+ * Copyright 2001-2005 Markus Brenner <markus@brenner.de>
+ 				and 	Pete Rittwage <peter@rittwage.com>
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,6 +10,7 @@
 /*linux #include "cbm.h"*/
 #include <opencbm.h>
 #include "gcr.h"
+/*linux #include "kernel.h" */
 #include "mnib.h"
 
 extern char bitrate_range[4];
@@ -14,6 +20,9 @@ extern char density_branch[4];
 extern unsigned int capacity[];
 extern unsigned int capacity_min[];
 extern unsigned int capacity_max[];
+
+extern char sector_map_1541[];
+extern int speed_map_1541[];
 
 
 int read_halftrack(CBM_FILE fd, int halftrack, BYTE *buffer)
@@ -36,7 +45,7 @@ int read_halftrack(CBM_FILE fd, int halftrack, BYTE *buffer)
 	}
 
 	for (defdens = 3; halftrack >= bitrate_range[defdens]; defdens--);
-
+	
 	// we scan for the disk density and retry a few times if it's non-standard
 	for(i = 0; i < 3; i ++)
 	{
@@ -89,11 +98,12 @@ int read_halftrack(CBM_FILE fd, int halftrack, BYTE *buffer)
     {
         set_bitrate(fd, density & 3);
 
+		// read track
 		if (density & BM_NO_SYNC)
        		timeout = cbm_mnib_read_track(fd, buffer, 0x2000, FL_READWOSYNC); /*linux TODO: use correct length */
         else
         	timeout = cbm_mnib_read_track(fd, buffer, 0x2000, FL_READNORMAL); /*linux TODO: use corrent length */
-
+		
 		if(!timeout)
 		{
 			printf("\ntimeout failure!");
@@ -126,13 +136,12 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
     BYTE *cbufn, *cbufo;
     BYTE *bufn,  *bufo;
 
-    int lenn;
-    unsigned int leno;
+    int lenn, leno;
     int densn, denso;
     int i, l;
 	int badgcr = 0;
-	char errorstring[512];
-    char diffstr[80];
+	char errorstring[0x1000];
+	char diffstr[80];
 	int errors = 0;
 	int retries = 1;
 	int short_read = 0;
@@ -146,19 +155,20 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
 	diffstr[0] = '\0';
 	errorstring[0] = '\0';
 
+	if(!error_retries) error_retries = 1;
+	
 	////////////////////////////////////////////////////////////////////
 	// first pass at normal track read
 	///////////////////////////////////
 	for(l = 0; l < error_retries; l++)
 	{
-		badgcr = 0;
-
 		memset(bufo, 0, 0x2000);
 		denso = read_halftrack(fd, halftrack, bufo);
 
 		// find track cycle and length
 		memset(cbufo, 0, 0x2000);
-		leno = extract_GCR_track(cbufo, bufo, &align, force_align);
+		leno = extract_GCR_track(cbufo, bufo, &align, force_align,
+				capacity_min[denso & 3], capacity_max[denso & 3]);
 
 		// if we get nothing (except t18) we are on an empty track (unformatted)
 		if ( (!leno) && (halftrack != 36) )
@@ -173,8 +183,8 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
 		// try again, probably bad read or a weak match
 		if(leno < capacity_min[denso & 3] - 150)
 		{
-			printf("[%d<%d!] ", leno, capacity_min[denso & 3] - 150);
-			fprintf(fplog,"[%d<%d!] ", leno, capacity_min[denso & 3] - 150);
+			printf("<! ");
+			fprintf(fplog,"[%d<%d!] ", leno, capacity_min[denso & 3] - 155);
 			l--;
 			if(short_read++ > 15) break;
 			continue;
@@ -184,8 +194,8 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
 		// try again to make sure it's intentional
 		if(leno > capacity_max[denso & 3] + 250)
 		{
-			printf("[%d>%d!] ",leno, capacity_max[denso & 3] + 250);
-			fprintf(fplog,"[%d>%d!] ", leno, capacity_max[denso & 3] + 250);
+			printf("!> ");
+			fprintf(fplog,"[%d>%d!] ", leno, capacity_max[denso & 3] + 255);
 			l--;
 			if(long_read++ > 15) break;
 			continue;
@@ -249,7 +259,8 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
         densn = read_halftrack(fd, halftrack, bufn);
 
         memset(cbufn, 0, 0x2000);
-        lenn = extract_GCR_track(cbufn, bufn, &align, force_align);
+        lenn = extract_GCR_track(cbufn, bufn, &align, force_align,
+        		capacity_min[densn & 3], capacity_max[densn & 3]);
 
 		printf("%d ",lenn);
 		fprintf(fplog,"%d ",lenn);
@@ -258,12 +269,14 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
         badgcr = check_bad_gcr(cbufn, lenn, 1);
 
 		// compare raw gcr data, unreliable
-		if(compare_tracks(cbufo, cbufn, leno, lenn, 0, errorstring))
+		if(compare_tracks(cbufo, cbufn, leno, lenn, 1, errorstring))
 		{
 			printf("[RAW MATCH] ");
 			fprintf(fplog,"[RAW MATCH] ");
 			break;
 		}
+		else
+			fprintf(fplog,"%s",errorstring);
 
 		// compare sector data
 		if(compare_sectors(cbufo, cbufn, leno, lenn, halftrack, errorstring))
@@ -272,7 +285,8 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
 			fprintf(fplog,"[SEC MATCH] ");
 			break;
 		}
-
+		else
+			fprintf(fplog,"%s",errorstring);
 	}
 
 	if(badgcr)
@@ -293,16 +307,28 @@ void read_nib(CBM_FILE fd, FILE *fpout, char *track_header)
     int track;
     int density;
     int header_entry;
+    int i,track_len;
     BYTE buffer[0x2000];
-    int i;
+    BYTE *cycle_start;  /* start position of cycle */
+    BYTE *cycle_stop;   /* stop position of cycle  */
 
 	memset(diskid,0,sizeof(diskid));
 
+	/* read track 18 */
     density = read_halftrack(fd, 18*2, buffer);
+	
+	/* determine speed of drive that wrote this disk */
+	cycle_start = buffer;
+	find_track_cycle(&cycle_start, &cycle_stop, capacity_min[density&3], capacity_max[density&3]);
+    track_len = cycle_stop-cycle_start;
+	printf("Mastering drive averaged %.1f RPM.\n\n",(float)2143190/track_len);
+	fprintf(fplog,"Mastering drive averaged %.1f RPM.\n\n",(float)2143190/track_len);
+
+	/* determine disk id for e11 checks */
 	if (!extract_id(buffer, diskid))
 		fprintf(stderr, "[Cannot find directory sector!]\n");
-    else
-    {
+	   else
+	{
 		printf("ID: %s\n",diskid);
 		fprintf(fplog,"ID: %s\n",diskid);
 	}
@@ -314,8 +340,8 @@ void read_nib(CBM_FILE fd, FILE *fpout, char *track_header)
 
         // density = read_halftrack(track, buffer);
         density = paranoia_read_halftrack(fd, track, buffer);
-        track_header[header_entry*2] = (BYTE) track;
-        track_header[header_entry*2+1] = (BYTE) density;
+        track_header[header_entry*2] = track;
+        track_header[header_entry*2+1] = density;
         header_entry++;
 
         /* process and save track to disk */
@@ -348,7 +374,7 @@ int read_d64(CBM_FILE fd, FILE *fpout)
     BYTE errorcode;
     int sector_count[21];     /* number of different sector data read */
     int sector_occur[21][16]; /* how many times was this sector data read? */
-    BYTE sector_error[21][16]; /* type of error on this sector data */
+    int sector_error[21][16]; /* type of error on this sector data */
     int sector_use[21];       /* best data for this sector so far */
     int sector_max[21];       /* # of times the best sector data has occured */
     int goodtrack;
@@ -380,10 +406,11 @@ int read_d64(CBM_FILE fd, FILE *fpout)
         for (retry = 0; retry < 16; retry++)
         {
             goodtrack = 1;
-            read_halftrack(fd, 2*track, buffer);
+            density = read_halftrack(fd, 2*track, buffer);
 
             cycle_start = buffer;
-            find_track_cycle(&cycle_start, &cycle_stop);
+            find_track_cycle(&cycle_start, &cycle_stop,
+            		capacity_min[density & 3], capacity_max[density & 3]);
 
             for (sector = 0; sector < sector_map_1541[track]; sector++)
             {

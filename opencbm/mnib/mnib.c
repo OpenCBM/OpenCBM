@@ -35,6 +35,8 @@
 	     	reduce syncs contributed by Pete
 	     	improved do_reduce_syncs() function
              strip leading sync, use FL_WRITESYNC instead of FL_WRITENOSYNC
+	V 0.36d  Untold number of additions and consequent bugfixes. (pjr)
+
 */
 
 #include <stdio.h>
@@ -48,15 +50,14 @@
 
 /*linux  #include "cbm.h" */
 #include <opencbm.h>
-
 #include "arch.h"
-
 #define DRIVE 8 // @@@srt
 
 /*linux Linux-Wrapper for the delay-function: */
-#define delay(x) arch_usleep(x*1000)
+#include <unistd.h>
+#define delay(x) usleep(x*1000)
 /*linux Linux-Wrapper for the getch()-function: */
-#define getch() getchar();
+#define getch(x) getchar(x);
 
 
 #include "gcr.h"
@@ -68,19 +69,12 @@ char bitrate_range[4] = { 43*2, 31*2, 25*2, 18*2 };
 char bitrate_value[4] = { 0x00, 0x20, 0x40, 0x60 };
 char density_branch[4] = { 0xb1, 0xb5, 0xb7, 0xb9 };
 
-/* default values are overwritten by adjust target */
-/* Burst Nibbler defaults */
-unsigned int capacity[] = { 6231, 6646, 7121, 7664 };
+extern unsigned int capacity[];
+extern unsigned int capacity_min[];
+extern unsigned int capacity_max[];
 
-/* G64 specification defaults */
-/*{ 6250-CAPACITY_MARGIN, 6666-CAPACITY_MARGIN, 7142-CAPACITY_MARGIN, 7692-CAPACITY_MARGIN };*/
-
-/* minimum and maximum allowed track capacities */
-unsigned int capacity_min[] = { 0x1827, 0x19c6, 0x1ba1, 0x1dc0 };
-unsigned int capacity_max[] = { 0x18a7, 0x1a46, 0x1c21, 0x1e90 };
-
-/*linux copy of send_par_cmd needed here, because we haven't it in the kernel */
-void send_par_cmd(CBM_FILE fd,BYTE cmd)
+/*linux copy of send_mnib_cmd needed here, because we haven't it in the cbm library */
+void send_mnib_cmd(CBM_FILE fd,BYTE cmd)
 {
     cbm_mnib_par_write(fd, 0x00);
     cbm_mnib_par_write(fd, 0x55);
@@ -136,13 +130,12 @@ void upload_code(CBM_FILE fd)
     floppybytes = databytes;
 }
 
-
 int test_par_port(CBM_FILE fd)
 {
     int i;
     int rv;
 
-    send_par_cmd(fd,FL_TEST);
+    send_mnib_cmd(fd,FL_TEST);
     for (i = 0, rv = 1; i < 0x100; i++)
     {
 /*
@@ -157,10 +150,9 @@ int test_par_port(CBM_FILE fd)
 
 int verify_floppy(CBM_FILE fd)
 {
-    unsigned int i;
-    int rv;
+    int i, rv;
 
-    send_par_cmd(fd, FL_VERIFY_CODE);
+    send_mnib_cmd(fd, FL_VERIFY_CODE);
     for (i = 2, rv = 1; i < floppybytes; i++)
     {
         if (cbm_mnib_par_read(fd) != floppy_code[i])
@@ -178,7 +170,7 @@ int verify_floppy(CBM_FILE fd)
 
 int find_par_port(CBM_FILE fd)
 {
-/*linux
+/*linux    
     int i;
     for (i = 0; set_par_port(i); i++)
 	{
@@ -193,9 +185,10 @@ int find_par_port(CBM_FILE fd)
     return (0); /* no parallel port found */
 }
 
+
 void set_full_track(CBM_FILE fd)
 {
-    send_par_cmd(fd, FL_MOTOR);
+    send_mnib_cmd(fd, FL_MOTOR);
     cbm_mnib_par_write(fd, 0xfc); /* $1c00 CLEAR mask (clear stepper bits) */
     cbm_mnib_par_write(fd, 0x02); /* $1c00  SET  mask (stepper bits = %10) */
     cbm_mnib_par_read(fd);
@@ -204,7 +197,7 @@ void set_full_track(CBM_FILE fd)
 
 void motor_on(CBM_FILE fd)
 {
-    send_par_cmd(fd, FL_MOTOR);
+    send_mnib_cmd(fd, FL_MOTOR);
     cbm_mnib_par_write(fd, 0xf3); /* $1c00 CLEAR mask */
     cbm_mnib_par_write(fd, 0x0c); /* $1c00  SET  mask (LED + motor ON) */
     cbm_mnib_par_read(fd);
@@ -213,7 +206,7 @@ void motor_on(CBM_FILE fd)
 
 void motor_off(CBM_FILE fd)
 {
-    send_par_cmd(fd,FL_MOTOR);
+    send_mnib_cmd(fd,FL_MOTOR);
     cbm_mnib_par_write(fd, 0xf3); /* $1c00 CLEAR mask */
     cbm_mnib_par_write(fd, 0x00); /* $1c00  SET  mask (LED + motor OFF) */
     cbm_mnib_par_read(fd);
@@ -222,7 +215,7 @@ void motor_off(CBM_FILE fd)
 
 void step_to_halftrack(CBM_FILE fd,int halftrack)
 {
-    send_par_cmd(fd,FL_STEPTO);
+    send_mnib_cmd(fd,FL_STEPTO);
     cbm_mnib_par_write(fd, (halftrack != 0) ? halftrack : 1);
     cbm_mnib_par_read(fd);
 }
@@ -230,7 +223,7 @@ void step_to_halftrack(CBM_FILE fd,int halftrack)
 unsigned int track_capacity(CBM_FILE fd)
 {
     unsigned int capacity;
-    send_par_cmd(fd, FL_CAPACITY);
+    send_mnib_cmd(fd, FL_CAPACITY);
     capacity  = (unsigned int) cbm_mnib_par_read(fd);
     capacity |= (unsigned int) cbm_mnib_par_read(fd) << 8;
     return (capacity);
@@ -242,7 +235,7 @@ void reset_floppy(CBM_FILE fd)
 
     motor_on(fd);
     step_to_halftrack(fd,36);
-    send_par_cmd(fd,FL_RESET);
+    send_mnib_cmd(fd,FL_RESET);
     printf("drive reset...\n");
     delay(5000);
     cbm_listen(fd,DRIVE,15);
@@ -258,14 +251,14 @@ void reset_floppy(CBM_FILE fd)
 
 int set_bitrate(CBM_FILE fd,int density) /* $13d6 */
 {
-	send_par_cmd(fd,FL_DENSITY);
+	send_mnib_cmd(fd,FL_DENSITY);
 	cbm_mnib_par_write(fd, density_branch[density]);
 	cbm_mnib_par_write(fd, 0x9f);
 	cbm_mnib_par_write(fd, bitrate_value[density]);
 	cbm_mnib_par_read(fd);
 
     /* this doesn't always work? */
-    //send_par_cmd(FL_MOTOR);
+    //send_mnib_cmd(FL_MOTOR);
     //cbm_mnib_par_write(FD, 0x9f);                   /* $1c00 CLEAR mask */
     //cbm_mnib_par_write(FD, bitrate_value[density]); /* $1c00  SET  mask */
     //cbm_mnib_par_read(FD);
@@ -278,7 +271,7 @@ int set_default_bitrate(CBM_FILE fd,int track) /* $13bc */
     BYTE density;
 
     for (density = 3; track >= bitrate_range[density]; density--);
-    send_par_cmd(fd, FL_DENSITY);
+    send_mnib_cmd(fd, FL_DENSITY);
     cbm_mnib_par_write(fd, density_branch[density]);
     cbm_mnib_par_write(fd, 0x9f);                   /* $1c00 CLEAR mask */
     cbm_mnib_par_write(fd, bitrate_value[density]); /* $1c00  SET  mask */
@@ -289,7 +282,7 @@ int set_default_bitrate(CBM_FILE fd,int track) /* $13bc */
 
 int scan_track(CBM_FILE fd,int track) /* $152b Density Scan*/
 {
-    int density;
+    BYTE density;
     BYTE killer_info;
     int i, bin;
     BYTE count;
@@ -298,7 +291,7 @@ int scan_track(CBM_FILE fd,int track) /* $152b Density Scan*/
 
     density = set_default_bitrate(fd,track);
 
-   	send_par_cmd(fd, FL_SCANKILLER); /* scan for killer track */
+   	send_mnib_cmd(fd, FL_SCANKILLER); /* scan for killer track */
     killer_info = cbm_mnib_par_read(fd);
 
     if (killer_info & BM_FF_TRACK)
@@ -311,7 +304,7 @@ int scan_track(CBM_FILE fd,int track) /* $152b Density Scan*/
 
     for (i = 0; i < 6; i++)
     {
-        send_par_cmd(fd,FL_SCANDENSITY);
+        send_mnib_cmd(fd,FL_SCANDENSITY);
 		/* floppy sends statistic data in reverse bit-rate order */
         for (bin = 3; bin >= 0; bin--)
         {
@@ -340,14 +333,13 @@ int scan_track(CBM_FILE fd,int track) /* $152b Density Scan*/
         density = iStatsMax;
 
     set_bitrate(fd,density);
-    send_par_cmd(fd,FL_SCANKILLER); /* scan for killer track */
+    send_mnib_cmd(fd,FL_SCANKILLER); /* scan for killer track */
     killer_info = cbm_mnib_par_read(fd);
 
     return (density | killer_info);
 }
 
-
-#if 0
+//#if 0
 int scan_density(CBM_FILE fd)
 {
     int track;
@@ -366,9 +358,9 @@ int scan_density(CBM_FILE fd)
         else if (density & BM_NO_SYNC) printf("S");
         else printf("%d", (density & 3));
     }
-    return(density);
+	return(density);
 }
-#endif
+//#endif
 
 void adjust_target(CBM_FILE fd)
 {
@@ -378,9 +370,6 @@ void adjust_target(CBM_FILE fd)
 
     int i;
     unsigned int cap1, cap2;
-
-    motor_on(fd);
-    step_to_halftrack(fd,start_track);
 
     printf("\nTesting track capacity for each density:\n");
 
@@ -411,9 +400,10 @@ void adjust_target(CBM_FILE fd)
     	else
     		printf("- OK\n");
 	}
+
+	printf("\nDrive speed averaged %.1f RPM.\n",(float)2143190/(capacity[2]+CAPACITY_MARGIN));
+
 }
-
-
 
 void file2disk(CBM_FILE fd,char *filename)
 {
@@ -423,13 +413,14 @@ void file2disk(CBM_FILE fd,char *filename)
     char g64header[0x2a0];
     int nibsize;
 
+    motor_on(fd);
+  	if(auto_density_adjust)	adjust_target(fd);
+
     if ((fpin = fopen(filename,"rb")) == NULL)
     {
         fprintf(stderr, "Couldn't open input file %s!\n", filename);
         exit(2);
     }
-
-  	adjust_target(fd);
 
     if (compare_extension(filename, "D64"))
     {
@@ -441,7 +432,7 @@ void file2disk(CBM_FILE fd,char *filename)
         imagetype = IMAGE_G64;
         memset(g64header, 0x00, 0x2ac);
 		for (i = 0; i < 0x2ac; i++)
-			g64header[i] = (char) fgetc(fpin);
+			g64header[i] = fgetc(fpin);
 		parse_disk(fd, fpin, g64header+0x9);
 	}
     else if (compare_extension(filename, "NIB"))
@@ -456,21 +447,21 @@ void file2disk(CBM_FILE fd,char *filename)
 		if(nibsize == 327936)	// 40 tracks
 		{
 			end_track = 40*2;
-			printf("40 track image\n");
+			printf("\n40 track image");
 		}
 		else
 		{
 			end_track = 41*2;	// 41 tracks
-			printf("41 track image\n");
+			printf("\n41 track image");
 		}
 		rewind(fpin);
 
         memset(mnibheader, 0x00, 0x100);
 		for (i = 0; i < 0x100; i++)
-			mnibheader[i] = (char) fgetc(fpin);
+			mnibheader[i] = fgetc(fpin);
 		parse_disk(fd, fpin, mnibheader+0x10);
 	}
-    else printf("Unknown image type");
+    else printf("\nUnknown image type");
 
     printf("\n");
     cbm_mnib_par_read(fd);
@@ -505,7 +496,6 @@ void disk2file(CBM_FILE fd,char *filename)
 		exit(2);
 	}
     
-
 	/* create log file */
     strcpy(logfilename, filename);
     dotpos = strrchr(logfilename, '.');
@@ -592,7 +582,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     char filename[80];
 
     fprintf(stdout,
-        "\nmnib - Commodore G64 disk image nibbler.\n"
+        "\nmnib - Commodore 1541/1571 disk image nibbler.\n"
         "(C) 2000-04 Markus Brenner and Pete Rittwage.\n"
         "Version "VERSION"\n\n");
 
@@ -609,6 +599,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     fix_gcr = 1;
     aggressive_gcr = 0;
     error_retries = 10;
+	verbose = 0;
+	auto_density_adjust = 1;
 
     mode = MODE_READ_DISK; // default to read a disk
     disktype = DISK_NORMAL;
@@ -621,17 +613,17 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         {
             case 'h':
                 track_inc = 1;
-                printf("ARG: using halftracks\n");
+                printf("* Reading halftracks\n");
                 break;
 
 			case 'k':
 				read_killer = 0;
-				printf("ARG: don't read 'killer' tracks\n");
+				printf("* Ignoring 'killer' tracks\n");
                 break;
 
             case 'l':
                 end_track = 40*2;
-                printf("ARG: limit to 40 tracks\n");
+                printf("* Limiting functions to 40 tracks\n");
                 break;
 
             case 'w':   // we are writing a disk
@@ -644,13 +636,13 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
 			case 't':
 				// hidden secret raw track file writing mode
-				printf("ARG: Activated Pete's secret raw track writing mode\n");
+				printf("* Raw MTOOL track writing mode\n");
 				mode = MODE_WRITE_RAW;
                 break;
 
 			case 'p':
 				// custom protection handling
-				printf("ARG: Custom copy protection handler = ");
+				printf("* Custom copy protection handler: ");
 				if( (*argv)[2] == 'x')
 				{
 					printf("V-MAX!\n");
@@ -659,15 +651,16 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 				}
 				else if( (*argv)[2] == 'v')
 				{
-					printf("Epyx Vorpal\n");
+					printf("VORPAL (NEWER)\n");
 					force_align = ALIGN_VORPAL;
 				}
 				else if( (*argv)[2] == 'r')
 				{
-					printf("Rapidlok\n");
+					printf("RAPIDLOK\n");
 					force_align = ALIGN_RAPIDLOK;
 					reduce_syncs = 0;
-					//reduce_weak = 1;
+					reduce_weak = 1;
+					//reduce_gaps = 1;
 				}
 				else
 					printf("Unknown protection handler\n");
@@ -675,11 +668,16 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
 			case 'a':
 				// custom alignment handling
-				printf("ARG: Custom alignment = ");
+				printf("* Custom alignment: ");
 				if( (*argv)[2] == '0')
 				{
 					printf("sector 0\n");
 					force_align = ALIGN_SEC0;
+				}
+				if( (*argv)[2] == 'g')
+				{
+					printf("gap\n");
+					force_align = ALIGN_GAP;
 				}
 				else if( (*argv)[2] == 'w')
 				{
@@ -691,41 +689,56 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 					printf("longest sync\n");
 					force_align = ALIGN_LONGSYNC;
 				}
+				else if( (*argv)[2] == 'a')
+				{
+					printf("autogap\n");
+					force_align = ALIGN_AUTOGAP;
+				}
 				else
 					printf("Unknown alignment parameter\n");
 				break;
 
 			case 's':
 				// hidden forced sector 0 alignment
-				printf("ARG: Force sector0 alignment\n");
+				printf("* Force sector0 alignment\n");
 				force_align = ALIGN_SEC0;
                 break;
 
             case 'r':
                 reduce_syncs = 0;
-                printf("ARG: Disabled 'reduce syncs' option\n");
+                printf("* Disabled 'reduce syncs' option\n");
                 break;
 
             case '0':
                 reduce_weak = 1;
-                printf("ARG: Enabled 'reduce weak' option\n");
+                printf("* Enabled 'reduce weak' option\n");
                 break;
 
             case 'g':
                 reduce_gaps = 1;
-                printf("ARG: Enabled 'reduce gaps' option\n");
+                printf("* Enabled 'reduce gaps' option\n");
                 break;
 
             case 'f':
                 fix_gcr = 0;
-                printf("ARG: Disabled weak GCR bit simulation\n");
+                printf("* Disabled weak GCR bit simulation\n");
+                break;
+
+			case 'v':
+				verbose = 1;
+				printf("* Verbose mode on\n");
+                break;
+
+			case 'd':
+				auto_density_adjust = 0;
+				printf("* Auto density adjust off\n");
                 break;
 
     		case 'e':		// change read retries
     			if( ! (*argv)[2])
 					usage();
 				error_retries = atoi((char *)(&(*argv)[2]));
-    			printf("ARG: read retries set to %d\n",error_retries);
+    			printf("* Read retries set to %d\n",error_retries);
     			break;
 
     		default:
@@ -787,9 +800,14 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 /*
     scan_density();
 */
-    fprintf(stderr, "test: %s\n", test_par_port(fd) ? "OK" : "FAILED");
-    fprintf(stderr, "code: %s\n", (ok=verify_floppy(fd)) ? "OK" : "FAILED");
-    if (!ok) exit (5);
+    //fprintf(stderr, "test: %s\n", test_par_port(fd) ? "OK" : "FAILED");
+    //fprintf(stderr, "code: %s\n", (ok=verify_floppy(fd)) ? "OK" : "FAILED");
+    if(!ok)
+    {
+		printf("Failed parallel port transfer test. Check cabling.\n");
+		exit (5);
+	}
+	printf("\n");
 
     switch(mode)
     {
@@ -798,20 +816,22 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         break;
 
       case MODE_WRITE_DISK:
-      	printf("\nWriting '%s'.\n",filename);
-      	printf("Disk in drive will be overwritten!\nPress a key to continue\n");
+      	printf("Ready to write '%s'.\n",filename);
+      	printf("Current disk WILL be OVERWRITTEN!\nPress a key to continue or CTRL-C to quit.\n");
       	getch();
         file2disk(fd,filename);
         break;
 
       case MODE_UNFORMAT_DISK:
-       	printf("\nDisk in drive will be overwritten!\nPress a key to continue\n");
+      	printf("Ready to unformat disk.\n");
+       	printf("Current disk WILL be DESTROYED!\nPress a key to continue or CTRL-C to quit.\n");
       	getch();
         unformat_disk(fd);
         break;
 
       case MODE_WRITE_RAW:
-    	printf("\nDisk in drive will be overwritten!\nPress a key to continue\n");
+      	printf("Ready to write raw tracks to disk.\n");
+    	printf("Current disk WILL be OVERWRITTEN!\nPress a key to continue or CTRL-C to quit.\n");
       	getch();
     	write_raw(fd);
     	break;
@@ -819,9 +839,9 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     motor_on(fd);
     step_to_halftrack(fd,18*2);
-    send_par_cmd(fd,FL_RESET);
+    /*linux    send_mnib_cmd(fd,FL_RESET); */
     printf("drive reset...\n");
-    delay(2000);
+    /*linux    delay(2000); */
 
 	/*linux cbm4linux ending: */
 	cbm_reset(fd);

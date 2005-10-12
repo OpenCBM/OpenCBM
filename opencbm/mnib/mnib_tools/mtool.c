@@ -10,9 +10,56 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "gcr.h"
-#include "version.h"
-#include "mnib.h"
+#include "../gcr.h"
+#include "../version.h"
+/*linux #include "mnib.h" */
+/*linux the defines from mnib.h: */
+#define DISK_NORMAL    0
+
+#define IMAGE_NIB      0    /* destination image format */
+#define IMAGE_D64      1
+#define IMAGE_G64      2
+
+#define BM_MATCH       0x10
+#define BM_NO_SYNC     0x40
+#define BM_FF_TRACK    0x80
+
+// tested extensively with Pete's Newtronics mech-based 1541.
+//#define CAPACITY_MARGIN 11	// works with FL_WRITENOSYNC
+//#define CAPACITY_MARGIN 13	// works with both FL_WRITESYNC and FL_WRITENOSYNC
+#define CAPACITY_MARGIN 16	// safe value
+
+
+#define MODE_READ_DISK     	0
+#define MODE_WRITE_DISK    	1
+#define MODE_UNFORMAT_DISK 	2
+#define MODE_WRITE_RAW	   	3
+#define MODE_TEST_ALIGNMENT 4
+
+int start_track;
+int end_track;
+int track_inc;
+int reduce_syncs;
+int reduce_weak;
+int reduce_gaps;
+int fix_gcr;
+int aggressive_gcr;
+int current_track;
+int align;
+int force_align;
+int read_killer;
+int error_retries;
+unsigned int lpt[4];
+int lpt_num;
+int drivetype;
+unsigned int floppybytes;
+int disktype;
+int imagetype;
+int mode;
+
+
+/*linux Linux-Wrapper for the getch()-function: */
+#define getch(x) getchar(x);
 
 
 BYTE diskbuf[84 * 0x2000];
@@ -500,6 +547,7 @@ int scandisk(void)
 	int totalfat = 0;
 	int totalrl = 0;
 	int totalgcr = 0;
+	int empty = 0, temp_empty;
 	int errors = 0, temp_errors;
 	int defdensity;
 	char *errorstring[256];
@@ -585,15 +633,25 @@ int scandisk(void)
 			if((!fat_tracks[track-2]) && (!rapidlok_tracks[track]))
 				temp_errors = check_errors(diskbuf+(0x2000 * track),length[track],track,id,errorstring);
 
-			if(advanced_info)
-				raw_track_info(diskbuf+(0x2000 * track),length[track],errorstring);
-
 			if(temp_errors)
 			{
 				errors += temp_errors;
-				printf("%s",errorstring);
+				printf("\n%s",errorstring);
 				getch();
 			}
+
+			temp_empty = check_empty(diskbuf+(0x2000 * track),length[track],track,id,errorstring);
+			if(temp_empty)
+			{
+				empty += temp_empty;
+				printf("\n%s",errorstring);
+				getch();
+			}
+
+			if(advanced_info)
+				raw_track_info(diskbuf+(0x2000 * track),length[track],errorstring);
+
+			printf("\n");
 	  	}
 
 
@@ -607,6 +665,7 @@ int scandisk(void)
 	}
 	printf("\n\ndisk id: %s\n",id);
 	printf("%d disk errors detected.\n",errors);
+	printf("%d empty sectors detected.\n",empty);
 	printf("%d bad/weak gcr bytes detected.\n",totalgcr);
 	printf("%d fat tracks detected.\n",totalfat);
 	printf("%d rapidlok tracks detected.\n",totalrl);

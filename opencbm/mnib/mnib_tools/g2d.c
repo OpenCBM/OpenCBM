@@ -15,8 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
-#include "gcr.h"
-#include "version.h"
+#include "../gcr.h"
+#include "../version.h"
 
 
 void usage(void)
@@ -33,13 +33,13 @@ int main(int argc, char **argv)
     int track, sector;
     BYTE id[3];
     BYTE gcr_track[7930], rawdata[260];
-    BYTE *gcr_start, *gcr_cycle; 
+    BYTE *gcr_start, *gcr_cycle;
     BYTE errorinfo[MAXBLOCKSONDISK];
     BYTE errorcode;
     int save_errorinfo;
     unsigned long blockindex;
     int cycle_len;
-    
+
     fprintf(stdout,
         "\ng2d - converts a G64 disk image into a standard D64 disk image.\n"
         "(C) 1999-2003 Markus Brenner.\n"
@@ -132,10 +132,7 @@ int main(int argc, char **argv)
 
         for (sector = 0; sector < sector_map_1541[track + 1]; sector++)
         {
-            BYTE chksum;
-            int i;
-
-            printf("%d",sector);
+	        printf("%d",sector);
 
             errorcode = convert_GCR_sector(gcr_start, gcr_cycle,
                                            rawdata,

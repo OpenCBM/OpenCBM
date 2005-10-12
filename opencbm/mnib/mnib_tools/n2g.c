@@ -1,6 +1,7 @@
 /* n2g - Converts mnib nibbler data to G64 image
 
     (C) 2000-03 Markus Brenner <markus@brenner.de>
+		with small additions by Pete Rittwage <peter@rittwage.com>
 
     Based on code by Andreas Boose <boose@unixserv.rz.fh-hannover.de>
 
@@ -9,6 +10,7 @@
     V 0.23   ignore halftrack information if present
     V 0.24   fixed density information
     V 0.35   moved extract_GCR_track() to gcr.c, unified versioning
+
 */
 
 
@@ -17,8 +19,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
-#include "gcr.h"
-#include "version.h"
+#include "../gcr.h"
+#include "../version.h"
+
+extern unsigned int capacity_min[];
+extern unsigned int capacity_max[];
+extern int speed_map_1541[];
+extern char sector_map_1541[];
 
 
 static int write_dword(FILE *fd, DWORD *buf, int num)
@@ -142,6 +149,11 @@ int main(int argc, char **argv)
 				{
 					printf("longest sync\n");
 					force_align = ALIGN_LONGSYNC;
+				}
+				else if( (*argv)[2] == 'a')
+				{
+					printf("autogap\n");
+					force_align = ALIGN_AUTOGAP;
 				}
 				else
 					printf("Unknown alignment parameter\n");
@@ -279,7 +291,8 @@ int main(int argc, char **argv)
 //        source_track = check_vmax(mnib_track);
 
 	    align = ALIGN_NONE;
-        track_len = extract_GCR_track(gcr_track+2, mnib_track, &align, force_align);
+        track_len = extract_GCR_track(gcr_track+2, mnib_track, &align, force_align,
+        			capacity_min[speed_map_1541[track]], capacity_max[speed_map_1541[track/2]]);
 
         switch (align)
 		{
@@ -291,6 +304,7 @@ int main(int argc, char **argv)
 			case ALIGN_VORPAL:		printf("(vorpal) ");	break;
 			case ALIGN_VMAX:		printf("(v-max) ");	break;
 			case ALIGN_RAPIDLOK:	printf("(rapidlok) ");	break;
+			case ALIGN_AUTOGAP:		printf("(autogap) ");	break;
 		}
 
 		if(track_len > 0)

@@ -1,3 +1,8 @@
+/* MNIB Write routines
+ * Copyright 2001-2005 Markus Brenner <markus@brenner.de>
+ 				and 	Pete Rittwage <peter@rittwage.com>
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,6 +10,7 @@
 /*linux #include "cbm.h" */
 #include <opencbm.h>
 #include "gcr.h"
+/*linux #include "kernel.h" */
 #include "mnib.h"
 
 extern char bitrate_range[4];
@@ -15,12 +21,15 @@ extern unsigned int capacity[];
 extern unsigned int capacity_min[];
 extern unsigned int capacity_max[];
 
+extern char sector_map_1541[];
+extern int speed_map_1541[];
 
-void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrdata)
+
+void write_halftrack(int halftrack, int density, int length, BYTE *gcrdata)
 {
     int defdens;
     int badgcr = 0;
-	unsigned int orglen;
+	int orglen;
 
 	// double-check our sync-flag assumptions
 	density = check_sync_flags(gcrdata, (density & 3), length);
@@ -29,42 +38,47 @@ void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrd
 	for (defdens = 3; halftrack >= bitrate_range[defdens]; defdens--);
 
 	// user display
-	printf("\n%4.1f: (density=",(float)halftrack/2);
+	if(verbose) printf("\n%4.1f: (density=",(float)halftrack/2);
 
 	if(density & BM_NO_SYNC)
-		printf("NOSYNC:");
-
+	{
+		if(verbose) printf("NOSYNC:");
+	}
 	else if (density & BM_FF_TRACK)
 	{
 		// reset sync killer track length to 0
 		length = 0;
-		printf("KILLER:");
+		if(verbose) printf("KILLER:");
 	}
-	printf("%d",density & 3);
-	if(density != defdens) printf("!");
-	printf(") [");
+	
+	if(verbose)
+	{	printf("%d",density & 3);
+		if(density != defdens) printf("!");
+		printf(") [");
+	}
 
 	if(length > 0)
 	{
 		if(fix_gcr)
 		{
 			badgcr = check_bad_gcr(gcrdata, length, 1);
-			if(badgcr > 0) printf("weak:%d ",badgcr);
+			if((badgcr > 0)&&(verbose)) printf("weak:%d ",badgcr);
 		}
 
 		// if our track contains sync,
 	    // we reduce to a minimum of 16 (only 10 are required, technically)
 	  	orglen = length;
+	  	
+		// turn on sync reduction for Rapidlok keytrack
+	  	if((force_align == ALIGN_RAPIDLOK) && (halftrack == 36*2))
+	  		reduce_syncs = 1;
+
 	  	if( (length > capacity[density & 3]) && (!(density & BM_NO_SYNC)) && (reduce_syncs) )
 	    {
-			// strip leading sync bytes first; we will write our own sync mark
-	      	//leadsyncs = strip_leading_syncs(gcrdata, length);
-	    	//length -= leadsyncs;
-
 			// then try to reduce sync within the track
 	    	if(length > capacity[density & 3])
 	    		length = reduce_runs(gcrdata, length, capacity[density & 3], 2, 0xff);
-		   	if(length < orglen) printf("rsync:%d ", orglen - length);
+		   	if((length < orglen)&&(verbose)) printf("rsync:%d ", orglen - length);
 	   	}
 
 		// we could reduce gap bytes ($55 and variants) here too,
@@ -75,7 +89,7 @@ void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrd
 			length = reduce_runs(gcrdata, length, capacity[density & 3], 2, 0xaa);
 			length = reduce_runs(gcrdata, length, capacity[density & 3], 2, 0x5a);
 			length = reduce_runs(gcrdata, length, capacity[density & 3], 2, 0xa5);
-			if(length < orglen) printf("rgaps:%d ", orglen - length);
+			if((length < orglen)&&(verbose)) printf("rgaps:%d ", orglen - length);
 		}
 
 		// reduce weak bit runs (experimental)
@@ -83,7 +97,7 @@ void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrd
 	    if( (length > capacity[density & 3]) && (badgcr > 0) && (reduce_weak) )
 		{
 			length = reduce_runs(gcrdata, length, capacity[density & 3], 2, 0x00);
-			if(length < orglen) printf("rweak:%d ", orglen - length);
+			if((length < orglen)&&(verbose)) printf("rweak:%d ", orglen - length);
 		}
 
 	    // still not small enough, we have to truncate the end
@@ -91,7 +105,8 @@ void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrd
 	    if (length > capacity[density & 3])
 	    {
 			length = capacity[density & 3];
-	    	if(length < orglen) printf("trunc:%d ",orglen - length);
+	    	if((length < orglen)&&(verbose)) printf("trunc:%d ",orglen - length);
+	    	else printf("\nHad to truncate track %d by %d bytes.",halftrack/2,orglen-length);
 		}
 	}
 
@@ -117,10 +132,10 @@ void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrd
 	track_density[halftrack] = density;
 	memcpy(diskbuf + (halftrack * 0x2000), gcrdata, length);
 
-	printf("] length=%d ",length);
+	if(verbose) printf("] length=%d ",length);
 
 	//print out track alignment, as determined
-	if (imagetype == IMAGE_NIB)
+	if ((imagetype == IMAGE_NIB) && (verbose))
 	{
 		switch (align)
 		{
@@ -132,6 +147,7 @@ void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrd
 				case ALIGN_VORPAL:		printf("(vorpal) ");	break;
 				case ALIGN_VMAX:		printf("(v-max) ");	break;
 				case ALIGN_RAPIDLOK:	printf("(rapidlok) ");	break;
+				case ALIGN_AUTOGAP:		printf("(autogap) ");	break;
 		}
 	}
 }
@@ -144,7 +160,7 @@ void master_disk(CBM_FILE fd)
 	BYTE inert_byte;
 	BYTE rawtrack[0x2400];
 
-	printf("\n\nBurst Writing [");
+	printf("\nBurst Writing [");
 
 	for (track = start_track; track <= end_track; track += track_inc)
 	{
@@ -158,7 +174,7 @@ void master_disk(CBM_FILE fd)
 		// figure out the right amount of time to waste here
 		// (in bytes) to get to the start of the previous track
 		// for alignment purposes
-		if((track_density[track] & BM_NO_SYNC) || (force_align == ALIGN_RAPIDLOK))
+		if(track_density[track] & BM_NO_SYNC)
 			inert_byte = 0x55;
 		else
 			inert_byte = 0xff;
@@ -182,7 +198,6 @@ void master_disk(CBM_FILE fd)
 			printf("\ntimeout failure!");
 			exit(0);
 		}
-
 		printf("%d",track_density[track]&3);
 	}
 	printf("]\n");
@@ -197,7 +212,7 @@ void write_raw(CBM_FILE fd)
 	int length;
 
 	motor_on(fd);
-	adjust_target(fd);
+	if(auto_density_adjust)	adjust_target(fd);
 
 	for (track = start_track; track <= end_track; track += track_inc)
 	{
@@ -206,7 +221,7 @@ void write_raw(CBM_FILE fd)
 		{
 			sprintf(testfilename,"raw/tr%dd%d", track/2, density);
 			if( (trkin = fopen(testfilename,"rb")) ) break;
-        }
+		}
 
 		if(trkin)
 		{
@@ -250,7 +265,11 @@ void unformat_track(CBM_FILE fd, int track)
 
 	// write 0x01 $2000 times
 	memset(buffer, 0x01, 0x2000);
-	cbm_mnib_write_track(fd, buffer, 0x2000, FL_WRITENOSYNC);
+	if(!cbm_mnib_write_track(fd, buffer, 0x2000, FL_WRITENOSYNC))
+	{
+		printf("\ntimeout failure!");
+		exit(0);
+	}
 }
 
 
@@ -294,7 +313,8 @@ void parse_disk(CBM_FILE fd, FILE *fpin, char *track_header)
            	// get track from file
            	align = ALIGN_NONE;  // reset track alignment feedback
             fread(buffer,1,0x2000,fpin);
-           	length = extract_GCR_track(gcrdata, buffer, &align, force_align);
+           	length = extract_GCR_track(gcrdata, buffer, &align, force_align,
+           		capacity_min[density & 3], capacity_max[density & 3]);
 
 			// write track
 			write_halftrack(track, density, length, gcrdata);
@@ -324,8 +344,8 @@ void parse_disk(CBM_FILE fd, FILE *fpin, char *track_header)
             dens_pointer += 8;
 
             /* get length */
-            buffer[0] = (BYTE) fgetc(fpin);
-            buffer[1] = (BYTE) fgetc(fpin);
+            buffer[0] = fgetc(fpin);
+            buffer[1] = fgetc(fpin);
            	length = buffer[1] << 8 | buffer[0];
 
             /* get track from file */
@@ -340,7 +360,7 @@ void parse_disk(CBM_FILE fd, FILE *fpin, char *track_header)
 }
 
 
-void write_d64(CBM_FILE fd, FILE *fpin)
+int write_d64(CBM_FILE fd, FILE *fpin)
 {
     int track, sector, sector_ref;
     int density;
@@ -379,7 +399,7 @@ void write_d64(CBM_FILE fd, FILE *fpin)
       default:
         rewind(fpin);
         fprintf(stderr, "Bad d64 image size.\n");
-        return;
+        return 0;
     }
 
     // determine disk id from track 18
@@ -422,7 +442,7 @@ void write_d64(CBM_FILE fd, FILE *fpin)
 
         // write track
         write_halftrack(track*2, density, length, gcrdata);
-        printf("%s",errorstring);
+        if(verbose) printf("%s",errorstring);
     }
 
     // "unformat" last 5 tracks on 35 track disk
@@ -438,7 +458,7 @@ void write_d64(CBM_FILE fd, FILE *fpin)
 
 	master_disk(fd);
     step_to_halftrack(fd, 18*2);
-	return;
+	return(1);
 }
 
 
