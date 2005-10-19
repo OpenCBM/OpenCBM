@@ -93,9 +93,9 @@ int find_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, int cap
 
 int find_nondos_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, int cap_max);
 
-int convert_GCR_sector(BYTE *gcr_start, BYTE *gcr_end,
-                       BYTE *d64_sector,
-                       int track, int sector, BYTE *id);
+BYTE convert_GCR_sector(BYTE *gcr_start, BYTE *gcr_end,
+                        BYTE *d64_sector,
+                        int track, int sector, BYTE *id);
 
 void convert_sector_to_GCR(BYTE *buffer, BYTE *ptr,
                                   int track, int sector, BYTE *diskID, int error);

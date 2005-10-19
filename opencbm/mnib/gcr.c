@@ -189,9 +189,9 @@ int extract_id(BYTE *gcr_track, BYTE *id)
 }
 
 
-int convert_GCR_sector(BYTE *gcr_start, BYTE *gcr_cycle,
-                       BYTE *d64_sector,
-                       int track, int sector, BYTE *id)
+BYTE convert_GCR_sector(BYTE *gcr_start, BYTE *gcr_cycle,
+                        BYTE *d64_sector,
+                        int track, int sector, BYTE *id)
 {
     BYTE header[10];    /* block header */
     BYTE hdr_chksum;    /* header checksum */
@@ -199,7 +199,7 @@ int convert_GCR_sector(BYTE *gcr_start, BYTE *gcr_cycle,
     BYTE gcr_buffer[2 * GCR_TRACK_LENGTH];
     BYTE *gcr_ptr, *gcr_end, *gcr_last;
     BYTE *sectordata;
-    int error_code;
+    BYTE error_code;
     int sync_found;
     int track_len;
     int i;
@@ -232,8 +232,8 @@ int convert_GCR_sector(BYTE *gcr_start, BYTE *gcr_cycle,
     {
         if (*gcr_ptr == 0xff)
         {
-			if (sync_found < 2) sync_found++;
-		}
+            if (sync_found < 2) sync_found++;
+        }
         else /* (*gcr_ptr != 0xff) */
         {
             if (sync_found < 2) sync_found = 0;
@@ -341,7 +341,7 @@ int convert_GCR_sector(BYTE *gcr_start, BYTE *gcr_cycle,
 		//printf("(S%d DATA_CHKSUM $%0.2x != $%0.2x) ", sector, blk_chksum, d64_sector[257]);
 		error_code = (error_code == OK) ? BAD_DATA_CHECKSUM : error_code;
 	}
-	return(error_code);
+    return(error_code);
 }
 
 
@@ -376,8 +376,8 @@ void convert_sector_to_GCR(BYTE *buffer, BYTE *ptr,
 
         buf[0] = 0x08;             /* Header identifier */
         buf[1] = sector ^ track ^ diskID[1] ^ diskID[0];
-        buf[2] = sector;
-        buf[3] = track;
+        buf[2] = (BYTE) sector;
+        buf[3] = (BYTE) track;
 
         if (error == BAD_HEADER_CHECKSUM)
             buf[1] ^= 0xff;
@@ -489,12 +489,12 @@ int find_nondos_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, 
     BYTE *cycle_pos;    /* start of cycle repetition */
     BYTE *stop_pos;     /* maximum position allowed for cycle */
     BYTE *p1, *p2, *p3;	/* local pointers for comparisons */
+	int i, j, redund;
 
 	nib_track = *cycle_start;
 	start_pos = nib_track;
 	stop_pos = nib_track + GCR_TRACK_LENGTH - MATCH_LENGTH;
 	cycle_pos = NULL;
-	int i, j, redund;
 
    	for(p1 = start_pos; p1 < stop_pos; p1 ++)
    	{

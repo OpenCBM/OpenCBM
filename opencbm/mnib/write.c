@@ -25,11 +25,11 @@ extern char sector_map_1541[];
 extern int speed_map_1541[];
 
 
-void write_halftrack(int halftrack, int density, int length, BYTE *gcrdata)
+void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrdata)
 {
     int defdens;
     int badgcr = 0;
-	int orglen;
+	unsigned int orglen;
 
 	// double-check our sync-flag assumptions
 	density = check_sync_flags(gcrdata, (density & 3), length);
@@ -344,8 +344,8 @@ void parse_disk(CBM_FILE fd, FILE *fpin, char *track_header)
             dens_pointer += 8;
 
             /* get length */
-            buffer[0] = fgetc(fpin);
-            buffer[1] = fgetc(fpin);
+            buffer[0] = (char) fgetc(fpin);
+            buffer[1] = (char) fgetc(fpin);
            	length = buffer[1] << 8 | buffer[0];
 
             /* get track from file */
@@ -360,7 +360,7 @@ void parse_disk(CBM_FILE fd, FILE *fpin, char *track_header)
 }
 
 
-int write_d64(CBM_FILE fd, FILE *fpin)
+void write_d64(CBM_FILE fd, FILE *fpin)
 {
     int track, sector, sector_ref;
     int density;
@@ -399,7 +399,7 @@ int write_d64(CBM_FILE fd, FILE *fpin)
       default:
         rewind(fpin);
         fprintf(stderr, "Bad d64 image size.\n");
-        return 0;
+        return;
     }
 
     // determine disk id from track 18
@@ -458,7 +458,6 @@ int write_d64(CBM_FILE fd, FILE *fpin)
 
 	master_disk(fd);
     step_to_halftrack(fd, 18*2);
-	return(1);
 }
 
 

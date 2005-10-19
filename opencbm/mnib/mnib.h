@@ -3,6 +3,9 @@
  * and Pete Rittwage <peter@rittwage.com>
  */
 
+#ifndef __MNIB_H__
+#define __MNIB_H__
+
 #define FD 1                /* (unused) file number for cbm_routines */
 
 #define FL_STEPTO      0x00
@@ -45,9 +48,9 @@
 #define MODE_WRITE_RAW	   	3
 #define MODE_TEST_ALIGNMENT 4
 
-int start_track;
-int end_track;
-int track_inc;
+BYTE start_track;
+BYTE end_track;
+BYTE track_inc;
 int reduce_syncs;
 int reduce_weak;
 int reduce_gaps;
@@ -83,13 +86,13 @@ int read_d64(CBM_FILE fd, FILE *fpout);
 void read_nib(CBM_FILE fd, FILE *fpout, char *track_header);
 
 /* write.c */
-void write_halftrack(int halftrack, int density, int length, BYTE *gcrdata);
+void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrdata);
 void master_disk(CBM_FILE fd);
 void write_raw(CBM_FILE fd);
 void unformat_disk(CBM_FILE fd);
 void unformat_track(CBM_FILE fd, int track);
 void parse_disk(CBM_FILE fd, FILE *fpin, char *track_header);
-int write_d64(CBM_FILE fd, FILE *fpin);
+void write_d64(CBM_FILE fd, FILE *fpin);
 
 /* mnib.c  */
 int compare_extension(char *filename, char *extension);
@@ -111,8 +114,9 @@ void adjust_target(CBM_FILE fd);
 void file2disk(CBM_FILE fd, char *filename);
 void disk2file(CBM_FILE fd, char *filename);
 void usage(void);
-int main(int argc, char *argv[]);
+//int main(int argc, char *argv[]);
 
 /*linux send_par_cmd is needed here, because we haven't it in the kernel */
 void send_par_cmd(CBM_FILE fd, BYTE cmd);
 
+#endif

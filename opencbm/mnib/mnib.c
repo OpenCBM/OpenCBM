@@ -54,10 +54,11 @@
 #define DRIVE 8 // @@@srt
 
 /*linux Linux-Wrapper for the delay-function: */
-#include <unistd.h>
-#define delay(x) usleep(x*1000)
+//#include <unistd.h>
+//#define delay(x) usleep(x*1000)
+#define delay(x) arch_usleep(x*1000)
 /*linux Linux-Wrapper for the getch()-function: */
-#define getch(x) getchar(x);
+#define getch() getchar();
 
 
 #include "gcr.h"
@@ -150,7 +151,8 @@ int test_par_port(CBM_FILE fd)
 
 int verify_floppy(CBM_FILE fd)
 {
-    int i, rv;
+    unsigned int i;
+    int rv;
 
     send_mnib_cmd(fd, FL_VERIFY_CODE);
     for (i = 2, rv = 1; i < floppybytes; i++)
@@ -282,7 +284,7 @@ int set_default_bitrate(CBM_FILE fd,int track) /* $13bc */
 
 int scan_track(CBM_FILE fd,int track) /* $152b Density Scan*/
 {
-    BYTE density;
+    int density;
     BYTE killer_info;
     int i, bin;
     BYTE count;
@@ -432,7 +434,7 @@ void file2disk(CBM_FILE fd,char *filename)
         imagetype = IMAGE_G64;
         memset(g64header, 0x00, 0x2ac);
 		for (i = 0; i < 0x2ac; i++)
-			g64header[i] = fgetc(fpin);
+			g64header[i] = (char) fgetc(fpin);
 		parse_disk(fd, fpin, g64header+0x9);
 	}
     else if (compare_extension(filename, "NIB"))
@@ -458,7 +460,7 @@ void file2disk(CBM_FILE fd,char *filename)
 
         memset(mnibheader, 0x00, 0x100);
 		for (i = 0; i < 0x100; i++)
-			mnibheader[i] = fgetc(fpin);
+			mnibheader[i] = (char) fgetc(fpin);
 		parse_disk(fd, fpin, mnibheader+0x10);
 	}
     else printf("\nUnknown image type");
@@ -800,6 +802,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 /*
     scan_density();
 */
+    ok = 1;
+
     //fprintf(stderr, "test: %s\n", test_par_port(fd) ? "OK" : "FAILED");
     //fprintf(stderr, "code: %s\n", (ok=verify_floppy(fd)) ? "OK" : "FAILED");
     if(!ok)

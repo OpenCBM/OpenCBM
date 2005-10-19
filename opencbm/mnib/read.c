@@ -136,7 +136,8 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
     BYTE *cbufn, *cbufo;
     BYTE *bufn,  *bufo;
 
-    int lenn, leno;
+    int lenn;
+    unsigned int leno;
     int densn, denso;
     int i, l;
 	int badgcr = 0;
@@ -304,7 +305,7 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
 
 void read_nib(CBM_FILE fd, FILE *fpout, char *track_header)
 {
-    int track;
+    BYTE track;
     int density;
     int header_entry;
     int i,track_len;
@@ -341,7 +342,7 @@ void read_nib(CBM_FILE fd, FILE *fpout, char *track_header)
         // density = read_halftrack(track, buffer);
         density = paranoia_read_halftrack(fd, track, buffer);
         track_header[header_entry*2] = track;
-        track_header[header_entry*2+1] = density;
+        track_header[header_entry*2+1] = (BYTE) density;
         header_entry++;
 
         /* process and save track to disk */
@@ -374,7 +375,7 @@ int read_d64(CBM_FILE fd, FILE *fpout)
     BYTE errorcode;
     int sector_count[21];     /* number of different sector data read */
     int sector_occur[21][16]; /* how many times was this sector data read? */
-    int sector_error[21][16]; /* type of error on this sector data */
+    BYTE sector_error[21][16]; /* type of error on this sector data */
     int sector_use[21];       /* best data for this sector so far */
     int sector_max[21];       /* # of times the best sector data has occured */
     int goodtrack;
