@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.1.2.1 2005-09-16 12:39:54 strik Exp $ \n
+** \version $Id: mnib.c,v 1.1.2.2 2005-10-19 16:28:15 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -99,7 +99,7 @@ cbmiec_mnib_par_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
 }
 
 static void
-send_par_cmd(PDEVICE_EXTENSION Pdx, UCHAR cmd)
+cbm_mnib_send_cmd(PDEVICE_EXTENSION Pdx, UCHAR cmd)
 {
     FUNC_ENTER();
 
@@ -113,51 +113,34 @@ send_par_cmd(PDEVICE_EXTENSION Pdx, UCHAR cmd)
 }
 
 static int
-cbm_nib_read1(PDEVICE_EXTENSION Pdx)
+cbm_nib_read(PDEVICE_EXTENSION Pdx, int Toggle)
 {
-    int to;
+    int to = 0;
     int j;
 
     FUNC_ENTER();
 
-    to = 0;
+    CBMIEC_RELEASE(PP_DATA_OUT); // @@@ DATA_IN ???
 
-    CBMIEC_RELEASE(PP_DATA_OUT);
+    cbmiec_udelay(2); 
 
-    for (j=0; j < 2; j++)
+    if (!Toggle)
     {
-        CBMIEC_GET(PP_DATA_IN);
+        while (CBMIEC_GET(PP_DATA_IN))
+        {
+            if (to++ > 1000000)
+                break;
+        }
+    }
+    else
+    {
+        while (!CBMIEC_GET(PP_DATA_IN))
+        {
+            if (to++ > 1000000)
+                break;
+        }
     }
 
-    while (CBMIEC_GET(PP_DATA_IN))
-    {
-        if (to++ > 1000000)
-            break;
-    }
-
-    return to > 1000000 ? -1 : READ_PORT_UCHAR(PAR_PORT);
-}
-
-static int
-cbm_nib_read2(PDEVICE_EXTENSION Pdx)
-{
-    int to;
-    int j;
-
-    FUNC_ENTER();
-
-    to = 0;
-
-    CBMIEC_RELEASE(PP_DATA_OUT);
-
-    for (j=0; j < 2; j++)
-        CBMIEC_GET(PP_DATA_IN);
-
-    while (!CBMIEC_GET(PP_DATA_IN))
-    {
-        if (to++ > 1000000)
-            break;
-    }
     return to > 1000000 ? -1 : READ_PORT_UCHAR(PAR_PORT);
 }
 
@@ -177,7 +160,7 @@ cbm_nib_write(PDEVICE_EXTENSION Pdx, char Data, int Toggle)
 
         if (!Toggle)
         {
-            while (CBMIEC_GET(PP_DATA_IN))
+            while (CBMIEC_GET(PP_DATA_IN)) // @@@ CLK_IN ???
             {
                 if (to++ > 1000000)
                     break;
@@ -185,19 +168,22 @@ cbm_nib_write(PDEVICE_EXTENSION Pdx, char Data, int Toggle)
         }
         else
         {
-            while (!CBMIEC_GET(PP_DATA_IN))
+            while (!CBMIEC_GET(PP_DATA_IN)) // @@@ CLK_IN ???
             {
                 if (to++ > 1000000)
                     break;
             }
         }
 
-        cbmiec_pp_write(Pdx, Data);
-        retval = 0;
+        if (to++ <= 1000000)
+        {
+            cbmiec_pp_write(Pdx, Data);
+            retval = 0; // @@@ retval = 1 ???
+        }
 
     } while (0);
 
-	FUNC_LEAVE_INT(retval);
+    FUNC_LEAVE_INT(retval);
 }
 
 #define enable()  cbmiec_release_irq()
@@ -207,54 +193,46 @@ NTSTATUS
 cbmiec_mnib_read_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, OUT UCHAR* Buffer, IN ULONG ReturnLength)
 {
     NTSTATUS ntStatus;
-	ULONG i;
+    ULONG i;
     UCHAR dummy;
 
-	int	timeout = 0;
-	int byte;
+    int timeout = 0;
+    int byte;
 
     FUNC_ENTER();
 
-	disable();
+    disable();
 
-	send_par_cmd(Pdx, Mode);
-	cbmiec_mnib_par_read(Pdx, &dummy);
+    cbm_mnib_send_cmd(Pdx, Mode);
+    cbmiec_mnib_par_read(Pdx, &dummy);
 
-	for (i = 0; i < ReturnLength; i += 2)
-	{
-		byte = cbm_nib_read1(Pdx);
-		if (byte <= 0)
-		{
-			timeout = 1;
-			break;
-		}
-		Buffer[i] = (UCHAR) byte;
-
-	    byte = cbm_nib_read2(Pdx);
-	    if (byte <= 0)
-	    {
-			timeout = 1;
-			break;
-		}
-		Buffer[i+1] = (UCHAR) byte;
+    for (i = 0; i < ReturnLength; i ++)
+    {
+        byte = cbm_nib_read(Pdx, i&1);
+        if (byte == -1)
+        {
+            timeout = 1;
+            break;
+        }
+        Buffer[i] = (UCHAR) byte;
 
         if (QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
         {
             timeout = 1; // FUNC_LEAVE_NTSTATUS_CONST(STATUS_TIMEOUT);
         }
-	}
+    }
 
     if(!timeout)
     {
         cbmiec_mnib_par_read(Pdx, &dummy);
-	    enable();
-	    ntStatus = STATUS_SUCCESS;
+        enable();
+        ntStatus = STATUS_SUCCESS;
     }
     else
     {
-	    enable();
-	    DBG_PRINT((DBG_PREFIX "timeout failure!"));
-	    ntStatus = STATUS_TIMEOUT;
+        enable();
+        DBG_PRINT((DBG_PREFIX "timeout failure!"));
+        ntStatus = STATUS_TIMEOUT;
     }
 
     FUNC_LEAVE_NTSTATUS(ntStatus);
@@ -266,45 +244,45 @@ cbmiec_mnib_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, IN UCHAR* Buffe
     NTSTATUS ntStatus;
     UCHAR dummy;
 
-	ULONG i = 0;
+    ULONG i = 0;
 
-	int timeout = 0;
+    int timeout = 0;
 
     FUNC_ENTER();
 
-	disable();
+    disable();
 
-  	// send write command
-   	send_par_cmd(Pdx, Mode);
-	cbmiec_mnib_par_write(Pdx, 0);
+    // send write command
+    cbm_mnib_send_cmd(Pdx, Mode);
+    cbmiec_mnib_par_write(Pdx, 0);
 
-	for (i = 0; i < BufferLength; i++)
-	{
-		if(cbm_nib_write(Pdx, Buffer[i], i&1))
-		{
-			timeout = 1;
-			break;
-		}
+    for (i = 0; i < BufferLength; i++)
+    {
+        if(cbm_nib_write(Pdx, Buffer[i], i&1))
+        {
+            timeout = 1;
+            break;
+        }
 
         if (QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
         {
             timeout = 1; // FUNC_LEAVE_NTSTATUS_CONST(STATUS_TIMEOUT);
         }
-	}
+    }
 
-	if(!timeout)
-	{
-		cbm_nib_write(Pdx, 0, i&1);
-		cbmiec_mnib_par_read(Pdx, &dummy);
-		enable();
-	    ntStatus = STATUS_SUCCESS;
-	}
-	else
-	{
-		enable();
-	    DBG_PRINT((DBG_PREFIX "timeout failure!"));
-	    ntStatus = STATUS_TIMEOUT;
-	}
+    if(!timeout)
+    {
+        cbm_nib_write(Pdx, 0, i&1);
+        cbmiec_mnib_par_read(Pdx, &dummy);
+        enable();
+        ntStatus = STATUS_SUCCESS;
+    }
+    else
+    {
+        enable();
+        DBG_PRINT((DBG_PREFIX "timeout failure!"));
+        ntStatus = STATUS_TIMEOUT;
+    }
 
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }
