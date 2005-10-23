@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1.4.1 2005-10-19 08:51:48 strik Exp $
+# $Id: Makefile,v 1.1.4.2 2005-10-23 20:46:05 tischuer Exp $
 
 ifneq ($(KERNELRELEASE),)
 EXTRA_CFLAGS := $(CBM4LINUX_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
@@ -18,7 +18,6 @@ all: cbm.o
 .PHONY: all clean mrproper install uninstall install-files
 clean:
 	rm -f cbm.mod.c *.o *.ko .cbm*
-	rm Makefile
 
 mrproper: clean
 

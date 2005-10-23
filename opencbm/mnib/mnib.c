@@ -341,7 +341,7 @@ int scan_track(CBM_FILE fd,int track) /* $152b Density Scan*/
     return (density | killer_info);
 }
 
-//#if 0
+
 int scan_density(CBM_FILE fd)
 {
     int track;
@@ -362,7 +362,6 @@ int scan_density(CBM_FILE fd)
     }
 	return(density);
 }
-//#endif
 
 void adjust_target(CBM_FILE fd)
 {
@@ -375,6 +374,8 @@ void adjust_target(CBM_FILE fd)
 
     printf("\nTesting track capacity for each density:\n");
 
+    step_to_halftrack(fd, 2);
+    
     for (i = 0; i < 4; i ++)
     {
         set_bitrate(fd,i);
@@ -403,7 +404,7 @@ void adjust_target(CBM_FILE fd)
     		printf("- OK\n");
 	}
 
-	printf("\nDrive speed averaged %.1f RPM.\n",(float)2143190/(capacity[2]+CAPACITY_MARGIN));
+	printf("\nDrive speed averaged %.1f RPM.\n",(float)2309195/(capacity[3]+CAPACITY_MARGIN));
 
 }
 
@@ -748,6 +749,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                 break;
         }
     }
+    printf("-\n");
 
     if ((argc < 1) && (!mode)) usage();
     strcpy(filename, argv[0]);
@@ -802,10 +804,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 /*
     scan_density();
 */
-    ok = 1;
-
-    //fprintf(stderr, "test: %s\n", test_par_port(fd) ? "OK" : "FAILED");
-    //fprintf(stderr, "code: %s\n", (ok=verify_floppy(fd)) ? "OK" : "FAILED");
+    fprintf(stderr, "Port Test: %s, ", test_par_port(fd) ? "OK" : "FAILED");
+    fprintf(stderr, "Code Verify: %s\n", (ok=verify_floppy(fd)) ? "OK" : "FAILED");
     if(!ok)
     {
 		printf("Failed parallel port transfer test. Check cabling.\n");

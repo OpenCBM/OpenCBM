@@ -22,7 +22,6 @@ extern unsigned int capacity_min[];
 extern unsigned int capacity_max[];
 
 extern char sector_map_1541[];
-extern int speed_map_1541[];
 
 
 int read_halftrack(CBM_FILE fd, int halftrack, BYTE *buffer)
@@ -47,7 +46,7 @@ int read_halftrack(CBM_FILE fd, int halftrack, BYTE *buffer)
 	for (defdens = 3; halftrack >= bitrate_range[defdens]; defdens--);
 	
 	// we scan for the disk density and retry a few times if it's non-standard
-	for(i = 0; i < 3; i ++)
+	for(i = 0; i < 5; i ++)
 	{
 		density = scan_track(fd, halftrack);
 		if(((density & 3) == defdens) || (density & BM_NO_SYNC) || (density & BM_FF_TRACK))
@@ -187,7 +186,7 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
 			printf("<! ");
 			fprintf(fplog,"[%d<%d!] ", leno, capacity_min[denso & 3] - 155);
 			l--;
-			if(short_read++ > 15) break;
+			if(short_read++ > error_retries) break;
 			continue;
 		}
 
@@ -198,7 +197,7 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
 			printf("!> ");
 			fprintf(fplog,"[%d>%d!] ", leno, capacity_max[denso & 3] + 255);
 			l--;
-			if(long_read++ > 15) break;
+			if(long_read++ > error_retries) break;
 			continue;
 		}
 
@@ -308,23 +307,17 @@ void read_nib(CBM_FILE fd, FILE *fpout, char *track_header)
     BYTE track;
     int density;
     int header_entry;
-    int i,track_len;
+    int i;
     BYTE buffer[0x2000];
-    BYTE *cycle_start;  /* start position of cycle */
-    BYTE *cycle_stop;   /* stop position of cycle  */
+	//unsigned int track_len;
+    //BYTE *cycle_start;  /* start position of cycle */
+    //BYTE *cycle_stop;   /* stop position of cycle  */
 
 	memset(diskid,0,sizeof(diskid));
 
 	/* read track 18 */
     density = read_halftrack(fd, 18*2, buffer);
 	
-	/* determine speed of drive that wrote this disk */
-	cycle_start = buffer;
-	find_track_cycle(&cycle_start, &cycle_stop, capacity_min[density&3], capacity_max[density&3]);
-    track_len = cycle_stop-cycle_start;
-	printf("Mastering drive averaged %.1f RPM.\n\n",(float)2143190/track_len);
-	fprintf(fplog,"Mastering drive averaged %.1f RPM.\n\n",(float)2143190/track_len);
-
 	/* determine disk id for e11 checks */
 	if (!extract_id(buffer, diskid))
 		fprintf(stderr, "[Cannot find directory sector!]\n");
@@ -333,6 +326,13 @@ void read_nib(CBM_FILE fd, FILE *fpout, char *track_header)
 		printf("ID: %s\n",diskid);
 		fprintf(fplog,"ID: %s\n",diskid);
 	}
+
+	/* determine speed of drive that wrote this disk */
+	//cycle_start = buffer;
+	//find_track_cycle(&cycle_start, &cycle_stop, capacity_min[density&3], capacity_max[density&3]);
+    //track_len = cycle_stop-cycle_start;
+	//printf(" (mastering drive averaged %.1f RPM)\n",(float)2143190/track_len);
+	//fprintf(fplog," (mastering drive averaged %.1f RPM)\n",(float)2143190/track_len);
 
     header_entry = 0;
     for (track = start_track; track <= end_track; track += track_inc)

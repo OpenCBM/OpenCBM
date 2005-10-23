@@ -22,7 +22,6 @@ extern unsigned int capacity_min[];
 extern unsigned int capacity_max[];
 
 extern char sector_map_1541[];
-extern int speed_map_1541[];
 
 
 void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrdata)
@@ -372,7 +371,7 @@ void write_d64(CBM_FILE fd, FILE *fpin)
     int error;
     int d64size;
     int last_track;
-    char errorstring[256], tmpstr[8];
+    char errorstring[0x1000], tmpstr[8];
 
     /* here we get to rebuild tracks from scratch */
     memset(errorinfo, OK, MAXBLOCKSONDISK);

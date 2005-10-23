@@ -341,7 +341,7 @@ BYTE convert_GCR_sector(BYTE *gcr_start, BYTE *gcr_cycle,
 		//printf("(S%d DATA_CHKSUM $%0.2x != $%0.2x) ", sector, blk_chksum, d64_sector[257]);
 		error_code = (error_code == OK) ? BAD_DATA_CHECKSUM : error_code;
 	}
-    return(error_code);
+	return(error_code);
 }
 
 
@@ -435,7 +435,7 @@ int find_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, int cap
     BYTE *cycle_pos;    /* start of cycle repetition */
     BYTE *stop_pos;     /* maximum position allowed for cycle */
 
-    BYTE *sync_pos;     /* cycle search variable */
+    BYTE *data_pos;     /* cycle search variable */
     BYTE *p1, *p2; 		/* local pointers for comparisons */
 
 	nib_track = *cycle_start;
@@ -445,31 +445,30 @@ int find_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, int cap
     /* try to find a normal track cycle  */
     for (start_pos = nib_track;;find_sync(&start_pos, stop_pos))
     {
-		if ((sync_pos = start_pos + (cap_min-150)) >= stop_pos)
+		if ((data_pos = start_pos + (cap_min-150)) >= stop_pos)
            		break; /* no cycle found */
 
-        /* try to find next sync */
-        while (find_sync(&sync_pos, stop_pos))
-        {
-            /* found a sync, now let's see if data matches */
-            p1 = start_pos;
-            cycle_pos = sync_pos;
-            for (p2 = cycle_pos; p2 < stop_pos;)
-            {
-                /* try to match all remaining syncs, too */
-                if (memcmp(p1, p2, MATCH_LENGTH) != 0)
-                {
-                    cycle_pos = NULL;
-                    break;
-                }
-                if (!find_sync(&p1, stop_pos)) break;
-                if (!find_sync(&p2, stop_pos)) break;
-            }
+		while (find_sync(&data_pos, stop_pos))
+		{
+			p1 = start_pos;
+			cycle_pos = data_pos;
+            
+			for (p2 = cycle_pos; p2 < stop_pos;)
+			{
+				/* try to match all remaining syncs, too */
+				if (memcmp(p1, p2, MATCH_LENGTH) != 0)
+				{
+					cycle_pos = NULL;
+					break;
+				}
+				if (!find_sync(&p1, stop_pos)) break;
+				if (!find_sync(&p2, stop_pos)) break;
+			}
 
-            if (cycle_pos != NULL)
-            {
-               	*cycle_start = start_pos;
-               	*cycle_stop = cycle_pos;
+			if ( (cycle_pos != NULL) && (check_valid_data(data_pos, MATCH_LENGTH)) )
+			{
+				*cycle_start = start_pos;
+				*cycle_stop = cycle_pos;
                	return (cycle_pos - start_pos);
             }
         }
@@ -481,15 +480,13 @@ int find_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, int cap
 	return (0x2000);
 }
 
-
 int find_nondos_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, int cap_max)
 {
     BYTE *nib_track;	/* start of nibbled track data */
     BYTE *start_pos;    /* start of periodic area */
     BYTE *cycle_pos;    /* start of cycle repetition */
     BYTE *stop_pos;     /* maximum position allowed for cycle */
-    BYTE *p1, *p2, *p3;	/* local pointers for comparisons */
-	int i, j, redund;
+    BYTE *p1, *p2;	/* local pointers for comparisons */
 
 	nib_track = *cycle_start;
 	start_pos = nib_track;
@@ -499,7 +496,7 @@ int find_nondos_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, 
    	for(p1 = start_pos; p1 < stop_pos; p1 ++)
    	{
 		/* now try to match it */
-		for (p2 = p1 + (cap_min-150); p2 < stop_pos; p2 ++)
+		for (p2 = p1 + (cap_min - 150); p2 < stop_pos; p2 ++)
 		{
 			/* try to match data */
 			if (memcmp(p1, p2, MATCH_LENGTH) != 0)
@@ -508,41 +505,12 @@ int find_nondos_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, 
 				cycle_pos = p2;
 
 			/* we found one! */
-   		    if (cycle_pos != NULL)
+   		    if ( (cycle_pos != NULL) && (check_valid_data(cycle_pos, MATCH_LENGTH)) )
 			{
-				/* check that it's not inert data */
-				for(p3 = cycle_pos; p3 < cycle_pos + MATCH_LENGTH; p3 ++)
-				{
-					// simple routine
-					// keeps from matching common occcurances
-					for(i=0, redund=0; i<MATCH_LENGTH; i++)
-					{
-						for(j=0; j<MATCH_LENGTH; j++)
-						{
-							//printf("p3:%0.2x,%0.2x-",*(p3+i),*(p3+j));
-							if((i != j) && (*(p3+i) == *(p3+j)))
-								redund++;
-
-							if(redund > 2)
-								break;
-						}
-						if(redund > 2)
-							break;
-					}
-					if(redund > 2)
-					{
-						cycle_pos = NULL;
-						break;
-					}
-
-				}
-				if(cycle_pos != NULL)
-				{
-					*cycle_start = p1;
-					*cycle_stop = cycle_pos;
-					return (cycle_pos - p1);
-				}
-   		    }
+				*cycle_start = p1;
+				*cycle_stop = cycle_pos;
+				return (cycle_pos - p1);
+			}
    		}
 	}
 
@@ -550,6 +518,24 @@ int find_nondos_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, 
 	*cycle_start = nib_track;
 	*cycle_stop = nib_track + 0x2000;
 	return (0x2000);
+}
+
+int check_valid_data(BYTE *data, int matchlen)
+{
+	/* makes assumptions on whether this is good data to match cycles */
+
+	int i, redundbytes = 0;
+
+	for(i = 0; i < matchlen; i++)
+	{
+		//printf("%.2x ",data[i]);
+		if(data[i] == data[i+1]) redundbytes++;
+	}
+
+	//printf("%d\n",redundbytes);
+
+	if(redundbytes < matchlen - 2) return 1;
+	else return 0;
 }
 
 
@@ -699,11 +685,11 @@ int extract_GCR_track(BYTE *destination, BYTE *source, int *align, int force_ali
 	memset(work_buffer, 0, sizeof(work_buffer));
 	memcpy(work_buffer, cycle_start, 0x2000);
 
-	/* first pass to find a cycle in normal DOS tracks */
+	/* find cycle */
     find_track_cycle(&cycle_start, &cycle_stop, cap_min, cap_max);
     track_len = cycle_stop-cycle_start;
 
-	/* second pass designed for non-DOS tracks */
+	/* second pass to find a cycle in custom track */
 	if(track_len == 0x2000)
 	{
 		find_nondos_track_cycle(&cycle_start, &cycle_stop, cap_min, cap_max);
@@ -1073,24 +1059,48 @@ int compare_sectors(BYTE *track1, BYTE *track2, int length1, int length2, int tr
 		}
 
 		// either sector header missing
-		if( ((error == HEADER_NOT_FOUND) && (error2 != HEADER_NOT_FOUND)) ||
-			((error != HEADER_NOT_FOUND) && (error2 == HEADER_NOT_FOUND)) )
-
+		if(error == HEADER_NOT_FOUND)
 		{
-			sprintf(tmpstr,"\nS%d: sector header missing",sector);
+			sprintf(tmpstr,"\nS%d: header missing from first track",sector);
+			strcat(outputstring, tmpstr);
+			continue;
+		}
+		if(error2 == HEADER_NOT_FOUND)
+		{
+			sprintf(tmpstr,"\nS%d: header missing from second track",sector);
 			strcat(outputstring, tmpstr);
 			continue;
 		}
 
 		// either sector data missing
-		if( ((error == DATA_NOT_FOUND) && (error2 != DATA_NOT_FOUND)) ||
-			((error != DATA_NOT_FOUND) && (error2 == DATA_NOT_FOUND)) )
+		if(error == DATA_NOT_FOUND)
 		{
-			sprintf(tmpstr,"\nS%d: sector data missing ",sector);
+			sprintf(tmpstr,"\nS%d: data missing from first track",sector);
+			strcat(outputstring, tmpstr);
+			continue;
+		}
+		if(error2 == DATA_NOT_FOUND)
+		{
+			sprintf(tmpstr,"\nS%d: data missing from second track",sector);
 			strcat(outputstring, tmpstr);
 			continue;
 		}
 
+		// either sector data missing
+		if(error == SYNC_NOT_FOUND)
+		{
+			sprintf(tmpstr,"\nS%d: sync missing from first track",sector);
+			strcat(outputstring, tmpstr);
+			continue;
+		}
+		if(error2 == SYNC_NOT_FOUND)
+		{
+			sprintf(tmpstr,"\nS%d: sync missing from second track",sector);
+			strcat(outputstring, tmpstr);
+			continue;
+		}
+
+		// continue checking
 		if((checksum1 == checksum2) && (error == error2))
 		{
 			//printf("S%d: sector data match\n",sector);
@@ -1155,7 +1165,7 @@ int check_empty(BYTE *gcrdata, int length, int track, char *id, char *errorstrin
 		if(errorcode == OK)
 		{
 			/* checks for empty (unused) sector */
-			for (i = 2; i < 257; i++)
+			for (i = 2; i <= 256; i++)
 			{
 				if(secbuf[i] != 0x01)
 				{

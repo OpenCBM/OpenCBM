@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.1.4.2 2005-10-12 15:10:01 tischuer Exp $";
+    "@(#) $Id: cbm_module.c,v 1.1.4.3 2005-10-23 20:46:05 tischuer Exp $";
 #endif
 
 #include <linux/config.h>
@@ -1058,12 +1058,12 @@ int cbm_nib_write(char data, int toggle)
 
 	if (!toggle)
 	{
-		while (GET(CLK_IN))
+		while (GET(DATA_IN))
 		if (to++ > 1000000) return 1;
 	}
 	else
 	{
-		while (!GET(CLK_IN))
+		while (!GET(DATA_IN))
 		if (to++ > 1000000) return 1;
 	}
 	/*linux outportb(parport, data); */

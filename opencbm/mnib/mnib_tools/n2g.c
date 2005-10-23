@@ -83,7 +83,7 @@ int main(int argc, char **argv)
 
     fprintf(stdout,
         "\nn2g - converts a NIB type disk dump into a standard G64 disk image.\n"
-        "(C) 2000-03 Markus Brenner.\n"
+        "(C) 2000-05 Markus Brenner and Pete Rittwage.\n"
         "Version "VERSION"\n\n");
 
    while (--argc && (*(++argv)[0] == '-'))
@@ -270,8 +270,7 @@ int main(int argc, char **argv)
         if (fread(mnib_track, GCR_TRACK_LENGTH, 1, fpin) < 1)
         {
             /* track doesn't exist: write blank track */
-            printf("\nTrack: %2d ",track+1);
-            // fprintf(stderr, "Cannot read track from mnib image.\n");
+            printf("\nTrack: %2d: no data ",track+1);
             track_len = raw_track_size[speed_map_1541[track]];
             memset(&gcr_track[2], 0x55, track_len);
             gcr_track[2] = 0xff;
@@ -286,13 +285,11 @@ int main(int argc, char **argv)
             continue;
         }
 
-        printf("\nTrack: %2d ",track+1);
-
-//        source_track = check_vmax(mnib_track);
+        printf("\nTrack: %2d (%d) ",track+1,gcr_speed_p[track*2]);
 
 	    align = ALIGN_NONE;
         track_len = extract_GCR_track(gcr_track+2, mnib_track, &align, force_align,
-        			capacity_min[speed_map_1541[track]], capacity_max[speed_map_1541[track/2]]);
+        			capacity_min[gcr_speed_p[track*2]], capacity_max[gcr_speed_p[track*2]]);
 
         switch (align)
 		{

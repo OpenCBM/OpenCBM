@@ -40,7 +40,8 @@
    8000 GCR bytes / 10 = 800 bytes */
 //#define MAX_SYNC_OFFSET 800
 /* this was too small for Lode Runner original (805), so increase to 820 */
-#define MAX_SYNC_OFFSET 820
+//#define MAX_SYNC_OFFSET 820
+#define MAX_SYNC_OFFSET 0x1500
 
 #define SIGNIFICANT_GAPLEN_DIFF 0x20
 
@@ -130,5 +131,4 @@ int is_bad_gcr(BYTE *gcrdata, int length, int pos);
 
 int check_formatted(BYTE *gcrdata);
 
-
-
+int check_valid_data(BYTE *data, int length);
