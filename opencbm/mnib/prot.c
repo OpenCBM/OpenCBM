@@ -8,7 +8,6 @@
 #include "gcr.h"
 #include "prot.h"
 
-
 void shift_buffer(BYTE *buffer, int length, int n)
 {
     int i;
@@ -94,14 +93,13 @@ BYTE* auto_gap(BYTE *work_buffer, int tracklen)
     BYTE *buffer_end;
     BYTE *key_temp;
     BYTE *key;
-    BYTE gapbyte;
     int run = 0;
 	int longest = 0;
 
 
     pos = work_buffer;
     buffer_end = work_buffer + tracklen;
-    key = key_temp = NULL;
+    key = key_temp = work_buffer;
 
     /* try to find longest non-bad gcr run */
     while (pos < buffer_end)
@@ -117,7 +115,7 @@ BYTE* auto_gap(BYTE *work_buffer, int tracklen)
 			{
 				key = key_temp;
 				longest = run;
-				gapbyte = *pos;
+				//gapbyte = *pos;
 			}
 			run=0;
 		}
@@ -146,7 +144,7 @@ BYTE* find_weak_gap(BYTE *work_buffer, int tracklen)
 
     pos = work_buffer;
     buffer_end = work_buffer + tracklen;
-    key = key_temp = NULL;
+    key = key_temp = work_buffer;
 
     /* try to find longest bad gcr run */
     while (pos < buffer_end)
@@ -186,7 +184,7 @@ BYTE* find_long_sync(BYTE *work_buffer, int tracklen)
 
     pos = work_buffer;
     buffer_end = work_buffer + tracklen;
-    key = key_temp = NULL;
+    key = key_temp = work_buffer;
 
     /* try to find longest sync run */
     while (pos < buffer_end)

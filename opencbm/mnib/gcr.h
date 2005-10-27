@@ -122,8 +122,8 @@ int check_empty(BYTE *gcrdata, int length, int track, char *id, char *errorstrin
 int compare_tracks(BYTE *track1, BYTE *track2, int length1, int length2, int same_disk,
 				   char *outputstring);
 
-int compare_sectors(BYTE *track1, BYTE *track2, int length1, int length2, int track,
-	 				char *outputstring);
+int compare_sectors(BYTE *track1, BYTE *track2, int length1, int length2, char *id1, char *id2,
+					int track, char *outputstring);
 
 int reduce_runs(BYTE *buffer, int length, int length_max, int minrun, BYTE target);
 

@@ -181,7 +181,7 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
 
 		// if we get less than what a track holds,
 		// try again, probably bad read or a weak match
-		if(leno < capacity_min[denso & 3] - 150)
+		if(leno < capacity_min[denso & 3] - 155)
 		{
 			printf("<! ");
 			fprintf(fplog,"[%d<%d!] ", leno, capacity_min[denso & 3] - 155);
@@ -192,7 +192,7 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
 
 		// if we get more than capacity
 		// try again to make sure it's intentional
-		if(leno > capacity_max[denso & 3] + 250)
+		if(leno > capacity_max[denso & 3] + 255)
 		{
 			printf("!> ");
 			fprintf(fplog,"[%d>%d!] ", leno, capacity_max[denso & 3] + 255);
@@ -279,7 +279,7 @@ int paranoia_read_halftrack(CBM_FILE fd,int halftrack, BYTE *buffer)
 			fprintf(fplog,"%s",errorstring);
 
 		// compare sector data
-		if(compare_sectors(cbufo, cbufn, leno, lenn, halftrack, errorstring))
+		if(compare_sectors(cbufo, cbufn, leno, lenn, diskid, diskid, halftrack, errorstring))
 		{
 			printf("[SEC MATCH] ");
 			fprintf(fplog,"[SEC MATCH] ");

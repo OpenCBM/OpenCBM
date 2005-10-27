@@ -25,7 +25,6 @@ extern unsigned int capacity_max[];
 extern int speed_map_1541[];
 extern char sector_map_1541[];
 
-
 void usage(void)
 {
     fprintf(stderr, "Usage: n2d data [d64image]\n\n");
@@ -109,7 +108,7 @@ int main(int argc, char **argv)
 
     if (fread(gcr_track, sizeof(BYTE), GCR_TRACK_LENGTH, fp_nib) < GCR_TRACK_LENGTH)
     {
-        fprintf(stderr, "Cannot read track from G64 image.\n");
+        fprintf(stderr, "Cannot read track from image.\n");
         goto fail;
     }
     if (!extract_id(gcr_track, id))

@@ -45,12 +45,12 @@ int speed_map_1541[42] =
 };
 
 /* Burst Nibbler defaults */
-//unsigned int capacity[] = { 0x1857, 0x19f6, 0x1bd1, 0x1df0 };
+unsigned int capacity[] = { 0x1857, 0x19f6, 0x1bd1, 0x1df0 };
 unsigned int capacity_min[] = { 0x1827, 0x19c6, 0x1ba1, 0x1dc0 };
 unsigned int capacity_max[] = { 0x18a7, 0x1a46, 0x1c21, 0x1e90 };
 
 /* Super Card defaults */
-unsigned int capacity[] = { 0x1848, 0x1a18, 0x1c08, 0x1e38 };
+//unsigned int capacity[] = { 0x1848, 0x1a18, 0x1c08, 0x1e38 };
 
 
 /* Nibble-to-GCR conversion table */
@@ -522,20 +522,22 @@ int find_nondos_track_cycle(BYTE **cycle_start, BYTE **cycle_stop, int cap_min, 
 
 int check_valid_data(BYTE *data, int matchlen)
 {
-	/* makes assumptions on whether this is good data to match cycles */
-
-	int i, redundbytes = 0;
+	//makes assumptions on whether this is good data to match cycles
+	int i, redund = 0;
 
 	for(i = 0; i < matchlen; i++)
 	{
-		//printf("%.2x ",data[i]);
-		if(data[i] == data[i+1]) redundbytes++;
+		if( (data[i] == data[i+1]) ||
+			(data[i] == data[i+2]) ||
+			(data[i] == data[i+3]) ||
+			(data[i] == data[i+4]) )
+			redund++;
 	}
 
-	//printf("%d\n",redundbytes);
-
-	if(redundbytes < matchlen - 2) return 1;
-	else return 0;
+	if(redund > 1)
+		return 0;
+	else
+		return 1;
 }
 
 
@@ -689,9 +691,10 @@ int extract_GCR_track(BYTE *destination, BYTE *source, int *align, int force_ali
     find_track_cycle(&cycle_start, &cycle_stop, cap_min, cap_max);
     track_len = cycle_stop-cycle_start;
 
-	/* second pass to find a cycle in custom track */
-	if(track_len == 0x2000)
+	/* second pass to find a cycle in track w/o syncs */
+	if((track_len > cap_max) || (track_len < cap_min))
 	{
+		//printf("(N)");
 		find_nondos_track_cycle(&cycle_start, &cycle_stop, cap_min, cap_max);
 		track_len = cycle_stop-cycle_start;
 	}
@@ -719,37 +722,29 @@ int extract_GCR_track(BYTE *destination, BYTE *source, int *align, int force_ali
         	return(track_len);
 		}
 
-		if (force_align == ALIGN_SEC0)
+		if (force_align == ALIGN_AUTOGAP)
 		{
-			// for the occasional stickler
-			*align = ALIGN_SEC0;
-			marker_pos = find_sector0(work_buffer, track_len, &sector0_len);
+			marker_pos = auto_gap(work_buffer, track_len);
 			memcpy(destination, marker_pos, track_len);
-        	return(track_len);
+			*align = ALIGN_AUTOGAP;
+			return(track_len);
 		}
-
-		if (force_align == ALIGN_GAP)
-		{
-			// for the occasional stickler
-			*align = ALIGN_GAP;
-			marker_pos = find_sector_gap(work_buffer, track_len, &sectorgap_len);
-			memcpy(destination, marker_pos, track_len);
-        	return(track_len);
-		}
+	
 	}
 
     /* try to guess original alignment */
     sector0_pos   = find_sector0(work_buffer, track_len, &sector0_len);
     sectorgap_pos = find_sector_gap(work_buffer, track_len, &sectorgap_len);
 
-    if (sectorgap_len > (GCR_BLOCK_DATA_LEN + SIGNIFICANT_GAPLEN_DIFF))
+    if( (sectorgap_len > GCR_BLOCK_DATA_LEN + SIGNIFICANT_GAPLEN_DIFF) ||
+    	(force_align == ALIGN_GAP))
     //if (sectorgap_len >= sector0_len + 0x40) /* Burstnibbler's calc */
     {
 		*align = ALIGN_GAP;
         memcpy(destination, sectorgap_pos, track_len);
         return(track_len);
     }
-    else if (sector0_len)
+    else if ( (sector0_len) || (force_align == ALIGN_SEC0))
     {
 		*align = ALIGN_SEC0;
         memcpy(destination, sector0_pos, track_len);
@@ -785,10 +780,12 @@ int extract_GCR_track(BYTE *destination, BYTE *source, int *align, int force_ali
 		}
 	}
 
-	if(force_align == ALIGN_AUTOGAP)
+	// we aren't dealing with a normal track here, so autogap it
+	marker_pos = auto_gap(work_buffer, track_len);
+	if(marker_pos)
 	{
-		marker_pos = auto_gap(work_buffer, track_len);
 		memcpy(destination, marker_pos, track_len);
+		*align = ALIGN_AUTOGAP;
 		return(track_len);
 	}
 
@@ -947,21 +944,6 @@ int compare_tracks(BYTE *track1, BYTE *track2, int length1, int length2, int sam
 				}
 			}
 
-			// we can sometimes ignore 0x55 and 0xaa variations due to framing
-			// errors caused by stopped writing at the end-of-sector
-			//if(!same_disk)
-			//{
-			//	if ( ((track1[j] & 0x05) == 0x05) || ((track2[k] & 0x05) == 0x05) ||
-			//	     ((track1[j] & 0x50) == 0x50) || ((track2[k] & 0x50) == 0x50) ||
-			//	     ((track1[j] & 0xa0) == 0xa0) || ((track2[k] & 0xa0) == 0xa0) ||
-			//	     ((track1[j] & 0x0a) == 0x0a) || ((track2[k] & 0x0a) == 0x0a) )
-			//	{
-			//		gap_diff ++;
-			//		j++; k++;
-			//		continue;
-			//	}
-			//}
-
 			// we ignore bad gcr bytes
 			if ( (is_bad_gcr(track1, length1, j)) || (is_bad_gcr(track2, length2, k)) )
 			{
@@ -1016,18 +998,17 @@ int compare_tracks(BYTE *track1, BYTE *track2, int length1, int length2, int sam
 	return match;
 }
 
-int compare_sectors(BYTE *track1, BYTE *track2, int length1, int length2, int track,
+int compare_sectors(BYTE *track1, BYTE *track2, int length1, int length2, char *id1, char *id2, int track,
 	 				char *outputstring)
 {
 	int sec_match = 0;
 	int numsecs = 0;
-	int sector, error, error2, i;
+	int sector, error1, error2, i;
 
 	BYTE checksum1 = 0;
 	BYTE checksum2 = 0;
-	BYTE secbuf[260];
+	BYTE secbuf1[260];
 	BYTE secbuf2[260];
-	BYTE id[3];
 	char tmpstr[256];
 
 	outputstring[0] = '\0';
@@ -1041,74 +1022,36 @@ int compare_sectors(BYTE *track1, BYTE *track2, int length1, int length2, int tr
 	{
 		numsecs ++;
 
-	 	memset(secbuf, 0, sizeof(secbuf));
-	 	memset(secbuf2, 0, sizeof(secbuf));
+	 	memset(secbuf1, 0, sizeof(secbuf1));
+	 	memset(secbuf2, 0, sizeof(secbuf2));
 
-		error = convert_GCR_sector(track1, track1 + length1,
-				secbuf, track/2, sector, id);
+		error1 = convert_GCR_sector(track1, track1 + length1,
+				secbuf1, track/2, sector, id1);
 
 		error2 = convert_GCR_sector(track2, track2 + length2,
-				secbuf2, track/2, sector, id);
+				secbuf2, track/2, sector, id2);
 
 		// compare data returned
 		checksum1 = checksum2 = 0;
-		for(i = 1; i <= 256; i++)
+		for(i = 2; i <= 256; i++)
 		{
-			checksum1 ^= secbuf[i];
+			checksum1 ^= secbuf1[i];
 			checksum2 ^= secbuf2[i];
 		}
 
-		// either sector header missing
-		if(error == HEADER_NOT_FOUND)
-		{
-			sprintf(tmpstr,"\nS%d: header missing from first track",sector);
-			strcat(outputstring, tmpstr);
-			continue;
-		}
-		if(error2 == HEADER_NOT_FOUND)
-		{
-			sprintf(tmpstr,"\nS%d: header missing from second track",sector);
-			strcat(outputstring, tmpstr);
-			continue;
-		}
-
-		// either sector data missing
-		if(error == DATA_NOT_FOUND)
-		{
-			sprintf(tmpstr,"\nS%d: data missing from first track",sector);
-			strcat(outputstring, tmpstr);
-			continue;
-		}
-		if(error2 == DATA_NOT_FOUND)
-		{
-			sprintf(tmpstr,"\nS%d: data missing from second track",sector);
-			strcat(outputstring, tmpstr);
-			continue;
-		}
-
-		// either sector data missing
-		if(error == SYNC_NOT_FOUND)
-		{
-			sprintf(tmpstr,"\nS%d: sync missing from first track",sector);
-			strcat(outputstring, tmpstr);
-			continue;
-		}
-		if(error2 == SYNC_NOT_FOUND)
-		{
-			sprintf(tmpstr,"\nS%d: sync missing from second track",sector);
-			strcat(outputstring, tmpstr);
-			continue;
-		}
-
 		// continue checking
-		if((checksum1 == checksum2) && (error == error2))
+		if((checksum1 == checksum2) && (error1 == error2))
 		{
 			//printf("S%d: sector data match\n",sector);
 			sec_match++;
 		}
 		else
 		{
-			sprintf(tmpstr,"\nS%d: data/error mismatch (%.2x!=%.2x)",sector,checksum1,checksum2);
+			if(checksum1 != checksum2)
+				sprintf(tmpstr,"\nS%d: data mismatch (%.2x/%.2x)",sector,checksum1,checksum2);
+			else
+				sprintf(tmpstr,"\nS%d: error mismatch (E%d/E%d)",sector,error1,error2);
+
 			strcat(outputstring, tmpstr);
 		}
 	}

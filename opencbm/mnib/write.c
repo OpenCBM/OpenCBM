@@ -146,7 +146,7 @@ void write_halftrack(int halftrack, int density, unsigned int length, BYTE *gcrd
 				case ALIGN_VORPAL:		printf("(vorpal) ");	break;
 				case ALIGN_VMAX:		printf("(v-max) ");	break;
 				case ALIGN_RAPIDLOK:	printf("(rapidlok) ");	break;
-				case ALIGN_AUTOGAP:		printf("(autogap) ");	break;
+				case ALIGN_AUTOGAP:		printf("(auto) ");	break;
 		}
 	}
 }
@@ -156,8 +156,8 @@ void master_disk(CBM_FILE fd)
 {
 	int track;
 	int align_offset;	// how many bytes we are "late"
-	BYTE inert_byte;
 	BYTE rawtrack[0x2400];
+	BYTE gapbyte;
 
 	printf("\nBurst Writing [");
 
@@ -173,16 +173,15 @@ void master_disk(CBM_FILE fd)
 		// figure out the right amount of time to waste here
 		// (in bytes) to get to the start of the previous track
 		// for alignment purposes
-		if(track_density[track] & BM_NO_SYNC)
-			inert_byte = 0x55;
-		else
-			inert_byte = 0xff;
-
+		// we now use the last byte in the track for the leader bytes
+		gapbyte = *(diskbuf+(track*0x2000)+(track_length[track]-1));
+		//printf("trk: %d len: %d (%.2x)\n ",track/2,track_length[track],gapbyte);
+		if(!gapbyte) gapbyte = 0x01; // fix $00 bytes
 		align_offset = 0x100+(0x100*(track_density[track]&3));
 
 		// add filler so track is completely erased
 		// also used for timing from track to track
-		memset(rawtrack, inert_byte, sizeof(rawtrack));
+		memset(rawtrack, gapbyte, sizeof(rawtrack));
 
 		// append track data after alignment filler
 		memcpy(rawtrack+align_offset,diskbuf+(track*0x2000),track_length[track]);

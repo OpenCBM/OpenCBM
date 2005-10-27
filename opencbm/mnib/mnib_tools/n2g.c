@@ -27,7 +27,6 @@ extern unsigned int capacity_max[];
 extern int speed_map_1541[];
 extern char sector_map_1541[];
 
-
 static int write_dword(FILE *fd, DWORD *buf, int num)
 {
     int i;
@@ -77,9 +76,10 @@ int main(int argc, char **argv)
     int align = ALIGN_NONE;
     int force_align = ALIGN_NONE;
     int org_len;
-    int reduce_syncs = 0;
-    int reduce_weak = 0;
-    int reduce_gaps = 0;
+    int reduce_syncs = 1;
+    int reduce_weak = 1;
+    int reduce_gaps = 1;
+    int use_halftracks = 0;
 
     fprintf(stdout,
         "\nn2g - converts a NIB type disk dump into a standard G64 disk image.\n"
@@ -96,18 +96,18 @@ int main(int argc, char **argv)
             break;
 
           case 'r':
-            printf("ARG: Reduce syncs\n");
-            reduce_syncs = 1;
+            printf("ARG: Reduce syncs disabled\n");
+            reduce_syncs = 0;
             break;
 
           case '0':
-            printf("ARG: Reduce weak GCR\n");
-            reduce_weak = 1;
+            printf("ARG: Reduce weak GCR disabled\n");
+            reduce_weak = 0;
           	break;
 
           case 'g':
-		    printf("ARG: Reduce gaps\n");
-		    reduce_gaps = 1;
+		    printf("ARG: Reduce gaps disabled\n");
+		    reduce_gaps = 0;
 		    break;
 
 			case 'p':
@@ -157,6 +157,11 @@ int main(int argc, char **argv)
 				}
 				else
 					printf("Unknown alignment parameter\n");
+				break;
+			
+			case 'h':
+				printf("ARG: Using halftracks...");
+				use_halftracks = 1;
 				break;
 
           default:
@@ -259,7 +264,7 @@ int main(int argc, char **argv)
         gcr_track[1] = raw_track_size[speed_map_1541[track]] / 256;
 
         /* Skip halftracks if present in image */
-        if (nib_header[header_offset] < (track + 1) * 2)
+        if( nib_header[header_offset] < (track + 1) * 2)
         {
             fseek(fpin, GCR_TRACK_LENGTH, SEEK_CUR);
             header_offset += 2;
@@ -301,7 +306,7 @@ int main(int argc, char **argv)
 			case ALIGN_VORPAL:		printf("(vorpal) ");	break;
 			case ALIGN_VMAX:		printf("(v-max) ");	break;
 			case ALIGN_RAPIDLOK:	printf("(rapidlok) ");	break;
-			case ALIGN_AUTOGAP:		printf("(autogap) ");	break;
+			case ALIGN_AUTOGAP:		printf("(auto) ");	break;
 		}
 
 		if(track_len > 0)
@@ -323,17 +328,6 @@ int main(int argc, char **argv)
 				}
 			}
 
-			// reduce weak bit runs (experimental)
-			if(reduce_weak)
-			{
-				org_len = track_len;
-				if(track_len > 7928)
-				{
-					track_len = reduce_runs(gcr_track+2, track_len, 7928, 2, 0x00);
-				   	printf("rweak:%d ", org_len - track_len);
-				}
-			}
-
 			// reduce gaps (experimental)
 			if(reduce_gaps)
 			{
@@ -344,6 +338,18 @@ int main(int argc, char **argv)
 				   	printf("rgaps:%d ", org_len - track_len);
 				}
 			}
+
+			// reduce weak bit runs (experimental)
+			if(reduce_weak)
+			{
+				org_len = track_len;
+				if(track_len > 7928)
+				{
+					track_len = reduce_runs(gcr_track+2, track_len, 7928, 2, 0x00);
+				   	printf("rweak:%d ", org_len - track_len);
+				}
+			}
+		
 		}
 
 		printf("- track length:  %d ", track_len);

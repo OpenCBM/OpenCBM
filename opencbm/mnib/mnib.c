@@ -565,6 +565,8 @@ void usage(void)
     fprintf(stderr, " -l : Limit functions to 40 tracks\n");
     fprintf(stderr, " -k : Disable reading 'killer' tracks\n");
     fprintf(stderr, " -r : Disable 'reduce syncs' option\n");
+	fprintf(stderr, " -g : Disable 'reduce gaps' option\n");
+	fprintf(stderr, " -0 : Disable 'reduce weak' option\n");
 	fprintf(stderr, " -f : Disable weak GCR bit simulation\n");
 	fprintf(stderr, " -u : Unformat disk (removes *ALL* data)\n");
 	fprintf(stderr, " -h : Read halftracks\n");
@@ -586,7 +588,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     fprintf(stdout,
         "\nmnib - Commodore 1541/1571 disk image nibbler.\n"
-        "(C) 2000-04 Markus Brenner and Pete Rittwage.\n"
+        "(C) 2000-05 Markus Brenner and Pete Rittwage.\n"
         "Version "VERSION"\n\n");
 
     bump = reset = 1; // by default, use reset, bump
@@ -596,8 +598,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     track_inc = 2;
 
     reduce_syncs = 1;
-    reduce_weak = 0;
-    reduce_gaps = 0;
+    reduce_weak = 1;
+    reduce_gaps = 1;
     read_killer = 1;
     fix_gcr = 1;
     aggressive_gcr = 0;
@@ -713,13 +715,13 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                 break;
 
             case '0':
-                reduce_weak = 1;
-                printf("* Enabled 'reduce weak' option\n");
+                reduce_weak = 0;
+                printf("* Disabled 'reduce weak' option\n");
                 break;
 
             case 'g':
-                reduce_gaps = 1;
-                printf("* Enabled 'reduce gaps' option\n");
+                reduce_gaps = 0;
+                printf("* Disabled 'reduce gaps' option\n");
                 break;
 
             case 'f':
