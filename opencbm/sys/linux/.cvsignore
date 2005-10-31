@@ -1,0 +1,7 @@
+.tmp_versions
+.cbm.ko.cmd
+.cbm.mod.o.cmd
+.cbm.o.cmd
+.cbm_module.o.cmd
+cbm.ko
+cbm.mod.c
