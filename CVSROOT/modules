@@ -32,3 +32,6 @@ cbm4linux  cbm4win
 #
 c4w	-a cbm4win
 c4l     -a cbm4linux
+
+# Additional modules
+mnib       cbm4win/mnib
