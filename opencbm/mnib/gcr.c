@@ -669,7 +669,7 @@ int extract_GCR_track(BYTE *destination, BYTE *source, int *align, int force_ali
     BYTE work_buffer[0x4000]; /* working buffer */
     BYTE *cycle_start;  /* start position of cycle */
     BYTE *cycle_stop;   /* stop position of cycle  */
-    DWORD track_len;
+    int track_len;
 
     BYTE *sector0_pos = NULL;	/* position of sector 0 */
     BYTE *sectorgap_pos = NULL;	/* position of sector gap */
