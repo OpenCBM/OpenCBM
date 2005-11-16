@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.1.2.2 2005-10-19 16:28:15 strik Exp $ \n
+** \version $Id: mnib.c,v 1.1.2.3 2005-11-16 18:32:07 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -203,9 +203,6 @@ cbmiec_mnib_read_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, OUT UCHAR* Buffe
 
     disable();
 
-    cbm_mnib_send_cmd(Pdx, Mode);
-    cbmiec_mnib_par_read(Pdx, &dummy);
-
     for (i = 0; i < ReturnLength; i ++)
     {
         byte = cbm_nib_read(Pdx, i&1);
@@ -251,10 +248,6 @@ cbmiec_mnib_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, IN UCHAR* Buffe
     FUNC_ENTER();
 
     disable();
-
-    // send write command
-    cbm_mnib_send_cmd(Pdx, Mode);
-    cbmiec_mnib_par_write(Pdx, 0);
 
     for (i = 0; i < BufferLength; i++)
     {
