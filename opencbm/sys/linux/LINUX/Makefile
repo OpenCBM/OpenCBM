@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-03-02 18:17:22 strik Exp $
+# $Id: Makefile,v 1.2 2005-11-18 19:39:13 strik Exp $
 
 ifneq ($(KERNELRELEASE),)
 EXTRA_CFLAGS := $(CBM4LINUX_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
@@ -18,6 +18,7 @@ all: cbm.o
 .PHONY: all clean mrproper install uninstall install-files
 clean:
 	rm -f cbm.mod.c *.o *.ko .cbm*
+	rm -f Makefile
 
 mrproper: clean
 
@@ -31,6 +32,8 @@ uninstall:
 	rm -f $(MODDIR)/cbm.o
 
 cbm.o: cbm_module.c
+	ln -s LINUX/Makefile Makefile
 	$(MAKE) -C $(KERNEL_SOURCE) here=`pwd` CBM4LINUX_KERNEL_FLAGS=$(KERNEL_FLAGS) SUBDIRS=`pwd` modules
+	rm -f Makefile
 
 endif

@@ -59,6 +59,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name demorpm1541
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mnib
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -250,6 +253,24 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name arch
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "mnib"=..\mnib\WINBUILD\mnib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
     End Project Dependency
 }}}
 

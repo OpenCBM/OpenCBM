@@ -20,4 +20,5 @@ SOURCES=../cbm.c \
 	../upload.c \
         i_opencbm.c \
 	archlib.c \
+	archmnib.c \
         opencbm.rc

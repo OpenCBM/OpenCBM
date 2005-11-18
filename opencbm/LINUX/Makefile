@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-03-02 18:17:16 strik Exp $
+# $Id: Makefile,v 1.2 2005-11-18 19:39:12 strik Exp $
 
 include LINUX/config.make
 
@@ -8,6 +8,7 @@ DEVMAJOR = 10
 DEVMINOR = 177
 SUBDIRS  = sys/linux include arch/$(ARCH) lib compat \
            cbmctrl cbmformat d64copy cbmcopy \
+           mnib \
            demo/flash demo/morse docs
 
 .PHONY: all clean mrproper dist install uninstall dev install-files

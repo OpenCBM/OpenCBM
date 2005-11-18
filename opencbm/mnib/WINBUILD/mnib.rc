@@ -1,0 +1,27 @@
+#include <windows.h>
+
+#include <ntverp.h>
+
+#define VER_FILETYPE                VFT_APP
+#define VER_FILESUBTYPE             VFT2_UNKNOWN
+#define VER_FILEDESCRIPTION_STR     "mnib program, windows version"
+#define VER_INTERNALNAME_STR        "mnib.exe"
+
+#include "version.h"
+
+#undef VER_PRODUCTNAME_STR
+#undef VER_PRODUCTVERSION
+#undef VER_PRODUCTVERSION_STR
+#undef VER_COMPANYNAME_STR
+
+#define VER_LEGALCOPYRIGHT_STR      "(c) Markus Brenner and Pete Rittwage"
+#define VER_COMPANYNAME_STR         "Markus Brenner and Pete Rittwage"
+
+#define VER_PRODUCTVERSION          CBM4WIN_VERSION_MAJOR,CBM4WIN_VERSION_MINOR,CBM4WIN_VERSION_SUBMINOR,CBM4WIN_VERSION_DEVEL
+#define VER_FILEVERSION             VER_PRODUCTVERSION
+#define VER_PRODUCTVERSION_STR      CBM4WIN_VERSION_STRING
+#define VER_FILEVERSION_STR         VER_PRODUCTVERSION_STR
+#define VER_LANGNEUTRAL
+#define VER_PRODUCTNAME_STR         "CBM4WIN - Accessing CBM drives from Windows"
+
+#include "common.ver"
