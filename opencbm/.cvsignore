@@ -8,3 +8,5 @@ bin
 *Release
 *.opt
 *.ncb
+build-stamp
+configure-stamp
