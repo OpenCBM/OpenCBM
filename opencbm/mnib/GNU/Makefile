@@ -38,7 +38,7 @@ linux:
 
 win32:
 	${MAKE} CFLAGS="-I include/WINDOWS/ -I ${CBM_WIN_PATH}/include -D WIN32 -mno-cygwin ${CFLAGS}" \
-		LDFLAGS="-L${CBM_WIN_PATH}/bin/i386/ -lopencbm" \
+		LDFLAGS="-mno-cygwin -L${CBM_WIN_PATH}/bin/i386/ -lopencbm" \
 		-f GNU/Makefile \
 		buildall
 
