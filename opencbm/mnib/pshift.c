@@ -8,7 +8,7 @@
 #include <string.h>
 #include <ctype.h>
 
-typedef unsigned char BYTE;
+#include "mnibarch.h"
 #include "prot.h"
 
 static void usage(void);
@@ -22,7 +22,7 @@ usage()
 	exit(1);
 }
 
-int
+int ARCH_MAINDECL
 main(int argc, char *argv[])
 {
 	char infile[80], outfile[80];

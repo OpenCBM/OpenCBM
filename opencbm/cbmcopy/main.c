@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.7 2005-07-21 17:39:20 strik Exp $";
+    "@(#) $Id: main.c,v 1.8 2005-11-19 16:01:29 strik Exp $";
 #endif
 
 #include <ctype.h>
@@ -233,7 +233,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
                 help(argv[0]);
                 return 0;
             case 'V': /* --version */
-                printf("cbmcopy %s\n", VERSION);
+                printf("cbmcopy %s\n", OPENCBM_VERSION);
                 return 0;
             case 'q': /* -- quiet */
                 if(verbosity > sev_fatal)

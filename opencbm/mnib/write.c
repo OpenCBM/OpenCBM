@@ -9,24 +9,7 @@
 #include <string.h>
 #include <time.h>
 
-#ifdef DJGPP
-#include <dos.h>
-#include <conio.h>
-#include "cbm.h"
-#include "kernel.h"
-#include "mnib_rt.h"
-typedef int CBM_FILE;
-#else
-# include <opencbm.h>
-# include <arch.h>
-# define msleep(x) arch_usleep(x*1000)
-/*
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-#define msleep(x)	sleep((x) / 1000)
-*/
-#endif // DJGPP
+#include "mnibarch.h"
 
 #include "gcr.h"
 #include "mnib.h"

@@ -1,18 +1,14 @@
 
-TARGETNAME=mnib
+TARGETNAME=n2d
 TARGETPATH=../../bin
 TARGETTYPE=PROGRAM
 
-TARGETLIBS=../../bin/*/opencbm.lib
-
 INCLUDES=../include/WINDOWS;../../include;../../include/WINDOWS;../../arch/windows/
 
-SOURCES=../mnib.c \
+SOURCES=../n2d.c \
 	../gcr.c \
-	../read.c \
-	../write.c \
 	../prot.c \
-        mnib.rc
+        n2d.rc
 
 UMTYPE=console
 #UMBASE=0x100000

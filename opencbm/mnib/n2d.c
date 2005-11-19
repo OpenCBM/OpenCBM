@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mnibarch.h"
 #include "gcr.h"
 #include "version.h"
 
@@ -28,7 +29,7 @@ usage(void)
 	exit(-1);
 }
 
-int
+int ARCH_MAINDECL
 main(int argc, char **argv)
 {
 	FILE *fp_nib, *fp_d64;

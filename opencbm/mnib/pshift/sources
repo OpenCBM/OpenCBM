@@ -1,18 +1,14 @@
 
-TARGETNAME=mnib
+TARGETNAME=pscan
 TARGETPATH=../../bin
 TARGETTYPE=PROGRAM
 
-TARGETLIBS=../../bin/*/opencbm.lib
-
 INCLUDES=../include/WINDOWS;../../include;../../include/WINDOWS;../../arch/windows/
 
-SOURCES=../mnib.c \
+SOURCES=../pshift.c \
 	../gcr.c \
-	../read.c \
-	../write.c \
 	../prot.c \
-        mnib.rc
+        pshift.rc
 
 UMTYPE=console
 #UMBASE=0x100000

@@ -63,18 +63,7 @@
 #include <time.h>
 #include <ctype.h>
 
-#ifdef DJGPP
-#include <dos.h>
-#include <conio.h>
-#include "cbm.h"
-#include "kernel.h"
-typedef int CBM_FILE;
-#define ARCH_MAINDECL
-#else
-#include <opencbm.h>
-#include "arch.h"
-#define delay(x) arch_usleep(x*1000)
-#endif
+#include "mnibarch.h"
 
 #include "gcr.h"
 #include "bn_flop.h"		/* floppy code: unsigned char floppy_code[] */

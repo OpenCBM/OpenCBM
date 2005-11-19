@@ -23,6 +23,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
+#include "mnibarch.h"
 #include "gcr.h"
 #include "version.h"
 
@@ -58,7 +59,7 @@ usage(void)
 	exit(1);
 }
 
-int
+int ARCH_MAINDECL
 main(int argc, char **argv)
 {
 	FILE *fpin, *fpout;

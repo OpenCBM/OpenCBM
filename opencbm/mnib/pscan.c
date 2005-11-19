@@ -12,13 +12,7 @@
 #include <time.h>
 #include <ctype.h>
 
-#ifdef DJGPP
-#include <dos.h>
-#include <conio.h>
-
-typedef unsigned char BYTE;
-typedef int CBM_FILE;
-#endif
+#include "mnibarch.h"
 
 #include "gcr.h"
 #include "mnib.h"
@@ -64,7 +58,7 @@ usage(void)
 	exit(1);
 }
 
-int
+int ARCH_MAINDECL
 main(int argc, char *argv[])
 {
 	char file1[80];

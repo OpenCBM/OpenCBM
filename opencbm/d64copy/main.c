@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.5 2005-07-21 17:39:20 strik Exp $";
+    "@(#) $Id: main.c,v 1.6 2005-11-19 16:01:29 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -248,7 +248,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         {
             case 'h': help();
                       return 0;
-            case 'V': printf("d64copy %s\n", VERSION);
+            case 'V': printf("d64copy %s\n", OPENCBM_VERSION);
                       return 0;
             case 'w': settings->warp = 1;
                       break;

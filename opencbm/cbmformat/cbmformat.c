@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmformat.c,v 1.8 2005-06-03 12:06:35 strik Exp $";
+    "@(#) $Id: cbmformat.c,v 1.9 2005-11-19 16:01:29 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -97,7 +97,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                       break;
             case 'h': help();
                       return 0;
-            case 'V': printf("cbmformat %s\n", VERSION);
+            case 'V': printf("cbmformat %s\n", OPENCBM_VERSION);
                       return 0;
             case 'p': show_progress = 1;
                       break;

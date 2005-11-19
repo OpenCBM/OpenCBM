@@ -8,7 +8,7 @@
 #ifdef WIN32
 # include "version.h"
 
-# define VERSION CBM4WIN_VERSION_STRING
+# define OPENCBM_VERSION CBM4WIN_VERSION_STRING
 # define ARCH_CBM_LINUX_WIN( _linux, _win) _win
 
 # include <stdio.h>

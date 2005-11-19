@@ -1,2 +1,5 @@
-DIRS=WINBUILD
-
+DIRS=WINBUILD	\
+	n2d	\
+	n2g	\
+	pscan	\
+	pshift
