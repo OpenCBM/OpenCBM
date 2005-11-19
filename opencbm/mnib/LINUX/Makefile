@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2005-11-18 19:39:13 strik Exp $
+# $Id: Makefile,v 1.3 2005-11-19 16:42:42 strik Exp $
 
 include ../LINUX/config.make
 
@@ -7,6 +7,8 @@ include ../LINUX/config.make
 OBJS = mnib.o read.o write.o gcr.o prot.o
 PROG = mnib
 # MAN1 = mnib.1
+
+CFLAGS := -I include/LINUX $(CFLAGS)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@

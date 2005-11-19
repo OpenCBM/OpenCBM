@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.2 2005-11-18 19:39:12 strik Exp $
+# $Id: config.make,v 1.3 2005-11-19 16:42:42 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -24,7 +24,7 @@ MODDIR      = `for d in /lib/modules/\`uname -r\`/{misc,kernel/drivers/char}; do
 #
 ARCH	     = linux
 
-CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DVERSION=$(VERSION)
+CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DOPENCBM_VERSION=$(VERSION)
 LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
 LINK_FLAGS   = -L../lib -L../arch/$(ARCH) -lopencbm -larch
