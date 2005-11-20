@@ -1,27 +1,20 @@
-# $Id: Makefile,v 1.3 2005-11-19 16:42:42 strik Exp $
+# $Id: Makefile,v 1.4 2005-11-20 12:23:53 strik Exp $
 
 include ../LINUX/config.make
 
 .PHONY: all mrproper clean install uninstall install-files
 
 OBJS = mnib.o read.o write.o gcr.o prot.o
-PROG = mnib
+PROG = mnib n2d n2g pscan pshift
 # MAN1 = mnib.1
 
-CFLAGS := -I include/LINUX $(CFLAGS)
-
-.c.o:
-	$(CC) $(CFLAGS) -c $< -o $@
-
-all: $(PROG)
+all:
+	make -f GNU/Makefile CBM_LNX_PATH="../" linux
 
 mrproper: clean
 
 clean:
-	rm -f $(PROG) $(OBJS)
-
-$(PROG): $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LINK_FLAGS)
+	make -f GNU/Makefile CBM_LNX_PATH="../" distclean
 
 install-files: $(PROG)
 	install -m 755 -s $(PROG) $(BINDIR)

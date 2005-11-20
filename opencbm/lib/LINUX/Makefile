@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2005-11-18 19:39:12 strik Exp $
+# $Id: Makefile,v 1.4 2005-11-20 12:23:52 strik Exp $
 
 include ../LINUX/config.make
 
@@ -6,6 +6,7 @@ include ../LINUX/config.make
 
 LIBCBMCOPY = ../libcbmcopy
 LIBD64COPY = ../libd64copy
+LIBARCH    = ../arch/linux/
 
 SHLIB   = libopencbm.so
 SHLIBV  = $(SHLIB).$(MAJ)
@@ -48,7 +49,7 @@ $(SHLIBV): $(SHLIBV3)
 	ln -sf $< $@
 
 $(SHLIBV3): $(SHOBJS)
-	$(CC) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS)
+	$(CC) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a
 
 $(LIB): $(OBJS)
 	$(AR) r $@ $(OBJS)

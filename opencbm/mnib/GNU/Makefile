@@ -58,19 +58,19 @@ PROG=mnib n2d n2g pshift pscan
 buildall: ${PROG}
 
 mnib: ${OBJ} ${MNIB_OBJ} ${ARCH_OBJ}
-	${CC} -o mnib.exe ${OBJ} ${LDFLAGS} ${MNIB_OBJ} ${ARCH_OBJ}
+	${CC} -o mnib ${OBJ} ${LDFLAGS} ${MNIB_OBJ} ${ARCH_OBJ}
 
 n2d: ${OBJ} n2d.o
-	${CC} -o n2d.exe n2d.o ${OBJ}
+	${CC} -o n2d n2d.o ${OBJ}
 
 n2g: ${OBJ} n2g.o
-	${CC} -o n2g.exe n2g.o ${OBJ}
+	${CC} -o n2g n2g.o ${OBJ}
 
 pshift:	${OBJ} pshift.o
-	${CC} -o pshift.exe pshift.o ${OBJ}
+	${CC} -o pshift pshift.o ${OBJ}
 
 pscan:	${OBJ} pscan.o
-	${CC} -o pscan.exe pscan.o ${OBJ} 
+	${CC} -o pscan pscan.o ${OBJ} 
 
 clean:
 	${RM} *.o
