@@ -63,16 +63,16 @@ mnib: ${OBJ} ${MNIB_OBJ} ${ARCH_OBJ}
 	${CC} -o mnib$(EXE) ${OBJ} ${LDFLAGS} ${MNIB_OBJ} ${ARCH_OBJ}
 
 n2d: ${OBJ} n2d.o
-	${CC} -o n2d$(EXE) n2d.o ${OBJ}
+	${CC} -o n2d$(EXE) n2d.o ${OBJ} $(LDFLAGS)
 
 n2g: ${OBJ} n2g.o
-	${CC} -o n2g$(EXE) n2g.o ${OBJ}
+	${CC} -o n2g$(EXE) n2g.o ${OBJ} $(LDFLAGS)
 
 pshift:	${OBJ} pshift.o
-	${CC} -o pshift$(EXE) pshift.o ${OBJ}
+	${CC} -o pshift$(EXE) pshift.o ${OBJ} $(LDFLAGS)
 
 pscan:	${OBJ} pscan.o
-	${CC} -o pscan$(EXE) pscan.o ${OBJ} 
+	${CC} -o pscan$(EXE) pscan.o ${OBJ} $(LDFLAGS)
 
 clean:
 	${RM} *.o
