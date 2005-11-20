@@ -273,7 +273,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mnibn2d"="..\mnib\n2d\mnibn2d.dsp" - Package Owner=<4>
+Project: "mnibn2d"="..\mnib\WINBUILD-n2d\mnibn2d.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -285,7 +285,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mnibn2g"="..\mnib\n2g\mnibn2g.dsp" - Package Owner=<4>
+Project: "mnibn2g"="..\mnib\WINBUILD-n2g\mnibn2g.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -297,7 +297,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mnibpscan"="..\mnib\pscan\mnibpscan.dsp" - Package Owner=<4>
+Project: "mnibpscan"="..\mnib\WINBUILD-pscan\mnibpscan.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -309,7 +309,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mnibpshift"="..\mnib\pshift\mnibpshift.dsp" - Package Owner=<4>
+Project: "mnibpshift"="..\mnib\WINBUILD-pshift\mnibpshift.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
