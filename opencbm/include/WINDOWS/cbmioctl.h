@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.4 2005-11-20 13:37:43 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.5 2005-11-20 13:50:28 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -117,13 +117,6 @@ struct CBMT_BOOLEAN
     BOOLEAN Decision;
 
 } CBMT_BOOLEAN;
-
-/*! in for MNIB_READ_TRACK */
-typedef
-struct CBMT_MNIB_READ_TRACK_IN
-{
-    UCHAR Dummy;
-} CBMT_MNIB_READ_TRACK_IN;
 
 /*! out for MNIB_READ_TRACK */
 typedef
@@ -283,7 +276,7 @@ typedef CBMT_SINGLEBYTE CBMT_MNIB_PWRITE_IN;
 
 //! IOCTL for reading a complete track (for mnib)
 #define CBMCTRL_MNIB_READ_TRACK \
-                            _CBMIO(CBMCTRL_BASE, 21) // CBMT_MNIB_READ_TRACK_IN  CBMT_MNIB_READ_TRACK_OUT
+                            _CBMIO(CBMCTRL_BASE, 21) // -                    CBMT_MNIB_READ_TRACK_OUT
 
 //! IOCTL for writing a complete track (for mnib)
 #define CBMCTRL_MNIB_WRITE_TRACK \

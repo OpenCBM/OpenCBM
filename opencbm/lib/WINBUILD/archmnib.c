@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archmnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: archmnib.c,v 1.3 2005-11-20 13:37:43 strik Exp $ \n
+** \version $Id: archmnib.c,v 1.4 2005-11-20 13:50:28 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **
@@ -122,7 +122,6 @@ cbmarch_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
 int
 cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
-    CBMT_MNIB_READ_TRACK_IN parameter;
     CBMT_MNIB_READ_TRACK_OUT *result;
     int bufferlength = Length + sizeof(CBMT_MNIB_READ_TRACK_OUT);
     int retval = 0;
@@ -134,7 +133,7 @@ cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Le
     if (result)
     {
         retval = cbm_ioctl(HandleDevice, CBMCTRL(MNIB_READ_TRACK),
-            &parameter, sizeof(parameter),
+            NULL, 0,
             result, bufferlength);
 
         if (retval == 0)

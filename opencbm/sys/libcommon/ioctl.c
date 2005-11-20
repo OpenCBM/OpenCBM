@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.8 2005-11-20 13:37:44 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.9 2005-11-20 13:50:28 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -244,8 +244,7 @@ cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
 
         case CBMCTRL_MNIB_READ_TRACK:
             DBG_IRP(CBMCTRL_MNIB_READ_TRACK);
-            ntStatus = cbm_checkinputbuffer(irpSp, sizeof(CBMT_MNIB_READ_TRACK_IN),
-                cbm_checkoutputbuffer(irpSp, sizeof(CBMT_MNIB_READ_TRACK_OUT), STATUS_SUCCESS));
+            ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_MNIB_READ_TRACK_OUT), STATUS_SUCCESS);
             break;
 
         case CBMCTRL_MNIB_WRITE_TRACK:
