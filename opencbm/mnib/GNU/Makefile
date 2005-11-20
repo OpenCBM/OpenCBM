@@ -27,6 +27,7 @@ dos:
 		CC="${DJGPP_PATH}\bin\gcc" \
 		ARCH_OBJ="cbm.o kernel.o mnib_rt.o" \
 		CFLAGS="-I include/DOS/ $(CFLAGS)" \
+		EXE=".exe" \
 		-f GNU/Makefile \
 		buildall
 
@@ -39,6 +40,7 @@ linux:
 win32:
 	${MAKE} CFLAGS="-I include/WINDOWS/ -I ${CBM_WIN_PATH}/include -D WIN32 -mno-cygwin ${CFLAGS}" \
 		LDFLAGS="-mno-cygwin -L${CBM_WIN_PATH}/bin/i386/ -lopencbm" \
+		EXE=".exe" \
 		-f GNU/Makefile \
 		buildall
 
@@ -58,19 +60,19 @@ PROG=mnib n2d n2g pshift pscan
 buildall: ${PROG}
 
 mnib: ${OBJ} ${MNIB_OBJ} ${ARCH_OBJ}
-	${CC} -o mnib ${OBJ} ${LDFLAGS} ${MNIB_OBJ} ${ARCH_OBJ}
+	${CC} -o mnib$(EXE) ${OBJ} ${LDFLAGS} ${MNIB_OBJ} ${ARCH_OBJ}
 
 n2d: ${OBJ} n2d.o
-	${CC} -o n2d n2d.o ${OBJ}
+	${CC} -o n2d$(EXE) n2d.o ${OBJ}
 
 n2g: ${OBJ} n2g.o
-	${CC} -o n2g n2g.o ${OBJ}
+	${CC} -o n2g$(EXE) n2g.o ${OBJ}
 
 pshift:	${OBJ} pshift.o
-	${CC} -o pshift pshift.o ${OBJ}
+	${CC} -o pshift$(EXE) pshift.o ${OBJ}
 
 pscan:	${OBJ} pscan.o
-	${CC} -o pscan pscan.o ${OBJ} 
+	${CC} -o pscan$(EXE) pscan.o ${OBJ} 
 
 clean:
 	${RM} *.o
