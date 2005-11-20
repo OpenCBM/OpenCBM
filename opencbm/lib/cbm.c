@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.8 2005-11-18 19:39:12 strik Exp $ \n
+** \version $Id: cbm.c,v 1.9 2005-11-20 13:37:43 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -979,9 +979,6 @@ cbm_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
  \param Length
    The length of the Buffer.
 
- \param Mode
-   \todo
-
  \return
    != 0 on success.
 
@@ -990,11 +987,11 @@ cbm_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
 */
 
 int CBMAPIDECL
-cbm_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, __u_char Mode)
+cbm_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_mnib_read_track(HandleDevice, Buffer, Length, Mode));
+    FUNC_LEAVE_INT(cbmarch_mnib_read_track(HandleDevice, Buffer, Length));
 }
 
 /*! \brief MNIB: Write a complete track
@@ -1011,9 +1008,6 @@ cbm_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length
  \param Length
    The length of the Buffer.
 
- \param Mode
-   \todo
-
  \return
    != 0 on success.
 
@@ -1022,9 +1016,9 @@ cbm_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length
 */
 
 int CBMAPIDECL
-cbm_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, __u_char Mode)
+cbm_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_mnib_write_track(HandleDevice, Buffer, Length, Mode));
+    FUNC_LEAVE_INT(cbmarch_mnib_write_track(HandleDevice, Buffer, Length));
 }

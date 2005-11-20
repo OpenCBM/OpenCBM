@@ -7,7 +7,7 @@
  *  Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
-/* $Id: cbm_module.h,v 1.2 2005-11-18 19:39:12 strik Exp $ */
+/* $Id: cbm_module.h,v 1.3 2005-11-20 13:37:43 strik Exp $ */
 
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H
@@ -44,7 +44,6 @@
 typedef struct MNIB_RW_VALUE {     // all values needed by MNIB_READ_TRACK and MNIB_WRITE_TRACK
        unsigned char *buffer;
        int length;
-       int mode;
 } MNIB_RW_VALUE;
 
 #endif

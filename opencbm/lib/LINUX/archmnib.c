@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: archmnib.c,v 1.2 2005-11-18 19:39:12 strik Exp $";
+    "@(#) $Id: archmnib.c,v 1.3 2005-11-20 13:37:43 strik Exp $";
 #endif
 
 #include <fcntl.h>
@@ -37,27 +37,25 @@ void cbmarch_mnib_par_write(CBM_FILE f, __u_char c)
 	ioctl(f, CBMCTRL_MNIB_PAR_WRITE, c);
 }
 
-int cbmarch_mnib_read_track(CBM_FILE f, __u_char *buffer, unsigned int length, __u_char mode)
+int cbmarch_mnib_read_track(CBM_FILE f, __u_char *buffer, unsigned int length)
 {
 	int retval;
 
 	MNIB_RW_VALUE mv;
 	mv.buffer=buffer;
 	mv.length=length; /* only needed in write_track */
-	mv.mode=mode;
 	retval=ioctl(f, CBMCTRL_MNIB_READ_TRACK, &mv);  /* we have to catch retval to check on EFAULT */
 	if(retval==(-EFAULT)) {printf("cbm4linux: cbm.c: cbm_mnib_read_track: ioctl returned -EFAULT"); return 0;}
 	return retval;
 }
 
-int cbmarch_mnib_write_track(CBM_FILE f,  __u_char *buffer, unsigned int length, __u_char mode)
+int cbmarch_mnib_write_track(CBM_FILE f,  __u_char *buffer, unsigned int length)
 {
 	int retval;
 	
 	MNIB_RW_VALUE mv;
 	mv.buffer=buffer;
 	mv.length=length;
-	mv.mode=mode;
 	retval=ioctl(f, CBMCTRL_MNIB_WRITE_TRACK, &mv);
 	if(retval==(-EFAULT)) {printf("cbm4linux: cbm.c: cbm_mnib_write_track: ioctl returned -EFAULT"); return 0;}
 	return retval;

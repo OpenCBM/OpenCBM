@@ -213,7 +213,7 @@ master_disk(CBM_FILE fd)
 			cbm_mnib_par_write(fd, 0);
 
 			if (!cbm_mnib_write_track(fd, rawtrack, align_offset +
-			  track_length[track], 0))
+			  track_length[track]))
 			{
 				putchar('?');
 				fflush(stdin);
@@ -332,7 +332,7 @@ unformat_track(CBM_FILE fd, int track)
 		send_mnib_cmd(fd, FL_WRITENOSYNC);
 		cbm_mnib_par_write(fd, 0);
 
-		if (!cbm_mnib_write_track(fd, buffer, 0x2000, 0))
+		if (!cbm_mnib_write_track(fd, buffer, 0x2000))
 		{
 			putchar('?');
 			fflush(stdout);

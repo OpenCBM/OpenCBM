@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.6 2005-11-18 19:39:13 strik Exp $ \n
+** \version $Id: iec.h,v 1.7 2005-11-20 13:37:44 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -122,9 +122,9 @@ extern NTSTATUS
 cbmiec_mnib_par_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte);
 
 extern NTSTATUS
-cbmiec_mnib_read_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, OUT UCHAR* Buffer, IN ULONG BufferLength);
+cbmiec_mnib_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG BufferLength);
 
 extern NTSTATUS
-cbmiec_mnib_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, IN UCHAR* Buffer, IN ULONG BufferLength);
+cbmiec_mnib_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR* Buffer, IN ULONG BufferLength);
 
 #endif /* #ifndef CBMIEC_H */

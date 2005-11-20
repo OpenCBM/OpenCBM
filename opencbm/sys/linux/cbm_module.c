@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.2 2005-11-18 19:39:13 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.3 2005-11-20 13:37:44 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -61,8 +61,8 @@ static char *rcsid =
 #define msleep(x)	udelay(x) /* delay for x microseconds */
 
 /* forward references for mnib routines */
-int cbm_mnib_read_track(unsigned char *buffer, int mode);
-int cbm_mnib_write_track(unsigned char *buffer, int length, int mode);
+int cbm_mnib_read_track(unsigned char *buffer);
+int cbm_mnib_write_track(unsigned char *buffer, int length);
 void cbm_mnib_send_cmd(unsigned char cmd);
 unsigned char cbm_mnib_par_read(void);
 int cbm_mnib_par_write(unsigned char c);
@@ -644,7 +644,7 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 			/* verify if it's ok to write into the buffer */
 			if(access_ok(VERIFY_WRITE, kernel_val.buffer, 0x2000)==0) return -EFAULT;
 			/* and do it: */
-			return cbm_mnib_read_track(kernel_val.buffer, kernel_val.mode);
+			return cbm_mnib_read_track(kernel_val.buffer);
 			
 		case CBMCTRL_MNIB_WRITE_TRACK:
 			user_val=(MNIB_RW_VALUE *) arg; // cast arg to structure pointer
@@ -655,7 +655,7 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 			/* verify if it's ok to read from the buffer */
 			if(access_ok(VERIFY_READ, (void *)kernel_val.buffer, 0x2000)==0) return -EFAULT;
 			/* and do it: */
-			return cbm_mnib_write_track(kernel_val.buffer, kernel_val.length, kernel_val.mode);
+			return cbm_mnib_write_track(kernel_val.buffer, kernel_val.length);
         }
         return -EINVAL;
 }
@@ -866,7 +866,7 @@ int cbm_init(void)
 	(they are all called by the ioctl-function)
 */
 
-int cbm_mnib_read_track(unsigned char *buffer, int mode)
+int cbm_mnib_read_track(unsigned char *buffer)
 {
 	IRQSTOPVARS;
 
@@ -891,7 +891,7 @@ int cbm_mnib_read_track(unsigned char *buffer, int mode)
 }
 
 
-int cbm_mnib_write_track(unsigned char *buffer, int length, int mode)
+int cbm_mnib_write_track(unsigned char *buffer, int length)
 {
 	IRQSTOPVARS;
 

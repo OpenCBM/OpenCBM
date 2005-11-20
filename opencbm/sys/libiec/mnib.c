@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.2 2005-11-18 19:39:13 strik Exp $ \n
+** \version $Id: mnib.c,v 1.3 2005-11-20 13:37:44 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -190,7 +190,7 @@ cbm_nib_write(PDEVICE_EXTENSION Pdx, char Data, int Toggle)
 #define disable() cbmiec_block_irq()
 
 NTSTATUS
-cbmiec_mnib_read_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, OUT UCHAR* Buffer, IN ULONG ReturnLength)
+cbmiec_mnib_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG ReturnLength)
 {
     NTSTATUS ntStatus;
     ULONG i;
@@ -236,7 +236,7 @@ cbmiec_mnib_read_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, OUT UCHAR* Buffe
 }
 
 NTSTATUS
-cbmiec_mnib_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR Mode, IN UCHAR* Buffer, IN ULONG BufferLength)
+cbmiec_mnib_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR* Buffer, IN ULONG BufferLength)
 {
     NTSTATUS ntStatus;
     UCHAR dummy;

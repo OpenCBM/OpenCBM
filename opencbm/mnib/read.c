@@ -100,7 +100,7 @@ read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 			send_mnib_cmd(fd, FL_READNORMAL);
 
 		cbm_mnib_par_read(fd);
-		timeout = cbm_mnib_read_track(fd, buffer, 0x2000, 0);
+		timeout = cbm_mnib_read_track(fd, buffer, 0x2000);
 
 		// If we got a timeout, reset the port before retrying.
 		if (!timeout)

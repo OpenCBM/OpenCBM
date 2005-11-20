@@ -13,7 +13,7 @@
 #endif // DJGPP
 
 int
-cbm_mnib_write_track(int fd, unsigned char * buffer, int length, int mode)
+cbm_mnib_write_track(int fd, unsigned char * buffer, int length)
 {
 	int i;
 
@@ -62,7 +62,7 @@ cbm_nib_write(char data, int toggle)
 }
 
 int
-cbm_mnib_read_track(int fd, unsigned char * buffer, unsigned int length, int mode)
+cbm_mnib_read_track(int fd, unsigned char * buffer, unsigned int length)
 {
 	int i, byte;
 

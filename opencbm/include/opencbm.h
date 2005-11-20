@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.10 2005-11-18 19:39:12 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.11 2005-11-20 13:37:43 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -157,8 +157,8 @@ EXTERN char * CBMAPIDECL cbm_ascii2petscii(char *str);
 
 EXTERN __u_char CBMAPIDECL cbm_mnib_par_read(CBM_FILE f);
 EXTERN void CBMAPIDECL cbm_mnib_par_write(CBM_FILE f, __u_char c);
-EXTERN int CBMAPIDECL cbm_mnib_read_track(CBM_FILE f, __u_char *buffer, unsigned int length, __u_char mode);
-EXTERN int CBMAPIDECL cbm_mnib_write_track(CBM_FILE f, __u_char *buffer, unsigned int length, __u_char mode);
+EXTERN int CBMAPIDECL cbm_mnib_read_track(CBM_FILE f, __u_char *buffer, unsigned int length);
+EXTERN int CBMAPIDECL cbm_mnib_write_track(CBM_FILE f, __u_char *buffer, unsigned int length);
 
 /* mnib functions end */
 

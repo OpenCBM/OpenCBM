@@ -29,7 +29,7 @@ extern int  cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State);
 
 extern __u_char cbmarch_mnib_par_read(CBM_FILE HandleDevice);
 extern void cbmarch_mnib_par_write(CBM_FILE HandleDevice, __u_char Value);
-extern int  cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, __u_char Mode);
-extern int  cbmarch_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, __u_char Mode);
+extern int  cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+extern int  cbmarch_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
 #endif // #ifndef ARCHLIB_H

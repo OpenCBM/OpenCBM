@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archmnib_vice.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: archmnib_vice.c,v 1.2 2005-11-18 19:39:12 strik Exp $ \n
+** \version $Id: archmnib_vice.c,v 1.3 2005-11-20 13:37:43 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code for VICE emulation
 **
@@ -102,9 +102,6 @@ cbmarch_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
  \param Length
    The length of the Buffer.
 
- \param Mode
-   \todo
-
  \return
    0 on success.
 
@@ -113,7 +110,7 @@ cbmarch_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
 */
 
 int
-cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, __u_char Mode)
+cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
 
@@ -134,9 +131,6 @@ cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Le
  \param Length
    The length of the Buffer.
 
- \param Mode
-   \todo
-
  \return
    0 on success.
 
@@ -145,7 +139,7 @@ cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Le
 */
 
 int
-cbmarch_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, __u_char Mode)
+cbmarch_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
 

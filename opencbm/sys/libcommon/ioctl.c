@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.7 2005-11-18 19:39:13 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.8 2005-11-20 13:37:44 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -464,7 +464,7 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 
             DBG_ASSERT(sizeof(CBMT_MNIB_READ_TRACK_OUT) == 1);
 //            returnLength -= sizeof(CBMT_MNIB_READ_TRACK_OUT);
-            ntStatus = cbmiec_mnib_read_track(Pdx, INPUTVALUE(CBMT_MNIB_READ_TRACK_IN)->Mode,
+            ntStatus = cbmiec_mnib_read_track(Pdx, 
                 (OUTPUTVALUE(CBMT_MNIB_READ_TRACK_OUT)->Buffer), (ULONG) returnLength);
 //            returnLength += sizeof(CBMT_MNIB_READ_TRACK_OUT);
             break;
@@ -472,7 +472,7 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
         case CBMCTRL_MNIB_WRITE_TRACK:
             DBG_IRP(CBMCTRL_MNIB_WRITE_TRACK);
             returnLength = irpSp->Parameters.DeviceIoControl.InputBufferLength;
-            ntStatus = cbmiec_mnib_write_track(Pdx, INPUTVALUE(CBMT_MNIB_READ_TRACK_IN)->Mode,
+            ntStatus = cbmiec_mnib_write_track(Pdx,
                 INPUTVALUE(CBMT_MNIB_WRITE_TRACK_IN)->Buffer,
                 (ULONG) returnLength - sizeof(CBMT_MNIB_WRITE_TRACK_IN));
             break;

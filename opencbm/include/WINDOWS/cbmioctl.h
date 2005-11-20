@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.3 2005-11-18 19:39:12 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.4 2005-11-20 13:37:43 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -122,7 +122,7 @@ struct CBMT_BOOLEAN
 typedef
 struct CBMT_MNIB_READ_TRACK_IN
 {
-    UCHAR Mode;
+    UCHAR Dummy;
 } CBMT_MNIB_READ_TRACK_IN;
 
 /*! out for MNIB_READ_TRACK */
@@ -136,7 +136,6 @@ struct CBMT_MNIB_READ_TRACK_OUT
 typedef
 struct CBMT_MNIB_WRITE_TRACK_IN
 {
-    UCHAR Mode;
     UCHAR Buffer[0];
 } CBMT_MNIB_WRITE_TRACK_IN;
 
