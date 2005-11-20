@@ -41,7 +41,7 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) SUBDIRS=$(subdirs)
+	$(MAKE) -f LINUX/Makefile SUBDIRS=$(subdirs)
 
 	touch build-stamp
 
@@ -51,7 +51,7 @@ clean:
 	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) SUBDIRS=$(subdirs) clean
+	-$(MAKE) -f LINUX/Makefile SUBDIRS=$(subdirs) clean
 	-rm -f docs/*.dvi
 
 	dh_clean
@@ -63,7 +63,8 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/tmp
-	$(MAKE) SUBDIRS=$(subdirs) \
+	$(MAKE) -f LINUX/Makefile \
+		SUBDIRS=$(subdirs) \
 		PREFIX=$(CURDIR)/debian/tmp/usr \
 		MANDIR=$(CURDIR)/debian/tmp/usr/share/man/man1 \
 		INFODIR=$(CURDIR)/debian/tmp/usr/share/info \
