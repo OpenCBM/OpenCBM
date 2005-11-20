@@ -1,4 +1,5 @@
 #include "opencbm.h"
-#include "arch.h"
-#define delay(x)  arch_usleep(x*1000)
+#define delay(x)  Sleep(x)
 #define msleep(x) delay(x)
+
+#define ARCH_MAINDECL __cdecl
