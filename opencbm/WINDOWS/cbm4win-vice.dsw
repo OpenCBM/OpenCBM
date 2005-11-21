@@ -42,9 +42,6 @@ Package=<4>
     Project_Dep_Name demomorse
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name install
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name libcbmcopy
     End Project Dependency
     Begin Project Dependency
@@ -58,6 +55,21 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name demorpm1541
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mnib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mnibn2d
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mnibn2g
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mnibpscan
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name mnibpshift
     End Project Dependency
 }}}
 

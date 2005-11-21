@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.11 2005-11-20 13:37:43 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.12 2005-11-21 18:10:21 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -32,6 +32,11 @@ extern "C" {
   /* we have windows */
 
 #include <windows.h>
+
+#ifdef DEFINE_ULONG_PTR
+#define ULONG_PTR ULONG
+#endif /* #ifdef DEFINE_ULONG_PTR */
+
 
 # if defined DLL
 #  define EXTERN __declspec(dllexport) /*!< we are exporting the functions */
