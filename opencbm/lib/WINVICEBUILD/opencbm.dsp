@@ -96,6 +96,10 @@ SOURCE=.\archlib_vice.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\archmnib_vice.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\cbm.c
 # End Source File
 # Begin Source File
