@@ -456,6 +456,7 @@ adjust_target(CBM_FILE fd)
 			printf("2) Write protect is on.\n");
 			printf("3) Disk is damaged.\n");
 			printf("4) Disk drive needs adjusted or repaired.\n");
+			closeout_drive(fd);
 			exit(0);
 		}
 		else
@@ -487,6 +488,7 @@ file2disk(CBM_FILE fd, char * filename)
 	if ((fpin = fopen(filename, "rb")) == NULL)
 	{
 		fprintf(stderr, "Couldn't open input file %s!\n", filename);
+		closeout_drive(fd);
 		exit(2);
 	}
 
@@ -517,7 +519,7 @@ file2disk(CBM_FILE fd, char * filename)
 			end_track = 40 * 2;
 			printf("\n40 track image");
 		}
-		else if (nibsize == 338128)
+		else if (nibsize == 336128)
 		{
 			end_track = 41 * 2;	// 41 tracks
 			printf("\n41 track image");
@@ -525,6 +527,7 @@ file2disk(CBM_FILE fd, char * filename)
 		else
 		{
 			printf("unsupported file format");
+			closeout_drive(fd);
 			exit(0);
 		}
 		rewind(fpin);
@@ -565,6 +568,7 @@ disk2file(CBM_FILE fd, char *filename)
 	if (imagetype != IMAGE_NIB && imagetype != IMAGE_D64)
 	{
 		printf("Only the NIB and D64 formats are supported for reading.");
+		closeout_drive(fd);
 		exit(2);
 	}
 
@@ -579,6 +583,7 @@ disk2file(CBM_FILE fd, char *filename)
 	{
 		fprintf(stderr, "Couldn't create log file %s!\n",
 		  logfilename);
+		closeout_drive(fd);
 		exit(2);
 	}
 	fprintf(fplog, "%s\n", VERSION);
@@ -588,6 +593,7 @@ disk2file(CBM_FILE fd, char *filename)
 	{
 		fprintf(stderr, "Couldn't create output file %s!\n",
 		  filename);
+		closeout_drive(fd);
 		exit(2);
 	}
 
@@ -932,14 +938,19 @@ main(int argc, char *argv[])
 	motor_on(fd);
 	step_to_halftrack(fd, 18 * 2);
 
-#ifdef DJGPP
-	send_mnib_cmd(fd, FL_RESET);
-	printf("drive reset...\n");
-	delay(2000);
-#else
-	cbm_reset(fd);
-	cbm_driver_close(fd);
-#endif
+	closeout_drive(fd);
 
 	exit(1);
+}
+
+void closeout_drive(CBM_FILE fd)
+{
+	#ifdef DJGPP
+		send_mnib_cmd(fd, FL_RESET);
+		printf("drive reset...\n");
+		delay(2000);
+	#else
+		cbm_reset(fd);
+		cbm_driver_close(fd);
+	#endif
 }

@@ -96,6 +96,7 @@ int find_sync(BYTE ** gcr_pptr, BYTE * gcr_end);
 void convert_4bytes_to_GCR(BYTE * buffer, BYTE * ptr);
 int convert_4bytes_from_GCR(BYTE * gcr, BYTE * plain);
 int extract_id(BYTE * gcr_track, BYTE * id);
+int extract_cosmetic_id(BYTE * gcr_track, BYTE * id);
 int find_track_cycle(BYTE ** cycle_start, BYTE ** cycle_stop, int cap_min,
   int cap_max);
 int find_nondos_track_cycle(BYTE ** cycle_start, BYTE ** cycle_stop,

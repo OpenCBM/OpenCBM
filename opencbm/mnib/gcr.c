@@ -190,6 +190,22 @@ extract_id(BYTE * gcr_track, BYTE * id)
 	return (1);
 }
 
+int
+extract_cosmetic_id(BYTE * gcr_track, BYTE * id)
+{
+	BYTE secbuf[260];
+	int error;
+
+	// get sector into buffer- we don't care about id mismatch here
+	error = convert_GCR_sector(gcr_track, gcr_track + GCR_TRACK_LENGTH,
+		  secbuf, 18, 0, id);
+
+	id[0] = secbuf[0xa3];
+	id[1] = secbuf[0xa4];
+
+	return 1;
+}
+
 BYTE
 convert_GCR_sector(BYTE * gcr_start, BYTE * gcr_cycle, BYTE * d64_sector,
   int track, int sector, BYTE * id)

@@ -178,10 +178,14 @@ master_disk(CBM_FILE fd)
 	memset(diskid, 0, sizeof(diskid));
 	extract_id(diskbuf + ((18 * 2) * 0x2000), diskid);
 
-	printf("\n-\nBurst Writing...\n");
+	printf("\n-\nBurst Writing...\n\n");
 
-	if (!verify)
-		printf("[");
+	if(!verify)
+	{
+		printf("00000000011111111112222222222333333333344\n");
+		printf("12345678901234567890123456789012345678901\n");
+		printf("=========================================\n");
+	}
 
 	for (track = start_track; track <= end_track; track += track_inc)
 	{
@@ -219,7 +223,8 @@ master_disk(CBM_FILE fd)
 				fflush(stdin);
 				cbm_mnib_par_read(fd);
 				msleep(500);
-				printf("%c ", test_par_port(fd)? '+' : '-');
+				//printf("%c ", test_par_port(fd)? '+' : '-');
+				test_par_port(fd);
 			}
 			else
 				break;
@@ -253,8 +258,6 @@ master_disk(CBM_FILE fd)
 			printf("\n");
 		}
 	}
-	if (!verify)
-		printf("]\n");
 }
 
 void
@@ -305,14 +308,16 @@ unformat_disk(CBM_FILE fd)
 	motor_on(fd);
 	set_density(fd, 2);
 
-	printf("\nUnformatting [");
+	printf("\nUnformatting...\n\n");
+	printf("00000000011111111112222222222333333333344\n");
+	printf("12345678901234567890123456789012345678901\n");
+	printf("=========================================\n");
 
 	for (track = start_track; track <= end_track; track += track_inc)
 	{
 		printf("X");
 		unformat_track(fd, track);
 	}
-	printf("]\n");
 }
 
 void
@@ -338,7 +343,8 @@ unformat_track(CBM_FILE fd, int track)
 			fflush(stdout);
 			cbm_mnib_par_read(fd);
 			msleep(500);
-			printf("%c ", test_par_port(fd)? '+' : '-');
+			//printf("%c ", test_par_port(fd)? '+' : '-');
+			test_par_port(fd);
 		}
 		else
 			break;

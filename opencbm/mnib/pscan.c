@@ -565,7 +565,7 @@ compare_extension(char *filename, char *extension)
 int
 scandisk(void)
 {
-	BYTE id[3];
+	BYTE id[3], cosmetic_id[3];
 	int track = 0;
 	int totalfat = 0;
 	int totalrl = 0;
@@ -589,6 +589,11 @@ scandisk(void)
 	memset(id, 0, 3);
 	extract_id(diskbuf + (36 * 0x2000), id);
 	printf("\ndisk id: %s\n", id);
+
+	// collect and print "cosmetic" disk id for comparison
+	memset(cosmetic_id, 0, 3);
+	extract_cosmetic_id(diskbuf + (36 * 0x2000), cosmetic_id);
+	printf("cosmetic disk id: %s\n", cosmetic_id);
 
 	getchar();
 

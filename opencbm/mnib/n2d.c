@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <fcntl.h>
 #include "mnibarch.h"
 #include "gcr.h"
 #include "version.h"
@@ -25,7 +27,8 @@
 static void
 usage(void)
 {
-	fprintf(stderr, "Usage: n2d data [d64image]\n\n");
+	fprintf(stderr, "Usage: n2d <option> nibimage [d64image]\n");
+	fprintf(stderr, "-p: Patch cosmetic disk id to real disk id\n");
 	exit(-1);
 }
 
@@ -33,8 +36,8 @@ int ARCH_MAINDECL
 main(int argc, char **argv)
 {
 	FILE *fp_nib, *fp_d64;
-	char nibname[1024], d64name[1024];
-	BYTE id[3];
+	char inname[1024], outname[1024], *dotpos;;
+	BYTE id[3], cosmetic_id[3];;
 	int track, sector;
 	BYTE gcr_track[GCR_TRACK_LENGTH], rawdata[260];
 	BYTE errorinfo[MAXBLOCKSONDISK], errorcode;
@@ -43,36 +46,51 @@ main(int argc, char **argv)
 	int header_offset;
 	BYTE *cycle_start;	/* start position of cycle    */
 	BYTE *cycle_stop;	/* stop  position of cycle +1 */
+	int patch_diskid = 0;
 
 	fprintf(stdout,
 	  "\nn2d - converts a NIB type disk dump into a standard D64 disk image.\n"
-	  "(C) 2000-05 Markus Brenner.\n" "Version " VERSION "\n\n");
+	  "(C) 2000-05 Markus Brenner and Pete Rittwage.\n" "Version " VERSION "\n\n");
 
-	if (argc == 2)
+	while (--argc && (*(++argv)[0] == '-'))
 	{
-		char *dotpos;
+		switch (tolower((*argv)[1]))
+		{
+		case 'p':
+			printf("ARG: Patch cosmetic disk id to real disk ID\n");
+			patch_diskid = 1;
+			break;
 
-		strcpy(nibname, argv[1]);
-		strcpy(d64name, nibname);
-		dotpos = strrchr(d64name, '.');
-		if (dotpos != NULL)
-			*dotpos = '\0';
-		strcat(d64name, ".d64");
+		default:
+			usage();
+			break;
+		}
 	}
-	else if (argc == 3)
+
+	if (argc == 1)
 	{
-		strcpy(nibname, argv[1]);
-		strcpy(d64name, argv[2]);
+		strcpy(inname, argv[0]);
+		strcpy(outname, inname);
+	}
+	else if (argc == 2)
+	{
+		strcpy(inname, argv[0]);
+		strcpy(outname, argv[1]);
 	}
 	else
 		usage();
 
+	dotpos = strrchr(outname, '.');
+	if (dotpos != NULL)
+		*dotpos = '\0';
+	strcat(outname, ".d64");
+
 	fp_nib = fp_d64 = NULL;
 
-	fp_nib = fopen(nibname, "rb");
+	fp_nib = fopen(inname, "rb");
 	if (fp_nib == NULL)
 	{
-		fprintf(stderr, "Cannot open NIB image %s.\n", nibname);
+		fprintf(stderr, "Cannot open NIB image %s.\n", inname);
 		goto fail;
 	}
 
@@ -84,15 +102,14 @@ main(int argc, char **argv)
 
 	if (memcmp(nib_header, "MNIB-1541-RAW", 13) != 0)
 	{
-		fprintf(stderr, "input file %s isn't an mnib data file!\n",
-		  nibname);
+		fprintf(stderr, "input file %s isn't an mnib data file!\n", inname);
 		goto fail;
 	}
 
-	fp_d64 = fopen(d64name, "wb");
+	fp_d64 = fopen(outname, "wb");
 	if (fp_d64 == NULL)
 	{
-		fprintf(stderr, "Cannot open D64 image %s.\n", d64name);
+		fprintf(stderr, "Cannot open D64 image %s.\n", outname);
 		goto fail;
 	}
 
@@ -120,7 +137,13 @@ main(int argc, char **argv)
 		fprintf(stderr, "Cannot find directory sector.\n");
 		goto fail;
 	}
-	printf("ID: %2x %2x\n", id[0], id[1]);
+	//printf("ID: %2x %2x\n", id[0], id[1]);
+	printf("\ndisk id: %s\n", id);
+
+	// collect and print "cosmetic" disk id for comparison
+	memset(cosmetic_id, 0, 3);
+	extract_cosmetic_id(gcr_track, cosmetic_id);
+	printf("cosmetic disk id: %s\n", cosmetic_id);
 
 	/* reset file pointer to first track */
 	fseek(fp_nib, 0x100, SEEK_SET);
@@ -171,6 +194,8 @@ main(int argc, char **argv)
 			else
 				printf("%d", errorcode);
 
+
+
 			if (fwrite((char *) rawdata + 1, 256, 1, fp_d64) != 1)
 			{
 				fprintf(stderr,
@@ -191,6 +216,17 @@ main(int argc, char **argv)
 			fprintf(stderr, "Cannot write error information.\n");
 			goto fail;
 		}
+	}
+
+	// fix cosmetic id to real disk id
+	if((strcmp((char *)id, (char *)cosmetic_id)) && (patch_diskid))
+	{
+		printf("\n\nPatched cosmetic disk id to real disk id.\n");
+		fseek(fp_d64, 0x165a2, SEEK_SET);
+		fwrite(id, sizeof(BYTE), 2, fp_d64);
+		// put original cosmetic id in unused part of sector
+		fseek(fp_d64, 0x165fe, SEEK_SET);
+		fwrite(cosmetic_id, sizeof(BYTE), 2, fp_d64);
 	}
 
 fail:
