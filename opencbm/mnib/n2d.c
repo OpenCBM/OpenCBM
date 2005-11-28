@@ -36,8 +36,8 @@ int ARCH_MAINDECL
 main(int argc, char **argv)
 {
 	FILE *fp_nib, *fp_d64;
-	char inname[1024], outname[1024], *dotpos;;
-	BYTE id[3], cosmetic_id[3];;
+	char inname[1024], outname[1024], *dotpos;
+	BYTE id[3], cosmetic_id[3];
 	int track, sector;
 	BYTE gcr_track[GCR_TRACK_LENGTH], rawdata[260];
 	BYTE errorinfo[MAXBLOCKSONDISK], errorcode;
