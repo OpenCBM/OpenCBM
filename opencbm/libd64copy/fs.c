@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: fs.c,v 1.6 2005-04-17 15:32:18 strik Exp $";
+    "@(#) $Id: fs.c,v 1.7 2005-11-28 16:41:29 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -268,41 +268,47 @@ static void close_disk(void)
      * redone before closing the disk 
      */
 
-    if (atom_execute)
+    if (the_file && atom_execute)
     {
         atom_execute = 0;
         write_block(atom_tr, atom_se, atom_blk, atom_size, atom_read_status);
     }
 
-    switch(fs_settings->error_mode)
+    if (fs_settings)
     {
-        case em_always:
-            has_errors = 1;
-            break;
-        case em_never:
-            has_errors = 0;
-            break;
-        default:
-            if(error_map)
-            {
-                for(i = 0; !has_errors && i < block_count; i++)
+        switch(fs_settings->error_mode)
+        {
+            case em_always:
+                has_errors = 1;
+                break;
+            case em_never:
+                has_errors = 0;
+                break;
+            default:
+                if(error_map)
                 {
-                    has_errors = error_map[i] != 0;
+                    for(i = 0; !has_errors && i < block_count; i++)
+                    {
+                        has_errors = error_map[i] != 0;
+                    }
                 }
-            }
-            break;
+                break;
+        }
     }
 
-    if(has_errors)
+    if(the_file)
     {
-        if(fseek(the_file, block_count * BLOCKSIZE, SEEK_SET) == 0)
+        if(has_errors)
         {
-            fwrite(error_map, block_count, 1, the_file);
+            if(fseek(the_file, block_count * BLOCKSIZE, SEEK_SET) == 0)
+            {
+                fwrite(error_map, block_count, 1, the_file);
+            }
+        } 
+        else
+        {
+            arch_ftruncate(arch_fileno(the_file), block_count * BLOCKSIZE);
         }
-    } 
-    else
-    {
-        arch_ftruncate(arch_fileno(the_file), block_count * BLOCKSIZE);
     }
 
     if(error_map)
