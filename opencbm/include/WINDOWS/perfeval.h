@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/WINDOWS/perfeval.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.h,v 1.3 2005-09-11 13:32:33 strik Exp $ \n
+** \version $Id: perfeval.h,v 1.4 2005-12-14 09:08:18 strik Exp $ \n
 ** \n
 ** \brief Functions and macros for performance evaluation purposes
 **
@@ -52,10 +52,16 @@ extern VOID PerfSave(VOID);
 #define PERF_EVENT(_Event_, _Data_) PerfEvent(_Event_, _Data_)
 
 /*! Only define this non-empty if you want very verbose performance data */
-#if 0
+#ifdef PERFEVAL_VERBOSE
   #define PERF_EVENT_VERBOSE(_Event_, _Data_) PERF_EVENT(_Event_, _Data_)
 #else
   #define PERF_EVENT_VERBOSE(_Event_, _Data_)
+#endif
+
+#ifdef PERFEVAL_MNIB
+  #define PERF_EVENT_MNIB(_Event_, _Data_) PERF_EVENT(_Event_, _Data_)
+#else
+  #define PERF_EVENT_MNIB(_Event_, _Data_)
 #endif
 
 /*! Call PerfSave() if performance evaluation is selected */
