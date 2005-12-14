@@ -510,7 +510,7 @@ cbm_ioctl(int f, unsigned int cmd, unsigned long arg)
 	case CBMCTRL_PAR_READ:
 		RELEASE(DATA_OUT | CLK_OUT);
 		SET(ATN_OUT);
-		msleep(20);	/* 200? */
+		msleep(200);	/* 200? */
 		// for (j=0; j < 20; j++) GET(DATA_IN);
 		while (GET(DATA_IN));
 		rv = inportb(parport);
@@ -526,7 +526,7 @@ cbm_ioctl(int f, unsigned int cmd, unsigned long arg)
 	case CBMCTRL_PAR_WRITE:
 		RELEASE(DATA_OUT | CLK_OUT);
 		SET(ATN_OUT);
-		msleep(20);
+		msleep(200);
 		// for (j=0; j < 20; j++) GET(DATA_IN);
 		while (GET(DATA_IN));
 		PARWRITE();

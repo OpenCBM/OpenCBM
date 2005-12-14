@@ -85,8 +85,8 @@ find_sync(BYTE ** gcr_pptr, BYTE * gcr_end)
 			return 0;	/* not found */
 		}
 
-		// sync flag goes up after 10 bits
-		if (((*gcr_pptr)[0] & 0x03) == 0x03 && (*gcr_pptr)[1] == 0xff)
+		// sync flag goes up after the 9th bit
+		if ( ((*gcr_pptr)[0] & 0x01) == 0x01 && (*gcr_pptr)[1] == 0xff)
 			break;
 
 		(*gcr_pptr)++;
@@ -758,6 +758,18 @@ extract_GCR_track(BYTE * destination, BYTE * source, int * align,
 			marker_pos = auto_gap(work_buffer, track_len);
 		}
 
+		if (force_align == ALIGN_LONGSYNC)
+		{
+			*align = ALIGN_LONGSYNC;
+			marker_pos = find_long_sync(work_buffer, track_len);
+		}
+
+		if (force_align == ALIGN_WEAK)
+		{
+			*align = ALIGN_WEAK;
+			marker_pos = find_weak_gap(work_buffer, track_len);
+		}
+
 		// we found a protection track
 		if (marker_pos)
 		{
@@ -856,11 +868,14 @@ strip_runs(BYTE * buffer, int length, int minrun, BYTE target)
 	skipped = 0;
 	end = buffer + length;
 
-	for (source = buffer; source < end; source++)
+	for (source = buffer; source < end - 2; source++)
 	{
 		if (*source == target)
 		{
-			if (run == minrun)
+			// fixed to only remove bytes before sync
+			if ( run == minrun && target == 0xff )
+				skipped++;
+			else if ( run == minrun &&  *(source+2) == 0xff )
 				skipped++;
 			else
 				*buffer++ = target;
@@ -905,10 +920,6 @@ check_sync_flags(BYTE * gcrdata, int density, int length)
 
 	syncs = 0;
 
-	// empty tracks have no sync
-	if (!length)
-		return (density |= BM_NO_SYNC);
-
 	// check manually for SYNCKILL
 	for (i = 0; i < length; i++)
 	{
@@ -916,20 +927,14 @@ check_sync_flags(BYTE * gcrdata, int density, int length)
 			syncs++;
 	}
 
+	//printf("syncs: %d\n",syncs);
+
 	if (syncs == length)
 		return (density |= BM_FF_TRACK);
-
-	// check manually for NOSYNC
-	for (i = 0; i < length - 1; i++)
-	{
-		if ((gcrdata[i] & 0x03) == 0x03 && gcrdata[i + 1] == 0xff)
-			break;
-	}
-
-	if (i == length - 1)
+	else if(!syncs)
 		return (density |= BM_NO_SYNC);
-
-	return (density);
+	else
+		return(density);
 }
 
 int
@@ -978,14 +983,14 @@ compare_tracks(BYTE * track1, BYTE * track2, int length1, int length2,
 			// we ignore start of sync differences
 			if (j < length1 - 1 && k < length2 - 1)
 			{
-				if ((track1[j] & 0x03) == 0x03 && track1[j + 1] == 0xff)
+				if ((track1[j] & 0x01) == 0x01 && track1[j + 1] == 0xff)
 				{
 					presync_diff++;
 					k--;
 					continue;
 				}
 
-				if ((track2[k] & 0x03) == 0x03 && track2[k + 1] == 0xff)
+				if ((track2[k] & 0x01) == 0x01 && track2[k + 1] == 0xff)
 				{
 					presync_diff++;
 					j--;
@@ -1054,7 +1059,7 @@ compare_sectors(BYTE * track1, BYTE * track2, int length1, int length2,
   BYTE * id1, BYTE * id2, int track, char * outputstring)
 {
 	int sec_match, numsecs;
-	int sector, error1, error2, i;
+	int sector, error1, error2, i, empty;
 	BYTE checksum1, checksum2;
 	BYTE secbuf1[260], secbuf2[260];
 	char tmpstr[256];
@@ -1076,6 +1081,7 @@ compare_sectors(BYTE * track1, BYTE * track2, int length1, int length2,
 
 		memset(secbuf1, 0, sizeof(secbuf1));
 		memset(secbuf2, 0, sizeof(secbuf2));
+		tmpstr[0] = '\0';
 
 		error1 = convert_GCR_sector(track1, track1 + length1,
 		  secbuf1, track / 2, sector, id1);
@@ -1084,32 +1090,54 @@ compare_sectors(BYTE * track1, BYTE * track2, int length1, int length2,
 		  secbuf2, track / 2, sector, id2);
 
 		// compare data returned
-		checksum1 = checksum2 = 0;
+		checksum1 = checksum2 = empty = 0;
 		for (i = 2; i <= 256; i++)
 		{
 			checksum1 ^= secbuf1[i];
 			checksum2 ^= secbuf2[i];
+
+			if (secbuf1[i] == 0x01)
+				empty++;
 		}
 
 		// continue checking
-		if (checksum1 == checksum2 && error1 == error2)
+		if (checksum1 == checksum2 && error1 == error2 && empty < 254)
 		{
-			//printf("S%d: sector data match\n",sector);
+			if(error1 == SECTOR_OK)
+			{
+				//sprintf(tmpstr,"S%d: std sector data match\n",sector);
+			}
+			else
+			{
+				sprintf(tmpstr,"S%d: non-std sector data match\n",sector);
+			}
 			sec_match++;
+		}
+		else if (checksum1 == checksum2 && error1 == error2)
+		{
+			if(error1 == SECTOR_OK)
+			{
+				sprintf(tmpstr,"S%d: empty sector match\n",sector);
+				sec_match++;
+			}
+			else
+			{
+				sprintf(tmpstr,"S%d: unrecognized sector\n",sector);
+			}
 		}
 		else
 		{
 			if (checksum1 != checksum2)
 				sprintf(tmpstr,
-				  "\nS%d: data mismatch (%.2x/%.2x)", sector,
+				  "S%d: data mismatch (%.2x/%.2x)\n", sector,
 				  checksum1, checksum2);
 			else
 				sprintf(tmpstr,
-				  "\nS%d: error mismatch (E%d/E%d)", sector,
+				  "S%d: error mismatch (E%d/E%d)\n", sector,
 				  error1, error2);
 
-			strcat(outputstring, tmpstr);
 		}
+		strcat(outputstring, tmpstr);
 	}
 
 	if (sec_match == sector_map_1541[(track / 2) + 1])

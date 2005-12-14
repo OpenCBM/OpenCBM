@@ -490,16 +490,16 @@ compare_disks(void)
 				diskbuf2 + (track * 0x2000), length[track],
 				length2[track], 0, errorstring);
 
-			printf("%s\n", errorstring);
+			printf("%s", errorstring);
 
 			if (gcr_match)
 			{
 				gcr_total++;
-				printf("[*GCR MATCH*] ");
+				printf("[*GCR MATCH*]\n");
 			}
 			else
 			{
-				printf("[*NO GCR MATCH*] ");
+				printf("[*NO GCR MATCH*]\n");
 				sprintf(tmpstr, "%d,", track / 2);
 				strcat(gcr_mismatches, tmpstr);
 			}
@@ -510,7 +510,7 @@ compare_disks(void)
 				diskbuf2 + (track * 0x2000), length[track],
 				length2[track], id, id2, track, errorstring);
 
-			printf("%s\n", errorstring);
+			printf("%s", errorstring);
 
 			sec_total += sec_match;
 			numsecs += sector_map_1541[(track / 2) + 1];
@@ -518,20 +518,20 @@ compare_disks(void)
 			if (sec_match)
 			{
 				trk_total++;
-				printf("[*DATA MATCH*]");
+				printf("[*DATA MATCH*]\n");
 			}
 			else
 			{
-				printf("[*NO DATA MATCH*]");
+				printf("[*NO DATA MATCH*]\n");
 				sprintf(tmpstr, "%d,", track / 2);
 				strcat(sec_mismatches, tmpstr);
 				getchar();
 			}
 			printf("\n");
 		}
-		printf("\n");
 	}
 
+	printf("\n");
 	printf("%d/%d tracks had a perfect GCR match\n", gcr_total,
 	  numtracks);
 	printf("Mismatches (%s)\n", gcr_mismatches);

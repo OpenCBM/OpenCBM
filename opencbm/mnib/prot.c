@@ -41,19 +41,21 @@ align_vmax(BYTE * work_buffer, int tracklen)
 
 	/*
 	 * Some games have all their tracks aligned to $49 bytes
-	 * while others use a run of $55 $AA.
-	 * need to find a way to discern/search them
+	 * while others use a run of $5A
 	 */
 
 	/* Try to find 0x5a track 20 marker bytes */
 	while (pos < buffer_end)
 	{
 		// duplicator's marker?
-		if (*pos == 0x5a)
+		if ((*pos == 0x5a) || (*pos == 0x49))
 		{
-			if (run == 5)	// it's a marker
-				return (pos - 5);
-
+			if (run == 5)	// it's a marker, make a sync
+			{
+				*(pos - 5) = 0xff;
+				*(pos - 6) = 0xff;
+				return (pos - 6);
+			}
 			run++;
 		}
 		else
@@ -80,7 +82,7 @@ auto_gap(BYTE * work_buffer, int tracklen)
 	key = key_temp = NULL;
 
 	/* try to find longest non-bad gcr run */
-	while (pos < buffer_end)
+	while (pos < buffer_end - 2)
 	{
 		if (*pos == *(pos + 1))	// && (*pos != 0x00 ))
 		{
@@ -100,9 +102,12 @@ auto_gap(BYTE * work_buffer, int tracklen)
 		pos++;
 	}
 
-	/* first byte after gap */
+	/* last 5 bytes of gap */
 	// printf("gapbyte: %x, len: %d\n",gapbyte,longest);
-	return (key);
+	if(key >= work_buffer + 5)
+		return(key - 5);
+	else
+		return(key);
 }
 
 // The idea behind this is that weak bits commonly occur

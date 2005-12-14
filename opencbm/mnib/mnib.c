@@ -88,6 +88,7 @@ int disktype, imagetype;
 int mode;
 int verify;
 int auto_density_adjust;
+int align_disk;
 
 FILE *fplog;
 
@@ -427,13 +428,14 @@ adjust_target(CBM_FILE fd)
 {
 	int i;
 	unsigned int cap1, cap2;
+	int track_dens[4] = { 2, 36, 50, 62 };
 
 	printf("\nTesting track capacity for each density:\n");
 
-	step_to_halftrack(fd, 2);
-
 	for (i = 0; i < 4; i++)
 	{
+		step_to_halftrack(fd, track_dens[i]);
+
 		set_bitrate(fd, i);
 		cap1 = track_capacity(fd);
 		cap2 = track_capacity(fd);
@@ -467,6 +469,24 @@ adjust_target(CBM_FILE fd)
 	  (float) 2309195 / (capacity[3] + CAPACITY_MARGIN));
 }
 
+void init_aligned_disk(CBM_FILE fd)
+{
+	int track;
+
+	printf("Prepping aligned disk.\n");
+
+	for (track = start_track; track <= end_track; track += track_inc)
+	{
+		step_to_halftrack(fd, track);
+
+		/* this should take into account capacity() calculations, but doesn't */
+		msleep(175390);  // derived from busy loop in BN_FLOP
+
+		send_mnib_cmd(fd, FL_INITTRACK);
+		cbm_mnib_par_read(fd);
+	}
+}
+
 char
 char_fgetc(FILE *stream)
 {
@@ -482,8 +502,12 @@ file2disk(CBM_FILE fd, char * filename)
 	int nibsize;
 
 	motor_on(fd);
+
 	if (auto_density_adjust)
 		adjust_target(fd);
+
+	if (align_disk)
+		init_aligned_disk(fd);
 
 	if ((fpin = fopen(filename, "rb")) == NULL)
 	{
@@ -684,6 +708,7 @@ main(int argc, char *argv[])
 	fix_gcr = 1;
 	error_retries = 10;
 	verify = 0;
+	align_disk = 0;
 	auto_density_adjust = 1;
 
 	mode = MODE_READ_DISK;	// default to read a disk
@@ -693,13 +718,17 @@ main(int argc, char *argv[])
 
 	while (--argc && (*(++argv)[0] == '-'))
 	{
-		switch (tolower((*argv)[1]))
+		switch ((*argv)[1])
 		{
 		case 'h':
 			track_inc = 1;
 			printf("* Reading halftracks\n");
 			break;
 
+		case 'b':
+			align_disk = 1;
+			printf("* BurstNibbler-style track alignment\n");
+			break;
 		case 'v':
 			verify = 1;
 			printf("* Verify written data\n");
@@ -794,6 +823,13 @@ main(int argc, char *argv[])
 		case 'r':
 			reduce_syncs = 0;
 			printf("* Disabled 'reduce syncs' option\n");
+			break;
+
+		case 'D':
+			if (!(*argv)[2])
+				usage();
+			drive = (BYTE) atoi((char *) (&(*argv)[2]));
+			printf("* Use Device %d\n", drive);
 			break;
 
 		case '0':

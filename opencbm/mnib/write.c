@@ -54,12 +54,10 @@ write_halftrack(int halftrack, int density, int length, BYTE * gcrdata)
 
 	if (length > 0)
 	{
-		if (fix_gcr)
-		{
-			badgcr = check_bad_gcr(gcrdata, length, 1);
-			if (badgcr > 0)
-				printf("weak:%d ", badgcr);
-		}
+		// handle bad GCR / weak bits
+		badgcr = check_bad_gcr(gcrdata, length, fix_gcr);
+		if (badgcr > 0)
+			printf("weak:%d ", badgcr);
 
 		// If our track contains sync, we reduce to a minimum of 16
 		// (only 10 are required, technically)
@@ -76,13 +74,14 @@ write_halftrack(int halftrack, int density, int length, BYTE * gcrdata)
 				printf("rsync:%d ", orglen - length);
 		}
 
-		// We could reduce gap bytes ($55 and variants) here too,
+		// We could reduce gap bytes ($55 and $AA) here too,
 		orglen = length;
 		if (length > capacity[density & 3] && reduce_gaps)
 		{
-			// XXX We can reduce by 0xAA here also
 			length = reduce_runs(gcrdata, length, capacity[density & 3],
 			  2, 0x55);
+			length = reduce_runs(gcrdata, length, capacity[density & 3],
+			  2, 0xaa);
 			if (length < orglen)
 				printf("rgaps:%d ", orglen - length);
 		}
@@ -107,6 +106,15 @@ write_halftrack(int halftrack, int density, int length, BYTE * gcrdata)
 			else
 				printf("\nHad to truncate track %d by %d bytes.",
 				  halftrack / 2, orglen - length);
+		}
+
+		// handle short tracks
+		orglen = length;
+		if(length < capacity[density & 3])
+		{
+			memset(gcrdata + length, 0x55, capacity[density & 3] - length);
+			length = capacity[density & 3];
+			printf("pad:%d ", length - orglen);
 		}
 	}
 
@@ -169,7 +177,7 @@ master_disk(CBM_FILE fd)
 {
 	int track, i, length, density;
 	int align_offset;	// how many bytes we are "late"
-	BYTE rawtrack[0x2400];
+	BYTE rawtrack[0x2800];
 	BYTE cmptrack[0x2000], cmpraw[0x2000];
 	BYTE gapbyte = 0x55;
 	char errorstring[0x1000];
@@ -196,10 +204,8 @@ master_disk(CBM_FILE fd)
 			continue;
 		}
 
-		align_offset = 0x100 + (0x100 * (track_density[track] & 3));
-
-		// add filler so track is completely erased
-		// also used for timing from track to track
+		// add filler so track is completely erased, plus alignment offset
+		align_offset = 0x400 + ((track_density[track] & 3) * 0x100);
 		memset(rawtrack, gapbyte, sizeof(rawtrack));
 
 		// append track data after alignment filler
@@ -214,7 +220,7 @@ master_disk(CBM_FILE fd)
 		for (i = 0; i < 10; i++)
 		{
 			send_mnib_cmd(fd, FL_WRITENOSYNC);
-			cbm_mnib_par_write(fd, 0);
+			cbm_mnib_par_write(fd, (align_disk) ? 0xfb : 0x00);
 
 			if (!cbm_mnib_write_track(fd, rawtrack, align_offset +
 			  track_length[track]))
@@ -404,9 +410,9 @@ parse_disk(CBM_FILE fd, FILE * fpin, char *track_header)
 		printf("G64: %d tracks, %d bytes each", g64tracks,
 		  g64maxtrack);
 
-		// reduce tracks if > 40, or else causes alignment problems (PJR)
-		if (g64tracks > 80)
-			g64tracks = 80;
+		// reduce tracks if > 41, we can't write 42 tracks
+		if (g64tracks > 82)
+			g64tracks = 82;
 
 		dens_pointer = 0;
 		for (track = start_track; track <= g64tracks; track += track_inc)
@@ -414,11 +420,6 @@ parse_disk(CBM_FILE fd, FILE * fpin, char *track_header)
 			// clear buffers
 			memset(buffer, 0, 0x2000);
 			memset(gcrdata, 0, 0x2000);
-
-			/*
-			 * There shouldn't be any G64's with halftracks out there yet? :)
-			 * we couldn't write them anyway
-			 */
 
 			/* get density from header or use default */
 			density = track_header[0x153 + dens_pointer];
