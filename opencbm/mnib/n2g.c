@@ -307,7 +307,7 @@ main(int argc, char **argv)
 			break;
 		}
 
-		if (track_len > 0 && track_len < 0x2000)
+		if (track_len > 0)
 		{
 			// handle illegal GCR
 			badgcr =

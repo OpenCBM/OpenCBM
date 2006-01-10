@@ -981,12 +981,11 @@ main(int argc, char *argv[])
 
 void closeout_drive(CBM_FILE fd)
 {
-	#ifdef DJGPP
 		send_mnib_cmd(fd, FL_RESET);
 		printf("drive reset...\n");
 		delay(2000);
-	#else
+#ifndef DJGPP
 		cbm_reset(fd);
 		cbm_driver_close(fd);
-	#endif
+#endif
 }
