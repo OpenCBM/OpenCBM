@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.4 2005-07-16 17:20:41 strik Exp $ \n
+** \version $Id: PortAccess.c,v 1.5 2006-01-21 11:26:28 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -296,6 +296,7 @@ ParPortInit(PUNICODE_STRING ParallelPortName, PDEVICE_EXTENSION Pdx)
     if (NT_SUCCESS(ntStatus))
     {
         Pdx->ParPortPortAddress = Pdx->PortInfo->Controller;
+        DBG_PPORT((DBG_PREFIX "Controller = 0x%p", Pdx->PortInfo->Controller));
     }
 
     // if we failed getting the parallel port info, but there was memory
