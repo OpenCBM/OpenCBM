@@ -1,0 +1,36 @@
+rem $Id: ddkbuild_local.bat.sample,v 1.1 2006-01-21 11:25:28 strik Exp $
+rem
+rem THIS IS A SAMPLE FILE FOR DDKBUILD_LOCAL.BAT
+rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
+rem CURRENT CBM4WIN DIRECTORY.
+rem
+rem EXAMPLE:
+rem
+rem If the cbm4win sources are in ~/somedir/cbm4win/,
+rem then store this file in ~/somedir/ddkbuild_local.bat
+rem
+
+set DDKBUILD_COMMAND_OSR=ddkbuild.bat
+set DDKBUILD_COMMAND_HOLLIS=ddkbuild_hollis.bat
+
+set BASEDIR=
+set W2KBASE=
+set WXPBASE=
+set WNETBASE=c:\WINDDK\3790.1830
+set BASH=c:\cygwin\bin\bash
+
+rem set COPYTARGET=
+rem set COPYSYM=
+
+set DDKBUILD_HOLLIS=1
+set CMDARGUMENTS=
+rem set DDKBUILD_ARGUMENTS=-prefast
+
+rem Settings for the BASH CC65 build process:
+
+rem set CC65PATH=/usr/local/bin/
+rem set CL65=%CC65PATH%cl65
+rem set LD65=%CC65PATH%ld65
+rem set OD=/usr/bin/od
+rem set SED=/usr/bin/sed
+rem set RM=/usr/bin/rm

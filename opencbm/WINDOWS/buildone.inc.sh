@@ -1,12 +1,12 @@
 #! /bin/sh
 
-CC65PATH=/usr/local/bin/
+[ "$CC65PATH" = "" ] && CC65PATH=
 
-CL65=$CC65PATH\cl65
-LD65=$CC65PATH\ld65
-OD=/usr/bin/od
-SED=/usr/bin/sed
-RM=/usr/bin/rm
+[ "$CL65"     = "" ] && CL65=$CC65PATH\cl65
+[ "$LD65"     = "" ] && LD65=$CC65PATH\ld65
+[ "$OD"       = "" ] && OD=od
+[ "$SED"      = "" ] && SED=sed
+[ "$RM"       = "" ] && RM=rm
 
 CA65_FLAGS="--feature labels_without_colons --feature pc_assignment --feature loose_char_term --asm-include-dir .."
 

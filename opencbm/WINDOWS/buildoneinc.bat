@@ -1,6 +1,10 @@
 @echo off
 rem start buildoneinc
 
+rem set default local settings (not controlled by CVS)
+if exist ..\..\DDKBUILD_LOCAL.BAT call ..\..\DDKBUILD_LOCAL.BAT
+
+
 if not defined BASH set BASH=bash
 
 rem set CYGWIN=c:\cygwin
