@@ -8,7 +8,7 @@
 [ "$SED"      = "" ] && SED=sed
 [ "$RM"       = "" ] && RM=rm
 
-CA65_FLAGS="--feature labels_without_colons --feature pc_assignment --feature loose_char_term --asm-include-dir .."
+CA65_FLAGS="$CA65_FLAGS --feature labels_without_colons --feature pc_assignment --feature loose_char_term --asm-include-dir .."
 
 funcbuildinc()
 {

@@ -1,4 +1,4 @@
-rem $Id: ddkbuild_local.bat.sample,v 1.1 2006-01-21 11:25:28 strik Exp $
+rem $Id: ddkbuild_local.bat.sample,v 1.2 2006-01-22 18:49:48 strik Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR DDKBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
@@ -34,3 +34,5 @@ rem set LD65=%CC65PATH%ld65
 rem set OD=/usr/bin/od
 rem set SED=/usr/bin/sed
 rem set RM=/usr/bin/rm
+
+rem set CA65_FLAGS=
