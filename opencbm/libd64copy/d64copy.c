@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.7 2005-09-11 13:32:33 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.8 2006-01-25 17:10:38 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -99,8 +99,8 @@ static const struct drive_prog
 };
 
 
-static const int default_interleave[] = { 17, 4, 13, 7 };
-static const int warp_write_interleave[] = { 0, 6, 12, 4 };
+static const int default_interleave[] = { -1, 17, 4, 13, 7, -1 };
+static const int warp_write_interleave[] = { -1, 0, 6, 12, 4, -1 };
 
 
 /*
@@ -238,6 +238,8 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
         settings->interleave = (dst->is_cbm_drive && settings->warp) ?
             warp_write_interleave[settings->transfer_mode] :
             default_interleave[settings->transfer_mode];
+
+        assert(settings->interleave >= 0);
     }
 
 
@@ -592,7 +594,6 @@ transfers[] =
     { &d64copy_pp_transfer, "parallel", "p%" },
     { NULL, NULL, NULL }
 };
-
 
 char *d64copy_get_transfer_modes()
 {
