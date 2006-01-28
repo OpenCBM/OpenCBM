@@ -6,7 +6,7 @@
 ;
 ; Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ;
-; "$Id: pp1571.a65,v 1.1 2004-11-07 11:05:12 strik Exp $"
+; "$Id: pp1571.a65,v 1.2 2006-01-28 18:38:37 strik Exp $"
 
 	* = $0700
 
@@ -19,15 +19,16 @@
 
 sblk	lda #$ff	; send block
 	sta $4003
-sblk0	lda ($30),y
+sblk0
+    jsr clk_1
+	lda ($30),y
 	sta $4001
 	jsr data_0
-	jsr clk_1
 	iny
+    jsr clk_0
 	lda ($30),y
 	sta $4001
 	jsr data_1
-	jsr clk_0
 	iny
 	bne sblk0
 	rts
@@ -35,13 +36,15 @@ sblk0	lda ($30),y
 sbyte	pha
 	lda #$ff
 	sta $4003
+	jsr clk_1
 	pla
 	sta $4001
-	lda #$00
-	sta $1800
-	jsr clk_1
+    jsr data_0
+	jsr clk_0
 	lda #$02
 	sta $1800
+    rts
+
 clk_0	lda #$04
 c0	bit $1800
 	beq c0

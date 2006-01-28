@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.6 2005-09-11 13:32:33 strik Exp $";
+    "@(#) $Id: pp.c,v 1.7 2006-01-28 18:38:37 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -18,11 +18,6 @@ static char *rcsid =
 #include <stdlib.h>
 
 #include "arch.h"
-
-enum pp_direction_e
-{
-    PP_READ, PP_WRITE
-};
 
 static CBM_FILE fd_cbm;
 static int two_sided;
@@ -35,19 +30,8 @@ static const unsigned char pp1571_drive_prog[] = {
 #include "pp1571.inc"
 };
 
-static void pp_check_direction(enum pp_direction_e dir)
-{
-    static enum pp_direction_e direction = PP_READ;
-    if(direction != dir)
-    {
-        arch_usleep(100);
-        direction = dir;
-    }
-}
-
 static int pp_write_nohs(CBM_FILE fd, char c1, char c2)
 {
-    pp_check_direction(PP_WRITE);
     cbm_pp_write(fd, c1);
     cbm_iec_release(fd, IEC_CLOCK);
 #ifndef USE_CBM_IEC_WAIT
@@ -75,22 +59,21 @@ static int pp_write(CBM_FILE fd, char c1, char c2)
 
 static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 {
-    pp_check_direction(PP_READ);
+    cbm_iec_release(fd, IEC_CLOCK);
 #ifndef USE_CBM_IEC_WAIT
     while(cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
     *c1 = cbm_pp_read(fd);
-    cbm_iec_release(fd, IEC_CLOCK);
 
+    cbm_iec_set(fd, IEC_CLOCK);
 #ifndef USE_CBM_IEC_WAIT
     while(!cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
     *c2 = cbm_pp_read(fd);
-    cbm_iec_set(fd, IEC_CLOCK);
 
     return 0;
 }
@@ -160,7 +143,6 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
 
     cbm_upload(fd_cbm, d, 0x700, drive_prog, prog_size);
     start(fd, d);
-    pp_check_direction(PP_WRITE);
     cbm_iec_wait(fd_cbm, IEC_DATA, 1);
     return 0;
 }
