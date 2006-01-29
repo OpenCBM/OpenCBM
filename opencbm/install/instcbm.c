@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.7 2004-12-22 18:00:17 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.8 2006-01-29 17:59:31 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -809,6 +809,7 @@ InstallDriver(parameter_t *Parameter)
                         }
                         else
                         {
+#ifdef _X86_
                             strcpy(&driverLocalPath[driverLocalLen], "opencbmvdd.dll");
                             strcpy(&driverSystemPath[driverSystemLen], "opencbmvdd.dll");
                             printf("\nCopying '%s' to '%s'", driverLocalPath, driverSystemPath);
@@ -818,6 +819,7 @@ InstallDriver(parameter_t *Parameter)
                                 printf(" FAILED!\n");
                             }
                             else
+#endif // #ifdef _X86_
                             {
                                 printf("\n");
                                 strcpy(driverSystemPath, "System32\\DRIVERS\\");
