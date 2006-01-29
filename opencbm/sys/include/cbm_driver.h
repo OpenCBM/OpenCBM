@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.3 2005-09-11 13:32:33 strik Exp $ \n
+** \version $Id: cbm_driver.h,v 1.4 2006-01-29 17:58:07 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **
@@ -29,6 +29,9 @@ typedef struct _DEVICE_EXTENSION DEVICE_EXTENSION, *PDEVICE_EXTENSION;
 #include "perfeval.h"
 
 /* The following defines are used if performance evaluation is selected. */
+
+/*! Performance evaluation: Make sure the measuring system works as expected */
+#define PERF_EVENT_MEASURE_TIME(_x_)    PERF_EVENT(0x1, (ULONG_PTR) _x_)
 
 /*! Performance evaluation: StartIo() is performed */
 #define PERF_EVENT_STARTIO(_x_)         PERF_EVENT(0x10, (ULONG_PTR) _x_)
