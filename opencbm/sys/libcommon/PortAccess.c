@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.5 2006-01-21 11:26:28 strik Exp $ \n
+** \version $Id: PortAccess.c,v 1.6 2006-01-29 17:58:56 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -296,7 +296,14 @@ ParPortInit(PUNICODE_STRING ParallelPortName, PDEVICE_EXTENSION Pdx)
     if (NT_SUCCESS(ntStatus))
     {
         Pdx->ParPortPortAddress = Pdx->PortInfo->Controller;
-        DBG_PPORT((DBG_PREFIX "Controller = 0x%p", Pdx->PortInfo->Controller));
+        DBG_PPORT((DBG_PREFIX "Got parallel port information:"));
+        DBG_PPORT((DBG_PREFIX "- OriginalController = 0x%p", Pdx->PortInfo->OriginalController));
+        DBG_PPORT((DBG_PREFIX "- Controller         = 0x%p", Pdx->PortInfo->Controller));
+        DBG_PPORT((DBG_PREFIX "- Span of controller = 0x%08x", Pdx->PortInfo->SpanOfController));
+        DBG_PPORT((DBG_PREFIX "- TryAllocatePort    = 0x%p", Pdx->PortInfo->TryAllocatePort));
+        DBG_PPORT((DBG_PREFIX "- FreePort           = 0x%p", Pdx->PortInfo->FreePort));
+        DBG_PPORT((DBG_PREFIX "- QueryNumWaiters    = 0x%p", Pdx->PortInfo->QueryNumWaiters));
+        DBG_PPORT((DBG_PREFIX "- Context            = 0x%p", Pdx->PortInfo->Context));
     }
 
     // if we failed getting the parallel port info, but there was memory
