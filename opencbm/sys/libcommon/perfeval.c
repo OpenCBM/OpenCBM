@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/perfeval.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.c,v 1.5 2005-09-11 13:32:33 strik Exp $ \n
+** \version $Id: perfeval.c,v 1.6 2006-01-29 17:57:00 strik Exp $ \n
 ** \n
 ** \brief Functions for performance evaluation purposes - KERNEL version
 **
@@ -20,6 +20,8 @@
 #include <wdm.h>
 
 #include "cbm_driver.h"
+
+#include "../libiec/i_iec.h"
 
 #ifdef PERFEVAL
 
@@ -156,6 +158,16 @@ PerfInit(VOID)
         ProcessorFrequency = li.LowPart;
 
 #endif
+
+        {
+            unsigned int waitPeriod = 100;
+
+            DBG_PRINT((DBG_PREFIX "Measuring time:"));
+            PERF_EVENT_MEASURE_TIME(0);
+            cbmiec_udelay(waitPeriod);
+            PERF_EVENT_MEASURE_TIME(waitPeriod);
+            DBG_PRINT((DBG_PREFIX "We waited %u us.", waitPeriod));
+        }
     }
 
     FUNC_LEAVE();
@@ -345,7 +357,12 @@ PerfSynchronize(VOID)
         {
             PERFEVAL_FILE_HEADER fileHeader;
 
-            fileHeader.FileVersion = 2;
+            fileHeader.FileVersion = 2
+#ifndef _X86_
+            | (1<<31);
+#endif /* #ifndef _X86_ */
+            ;
+
             fileHeader.ProcessorFrequency = ProcessorFrequency;
             fileHeader.CountEntries = CurrentPerformanceEvalEntry + 1;
 
