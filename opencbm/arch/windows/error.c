@@ -12,6 +12,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "arch.h"
 
@@ -73,60 +74,59 @@ void arch_error(int AUnused, unsigned int ErrorCode, const char *Format, ...)
 {
     va_list ap;
     char ErrorMessageBuffer[2048];
-    int m;
-    int n;
+    char ErrorMessageBuffer2[2048];
+    char *errorText;
 
     UNREFERENCED_PARAMETER(AUnused);
 
-    // Write the error message into the buffer
-
-    m = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS
-                      | FORMAT_MESSAGE_MAX_WIDTH_MASK,
-                      NULL,
-                      ErrorCode,
-                      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-                      (LPTSTR) ErrorMessageBuffer,
-                      sizeof(ErrorMessageBuffer)-1,
-                      NULL);
-
-    // make sure there is a trailing zero
-
-    ErrorMessageBuffer[m] = 0;
-
-
-    // Now, append the optional string to the output
+    // Write the optional string into the output
 
     if (Format && *Format)
     {
         va_start(ap, Format);
 
-        n = _vsnprintf(&ErrorMessageBuffer[m], sizeof(ErrorMessageBuffer) - m, Format, ap);
+        _vsnprintf(ErrorMessageBuffer2, sizeof(ErrorMessageBuffer2), Format, ap);
 
         va_end(ap);
 
-        if (n >= 0)
-        {
-            n += m;
-        }
-
-        if (n < 0 || n >= sizeof(ErrorMessageBuffer)-1)
-        {
-            n = sizeof(ErrorMessageBuffer)-2;
-        }
-
         // make sure there is a trailing zero
 
-        ErrorMessageBuffer[n] = 0;
+        ErrorMessageBuffer2[sizeof(ErrorMessageBuffer2) - 1] = 0;
+    }
 
-        fprintf(stderr, "%s\n", AUnused, ErrorCode, ErrorMessageBuffer);
+    // Get the error message
+
+    errorText = arch_strerror(ErrorCode);
+
+    // Append the message to the buffer. Make sure not to overwrite the buffer
+
+    if (errorText)
+    {
+        _snprintf(ErrorMessageBuffer, sizeof(ErrorMessageBuffer), "%s: %s", ErrorMessageBuffer2, errorText);
+
+        ErrorMessageBuffer[sizeof(ErrorMessageBuffer)-1] = 0;
+    }
+    else
+    {
+        assert(sizeof(ErrorMessageBuffer) >= sizeof(ErrorMessageBuffer2));
+
+        strcpy(ErrorMessageBuffer, ErrorMessageBuffer2);
+    }
+
+    fprintf(stderr, "%s\n", ErrorMessageBuffer);
 
 #if DBG
+
+    {
+        int n = strlen(ErrorMessageBuffer);
+
+        if (n == sizeof(ErrorMessageBuffer))
+            --n;
 
         ErrorMessageBuffer[n] = '\n';
         ErrorMessageBuffer[n+1] = 0;
         OutputDebugString(ErrorMessageBuffer);
+    }
 
 #endif
-
-    }
 }
