@@ -6,7 +6,7 @@
 ;
 ; Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ;
-; "$Id: pp1541.a65,v 1.2 2006-01-28 18:38:37 strik Exp $"
+; "$Id: pp1541.a65,v 1.3 2006-01-30 18:14:25 strik Exp $"
 
 ; XP1541 transfer routines
 
@@ -21,15 +21,15 @@
 
 sblk	lda #$ff	; send block
 	sta $1803
-sblk0	jsr clk_1
-	lda ($30),y
+sblk0	lda ($30),y
 	sta $1801
 	jsr data_0
+	jsr clk_1
 	iny
-	jsr clk_0
 	lda ($30),y
 	sta $1801
 	jsr data_1
+	jsr clk_0
 	iny
 	bne sblk0
 	rts
@@ -37,15 +37,13 @@ sblk0	jsr clk_1
 sbyte	pha
 	lda #$ff
 	sta $1803
-	jsr clk_1
 	pla
 	sta $1801
-	jsr data_0
-	jsr clk_0
+	lda #$00
+	sta $1800
+	jsr clk_1
 	lda #$02
 	sta $1800
-	rts
-
 clk_0	lda #$04
 c0	bit $1800
 	beq c0

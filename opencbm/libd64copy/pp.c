@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.8 2006-01-29 12:02:46 strik Exp $";
+    "@(#) $Id: pp.c,v 1.9 2006-01-30 18:14:25 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -76,21 +76,21 @@ static int pp_write(CBM_FILE fd, char c1, char c2)
 static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 {
     pp_check_direction(PP_READ);
-    cbm_iec_release(fd, IEC_CLOCK);
 #ifndef USE_CBM_IEC_WAIT
     while(cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
     *c1 = cbm_pp_read(fd);
+    cbm_iec_release(fd, IEC_CLOCK);
 
-    cbm_iec_set(fd, IEC_CLOCK);
 #ifndef USE_CBM_IEC_WAIT
     while(!cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
     *c2 = cbm_pp_read(fd);
+    cbm_iec_set(fd, IEC_CLOCK);
 
     return 0;
 }
