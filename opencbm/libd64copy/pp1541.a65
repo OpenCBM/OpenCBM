@@ -5,8 +5,9 @@
 ; 2 of the License, or (at your option) any later version.
 ;
 ; Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+; Copyright 2005-2006 Spiro Trikaliotis
 ;
-; "$Id: pp1541.a65,v 1.3 2006-01-30 18:14:25 strik Exp $"
+; "$Id: pp1541.a65,v 1.4 2006-01-30 20:40:05 strik Exp $"
 
 ; XP1541 transfer routines
 
@@ -39,11 +40,9 @@ sbyte	pha
 	sta $1803
 	pla
 	sta $1801
-	lda #$00
-	sta $1800
+	jsr data_0
 	jsr clk_1
-	lda #$02
-	sta $1800
+	jsr data_1
 clk_0	lda #$04
 c0	bit $1800
 	beq c0
@@ -62,32 +61,38 @@ gbyte	tya
 	txa
 	rts
 
-gts	lda #$00
+gts
+	jsr data_0
+	lda #$00
 	sta $1803
 	jsr clk_1
 	ldx $1801
-	lda #$00
-	sta $1800
+	jsr data_1
 	jsr clk_0
 	ldy $1801
+	rts
+
 data_1	lda #$02
 	.byte $2c
 data_0	lda #$00
 	sta $1800
 	rts
 
-gblk	lda #$00
-	sta $1803
+gblk
 	tya
 	lsr
 	bcc gblk0
 	jsr gbyte
 	iny
-gblk0	jsr clk_1
+gblk0
+	jsr data_0
+	lda #$00
+	sta $1803
+	jsr clk_1
 	lda $1801
 	sta ($30),y
 	iny
-	jsr data_0
+	jsr data_1
 	jsr clk_0
 	lda $1801
 	sta ($30),y
