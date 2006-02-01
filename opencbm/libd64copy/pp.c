@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.10 2006-01-30 20:40:04 strik Exp $";
+    "@(#) $Id: pp.c,v 1.11 2006-02-01 14:07:00 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -49,17 +49,17 @@ static int pp_write(CBM_FILE fd, char c1, char c2)
 {
     pp_check_direction(PP_WRITE);
 #ifndef USE_CBM_IEC_WAIT
-    while(cbm_iec_get(fd, IEC_DATA));
+    while(!cbm_iec_get(fd, IEC_DATA));
 #else
-    cbm_iec_wait(fd, IEC_DATA, 0);
+    cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
     cbm_pp_write(fd, c1);
     cbm_iec_release(fd, IEC_CLOCK);
 
 #ifndef USE_CBM_IEC_WAIT
-    while(!cbm_iec_get(fd, IEC_DATA));
+    while(cbm_iec_get(fd, IEC_DATA));
 #else
-    cbm_iec_wait(fd, IEC_DATA, 1);
+    cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
     cbm_pp_write(fd, c2);
     cbm_iec_set(fd, IEC_CLOCK);
@@ -71,17 +71,17 @@ static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 {
     pp_check_direction(PP_READ);
 #ifndef USE_CBM_IEC_WAIT
-    while(cbm_iec_get(fd, IEC_DATA));
+    while(!cbm_iec_get(fd, IEC_DATA));
 #else
-    cbm_iec_wait(fd, IEC_DATA, 0);
+    cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
     *c1 = cbm_pp_read(fd);
     cbm_iec_release(fd, IEC_CLOCK);
 
 #ifndef USE_CBM_IEC_WAIT
-    while(!cbm_iec_get(fd, IEC_DATA));
+    while(cbm_iec_get(fd, IEC_DATA));
 #else
-    cbm_iec_wait(fd, IEC_DATA, 1);
+    cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
     *c2 = cbm_pp_read(fd);
     cbm_iec_set(fd, IEC_CLOCK);
@@ -152,9 +152,12 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
         prog_size  = sizeof(pp1541_drive_prog);
     }
 
+    /* make sure the XP1541 portion of the cable is in input mode */
+    cbm_pp_read(fd_cbm);
+
     cbm_upload(fd_cbm, d, 0x700, drive_prog, prog_size);
     start(fd, d);
-    pp_check_direction(PP_WRITE);
+    pp_check_direction(PP_READ);
     cbm_iec_wait(fd_cbm, IEC_DATA, 1);
     return 0;
 }
@@ -164,6 +167,9 @@ static void close_disk(void)
     pp_write(fd_cbm, 0, 0);
     arch_usleep(100);
     cbm_iec_wait(fd_cbm, IEC_DATA, 0);
+
+    /* make sure the XP1541 portion of the cable is in input mode */
+    cbm_pp_read(fd_cbm);
 }
 
 static int send_track_map(unsigned char tr, const char *trackmap, unsigned char count)

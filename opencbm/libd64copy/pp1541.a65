@@ -7,96 +7,10 @@
 ; Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ; Copyright 2005-2006 Spiro Trikaliotis
 ;
-; "$Id: pp1541.a65,v 1.4 2006-01-30 20:40:05 strik Exp $"
+; "$Id: pp1541.a65,v 1.5 2006-02-01 14:07:01 strik Exp $"
 
 ; XP1541 transfer routines
 
-	* = $0700
+Drive1541 = 1
 
-	jmp gts		; get track/sector
-	jmp gbyte	; get byte
-	jmp gblk	; receive block
-	jmp sbyte	; send byte
-	jmp sblk	; send block
-	jmp data_1
-
-sblk	lda #$ff	; send block
-	sta $1803
-sblk0	lda ($30),y
-	sta $1801
-	jsr data_0
-	jsr clk_1
-	iny
-	lda ($30),y
-	sta $1801
-	jsr data_1
-	jsr clk_0
-	iny
-	bne sblk0
-	rts
-
-sbyte	pha
-	lda #$ff
-	sta $1803
-	pla
-	sta $1801
-	jsr data_0
-	jsr clk_1
-	jsr data_1
-clk_0	lda #$04
-c0	bit $1800
-	beq c0
-	rts
-
-clk_1   lda #$04
-c1	bit $1800
-	bne c1
-	rts
-
-gbyte	tya
-	pha
-	jsr gts
-	pla
-	tay
-	txa
-	rts
-
-gts
-	jsr data_0
-	lda #$00
-	sta $1803
-	jsr clk_1
-	ldx $1801
-	jsr data_1
-	jsr clk_0
-	ldy $1801
-	rts
-
-data_1	lda #$02
-	.byte $2c
-data_0	lda #$00
-	sta $1800
-	rts
-
-gblk
-	tya
-	lsr
-	bcc gblk0
-	jsr gbyte
-	iny
-gblk0
-	jsr data_0
-	lda #$00
-	sta $1803
-	jsr clk_1
-	lda $1801
-	sta ($30),y
-	iny
-	jsr data_1
-	jsr clk_0
-	lda $1801
-	sta ($30),y
-	jsr data_1
-	iny
-	bne gblk0
-	rts
+.include "pp1571.a65"
