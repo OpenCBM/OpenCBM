@@ -4,14 +4,14 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005 Spiro Trikaliotis
+ *  Copyright 2005-2006 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archlib_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: archlib_vice.c,v 1.3 2005-08-24 18:18:05 strik Exp $ \n
+** \version $Id: archlib_vice.c,v 1.4 2006-02-07 18:48:06 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        This variant is for accessing VICE instead of a real device
@@ -851,9 +851,9 @@ cbmarch_iec_poll(CBM_FILE HandleDevice)
 //    DbgOut("iec_poll = $%02x", line);
     DbgLineStatus((unsigned char)(line ^ 0xc0));
 
-    if ( (line & VICE_CLK_IN))  result |= IEC_CLOCK;
-    if ( (line & VICE_DATA_IN)) result |= IEC_DATA;
-    if (!(line & VICE_ATN_OUT)) result |= IEC_ATN;
+    if (!(line & VICE_CLK_IN))  result |= IEC_CLOCK;
+    if (!(line & VICE_DATA_IN)) result |= IEC_DATA;
+    if ( (line & VICE_ATN_OUT)) result |= IEC_ATN;
 
     FUNC_LEAVE_INT(result);
 }
@@ -976,7 +976,7 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line)
 
         vicepause();
         vicewriteregister(reg_a, mask ^ 0xff);
-        vicewriteregister(reg_x, line ^ mask);
+        vicewriteregister(reg_x, line);
         send_and_wait(addr_iec_setrelease, data_iec_setrelease, sizeof(data_iec_setrelease));
     }
 
