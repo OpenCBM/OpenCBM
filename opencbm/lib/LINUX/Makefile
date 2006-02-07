@@ -1,6 +1,8 @@
-# $Id: Makefile,v 1.4 2005-11-20 12:23:52 strik Exp $
+# $Id: Makefile,v 1.5 2006-02-07 19:00:11 strik Exp $
 
 include ../LINUX/config.make
+
+CA65_FLAGS += --asm-include-dir ../libd64copy/
 
 .PHONY: all clean mrproper install uninstall install-files
 

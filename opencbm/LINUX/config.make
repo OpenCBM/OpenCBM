@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.3 2005-11-19 16:42:42 strik Exp $
+# $Id: config.make,v 1.4 2006-02-07 19:00:10 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -86,7 +86,7 @@ XA          = xa
 # (cc65 >= 2.6 required)
 CL65        = cl65
 LD65        = ld65
-CA65_FLAGS  = --feature labels_without_colons --feature pc_assignment --feature loose_char_term
+CA65_FLAGS  = --feature labels_without_colons --feature pc_assignment --feature loose_char_term --asm-include-dir ..
 
 
 #
