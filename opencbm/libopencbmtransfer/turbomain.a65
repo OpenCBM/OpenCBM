@@ -1,0 +1,133 @@
+
+; This program is free software; you can redistribute it and/or
+; modify it under the terms of the GNU General Public License
+; as published by the Free Software Foundation; either version
+; 2 of the License, or (at your option) any later version.
+;
+; Copyright 2005 Spiro Trikaliotis
+;
+; "$Id: turbomain.a65,v 1.1.2.1 2006-02-12 16:59:20 strik Exp $"
+
+; libopencbmtransfer routines, main loop
+
+        .include "common.i65"
+
+; define the next if WRITEMEM should be tested
+DefTestWriteMem = 1
+DefFlipLed = 1
+
+        *=$0500
+
+        jsr init
+        jmp start
+
+.ifdef DefTestWriteMem
+ptr2 = $32
+.endif
+
+CMD_EXECUTE = $80
+CMD_READMEM = $1
+CMD_WRITEMEM = $0
+
+get_ts = $0700
+get_byte = $0703
+get_block = $0706
+send_block = $070c
+init = $070f
+
+readmem:
+        jsr send_block
+        beq start       ; uncond
+
+execute_cmd:
+        jsr ts
+        jmp (ptr)
+
+        ; Init transfer routine
+start:
+.ifdef DefFlipLed
+        jsr flipled
+.endif
+        jsr get_byte
+.ifdef DefFlipLed
+        jsr flipled
+.endif
+        bmi execute_cmd
+
+readmem_cmd:
+writemem_cmd:
+        pha
+        jsr ts
+        jsr get_byte
+        tay
+        pla
+        bne readmem     ; read memory, then execute that
+.ifdef DefTestWriteMem
+        lda #0
+        sta ptr
+        lda #3
+        sta ptr+1
+.endif
+        jsr get_block
+.ifdef DefTestWriteMem
+        ldy #0
+cmpnext lda (ptr),y
+        cmp (ptr2),y
+        bne error
+        iny
+        bne cmpnext
+.endif
+        beq start       ; uncond
+
+.ifdef DefTestWriteMem
+error:
+        jsr flipled
+        jsr delay1
+        jsr flipled
+        jsr delay1
+        jmp error
+.endif
+
+ts:
+        jsr get_ts
+        stx ptr
+        sty ptr+1
+.ifdef DefTestWriteMem
+        stx ptr2
+        sty ptr2+1
+.endif
+        rts
+
+
+
+.ifdef DefFlipLed
+flipled:
+        pha
+        lda #8
+        eor $1c00
+        sta $1c00
+        pla
+        rts
+
+delay1:
+        pha
+        txa
+        pha
+        tya
+        pha
+
+        ldx #0
+        ldy #0
+
+loop:   dey
+        bne loop
+        dex
+        bne loop
+
+        pla
+        tay
+        pla
+        tax
+        pla
+        rts
+.endif

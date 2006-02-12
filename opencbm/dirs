@@ -10,5 +10,7 @@ DIRS= \
 	cbmctrl \
 	install \
 	lib \
+	libopencbmtransfer \
 	demo \
+	sample \
 	sys
