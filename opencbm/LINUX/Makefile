@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2005-11-18 19:39:12 strik Exp $
+# $Id: Makefile,v 1.3 2006-02-12 15:13:29 strik Exp $
 
 include LINUX/config.make
 
@@ -7,7 +7,7 @@ CBMPERM  = 666
 DEVMAJOR = 10
 DEVMINOR = 177
 SUBDIRS  = sys/linux include arch/$(ARCH) lib compat \
-           cbmctrl cbmformat d64copy cbmcopy \
+           cbmctrl cbmformat cbmforng d64copy cbmcopy \
            mnib \
            demo/flash demo/morse docs
 

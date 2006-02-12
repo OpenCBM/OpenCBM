@@ -2,6 +2,7 @@ DIRS= \
 	arch \
 	mnib \
 	cbmformat \
+	cbmforng \
 	libcbmcopy \
 	cbmcopy \
 	libd64copy \

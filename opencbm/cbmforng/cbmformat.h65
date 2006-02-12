@@ -1,0 +1,95 @@
+;/*
+; * cbmformat.o65 - 6502 based fast formatting routine with probing for
+; *                 the Commodore 1541 floppy disk drive and compatibles
+; *
+; * Copyright (C) 2005,2006 Wolfgang Moser
+; *
+; *	This library is free software; you can redistribute it and/or
+; *	modify it under the terms of the GNU Lesser General Public
+; *	License as published by the Free Software Foundation; either
+; *	version 2.1 of the License, or (at your option) any later version.
+; */
+;
+; Development version of the next generation CBM formatter: 0.1.0.34-mo20060201
+;
+;
+; Header declaration of the parameter block, including the 5 byte GCR
+; patterns that describe the format pattern generattion of the data blocks
+;
+;
+; This parameter block needs to be set up and then send to the floppy
+; disk drive's RAM at location $0200-.sizeof(FormatParameters). While
+; the last six bytes are parameters controlling some features of the
+; formatter, the first six 5 byte blocks are GCR encoded parts of the
+; format patters that have to written to disk.
+;
+; For the following data structures (and the implementation of the
+; formatter) it is assumed that the data block parts of each sector
+; are filled uniformly. Before the start of each data block a marker
+; byte of $07 is following the SYNC mark. Furthermore to correctly
+; "emulate" the original Commodore format pattern the very first
+; byte of each data block differs from all remaining bytes. At the
+; end of each data block, a checksum byte is following which differs
+; from the uniform fill pattern. Furthermore two filler bytes with
+; a value of $00 complete a raw sector.
+; Because of these differences, three 5 byte GCR pattern blocks are
+; maintained within the structure. One for the beginning of the data
+; block, then a pattern that is repeated 63 times, when writing a
+; data block and a 5 byte pattern block for writing the end.
+; With the original Commodore 1541 disk format, the beginning of a
+; data block differs on track 1 and because of another checksum also
+; its end. To successfully generate all the data block patterns on the
+; host side, do the following steps (e.g. Commodore 1541 disk format):
+;
+;     - fill a 4 byte buffer with:  $01 $01 $01 $01
+;     - GCR convert that buffer into a 5 byte pattern and store it to CDBGIMT
+;
+;     - fill a 4 byte buffer with:  $07 $4b $01 $01
+;     - GCR convert that buffer into a 5 byte pattern and store it to CDBGSTN
+;
+;     - fill a 4 byte buffer with:  $07 $00 $01 $01
+;     - GCR convert that buffer into a 5 byte pattern and store it to CDBGST1
+;
+;     - fill a 4 byte buffer with:  $01 $01 $00 $00  ($01 = $00 EXOR $01)
+;     - GCR convert that buffer into a 5 byte pattern and store it to CDBGEN1
+;
+;     - fill a 4 byte buffer with:  $01 $4a $00 $00  ($4a = $4b EXOR $01)
+;     - GCR convert that buffer into a 5 byte pattern and store it to CDBGENN
+;
+; The last 5 byte pattern describes the second 5 byte GCR part of
+; each sector header of the disk beeing formatted. While the first
+; sector header parts are created just in time, the second part can
+; be precreated, since it is constant for the whole disk. It consists
+; of the second and then the first disk header ID, followed by two
+; filler bytes of $0f, all encoded to GCR. To create it on host side
+; do:
+;
+;     - fill a 4 byte buffer with:  HID2 HID1 $0f $0f
+;     - GCR convert that buffer into a 5 byte pattern and store it to CHDR2ND
+;
+; Take note that the bytes HID1 and HID2 must be the very same values
+; that are send to the disk drive, when starting the format code and
+; sending the disk's name as well as the format ID (the both header
+; IDs).
+;
+; Example for executing the uploaded formatting routine after the
+; parameter block was transmitted also:
+;
+;     "M-E"+CHR$(3)+CHR$(3)+"0:DISKNAME,ID"
+;
+.struct FormatParameters
+	CDBGIMT .res 5				; intermediate section of data block
+	CDBGSTN .res 5				; start of data block for track 2 to 40
+	CDBGST1 .res 5				; start of data block for track 1
+	CDBGEN1 .res 5				; end of data block for tracks 1
+	CDBGENN .res 5				; end of data block for tracks 2 to 40
+	CHDR2ND .res 5				; second part of sector header block including filler
+	P_STRCK .byte				; start track parameter
+	P_ETRCK .byte				; end track parameter (last track plus one)
+	P_RETRY .byte				; number of retries (per disk, not per track)
+	P_DOBMP .byte				; flag, if an initial head bump should be done
+	P_DEMAG .byte				; flag, if the disk should be demagnetized
+	P_VRIFY .byte				; flag, if the disk should be verified
+.endstruct
+	;	P_CSHNG .byte			; flag, if the cushioning should be used
+

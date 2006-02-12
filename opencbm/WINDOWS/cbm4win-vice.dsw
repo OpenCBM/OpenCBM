@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "all"=".\all.dsp" - Package Owner=<4>
+Project: "all"=.\all.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "allvs"=".\allvs.dsp" - Package Owner=<4>
+Project: "allvs"=.\allvs.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -71,11 +71,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name mnibpshift
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name cbmforng
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "arch"="..\arch\windows\WINBUILD\arch.dsp" - Package Owner=<4>
+Project: "arch"=..\arch\windows\WINBUILD\arch.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -87,7 +90,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cbmcopy"="..\cbmcopy\WINBUILD\cbmcopy.dsp" - Package Owner=<4>
+Project: "cbmcopy"=..\cbmcopy\WINBUILD\cbmcopy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -108,7 +111,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cbmctrl"="..\cbmctrl\WINBUILD\cbmctrl.dsp" - Package Owner=<4>
+Project: "cbmctrl"=..\cbmctrl\WINBUILD\cbmctrl.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -126,7 +129,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cbmformat"="..\cbmformat\WINBUILD\cbmformat.dsp" - Package Owner=<4>
+Project: "cbmformat"=..\cbmformat\WINBUILD\cbmformat.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -144,7 +147,25 @@ Package=<4>
 
 ###############################################################################
 
-Project: "d64copy"="..\d64copy\WINBUILD\d64copy.dsp" - Package Owner=<4>
+Project: "cbmforng"=..\cbmforng\WINBUILD\cbmforng.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "d64copy"=..\d64copy\WINBUILD\d64copy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -165,7 +186,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "demoflash"="..\demo\flash\WINBUILD\demoflash.dsp" - Package Owner=<4>
+Project: "demoflash"=..\demo\flash\WINBUILD\demoflash.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -183,7 +204,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "demomorse"="..\demo\morse\WINBUILD\demomorse.dsp" - Package Owner=<4>
+Project: "demomorse"=..\demo\morse\WINBUILD\demomorse.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -201,7 +222,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "demorpm1541"="..\demo\rpm1541\WINBUILD\demorpm1541.dsp" - Package Owner=<4>
+Project: "demorpm1541"=..\demo\rpm1541\WINBUILD\demorpm1541.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -219,7 +240,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "install"="..\install\WINBUILD\install.dsp" - Package Owner=<4>
+Project: "install"=..\install\WINBUILD\install.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -234,7 +255,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libcbmcopy"="..\libcbmcopy\WINBUILD\libcbmcopy.dsp" - Package Owner=<4>
+Project: "libcbmcopy"=..\libcbmcopy\WINBUILD\libcbmcopy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -249,7 +270,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libd64copy"="..\libd64copy\WINBUILD\libd64copy.dsp" - Package Owner=<4>
+Project: "libd64copy"=..\libd64copy\WINBUILD\libd64copy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -267,7 +288,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mnib"="..\mnib\WINBUILD\mnib.dsp" - Package Owner=<4>
+Project: "mnib"=..\mnib\WINBUILD\mnib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -333,7 +354,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "opencbm"="..\lib\WINVICEBUILD\opencbm.dsp" - Package Owner=<4>
+Project: "opencbm"=..\lib\WINVICEBUILD\opencbm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -348,7 +369,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "syslibcommon"="..\sys\libcommon\syslibcommon.dsp" - Package Owner=<4>
+Project: "syslibcommon"=..\sys\libcommon\syslibcommon.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -360,7 +381,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "syslibiec"="..\sys\libiec\syslibiec.dsp" - Package Owner=<4>
+Project: "syslibiec"=..\sys\libiec\syslibiec.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -372,7 +393,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "sysnt4"="..\sys\nt4\sysnt4.dsp" - Package Owner=<4>
+Project: "sysnt4"=..\sys\nt4\sysnt4.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -384,7 +405,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "sysw98"="..\sys\wdm\win98\sysw98.dsp" - Package Owner=<4>
+Project: "sysw98"=..\sys\wdm\win98\sysw98.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -396,7 +417,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "syswdm"="..\sys\wdm\win2000\syswdm.dsp" - Package Owner=<4>
+Project: "syswdm"=..\sys\wdm\win2000\syswdm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -408,7 +429,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "vdd"="..\sys\vdd\dll\WINBUILD\vdd.dsp" - Package Owner=<4>
+Project: "vdd"=..\sys\vdd\dll\WINBUILD\vdd.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
