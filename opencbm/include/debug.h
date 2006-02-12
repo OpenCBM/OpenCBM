@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.9 2005-09-11 13:32:33 strik Exp $ \n
+** \version $Id: debug.h,v 1.10 2006-02-12 15:52:56 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -20,7 +20,23 @@
    #error Only one of DBG_KERNELMODE and DBG_USERMODE must be specified!
 #endif
 
+#ifndef DBG
+ #ifdef _DEBUG
+  #define DBG 1
+  #define __FUNCTION__ ""
+ #endif
+#endif
+
 #if DBG
+
+       /* as dumping memory is used regularly when debugging,
+          we give a debug helper function for this */
+
+       extern void dbg_memdump(const char *Where,
+           const unsigned char *InputBuffer,
+           const unsigned int Count);
+
+       #define DBG_MEMDUMP(_Where, _Buffer, _Count) dbg_memdump(_Where, _Buffer, _Count)
 
        #define DBG_MAX_BUFFERLEN 4096
 
@@ -197,6 +213,8 @@ int __cdecl main(int argc, char *argv[])
 
 #else // #ifdef DBG_KERNELMODE
 
+              #include <windows.h>
+
               /*! This macro is called to output the buffer */
               #define _DBG_PERFORM(_xxx) OutputDebugString(_xxx);
 
@@ -257,7 +275,7 @@ int __cdecl main(int argc, char *argv[])
        /*! leave the function with a return value of type HANDLE */
        #define FUNC_LEAVE_HANDLE( _xxx ) { const HANDLE  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with HANDLE=%u", __FUNCTION__, (unsigned)(_OUT_) )); }      return _OUT_; }
        /*! leave the function with a return value of type STRING */
-       #define FUNC_LEAVE_STRING( _xxx ) { const char *  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with '%s'",      __FUNCTION__,           (_OUT_) )); }      return _OUT_; }
+       #define FUNC_LEAVE_STRING( _xxx ) { const char *  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with '%s'",      __FUNCTION__,           (_OUT_) )); }      return _xxx;  }
        /*! leave the function with a return value of type ULONG */
        #define FUNC_LEAVE_ULONG(  _xxx ) { const ULONG   _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with ULONG=%ul", __FUNCTION__, (ULONG)   (_OUT_) )); }      return _OUT_; }
        /*! leave the function with a return value of type ULONG */
@@ -316,6 +334,8 @@ int __cdecl main(int argc, char *argv[])
        #endif
 
 #else  // #if DBG
+
+       #define DBG_MEMDUMP(_Where, _Buffer, _Count)
 
        //! On release builds, a dummy
        #define DBG_BREAKPOINT

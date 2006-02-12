@@ -1,13 +1,11 @@
 /*! ************************************************************** 
 ** \file arch/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.2 2005-03-02 18:17:17 strik Exp $ \n
+** \version $Id: debug.c,v 1.3 2006-02-12 15:52:56 strik Exp $ \n
 ** \n
 ** \brief Debugging help functions and definitions
 **
 ****************************************************************/
-
-#if DBG
 
 #ifndef DBG_KERNELMODE
     /*! Mark: We are in user-space (for debug.h) */
@@ -15,6 +13,8 @@
 #endif // #ifndef DBG_KERNELMODE
 
 #include "debug.h"
+
+#if DBG
 
 #include <stdarg.h>
 #include <stdio.h>

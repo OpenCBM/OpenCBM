@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.8 2006-01-29 17:59:31 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.9 2006-02-12 15:52:56 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <direct.h>
 
-#include "instcbm.h"
 #include "cbmioctl.h"
 
 #include <getopt.h>
@@ -39,6 +38,7 @@
 
 #include "debug.h"
 
+#include "instcbm.h"
 
 /*! \brief Format a returned error code into a string
 

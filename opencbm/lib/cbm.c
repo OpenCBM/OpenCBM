@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.9 2005-11-20 13:37:43 strik Exp $ \n
+** \version $Id: cbm.c,v 1.10 2006-02-12 15:52:56 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -37,54 +37,6 @@
 
 // #define DBG_DUMP_RAW_READ
 // #define DBG_DUMP_RAW_WRITE
-
-/*-------------------------------------------------------------------*/
-/*--------- DEBUGGING FUNCTIONS -------------------------------------*/
-
-#if DBG
-
-#include <stdio.h>
-
-static void 
-memdump(IN const char *Where, IN const unsigned char *InputBuffer, IN const size_t Count)
-{
-    unsigned i;
-    char outputBufferChars[17];
-    char outputBuffer[100];
-    char *p;
-
-    p = outputBuffer;
-
-    DBG_PRINT((DBG_PREFIX "%s: (0x%04x)", Where, (unsigned) Count));
-
-    for (i=0; i<Count; i++) 
-    {
-        p += sprintf(p, "%02x ", (unsigned) InputBuffer[i]);
-
-        if (i % 16 == 7)
-        {
-            p += sprintf(p, "- ");
-        }
-
-        outputBufferChars[i % 16] = isprint(InputBuffer[i]) ? InputBuffer[i] : '.';
-
-        if (i % 16 == 15)
-        {
-            outputBufferChars[(i % 16) + 1] = 0;
-            DBG_PRINT((DBG_PREFIX "%04x: %-50s  %s",
-                (unsigned) i & 0xfff0, outputBuffer, outputBufferChars));
-            p = outputBuffer;
-        }
-    }
-
-    if (i % 16 != 0)
-    {
-        outputBufferChars[i % 16] = 0;
-        DBG_PRINT((DBG_PREFIX "%04x: %-50s  %s",
-            (unsigned) i & 0xfff0, outputBuffer, outputBufferChars));
-    }
-}
-#endif // #if DBG
 
 /*-------------------------------------------------------------------*/
 /*--------- DRIVER HANDLING -----------------------------------------*/
@@ -198,7 +150,7 @@ cbm_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
     FUNC_ENTER();
 
 #ifdef DBG_DUMP_RAW_WRITE
-    memdump("cbm_raw_write", Buffer, Count);
+    DBG_MEMDUMP("cbm_raw_write", Buffer, Count);
 #endif
 
     FUNC_LEAVE_INT(cbmarch_raw_write(HandleDevice,Buffer, Count));
@@ -238,7 +190,7 @@ cbm_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
     bytesRead = cbmarch_raw_read(HandleDevice, Buffer, Count);
 
 #ifdef DBG_DUMP_RAW_READ
-    memdump("cbm_raw_read", Buffer, bytesRead);
+    DBG_MEMDUMP("cbm_raw_read", Buffer, bytesRead);
 #endif
 
     FUNC_LEAVE_INT(bytesRead);
