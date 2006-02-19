@@ -20,4 +20,5 @@ INCLUDES=../../include;../../include/WINDOWS;../../../include;../../../include/W
 
 SOURCES= 	../LoadUnload.c \
 		../PortEnum.c \
+		../PortAccessWdm.c \
 		cbm4wdm.rc

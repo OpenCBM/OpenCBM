@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/util.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util.c,v 1.4 2005-09-11 13:32:33 strik Exp $ \n
+** \version $Id: util.c,v 1.5 2006-02-19 17:29:51 strik Exp $ \n
 ** \n
 ** \brief Some utility functions for the IEC library
 **
@@ -105,7 +105,7 @@ cbmiec_block_irq(VOID)
     DBGDO(DBG_ASSERT(InterlockedIncrement(&i_blockirq_usage_count)==1));
 
     KeRaiseIrql(HIGH_LEVEL, &i_blockirq_previous_irql);
-//    __asm cli
+    CLI();
 
     FUNC_LEAVE();
 }
@@ -120,7 +120,7 @@ cbmiec_release_irq(VOID)
 {
     FUNC_ENTER();
 
-//    __asm sti
+    STI();
     KeLowerIrql(i_blockirq_previous_irql);
 
     DBGDO(DBG_ASSERT(InterlockedDecrement(&i_blockirq_usage_count)==0));

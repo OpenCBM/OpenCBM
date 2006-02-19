@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004-2006 Spiro Trikaliotis <cbm4win@trikaliotis.net>
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.6 2006-01-29 17:58:56 strik Exp $ \n
+** \version $Id: PortAccess.c,v 1.7 2006-02-19 17:29:51 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -440,7 +440,7 @@ ParPortGetPnpInformation(PDEVICE_EXTENSION Pdx, PPARALLEL_PNP_INFORMATION PnpInf
 }
 #undef DBG_PPORT_VERBOSE
 
-/*! \brief Set the operational mode of the parallel port
+/*! \brief Set the operational mode of the parallel port, WDM Version
 
  This function sets the operational mode of the parallel port.
 
@@ -453,16 +453,16 @@ ParPortGetPnpInformation(PDEVICE_EXTENSION Pdx, PPARALLEL_PNP_INFORMATION PnpInf
  This function must be run at IRQL == PASSIVE_LEVEL.
 */
 NTSTATUS
-ParPortSetMode(PDEVICE_EXTENSION Pdx)
+ParPortSetModeWdm(PDEVICE_EXTENSION Pdx)
 {
     PARALLEL_PNP_INFORMATION pnpInformation;
     NTSTATUS ntStatus;
 
     FUNC_ENTER();
 
-    // assume we have success in the following
+    // do not assume success for the following
 
-    ntStatus = STATUS_SUCCESS;
+    ntStatus = STATUS_INVALID_PARAMETER;
 
     if (ParPortGetPnpInformation(Pdx, &pnpInformation))
     {
@@ -522,7 +522,7 @@ ParPortSetMode(PDEVICE_EXTENSION Pdx)
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }
 
-/*! \brief Unset the operational mode of the parallel port
+/*! \brief Unset the operational mode of the parallel port, WDM Version
 
  This function unsets the operational mode of the parallel port.
 
@@ -536,7 +536,7 @@ ParPortSetMode(PDEVICE_EXTENSION Pdx)
  This function must be run at IRQL == PASSIVE_LEVEL.
 */
 NTSTATUS
-ParPortUnsetMode(PDEVICE_EXTENSION Pdx)
+ParPortUnsetModeWdm(PDEVICE_EXTENSION Pdx)
 {
     PARALLEL_PNP_INFORMATION pnpInformation;
     NTSTATUS ntStatus;

@@ -17,4 +17,5 @@ INCLUDES=../include;../include/WINDOWS;../../include;../../include/WINDOWS;../li
 
 SOURCES= 	LoadUnload.c \
 		PortEnum.c \
+		PortAccessNt4.c \
 		cbm4nt.rc

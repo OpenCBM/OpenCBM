@@ -13,7 +13,7 @@ CFG=sysnt4 - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "sysnt4.mak" CFG="nt4 - Win32 Debug"
+!MESSAGE NMAKE /f "sysnt4.mak" CFG="sysnt4 - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -87,6 +87,10 @@ CFG=sysnt4 - Win32 Debug
 # Begin Source File
 
 SOURCE=.\LoadUnload.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\PortAccessNt4.c
 # End Source File
 # Begin Source File
 

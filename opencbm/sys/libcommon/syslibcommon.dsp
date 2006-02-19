@@ -193,6 +193,30 @@ SOURCE=..\..\include\version.h
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # End Group
+# Begin Group "i386"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\i386\clisti.c
+# End Source File
+# End Group
+# Begin Group "AMD64"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\amd64\clisti.c
+# End Source File
+# End Group
+# Begin Group "iA64"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\ia64\clisti.c
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\.cvsignore

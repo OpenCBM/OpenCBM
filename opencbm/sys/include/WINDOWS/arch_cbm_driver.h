@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.3 2005-08-24 18:18:05 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.4 2006-02-19 17:29:51 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **
@@ -49,6 +49,13 @@ struct _ARCH_DEVICE_EXTENSION {
 
     /*! Are we running on an NT4 system? */
     BOOLEAN IsNT4;
+
+    /*! != 0 if ECP/EPP modes are not handled by parport.sys, but by us. 
+     *  This is only allowed if we are running on NT4.
+     *  \remark The NT4 code uses this internally to remember the type
+     *  of parallel port (ECP, EPP, SPP, bidir).
+     */
+    ULONG HandleEcpEppMyself;
 
     /*! Pointer to the lower device object *
      * \todo Only for WDM driver PDEVICE_OBJECT LowerDeviceObject;
@@ -194,6 +201,12 @@ extern NTSTATUS
 ParPortUnsetMode(PDEVICE_EXTENSION Pdx);
 
 extern NTSTATUS
+ParPortSetModeWdm(PDEVICE_EXTENSION Pdx);
+
+extern NTSTATUS
+ParPortUnsetModeWdm(PDEVICE_EXTENSION Pdx);
+
+extern NTSTATUS
 ParPortAllocInterrupt(PDEVICE_EXTENSION Pdx, PKSERVICE_ROUTINE Isr);
 
 extern NTSTATUS
@@ -229,3 +242,9 @@ CbmGetCurrentProcessorNumber(VOID);
 
 extern ULONG
 CbmGetNumberProcessors(VOID);
+
+extern VOID
+CLI(VOID);
+
+extern VOID
+STI(VOID);

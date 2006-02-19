@@ -90,6 +90,10 @@ SOURCE=..\LoadUnload.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\PortAccessWdm.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\PortEnum.c
 # End Source File
 # End Group
