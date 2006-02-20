@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archlib_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: archlib_vice.c,v 1.5 2006-02-20 12:11:16 strik Exp $ \n
+** \version $Id: archlib_vice.c,v 1.6 2006-02-20 19:07:28 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        This variant is for accessing VICE instead of a real device
@@ -955,30 +955,32 @@ static unsigned int addr_iec_setrelease = 0x2680;
 void
 cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
-    __u_char line = 0;
-    __u_char mask = 0;
+    __u_char set = 0;
+    __u_char release = 0;
 
     FUNC_ENTER();
 
+    DBG_ASSERT((Set & Release) == 0);
+
 //    DbgOut("");
-//    DbgOut("setrelease: Mask = %u, Line = %u", Mask, Line);
+//    DbgOut("setrelease: Mask = %u, Line = %u", Set, Release);
     cbmarch_iec_poll(HandleDevice);
 
-    if (Set & IEC_DATA)  mask |= VICE_DATA_OUT;
-    if (Set & IEC_CLOCK) mask |= VICE_CLK_OUT;
-    if (Set & IEC_ATN)   mask |= VICE_ATN_OUT;
+    if (Set & IEC_DATA)  set |= VICE_DATA_OUT;
+    if (Set & IEC_CLOCK) set |= VICE_CLK_OUT;
+    if (Set & IEC_ATN)   set |= VICE_ATN_OUT;
 
-    if (Release & IEC_DATA)  line |= VICE_DATA_OUT;
-    if (Release & IEC_CLOCK) line |= VICE_CLK_OUT;
-    if (Release & IEC_ATN)   line |= VICE_ATN_OUT;
+    if (Release & IEC_DATA)  release |= VICE_DATA_OUT;
+    if (Release & IEC_CLOCK) release |= VICE_CLK_OUT;
+    if (Release & IEC_ATN)   release |= VICE_ATN_OUT;
 
-    if (mask)
+    if (set || release)
     {
-//        DbgOut("iec_setrelease = mask = $%02x, line = $%02x", mask, line);
+//        DbgOut("iec_setrelease = set = $%02x, release = $%02x", set, release);
 
         vicepause();
-        vicewriteregister(reg_a, mask ^ 0xff);
-        vicewriteregister(reg_x, line);
+        vicewriteregister(reg_a, release ^ 0xff);
+        vicewriteregister(reg_x, set);
         send_and_wait(addr_iec_setrelease, data_iec_setrelease, sizeof(data_iec_setrelease));
     }
 
