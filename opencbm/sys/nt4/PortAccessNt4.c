@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/PortAccessNt4.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccessNt4.c,v 1.1 2006-02-19 17:29:51 strik Exp $ \n
+** \version $Id: PortAccessNt4.c,v 1.2 2006-02-20 15:57:54 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver,
 **        NT4 version
@@ -425,7 +425,7 @@ prport(PUCHAR port)
    Pointer to a device extension which contains the DEVICE_OBJECT 
    of the parallel port driver.
 
- This function has to be balanced with a corresponding ParPortUnsetMode()
+ This function has to be balanced with a corresponding ParPortUnsetModeNt4()
 
  This function must be run at IRQL == PASSIVE_LEVEL.
 */
@@ -456,6 +456,12 @@ ParPortSetModeNt4(PDEVICE_EXTENSION Pdx)
         prport(Pdx->ParPortPortAddress);
     }
 
+    if (lptmode > lptSPP)
+    {
+        DBG_PRINT((DBG_PREFIX "Writing the value 0xE4 to 0x%04x", Pdx->ParPortPortAddress+2));
+        WRITE_PORT_UCHAR(Pdx->ParPortPortAddress+2,0xE4);
+    }
+
     Pdx->HandleEcpEppMyself = (lptmode & 0xFF) | ((oldecpmode & 0xFF) << 8);
 
     FUNC_LEAVE_NTSTATUS(ntStatus);
@@ -470,7 +476,7 @@ ParPortSetModeNt4(PDEVICE_EXTENSION Pdx)
    of the parallel port driver.
 
  This function mustn't be called without a prior call to
- ParPortSetMode()
+ ParPortSetModeNt4()
 
  This function must be run at IRQL == PASSIVE_LEVEL.
 */

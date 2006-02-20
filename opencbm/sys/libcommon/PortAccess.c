@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.7 2006-02-19 17:29:51 strik Exp $ \n
+** \version $Id: PortAccess.c,v 1.8 2006-02-20 15:57:54 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -448,7 +448,7 @@ ParPortGetPnpInformation(PDEVICE_EXTENSION Pdx, PPARALLEL_PNP_INFORMATION PnpInf
    Pointer to a device extension which contains the DEVICE_OBJECT 
    of the parallel port driver.
 
- This function has to be balanced with a corresponding ParPortUnsetMode()
+ This function has to be balanced with a corresponding ParPortUnsetModeWdm()
 
  This function must be run at IRQL == PASSIVE_LEVEL.
 */
@@ -531,7 +531,7 @@ ParPortSetModeWdm(PDEVICE_EXTENSION Pdx)
    of the parallel port driver.
 
  This function mustn't be called without a prior call to
- ParPortSetMode()
+ ParPortSetModeWdm()
 
  This function must be run at IRQL == PASSIVE_LEVEL.
 */
