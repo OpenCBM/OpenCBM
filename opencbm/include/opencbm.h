@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael.klein@puffin.lb.shuttle.de> \n
-** \version $Id: opencbm.h,v 1.12 2005-11-21 18:10:21 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.13 2006-02-20 12:11:16 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -135,7 +135,7 @@ EXTERN int CBMAPIDECL cbm_iec_poll(CBM_FILE f);
 EXTERN int CBMAPIDECL cbm_iec_get(CBM_FILE f, int line);
 EXTERN void CBMAPIDECL cbm_iec_set(CBM_FILE f, int line);
 EXTERN void CBMAPIDECL cbm_iec_release(CBM_FILE f, int line);
-EXTERN void CBMAPIDECL cbm_iec_setrelease(CBM_FILE f, int mask, int line);
+EXTERN void CBMAPIDECL cbm_iec_setrelease(CBM_FILE f, int set, int release);
 EXTERN int CBMAPIDECL cbm_iec_wait(CBM_FILE f, int line, int state);
 
 EXTERN int CBMAPIDECL cbm_upload(CBM_FILE f, __u_char dev, int adr, const void *prog, size_t size);

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.10 2006-02-12 15:52:56 strik Exp $ \n
+** \version $Id: cbm.c,v 1.11 2006-02-20 12:11:16 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -641,36 +641,39 @@ cbm_iec_release(CBM_FILE HandleDevice, int Line)
     FUNC_LEAVE();
 }
 
-/*! \brief Activate a line on the IEC serial bus
+/*! \brief Activate and deactive a line on the IEC serial bus
 
- This function activates (sets to 0V) a line on the IEC serial bus.
+ This function activates (sets to 0V, L) and deactivates 
+ (set to 5V, H) lines on the IEC serial bus.
 
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
- \param Mask
-   The mask of which lines have to be altered at all. Any line
-   not mentioned here is left untouched. This has to be a bitwise
-   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
+ \param Set
+   The mask of which lines should be set. This has to be a bitwise OR
+   between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
- \param Line
-   If a line has been set in Mask, the corresponding bit here decides
-   if that line is to be set (in this case, it is ORed to this value)
-   or released (in this case, the corresponding bit here is 0).
+ \param Release
+   The mask of which lines should be released. This has to be a bitwise
+   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
 
  \bug
    This function can't signal an error, thus, be careful!
+
+ \remark
+   If a bit is specified in the Set as well as in the Release mask, the
+   effect is undefined.
 */
 
 void CBMAPIDECL
-cbm_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line)
+cbm_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     FUNC_ENTER();
  
-    cbmarch_iec_setrelease(HandleDevice, Mask, Line);
+    cbmarch_iec_setrelease(HandleDevice, Set, Release);
 
     FUNC_LEAVE();
 }

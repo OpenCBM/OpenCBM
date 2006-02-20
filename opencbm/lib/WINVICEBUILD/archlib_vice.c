@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archlib_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: archlib_vice.c,v 1.4 2006-02-07 18:48:06 strik Exp $ \n
+** \version $Id: archlib_vice.c,v 1.5 2006-02-20 12:11:16 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        This variant is for accessing VICE instead of a real device
@@ -882,7 +882,7 @@ cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
 
-    cbmarch_iec_setrelease(HandleDevice, Line, Line);
+    cbmarch_iec_setrelease(HandleDevice, Line, 0);
 
     FUNC_LEAVE();
 }
@@ -910,34 +910,36 @@ cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
 
-    cbmarch_iec_setrelease(HandleDevice, Line, 0);
+    cbmarch_iec_setrelease(HandleDevice, 0, Line);
 
     FUNC_LEAVE();
 }
 
-/*! \brief Activate a line on the IEC serial bus
+/*! \brief Activate and deactive a line on the IEC serial bus
 
- This function activates (sets to 0V) and deactivates 
- lines on the IEC serial bus in one call.
+ This function activates (sets to 0V, L) and deactivates 
+ (set to 5V, H) lines on the IEC serial bus.
 
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
- \param Mask
-   The mask of which lines have to be altered at all. Any line
-   not mentioned here is left untouched. This has to be a bitwise
-   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
+ \param Set
+   The mask of which lines should be set. This has to be a bitwise OR
+   between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
- \param Line
-   If a line has been set in Mask, the corresponding bit here decides
-   if that line is to be set (in this case, it is ORed to this value)
-   or released (in this case, the corresponding bit here is 0).
+ \param Release
+   The mask of which lines should be released. This has to be a bitwise
+   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
 
  \bug
    This function can't signal an error, thus, be careful!
+
+ \remark
+   If a bit is specified in the Set as well as in the Release mask, the
+   effect is undefined.
 */
 
 static unsigned char data_iec_setrelease[] = { 
@@ -951,7 +953,7 @@ static unsigned char data_iec_setrelease[] = {
 static unsigned int addr_iec_setrelease = 0x2680;
 
 void
-cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line)
+cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     __u_char line = 0;
     __u_char mask = 0;
@@ -962,13 +964,13 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line)
 //    DbgOut("setrelease: Mask = %u, Line = %u", Mask, Line);
     cbmarch_iec_poll(HandleDevice);
 
-    if (Mask & IEC_DATA)  mask |= VICE_DATA_OUT;
-    if (Mask & IEC_CLOCK) mask |= VICE_CLK_OUT;
-    if (Mask & IEC_ATN)   mask |= VICE_ATN_OUT;
+    if (Set & IEC_DATA)  mask |= VICE_DATA_OUT;
+    if (Set & IEC_CLOCK) mask |= VICE_CLK_OUT;
+    if (Set & IEC_ATN)   mask |= VICE_ATN_OUT;
 
-    if (Line & IEC_DATA)  line |= VICE_DATA_OUT;
-    if (Line & IEC_CLOCK) line |= VICE_CLK_OUT;
-    if (Line & IEC_ATN)   line |= VICE_ATN_OUT;
+    if (Release & IEC_DATA)  line |= VICE_DATA_OUT;
+    if (Release & IEC_CLOCK) line |= VICE_CLK_OUT;
+    if (Release & IEC_ATN)   line |= VICE_ATN_OUT;
 
     if (mask)
     {

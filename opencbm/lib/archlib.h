@@ -24,7 +24,7 @@ extern void cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte);
 extern int  cbmarch_iec_poll(CBM_FILE HandleDevice);
 extern void cbmarch_iec_set(CBM_FILE HandleDevice, int Line);
 extern void cbmarch_iec_release(CBM_FILE HandleDevice, int Line);
-extern void cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line);
+extern void cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release);
 extern int  cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State);
 
 extern __u_char cbmarch_mnib_par_read(CBM_FILE HandleDevice);

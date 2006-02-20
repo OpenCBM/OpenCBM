@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: archlib.c,v 1.1 2005-03-02 18:17:20 strik Exp $";
+    "@(#) $Id: archlib.c,v 1.2 2006-02-20 12:11:16 strik Exp $";
 #endif
 
 #include <fcntl.h>
@@ -134,7 +134,7 @@ int cbmarch_iec_wait(CBM_FILE f, int line, int state)
     return ioctl(f, CBMCTRL_IEC_WAIT, (line<<8) | state);
 }
 
-void cbmarch_iec_setrelease(CBM_FILE f, int mask, int line)
+void cbmarch_iec_setrelease(CBM_FILE f, int set, int release)
 {
-    ioctl(f, CBMCTRL_IEC_SETRELEASE, (mask<<8) | line);
+    ioctl(f, CBMCTRL_IEC_SETRELEASE, (set<<8) | release);
 }

@@ -10,9 +10,9 @@
  */
 
 /*! ************************************************************** 
-** \file sys/libiec/set.c \n
+** \file sys/libiec/setrelease.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: setrelease.c,v 1.3 2005-07-16 17:20:42 strik Exp $ \n
+** \version $Id: setrelease.c,v 1.4 2006-02-20 12:11:16 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -24,43 +24,47 @@
 #include "cbm_driver.h"
 #include "i_iec.h"
 
-/*! \brief Set a specific line on the IEC bus
+/*! \brief Activate and deactive a line on the IEC serial bus
 
- This function sets a specific line on the IEC bus, and releases
- other lines.
+ This function activates (sets to 0V, L) and deactivates 
+ (set to 5V, H) lines on the IEC serial bus.
 
  \param Pdx
    Pointer to the device extension.
 
- \param Mask
-   The mask of which lines have to be altered at all. Any line
-   not mentioned here is left untouched. This has to be a bitwise
-   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
+ \param Set
+   The mask of which lines should be set. This has to be a bitwise OR
+   between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
- \param Line
-   If a line has been set in Mask, the corresponding bit here decides
-   if that line is to be set (in this case, it is ORed to this value)
-   or released (in this case, the corresponding bit here is 0).
+ \param Release
+   The mask of which lines should be released. This has to be a bitwise
+   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
  \return 
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
+
+ \remark
+   If a bit is specified in the Set as well as in the Release mask, the
+   effect is undefined.
 */
 NTSTATUS
-cbmiec_iec_setrelease(IN PDEVICE_EXTENSION Pdx, IN USHORT Mask, IN USHORT Line)
+cbmiec_iec_setrelease(IN PDEVICE_EXTENSION Pdx, IN USHORT Set, IN USHORT Release)
 {
     NTSTATUS ntStatus;
 
     FUNC_ENTER();
 
-    FUNC_PARAM((DBG_PREFIX "line = 0x%02x, mask = 0x%02x", Line, Mask));
+    FUNC_PARAM((DBG_PREFIX "set = 0x%02x, release = 0x%02x", Set, Release));
 
     ntStatus = STATUS_SUCCESS;
 
+    DBG_ASSERT((Set & Release) == 0);
+
     // Set the correct line as given by the call
 
-    if ( (Line & ~(IEC_LINE_DATA | IEC_LINE_CLOCK | IEC_LINE_ATN | IEC_LINE_RESET))
-        || (Mask & ~(IEC_LINE_DATA | IEC_LINE_CLOCK | IEC_LINE_ATN | IEC_LINE_RESET)))
+    if ( (Set & ~(IEC_LINE_DATA | IEC_LINE_CLOCK | IEC_LINE_ATN | IEC_LINE_RESET))
+        || (Release & ~(IEC_LINE_DATA | IEC_LINE_CLOCK | IEC_LINE_ATN | IEC_LINE_RESET)))
     {
         // there was some bit set that is not recognized, return
         // with an error
@@ -68,19 +72,12 @@ cbmiec_iec_setrelease(IN PDEVICE_EXTENSION Pdx, IN USHORT Mask, IN USHORT Line)
     }
     else
     {
+        ULONG set_mask = 0;
+        ULONG release_mask = 0;
 
 #define SET_RELEASE_LINE(_LineName, _PPName) \
-        if (Mask & IEC_LINE_##_LineName) \
-        { \
-            if (Line & IEC_LINE_##_LineName) \
-            { \
-                CBMIEC_SET(PP_##_PPName##_OUT); \
-            } \
-            else \
-            { \
-                CBMIEC_RELEASE(PP_##_PPName##_OUT); \
-            } \
-        }
+        if (Set     & IEC_LINE_##_LineName) { set_mask     |= PP_##_PPName##_OUT; } \
+        if (Release & IEC_LINE_##_LineName) { release_mask |= PP_##_PPName##_OUT; }
 
         SET_RELEASE_LINE(DATA,  DATA);
         SET_RELEASE_LINE(CLOCK, CLK);
@@ -100,6 +97,8 @@ cbmiec_iec_setrelease(IN PDEVICE_EXTENSION Pdx, IN USHORT Mask, IN USHORT Line)
 #endif // #ifdef TEST_BIDIR
 
 #undef SET_RELEASE_LINE
+
+        CBMIEC_SET_RELEASE(set_mask, release_mask);
 
     }
 

@@ -17,7 +17,7 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/opencbn.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: OPENCBM.C,v 1.5 2005-02-08 19:38:54 strik Exp $ \n
+** \version $Id: OPENCBM.C,v 1.6 2006-02-20 12:11:16 strik Exp $ \n
 ** \n
 ** \brief Library for accessing the driver from DOS
 **
@@ -521,11 +521,11 @@ vdd_usleep(CBM_FILE f, unsigned int howlong)
 }
 
 void
-cbm_iec_setrelease(CBM_FILE f, int mask, int line)
+cbm_iec_setrelease(CBM_FILE f, int set, int release)
 {
     asm {
-        mov ch,byte ptr [mask]
-        mov cl,byte ptr [line]
+        mov ch,byte ptr [set]
+        mov cl,byte ptr [release]
         CbmDispatchCall(28)
     }
 }

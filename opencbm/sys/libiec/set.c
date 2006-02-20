@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/set.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: set.c,v 1.4 2005-07-16 17:20:42 strik Exp $ \n
+** \version $Id: set.c,v 1.5 2006-02-20 12:11:16 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael.klein@puffin.lb.shuttle.de>
 ** \n
@@ -42,29 +42,7 @@
 NTSTATUS
 cbmiec_iec_set(IN PDEVICE_EXTENSION Pdx, IN USHORT Line)
 {
-    NTSTATUS ntStatus;
-
     FUNC_ENTER();
 
-    FUNC_PARAM((DBG_PREFIX "line = 0x%02x", Line));
-
-    ntStatus = STATUS_SUCCESS;
-
-    // Set the correct line as given by the call
-
-    if (Line & ~(IEC_LINE_DATA | IEC_LINE_CLOCK | IEC_LINE_ATN | IEC_LINE_RESET))
-    {
-        // there was some bit set that is not recognized, return
-        // with an error
-        ntStatus = STATUS_INVALID_PARAMETER;
-    }
-    else
-    {
-        if (Line & IEC_LINE_DATA)  CBMIEC_SET(PP_DATA_OUT);
-        if (Line & IEC_LINE_CLOCK) CBMIEC_SET(PP_CLK_OUT);
-        if (Line & IEC_LINE_ATN)   CBMIEC_SET(PP_ATN_OUT);
-        if (Line & IEC_LINE_RESET) CBMIEC_SET(PP_RESET_OUT);
-    }
-
-    FUNC_LEAVE_NTSTATUS(ntStatus );
+    FUNC_LEAVE_NTSTATUS(cbmiec_iec_setrelease(Pdx, Line, 0));
 }

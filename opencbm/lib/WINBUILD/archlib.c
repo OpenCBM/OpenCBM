@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.3 2005-11-18 19:39:12 strik Exp $ \n
+** \version $Id: archlib.c,v 1.4 2006-02-20 12:11:16 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -834,40 +834,42 @@ cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
     FUNC_LEAVE();
 }
 
-/*! \brief Activate a line on the IEC serial bus
+/*! \brief Activate and deactive a line on the IEC serial bus
 
- This function activates (sets to 0V) and deactivates 
- lines on the IEC serial bus in one call.
+ This function activates (sets to 0V, L) and deactivates 
+ (set to 5V, H) lines on the IEC serial bus.
 
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
- \param Mask
-   The mask of which lines have to be altered at all. Any line
-   not mentioned here is left untouched. This has to be a bitwise
-   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
+ \param Set
+   The mask of which lines should be set. This has to be a bitwise OR
+   between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
- \param Line
-   If a line has been set in Mask, the corresponding bit here decides
-   if that line is to be set (in this case, it is ORed to this value)
-   or released (in this case, the corresponding bit here is 0).
+ \param Release
+   The mask of which lines should be released. This has to be a bitwise
+   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
 
  \bug
    This function can't signal an error, thus, be careful!
+
+ \remark
+   If a bit is specified in the Set as well as in the Release mask, the
+   effect is undefined.
 */
 
 void
-cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Mask, int Line)
+cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     CBMT_IEC_SETRELEASE_IN parameter;
 
     FUNC_ENTER();
  
-    parameter.State = (UCHAR) Mask;
-    parameter.Line = (UCHAR) Line;
+    parameter.State = (UCHAR) Set;
+    parameter.Line = (UCHAR) Release;
 
     cbm_ioctl(HandleDevice, CBMCTRL(IEC_SETRELEASE), &parameter, sizeof(parameter), NULL, 0);
 

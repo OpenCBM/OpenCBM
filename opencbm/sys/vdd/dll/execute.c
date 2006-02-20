@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.8 2005-07-21 17:39:20 strik Exp $ \n
+** \version $Id: execute.c,v 1.9 2006-02-20 12:11:16 strik Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **
@@ -726,28 +726,31 @@ vdd_iec_release(CBM_FILE HandleDevice)
     FUNC_LEAVE_BOOLEAN(FALSE);
 }
 
-/*! \brief Activate a line on the IEC serial bus
+/*! \brief Activate and deactive a line on the IEC serial bus
 
- This function activates (sets to 0V) a line on the IEC serial bus.
+ This function activates (sets to 0V, L) and deactivates 
+ (set to 5V, H) lines on the IEC serial bus.
 
  \param HandleDevice (BX)
    A CBM_FILE which contains the file handle of the driver.
 
- \param Mask (CH)
-   The mask of which lines have to be altered at all. Any line
-   not mentioned here is left untouched. This has to be a bitwise
-   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
+ \param Set (CH)
+   The mask of which lines should be set. This has to be a bitwise OR
+   between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
- \param Line (CL)
-   If a line has been set in Mask, the corresponding bit here decides
-   if that line is to be set (in this case, it is ORed to this value)
-   or released (in this case, the corresponding bit here is 0).
+ \param Release (CL)
+   The mask of which lines should be released. This has to be a bitwise
+   OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
  If vdd_driver_open() did not succeed, it is illegal to 
  call this function.
 
  \bug
    This function can't signal an error, thus, be careful!
+
+ \remark
+   If a bit is specified in the Set as well as in the Release mask, the
+   effect is undefined.
 */
 
 BOOLEAN
@@ -1175,30 +1178,32 @@ vdd_iohook_outb(WORD iport,BYTE data)
 
 #ifdef NEW_IMPLEMENTATION_WITH_SETRELEASE
 
-        BYTE mask = IEC_ATN | IEC_CLOCK | IEC_DATA | IEC_RESET;
-        BYTE line = 0;
+        BYTE release = IEC_ATN | IEC_CLOCK | IEC_DATA | IEC_RESET;
+        BYTE set = 0;
 
         vdd_iohook_lastwrittencontrolregister = data;
 
         data ^= 0x04 ^ pp_outeor;
 
-        if (data & pp_atn_out)   line |= IEC_ATN;
-        if (data & pp_data_out)  line |= IEC_DATA;
-        if (data & pp_clk_out)   line |= IEC_CLOCK;
-        if (data & pp_reset_out) line |= IEC_RESET;
+        if (data & pp_atn_out)   { set |= IEC_ATN;   release &= ~IEC_ATN;   }
+        if (data & pp_data_out)  { set |= IEC_DATA;  release &= ~IEC_DATA;  }
+        if (data & pp_clk_out)   { set |= IEC_CLOCK; release &= ~IEC_CLOCK; }
+        if (data & pp_reset_out) { set |= IEC_RESET; release &= ~IEC_RESET; }
 
  #ifdef TEST_BIDIR
 
-        mask |= 0x10;
-
         if (data & 0x10)
         {
-            line |= 0x10;
+            set |= 0x10;
+        }
+        else
+        {
+            release |= 0x10;
         }
 
  #endif // #ifdef TEST_BIDIR
 
-        cbm_iec_setrelease(VddCbmFileForIoHook, mask, line);
+        cbm_iec_setrelease(VddCbmFileForIoHook, set, release);
 
 #else // #ifdef NEW_IMPLEMENTATION_WITH_SETRELEASE
 

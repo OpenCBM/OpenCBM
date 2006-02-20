@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.7 2005-11-20 13:37:44 strik Exp $ \n
+** \version $Id: iec.h,v 1.8 2006-02-20 12:11:16 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -83,7 +83,7 @@ extern NTSTATUS
 cbmiec_iec_release(IN PDEVICE_EXTENSION Pdx, IN USHORT Line);
 
 extern NTSTATUS
-cbmiec_iec_setrelease(IN PDEVICE_EXTENSION Pdx, IN USHORT Mask, IN USHORT Line);
+cbmiec_iec_setrelease(IN PDEVICE_EXTENSION Pdx, IN USHORT Set, IN USHORT Release);
 
 extern NTSTATUS
 cbmiec_pp_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Byte);

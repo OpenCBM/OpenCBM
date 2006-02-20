@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.3 2005-11-20 13:37:44 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.4 2006-02-20 12:11:16 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -589,12 +589,13 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 
                 case CBMCTRL_IEC_SETRELEASE:
 			{
-				unsigned mask = arg >> 8;
-				unsigned line = arg & 0xFF;
+				unsigned set = arg >> 8;
+				unsigned release = arg & 0xFF;
+                unsigned set_mask = 0;
+                unsigned release_mask = 0;
 
-
-				if ( (line & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET))
-				  || (mask & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)))
+				if ( (set & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET))
+				  || (release & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)))
 				{
 					// there was some bit set that is not recognized, return
 					// with an error
@@ -602,10 +603,17 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 				}
 				else
 				{
-					if (mask & IEC_DATA)  { if (line & IEC_DATA)  SET(DATA_OUT); else RELEASE(DATA_OUT); }
-					if (mask & IEC_CLOCK) { if (line & IEC_CLOCK) SET(CLK_OUT);  else RELEASE(CLK_OUT); }
-					if (mask & IEC_ATN)   { if (line & IEC_ATN)   SET(ATN_OUT);  else RELEASE(ATN_OUT); }
-					if (mask & IEC_RESET) { if (line & IEC_RESET) SET(RESET);    else RELEASE(RESET); }
+                    if (set & IEC_DATA)  set_mask = DATA_OUT;
+                    if (set & IEC_CLOCK) set_mask = CLK_OUT;
+                    if (set & IEC_ATN)   set_mask = ATN_OUT;
+                    if (set & IEC_RESET) set_mask = RESET;
+
+                    if (release & IEC_DATA)  release_mask = DATA_OUT;
+                    if (release & IEC_CLOCK) release_mask = CLK_OUT;
+                    if (release & IEC_ATN)   release_mask = ATN_OUT;
+                    if (release & IEC_RESET) release_mask = RESET;
+
+					SET_RELEASE(set_mask, release_mask);
 				}
 			}
                         return 0;
