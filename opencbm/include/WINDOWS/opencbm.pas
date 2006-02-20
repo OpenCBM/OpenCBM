@@ -8,7 +8,7 @@
  *
 }
 
-{ $Id: opencbm.pas,v 1.1 2005-03-02 18:17:20 strik Exp $ }
+{ $Id: opencbm.pas,v 1.2 2006-02-20 16:07:27 strik Exp $ }
 
 unit opencbm;
 
@@ -65,7 +65,7 @@ function cbm_iec_poll(const HFile :CBM_FILE) : Integer; cdecl; external 'opencbm
 function cbm_iec_get(const HFile :CBM_FILE; const Line :Integer) : Integer; cdecl; external 'opencbm.dll';
 procedure cbm_iec_set(const HFile :CBM_FILE; const Line :Integer); cdecl; external 'opencbm.dll';
 procedure cbm_iec_release(const HFile :CBM_FILE; const Line :Integer); cdecl; external 'opencbm.dll';
-procedure cbm_iec_setrelease(const HFile :CBM_FILE; const Mask :Integer; const Line :Integer); cdecl; external 'opencbm.dll';
+procedure cbm_iec_setrelease(const HFile :CBM_FILE; const Set :Integer; const Release :Integer); cdecl; external 'opencbm.dll';
 function cbm_iec_wait(const HFile :CBM_FILE; const Line :Integer; const State :Integer) : Integer; cdecl; external 'opencbm.dll';
 
 function cbm_upload(const HFile :CBM_FILE; const Device :ShortInt; const AddressInFloppy :Integer;
