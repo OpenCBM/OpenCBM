@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/vice_comm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vice_comm.c,v 1.1 2005-07-01 12:22:16 strik Exp $ \n
+** \version $Id: vice_comm.c,v 1.2 2006-02-22 09:52:09 strik Exp $ \n
 ** \n
 ** \brief Library functions for communicating with VICE.
 **
@@ -71,7 +71,7 @@ int vicereadregister(viceregs which)
     return value;
 }
 
-void vicewriteregister(viceregs which, int value)
+void vicewriteregister(viceregs which, unsigned int value)
 {
     switch (which)
     {
@@ -84,12 +84,12 @@ void vicewriteregister(viceregs which, int value)
     }
 }
 
-void vicewriteregister_when_at(int value)
+void vicewriteregister_when_at(unsigned int value)
 {
     ptr_mappedfile->regupdateaddress = value;
 }
 
-void vicereadmemory(unsigned int address, int size, char *buffer)
+void vicereadmemory(unsigned int address, unsigned int size, char *buffer)
 {
     if (ptr_mappedfile)
     {
@@ -101,7 +101,7 @@ void vicereadmemory(unsigned int address, int size, char *buffer)
     }
 }
 
-void vicepreparereadmemory(unsigned int address, int size)
+void vicepreparereadmemory(unsigned int address, unsigned int size)
 {
     if (ptr_mappedfile)
     {
@@ -113,7 +113,7 @@ void vicepreparereadmemory(unsigned int address, int size)
     }
 }
 
-void vicewritememory(unsigned int address, int size, const char *buffer)
+void vicewritememory(unsigned int address, unsigned int size, const char *buffer)
 {
     if (ptr_mappedfile)
     {
@@ -250,10 +250,36 @@ BOOLEAN viceinit(void)
         if (!ptr_mappedfile)
             break;
 
+#ifdef MSVC_COMPILE
+/*
+ * Why this #ifdef and the #define?
+ * - With older headers (for example, as given with MSVC6), there
+ *   was only an 
+ *   PVOID InterlockedCompareExchange(PVOID *Dest, PVOID Exch, PVOID Comperand);
+ * - With ne^wer SDKs (and the DDK), the above function has been renamed to
+ *   InterlockedCompareExchangePointer(), and a new function
+ *   LONG InterlockedCompareExchange(PLONG Dest, LONG Exch, LONG Comperand);
+ *   has been added.
+ *   (This is due to the fact that a pointer and an ULONG are not necessarily
+ *   the same length anymore with the introduction of WIN64, cf. ULONG_PTR,
+ *   InterlockedCompareExchange64(), etc.)
+ *   Thus, depending upon the headers we are including, the one or the other
+ *   use gets some warning. This #ifdef (both paths only differ in the casts)
+ *   avoids any warnings.
+ * -@srt.20060221
+ */
+
+# define InterlockedCompareExchange(_a, _b, _c) \
+    (LONG) InterlockedCompareExchange(_a, (PVOID)_b, (PVOID)_c)
+
+#endif
+
         if (InterlockedCompareExchange(
                   (PVOID)&ptr_mappedfile->version, 1, 0)
                   > 1)
             break;
+
+#undef InterlockedCompareExchange
 
         if (InterlockedIncrement(&ptr_mappedfile->controllerAvailable) > 1)
             break;

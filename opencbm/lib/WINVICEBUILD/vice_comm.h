@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/vice_comm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vice_comm.h,v 1.1 2005-07-01 12:22:16 strik Exp $ \n
+** \version $Id: vice_comm.h,v 1.2 2006-02-22 09:52:09 strik Exp $ \n
 ** \n
 ** \brief Library interface for communicating with VICE.
 **
@@ -23,11 +23,11 @@ typedef
 enum viceregs_e { reg_pc = 0, reg_a = 1, reg_x = 2, reg_y = 3, reg_sp = 4, reg_flags = 5 } viceregs;
 
 extern int vicereadregister(viceregs which);
-extern void vicewriteregister_when_at(int value);
-extern void vicewriteregister(viceregs which, int value);
-extern void vicewritememory(unsigned int address, int length, const char *buffer);
-extern void vicereadmemory(unsigned int address, int length, char *buffer);
-extern void vicepreparereadmemory(unsigned int address, int length);
+extern void vicewriteregister_when_at(unsigned int value);
+extern void vicewriteregister(viceregs which, unsigned int value);
+extern void vicewritememory(unsigned int address, unsigned int length, const char *buffer);
+extern void vicereadmemory(unsigned int address, unsigned int length, char *buffer);
+extern void vicepreparereadmemory(unsigned int address, unsigned int length);
 extern void vicepause(void);
 extern void viceresume(void);
 extern BOOLEAN viceinit(void);
