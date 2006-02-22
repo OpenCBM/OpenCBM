@@ -252,7 +252,7 @@ void
 step_to_halftrack(CBM_FILE fd, int halftrack)
 {
 	send_mnib_cmd(fd, FL_STEPTO);
-	cbm_mnib_par_write(fd, (halftrack != 0) ? halftrack : 1);
+	cbm_mnib_par_write(fd, (__u_char) ((halftrack != 0) ? halftrack : 1));
 	cbm_mnib_par_read(fd);
 }
 
@@ -685,7 +685,7 @@ main(int argc, char *argv[])
     BYTE drive = 8;
 	int bump, reset, ok;
 	char cmd[80], error[500];
-	char filename[80];
+	char filename[256];
 
 	fprintf(stdout,
 	  "\nmnib - Commodore 1541/1571 disk image nibbler.\n"

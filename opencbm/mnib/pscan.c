@@ -61,15 +61,12 @@ usage(void)
 int ARCH_MAINDECL
 main(int argc, char *argv[])
 {
-	char file1[80];
-	char file2[80];
+	char file1[256];
+	char file2[256];
 
 	fprintf(stdout,
 	  "\npscan - Commodore G64 disk image scanner / comparator\n"
 	  "(C) 2004-2005 Pete Rittwage\n" "Version " VERSION "\n\n");
-
-	memset(file1, 0, 80);
-	memset(file2, 0, 80);
 
 	start_track = 1 * 2;
 	end_track = 41 * 2;

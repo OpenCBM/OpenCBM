@@ -63,7 +63,7 @@ int ARCH_MAINDECL
 main(int argc, char **argv)
 {
 	FILE *fpin, *fpout;
-	char inname[80], outname[80], *dotpos;
+	char inname[256], outname[256], *dotpos;
 	int track, badgcr, fixgcr;
 	BYTE gcr_header[12];
 	DWORD gcr_track_p[MAX_TRACKS_1541 * 2];

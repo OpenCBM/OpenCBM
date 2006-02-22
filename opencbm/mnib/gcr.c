@@ -1117,7 +1117,7 @@ compare_sectors(BYTE * track1, BYTE * track2, int length1, int length2,
 		{
 			if(error1 == SECTOR_OK)
 			{
-				sprintf(tmpstr,"S%d: empty sector match\n",sector);
+				//sprintf(tmpstr,"S%d: empty sector match\n",sector);
 				sec_match++;
 			}
 			else
@@ -1129,8 +1129,8 @@ compare_sectors(BYTE * track1, BYTE * track2, int length1, int length2,
 		{
 			if (checksum1 != checksum2)
 				sprintf(tmpstr,
-				  "S%d: data mismatch (%.2x/%.2x)\n", sector,
-				  checksum1, checksum2);
+				  "S%d: data/error mismatch (%.2x/E%d)(%.2x/E%d)\n", sector,
+				  checksum1, error1, checksum2, error2);
 			else
 				sprintf(tmpstr,
 				  "S%d: error mismatch (E%d/E%d)\n", sector,

@@ -45,8 +45,7 @@ win32:
 		buildall
 
 # Warning level.  Don't reduce, fix your new code instead.
-WARNS=	-Werror -W -Wall -Wstrict-prototypes -Wmissing-prototypes \
-	-Wpointer-arith -Wno-unused-parameter
+WARNS=	-Werror -W -Wall -Wstrict-prototypes -Wno-unused-parameter -Wpointer-arith 
 
 # Common objects
 OBJ=gcr.o prot.o

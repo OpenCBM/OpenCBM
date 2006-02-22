@@ -220,7 +220,7 @@ master_disk(CBM_FILE fd)
 		for (i = 0; i < 10; i++)
 		{
 			send_mnib_cmd(fd, FL_WRITENOSYNC);
-			cbm_mnib_par_write(fd, (align_disk) ? 0xfb : 0x00);
+			cbm_mnib_par_write(fd, (__u_char)((align_disk) ? 0xfb : 0x00));
 
 			if (!cbm_mnib_write_track(fd, rawtrack, align_offset +
 			  track_length[track]))

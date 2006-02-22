@@ -258,14 +258,14 @@ Writing back disk images to a real disk:
    "Thank you!" to all people who helped me out with information and
    testing
 
-   - Andreas Boose         <boose@linux.rz.fh-hannover.de>
-   - Joe Forster           <sta@c64.org>
-   - Michael Klein         <michael.klein@puffin.lb.shuttle.de>
-   - Matt Larsen           <mlarsen2000@yahoo.com>
-   - Chris Link            <Chris.Link@StudServ.Stud.Uni-Hannover.DE>
-   - Wolfgang Moser        <womo@d81.de>
-   - H†kan Sundell         <Hakan.Sundell@xpress.se>
-   - Nicolas Welte         <nwelte@web.de>
+   - Andreas Boose       
+   - Joe Forster   
+   - Michael Klein         
+   - Matt Larsen          
+   - Chris Link           
+   - Wolfgang Moser       
+   - H†kan Sundell        
+   - Nicolas Welte         
    - Tim Schurman
    - Spiro Trikaliotis
    - Nate Lawson

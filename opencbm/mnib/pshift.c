@@ -25,7 +25,7 @@ usage()
 int ARCH_MAINDECL
 main(int argc, char *argv[])
 {
-	char infile[80], outfile[80];
+	char infile[256], outfile[256];
 	char *dotpos;
 	char mnibheader[0x100];
 	int i, nibsize;
