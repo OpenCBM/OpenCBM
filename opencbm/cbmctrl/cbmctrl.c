@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.8 2005-07-31 08:39:47 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.9 2006-02-23 21:17:38 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -27,6 +27,18 @@ static const unsigned char prog_tdchange[] = {
 #include "tdchange.inc"
 };
 
+
+static int do_help(CBM_FILE fd, char *argv[]);
+
+/*
+ * Output version information
+ */
+static int do_version(CBM_FILE fd, char *argv[])
+{
+    printf("cbmctrl version " CBM4WIN_VERSION_STRING ", built on " __DATE__ " at " __TIME__ "\n");
+
+    return 0;
+}
 
 /*
  * Simple wrapper for reset
@@ -430,30 +442,50 @@ static int do_change(CBM_FILE fd, char *argv[])
 
 struct prog
 {
+    int      need_driver;
     char    *name;
     mainfunc prog;
     int      req_args_min;
     int      req_args_max;
     char    *arglist;
+    char    *help_text;
 };
 
 static struct prog prog_table[] =
 {
-    {"listen"  , do_listen  , 2, 2, "<device> <secadr>"               },
-    {"talk"    , do_talk    , 2, 2, "<device> <secadr>"               },
-    {"unlisten", do_unlisten, 0, 0, ""                                },
-    {"untalk"  , do_untalk  , 0, 0, ""                                },
-    {"open"    , do_open    , 3, 3, "<device> <secadr> <filename>"    },
-    {"close"   , do_close   , 2, 2, "<device> <secadr>"               },
-    {"status"  , do_status  , 1, 1, "<device>"                        },
-    {"command" , do_command , 2, 2, "<device> <cmdstr>"               },
-    {"dir"     , do_dir     , 1, 1, "<device>"                        },
-    {"download", do_download, 3, 4, "<device> <adr> <count> [<file>]" },
-    {"upload"  , do_upload  , 2, 3, "<device> <adr> [<file>]"         },
-    {"reset"   , do_reset   , 0, 0, ""                                },
-    {"detect"  , do_detect  , 0, 0, ""                                },
-    {"change"  , do_change  , 1, 1, "<device>"                        },
-    {NULL,NULL}
+    {0, "--help"  , do_help    , 0, 0, ""                                ,
+        "output this help screen"    },
+    {0, "--version",do_version , 0, 0, ""                                ,
+        "output version information" },
+    {1, "listen"  , do_listen  , 2, 2, "<device> <secadr>"               ,
+        "perform a listen on the IEC bus" },
+    {1, "talk"    , do_talk    , 2, 2, "<device> <secadr>"               ,
+        "perform a talk on the IEC bus"},
+    {1, "unlisten", do_unlisten, 0, 0, ""                                ,
+        "perform an unlisten on the IEC bus" },
+    {1, "untalk"  , do_untalk  , 0, 0, ""                                ,
+        "perform an untalk on the IEC bus" },
+    {1, "open"    , do_open    , 3, 3, "<device> <secadr> <filename>"    ,
+        "perform an open on the IEC bus"},
+    {1, "close"   , do_close   , 2, 2, "<device> <secadr>"               ,
+        "perform a close on the IEC bus"},
+    {1, "status"  , do_status  , 1, 1, "<device>"                        ,
+        "give the status of the specified drive"},
+    {1, "command" , do_command , 2, 2, "<device> <cmdstr>"               ,
+        "issue a command to the specified drive"},
+    {1, "dir"     , do_dir     , 1, 1, "<device>"                        ,
+        "output the directory of the disk in the specified drive"},
+    {1, "download", do_download, 3, 4, "<device> <adr> <count> [<file>]" ,
+        "download memory contents from the floppy drive"},
+    {1, "upload"  , do_upload  , 2, 3, "<device> <adr> [<file>]"         ,
+        "upoload memory contents to the floppy drive"},
+    {1, "reset"   , do_reset   , 0, 0, ""                                ,
+        "reset all drives on the IEC bus"},
+    {1, "detect"  , do_detect  , 0, 0, ""                                ,
+        "detect all drives on the IEC bus"},
+    {1, "change"  , do_change  , 1, 1, "<device>"                        ,
+        "wait for a disk to be changed in the specified drive"},
+    {0, NULL,NULL}
 };
 
 static struct prog *find_main(char *name)
@@ -470,6 +502,26 @@ static struct prog *find_main(char *name)
     return NULL;
 }
 
+/*
+ * Output a help screen
+ */
+static int do_help(CBM_FILE fd, char *argv[])
+{
+    int i;
+
+    do_version(fd, argv);
+
+    printf("\n");
+
+    for(i=0; prog_table[i].prog; i++)
+    {
+        printf("  %s %s\n", prog_table[i].name, prog_table[i].arglist);
+        printf("     * %s\n\n", prog_table[i].help_text);
+    }
+
+    return 0;
+}
+
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
     struct prog *p;
@@ -483,7 +535,10 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             CBM_FILE fd;
             int rv;
 
-            rv = cbm_driver_open(&fd, 0);
+            if(p->need_driver)
+                rv = cbm_driver_open(&fd, 0);
+            else
+                rv = 0;
 
             if(rv == 0)
             {
@@ -492,7 +547,9 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                 {
                     arch_error(0, arch_get_errno(), "%s", argv[1]);
                 }
-                cbm_driver_close(fd);
+
+                if(p->need_driver)
+                    cbm_driver_close(fd);
             }
             else
             {
@@ -512,11 +569,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     }
     else
     {
-        printf("invalid command, available ones are:\n\n");
-        for(i=0; prog_table[i].prog; i++)
-        {
-            printf("  %s %s\n", prog_table[i].name, prog_table[i].arglist);
-        }
+        printf("invalid command. For info on possible commands, try the --help parameter.\n\n");
     }
     return 2;
 }
