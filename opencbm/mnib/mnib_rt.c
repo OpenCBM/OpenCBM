@@ -10,6 +10,7 @@
 #include "cbm.h"
 #include "kernel.h"
 #include "mnib_rt.h"
+#include "gcr.h"
 #endif // DJGPP
 
 int
