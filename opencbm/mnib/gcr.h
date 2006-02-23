@@ -17,6 +17,7 @@
 #define BYTE unsigned char
 #define DWORD unsigned int
 #define MAX_TRACKS_1541 42
+#define MAX_TRACKS_1571 (MAX_TRACKS_1541 * 2)
 
 /* D64 constants */
 #define BLOCKSONDISK 683
@@ -97,18 +98,18 @@ void convert_4bytes_to_GCR(BYTE * buffer, BYTE * ptr);
 int convert_4bytes_from_GCR(BYTE * gcr, BYTE * plain);
 int extract_id(BYTE * gcr_track, BYTE * id);
 int extract_cosmetic_id(BYTE * gcr_track, BYTE * id);
-int find_track_cycle(BYTE ** cycle_start, BYTE ** cycle_stop, int cap_min,
+size_t find_track_cycle(BYTE ** cycle_start, BYTE ** cycle_stop, int cap_min,
   int cap_max);
-int find_nondos_track_cycle(BYTE ** cycle_start, BYTE ** cycle_stop,
+size_t find_nondos_track_cycle(BYTE ** cycle_start, BYTE ** cycle_stop,
   int cap_min, int cap_max);
 BYTE convert_GCR_sector(BYTE * gcr_start, BYTE * gcr_end,
   BYTE * d64_sector, int track, int sector, BYTE * id);
 void convert_sector_to_GCR(BYTE * buffer, BYTE * ptr,
   int track, int sector, BYTE * diskID, int error);
-BYTE * find_sector_gap(BYTE * work_buffer, int tracklen, int * p_sectorlen);
-BYTE * find_sector0(BYTE * work_buffer, int tracklen, int * p_sectorlen);
+BYTE * find_sector_gap(BYTE * work_buffer, int tracklen, size_t * p_sectorlen);
+BYTE * find_sector0(BYTE * work_buffer, int tracklen, size_t * p_sectorlen);
 int extract_GCR_track(BYTE * destination, BYTE * source, int * align,
-  int force_align, int cap_min, int cap_max);
+  int force_align, size_t cap_min, size_t cap_max);
 int replace_bytes(BYTE * buffer, int length, BYTE srcbyte, BYTE dstbyte);
 int check_bad_gcr(BYTE * gcrdata, int length, int fix);
 int check_sync_flags(BYTE * gcrdata, int density, int length);
@@ -124,6 +125,6 @@ int compare_sectors(BYTE * track1, BYTE * track2, int length1, int length2,
 int strip_runs(BYTE * buffer, int length, int minrun, BYTE target);
 int reduce_runs(BYTE * buffer, int length, int length_max, int minrun,
   BYTE target);
-int is_bad_gcr(BYTE * gcrdata, int length, int pos);
+int is_bad_gcr(BYTE * gcrdata, size_t length, size_t pos);
 int check_formatted(BYTE * gcrdata);
 int check_valid_data(BYTE * data, int length);

@@ -9,6 +9,7 @@
 #include <ctype.h>
 
 #include "mnibarch.h"
+#include "gcr.h"
 #include "prot.h"
 
 static void usage(void);
@@ -35,7 +36,7 @@ main(int argc, char *argv[])
 	int end_track;
 	int track_inc;
 	FILE *fpin, *fpout;
-	BYTE buffer[0x2000];
+	BYTE buffer[GCR_TRACK_LENGTH];
 
 	printf("\npshift - Commodore NIB image track shifter.\n"
 	  "(C) 2005 Pete Rittwage.\n"
@@ -113,37 +114,37 @@ main(int argc, char *argv[])
 	}
 	rewind(fpin);
 
-	memset(mnibheader, 0, 0x100);
-	fread(mnibheader, 0x100, 1, fpin);
-	fwrite(mnibheader, 0x100, 1, fpout);
+	memset(mnibheader, 0, sizeof(mnibheader));
+	fread(mnibheader, sizeof(mnibheader), 1, fpin); // @@@SRT: check success
+	fwrite(mnibheader, sizeof(mnibheader), 1, fpout); // @@@SRT: check success
 
 	printf("Processing GCR image [");
 
 	for (track = start_track; track <= end_track; track += track_inc)
 	{
 		// clear buffers
-		memset(buffer, 0, 0x2000);
+		memset(buffer, 0, sizeof(buffer));
 
 		// skip halftracks or nonexistant tracks
 		if ((mnibheader[0x10 + (header_entry * 2)] != track) ||
 		  (mnibheader[0x10 + (header_entry * 2)] == 0))
 		{
-			fread(buffer, 0x2000, 1, fpin);
-			memset(buffer, 0, 0x2000);
-			fwrite(buffer, 0x2000, 1, fpout);
+			fread(buffer, sizeof(buffer), 1, fpin); // @@@SRT: check success
+			memset(buffer, 0, sizeof(buffer));
+			fwrite(buffer, sizeof(buffer), 1, fpout); // @@@SRT: check success
 			printf("-");
 			header_entry++;
 			continue;
 		}
 
 		// get track from file
-		fread(buffer, 1, 0x2000, fpin);
+		fread(buffer, sizeof(buffer), 1, fpin); // @@@SRT: check success
 		if (track >= strack)
 		{
 			if (track == strack)
 			{
 				for (i = 0; i < bits; i++)
-					shift_buffer(buffer, 0x2000, 1);
+					shift_buffer(buffer, sizeof(buffer), 1);
 
 				printf("S");
 			}
@@ -153,7 +154,7 @@ main(int argc, char *argv[])
 		else
 			printf("o");
 
-		fwrite(buffer, 0x2000, 1, fpout);
+		fwrite(buffer, sizeof(buffer), 1, fpout); // @@@SRT: check success
 		header_entry++;
 
 	}

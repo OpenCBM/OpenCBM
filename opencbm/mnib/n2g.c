@@ -43,7 +43,7 @@ write_dword(FILE * fd, DWORD * buf, int num)
 		tmpbuf[i * 4 + 3] = (buf[i] >> 24) & 0xff;
 	}
 
-	if (fwrite((char *) tmpbuf, num, 1, fd) < 1)
+	if (fwrite(tmpbuf, num, 1, fd) < 1)
 	{
 		free(tmpbuf);
 		return -1;
@@ -177,7 +177,7 @@ main(int argc, char **argv)
 		goto fail;
 	}
 
-	if (fread(nib_header, sizeof(BYTE), 0x0100, fpin) < 0x100)
+	if (fread(nib_header, sizeof(nib_header), 1, fpin) < 1)
 	{
 		fprintf(stderr, "Cannot read header from mnib image.\n");
 		goto fail;
@@ -204,7 +204,7 @@ main(int argc, char **argv)
 	gcr_header[10] = G64_TRACK_MAXLEN % 256;	/* Size of each stored track */
 	gcr_header[11] = G64_TRACK_MAXLEN / 256;
 
-	if (fwrite((char *) gcr_header, sizeof(gcr_header), 1, fpout) != 1)
+	if (fwrite(gcr_header, sizeof(gcr_header), 1, fpout) != 1)
 	{
 		fprintf(stderr, "Cannot write G64 header.\n");
 		goto fail;
@@ -267,7 +267,7 @@ main(int argc, char **argv)
 
 			gcr_track[0] = track_len % 256;
 			gcr_track[1] = track_len / 256;
-			if (fwrite((char *) gcr_track, G64_TRACK_LENGTH, 1, fpout) != 1)
+			if (fwrite(gcr_track, G64_TRACK_LENGTH, 1, fpout) != 1)
 			{
 				fprintf(stderr, "Cannot write track data.\n");
 				goto fail;
@@ -372,7 +372,7 @@ main(int argc, char **argv)
 		gcr_track[0] = track_len % 256;
 		gcr_track[1] = track_len / 256;
 
-		if (fwrite((char *) gcr_track, G64_TRACK_LENGTH, 1, fpout) != 1)
+		if (fwrite(gcr_track, G64_TRACK_LENGTH, 1, fpout) != 1)
 		{
 			fprintf(stderr, "Cannot write track data.\n");
 			goto fail;

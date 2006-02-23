@@ -1,7 +1,9 @@
 DIRS= \
-	vdd \
 	wdm \
-	nt4 \
 	libcommon \
 	libwin \
 	libiec
+
+OPTIONAL_DIRS= \
+	vdd \
+	nt4

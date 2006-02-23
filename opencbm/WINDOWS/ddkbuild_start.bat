@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.4 2005-09-11 13:32:33 strik Exp $
+rem $Id: ddkbuild_start.bat,v 1.5 2006-02-23 17:32:06 strik Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -66,6 +66,7 @@ if /I "%0" EQU "-hollis" (
 )
 
 set DDKBUILD_PLATFORM=i386
+set OPTIONAL_DIRS=vdd nt4 win98
 
 if %DDKBUILD_HOLLIS% EQU 1 (
 	set DDKBUILD_PLATFORM_OPTION=W2K
@@ -79,6 +80,7 @@ if /I "%0" EQU "-i386" (
 ) else if /I "%0" EQU "-ia64" (
 	set DDKBUILD_PLATFORM=ia64
 	set DDKBUILD_PLATFORM_OPTION=64
+	set OPTIONAL_DIRS=
 	shift
 ) else if /I "%0" EQU "-amd64" (
 	set DDKBUILD_PLATFORM=amd64
@@ -87,6 +89,7 @@ if /I "%0" EQU "-i386" (
 		exit
 	)
 	set DDKBUILD_PLATFORM_OPTION=A64
+	set OPTIONAL_DIRS=
 	shift
 )
 
@@ -106,7 +109,7 @@ if %DDKBUILD_HOLLIS% EQU 1 (
 
 shift
 
-set CMDLINE=%TARGETSPEC% %DDKBUILD_ARGUMENTS% %CHECKEDFREE% .. %0 %1 %2 %3 %4 %5 %6 %7 %8 %9 %CMDARGUMENTS%
+set CMDLINE=%TARGETSPEC% %DDKBUILD_ARGUMENTS% %CHECKEDFREE% .. %OPTIONAL_DIRS% %0 %1 %2 %3 %4 %5 %6 %7 %8 %9 %CMDARGUMENTS% -F
 
 rem Make sure no error files are present before starting!
 if exist build*.err del build*.err

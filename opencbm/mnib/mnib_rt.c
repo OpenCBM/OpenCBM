@@ -68,7 +68,7 @@ cbm_mnib_read_track(int fd, unsigned char * buffer, unsigned int length)
 
 	disable();
 
-	for (i = 0; i < 0x2000; i++)
+	for (i = 0; i < GCR_TRACK_LENGTH; i++)
 	{
 		byte = cbm_nib_read(i & 1);
 

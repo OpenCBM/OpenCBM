@@ -487,18 +487,11 @@ void init_aligned_disk(CBM_FILE fd)
 	}
 }
 
-char
-char_fgetc(FILE *stream)
-{
-    return (char) fgetc(stream);
-}
-
 static void
 file2disk(CBM_FILE fd, char * filename)
 {
-	int i;
 	FILE *fpin;
-	char mnibheader[0x100], g64header[0x2a0];
+	char mnibheader[0x100], g64header[0x2ac];
 	int nibsize;
 
 	motor_on(fd);
@@ -524,9 +517,8 @@ file2disk(CBM_FILE fd, char * filename)
 	else if (compare_extension(filename, "G64"))
 	{
 		imagetype = IMAGE_G64;
-		memset(g64header, 0x00, 0x2ac);
-		for (i = 0; i < 0x2ac; i++)
-			g64header[i] = char_fgetc(fpin);
+		memset(g64header, 0x00, sizeof(g64header));
+        fread(g64header, sizeof(g64header), 1, fpin); // @@@SRT: check success
 		parse_disk(fd, fpin, g64header + 0x9);
 	}
 	else if (compare_extension(filename, "NIB"))
@@ -556,9 +548,8 @@ file2disk(CBM_FILE fd, char * filename)
 		}
 		rewind(fpin);
 
-		memset(mnibheader, 0x00, 0x100);
-		for (i = 0; i < 0x100; i++)
-			mnibheader[i] = char_fgetc(fpin);
+		memset(mnibheader, 0x00, sizeof(mnibheader));
+        fread(mnibheader, sizeof(mnibheader), 1, fpin); // @@@SRT: check success
 		parse_disk(fd, fpin, mnibheader + 0x10);
 	}
 	else
@@ -573,7 +564,6 @@ file2disk(CBM_FILE fd, char * filename)
 static void
 disk2file(CBM_FILE fd, char *filename)
 {
-	int i;
 	FILE *fpout;
 	char header[0x100], logfilename[128], *dotpos;
 
@@ -627,21 +617,17 @@ disk2file(CBM_FILE fd, char *filename)
 	if (imagetype == IMAGE_NIB)
 	{
 		/* write NIB-header */
-		memset(header, 0x00, 0x100);
+		memset(header, 0x00, sizeof(header));
 		sprintf(header, "MNIB-1541-RAW%c%c%c", 1, 0, 0);
 
-		for (i = 0; i < 0x100; i++)
-			fputc(header[i], fpout);
+		fwrite(header, sizeof(header), 1, fpout); // @@@SRT: check success
 
 		/* read out disk into file */
 		read_nib(fd, fpout, header + 0x10);
 
 		/* fill NIB-header */
 		rewind(fpout);
-		for (i = 0; i < 0x100; i++)
-		{
-			fputc(header[i], fpout);
-		}
+		fwrite(header, sizeof(header), 1, fpout); // @@@SRT: check success
 		fseek(fpout, 0, SEEK_END);
 
 	}

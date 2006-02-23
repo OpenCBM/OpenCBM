@@ -13,7 +13,7 @@ void
 shift_buffer(BYTE * buffer, int length, int n)
 {
 	int i;
-	BYTE tempbuf[0x2000];
+	BYTE tempbuf[GCR_TRACK_LENGTH];
 	BYTE carry;
 	int carryshift;
 

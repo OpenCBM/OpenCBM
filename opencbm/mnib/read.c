@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 
 #include "mnibarch.h"
 #include "gcr.h"
@@ -84,7 +85,7 @@ read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 	// some drives/disks timeout
 	if ((density & BM_FF_TRACK) && (!read_killer))
 	{
-		memset(buffer, 0xff, 0x2000);
+		memset(buffer, 0xff, GCR_TRACK_LENGTH);
 		return (density);
 	}
 
@@ -100,7 +101,7 @@ read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 			send_mnib_cmd(fd, FL_READNORMAL);
 
 		cbm_mnib_par_read(fd);
-		timeout = cbm_mnib_read_track(fd, buffer, 0x2000);
+		timeout = cbm_mnib_read_track(fd, buffer, GCR_TRACK_LENGTH);
 
 		// If we got a timeout, reset the port before retrying.
 		if (!timeout)
@@ -121,10 +122,10 @@ read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 static BYTE
 paranoia_read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 {
-	BYTE buffer1[0x2000];
-	BYTE buffer2[0x2000];
-	BYTE cbuffer1[0x2000];
-	BYTE cbuffer2[0x2000];
+	BYTE buffer1[GCR_TRACK_LENGTH];
+	BYTE buffer2[GCR_TRACK_LENGTH];
+	BYTE cbuffer1[GCR_TRACK_LENGTH];
+	BYTE cbuffer2[GCR_TRACK_LENGTH];
 	BYTE *cbufn, *cbufo, *bufn, *bufo;
 	unsigned int lenn, densn, i, l, badgcr;
     BYTE denso;
@@ -151,11 +152,11 @@ paranoia_read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 	// First pass at normal track read
 	for (l = 0; l < error_retries; l++)
 	{
-		memset(bufo, 0, 0x2000);
+		memset(bufo, 0, GCR_TRACK_LENGTH);
 		denso = read_halftrack(fd, halftrack, bufo);
 
 		// Find track cycle and length
-		memset(cbufo, 0, 0x2000);
+		memset(cbufo, 0, GCR_TRACK_LENGTH);
 		leno = extract_GCR_track(cbufo, bufo, &align, force_align,
 		  capacity_min[denso & 3], capacity_max[denso & 3]);
 
@@ -169,7 +170,7 @@ paranoia_read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 		{
 			printf("- no data\n");
 			fprintf(fplog, "%s (%d)\n", errorstring, leno);
-			memcpy(buffer, bufo, 0x2000);
+			memcpy(buffer, bufo, GCR_TRACK_LENGTH);
 			return (denso);
 		}
 
@@ -247,16 +248,16 @@ paranoia_read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 	badgcr = check_bad_gcr(cbufo, leno, 1);
 
 	// Don't bother to compare unformatted or bad data
-	if (leno == 0x2000)
+	if (leno == GCR_TRACK_LENGTH)
 		retries = 0;
 
 	// normal data, verify
 	for (i = 0; i < retries; i++)
 	{
-		memset(bufn, 0, 0x2000);
+		memset(bufn, 0, GCR_TRACK_LENGTH);
 		densn = read_halftrack(fd, halftrack, bufn);
 
-		memset(cbufn, 0, 0x2000);
+		memset(cbufn, 0, GCR_TRACK_LENGTH);
 		lenn = extract_GCR_track(cbufn, bufn, &align, force_align,
 		  capacity_min[densn & 3], capacity_max[densn & 3]);
 
@@ -295,7 +296,7 @@ paranoia_read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 	}
 	printf("\n");
 	fprintf(fplog, "%s (%d)\n", errorstring, leno);
-	memcpy(buffer, bufo, 0x2000);
+	memcpy(buffer, bufo, GCR_TRACK_LENGTH);
 	return denso;
 }
 
@@ -303,8 +304,8 @@ void
 read_nib(CBM_FILE fd, FILE * fpout, char *track_header)
 {
     BYTE track, density;
-	int header_entry, i;
-	BYTE buffer[0x2000];
+	int header_entry;
+	BYTE buffer[GCR_TRACK_LENGTH];
 	//unsigned int track_len;
 	//BYTE *cycle_start;  /* start position of cycle */
 	//BYTE *cycle_stop;   /* stop position of cycle  */
@@ -346,8 +347,7 @@ read_nib(CBM_FILE fd, FILE * fpout, char *track_header)
 		header_entry++;
 
 		/* process and save track to disk */
-		for (i = 0; i < 0x2000; i++)
-			fputc(buffer[i], fpout);
+		fwrite(buffer, sizeof(buffer), 1, fpout); // @@@SRT: check success
 	}
 	step_to_halftrack(fd, 18 * 2);
 }
@@ -505,7 +505,8 @@ read_d64(CBM_FILE fd, FILE * fpout)
 
 	blocks_to_save = (save_40_tracks) ? MAXBLOCKSONDISK : BLOCKSONDISK;
 
-	if (fwrite((char *) d64data, blocks_to_save * 256, 1, fpout) != 1)
+    assert(sizeof(d64data) < (blocks_to_save * 256));
+	if (fwrite(d64data, blocks_to_save * 256, 1, fpout) != 1)
 	{
 		fprintf(stderr, "Cannot write d64 data.\n");
 		return (0);
@@ -513,7 +514,8 @@ read_d64(CBM_FILE fd, FILE * fpout)
 
 	if (save_errorinfo == 1)
 	{
-		if (fwrite((char *) errorinfo, blocks_to_save, 1, fpout) != 1)
+        assert(sizeof(errorinfo) < blocks_to_save);
+		if (fwrite(errorinfo, blocks_to_save, 1, fpout) != 1)
 		{
 			fprintf(stderr, "Cannot write sector data.\n");
 			return (0);

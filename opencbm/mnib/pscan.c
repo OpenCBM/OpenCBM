@@ -33,23 +33,17 @@ static int raw_track_info(BYTE *gcrdata, int length, char *outputstring);
 static int check_fat(int track);
 static int check_rapidlok(int track);
 
-static BYTE diskbuf[84 * 0x2000];
-static BYTE diskbuf2[84 * 0x2000];
-static int length[84];
-static int length2[84];
-static int density[84];
-static int density2[84];
-static int fat_tracks[84];
-static int rapidlok_tracks[84];
-static int badgcr_tracks[84];
+static BYTE diskbuf[MAX_TRACKS_1571 * GCR_TRACK_LENGTH];
+static BYTE diskbuf2[MAX_TRACKS_1571 * GCR_TRACK_LENGTH];
+static int length[MAX_TRACKS_1571];
+static int length2[MAX_TRACKS_1571];
+static int density[MAX_TRACKS_1571];
+static int density2[MAX_TRACKS_1571];
+static int fat_tracks[MAX_TRACKS_1571];
+static int rapidlok_tracks[MAX_TRACKS_1571];
+static int badgcr_tracks[MAX_TRACKS_1571];
 static int fixgcr = 1;
 static int advanced_info;
-
-char
-char_fgetc(FILE *stream)
-{
-    return (char) fgetc(stream);
-}
 
 static void
 usage(void)
@@ -170,7 +164,7 @@ load_image(char *filename, int disknum)
 {
 	FILE *fpin;
 	char mnibheader[0x100];
-	char g64header[0x2a0];
+	char g64header[0x2ac];
 
 	if ((fpin = fopen(filename, "rb")) == NULL)
 	{
@@ -186,13 +180,13 @@ load_image(char *filename, int disknum)
 	else if (compare_extension(filename, "G64"))
 	{
 		imagetype = IMAGE_G64;
-		fread(g64header, 1, 0x2ac, fpin);
+		fread(g64header, sizeof(g64header), 1, fpin); // @@@SRT: check success
 		load_gcr(fpin, g64header + 0x9, disknum);
 	}
 	else if (compare_extension(filename, "NIB"))
 	{
 		imagetype = IMAGE_NIB;
-		fread(mnibheader, 1, 0x100, fpin);
+		fread(mnibheader, sizeof(mnibheader), 1, fpin); // @@@SRT: check success
 		load_gcr(fpin, mnibheader + 0x10, disknum);
 	}
 	else
@@ -211,7 +205,7 @@ load_d64(FILE * fpin, int disknum)
 {
 	int track, sector, sector_ref;
 	BYTE buffer[256];
-	BYTE gcrdata[0x2000];
+	BYTE gcrdata[GCR_TRACK_LENGTH];
 	BYTE errorinfo[MAXBLOCKSONDISK];
 	BYTE id[3] = { 0, 0, 0 };
 	int error;
@@ -229,7 +223,7 @@ load_d64(FILE * fpin, int disknum)
 	{
 	case (BLOCKSONDISK * 257):	/* 35 track image with errorinfo */
 		fseek(fpin, BLOCKSONDISK * 256, SEEK_SET);
-		fread(errorinfo, sizeof(BYTE), BLOCKSONDISK, fpin);
+		fread(errorinfo, BLOCKSONDISK, 1, fpin); // @@@SRT: check success
 		/* FALLTHROUGH */
 	case (BLOCKSONDISK * 256):	/* 35 track image w/o errorinfo */
 		last_track = 35;
@@ -237,7 +231,7 @@ load_d64(FILE * fpin, int disknum)
 
 	case (MAXBLOCKSONDISK * 257):	/* 40 track image with errorinfo */
 		fseek(fpin, MAXBLOCKSONDISK * 256, SEEK_SET);
-		fread(errorinfo, sizeof(BYTE), MAXBLOCKSONDISK, fpin);
+		fread(errorinfo, MAXBLOCKSONDISK, 1, fpin); // @@@SRT: check success
 		/* FALLTHROUGH */
 	case (MAXBLOCKSONDISK * 256):	/* 40 track image w/o errorinfo */
 		last_track = 40;
@@ -251,8 +245,8 @@ load_d64(FILE * fpin, int disknum)
 
 	// determine disk id from track 18
 	// $165A2, $165A3
-	fseek(fpin, 0x165a2, SEEK_SET);
-	fread(id, sizeof(BYTE), 2, fpin);
+	fseek(fpin, 0x165a2, SEEK_SET); // @@@SRT: "magiv value"
+	fread(id, 2, 1, fpin); // @@@SRT: check success
 	//printf("disk id: %s\n", id);
 
 	rewind(fpin);
@@ -276,7 +270,7 @@ load_d64(FILE * fpin, int disknum)
 			}
 
 			// read sector from file
-			fread(buffer, sizeof(BYTE), 256, fpin);
+			fread(buffer, sizeof(buffer), 1, fpin); // @@@SRT: check success
 
 			// convert to gcr
 			convert_sector_to_GCR(buffer, gcrdata + (sector * 361),
@@ -289,7 +283,7 @@ load_d64(FILE * fpin, int disknum)
 			for (density[track * 2] = 3;
 			  (track * 2) >= bitrate_range[density[track * 2]];
 			  density[track * 2]--);
-				memcpy(diskbuf + (track * 2 * 0x2000), gcrdata,
+				memcpy(diskbuf + (track * 2 * GCR_TRACK_LENGTH), gcrdata,
 				  length[track * 2]);
 		}
 		else
@@ -298,7 +292,7 @@ load_d64(FILE * fpin, int disknum)
 			for (density2[track * 2] = 3;
 			  (track * 2) >= bitrate_range[density2[track * 2]];
 			  density2[track * 2]--);
-				memcpy(diskbuf2 + (track * 2 * 0x2000), gcrdata,
+				memcpy(diskbuf2 + (track * 2 * GCR_TRACK_LENGTH), gcrdata,
 				  length2[track * 2]);
 		}
 		//printf("%s",errorstring);
@@ -313,8 +307,8 @@ load_gcr(FILE * fpin, char *track_header, int disknum)
 	int dens_pointer;
 	int header_entry;
 	int g64tracks, g64maxtrack;
-	BYTE buffer[0x2000];
-	BYTE gcrdata[0x2000];
+	BYTE buffer[GCR_TRACK_LENGTH];
+	BYTE gcrdata[GCR_TRACK_LENGTH];
 
 	if (imagetype == IMAGE_NIB)
 	{
@@ -326,8 +320,8 @@ load_gcr(FILE * fpin, char *track_header, int disknum)
 		  track += track_inc)
 		{
 			// clear buffers
-			memset(buffer, 0, 0x2000);
-			memset(gcrdata, 0, 0x2000);
+			memset(buffer, 0, sizeof(buffer));
+			memset(gcrdata, 0, sizeof(gcrdata));
 
 			// skip missing tracks
 			if (track_header[header_entry * 2] == 0)
@@ -339,13 +333,13 @@ load_gcr(FILE * fpin, char *track_header, int disknum)
 			// halftrack skip
 			if (track_header[header_entry * 2] < track)
 			{
-				fseek(fpin, 0x2000, SEEK_CUR);
+				fseek(fpin, GCR_TRACK_LENGTH, SEEK_CUR);
 				header_entry++;
 			}
 
 			// get track from file
 			align = ALIGN_NONE;
-			fread(buffer, 0x2000, 1, fpin);
+			fread(buffer, sizeof(buffer), 1, fpin); // @@@SRT: check success
 			printf("o");
 
 			if (disknum == 1)
@@ -359,7 +353,7 @@ load_gcr(FILE * fpin, char *track_header, int disknum)
 					capacity_min[density[track] & 3],
 					capacity_max[density[track] & 3]);
 
-				memcpy(diskbuf + (track * 0x2000), gcrdata,
+				memcpy(diskbuf + (track * GCR_TRACK_LENGTH), gcrdata,
 				  length[track]);
 			}
 			else
@@ -373,7 +367,7 @@ load_gcr(FILE * fpin, char *track_header, int disknum)
 					capacity_min[density2[track] & 3],
 					capacity_max[density2[track] & 3]);
 
-				memcpy(diskbuf2 + (track * 0x2000), gcrdata,
+				memcpy(diskbuf2 + (track * GCR_TRACK_LENGTH), gcrdata,
 				  length2[track]);
 			}
 			header_entry++;
@@ -398,8 +392,8 @@ load_gcr(FILE * fpin, char *track_header, int disknum)
 		  track += track_inc)
 		{
 			// clear buffers
-			memset(buffer, 0, 0x2000);
-			memset(gcrdata, 0, 0x2000);
+			memset(buffer, 0, GCR_TRACK_LENGTH);
+			memset(gcrdata, 0, GCR_TRACK_LENGTH);
 
 			/* get density from header or use default */
 			if (disknum == 1)
@@ -412,8 +406,7 @@ load_gcr(FILE * fpin, char *track_header, int disknum)
 			dens_pointer += (4 * track_inc);
 
 			/* get length */
-			buffer[0] = char_fgetc(fpin);
-			buffer[1] = char_fgetc(fpin);
+        	fread(buffer, 2, 1, fpin); // @@@SRT: check success
 
 			if (disknum == 1)
 				length[track] = buffer[1] << 8 | buffer[0];
@@ -421,14 +414,14 @@ load_gcr(FILE * fpin, char *track_header, int disknum)
 				length2[track] = buffer[1] << 8 | buffer[0];
 
 			/* get track from file */
-			fread(gcrdata, 1, g64maxtrack, fpin);
+			fread(gcrdata, 1, g64maxtrack, fpin); // @@@SRT: check success
 
 			// store track in disk buffer
 			if (disknum == 1)
-				memcpy(diskbuf + (track * 0x2000), gcrdata,
+				memcpy(diskbuf + (track * GCR_TRACK_LENGTH), gcrdata,
 				  length[track]);
 			else
-				memcpy(diskbuf2 + (track * 0x2000), gcrdata,
+				memcpy(diskbuf2 + (track * GCR_TRACK_LENGTH), gcrdata,
 				  length2[track]);
 		}
 	}
@@ -460,9 +453,9 @@ compare_disks(void)
 
 	// extract disk id's from track 18
 	memset(id, 0, 3);
-	extract_id(diskbuf + (36 * 0x2000), id);
+	extract_id(diskbuf + (36 * GCR_TRACK_LENGTH), id);
 	memset(id2, 0, 3);
-	extract_id(diskbuf2 + (36 * 0x2000), id2);
+	extract_id(diskbuf2 + (36 * GCR_TRACK_LENGTH), id2);
 
 	printf("\ndisk ID #1: %s\n", id);
 	printf("disk ID #2: %s\n", id2);
@@ -483,8 +476,8 @@ compare_disks(void)
 
 			// check for gcr match (unlikely)
 			gcr_match =
-			  compare_tracks(diskbuf + (track * 0x2000),
-				diskbuf2 + (track * 0x2000), length[track],
+			  compare_tracks(diskbuf + (track * GCR_TRACK_LENGTH),
+				diskbuf2 + (track * GCR_TRACK_LENGTH), length[track],
 				length2[track], 0, errorstring);
 
 			printf("%s", errorstring);
@@ -503,8 +496,8 @@ compare_disks(void)
 
 			// check for sector matches
 			sec_match =
-			  compare_sectors(diskbuf + (track * 0x2000),
-				diskbuf2 + (track * 0x2000), length[track],
+			  compare_sectors(diskbuf + (track * GCR_TRACK_LENGTH),
+				diskbuf2 + (track * GCR_TRACK_LENGTH), length[track],
 				length2[track], id, id2, track, errorstring);
 
 			printf("%s", errorstring);
@@ -584,12 +577,12 @@ scandisk(void)
 
 	// extract disk id from track 18
 	memset(id, 0, 3);
-	extract_id(diskbuf + (36 * 0x2000), id);
+	extract_id(diskbuf + (36 * GCR_TRACK_LENGTH), id);
 	printf("\ndisk id: %s\n", id);
 
 	// collect and print "cosmetic" disk id for comparison
 	memset(cosmetic_id, 0, 3);
-	extract_cosmetic_id(diskbuf + (36 * 0x2000), cosmetic_id);
+	extract_cosmetic_id(diskbuf + (36 * GCR_TRACK_LENGTH), cosmetic_id);
 	printf("cosmetic disk id: %s\n", cosmetic_id);
 
 	getchar();
@@ -605,7 +598,7 @@ scandisk(void)
 		if (length[track] > 0)
 		{
 			density[track] =
-			  check_sync_flags(diskbuf + (track * 0x2000),
+			  check_sync_flags(diskbuf + (track * GCR_TRACK_LENGTH),
 				density[track] & 3, length[track]);
 
 			printf("(%d", density[track] & 3);
@@ -637,7 +630,7 @@ scandisk(void)
 			if (fixgcr)
 			{
 				badgcr_tracks[track] =
-				  check_bad_gcr(diskbuf + (0x2000 * track),
+				  check_bad_gcr(diskbuf + (GCR_TRACK_LENGTH * track),
 					length[track], 1);
 
 				if (badgcr_tracks[track])
@@ -673,7 +666,7 @@ scandisk(void)
 			// errors since it's encoded for the wrong track number.
 			// rapidlok tracks are not standard gcr
 			if (!fat_tracks[track - 2] && !rapidlok_tracks[track])
-				temp_errors = check_errors(diskbuf + (0x2000 * track),
+				temp_errors = check_errors(diskbuf + (GCR_TRACK_LENGTH * track),
 					length[track], track, id, errorstring);
 
 			if (temp_errors)
@@ -683,7 +676,7 @@ scandisk(void)
 				getchar();
 			}
 
-			temp_empty = check_empty(diskbuf + (0x2000 * track),
+			temp_empty = check_empty(diskbuf + (GCR_TRACK_LENGTH * track),
 			  length[track], track, id, errorstring);
 			if (temp_empty)
 			{
@@ -692,7 +685,7 @@ scandisk(void)
 			}
 
 			if (advanced_info)
-				raw_track_info(diskbuf + (0x2000 * track),
+				raw_track_info(diskbuf + (GCR_TRACK_LENGTH * track),
 				  length[track], errorstring);
 
 			printf("\n");
@@ -703,7 +696,7 @@ scandisk(void)
 		sprintf(testfilename, "raw/tr%dd%d", track / 2,
 		  (density[track] & 3));
 		trkout = fopen(testfilename, "w");
-		fwrite(diskbuf + (track * 0x2000), length[track], 1, trkout);
+		fwrite(diskbuf + (track * GCR_TRACK_LENGTH), length[track], 1, trkout);
 		fclose(trkout);
 
 	}
@@ -720,11 +713,11 @@ static int
 raw_track_info(BYTE * gcrdata, int length, char *outputstring)
 {
 	int sync_cnt = 0;
-	int sync_len[0x2000];
+	int sync_len[GCR_TRACK_LENGTH];
 	int gap_cnt = 0;
-	int gap_len[0x2000];
+	int gap_len[GCR_TRACK_LENGTH];
 	int weak_cnt = 0;
-	int weak_len[0x2000];
+	int weak_len[GCR_TRACK_LENGTH];
 	int i, locked;
 
 	memset(sync_len, 0, sizeof(sync_len));
@@ -812,8 +805,8 @@ check_fat(int track)
 
 	if (length[track] > 0 && length[track + 2] > 0)
 	{
-		fat = compare_tracks(diskbuf + (track * 0x2000),
-		  diskbuf + ((track + 2) * 0x2000), length[track],
+		fat = compare_tracks(diskbuf + (track * GCR_TRACK_LENGTH),
+		  diskbuf + ((track + 2) * GCR_TRACK_LENGTH), length[track],
 		  length[track + 2], 1, errorstring);
 	}
 
@@ -834,7 +827,7 @@ check_rapidlok(int track)
 	int synclen = 0;
 	int keylen = 0;		// extra sector with # of 0x7b
 	int tlength = length[track];
-	BYTE *gcrdata = diskbuf + (track * 0x2000);
+	BYTE *gcrdata = diskbuf + (track * GCR_TRACK_LENGTH);
 
 	// extra sector is at the end.
 	// count the extra-sector (key) bytes.

@@ -93,4 +93,3 @@ BYTE scan_track(CBM_FILE fd, int track);
 BYTE scan_density(CBM_FILE fd);
 void adjust_target(CBM_FILE fd);
 void closeout_drive(CBM_FILE fd);
-char char_fgetc(FILE *stream);

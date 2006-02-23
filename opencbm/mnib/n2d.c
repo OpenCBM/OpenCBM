@@ -94,7 +94,7 @@ main(int argc, char **argv)
 		goto fail;
 	}
 
-	if (fread(nib_header, sizeof(BYTE), 0x0100, fp_nib) < 0x0100)
+	if (fread(nib_header, sizeof(nib_header), 1, fp_nib) < 1)
 	{
 		fprintf(stderr, "Cannot read header from mnib image.\n");
 		goto fail;
@@ -126,8 +126,7 @@ main(int argc, char **argv)
 		fseek(fp_nib, 2 * 17 * GCR_TRACK_LENGTH + 0x100, SEEK_SET);
 	}
 
-	if (fread(gcr_track, sizeof(BYTE), GCR_TRACK_LENGTH, fp_nib) <
-	  GCR_TRACK_LENGTH)
+	if (fread(gcr_track, GCR_TRACK_LENGTH, 1, fp_nib) < 1)
 	{
 		fprintf(stderr, "Cannot read track from image.\n");
 		goto fail;
@@ -162,8 +161,7 @@ main(int argc, char **argv)
 		header_offset += 2;
 
 		/* read in one track */
-		if (fread(gcr_track, sizeof(BYTE), GCR_TRACK_LENGTH, fp_nib) <
-		  GCR_TRACK_LENGTH)
+		if (fread(gcr_track, GCR_TRACK_LENGTH, 1, fp_nib) < 1)
 		{
 			fprintf(stderr, "Cannot read track from G64 image.\n");
 			goto fail;
@@ -196,7 +194,7 @@ main(int argc, char **argv)
 
 
 
-			if (fwrite((char *) rawdata + 1, 256, 1, fp_d64) != 1)
+			if (fwrite(rawdata + 1, 256, 1, fp_d64) != 1)
 			{
 				fprintf(stderr,
 				  "Cannot write sector data.\n");
@@ -211,7 +209,7 @@ main(int argc, char **argv)
 
 	if (save_errorinfo)
 	{
-		if (fwrite((char *) errorinfo, BLOCKSONDISK, 1, fp_d64) != 1)
+		if (fwrite(errorinfo, BLOCKSONDISK, 1, fp_d64) != 1)
 		{
 			fprintf(stderr, "Cannot write error information.\n");
 			goto fail;
@@ -223,10 +221,10 @@ main(int argc, char **argv)
 	{
 		printf("\n\nPatched cosmetic disk id to real disk id.\n");
 		fseek(fp_d64, 0x165a2, SEEK_SET);
-		fwrite(id, sizeof(BYTE), 2, fp_d64);
+		fwrite(id, 2, 1, fp_d64); // @@@SRT: check success
 		// put original cosmetic id in unused part of sector
 		fseek(fp_d64, 0x165fe, SEEK_SET);
-		fwrite(cosmetic_id, sizeof(BYTE), 2, fp_d64);
+		fwrite(cosmetic_id, 2, 1, fp_d64); // @@@SRT: check success
 	}
 
 fail:
