@@ -505,7 +505,7 @@ read_d64(CBM_FILE fd, FILE * fpout)
 
 	blocks_to_save = (save_40_tracks) ? MAXBLOCKSONDISK : BLOCKSONDISK;
 
-    assert(sizeof(d64data) < (blocks_to_save * 256));
+        assert(sizeof(d64data) < (size_t)(blocks_to_save * 256));
 	if (fwrite(d64data, blocks_to_save * 256, 1, fpout) != 1)
 	{
 		fprintf(stderr, "Cannot write d64 data.\n");
@@ -514,7 +514,7 @@ read_d64(CBM_FILE fd, FILE * fpout)
 
 	if (save_errorinfo == 1)
 	{
-        assert(sizeof(errorinfo) < blocks_to_save);
+                assert(sizeof(errorinfo) < (size_t)blocks_to_save);
 		if (fwrite(errorinfo, blocks_to_save, 1, fpout) != 1)
 		{
 			fprintf(stderr, "Cannot write sector data.\n");
