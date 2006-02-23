@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.9 2006-02-12 15:52:56 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.10 2006-02-23 20:40:02 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -24,6 +24,7 @@
 #include <direct.h>
 
 #include "cbmioctl.h"
+#include "version.h"
 
 #include <getopt.h>
 
@@ -178,17 +179,31 @@ GetOsVersion(VOID)
     FUNC_LEAVE_TYPE(retValue, osversion_t, "%u");
 }
 
+/*! \brief \internal Output version information of instcbm */
+static VOID
+version(VOID)
+{
+    FUNC_ENTER();
+
+    printf("cbm4win Version " CBM4WIN_VERSION_STRING ", built on " __DATE__ " at " __TIME__ "\n");
+
+    FUNC_LEAVE();
+}
+
 /*! \brief \internal Print out the help screen */
 static VOID
 usage(VOID)
 {
     FUNC_ENTER();
 
-    printf("Usage: instcbm [options]\n"
+    version();
+
+    printf("\nUsage: instcbm [options]\n"
             "Install the cbm4win driver on the system, or remove it.\n"
             "\n"
             "Options:\n"
             "  -h, --help      display this help and exit\n"
+            "  -V, --version   display version information about cbm4win\n"
             "  -r, --remove    remove (uninstall) the driver\n"
             "  -u, --update    update parameters if driver is already installed.\n"
             "  -l, --lpt=no    set default LPT port\n"
@@ -212,7 +227,6 @@ hint(char *s)
 {
     fprintf(stderr, "Try `%s' --help for more information.\n", s);
 }
-
 
 /*! \brief The parameter which are given on the command-line */
 typedef
@@ -407,6 +421,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
     struct option longopts[] =
     {
         { "help",       no_argument,       NULL, 'h' },
+        { "version",    no_argument,       NULL, 'V' },
         { "remove",     no_argument,       NULL, 'r' },
         { "forcent4",   no_argument,       NULL, 'F' },
         { "lpt",        required_argument, NULL, 'l' },
@@ -421,7 +436,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { NULL,         0,                 NULL, 0   }
     };
 
-    const char shortopts[] = "hrFl:nucA"
+    const char shortopts[] = "hrFl:nucAV"
 #if DBG
                              "D:B"
 #endif // #if DBG
@@ -455,6 +470,11 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         {
         case 'h':
             usage();
+            Parameter->NoExecute = TRUE;
+            break;
+
+        case 'V':
+            version();
             Parameter->NoExecute = TRUE;
             break;
 
