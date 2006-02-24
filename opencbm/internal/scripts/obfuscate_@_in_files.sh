@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: obfuscate_@_in_files.sh,v 1.1 2006-02-24 14:31:14 wmsr Exp $
+# $Id: obfuscate_@_in_files.sh,v 1.2 2006-02-24 15:16:18 wmsr Exp $
 #
 # Copyright (C) 2006 Wolfgang Moser
 #
@@ -23,6 +23,7 @@ case "$#" in
 	    echo \"$1\" exists and it is a directory
 	    egrep -r "<[^@<>]+@[-A-Za-z0-9.]+[.][-A-Za-z0-9]+>" $1 |\
 		fgrep -v templates.pot |	# sort out a template file \
+		fgrep -v $0 |			# sort out ourself \
 		cut -d: -f1 |			# only take the filenames \
 		sort -u |			# sort out duplicates \
 		xargs file |			# check the real type of a file \
@@ -32,8 +33,8 @@ case "$#" in
 
 		# DEBUG:  xargs -l1 echo Calling \"$0\" with:
 
-	    echo -e \\nAdditional fixes may be needed in:\\n
-	    egrep -r "[ <][-.A-Za-z0-9]+@[-.A-Za-z0-9]+[ >]" *
+	    echo -e \\nAdditional fixes may be needed in \(\*.bak files listing omitted\):\\n
+	    egrep -r "[ <][-.A-Za-z0-9]+@[-.A-Za-z0-9]+[ >]" * | grep -v "^[^:]*.bak:"
 	else
 	    echo \"$1\" does not exist or it is no directory
 	fi
@@ -48,14 +49,7 @@ case "$#" in
 		# Start searching for addresses to obfuscate,
 		# put the result into the temporary file
 		sed -r -e "s/<([^@<>]+)@([-A-Za-z0-9.]+)[.]([-A-Za-z0-9]+)>/<\1_(a)_\2_(o)_\3>/g" \
-		    < $2 > $1	# get the input file and put the filter result to the output
-
-		# Move the temporary file in place of the input file
-		# touch -r $2 $1 # causes problems with "cvs diff" and "make" ?
-		mv $1 $2
-
-		# Recreate the temporary file with size zero
-		touch $1
+		    -i.bak $2  # get the input file and put the filter result to the output
 	    else
 		echo argument file \"$2\" does not exist or it is no regular file
 	    fi
