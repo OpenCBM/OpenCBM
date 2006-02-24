@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.2 2005-02-13 17:58:12 strik Exp $ \n
+** \version $Id: i_opencbm.h,v 1.3 2006-02-24 12:21:41 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **

@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.8 2006-02-20 12:11:16 strik Exp $ \n
+** \version $Id: iec.h,v 1.9 2006-02-24 12:21:42 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **

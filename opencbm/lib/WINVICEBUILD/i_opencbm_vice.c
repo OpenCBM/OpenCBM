@@ -7,16 +7,16 @@
  *  Copyright 2005 Spiro Trikaliotis
  *
  *  Parts are Copyright
- *      Jouko Valta <jopi@stekt.oulu.fi>
- *      Andreas Boose <boose@linux.rz.fh-hannover.de>
+ *      Jouko Valta <jopi(at)stekt(dot)oulu(dot)fi>
+ *      Andreas Boose <boose(at)linux(dot)rz(dot)fh-hannover(dot)de>
 */
 
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/i_opencbm_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm_vice.c,v 1.1 2005-07-01 12:22:16 strik Exp $ \n
+** \version $Id: i_opencbm_vice.c,v 1.2 2006-02-24 12:21:41 strik Exp $ \n
 ** \authors Based on code from
-**    Michael Klein <michael.klein@puffin.lb.shuttle.de>
+**    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
 ** \brief Helper functions for the DLL for accessing the driver,
 **        and the install functions

@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2005 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.4 2006-02-19 17:29:51 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.5 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **

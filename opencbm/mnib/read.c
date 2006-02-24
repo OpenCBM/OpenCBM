@@ -1,7 +1,7 @@
 /*
  * MNIB Read routines
- * Copyright 2001-2005 Markus Brenner <markus@brenner.de>
- * and Pete Rittwage <peter@rittwage.com>
+ * Copyright 2001-2005 Markus Brenner <markus(at)brenner(dot)de>
+ * and Pete Rittwage <peter(at)rittwage(dot)com>
  */
 
 #include <stdio.h>

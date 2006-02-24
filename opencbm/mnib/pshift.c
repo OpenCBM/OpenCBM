@@ -1,6 +1,6 @@
 /*
  * Pete's CBM NIB Image Track Shifter
- * Copyright (c) 2005 Pete Rittwage <peter@rittwage.com>
+ * Copyright (c) 2005 Pete Rittwage <peter(at)rittwage(dot)com>
  */
 
 #include <stdio.h>

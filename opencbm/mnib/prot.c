@@ -1,6 +1,6 @@
 /*
  * Protection handlers for MNIB
- * Copyright 2004-2005 Pete Rittwage <peter@rittwage.com>
+ * Copyright 2004-2005 Pete Rittwage <peter(at)rittwage(dot)com>
  */
 
 #include <stdio.h>

@@ -4,10 +4,10 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbm4linux.h,v 1.1 2005-03-02 18:17:18 strik Exp $ */
+/* $Id: cbm4linux.h,v 1.2 2006-02-24 12:21:40 strik Exp $ */
 
 #ifndef CBM4LINUX_OLDAPI
 # warning \

@@ -4,12 +4,12 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2004 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: fs.c,v 1.7 2005-11-28 16:41:29 strik Exp $";
+    "@(#) $Id: fs.c,v 1.8 2006-02-24 12:21:42 strik Exp $";
 #endif
 
 #include "d64copy_int.h"

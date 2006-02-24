@@ -86,5 +86,5 @@ There is a web page available for cbm4win. Get updates from there:
    available for announcements and for user discussions.
 
    If you want to contact me directly, just contact me at
-   cbm4win@trikaliotis.net, or go to my homepage at
+   cbm4win(at)trikaliotis(dot)net, or go to my homepage at
    http://www.trikaliotis.net/.

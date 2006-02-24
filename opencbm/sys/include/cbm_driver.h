@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.4 2006-01-29 17:58:07 strik Exp $ \n
+** \version $Id: cbm_driver.h,v 1.5 2006-02-24 12:21:42 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **

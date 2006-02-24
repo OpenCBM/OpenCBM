@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.8 2005-04-17 15:32:17 strik Exp $ \n
+** \version $Id: startstop.c,v 1.9 2006-02-24 12:21:41 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **

@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/wdm/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.7 2005-03-02 18:17:23 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.8 2006-02-24 12:21:44 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **

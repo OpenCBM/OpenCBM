@@ -4,20 +4,20 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2004 Spiro Trikaliotis
  *
  *  Parts are Copyright
- *      Jouko Valta <jopi@stekt.oulu.fi>
- *      Andreas Boose <boose@linux.rz.fh-hannover.de>
+ *      Jouko Valta <jopi(at)stekt(dot)oulu(dot)fi>
+ *      Andreas Boose <boose(at)linux(dot)rz(dot)fh-hannover(dot)de>
 */
 
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.5 2005-04-17 15:32:18 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.6 2006-02-24 12:21:41 strik Exp $ \n
 ** \authors Based on code from
-**    Michael Klein <michael.klein@puffin.lb.shuttle.de>
+**    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
 ** \brief Helper functions for the DLL for accessing the driver,
 **        and the install functions

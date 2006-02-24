@@ -4,13 +4,13 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2002 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999-2002 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.4 2006-02-20 12:11:16 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.5 2006-02-24 12:21:44 strik Exp $";
 #endif
 
 #include <linux/config.h>

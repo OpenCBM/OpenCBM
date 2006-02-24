@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.9 2005-11-20 13:50:28 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.10 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **

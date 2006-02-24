@@ -1,10 +1,10 @@
 /*
     n2g - Converts mnib nibbler data to G64 image
 
-    (C) 2000-03 Markus Brenner <markus@brenner.de>
-		and Pete Rittwage <peter@rittwage.com>
+    (C) 2000-03 Markus Brenner <markus(at)brenner(dot)de>
+		and Pete Rittwage <peter(at)rittwage(dot)com>
 
-    Based on code by Andreas Boose <boose@unixserv.rz.fh-hannover.de>
+    Based on code by Andreas Boose <boose(at)linux(dot)rz(dot)fh-hannover(dot)de>
 
     V 0.21   use correct speed values in G64
     V 0.22   cleaned up version using gcr.c helper functions

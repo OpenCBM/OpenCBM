@@ -1,8 +1,8 @@
 /*
     gcr.h - Group Code Recording helper functions
 
-    (C) 2001-05 Markus Brenner <markus@brenner.de>
-    	and Pete Rittwage <peter@rittwage.com>
+    (C) 2001-05 Markus Brenner <markus(at)brenner(dot)de>
+    	and Pete Rittwage <peter(at)rittwage(dot)com>
         based on code by Andreas Boose
 
     V 0.33   improved sector extraction, added find_track_cycle() function

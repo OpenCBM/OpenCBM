@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2006 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004-2006 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.8 2006-02-20 15:57:54 strik Exp $ \n
+** \version $Id: PortAccess.c,v 1.9 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **

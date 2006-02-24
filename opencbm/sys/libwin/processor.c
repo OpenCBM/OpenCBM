@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2005 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libwin/processor.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: processor.c,v 1.1 2005-08-24 18:18:05 strik Exp $ \n
+** \version $Id: processor.c,v 1.2 2006-02-24 12:21:44 strik Exp $ \n
 ** \n
 ** \brief Functions for determining processor number
 **

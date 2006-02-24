@@ -4,7 +4,7 @@
 # Cbm4linux program is available from www.lb.shuttle.de/puffin/cbm4linux.
 # This program (cbmput) makes it easier to copy a file from Linux to a Commodore
 # drive connected to the parallel port via an XM1541 cable.
-# Written 5-01-2001 by John Cirillo  (cirillo@purdue.edu)
+# Written 5-01-2001 by John Cirillo  (cirillo(at)purdue(dot)edu)
 # Enjoy!
 #
 if [ "$1" = "" ] 

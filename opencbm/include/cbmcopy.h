@@ -4,10 +4,10 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- *  Copyright 2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbmcopy.h,v 1.3 2005-09-11 13:32:33 strik Exp $ */
+/* $Id: cbmcopy.h,v 1.4 2006-02-24 12:21:41 strik Exp $ */
 
 #ifndef CBMCOPY_H
 #define CBMCOPY_H

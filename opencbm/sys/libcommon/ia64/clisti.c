@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2006 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2006 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
-** \file sys/libcommon/i386/clisti.c \n
+** \file sys/libcommon/ia64/clisti.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: clisti.c,v 1.1 2006-02-19 17:29:51 strik Exp $ \n
+** \version $Id: clisti.c,v 1.2 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Wrappers for CLI/STI for the different platforms. Here: iA64
 **

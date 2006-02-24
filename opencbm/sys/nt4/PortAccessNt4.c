@@ -4,7 +4,7 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2006 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004-2006 Spiro Trikaliotis
  *  Copyright 1998      Wolfgang Moser
  *
  *  This file is heavily based on LPTDTC by Wolfgang Moser.
@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/PortAccessNt4.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccessNt4.c,v 1.2 2006-02-20 15:57:54 strik Exp $ \n
+** \version $Id: PortAccessNt4.c,v 1.3 2006-02-24 12:21:44 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver,
 **        NT4 version

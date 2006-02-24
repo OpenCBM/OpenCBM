@@ -1,9 +1,9 @@
 /*
     n2d.c - Converts mnib nibbler data to D64 image
 
-    (C) 2000-05 Markus Brenner <markus@brenner.de>
+    (C) 2000-05 Markus Brenner <markus(at)brenner(dot)de>
 
-    Based on code by Andreas Boose <boose@unixserv.rz.fh-hannover.de>
+    Based on code by Andreas Boose <boose(at)linux(dot)rz(dot)fh-hannover(dot)de>
 
     V 0.19   fixed usage message, only use 35 tracks for now
     V 0.20   improved disk error detection

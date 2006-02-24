@@ -4,13 +4,13 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2001 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Modifications for cbm4win Copyright 2001-2004 Spiro Trikaliotis
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.8 2006-01-25 17:10:38 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.9 2006-02-24 12:21:42 strik Exp $";
 #endif
 
 #include "d64copy_int.h"

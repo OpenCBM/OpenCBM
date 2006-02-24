@@ -2,8 +2,8 @@
 ; * cbmformat.o65 - 6502 based fast formatting routine with probing for
 ; *                 the Commodore 1541 floppy disk drive and compatibles
 ; *
-; * Copyright (C)           Joe Forster/STA <sta@c64.org>
-; * Copyright (C) 1999      Michael Klein <michael.klein@puffin.lb.shuttle.de>
+; * Copyright (C)           Joe Forster/STA <sta(at)c64(dot)org>
+; * Copyright (C) 1999      Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ; * Copyright (C) 2005      Spiro Trikaliotis
 ; * Copyright (C) 2005,2006 Wolfgang Moser
 ; *
@@ -15,7 +15,7 @@
 ;
 ; This next generation formatter routine for OpenCBM is a nearly complete
 ; rewrite of the formatting routine that comes with cbm4win 0.1.0a, which
-; is an adaption of Joe Forster/STAs <sta (at) c64 (dot) org>  formatter
+; is an adaption of Joe Forster/STAs <sta(at)c64(dot)org>  formatter
 ; for  The Star Commander.  While most of the main program and parts of
 ; the outermost job code loop have been preserverd, the rest was created
 ; from scratch.

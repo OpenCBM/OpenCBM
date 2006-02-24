@@ -4,10 +4,10 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbm_module.h,v 1.3 2005-11-20 13:37:43 strik Exp $ */
+/* $Id: cbm_module.h,v 1.4 2006-02-24 12:21:41 strik Exp $ */
 
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H

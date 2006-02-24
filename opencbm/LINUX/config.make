@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.4 2006-02-07 19:00:10 strik Exp $
+# $Id: config.make,v 1.5 2006-02-24 12:21:39 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -82,7 +82,7 @@ VERSION = '"$(MAJ).$(MIN).$(REL)"'
 # xa defs
 XA          = xa
 
-# cl65 defs, contributed by Ullrich von Bassewitz <uz@musoftware.de>
+# cl65 defs, contributed by Ullrich von Bassewitz <uz(at)musoftware(dot)de>
 # (cc65 >= 2.6 required)
 CL65        = cl65
 LD65        = ld65

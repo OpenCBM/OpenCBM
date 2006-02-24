@@ -4,12 +4,12 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: archlib.c,v 1.2 2006-02-20 12:11:16 strik Exp $";
+    "@(#) $Id: archlib.c,v 1.3 2006-02-24 12:21:41 strik Exp $";
 #endif
 
 #include <fcntl.h>

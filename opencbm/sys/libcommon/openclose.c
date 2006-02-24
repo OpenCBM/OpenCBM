@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.3 2005-04-20 14:24:07 strik Exp $ \n
+** \version $Id: openclose.c,v 1.4 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **

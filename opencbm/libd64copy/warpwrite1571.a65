@@ -1,8 +1,8 @@
 
-; This program is heavily based on Joe Forster/STAs <sta@c64.org>
+; This program is heavily based on Joe Forster/STAs <sta(at)c64(dot)org>
 ; StarCommander Turbo routines.
 ;
-; "$Id: warpwrite1571.a65,v 1.1 2004-11-07 11:05:12 strik Exp $"
+; "$Id: warpwrite1571.a65,v 1.2 2006-02-24 12:21:42 strik Exp $"
 
 	* = $0500
 

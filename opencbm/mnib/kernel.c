@@ -4,12 +4,12 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *
- *	Modified for DOS use by Markus Brenner <markus@brenner.de>
- *	XM1541 support by Wolfgang Moser <w.moser@gm.fh-koeln.de>
+ *	Modified for DOS use by Markus Brenner <markus(at)brenner(dot)de>
+ *	XM1541 support by Wolfgang Moser <womo(at)d81(dot)de>
  *
- *  MNIB Write support + consolidation by Pete Rittwage <peter@rittwage.com>
+ *  MNIB Write support + consolidation by Pete Rittwage <peter(at)rittwage(dot)com>
 */
 
 // #define DEBUG

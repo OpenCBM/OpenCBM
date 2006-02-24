@@ -1,7 +1,7 @@
 README.TXT for the mnib utilities 0.36 (08 November 2005)
 
 mnib, n2d, n2g and g2d are Copyright (C) 2000-05 Markus Brenner
-<markus@brenner.de> and Pete Rittwage <peter@rittwage.com>
+<markus(at)brenner(dot)de> and Pete Rittwage <peter(at)rittwage(dot)com>
 
 homepage: http://rittwage.com/c64pp/dp.php?pg=mnib
 homepage: http://markus.brenner.de/mnib/

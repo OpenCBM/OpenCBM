@@ -2,7 +2,7 @@
 # cbmrm 1.0
 # This program uses the cbm4linux cbmctrl program by Michael Klein (www.lb.shuttle.de/puffin/cbm4linux)
 # to delete a file on a Commodore drive connected to the parallel port via an XM1541 cable.
-# Written 5-01-2001 by John Cirillo  (cirillo@purdue.edu)
+# Written 5-01-2001 by John Cirillo  (cirillo(at)purdue(dot)edu)
 # Enjoy!
 #
 if [ "$1" = "" ] 

@@ -4,12 +4,12 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+ *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: flash.c,v 1.2 2004-12-07 19:44:46 strik Exp $";
+    "@(#) $Id: flash.c,v 1.3 2006-02-24 12:21:40 strik Exp $";
 #endif
 
 #include "opencbm.h"

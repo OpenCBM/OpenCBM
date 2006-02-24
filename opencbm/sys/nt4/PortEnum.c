@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/nt4/PortEnum.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortEnum.c,v 1.2 2005-03-02 18:17:22 strik Exp $ \n
+** \version $Id: PortEnum.c,v 1.3 2006-02-24 12:21:44 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **

@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/queue.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: queue.c,v 1.6 2005-04-17 15:32:19 strik Exp $ \n
+** \version $Id: queue.c,v 1.7 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Functions for queueung IRPs
 **

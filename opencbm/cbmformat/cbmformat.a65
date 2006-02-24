@@ -4,8 +4,8 @@
 ; *	as published by the Free Software Foundation; either version
 ; *	2 of the License, or (at your option) any later version.
 ; *
-; *  Copyright      Joe Forster/STA <sta@c64.org>
-; *  Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+; *  Copyright      Joe Forster/STA <sta(at)c64(dot)org>
+; *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ; *  Copyright 2005 Spiro Trikaliotis
 ; *  Copyright 2005 Wolfgang Moser
 ;
@@ -13,10 +13,10 @@
 ;            to allow cross-using this routines, even for non-GPLed code
 ;            (for example, but not limited to, the Star Commander).
 ;
-; This program is heavily based on Joe Forster/STAs <sta@c64.org>
+; This program is heavily based on Joe Forster/STAs <sta(at)c64(dot)org>
 ; StarCommander Turbo routines.
 ;
-; "$Id: cbmformat.a65,v 1.4 2005-05-05 13:26:46 strik Exp $"
+; "$Id: cbmformat.a65,v 1.5 2006-02-24 12:21:39 strik Exp $"
 
 
 JOB_BUMP	= $C0 ; bump the head

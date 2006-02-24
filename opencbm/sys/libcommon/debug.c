@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.14 2005-09-11 13:32:33 strik Exp $ \n
+** \version $Id: debug.c,v 1.15 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **

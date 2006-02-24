@@ -1,7 +1,7 @@
 Source: cbm4linux
 Section: misc
 Priority: extra
-Maintainer: Michael Klein <michael.klein@puffin.lb.shuttle.de>
+Maintainer: Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 Build-Depends: debhelper (>= 4.1.16), linuxdoc-tools, linuxdoc-tools-latex, linuxdoc-tools-text
 Standards-Version: 3.6.1
 

@@ -4,9 +4,9 @@
 ; as published by the Free Software Foundation; either version
 ; 2 of the License, or (at your option) any later version.
 ;
-; Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+; Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ;
-; "$Id: s2r.a65,v 1.2 2005-07-04 17:19:22 strik Exp $"
+; "$Id: s2r.a65,v 1.3 2006-02-24 12:21:41 strik Exp $"
 
 	port = $1800
 	db   = $86

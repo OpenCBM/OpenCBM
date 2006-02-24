@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2005 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004-2005 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file config.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: config.h,v 1.2 2005-12-14 09:08:19 strik Exp $ \n
+** \version $Id: config.h,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Definitions for the configuration of the cbm4win driver
 **

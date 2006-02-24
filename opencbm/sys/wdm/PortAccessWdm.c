@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2006 Spiro Trikaliotis <cbm4win@trikaliotis.net>
+ *  Copyright 2004-2006 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/wdm/PortAccessWdm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccessWdm.c,v 1.1 2006-02-19 17:29:52 strik Exp $ \n
+** \version $Id: PortAccessWdm.c,v 1.2 2006-02-24 12:21:44 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **        Only use WDM functions
