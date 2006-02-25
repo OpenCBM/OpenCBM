@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.11 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.12 2006-02-25 10:27:54 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -25,6 +25,7 @@
 
 #include "cbmioctl.h"
 #include "version.h"
+#include "arch.h"
 
 #include <getopt.h>
 
@@ -185,7 +186,7 @@ version(VOID)
 {
     FUNC_ENTER();
 
-    printf("cbm4win Version " CBM4WIN_VERSION_STRING ", built on " __DATE__ " at " __TIME__ "\n");
+    printf("cbm4win Version " OPENCBM_VERSION ", built on " __DATE__ " at " __TIME__ "\n");
 
     FUNC_LEAVE();
 }

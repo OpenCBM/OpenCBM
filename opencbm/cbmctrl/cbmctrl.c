@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.10 2006-02-24 12:21:39 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.11 2006-02-25 10:27:54 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -35,11 +35,7 @@ static int do_help(CBM_FILE fd, char *argv[]);
  */
 static int do_version(CBM_FILE fd, char *argv[])
 {
-#ifdef WIN32
-    printf("cbmctrl version " CBM4WIN_VERSION_STRING ", built on " __DATE__ " at " __TIME__ "\n");
-#else
     printf("cbmctrl version " OPENCBM_VERSION ", built on " __DATE__ " at " __TIME__ "\n");
-#endif
 
     return 0;
 }
@@ -452,43 +448,144 @@ struct prog
     int      req_args_min;
     int      req_args_max;
     char    *arglist;
+    char    *shorthelp_text;
     char    *help_text;
 };
 
 static struct prog prog_table[] =
 {
-    {0, "--help"  , do_help    , 0, 0, ""                                ,
-        "output this help screen"    },
-    {0, "--version",do_version , 0, 0, ""                                ,
-        "output version information" },
-    {1, "listen"  , do_listen  , 2, 2, "<device> <secadr>"               ,
-        "perform a listen on the IEC bus" },
-    {1, "talk"    , do_talk    , 2, 2, "<device> <secadr>"               ,
-        "perform a talk on the IEC bus"},
-    {1, "unlisten", do_unlisten, 0, 0, ""                                ,
-        "perform an unlisten on the IEC bus" },
-    {1, "untalk"  , do_untalk  , 0, 0, ""                                ,
-        "perform an untalk on the IEC bus" },
-    {1, "open"    , do_open    , 3, 3, "<device> <secadr> <filename>"    ,
-        "perform an open on the IEC bus"},
-    {1, "close"   , do_close   , 2, 2, "<device> <secadr>"               ,
-        "perform a close on the IEC bus"},
-    {1, "status"  , do_status  , 1, 1, "<device>"                        ,
-        "give the status of the specified drive"},
-    {1, "command" , do_command , 2, 2, "<device> <cmdstr>"               ,
-        "issue a command to the specified drive"},
-    {1, "dir"     , do_dir     , 1, 1, "<device>"                        ,
-        "output the directory of the disk in the specified drive"},
-    {1, "download", do_download, 3, 4, "<device> <adr> <count> [<file>]" ,
-        "download memory contents from the floppy drive"},
-    {1, "upload"  , do_upload  , 2, 3, "<device> <adr> [<file>]"         ,
-        "upoload memory contents to the floppy drive"},
-    {1, "reset"   , do_reset   , 0, 0, ""                                ,
-        "reset all drives on the IEC bus"},
-    {1, "detect"  , do_detect  , 0, 0, ""                                ,
-        "detect all drives on the IEC bus"},
-    {1, "change"  , do_change  , 1, 1, "<device>"                        ,
-        "wait for a disk to be changed in the specified drive"},
+    {0, "--help"  , do_help    , 0, 1, "[<command>]",
+        "output this help screen",
+        "This command outputs some help information for cbmctrl.\n\n"
+        "<command> is the (optional) command to get information about.\n\n"
+        "If you use it without parameter, it outputs a list of all\n"
+        "available commands." },
+
+    {0, "-h"      , do_help    , 0, 1, "",
+        "same as --help",
+        "for more info, use \"cbmctrl --help --help\"." },
+
+    {0, "--version",do_version , 0, 0, "",
+        "output version information",
+        "This command just outputs the version number and\n"
+        "build date of cbmctrl." },
+
+    {0, "-V"      , do_version , 0, 0, "",
+        "same as --version",
+        "for more info, use \"cbmctrl --help --version\"." },
+
+    {1, "listen"  , do_listen  , 2, 2, "<device> <secadr>",
+        "perform a listen on the IEC bus",
+        "Output a listen command on the IEC bus.\n"
+        "<device> is the device number,\n"
+        "<secadr> the secondary address to use for this.\n\n"
+        "This has to be undone later with an unlisten command." },
+
+    {1, "talk"    , do_talk    , 2, 2, "<device> <secadr>",
+        "perform a talk on the IEC bus",
+        "Output a talk command on the IEC bus.\n"
+        "<device> is the device number,\n"
+        "<secadr> the secondary address to use for this.\n\n"
+        "This has to be undone later with an untalk command." },
+
+    {1, "unlisten", do_unlisten, 0, 0, "",
+        "perform an unlisten on the IEC bus",
+        "Undo one or more previous listen commands.\n"
+        "This affects all drives." },
+
+    {1, "untalk"  , do_untalk  , 0, 0, "",
+        "perform an untalk on the IEC bus",
+        "Undo one or more previous talk commands.\n"
+        "This affects all drives." },
+
+    {1, "open"    , do_open    , 3, 3, "<device> <secadr> <filename>",
+        "perform an open on the IEC bus",
+        "Output an open command on the IEC bus.\n"
+        "<device> is the device number,\n"
+        "<secadr> the secondary address to use for this.\n"
+        "<filename> is the name of the file to be opened.\n\n"
+        "This has to be undone later with a close command.\n\n"
+        "NOTE: You cannot do an open without a filename.\n"
+        "      Although a CBM machine (i.e., a C64) allows this,\n"
+        "      this is an internal operation to the computer only." },
+
+    {1, "close"   , do_close   , 2, 2, "<device> <secadr>",
+        "perform a close on the IEC bus",
+        "Undo a previous open command." },
+
+    {1, "status"  , do_status  , 1, 1, "<device>",
+        "give the status of the specified drive",
+        "This command gets the status (the so-called 'error channel')"
+        "of the given drive and outputs it on the screen.\n"
+        "<device> is the device number of the drive."
+    },
+
+    {1, "command" , do_command , 2, 2, "<device> <cmdstr>",
+        "issue a command to the specified drive",
+        "This command issues a command to a specific drive.\n"
+        "This command is a command that you normally give to\n"
+        "channel 15 (i.e., N: to format a drive, V: to validate, etc.).\n\n"
+        "<device> is the device number of the drive.\n\n"
+        "<cmdstr> is the command to execute in the drive.\n"
+        "NOTE: You have to give the commands in upper-case letters.\n"
+        "      Lower case will NOT work!" },
+
+    {1, "dir"     , do_dir     , 1, 1, "<device>",
+        "output the directory of the disk in the specified drive",
+        "This command gets the directory of the disk in the drive.\n\n"
+        "<device> is the device number of the drive." },
+
+    {1, "download", do_download, 3, 4, "<device> <adr> <count> [<file>]",
+        "download memory contents from the floppy drive",
+        "With this command, you can get data from the floppy drive memory.\n"
+        "<device> is the device number of the drive.\n"
+        "<adr>    is the starting address of the memory region to get.\n"
+        "         it can be given in decimal or in hex (with a 0x prefix).\n"
+        "<count>  is the number of bytes to read.\n"
+        "         it can be given in decimal or in hex (with a 0x prefix).\n"
+        "<file>   (optional) file name of a file to write the contents to.\n"
+        "         If this name is not given (or it is a dash ('-'), the\n"
+        "         contents will be written to stdout, normally the console.\n\n" 
+        "Example:\n"
+        " cbmctrl download 8 0xc000 0x4000 1541ROM.BIN\n"
+        " * reads the 1541 ROM (from $C000 to $FFFF) from drive 8 into 1541ROM.BIN" },
+
+    {1, "upload"  , do_upload  , 2, 3, "<device> <adr> [<file>]",
+        "upload memory contents to the floppy drive",
+        "With this command, you can write data to the floppy drive memory.\n"
+        "<device> is the device number of the drive.\n"
+        "<adr>    is the starting address of the memory region to write to.\n"
+        "         it can be given in decimal or in hex (with a 0x prefix).\n"
+        "<file>   (optional) file name of a file to read the values from.\n"
+        "         If this name is not given (or it is a dash ('-'), the\n"
+        "         contents will be read from stdin, normally the console."
+        "Example:\n"
+        " cbmctrl upload 8 0x500 BUFFER2.BIN\n"
+        " * writes the file BUFFER2.BIN to drive 8, address $500." },
+
+    {1, "reset"   , do_reset   , 0, 0, "",
+        "reset all drives on the IEC bus",
+        "This command performs a (physical) reset of all drives on the IEC bus." },
+
+    {1, "detect"  , do_detect  , 0, 0, "",
+        "detect all drives on the IEC bus",
+        "This command tries to detect all drives on the IEC bus.\n"
+        "For this, this command access all possible drives and tries to read\n"
+        "some bytes from its memory. If a drive is detected, its name is output.\n"
+        "Additionally, this routine determines if the drive is connected via a\n"
+        "parallel cable (XP1541 companion cable)." },
+
+    {1, "change"  , do_change  , 1, 1, "<device>",
+        "wait for a disk to be changed in the specified drive",
+        "This command waits for a disk to be changed in the specified drive.\n\n"
+        "For this, it makes the following assumptions:\n\n"
+        "* there is already a disk in the drive.\n"
+        "* that disk will be removed and replaced by another disk.\n"
+        "* we do not want to return from this command until the disk is completely\n"
+        "  inserted and ready to be read/written.\n\n"
+        "Because of this, just opening the drive and closing it again (without\n"
+        "actually removing the disk) will not work in most cases." },
+
     {0, NULL,NULL}
 };
 
@@ -517,11 +614,32 @@ static int do_help(CBM_FILE fd, char *argv[])
 
     printf("\n");
 
-    for(i=0; prog_table[i].prog; i++)
+    if (*argv == 0)
     {
-        printf("  %s %s\n", prog_table[i].name, prog_table[i].arglist);
-        printf("     * %s\n\n", prog_table[i].help_text);
+        for(i=0; prog_table[i].prog; i++)
+        {
+            printf("  %-9s %s\n", prog_table[i].name, prog_table[i].shorthelp_text);
+        }
+
+        printf("\nFor more information on a specific command, try --help <COMMAND>.\n");
+
     }
+    else
+    {
+        struct prog *p;
+
+        p = find_main(argv[0]);
+
+        if (p)
+        {
+            printf(" cbmctrl %s %s\n\n  %s\n\n%s\n", p->name, p->arglist, p->shorthelp_text, p->help_text);
+        }
+        else
+        {
+            printf(" Nothing known about \"cbmctrl %s\".\n", argv[0]);
+        }
+    }
+
 
     return 0;
 }
@@ -529,7 +647,6 @@ static int do_help(CBM_FILE fd, char *argv[])
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
     struct prog *p;
-    int i;
 
     p = argc < 2 ? NULL : find_main(argv[1]);
     if(p)
@@ -567,7 +684,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         }
         else
         {
-            arch_error(0, arch_get_errno(), "wrong number of arguments:\n\n  %s %s %s\n",
+            fprintf(stderr, "wrong number of arguments:\n\n  %s %s %s\n",
                         argv[0], argv[1], p->arglist);
         }
     }
