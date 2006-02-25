@@ -175,6 +175,11 @@ Writing back disk images to a real disk:
         illegal GCR on purpose, such as what V-MAX! commonly does on the
         loader track 20.
 
+  -b : Enable BurstNibbler-style timed track alignment (W).  The Burstnibbler 
+  	parallel copier used widely in Europe formatted each track in a tightly-timed
+  	loop to attempt to better simulate track alignment.  It is not very successful
+  	from what I've seen, but the option is here if you'd like to try it.
+
    -aX: Alternative track alignments (W). There are several different ways
            to align tracks when writing them back out. By default, MNIB will
         do its best to figure out how the original disk was aligned by

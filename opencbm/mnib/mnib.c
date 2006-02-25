@@ -658,6 +658,7 @@ usage(void)
 	fprintf(stderr, " -g : Enable 'reduce gaps' option (R)\n");
 	fprintf(stderr, " -0 : Enable 'reduce weak' option (R)\n");
 	fprintf(stderr, " -f : Disable weak GCR bit simulation (W)\n");
+	fprintf(stderr, " -b : Enable BurstNibbler-style timed track alignment\n");
 	fprintf(stderr, " -aX: Alternative track alignments (W)\n");
 	fprintf(stderr, " -eX: Extended read retries (R)\n");
 	fprintf(stderr, " -pX: Custom protection handlers (W)\n");
