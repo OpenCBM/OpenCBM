@@ -1,0 +1,949 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Jens Schweikhardt">
+   <LINK REV=MADE HREF="mailto:schweikh@schweikhardt.net">
+   <TITLE>Linux Man Page Howto</TITLE>
+</HEAD>
+<BODY>
+
+<CENTER>
+<P><FONT SIZE="+2"><STRONG>THE LINUX MAN-PAGE-HOWTO</STRONG></FONT></P>
+</CENTER>
+
+<CENTER><P>Copyright 1995-2002 by Jens Schweikhardt, email: <A HREF="mailto:schweikh@schweikhardt.net">&lt;howto at schweikhardt dot net&gt;</A>
+</P></CENTER>
+
+<CENTER><P><A HREF="http://www.schweikhardt.net/index.html">http://www.schweikhardt.net/index.html</A></P></CENTER>
+
+<CENTER>
+<P>See further information on
+<A HREF="#copying">copying conditions</A> below.</P>
+<P>$Id: man_page_howto.html,v 1.21 2003/01/06 16:31:07 schweikh Exp schweikh $</P>
+</CENTER>
+<P>
+Click here to browse the <A
+HREF="http://www.schweikhardt.net/man_page_howto.html">author's latest
+version</A> of this document. Corrections and suggestions welcome! </P>
+
+<P>This HOWTO explains what you should bear in mind when you are going
+to write on-line documentation -- a so-called man page -- that you want
+to make accessible via the <CODE>man</CODE>(1) command. Throughout this
+HOWTO, a manual entry is simply referred to as a man page, regardless of
+actual length and without sexist intention. </P>
+
+<P><FONT SIZE="+1"><STRONG>Table of contents</STRONG></FONT></P>
+
+<OL>
+<LI><A HREF="#q1">A few thoughts on documentation</A></LI>
+
+<LI><A HREF="#q2">How are man pages accessed?</A></LI>
+
+<LI><A HREF="#q3">How should a formatted man page look?</A></LI>
+
+<LI><A HREF="#q4">How do I document several programs/functions in a
+single man page?</A></LI>
+
+<LI><A HREF="#q5">Which macro package should I use?</A></LI>
+
+<LI><A HREF="#q6">What preprocessors may I use?</A></LI>
+
+<LI><A HREF="#q7">Should I distribute source and/or already formatted
+documentation?</A></LI>
+
+<LI><A HREF="#q8">What are the font conventions?</A></LI>
+
+<LI><A HREF="#q9">How do I polish my man page?</A></LI>
+
+<LI><A HREF="#q10">How do I get a plain text man page without all that
+^H^_ stuff?</A></LI>
+
+<LI><A HREF="#q11">How do I get a high quality PostScript man page?</A></LI>
+
+<LI><A HREF="#q12">How do I get <CODE>apropos</CODE> and <CODE>whatis</CODE> to work?</A></LI>
+</OL>
+<OL TYPE=A>
+<LI><A HREF="#copying">Copying conditions</A></LI>
+
+<LI><A HREF="#acknowledgements">Acknowledgements</A></LI>
+
+<LI><A HREF="#changelog">Changelog</A></LI>
+</OL>
+
+<P><A NAME="q1"><STRONG><FONT SIZE="+1">1) A few thoughts on documentation</FONT></STRONG></A>
+</P>
+
+<P>Why do we write documentation? Silly question. Because we want others
+to be able to use our program, library function or whatever we have written
+and made available. But writing documentation is not all there is to it:
+</P>
+
+<UL>
+<LI>Documentation must be accessible. If it is hidden in some non-standard
+place where the documentation-related tools will not find it -- how can it
+serve its purpose?</LI>
+
+<LI>Documentation must be reliable and accurate. There is nothing more annoying
+than having program behaviour and documentation disagree. Users will curse
+you, send you hate mail and throw your work into the bit bucket, with the
+firm intent to never install anything written by that jerk again.</LI>
+</UL>
+
+<P>The historical and well known way documentation is accessed on UNIX
+is via the man(1) command. This HOWTO describes what you have to do to
+write a man page that will be correctly processed by the documentation-
+related tools. The most important of these tools are <CODE>man</CODE>(1), <CODE>xman</CODE>(1x),
+<CODE>apropos</CODE>(1), <CODE>makewhatis</CODE>(8) and <CODE>catman</CODE>(8). Reliability and accuracy of the
+information are, of course, up to you. But even in this respect you will
+find <A HREF="#q9">some ideas below</A> that help you avoid some common
+glitches. </P>
+
+<P><A NAME="q2"><STRONG><FONT SIZE="+1">2) How are man pages accessed? </FONT></STRONG></A></P>
+
+<P>You need to know the precise mechanism for acccessing man pages in
+order to give your man page the right name and install it in the right
+place. Each man page should be categorized in a specific section, denoted by
+a single character. The most common sections under Linux, and their human
+readable names, are: </P>
+
+<PRE>Section The human readable name
+   1    User commands that may be started by everyone.
+   2    System calls, that is, functions provided by the kernel.
+   3    Subroutines, that is, library functions.
+   4    Devices, that is, special files in the /dev directory.
+   5    File format descriptions, e.g. /etc/passwd.
+   6    Games, self-explanatory.
+   7    Miscellaneous, e.g. macro packages, conventions.
+   8    System administration tools that only root can execute.
+   9    Another (Linux specific) place for kernel routine documentation.
+   n    (Deprecated) New documentation, that may be moved to a more appropriate section.
+   o    (Deprecated) Old documentation, that may be kept for a grace period.
+   l    (Deprecated) Local documentation referring to this particular system.
+</PRE>
+
+<P>The name of the man page's source file (the input to the formatting
+system) is the name of the command, function or file name, followed by
+a dot, followed by the section character. If you write the documentation on the format
+of the `passwd' file you have to name the source file `passwd.5'. Here
+we also have an example of a file name that is the same as a command name.
+There might be even a library subroutine named passwd. Sectioning is the
+usual way to resolve these ambiguities: The command description is found
+in the file `passwd.1' and the hypothetical library subroutine in `passwd.3'.
+</P>
+
+<UL>
+<LI><FONT SIZE=-1>Sometimes additional characters are appended and the file
+name looks for example like `xterm.1x' or `wish.1tk'. The intent is to
+indicate that this is documentation for an X Window program or a Tk application,
+respectively. Some manual browsers can make use of this additional information.
+For example xman will use `xterm(x)' and `wish(tk)' in the list of available
+documentation. </FONT></LI>
+</UL>
+
+<P>Please do not use the n, o and l sections; according to the File System
+Standard these sections are deprecated. Stick to the numeric sections.
+Beware of name clashes with existing programs, functions or file names.
+It is certainly a bad idea to write yet another editor and call it ed,
+sed (for smart ed) or red (for Rocky's ed). By making sure your program's
+name is unique, you avoid having someone execute your program but read someone
+else's man page, or vice versa.</P>
+
+<P>Now we know the name to give our file. The next decision is the directory
+in which it will finally be installed (say, when the user runs `<CODE>make install</CODE>' for
+your package.) On Linux, all man pages are below directories listed 
+in the environment variable MANPATH. The doc-related tools use MANPATH
+in the same way the shell uses PATH to locate executables. In fact, MANPATH
+has the same format as PATH. Each contains a colon-separated list of directories
+(with the exception that MANPATH does not allow empty fields and relative
+pathnames -- it uses absolute names only.) If MANPATH is not set or not exported,
+a default will be used that contains at least the /usr/man directory. To
+speed up the search and to keep directories small, the directories specified
+by MANPATH (the so-called base directories) contain a bunch of subdirectories
+named `man&lt;s&gt;' where &lt;s&gt; stands for the one-character section designator
+introduced in the <a href="#q2">table above</a>. Not all of the sections may be represented
+by a subdirectory because there simply is no reason to keep an empty `mano'
+subdirectory. However, there may be directories named `cat&lt;s&gt;', `dvi&lt;s&gt;'
+and `ps&lt;s&gt;' which hold documentation that is ready to display or
+print. More on this later. The only other file in any base directory should
+be a file named `whatis'. The purpose and creation of this file will also
+be described under <a href="#q12">paragraph 12)</a>. The safest way to have a man page for
+section &lt;s&gt; installed in the right place is to put it in the directory
+/usr/man/man&lt;s&gt;. A good <CODE>Makefile</CODE>, however, will allow the user to
+chose a base directory, by means of a <CODE>make</CODE> variable, <VAR>MANDIR</VAR>, say. Most
+of the GNU packages can be configured with the <CODE>--prefix=/what/ever</CODE> option.
+The manuals will then be installed under the base directory /what/ever/man.
+I suggest you also provide a way to do something similar. </P>
+
+<P>With the advent of the Linux
+File System Standard (FS-Stnd), things became more complicated. The
+FS-Stnd 1.2 states that</P>
+
+<UL>
+<li>&quot;Provisions must be made in the structure of /usr/man to support
+manual pages which are written in different (or multiple) languages.&quot;
+</li>
+</UL>
+
+<P>This is achieved by introducing another directory level that distinguishes
+between different languages. Quoting again from FS-Stnd 1.2: </P>
+
+<UL>
+<li>&quot;This naming of language subdirectories of /usr/man is based on
+Appendix E of the POSIX 1003.1 standard which describes the locale identification
+string -- the most well accepted method to describe a cultural environment.
+The &lt;locale&gt; string is: &lt;language&gt;[_&lt;territory&gt;][.&lt;character-set&gt;][,&lt;version&gt;]&quot;</li>
+</UL>
+
+<P>(See the FS-Stnd for a few common &lt;locale&gt; strings.) According
+to these guidelines, we have our man pages in /usr/man/&lt;locale&gt;/man[1-9lno].
+The formatted versions should then be in /usr/man/&lt;locale&gt;/cat[1-9lno]
+of course, otherwise we could only provide them for a single locale. HOWEVER,
+I can not recommend switching to that structure at this time. The FS-Stnd
+1.2 also allows that </P>
+
+<UL>
+<li>&quot;Systems which use a unique language and code set for all manual
+pages may omit the &lt;locale&gt; substring and store all manual pages
+in &lt;mandir&gt;. For example, systems which only have English manual
+pages coded with ASCII, may store manual pages (the <CODE>man[1-9]</CODE> directories)
+directly in /usr/man. (That is the traditional circumstance and arrangement
+in fact.)&quot;</li>
+</UL>
+
+<P>I would not switch until all tools (like xman, tkman, info and many
+others that read man pages) can cope with the new structure. </P>
+
+<P><A NAME="q3"><STRONG><FONT SIZE="+1">3) How should a formatted man page
+look?</FONT></STRONG></A></P>
+
+<P>Let me present you an example. Below I will explain it in detail. If
+you read this as plain text it will not show the different typefaces (<STRONG>bold
+</STRONG>and <EM>italics</EM>). Please refer to the paragraph &quot;<A HREF="#q8">What
+are the font conventions?</A>&quot; for further explanations. Here comes
+the man page for the (hypothetical) <CODE>foo</CODE> program. </P>
+
+<PRE>FOO(1)                     User Manuals                    FOO(1)
+
+
+
+<STRONG>NAME
+</STRONG>     foo - frobnicate the bar library
+
+<STRONG>SYNOPSIS
+</STRONG>     <STRONG>foo [-bar] [-c</STRONG> <EM>config-file</EM> <STRONG>]</STRONG> <EM>file</EM> <STRONG>...
+
+DESCRIPTION
+</STRONG>     <STRONG>foo</STRONG>  frobnicates the bar library by tweaking internal symbol
+     tables. By default it parses all baz segments and rearranges
+     them  in  reverse  order  by time for the <STRONG>xyzzy</STRONG>(1) linker to
+     find them. The symdef entry is then compressed using the WBG
+     (Whiz-Bang-Gizmo) algorithm.  All files are processed in the
+     order specified.
+
+<STRONG>OPTIONS
+</STRONG>     -b   Do not write `busy' to stdout while processing.
+
+     -c config-file
+          Use the alternate system wide  <EM>config-file</EM>  instead  of
+          <EM>/etc/foo.conf</EM>.   This overrides any <STRONG>FOOCONF</STRONG> environment
+          variable.
+
+     -a   In addition to the baz segments, also parse the  blurfl
+          headers.
+
+     -r   Recursive  mode.  Operates  as fast as lightning at the
+          expense of a megabyte of virtual memory.
+
+<STRONG>FILES
+</STRONG>     <EM>/etc/foo.conf
+</EM>          The system wide configuration file. See <STRONG>foo</STRONG>(5) for fur-
+          ther details.
+     <EM>~/.foorc
+</EM>          Per  user  configuration  file.  See <STRONG>foo</STRONG>(5) for further
+          details.
+
+<STRONG>ENVIRONMENT
+</STRONG>     FOOCONF
+          If non-null the full pathname for an  alternate  system
+          wide <EM>foo.conf</EM>.  Overridden by the -c option.
+
+<STRONG>DIAGNOSTICS
+</STRONG>     The following diagnostics may be issued on stderr:
+
+     Bad magic number.
+          The input file does not look like an archive file.
+     Old style baz segments.
+          foo  can  only  handle  new  style  baz segments. COBOL
+          object libraries are not supported in this version.
+
+<STRONG>BUGS
+</STRONG>     The command name should have been chosen more  carefully  to
+     reflect its purpose.
+
+<STRONG>AUTHOR
+</STRONG>     Jens Schweikhardt <A HREF="mailto:howto@schweikhardt.net">&lt;howto at schweikhardt dot net&gt;</A>
+<STRONG>SEE ALSO
+</STRONG>     <STRONG>bar</STRONG>(1), <STRONG>foo</STRONG>(5), <STRONG>xyzzy</STRONG>(1)
+
+Linux                Last change: MARCH 1995                    2
+
+
+
+</PRE>
+
+<P>Here is the explanation as I promised. </P>
+
+<P><STRONG>The NAME section</STRONG></P>
+
+<P>...is the only required section. Man pages without a name section are
+as useful as refrigerators at the north pole. This section also has a
+standardized format consisting of a comma-separated list of program or
+function names, followed by a dash, followed by a short (usually one
+line) description of the functionality the program (or function, or
+file) is supposed to provide. By means of <CODE>makewhatis</CODE>(8),
+the name sections make it into the <CODE>whatis</CODE> database files.
+<CODE>Makewhatis</CODE> is the reason the name section must exist, and
+why it must adhere to the format I described. In the <CODE>groff</CODE>
+source it must look like</P>
+
+<P>.SH NAME foo \- frobnicate the bar library </P>
+
+<P>The \- is of importance here. The backslash is needed to make the dash
+distinct from a hyphenation dash that may appear in either the command
+name or the one line description. </P>
+
+<P><STRONG>The SYNOPSIS section</STRONG></P>
+
+<P>...is intended to give a short overview on available program options.
+For functions this sections lists corresponding include files and the prototype
+so the programmer knows the type and number of arguments as well as the
+return type. </P>
+
+<P><STRONG>The DESCRIPTION section </STRONG></P>
+
+<P>...eloquently explains why your sequence of 0s and 1s is worth
+anything at all. Here is where you write down all your knowledge. This is
+the Hall Of Fame. Win other programmers' and users' admiration by making
+this section the source of reliable and detailed information. Explain what
+the arguments are for, the file format, what algorithms do the dirty jobs.
+</P>
+
+<P><STRONG>The OPTIONS section</STRONG></P>
+
+<P>...gives a description of how each option affects program behaviour.
+You knew that, did you not? </P>
+
+<P><STRONG>The FILES section</STRONG></P>
+
+<P>...lists files the program or function uses. For example, it lists
+configuration files, startup files, and files the program directly
+operates on. It is a good idea to give the full pathname of these files
+and to make the install process modify the directory part to match user
+preferences: the <CODE>groff</CODE> manuals have a default prefix of
+/usr/local, so they reference /usr/local/lib/groff/* by default.
+However, if you install using 'make prefix=/opt/gnu' the references in
+the man page change to /opt/gnu/lib/groff/*</P>
+
+<P><STRONG>The ENVIRONMENT section </STRONG></P>
+
+<P>...lists all environment variables that affect your program or function
+and tells how, of course. Most commonly the variables will hold pathnames,
+filenames or default options. </P>
+
+<P><STRONG>The DIAGNOSTICS section</STRONG></P>
+
+<P>...should give an overview of the most common error messages from
+your program and how to cope with them. There is no need to explain
+system error error messages (from <CODE>perror</CODE>(3)) or fatal
+signals (from <CODE>psignal</CODE>(3)) as they can appear during
+execution of any program. </P>
+
+<P><STRONG>The BUGS section </STRONG></P>
+
+<P>...should ideally be non-existent. If you are brave, you can describe
+here the limitations, known inconveniences and features that others may regard
+as misfeatures. If you are not so brave, rename it the TO DO section ;-)
+</P>
+
+<P><STRONG>The AUTHOR section</STRONG></P>
+
+<P>...is nice to have in case there are gross errors in the documentation
+or program behaviour (Bzzt!) and you want to mail a bug report. </P>
+
+<P><STRONG>The SEE ALSO section</STRONG></P>
+
+<P>...is a list of related man pages in alphabetical order. Conventionally,
+it is the last section. You are free to invent other sections if they really
+do not fit in one of those described so far. So how exactly did you generate
+that man page? I expected that question, here is the source, Luke:</P>
+
+<PRE>.\&quot; Process this file with
+.\&quot; groff -man -Tascii foo.1
+.\&quot;
+.TH FOO 1 &quot;MARCH 1995&quot; Linux &quot;User Manuals&quot;
+.SH NAME
+foo \- frobnicate the bar library
+.SH SYNOPSIS
+.B foo [-bar] [-c
+.I config-file
+.B ]
+.I file
+.B ...
+.SH DESCRIPTION
+.B foo
+frobnicates the bar library by tweaking internal
+symbol tables. By default it parses all baz segments
+and rearranges them in reverse order by time for the
+.BR xyzzy (1)
+linker to find them. The symdef entry is then compressed
+using the WBG (Whiz-Bang-Gizmo) algorithm.
+All files are processed in the order specified.
+.SH OPTIONS
+.IP -b
+Do not write `busy' to stdout while processing.
+.IP &quot;-c config-file&quot;
+Use the alternate system wide
+.I config-file
+instead of
+.IR /etc/foo.conf .
+This overrides any
+.B FOOCONF
+environment variable.
+.IP -a
+In addition to the baz segments, also parse the
+blurfl headers.
+.IP -r
+Recursive mode. Operates as fast as lightning
+at the expense of a megabyte of virtual memory.
+.SH FILES
+.I /etc/foo.conf
+.RS
+The system wide configuration file. See
+.BR foo (5)
+for further details.
+.RE
+.I ~/.foorc
+.RS
+Per user configuration file. See
+.BR foo (5)
+for further details.
+.SH ENVIRONMENT
+.IP FOOCONF
+If non-null the full pathname for an alternate system wide
+.IR foo.conf .
+Overridden by the
+.B -c
+option.
+.SH DIAGNOSTICS
+The following diagnostics may be issued on stderr:
+ 
+Bad magic number.
+.RS
+The input file does not look like an archive file.
+.RE
+Old style baz segments.
+.RS
+.B foo
+can only handle new style baz segments. COBOL
+object libraries are not supported in this version.
+.SH BUGS
+The command name should have been chosen more carefully
+to reflect its purpose.
+.SH AUTHOR
+Jens Schweikhardt &lt;howto at schweikhardt dot net&gt;
+.SH &quot;SEE ALSO&quot;
+.BR bar (1),
+.BR foo (5),
+.BR xyzzy (1)
+
+</PRE>
+
+<P><A NAME="q4"><STRONG><FONT SIZE="+1">4) How do I document several programs/functions
+in a single man page?</FONT></STRONG></A></P>
+
+<P>Many programs (<CODE>grep</CODE>, <CODE>egrep</CODE>) and functions
+(<CODE>printf</CODE>, <CODE>fprintf</CODE>, ...) are documented in a
+single man page. However, these man pages would be quite useless if they
+were only accessible under one name. We cannot expect a user to remember
+that the <CODE>egrep</CODE> man page is actually the <CODE>grep</CODE>
+man page. It is therefore necessary to have the man page available under
+different names. You have several possibilities to achieve this: </P>
+
+<OL>
+<LI>have identical copies for each name.</LI>
+<LI>connect all man pages using hard links.</LI>
+<LI>symbolic links pointing to the actual man page.</LI>
+<LI>use <CODE>groff</CODE>'s `source' mechanism provided by the
+<CODE>.so</CODE> macro.</LI>
+</OL>
+
+<P>The first way is obviously a waste of disk space. The second is not
+recommended because intelligent versions of the <CODE>catman</CODE> program can save
+a lot of work by looking at the the file type or contents. Hard links will
+prevent <CODE>catman</CODE> from being clever. (Note that <CODE>catman</CODE>'s purpose is to format all man
+pages so they can be displayed quickly.) The third alternative
+has a slight drawback: if flexibility is a concern, you have to be aware
+that there are file systems that do not support symbolic links. The upshot
+of this is that the Best Thing (TM) is using <CODE>groff</CODE>'s source mechanism.
+Here is how to do it: If you want to have your man page available under
+the names `foo' and `bar' in section 1, then put the man page in foo.1
+and have bar.1 look like this: </P>
+
+<P><CODE>.so man1/foo.1</CODE></P>
+
+<P>It is important to specify the <CODE>man1/</CODE> directory part as
+well as the file name `foo.1' because when <CODE>groff</CODE> is run by
+the browser it will have the manual base directory as its current
+working directory (cwd) and <CODE>groff</CODE> interprets
+<CODE>.so</CODE> arguments relative to the cwd. </P>
+
+<P><A NAME="q5"><STRONG><FONT SIZE="+1">5) Which macro package should I use?
+</FONT></STRONG></A></P>
+
+<P>There are a number of macro packages especially designed for use in
+writing man pages. Usually they are in the groff macro directory /usr/lib/groff/tmac.
+The file names are <CODE>tmac.</CODE>&lt;something&gt;, where &lt;something&gt;
+is the argument to groff's -m option. Groff will use <CODE>tmac.</CODE>&lt;something&gt;
+when it is given the `<CODE>-m</CODE> &lt;something&gt;' option. Often the
+blank between `<CODE>-m</CODE>' and `&lt;something&gt;' is omitted so we may
+say `<CODE>groff -man</CODE>' when we are formatting man pages using the <CODE>tmac.an
+</CODE>macro package. That is the reason for the strange name `tmac.an'. Besides
+tmac.an there is another popular macro package, <CODE>tmac.doc</CODE>, which
+originated at the University of California at Berkeley. Many BSD man pages
+use it and it seems that UCB has made it its standard for documentation.
+The <CODE>tmac.doc</CODE> macros are much more flexible but alas, there are
+manual browsers that will not use them but always call <CODE>groff -man</CODE>.
+For example, all <CODE>xman</CODE> programs I have seen will screw up on man
+pages requiring <CODE>tmac.doc</CODE>. So do yourself a favor: use <CODE>tmac.an</CODE>
+-- use of any other macro package is considered harmful. <CODE>tmac.andoc
+</CODE>is a pseudo macro package that takes a look at the source and then
+loads either <CODE>tmac.an</CODE> or <CODE>tmac.doc</CODE>. Actually, any man page
+browser should use it but to this point,  not all of them do, so it is best we
+cling to ye olde <CODE>tmac.an</CODE>. Anything I tell you from now on and
+concerning macros only holds true for <CODE>tmac.an</CODE>. If you want to
+use the <CODE>tmac.doc</CODE> macros anyway, here is a pointer to detailed
+information on how to use them:
+<A HREF="http://www.FreeBSD.org/cgi/man.cgi">http://www.FreeBSD.org/cgi/man.cgi</A>.
+There is a searchable index form on the page. Enter <CODE>groff_mdoc</CODE>
+and it will find you <CODE>groff_mdoc(7)</CODE>, a tutorial sampler for writing
+BSD man pages. Some distros (I'm told) also come with
+mdoc(7), mdoc.samples(7) and groff_man(7).</P>
+
+The definitive dope for <CODE>troff</CODE>, with all macros explained, is
+the <EM>Troff User's Manual</EM>, available as
+<A HREF="http://cm.bell-labs.com/sys/doc/troff.html">html</A>,
+<A HREF="http://cm.bell-labs.com/sys/doc/troff.ps">PostScript (ps, 760K)</A> or
+<A HREF="http://cm.bell-labs.com/sys/doc/troff.pdf">Portable Document Format (pdf, 240K)</A>.
+
+by Jospeh F. Ossanna and Brian W. Kernighan, revised November 1992.
+AT&amp;T Bell Labs have made it publicly available.
+Do not forget to check out the late great
+<A HREF="http://www.kohala.com/start/">W. Richard Steven's
+homepage</A> (famous for <EM>Unix Network Programming</EM> as well as
+the <EM>TCP/IP Illustrated</EM> trilogy),
+who also has a list of
+<A HREF="http://www.kohala.com/start/troff/troff.html">Troff Resources</A>
+including <CODE>tbl</CODE>, <CODE>eqn</CODE>, <CODE>pic</CODE> and other filters.
+
+<P><A NAME="q6"><STRONG><FONT SIZE="+1">6) What preprocessors may I use? </FONT></STRONG></A></P>
+
+<P>Groff comes with at least three preprocessors, <CODE>tbl</CODE>,
+<CODE>eqn</CODE>, and <CODE>pic</CODE> (on some systems they are named
+<CODE>gtbl</CODE>, <CODE>geqn</CODE> and <CODE>gpic</CODE>.) Their
+purpose is to translate preprocessor macros and their data to regular
+troff input. <CODE>Tbl</CODE> is a table preprocessor, <CODE>eqn</CODE>
+is an equations/maths preprocessor and <CODE>pic</CODE> is a picture
+preprocessor. Please refer to the man pages for more information on what
+functionality they provide. To put it in a nutshell: do not write man
+pages requiring <EM>any</EM> preprocessor. Eqn will generally produce
+terrible output for typewriter-like devices, unfortunately the type of
+device 99% of all man pages are viewed on (well, at least I do). For
+example, XAllocColor.3x uses a few formulas with exponentiation. Due to
+the nature of typewriter-like devices, the exponent will be on the same
+line as the base. N to the power of two appears as `N2'.
+<CODE>Tbl</CODE> should be avoided because all xman programs I have seen
+fail on them. Xman 3.1.6 uses the following command to format man pages,
+e.g. signal(7):</P>
+
+<P><CODE>gtbl /usr/man/man7/signal.7 | geqn | gtbl | groff -Tascii -man /tmp/xmana01760
+2&gt; /dev/null</CODE></P>
+
+<P>which screws up for sources using <CODE>gtbl</CODE>, because
+<CODE>gtbl</CODE> output is fed again into <CODE>gtbl</CODE>. The effect
+is a man page without your table. I do not know if it is a bug or a
+feature that <CODE>gtbl</CODE> chokes on its own output or if xman could
+be a little smarter and not use <CODE>gtbl</CODE> twice. Furthermore,
+some systems use <CODE>grog</CODE> to determine what options to pass to
+groff. Unfortunately grog sometimes guesses wrong and recommends
+<CODE>groff -t</CODE> when in fact <CODE>tbl</CODE> must not be used.
+
+We are basically left with two workarounds for tables:
+
+<OL><LI>Format the table yourself manually and put it between .nf and
+.fi lines so that it will be left unformatted. You will not have bold and
+italics this way but this beats having your table swallowed any
+day.</LI>
+
+<LI>Use any <CODE>tbl</CODE> macros you like but distribute the
+<CODE>tbl</CODE> output instead of the input. There is however this
+quirk with <CODE>grog</CODE> who thinks that any file containing a line
+starting with <CODE>.TS</CODE> requires <CODE>tbl</CODE>.
+<CODE>Tbl</CODE> output for some reason unbeknownst to me still contains
+<CODE>.TS</CODE> and <CODE>.TE</CODE>. It seems you can simply remove
+them and have the result still look okay. YMMV, so please test this with
+your particular man page.</LI></OL>
+
+<P>I have yet to see a man page requiring <CODE>pic</CODE>
+preprocessing. But I would not like it. As you can see above,
+<CODE>xman</CODE> will not use it and <CODE>groff</CODE> will certainly
+do the funky wadakiki on the input.</P>
+
+<P><A NAME="q7"><STRONG><FONT SIZE="+1">7) Should I distribute source and/or
+already formatted documentation? </FONT></STRONG></A></P>
+
+<P>Let me give the pros (+) and cons (-) of a few selected possibilities:
+</P>
+
+<OL>
+<LI>Source only:<BR>
++ smaller distribution package.<BR>
+- inaccessible on systems without <CODE>groff</CODE>.</LI>
+
+<LI>Uncompressed formatted only:<BR>
++ accessible even on systems without <CODE>groff</CODE>. <BR>
+- the user cannot generate a dvi or postscript file. <BR>
+- waste of disk space on systems that also handle compressed pages.</LI>
+
+<LI>Compressed formatted only: <BR>
++ accessible even on systems without <CODE>groff</CODE>. <BR>
+- the user cannot generate a dvi or postscript file.<BR>
+- which compression format would you use? .Z? .z? .gz? All of them?</LI>
+
+<LI>Source and uncompressed formatted:<BR>
++ accessible even on systems without <CODE>groff</CODE>.<BR>
+- larger distribution package<BR>
+- some systems may expect compressed formatted man pages.<BR>
+- redundant information on systems equipped with <CODE>groff</CODE>.</LI>
+</OL>
+
+<P>IMHO it is best to distribute source only. The argument that it is
+inaccessible on systems without <CODE>groff </CODE>does not matter. The
+500+ man pages of the Linux Documentation Project are source only. The
+man pages of XFree86 are source only. The man pages from the FSF are
+source only. In fact, I have rarely seen software distributed with
+formatted man pages. If any sysadmin is really concerned about having
+man pages accessible then he also has <CODE>groff</CODE> installed. </P>
+
+<P><A NAME="q8"><STRONG><FONT SIZE="+1">8) What are the font conventions?
+</FONT></STRONG></A></P>
+
+<P>First of all: do not use direct font operators like <CODE>\fB</CODE>,
+<CODE>\fP</CODE> etc. Use macros which take arguments. This way you
+avoid a common glitch: forgetting the font change at the end of the word
+and having the bold or italic extend up to the next font change. Believe
+me, it happens more often than you think. The <CODE>tmac.an</CODE>
+macros provide the following type faces: </P>
+
+<UL>
+<li>.B Bold </li>
+
+<li>.BI Bold alternating with italics </li>
+
+<li>.BR Bold alternating with Roman </li>
+
+<li>.I Italics </li>
+
+<li>.IB Italics alternating with bold </li>
+
+<li>.IR Italics alternating with Roman </li>
+
+<li>.RB Roman alternating with bold</li>
+
+<li>.RI Roman alternating with italics </li>
+
+<li>.SM Small (scaled 9/10 of the regular size)</li>
+
+<li>.SB Small bold (<EM>not</EM> small alternating with bold) </li>
+</UL>
+
+<P>X alternating with Y means that the odd arguments are typeset in X while
+the even arguments are typeset in Y. For example </P>
+
+<UL>
+<li>.BI &quot;Arg 1 is Bold, &quot; &quot;Arg 2 is Italics, &quot; &quot;and
+Bold, &quot; &quot;and Italics.&quot; </li>
+</UL>
+
+<P>The double quotes are needed to include white space into an argument;
+without them, no white space appears between the alternating typefaces.
+In fact, you will only need the macros for alternating typefaces in
+cases where you <EM>want</EM>
+to avoid white space between typeface changes.
+So much for what is available. Here is how you should make use of the different
+typefaces: (portions shamelessly stolen from man(7)) </P>
+
+<P>Although there are many arbitrary conventions for man pages in the UNIX
+world, the existence of several hundred Linux-specific man pages defines
+our standards: For functions, the arguments are always specified using
+italics, even in the SYNOPSIS section, where the rest of the function is
+specified in bold: </P>
+
+<UL>
+<li>.BI &quot;myfunction(int &quot; argc &quot;, char **&quot; argv ); </li>
+</UL>
+
+<P>Filenames are always in italics, except in the SYNOPSIS section, where
+included files are in bold. So you should use </P>
+
+<UL>
+<li>.I /usr/include/stdio.h </li>
+</UL>
+
+<P>and </P>
+
+<UL>
+<li>.B #include &lt;stdio.h&gt; </li>
+</UL>
+
+<P>Special macros, which are usually in upper case, are in bold: </P>
+
+<UL>
+<li>.B MAXINT </li>
+</UL>
+
+<P>When enumerating a list of error codes, the codes are in bold. This
+list usually uses the .TP (paragraph with hanging tag) macro as follows:
+</P>
+
+<UL>
+<li>.TP<BR>
+.B EBADF<BR>
+.I fd is not a valid file descriptor.<BR>
+.TP <BR>
+.B EINVAL <BR>
+.I fd is unsuitable for reading <BR>
+</li>
+</UL>
+
+<P>Any reference to another man page (or to the subject of the current
+man page) is in bold. If the manual section number is given, it is given
+in roman, without any spaces: </P>
+
+<UL>
+<li>.BR man (7)</li>
+</UL>
+
+<P>Acronyms look best when typeset in small type face. So I recommend </P>
+
+<UL>
+<li>.SM UNIX </li>
+
+<li>.SM ASCII</li>
+
+<li>.SM TAB </li>
+
+<li>.SM NFS</li>
+
+<li>.SM LALR(1)</li>
+</UL>
+
+<P><A NAME="q9"><STRONG><FONT SIZE="+1">9) Polishing your man page</FONT></STRONG></A>
+</P>
+
+<P>Following are some guidelines that increase reliability, readability
+and 'formatability' of your documentation.</P>
+
+<UL>
+<LI>Test examples to make sure they work (use cut and paste to give your shell the
+exact wording from the man page). Copy the output of your command into your
+man page, do not just type what you <EM>think</EM> your program will print.</LI>
+
+<LI>Proof read, ispell, and have someone else read it, especially if you are
+not a native English speaker. The HOWTO you are reading has 
+passed the latter test (special thanks to Michael Miller for a
+particularly heroic contribution! All the remaining
+rough edges are entirely my fault).
+Additional volunteers are always welcome.</LI>
+
+<LI>Test your man page: Does <CODE>groff</CODE> complain when you format
+your man page? It is nice to have the <CODE>groff</CODE> command line in
+a comment. Does the <CODE>man</CODE>(1) command complain when you call
+<CODE>man yourprog</CODE>? Does it produce the expected result? Will
+<CODE>xman</CODE>(1x) and <CODE>tkman</CODE>(1tk) cope with your manual?
+XFree86 3.1 has xman 3.1.6 - X11R6, it will try to uncompress using <BR>
+<CODE>gzip -c -d &lt; %s &gt; %s <BR> zcat &lt; %s &gt; %s </CODE></LI>
+
+<LI>Will <CODE>makewhatis</CODE>(8) be able to extract the one-line
+description from the NAME section?</LI>
+
+<li>Translate your man page to HTML format using <CODE>rman</CODE> from
+  <A href="http://polyglotman.sourceforge.net/">http://polyglotman.sourceforge.net/</a>,
+  and view the result with a a set of web browsers (netscape, mozilla, opera, lynx, ...)
+  Check that the cross-references among your man pages work as hyperlinks in the
+  generated HTML.  If your software package has a web site, post its man pages
+  there, and keep them up-to-date.</li>
+<li>The <code>rman</code> utility can also translate man pages into LaTeX, RTF, SGML, and other
+formats; check these out if you want to incorporate your man pages in a book or
+other larger document.</li>
+<li>Try translating your man page to HTML using <code>man2html</code>, which has been part of the
+  Linux man package since man-1.4. The <code>man2html</code> utility is a less ambitious translator than
+  <code>rman</code>, but almost every Linux user has it already, so it is worth making sure that
+  <code>man2html</code> does not choke on your man page.</li>
+</UL>
+
+<P><A NAME="q10"><STRONG><FONT SIZE="+1">10) How do I get a plain text man page
+without all that ^H^_ stuff? </FONT></STRONG></A></P>
+
+<P>Have a look at <CODE>col</CODE>(1), because <CODE>col </CODE>can filter out backspace
+sequences. Just in case you cannot wait that long: </P>
+
+<P><CODE>funnyprompt$ groff -t -e -mandoc -Tascii manpage.1 | col -bx &gt;
+manpage.txt</CODE></P>
+
+<P>The <CODE>-t</CODE> and <CODE>-e</CODE> switches tell
+<CODE>groff</CODE> to preprocess using <CODE>tbl</CODE> and
+<CODE>eqn</CODE>. This is overkill for man pages that do not require
+preprocessing but it does no harm apart from a few CPU cycles wasted. On
+the other hand, not using <CODE>-t</CODE> when it is actually required
+does harm: the table is terribly formatted. You can even find out (well,
+&quot;guess&quot; is a better word) what command is needed to format a
+certain <CODE>groff</CODE> document (not just man pages) by issuing </P>
+
+<P><CODE>funnyprompt$ grog /usr/man/man7/signal.7<BR>
+groff -t -man /usr/man/man7/signal.7
+</CODE></P>
+
+<P>&quot;Grog&quot; stands for &quot;GROff Guess&quot;, and it does what
+it says--guess. If it were perfect we would not need options any more.
+I have seen it guess incorrectly on macro packages and on preprocessors.
+Here is a little perl script I wrote that can delete the page headers
+and footers, thereby saving you a few pages (and mother nature a tree)
+when printing long and elaborate man pages. Save it in a file named
+<CODE>strip-headers</CODE> &amp; chmod 755. </P>
+
+<PRE>    #!/usr/bin/perl -wn
+    #  make it slurp the whole file at once:
+    undef $/;
+    #  delete first header:
+    s/^\n*.*\n+//;
+    #  delete last footer:
+    s/\n+.*\n+$/\n/g;
+    #  delete page breaks:
+    s/\n\n+[^ \t].*\n\n+(\S+).*\1\n\n+/\n/g;
+    #  collapse two or more blank lines into a single one:
+    s/\n{3,}/\n\n/g;
+    #  see what is left...
+    print;
+</PRE>
+
+<P>You have to use it as the first filter after the <CODE>man</CODE>
+command as it relies on the number of newlines being output by
+<CODE>groff</CODE>. For example: </P>
+
+<P><CODE>funnyprompt$ man bash | strip-headers | col -bx &gt; bash.txt</CODE>
+</P>
+
+<P><A NAME="q11"><STRONG><FONT SIZE="+1">11) How do I get a high quality PostScript
+man page? </FONT></STRONG></A></P>
+
+<P><CODE>funnyprompt$ groff -t -e -mandoc -Tps manpage.1 &gt; manpage.ps</CODE>
+</P>
+
+<P>Print or view that using your favorite PostScript printer/viewer.
+See <A HREF="#q10">question 10)</A> for an explanation of the options. </P>
+
+<P><A NAME="q12"><STRONG><FONT SIZE="+1">12) How do I get `apropos' and `whatis'
+to work? </FONT></STRONG></A></P>
+
+<P>Suppose you wonder what compilers are installed on your system and how
+these can be invoked. To answer this (frequently asked) question you say
+</P>
+
+<P><CODE>funnyprompt$ apropos compiler<BR>
+f77 (1) - Fortran 77 compiler <BR>
+gcc (1) - GNU C and C++ compiler<BR>
+pc (1) - Pascal compiler
+</CODE></P>
+
+<P><CODE>Apropos</CODE> and <CODE>whatis</CODE> are used to quickly
+report which man page has information on a certain topic. Both programs
+search a number of files named `whatis' that may be found in each of the
+manual base directories. As previously stated, the whatis data base files
+contain a one line entry for any man page in the respective directory
+tree. In fact, that line is exactly the NAME section (to be precise:
+joined on one line and with hyphenation removed; note that the section
+is mentioned within parentheses). The whatis database files are created
+with the <CODE>makewhatis</CODE>(8) program. There are several versions
+around, so please refer to the man page to determine what options are
+available. In order for <CODE>makewhatis</CODE> to be able to extract
+the NAME sections correctly it is important that you, the manual writer,
+adhere to the NAME section format described under <A HREF="#q3">question
+3)</A>. The differences between <CODE>apropos</CODE> and
+<CODE>whatis</CODE> are simply where in the line they look, and what
+they are looking for. <CODE>Apropos</CODE> (which is equivalent to
+<CODE>man -k</CODE>) searches the argument string anywhere on the line,
+whereas <CODE>whatis</CODE> (equivalent to <CODE>man -f</CODE>) tries to
+match a complete command name only on the part before the dash.
+Consequently, `<CODE>whatis cc</CODE>' will report if there is a
+<CODE>cc</CODE> manual and remain quiet for <CODE>gcc</CODE>.</P>
+
+<CENTER><P>Corrections and suggestions welcome!</P></CENTER>
+
+<P><A NAME="copying"><STRONG><FONT SIZE="+1">A) Copying conditions </FONT></STRONG></A></P>
+
+<P>Copyright 1995-2001 by Jens Schweikhardt. All rights reserved.</P>
+<PRE>
+ "Two clause" BSD License:
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+ INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+</PRE>
+
+<P><A NAME="acknowledgements"><STRONG><FONT SIZE="+1">B) Acknowledgements</FONT></STRONG></A></P>
+
+<UL>
+<LI>Michael Miller for proofreading the whole HOWTO (in February 2001);
+    Gordon Torrie for many helpful grammar remarks (in August 2001). Any
+    remaining grammar or style bogons are entirely my fault.</LI>
+<LI><A HREF="http://www.SuSE.de/">S.u.S.E. (.de)</A> (or <A HREF="http://www.SuSE.com/">.com</A>)
+    who are the only distributor to keep sending me a free
+    copy of their latest product, acknowledging my work as a howto author.</LI>
+<li>George B. Moody for additional suggestions on how to polish a man page</li>
+</UL>
+
+<P>If your name is missing here, drop me a note.</P>
+
+<P><A NAME="changelog"><STRONG><FONT SIZE="+1">C) Changelog</FONT></STRONG></A></P>
+<UL>
+<LI>March 6 2001: HTML source now passes <CODE>weblint -pedantic</CODE>.
+    <A HREF="#q6">Paragraph 6:</A> Added workarounds for
+    <CODE>tbl</CODE> screw-ups. Added appendices <A HREF="#acknowledgements">B)</A>
+    and <A HREF="#changelog">C)</A>. Added RCS Id.</LI>
+<LI>August 9 2001: Howto put under a two clause BSD license.</LI>
+<LI>August 20 2001: Improved grammar. Use a numbered list for the TOC.</LI>
+<LI>October 28 2001: Added refs to mdoc(7), mdoc.samples(7) and groff_man(7).</LI>
+<LI>April 28 2002: Fix a grammar bogon by s/particular/particularly/.</LI>
+<LI>April 30 2002: Update the link to the groff_mdoc BSD tutorial.</LI>
+<LI>November 29 2002: More suggestions for polishing your man page.
+</UL>
+</BODY>
+</HTML>

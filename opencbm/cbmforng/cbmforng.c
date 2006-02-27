@@ -33,9 +33,9 @@ static void help()
 {
     printf(
 #ifdef CBMFORNG
-"Usage: cbmformat [OPTION]... DRIVE NAME,ID\n"
-#else
 "Usage: cbmforng [OPTION]... DRIVE NAME,ID\n"
+#else
+"Usage: cbmformat [OPTION]... DRIVE NAME,ID\n"
 #endif
 "Fast and reliable CBM-1541 disk formatter\n"
 "\n"
