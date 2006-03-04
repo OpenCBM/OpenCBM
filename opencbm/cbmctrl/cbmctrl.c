@@ -5,12 +5,13 @@
  *	2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Modifications for cbm4win Copyright 2001-2004 Spiro Trikaliotis
-*/
+ *  Modifications for cbm4win and general rework Copyright 2001-2006 Spiro Trikaliotis
+ *  Additions Copyright 2006 Wolfgang Moser <cbm(a)d81(o)de>
+ */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.11 2006-02-25 10:27:54 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.12 2006-03-04 10:58:57 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -94,6 +95,134 @@ static int do_open(CBM_FILE fd, char *argv[])
 static int do_close(CBM_FILE fd, char *argv[])
 {
     return cbm_close(fd, arch_atoc(argv[0]), arch_atoc(argv[1]));
+}
+
+/*
+ * read raw data from the IEC bus
+ */
+static int do_read(CBM_FILE fd, char *argv[])
+{
+    int size, rv = 0;
+    unsigned char buf[2048];
+    FILE *f;
+
+    if(argv[0] && strcmp(argv[0],"-") != 0)
+    {
+        /* a filename (other than simply "-") was given, open that file */
+
+        f = fopen(argv[0], "wb");
+    }
+    else
+    {
+        /* no filename was given, open stdout in binary mode */
+
+        f = arch_fdopen(arch_fileno(stdout), "wb");
+
+        /* set binary mode for output stream */
+
+        arch_setbinmode(arch_fileno(stdout));
+    }
+
+    if(!f)
+    {
+        arch_error(0, arch_get_errno(), "could not open output file: %s",
+              (argv[0] && strcmp(argv[0], "-") != 0) ? argv[0] : "stdout");
+        return 1;
+    }
+
+        /* fill a buffer with up to 64k of bytes from the IEC bus */
+    while(0 < (size = cbm_raw_read(fd, buf, sizeof(buf))))
+    {
+            /* write that to the file */
+        if(size != fwrite(buf, 1, size, f))
+        {
+            rv=1;   /* error condition from cbm_raw_read */
+            break;  /* do fclose(f) before exiting       */
+        }
+        /* if nobody complained, repeat filling the buffer */
+    }
+
+    if(size < 0) rv=1; /* error condition from cbm_raw_read */
+
+    fclose(f);
+    return rv;
+}
+
+/*
+ * write raw data to the IEC bus
+ */
+static int do_write(CBM_FILE fd, char *argv[])
+{
+    char *fn;
+    size_t size;
+    unsigned char buf[2048];
+    FILE *f;
+
+    if(!argv[0] || strcmp(argv[0], "-") == 0 || strcmp(argv[0], "") == 0)
+    {
+        fn = "(stdin)";
+        f = stdin;
+
+        // set binary mode for input stream
+
+        arch_setbinmode(arch_fileno(stdin));
+    }
+    else
+    {
+        off_t filesize;
+
+        fn = argv[0];
+        f = fopen(argv[0], "rb");
+        if(f == NULL)
+        {
+            arch_error(0, arch_get_errno(), "could not open %s", fn);
+            return 1;
+        }
+        if(arch_filesize(argv[0], &filesize))
+        {
+            arch_error(0, arch_get_errno(), "could not stat %s", fn);
+            return 1;
+        }
+    }
+
+        /* fill a buffer with up to 64k of bytes from file/console */
+    size = fread(buf, 1, sizeof(buf), f);
+        /* do this test only on the very first run */
+    if(size == 0 && feof(f))
+    {
+        arch_error(0, 0, "no data: %s", fn);
+        if(f != stdin) fclose(f);
+        return 1;
+    }
+    
+        /* as long as no error occurred */
+    while( ! ferror(f))
+    {
+            /* write that to the the IEC bus */
+        if(size != cbm_raw_write(fd, buf, size))
+        {
+        	/* exit the loop with another error condition */
+            break;
+        }
+
+            /* fill a buffer with up to 64k of bytes from file/console */
+        size = fread(buf, 1, sizeof(buf), f);
+        if(size == 0 && feof(f))
+        {
+        	/* nothing more to read */
+            if(f != stdin) fclose(f);
+            return 0;
+        }
+    }
+        /* the loop has exited, because of an error, check, which one */
+    if(ferror(f))
+    {
+        arch_error(0, 0, "could not read %s", fn);
+    }
+    /* else : size number of bytes could not be written to IEC bus */
+    
+    if(f != stdin) fclose(f);
+    return 1;
 }
 
 /*
@@ -513,12 +642,25 @@ static struct prog prog_table[] =
         "perform a close on the IEC bus",
         "Undo a previous open command." },
 
+    {1, "read"    , do_read    , 0, 1, "[<file>]",
+        "read raw data from the IEC bus",
+        "With this command, you can read raw data from the IEC bus.\n"
+        "<file>   (optional) file name of a file to write the contents to.\n"
+        "         If this name is not given or it is a dash ('-'), the\n"
+        "         contents will be written to stdout, normally the console." },
+
+    {1, "write"   , do_write   , 0, 1, "[<file>]",
+        "write raw data to the IEC bus",
+        "With this command, you can write raw data to the IEC bus.\n"
+        "<file>   (optional) file name of a file to read the values from.\n"
+        "         If this name is not given or it is a dash ('-'), the\n"
+        "         contents will be read from stdin, normally the console." },
+
     {1, "status"  , do_status  , 1, 1, "<device>",
         "give the status of the specified drive",
         "This command gets the status (the so-called 'error channel')"
         "of the given drive and outputs it on the screen.\n"
-        "<device> is the device number of the drive."
-    },
+        "<device> is the device number of the drive." },
 
     {1, "command" , do_command , 2, 2, "<device> <cmdstr>",
         "issue a command to the specified drive",
@@ -544,7 +686,7 @@ static struct prog prog_table[] =
         "<count>  is the number of bytes to read.\n"
         "         it can be given in decimal or in hex (with a 0x prefix).\n"
         "<file>   (optional) file name of a file to write the contents to.\n"
-        "         If this name is not given (or it is a dash ('-'), the\n"
+        "         If this name is not given or it is a dash ('-'), the\n"
         "         contents will be written to stdout, normally the console.\n\n" 
         "Example:\n"
         " cbmctrl download 8 0xc000 0x4000 1541ROM.BIN\n"
@@ -557,7 +699,7 @@ static struct prog prog_table[] =
         "<adr>    is the starting address of the memory region to write to.\n"
         "         it can be given in decimal or in hex (with a 0x prefix).\n"
         "<file>   (optional) file name of a file to read the values from.\n"
-        "         If this name is not given (or it is a dash ('-'), the\n"
+        "         If this name is not given or it is a dash ('-'), the\n"
         "         contents will be read from stdin, normally the console."
         "Example:\n"
         " cbmctrl upload 8 0x500 BUFFER2.BIN\n"
