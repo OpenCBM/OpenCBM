@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.6 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.7 2006-03-04 14:08:19 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -210,10 +210,10 @@ extern VOID
 cbmiec_udelay(IN ULONG howlong); // howlong in ms!
 
 extern NTSTATUS
-cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *buf, USHORT cnt, OUT USHORT *pReceived);
+cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *buf, ULONG cnt, OUT ULONG *pReceived);
 
 extern NTSTATUS
-cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *buf, USHORT cnt, USHORT *pSent, BOOLEAN atn, BOOLEAN talk);
+cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *buf, ULONG cnt, ULONG *pSent, BOOLEAN atn, BOOLEAN talk);
 
 extern VOID
 cbmiec_block_irq(VOID);

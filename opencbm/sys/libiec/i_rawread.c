@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.6 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.7 2006-03-04 14:08:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -43,14 +43,14 @@
    returns one of the error status values.
 */
 NTSTATUS
-cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, USHORT Count, OUT USHORT *Received)
+cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT ULONG *Received)
 {
     NTSTATUS ntStatus;
     BOOLEAN ok;
-    USHORT received;
-    USHORT bit;
-    USHORT b;
-    USHORT i;
+    ULONG received;
+    ULONG bit;
+    ULONG b;
+    ULONG i;
     ULONG flags;
 
     FUNC_ENTER();

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: rawread.c,v 1.4 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: rawread.c,v 1.5 2006-03-04 14:08:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -47,8 +47,8 @@
    returns one of the error status values.
 */
 NTSTATUS cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx, 
-						 OUT PUCHAR Buffer, IN USHORT Size, 
-						 OUT USHORT* Read)
+						 OUT PUCHAR Buffer, IN ULONG Size, 
+						 OUT ULONG* Read)
 {
     NTSTATUS ntStatus;
 
@@ -63,7 +63,7 @@ NTSTATUS cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx,
     ntStatus = cbmiec_i_raw_read(Pdx, Buffer, Size, Read);
 
 #if DBG
-    for (i=0;i<Size;i++)
+    for (i=0;i<*Read;i++)
     {
         FUNC_PARAM((DBG_PREFIX "   input %2u: 0x%02x '%c'", i, (unsigned) Buffer[i], (UCHAR) Buffer[i]));
     }

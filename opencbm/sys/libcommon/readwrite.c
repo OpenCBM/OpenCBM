@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/readwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: readwrite.c,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: readwrite.c,v 1.4 2006-03-04 14:08:16 strik Exp $ \n
 ** \n
 ** \brief Perform reading from and writing to the driver
 **
@@ -87,8 +87,8 @@ cbm_readwrite(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
     PIO_STACK_LOCATION irpSp;
     PDEVICE_EXTENSION pdx;
     NTSTATUS ntStatus;
-    USHORT readWriteBytesProcessed;
-    USHORT readWriteLength;
+    ULONG readWriteBytesProcessed;
+    ULONG readWriteLength;
     PUCHAR readWriteBuffer;
 
     FUNC_ENTER();
@@ -123,7 +123,7 @@ cbm_readwrite(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
 
         // Get the number of bytes to be read or written
 
-        readWriteLength = (USHORT) irpSp->Parameters.Read.Length;
+        readWriteLength = irpSp->Parameters.Read.Length;
 
         // If we do performance measurements, log the appropriate event
 
@@ -180,8 +180,8 @@ cbm_execute_readwrite(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 {
     PIO_STACK_LOCATION irpSp;
     NTSTATUS ntStatus;
-    USHORT readWriteBytesProcessed;
-    USHORT readWriteLength;
+    ULONG readWriteBytesProcessed;
+    ULONG readWriteLength;
     PUCHAR readWriteBuffer;
 
     FUNC_ENTER();
@@ -198,7 +198,7 @@ cbm_execute_readwrite(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 
     // Find out how much bytes are to be read/written
 
-    readWriteLength = (USHORT) irpSp->Parameters.Read.Length;
+    readWriteLength = irpSp->Parameters.Read.Length;
 
     // get the buffer where the bytes to be written are / where the bytes to be read
     // should be placed

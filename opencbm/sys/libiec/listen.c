@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/listen.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: listen.c,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: listen.c,v 1.4 2006-03-04 14:08:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -45,7 +45,7 @@ NTSTATUS
 cbmiec_listen(IN PDEVICE_EXTENSION Pdx, IN UCHAR Device, IN UCHAR Secaddr)
 {
     NTSTATUS ntStatus;
-    USHORT sent;
+    ULONG sent;
     UCHAR buffer[2];
 
     FUNC_ENTER();

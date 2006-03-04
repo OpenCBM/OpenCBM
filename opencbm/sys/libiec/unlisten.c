@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/unlisten.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: unlisten.c,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: unlisten.c,v 1.4 2006-03-04 14:08:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -39,7 +39,7 @@ NTSTATUS
 cbmiec_unlisten(IN PDEVICE_EXTENSION Pdx)
 {
     NTSTATUS ntStatus;
-    USHORT sent;
+    ULONG sent;
     UCHAR buffer;
 
     FUNC_ENTER();

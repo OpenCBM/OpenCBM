@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.9 2006-02-24 12:21:42 strik Exp $ \n
+** \version $Id: iec.h,v 1.10 2006-03-04 14:08:16 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -104,10 +104,10 @@ extern NTSTATUS
 cbmiec_global_init(IN PHANDLE HKey);
 
 extern NTSTATUS
-cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx, IN const PUCHAR Buffer, IN USHORT BufferLength, OUT USHORT* Written);
+cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx, IN const PUCHAR Buffer, IN ULONG BufferLength, OUT ULONG* Written);
 
 extern NTSTATUS 
-cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx, OUT PUCHAR Buffer, IN USHORT BufferLength, OUT USHORT* Read);
+cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx, OUT PUCHAR Buffer, IN ULONG BufferLength, OUT ULONG* Read);
 
 extern NTSTATUS
 cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType);

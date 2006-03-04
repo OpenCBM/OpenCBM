@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: rawwrite.c,v 1.4 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: rawwrite.c,v 1.5 2006-03-04 14:08:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -46,8 +46,8 @@
 */
 NTSTATUS
 cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx, 
-				 IN const PUCHAR Buffer, IN USHORT Size, 
-				 OUT USHORT *Written)
+				 IN const PUCHAR Buffer, IN ULONG Size, 
+				 OUT ULONG *Written)
 {
     NTSTATUS ntStatus;
 
