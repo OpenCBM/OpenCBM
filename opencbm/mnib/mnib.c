@@ -44,7 +44,8 @@
 			 (LONGSYNC, WEAKRUN, RAPIDLOK, VMAX, AUTOGAP/VORPAL)
 			 added functions to handle tricky disk protections (Pete)
 			 refined disk writing routines for reliability/compatibility (Pete)
-			 changed do_reduce_syncs() to strip_runs() and reduce_runs() for reuse (Pete)
+             changed do_reduce_syncs() to strip_runs() and reduce_runs()
+             for reuse (Pete)
 			 added unformatted track detection and handling (Pete)
 			 added extended killer track handling (Pete)
 			 fixed track cycle detection from getting false positives (Pete)
@@ -54,12 +55,12 @@
 			 code cleanup and bug fixes (Spiro and Nate) (Thanks!)
 			 Makefile(s) created and later unified (Nate Lawson)
                          Made mnib compile for cbm4win, too. (Spiro)
-
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <time.h>
 #include <ctype.h>
 
@@ -79,7 +80,7 @@ int reduce_syncs, reduce_weak, reduce_gaps;
 int fix_gcr, aggressive_gcr;
 int current_track;
 int align, force_align, read_killer;
-unsigned int error_retries;
+int error_retries;
 unsigned int lpt[4];
 int lpt_num;
 int drivetype;
@@ -91,11 +92,12 @@ int auto_density_adjust;
 int align_disk;
 
 FILE *fplog;
+static CBM_FILE fd;
 
 static int compare_extension(char * filename, char * extension);
-static void upload_code(CBM_FILE fd, BYTE drive);
-static void file2disk(CBM_FILE fd, char * filename);
-static void disk2file(CBM_FILE fd, char * filename);
+static int upload_code(CBM_FILE fd, BYTE drive);
+static int file2disk(CBM_FILE fd, char * filename);
+static int disk2file(CBM_FILE fd, char * filename);
 static int verify_floppy(CBM_FILE fd);
 #ifdef DJGPP
 static int find_par_port(CBM_FILE fd);
@@ -120,19 +122,19 @@ compare_extension(char * filename, char * extension)
 		return (0);
 }
 
-static void
+static int
 upload_code(CBM_FILE fd, BYTE drive)
 {
 	unsigned int databytes, start;
-	int i;
+	int i, ret;
 
 	/* patchdata if using 1571 drive */
 	unsigned int patch_pos[9] =
 	  { 0x72, 0x89, 0x9e, 0x1da, 0x224, 0x258, 0x262, 0x293, 0x2a6 };
 
+	/* Get total size of the code and starting address from first 2 bytes */
 	databytes = sizeof(floppy_code);
-
-	start = floppy_code[0] + (floppy_code[1] << 8);
+	start = floppy_code[0] | (floppy_code[1] << 8);
 
 	/* patch code if using 1571 drive */
 	if (drivetype == 1571)
@@ -147,9 +149,12 @@ upload_code(CBM_FILE fd, BYTE drive)
 	}
 
 	printf("Uploading floppy-side code...\n");
-	cbm_upload(fd, drive, start, floppy_code + 2, databytes - 2);
-
+	ret = cbm_upload(fd, drive, start, floppy_code + 2, databytes - 2);
+	if (ret < 0)
+		return (ret);
 	floppybytes = databytes;
+
+	return (0);
 }
 
 int
@@ -173,8 +178,9 @@ verify_floppy(CBM_FILE fd)
 {
 	unsigned int i, rv;
 
+	rv = 1;
 	send_mnib_cmd(fd, FL_VERIFY_CODE);
-	for (i = 2, rv = 1; i < floppybytes; i++)
+	for (i = 2; i < floppybytes; i++)
 	{
 		if (cbm_mnib_par_read(fd) != floppy_code[i])
 		{
@@ -245,7 +251,7 @@ motor_off(CBM_FILE fd)
 	cbm_mnib_par_write(fd, 0xf3);	/* $1c00 CLEAR mask */
 	cbm_mnib_par_write(fd, 0x00);	/* $1c00  SET  mask (LED + motor OFF) */
 	cbm_mnib_par_read(fd);
-	delay(500);					/* wait for motor to turn on */
+	delay(500);			/* wait for motor to turn off */
 }
 
 void
@@ -266,29 +272,40 @@ track_capacity(CBM_FILE fd)
 	return (capacity);
 }
 
-void
+int
 reset_floppy(CBM_FILE fd, BYTE drive)
 {
 	char cmd[80];
+	int ret;
 
+	/* Turn on motor, go to track 18, send reset cmd to drive code */
 	motor_on(fd);
-	step_to_halftrack(fd, 36);
+	step_to_halftrack(fd, 18*2);
 	send_mnib_cmd(fd, FL_RESET);
 	printf("drive reset...\n");
 	delay(5000);
 	cbm_listen(fd, drive, 15);
 
-	cbm_raw_write(fd, "I", 1);
-
+	/* Send Initialize command */
+	ret = cbm_raw_write(fd, "I", 1);
+	if (ret < 0) {
+		printf("reset_floppy: error %d initializing\n", ret);
+		return (ret);
+	}
 	cbm_unlisten(fd);
 	delay(5000);
+
+	/* Begin executing drive code at the start again */
 	sprintf(cmd, "M-E%c%c", 0x00, 0x03);
 	cbm_listen(fd, drive, 15);
-
-	cbm_raw_write(fd, cmd, 5);
-
+	ret = cbm_raw_write(fd, cmd, 5);
+	if (ret < 0) {
+		printf("reset_floppy: error %d sending cmd\n", ret);
+		return (ret);
+	}
 	cbm_unlisten(fd);
 	cbm_mnib_par_read(fd);
+	return (0);
 }
 
 int
@@ -320,7 +337,8 @@ set_default_bitrate(CBM_FILE fd, int track)
 {
 	BYTE density;
 
-	for (density = 3; track >= bitrate_range[density]; density--);
+	for (density = 3; track >= bitrate_range[density]; density--)
+		/* empty */ ;
 	send_mnib_cmd(fd, FL_DENSITY);
 	cbm_mnib_par_write(fd, density_branch[density]);
 	cbm_mnib_par_write(fd, 0x9f);					/* $1c00 CLEAR mask */
@@ -335,8 +353,7 @@ BYTE
 scan_track(CBM_FILE fd, int track)
 {
 	BYTE density, killer_info;
-	int i;
-    int bin;
+	int bin, i;
 	BYTE count;
 	BYTE density_major[4], iMajorMax; /* 50% majorities for bit rate */
 	BYTE density_stats[4], iStatsMax; /* total occurrences */
@@ -442,8 +459,8 @@ adjust_target(CBM_FILE fd)
 
 		capacity[i] = ((cap1 + cap2) / 2) - CAPACITY_MARGIN;
 		printf("(%d) %d, %d: %d - (%d < %d < %d) ", i, cap1, cap2,
-		  capacity[i] + CAPACITY_MARGIN, capacity_min[i], capacity[i],
-		  capacity_max[i]);
+		    capacity[i] + CAPACITY_MARGIN, capacity_min[i],
+		    capacity[i], capacity_max[i]);
 
 		if (capacity[i] < capacity_min[i] || capacity[i] > capacity_max[i])
 		{
@@ -458,8 +475,7 @@ adjust_target(CBM_FILE fd)
 			printf("2) Write protect is on.\n");
 			printf("3) Disk is damaged.\n");
 			printf("4) Disk drive needs adjusted or repaired.\n");
-			closeout_drive(fd);
-			exit(0);
+			exit(2);
 		}
 		else
 			printf("- OK\n");
@@ -469,7 +485,8 @@ adjust_target(CBM_FILE fd)
 	  (float) 2309195 / (capacity[3] + CAPACITY_MARGIN));
 }
 
-void init_aligned_disk(CBM_FILE fd)
+void
+init_aligned_disk(CBM_FILE fd)
 {
 	int track;
 
@@ -487,7 +504,7 @@ void init_aligned_disk(CBM_FILE fd)
 	}
 }
 
-static void
+static int
 file2disk(CBM_FILE fd, char * filename)
 {
 	FILE *fpin;
@@ -505,7 +522,6 @@ file2disk(CBM_FILE fd, char * filename)
 	if ((fpin = fopen(filename, "rb")) == NULL)
 	{
 		fprintf(stderr, "Couldn't open input file %s!\n", filename);
-		closeout_drive(fd);
 		exit(2);
 	}
 
@@ -518,7 +534,10 @@ file2disk(CBM_FILE fd, char * filename)
 	{
 		imagetype = IMAGE_G64;
 		memset(g64header, 0x00, sizeof(g64header));
-        fread(g64header, sizeof(g64header), 1, fpin); // @@@SRT: check success
+		if (fread(g64header, sizeof(g64header), 1, fpin) != 1) {
+			printf("unable to read G64 header\n");
+			exit(2);
+		}
 		parse_disk(fd, fpin, g64header + 0x9);
 	}
 	else if (compare_extension(filename, "NIB"))
@@ -543,13 +562,15 @@ file2disk(CBM_FILE fd, char * filename)
 		else
 		{
 			printf("unsupported file format");
-			closeout_drive(fd);
-			exit(0);
+			exit(2);
 		}
 		rewind(fpin);
 
 		memset(mnibheader, 0x00, sizeof(mnibheader));
-        fread(mnibheader, sizeof(mnibheader), 1, fpin); // @@@SRT: check success
+		if (fread(mnibheader, sizeof(mnibheader), 1, fpin) != 1) {
+			printf("unable to read NIB header\n");
+			exit(2);
+		}
 		parse_disk(fd, fpin, mnibheader + 0x10);
 	}
 	else
@@ -559,9 +580,10 @@ file2disk(CBM_FILE fd, char * filename)
 	cbm_mnib_par_read(fd);
 
 	fclose(fpin);
+	return (0);
 }
 
-static void
+static int
 disk2file(CBM_FILE fd, char *filename)
 {
 	FILE *fpout;
@@ -582,7 +604,6 @@ disk2file(CBM_FILE fd, char *filename)
 	if (imagetype != IMAGE_NIB && imagetype != IMAGE_D64)
 	{
 		printf("Only the NIB and D64 formats are supported for reading.");
-		closeout_drive(fd);
 		exit(2);
 	}
 
@@ -597,7 +618,6 @@ disk2file(CBM_FILE fd, char *filename)
 	{
 		fprintf(stderr, "Couldn't create log file %s!\n",
 		  logfilename);
-		closeout_drive(fd);
 		exit(2);
 	}
 	fprintf(fplog, "%s\n", VERSION);
@@ -607,7 +627,6 @@ disk2file(CBM_FILE fd, char *filename)
 	{
 		fprintf(stderr, "Couldn't create output file %s!\n",
 		  filename);
-		closeout_drive(fd);
 		exit(2);
 	}
 
@@ -616,20 +635,24 @@ disk2file(CBM_FILE fd, char *filename)
 
 	if (imagetype == IMAGE_NIB)
 	{
-		/* write NIB-header */
+		/* write initial NIB-header */
 		memset(header, 0x00, sizeof(header));
 		sprintf(header, "MNIB-1541-RAW%c%c%c", 1, 0, 0);
 
-		fwrite(header, sizeof(header), 1, fpout); // @@@SRT: check success
+		if (fwrite(header, sizeof(header), 1, fpout) != 1) {
+			printf("unable to write NIB header\n");
+			exit(2);
+		}
 
 		/* read out disk into file */
 		read_nib(fd, fpout, header + 0x10);
 
 		/* fill NIB-header */
 		rewind(fpout);
-		fwrite(header, sizeof(header), 1, fpout); // @@@SRT: check success
-		fseek(fpout, 0, SEEK_END);
-
+		if (fwrite(header, sizeof(header), 1, fpout) != 1) {
+			printf("unable to rewrite NIB header\n");
+			exit(2);
+		}
 	}
 	else
 	{
@@ -642,41 +665,62 @@ disk2file(CBM_FILE fd, char *filename)
 
 	fclose(fpout);
 	fclose(fplog);
+	return (0);
 }
 
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: mnib [options] <filename>\n");
-	fprintf(stderr, " -w : Write disk image\n");
-	fprintf(stderr, " -v : Verify written data (W)\n");
-	fprintf(stderr, " -u : Unformat disk (removes *ALL* data)\n");
-	fprintf(stderr, " -l : Limit functions to 40 tracks (R/W)\n");
-	fprintf(stderr, " -h : Use halftracks (R/W)\n");
-	fprintf(stderr, " -k : Disable reading 'killer' tracks (R)\n");
-	fprintf(stderr, " -r : Disable 'reduce syncs' option (R)\n");
-	fprintf(stderr, " -g : Enable 'reduce gaps' option (R)\n");
-	fprintf(stderr, " -0 : Enable 'reduce weak' option (R)\n");
-	fprintf(stderr, " -f : Disable weak GCR bit simulation (W)\n");
-	fprintf(stderr, " -b : Enable BurstNibbler-style timed track alignment\n");
-	fprintf(stderr, " -aX: Alternative track alignments (W)\n");
-	fprintf(stderr, " -eX: Extended read retries (R)\n");
-	fprintf(stderr, " -pX: Custom protection handlers (W)\n");
+	fprintf(stderr, "usage: mnib [options] <filename>\n"
+	     " -w : Write disk image\n"
+	     " -v : Verify written data (W)\n"
+	     " -u : Unformat disk (removes *ALL* data)\n"
+	     " -l : Limit functions to 40 tracks (R/W)\n"
+	     " -h : Use halftracks (R/W)\n"
+	     " -k : Disable reading 'killer' tracks (R)\n"
+	     " -r : Disable 'reduce syncs' option (R)\n"
+	     " -g : Enable 'reduce gaps' option (R)\n"
+	     " -0 : Enable 'reduce weak' option (R)\n"
+	     " -f : Disable weak GCR bit simulation (W)\n"
+	     " -b : Enable BurstNibbler-style timed track alignment\n"
+	     " -aX: Alternative track alignments (W)\n"
+	     " -eX: Extended read retries (R)\n"
+	     " -pX: Custom protection handlers (W)\n");
 	exit(1);
+}
+
+static void ARCH_SIGNALDECL
+handle_signals(int sig)
+{
+	/* Ignore multiple presses of ^C */
+	signal(SIGINT, SIG_IGN);
+	printf("\nExit requested by user. ");
+	exit(1);
+}
+
+static void ARCH_SIGNALDECL
+handle_exit(void)
+{
+	send_mnib_cmd(fd, FL_RESET);
+	printf("Resetting drive... ");
+	cbm_reset(fd);
+#ifndef DJGPP
+	cbm_driver_close(fd);
+#endif
+	printf("done.\n");
 }
 
 int ARCH_MAINDECL
 main(int argc, char *argv[])
 {
-    CBM_FILE fd;
     BYTE drive = 8;
-	int bump, reset, ok;
-	char cmd[80], error[500];
-	char filename[256];
+	int bump, count, ok, reset, rv;
+	char cmd[80], error[500], filename[256];
+	char byte;
 
 	fprintf(stdout,
 	  "\nmnib - Commodore 1541/1571 disk image nibbler.\n"
-	  "(C) 2000-05 Markus Brenner and Pete Rittwage.\n"
+	  "(C) 2000-06 Markus Brenner and Pete Rittwage.\n"
 	  "Version " VERSION "\n\n");
 
 #ifdef DJGPP
@@ -851,7 +895,6 @@ main(int argc, char *argv[])
 			break;
 		}
 	}
-	printf("-\n");
 
 	if (argc < 1 && !mode)
 		usage();
@@ -868,12 +911,17 @@ main(int argc, char *argv[])
 	cbm_driver_open(&fd, 0);
 #endif
 
+	/* Once the drive is accessed, we need to close out state when exiting */
+	atexit(handle_exit);
+	signal(SIGINT, handle_signals);
+
 	/* prepare error string $73: CBM DOS V2.6 1541 */
-	sprintf(cmd, "M-W%c%c%c%c%c%c%c%c", 0, 3, 5, 0xa9, 0x73, 0x4c, 0xc1, 0xe6);
+	sprintf(cmd, "M-W%c%c%c%c%c%c%c%c", 0, 3, 5, 0xa9, 0x73, 0x4c,
+	    0xc1, 0xe6);
 	cbm_exec_command(fd, drive, cmd, 11);
 	sprintf(cmd, "M-E%c%c", 0x00, 0x03);
 	cbm_exec_command(fd, drive, cmd, 5);
-	cbm_device_status(fd, drive, error, 500);
+	cbm_device_status(fd, drive, error, sizeof(error));
 	printf("Drive Version: %s\n", error);
 
 	if (error[18] == '4')
@@ -887,43 +935,87 @@ main(int argc, char *argv[])
 
 	if (bump)
 	{
-		/* perform a bump */
 		delay(1000);
 		printf("Bumping...\n");
+
+		/* Set job to run on track 1, sector 0 */
 		sprintf(cmd, "M-W%c%c%c%c%c", 6, 0, 2, 1, 0);
-		cbm_exec_command(fd, drive, cmd, 8);
-		sprintf(cmd, "M-W%c%c%c%c", 0, 0, 1, 0xc0);
-		cbm_exec_command(fd, drive, cmd, 7);
-		delay(2500);
+		if (cbm_exec_command(fd, drive, cmd, 8) != 0) {
+			printf("seek track 1 failed, exiting\n");
+			exit(4);
 	}
 
-	cbm_exec_command(fd, drive, "U0>M0", 0);
-	cbm_exec_command(fd, drive, "I0:", 0);
-	printf("Initializing\n");
+		/* Send bump command */
+		byte = 0xc0;
+		sprintf(cmd, "M-W%c%c%c%c", 0, 0, 1, byte);
+		if (cbm_exec_command(fd, drive, cmd, 7) != 0) {
+			printf("bump command failed, exiting\n");
+			exit(4);
+		}
+		delay(2000);
 
-	upload_code(fd, drive);
+		/* Wait until command has been completed (high bit=0) */
+		count = 10;
+		sprintf(cmd, "M-R%c%c", 0, 0);
+		while ((byte & 0x80) != 0 && count-- != 0) {
+			delay(500);
+			if (cbm_exec_command(fd, drive, cmd, 5) != 0) {
+				printf("bump m-r failed, exiting\n");
+				exit(4);
+			}
+			rv = cbm_talk(fd, drive, 15);
+			if (rv != 0) {
+				printf("bump talk failed: %d\n", rv);
+				exit(4);
+			}
+			rv = cbm_raw_read(fd, &byte, sizeof(byte));
+			cbm_untalk(fd);
+			if (rv != sizeof(byte)) {
+				printf("bump raw read failed: %d\n", rv);
+				exit(4);
+			}
+		}
+
+		/* Check if status was 1 (OK) */
+		if (byte != 1) {
+			printf("bump status was error: %#x\n", byte);
+			exit(4);
+		}
+	}
+
+	/*
+	 * Initialize media and switch drive to 1541 mode.
+	 * We initialize first to do the head seek to read the BAM after
+	 * the bump above.
+	 */
+	printf("Initializing\n");
+	cbm_exec_command(fd, drive, "I0:", 0);
+	cbm_exec_command(fd, drive, "U0>M0", 0);
+
+	if (upload_code(fd, drive) < 0) {
+		printf("code upload failed, exiting\n");
+		exit(5);
+	}
+
+	/* Begin executing drive code at $300 */
 	sprintf(cmd, "M-E%c%c", 0x00, 0x03);
 	cbm_exec_command(fd, drive, cmd, 5);
 
 	cbm_mnib_par_read(fd);
 
 #ifdef DJGPP
-	if (!find_par_port(fd))
-		exit(4);
+	if (!find_par_port(fd)) {
+		exit(6);
+	}
 #endif
 
-	fprintf(stderr, "Port Test: %s, ", test_par_port(fd)? "OK" : "FAILED");
-	fprintf(stderr, "Code Verify: %s\n", (ok =
-	    verify_floppy(fd))? "OK" : "FAILED");
+	fprintf(stderr, "Port test: %s, ", test_par_port(fd)? "OK" : "FAILED");
+	fprintf(stderr, "Code verify: %s\n", (ok = verify_floppy(fd))?
+	  "OK" : "FAILED");
 	if (!ok)
 	{
-		printf("Failed parallel port transfer test. Check cabling.\n");
-
-#ifdef linux
-		cbm_reset(fd);
-		cbm_driver_close(fd);
-#endif
-		exit(5);
+		printf("\nFailed parallel port transfer test. Check cabling.\n");
+		exit(7);
 	}
 	printf("\n");
 
@@ -961,18 +1053,5 @@ main(int argc, char *argv[])
 	motor_on(fd);
 	step_to_halftrack(fd, 18 * 2);
 
-	closeout_drive(fd);
-
-	exit(1);
-}
-
-void closeout_drive(CBM_FILE fd)
-{
-		send_mnib_cmd(fd, FL_RESET);
-		printf("drive reset...\n");
-		delay(2000);
-#ifndef DJGPP
-		cbm_reset(fd);
-		cbm_driver_close(fd);
-#endif
+	exit(0);
 }

@@ -5,5 +5,6 @@
 #define msleep(x) delay(x)
 
 #define ARCH_MAINDECL
+#define ARCH_SIGNALDECL
 
 typedef unsigned char BYTE;

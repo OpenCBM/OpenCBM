@@ -22,52 +22,57 @@ BYTE
 read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 {
 	BYTE density;
-    int defdens, i, timeout, printOutput;
+    int defdens, i, timeout, newtrack;
 	static int lasttrack = -1;
+    static BYTE lastdensity;
 
 	timeout = 0;
-	printOutput = (lasttrack == halftrack) ? 0 : 1;
-	step_to_halftrack(fd, halftrack);
-
+	newtrack = (lasttrack == halftrack) ? 0 : 1;
 	lasttrack = halftrack;
 
-	if (printOutput)
+	if(newtrack)
 	{
+		step_to_halftrack(fd, halftrack);
+
 		printf("%4.1f: (", (float) halftrack / 2);
 		if(mode == MODE_READ_DISK) fprintf(fplog, "%4.1f: (", (float) halftrack / 2);
-	}
 
 	// we scan for the disk density and retry a few times if it's non-standard
 	for (defdens = 3; halftrack >= bitrate_range[defdens]; defdens--);
 	for (i = 0; i < 5; i++)
 	{
-		density = scan_track(fd, halftrack);
+			lastdensity = density = scan_track(fd, halftrack);
+
 		if ((density & 3) == defdens ||
 		  (density & BM_NO_SYNC) || (density & BM_FF_TRACK))
 			break;
+	}
+	}
+	else
+	{
+		density = lastdensity;
 	}
 
 	if (density & BM_FF_TRACK)
 	{
 		/* killer sync track */
-		if (printOutput)
+		if (newtrack)
 		{
 			printf("KILLER:");
 			if(mode == MODE_READ_DISK) fprintf(fplog, "KILLER:");
-
 		}
 	}
 	else if (density & BM_NO_SYNC)
 	{
 		/* no sync found */
-		if (printOutput)
+		if (newtrack)
 		{
 			printf("NOSYNC:");
 			if(mode == MODE_READ_DISK) fprintf(fplog, "NOSYNC:");
 		}
 	}
 
-	if (printOutput)
+	if (newtrack)
 	{
 		if ((density & 3) == defdens)
 		{
@@ -127,10 +132,8 @@ paranoia_read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 	BYTE cbuffer1[GCR_TRACK_LENGTH];
 	BYTE cbuffer2[GCR_TRACK_LENGTH];
 	BYTE *cbufn, *cbufo, *bufn, *bufo;
-	unsigned int lenn, densn, i, l, badgcr;
+	int leno, lenn, densn, i, l, badgcr,errors, retries, short_read, long_read;
     BYTE denso;
-	unsigned int errors, retries, short_read, long_read;
-	int leno;
 	char errorstring[0x1000], diffstr[80];
 
 	badgcr = 0;
@@ -211,11 +214,13 @@ paranoia_read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 		if (halftrack == 36 && errors > 1)
 			continue;
 
-		// if we got all good sectors,
-		// or all bad sectors (protection)
-		// we don't need to retry any more
-		if (errors == 0 || errors > 15)
+		// if we got all good sectors we dont retry
+		if (errors == 0)
 			break;
+
+		// if all bad sectors (protection) we only retry once
+		if (errors == sector_map_1541[halftrack/2])
+			l = error_retries - 1;
 	}
 
 	// Give some indication of disk errors, unless it's all errors
@@ -223,7 +228,7 @@ paranoia_read_halftrack(CBM_FILE fd, int halftrack, BYTE * buffer)
 
 	// If there are a lot of errors, the track probably doesn't contain
 	// any DOS sectors (protection)
-	if (errors >= 15)
+	if (errors == sector_map_1541[halftrack/2])
 	{
 		printf("[PROT] ");
 		fprintf(fplog, "%s ", errorstring);

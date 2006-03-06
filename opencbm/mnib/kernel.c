@@ -167,13 +167,13 @@ show(char *s)
 void
 do_reset(void)
 {
-	printf("cbm_init: resetting devices\n");
+	DPRINTK("cbm_init: resetting devices\n");
 	RELEASE(DATA_OUT | ATN_OUT | CLK_OUT);
 	SET(RESET_OUT);
 	delay(100);		/* 100ms */
 	RELEASE(RESET_OUT);
 
-	printf("cbm_init: sleeping 2 seconds...\n");
+	DPRINTK("cbm_init: sleeping 2 seconds while drive settles...\n");
 	delay(2000);	/* 2s */
 }
 
@@ -370,7 +370,6 @@ cbm_iec_raw_write(const char * buf, int cnt, int atn, int talk)
 	}
 
 	delay(20);		/* 20ms */
-
 
 	while (cnt > sent && rv == 0)
 	{

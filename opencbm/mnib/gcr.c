@@ -873,7 +873,7 @@ strip_runs(BYTE * buffer, int length, int minrun, BYTE target)
 	{
 		if (*source == target)
 		{
-			// fixed to only remove bytes before sync
+			// fixed to only remove bytes before minimum amount of sync
 			if ( run == minrun && target == 0xff )
 				skipped++;
 			else if ( run == minrun &&  *(source+2) == 0xff )
@@ -1123,7 +1123,7 @@ compare_sectors(BYTE * track1, BYTE * track2, int length1, int length2,
 			}
 			else
 			{
-				sprintf(tmpstr,"S%d: unrecognized sector\n",sector);
+				sprintf(tmpstr,"S%d: unrecognized sector (%.2x/%.2x) (%.2x/%.2x)\n",sector,checksum1,error1,checksum2,error2);
 			}
 		}
 		else
