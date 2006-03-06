@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.12 2006-03-04 10:58:57 wmsr Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.13 2006-03-06 06:23:28 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -387,11 +387,20 @@ static int do_upload(CBM_FILE fd, char *argv[])
 {
     unsigned char unit;
     int addr;
+    int rv;
     size_t size;
     char *tail, *fn;
     unsigned char addr_buf[2];
-    static unsigned char buf[65537];
+    unsigned int buflen = 65537;
+    unsigned char *buf;
     FILE *f;
+
+    buf = malloc(buflen);
+    if (!buf)
+    {
+        fprintf(stderr, "Not enough memory for buffer.\n");
+        return 1;
+    }
 
     unit = arch_atoc(argv[0]);
 
@@ -399,6 +408,7 @@ static int do_upload(CBM_FILE fd, char *argv[])
     if(addr < -1 || addr > 0xffff || *tail)
     {
         arch_error(0, 0, "invalid address: %s", argv[1]);
+        free(buf);
         return 1;
     }
 
@@ -420,11 +430,13 @@ static int do_upload(CBM_FILE fd, char *argv[])
         if(f == NULL)
         {
             arch_error(0, arch_get_errno(), "could not open %s", fn);
+            free(buf);
             return 1;
         }
         if(arch_filesize(argv[2], &filesize))
         {
             arch_error(0, arch_get_errno(), "could not stat %s", fn);
+            free(buf);
             return 1;
         }
     }
@@ -436,6 +448,7 @@ static int do_upload(CBM_FILE fd, char *argv[])
         {
             arch_error(0, arch_get_errno(), "could not read %s", fn);
             if(f != stdin) fclose(f);
+            free(buf);
             return 1;
         }
 
@@ -449,12 +462,14 @@ static int do_upload(CBM_FILE fd, char *argv[])
     {
         arch_error(0, 0, "could not read %s", fn);
         if(f != stdin) fclose(f);
+        free(buf);
         return 1;
     }
     else if(size == 0 && feof(f))
     {
         arch_error(0, 0, "no data: %s", fn);
         if(f != stdin) fclose(f);
+        free(buf);
         return 1;
     }
 
@@ -462,12 +477,17 @@ static int do_upload(CBM_FILE fd, char *argv[])
     {
         arch_error(0, 0, "program too big: %s", fn);
         if (f != stdin) fclose(f);
+        free(buf);
         return 1;
     }
 
     if(f != stdin) fclose(f);
 
-    return (cbm_upload(fd, unit, addr, buf, size) == (int)size) ? 0 : 1;
+    rv = (cbm_upload(fd, unit, addr, buf, size) == (int)size) ? 0 : 1;
+
+    free(buf);
+
+    return rv;
 }
 
 /*
