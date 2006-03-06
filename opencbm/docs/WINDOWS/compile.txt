@@ -35,6 +35,18 @@ any problems with that one. The DDK contains the complete toolchain you need,
 that is, compiler, linker, build tool, debugging tools, documentation, and so
 on.
 
+Update:  With the beta test phase for Microsoft Vista (version next to Windows
+XP), Microsoft annouced the "Architecture of the Windows Driver Foundation
+(WDF)" development model for drivers. It includes the Kernel-Mode Driver
+Framework (KMDF) which includes the Windows 2003 SP 1 DDK. Actually the KDMF
+will replace the DDK in the future. The current KDMF 1.0 can be downloaded from
+Microsoft's website as an ISO image of 262 MiB. See more at:
+
+    http://www.microsoft.com/whdc/driver/wdf/KMDF_pkg.mspx
+    http://www.microsoft.com/whdc/driver/WDF/KMDF_pkgdwn.mspx?
+    http://www.microsoft.com/whdc/driver/wdf/default.mspx
+    http://www.microsoft.com/whdc/driver/wdf/wdf-arch.mspx
+
 Anyway, if you do not plan to modify the driver itself, but only to work on the
 "user mode" portion of the driver, the DDK is not needed. Although I built every
 official release of cbm4win with the DDK, you can use an ordinary compiler for
@@ -130,3 +142,4 @@ If you manage to compile cbm4win with another compiler, feel free tell me.
 Happy compiling!
 
 Spiro Trikaliotis, 27.11.2004
+Wolfgang Moser, 2006-03-05 (Updates regarding DDK/KMDF)
