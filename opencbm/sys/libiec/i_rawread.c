@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.7 2006-03-04 14:08:19 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.8 2006-03-06 12:58:39 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -55,14 +55,16 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
 
     FUNC_ENTER();
 
+    DBG_ASSERT(Received != NULL);
+
     ok = TRUE;
     received = 0;
+    *Received = 0;
 
-    // If there was an eoi already, we are ready
+    // If there was already an eoi, we are ready
 
     if (Pdx->Eoi)
     {
-        *Received = 0;
         FUNC_LEAVE_NTSTATUS_CONST(STATUS_END_OF_FILE);
     }
 
@@ -86,6 +88,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
 
             if (QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
             {
+                *Received = received;
                 FUNC_LEAVE_NTSTATUS_CONST(STATUS_TIMEOUT);
             }
         }

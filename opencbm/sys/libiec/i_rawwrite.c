@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawwrite.c,v 1.7 2006-03-04 14:08:19 strik Exp $ \n
+** \version $Id: i_rawwrite.c,v 1.8 2006-03-06 12:58:39 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -233,5 +233,5 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, ULONG Count, ULON
     DBG_ASSERT(Sent != NULL);
     *Sent = sent;
 
-    return ntStatus;
+    FUNC_LEAVE_NTSTATUS(ntStatus);
 }
