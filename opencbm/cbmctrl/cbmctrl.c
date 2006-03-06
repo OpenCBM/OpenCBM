@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.13 2006-03-06 06:23:28 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.14 2006-03-06 18:45:48 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -547,6 +547,11 @@ static int do_change(CBM_FILE fd, char *argv[])
 
     do
     {
+        /*
+         * Make sure the drive is on track 18
+         */
+        cbm_exec_command(fd, unit, "I0:", 0);
+
         rv = cbm_upload(fd, unit, 0x500, prog_tdchange, sizeof(prog_tdchange));
     
         if (rv != sizeof(prog_tdchange))
