@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.6 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: init.c,v 1.7 2006-03-06 05:54:34 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -189,7 +189,10 @@ cbmiec_cleanup(IN PDEVICE_EXTENSION Pdx)
 {
     FUNC_ENTER();
 
-    cbmiec_release_bus(Pdx);
+    if (!Pdx->DoNotReleaseBus)
+    {
+        cbmiec_release_bus(Pdx);
+    }
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
@@ -258,8 +261,11 @@ cbmiec_init(IN PDEVICE_EXTENSION Pdx)
 
     Pdx->IecBusy = FALSE;
 
-    CBMIEC_RELEASE(PP_RESET_OUT | PP_DATA_OUT | PP_ATN_OUT | PP_LP_BIDIR | PP_LP_IRQ);
-    CBMIEC_SET(PP_CLK_OUT);
+    if (!Pdx->DoNotReleaseBus)
+    {
+        CBMIEC_RELEASE(PP_RESET_OUT | PP_DATA_OUT | PP_ATN_OUT | PP_LP_BIDIR | PP_LP_IRQ);
+        CBMIEC_SET(PP_CLK_OUT);
+    }
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }

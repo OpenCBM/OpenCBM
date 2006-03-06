@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/talk.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: talk.c,v 1.4 2006-03-04 14:08:19 strik Exp $ \n
+** \version $Id: talk.c,v 1.5 2006-03-06 05:54:35 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -57,6 +57,8 @@ cbmiec_talk(IN PDEVICE_EXTENSION Pdx, IN UCHAR Device, IN UCHAR Secaddr)
     buffer[0] = 0x40 | Device;
     buffer[1] = 0x60 | Secaddr;
     ntStatus = cbmiec_i_raw_write(Pdx, buffer, 2, &sent, 1, 1);
+
+    Pdx->DoNotReleaseBus = TRUE;
 
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.4 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: openclose.c,v 1.5 2006-03-06 05:54:33 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **
@@ -188,7 +188,10 @@ cbm_execute_createopen(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
     // release the bus (to be able to share it with other
     // controllers
 
-    cbmiec_release_bus(Pdx);
+    if (!Pdx->DoNotReleaseBus)
+    {
+        cbmiec_release_bus(Pdx);
+    }
 
     // We're done, complete the IRP
 
@@ -230,7 +233,10 @@ cbm_execute_close(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 
     // release the bus (to be able to share it with other controllers)
 
-    cbmiec_release_bus(Pdx);
+    if (!Pdx->DoNotReleaseBus)
+    {
+        cbmiec_release_bus(Pdx);
+    }
 
     // release all resources we have previously allocated
 

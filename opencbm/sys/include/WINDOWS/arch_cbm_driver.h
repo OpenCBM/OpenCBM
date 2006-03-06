@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.5 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.6 2006-03-06 05:54:32 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **
@@ -94,6 +94,11 @@ struct _ARCH_DEVICE_EXTENSION {
 
     /*! FLAG: The interrupt for the parallel port has been allocated */
     BOOLEAN ParallelPortAllocatedInterrupt;
+
+    /*! FLAG: We are not allowed to release and init the bus on initialization or deinitialization,
+     *        because a TALK without a corresponding UNTALK has been issued.
+     */
+    BOOLEAN DoNotReleaseBus;
 
     /*! The thread handle for the worker thread*/
     HANDLE ThreadHandle;
