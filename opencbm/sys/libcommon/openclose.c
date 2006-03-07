@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.5 2006-03-06 05:54:33 strik Exp $ \n
+** \version $Id: openclose.c,v 1.6 2006-03-07 15:17:52 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **
@@ -188,7 +188,7 @@ cbm_execute_createopen(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
     // release the bus (to be able to share it with other
     // controllers
 
-    if (!Pdx->DoNotReleaseBus)
+    if (NT_SUCCESS(ntStatus) && !Pdx->DoNotReleaseBus)
     {
         cbmiec_release_bus(Pdx);
     }
