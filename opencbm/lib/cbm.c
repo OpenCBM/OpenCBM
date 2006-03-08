@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.12 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: cbm.c,v 1.13 2006-03-08 17:27:16 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -113,6 +113,63 @@ cbm_driver_close(CBM_FILE HandleDevice)
     FUNC_ENTER();
 
     cbmarch_driver_close(HandleDevice);
+
+    FUNC_LEAVE();
+}
+
+/*! \brief Lock the parallel port for the driver
+
+ This functions locks the driver onto the parallel port. This way,
+ no other program or driver can allocate the parallel port and
+ interfere with the communication.
+
+ \param HandleDevice  
+   A CBM_FILE which contains the file handle of the driver.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call cbm_driver_close().
+
+ \remark
+ A call to cbm_lock() is undone with a call to cbm_unlock().
+
+ Note that it is *not* necessary to call this function
+ (or cbm_unlock()) when all communication is done with
+ the handle to opencbm open (that is, between 
+ cbm_driver_open() and cbm_driver_close(). You only
+ need this function to pin the driver to the port even
+ when cbm_driver_close() is to be executed (for example,
+ because the program terminates).
+*/
+
+void CBMAPIDECL
+cbm_lock(CBM_FILE HandleDevice)
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE();
+}
+
+/*! \brief Unlock the parallel port for the driver
+
+ This functions unlocks the driver from the parallel port.
+ This way, other programs and drivers can allocate the
+ parallel port and do their own communication with
+ whatever device they use.
+
+ \param HandleDevice  
+   A CBM_FILE which contains the file handle of the driver.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call cbm_driver_close().
+
+ \remark
+ Look at cbm_lock() for an explanation of this function.
+*/
+
+void CBMAPIDECL
+cbm_unlock(CBM_FILE HandleDevice)
+{
+    FUNC_ENTER();
 
     FUNC_LEAVE();
 }

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.14 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.15 2006-03-08 17:27:10 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \n
@@ -107,6 +107,8 @@ enum cbm_cable_type_e
 /*! \todo FIXME: port isn't used yet */
 EXTERN int CBMAPIDECL cbm_driver_open(CBM_FILE *f, int port);
 EXTERN void CBMAPIDECL cbm_driver_close(CBM_FILE f);
+EXTERN void CBMAPIDECL cbm_lock(CBM_FILE f);
+EXTERN void CBMAPIDECL cbm_unlock(CBM_FILE f);
 
 /*! \todo FIXME: port isn't used yet */
 EXTERN const char * CBMAPIDECL cbm_get_driver_name(int port);
@@ -157,6 +159,10 @@ EXTERN char CBMAPIDECL cbm_petscii2ascii_c(char character);
 EXTERN char CBMAPIDECL cbm_ascii2petscii_c(char character);
 EXTERN char * CBMAPIDECL cbm_petscii2ascii(char *str);
 EXTERN char * CBMAPIDECL cbm_ascii2petscii(char *str);
+
+#if DBG
+EXTERN int CBMAPIDECL cbm_get_debugging_buffer(CBM_FILE HandleDevice, char *buffer, size_t len);
+#endif
 
 /* functions specifically for mnib */
 

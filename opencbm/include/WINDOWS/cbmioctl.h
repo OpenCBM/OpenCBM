@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.6 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.7 2006-03-08 17:27:11 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -281,6 +281,14 @@ typedef CBMT_SINGLEBYTE CBMT_MNIB_PWRITE_IN;
 //! IOCTL for writing a complete track (for mnib)
 #define CBMCTRL_MNIB_WRITE_TRACK \
                             _CBMIO(CBMCTRL_BASE, 22) // CBMT_MNIB_WRITE_TRACK_IN -
+
+//! IOCTL for locking the driver onto the parallel port
+#define CBMCTRL_PARPORT_LOCK  \
+                            _CBMIO(CBMCTRL_BASE, 23) // -                    -
+
+//! IOCTL for locking the driver onto the parallel port
+#define CBMCTRL_PARPORT_UNLOCK  \
+                            _CBMIO(CBMCTRL_BASE, 24) // -                    -
 
 /* these are the return codes of CBMCTRL_I_INSTALL: */
 

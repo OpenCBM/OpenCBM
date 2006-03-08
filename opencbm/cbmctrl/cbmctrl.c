@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.14 2006-03-06 18:45:48 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.15 2006-03-08 17:27:10 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -38,6 +38,24 @@ static int do_version(CBM_FILE fd, char *argv[])
 {
     printf("cbmctrl version " OPENCBM_VERSION ", built on " __DATE__ " at " __TIME__ "\n");
 
+    return 0;
+}
+
+/*
+ * Simple wrapper for lock
+ */
+static int do_lock(CBM_FILE fd, char *argv[])
+{
+    cbm_lock(fd);
+    return 0;
+}
+
+/*
+ * Simple wrapper for unlock
+ */
+static int do_unlock(CBM_FILE fd, char *argv[])
+{
+    cbm_unlock(fd);
     return 0;
 }
 
@@ -627,6 +645,12 @@ static struct prog prog_table[] =
     {0, "-V"      , do_version , 0, 0, "",
         "same as --version",
         "for more info, use \"cbmctrl --help --version\"." },
+
+    {1, "lock"    , do_lock    , 0, 0, "",
+        "Lock the parallel port for the use by cbm4win/cbm4linux." },
+
+    {1, "unlock"  , do_unlock  , 0, 0, "",
+        "Unlock the parallel port for the use by cbm4win/cbm4linux." },
 
     {1, "listen"  , do_listen  , 2, 2, "<device> <secadr>",
         "perform a listen on the IEC bus",

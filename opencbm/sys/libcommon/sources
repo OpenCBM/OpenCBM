@@ -15,6 +15,7 @@ INCLUDES=../include;../include/WINDOWS;../../include;../../include/WINDOWS
 
 SOURCES= 	openclose.c \
 		init.c \
+		lockunlock.c \
 		install.c \
 		thread.c \
 		startio.c \

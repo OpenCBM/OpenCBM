@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.6 2006-03-06 05:54:32 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.7 2006-03-08 17:27:18 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **
@@ -125,6 +125,12 @@ AddDeviceCommonInit(IN PDEVICE_OBJECT Fdo, IN PUNICODE_STRING DeviceName, IN PCW
 
 extern NTSTATUS
 cbm_install(IN PDEVICE_EXTENSION Pdx, OUT PCBMT_I_INSTALL_OUT ReturnBuffer, IN OUT PULONG ReturnLength);
+
+extern NTSTATUS
+cbm_lock(IN PDEVICE_EXTENSION Pdx);
+
+extern NTSTATUS
+cbm_unlock(IN PDEVICE_EXTENSION Pdx);
 
 #if DBG
 extern NTSTATUS

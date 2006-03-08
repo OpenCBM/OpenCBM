@@ -110,6 +110,10 @@ SOURCE=.\isr.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\lockunlock.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\openclose.c
 # End Source File
 # Begin Source File

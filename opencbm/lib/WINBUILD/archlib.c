@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.5 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: archlib.c,v 1.6 2006-03-08 17:27:18 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -919,3 +919,25 @@ cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 
     FUNC_LEAVE_INT(result.Line);
 }
+
+#if DBG
+
+/*! \brief Output contents of the debugging buffer
+
+ This function outputs the contents of the kernel-mode
+ debugging buffer to the screen.
+
+ This function is for use of the installation routines only!
+*/
+
+int CBMAPIDECL
+cbm_get_debugging_buffer(CBM_FILE HandleDevice, char *buffer, size_t len)
+{
+    FUNC_ENTER();
+
+    cbm_ioctl(HandleDevice, CBMCTRL(I_READDBG), NULL, 0, buffer, sizeof(buffer));
+
+    FUNC_LEAVE_INT(0);
+}
+
+#endif // #if DBG

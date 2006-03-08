@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.10 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.11 2006-03-08 17:27:24 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -257,6 +257,16 @@ cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
             ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_I_INSTALL_OUT), STATUS_SUCCESS);
             break;
 
+        case CBMCTRL_PARPORT_LOCK:
+            DBG_IRP(CBMCTRL_PARPORT_LOCK);
+            ntStatus = STATUS_SUCCESS;
+            break;
+
+        case CBMCTRL_PARPORT_UNLOCK:
+            DBG_IRP(CBMCTRL_PARPORT_UNLOCK);
+            ntStatus = STATUS_SUCCESS;
+            break;
+
 #if DBG
 
         case CBMCTRL_I_READDBG:
@@ -480,6 +490,16 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
             DBG_IRP(CBMCTRL_I_INSTALL);
             returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
             ntStatus = cbm_install(Pdx, OUTPUTVALUE(CBMT_I_INSTALL_OUT), (PULONG) &returnLength);
+            break;
+
+        case CBMCTRL_PARPORT_LOCK:
+            DBG_IRP(CBMCTRL_PARPORT_LOCK);
+            ntStatus = cbm_lock(Pdx);
+            break;
+
+        case CBMCTRL_PARPORT_UNLOCK:
+            DBG_IRP(CBMCTRL_PARPORT_UNLOCK);
+            ntStatus = cbm_unlock(Pdx);
             break;
 
 #if DBG
