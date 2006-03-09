@@ -118,6 +118,16 @@ to build the tools in every scenario.
   - After compilation has finished, you can get the compiled files in the
     bin\i386 directory.
 
+  NOTES:
+    For B., DDKBUILD_START.BAT understands the following optional parameters:
+      * ddkbuild_start fre         - create the free build (i386)
+      * ddkbuild_start chk         - create the checked build (i386)
+
+    And the modification switches:
+      * -amd64                     - create a build for the AMD64 platform
+      * -ia64                      - create a build for the iA64 platform
+      * -cefZ                      - recommended additional DDK switches
+
 
 4. BUILDING THE ASSEMBLER FILES
 
