@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.6 2006-03-08 17:27:18 strik Exp $ \n
+** \version $Id: archlib.c,v 1.7 2006-03-09 17:31:35 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -935,7 +935,7 @@ cbm_get_debugging_buffer(CBM_FILE HandleDevice, char *buffer, size_t len)
 {
     FUNC_ENTER();
 
-    cbm_ioctl(HandleDevice, CBMCTRL(I_READDBG), NULL, 0, buffer, sizeof(buffer));
+    cbm_ioctl(HandleDevice, CBMCTRL(I_READDBG), NULL, 0, buffer, len);
 
     FUNC_LEAVE_INT(0);
 }

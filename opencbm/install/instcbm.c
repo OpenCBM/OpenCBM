@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.12 2006-02-25 10:27:54 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.13 2006-03-09 17:31:35 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -206,6 +206,7 @@ usage(VOID)
             "  -h, --help      display this help and exit\n"
             "  -V, --version   display version information about cbm4win\n"
             "  -r, --remove    remove (uninstall) the driver\n"
+            "  -e, --enumpport re-enumerate the parallel port driver\n"
             "  -u, --update    update parameters if driver is already installed.\n"
             "  -l, --lpt=no    set default LPT port\n"
             "  -n, --nocopy    do not copy the driver files into the system directory\n"
@@ -241,6 +242,9 @@ struct parameter_s
 
     /*! --remove was given */
     BOOL Remove;
+
+    /*! --enum was given */
+    BOOL EnumerateParport;
 
     /*! --nocopy was given */
     BOOL NoCopy;
@@ -424,6 +428,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { "help",       no_argument,       NULL, 'h' },
         { "version",    no_argument,       NULL, 'V' },
         { "remove",     no_argument,       NULL, 'r' },
+        { "enumpport",  no_argument,       NULL, 'e' },
         { "forcent4",   no_argument,       NULL, 'F' },
         { "lpt",        required_argument, NULL, 'l' },
         { "update",     no_argument,       NULL, 'u' },
@@ -437,7 +442,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { NULL,         0,                 NULL, 0   }
     };
 
-    const char shortopts[] = "hrFl:nucAV"
+    const char shortopts[] = "hreFl:nucAV"
 #if DBG
                              "D:B"
 #endif // #if DBG
@@ -452,13 +457,13 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
     DBG_ASSERT(Parameter);
     memset(Parameter, 0, sizeof(*Parameter));
 
-    // We have no specified LPT port
+    // We have not specified an LPT port yet
 
     Parameter->Lpt = (ULONG) -1;
 
 #if DBG
 
-    // Until now, now DebugFlags were on the line
+    // Until now, no DebugFlags were on the line
 
     Parameter->DebugFlagsDriverWereGiven = FALSE;
     Parameter->DebugFlagsDllWereGiven = FALSE;
@@ -490,6 +495,20 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
             {
                 Parameter->ExecuteParameterGiven = TRUE;
                 Parameter->Remove = TRUE;
+            }
+            break;
+
+        case 'e':
+            if (Parameter->ExecuteParameterGiven)
+            {
+                error = TRUE;
+                printf("Colliding parameters were given, aborting!");
+                hint(Argv[0]);
+            }
+            else
+            {
+                Parameter->ExecuteParameterGiven = TRUE;
+                Parameter->EnumerateParport = TRUE;
             }
             break;
 
@@ -704,6 +723,33 @@ CheckDriver(parameter_t *Parameter)
     }
 
     FUNC_LEAVE_INT(error);
+}
+
+/*! \internal \brief Force re-enumeration of parallel port driver
+
+ This function forces a re-enumeration of the parallel port driver(s).
+
+ \param Parameter
+   Pointer to parameter_t struct which contains the
+   description of the parameters given on the command-line.
+
+ \return 
+   Return value which will be given on return from main().
+   That is, 0 on success, everything else indicates an error.
+*/
+static int
+EnumParportDriver(parameter_t *Parameter)
+{
+    FUNC_ENTER();
+
+    UNREFERENCED_PARAMETER(Parameter);
+
+    DBG_PRINT((DBG_PREFIX "Re-enumerating parallel port driver"));
+    printf("Re-enumerating parallel port driver\n");
+
+    CbmParportRestart();
+
+    FUNC_LEAVE_INT(0);
 }
 
 /*! \internal \brief Install the driver
@@ -985,6 +1031,12 @@ main(int Argc, char **Argv)
                 // The driver should be removed
 
                 retValue = RemoveDriver(&parameter);
+            }
+            else if (parameter.EnumerateParport)
+            {
+                // The driver should be removed
+
+                retValue = EnumParportDriver(&parameter);
             }
             else
             {

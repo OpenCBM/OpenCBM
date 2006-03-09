@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.7 2006-03-08 17:27:18 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.8 2006-03-09 17:31:35 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **
@@ -108,6 +108,14 @@ struct _ARCH_DEVICE_EXTENSION {
 
     /*! Boolean value: Should the running thread quit itself? */
     BOOLEAN QuitThread;
+
+    /*! Helper for cbmiec_block_irq */
+    KIRQL IecBlockIrqPreviousIrql;
+
+    /*! Helper for cbmiec_block_irq */
+#if DBG
+    LONG IecBlockIrqUsageCount;
+#endif
 
 } ARCH_DEVICE_EXTENSION;
 

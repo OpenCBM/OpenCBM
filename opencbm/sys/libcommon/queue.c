@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/queue.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: queue.c,v 1.7 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: queue.c,v 1.8 2006-03-09 17:31:35 strik Exp $ \n
 ** \n
 ** \brief Functions for queueung IRPs
 **
@@ -270,6 +270,9 @@ static VOID
 AcquireLock(IN PIO_CSQ Csq, OUT PKIRQL Irql)
 {
     PQUEUE queue;
+    KIRQL irql; // do not use Irql directly, but only indirectly,
+                // as suggested by Doron Holan at
+                // http://blogs.msdn.com/doronh/archive/2006/03/08/546934.aspx
 
     FUNC_ENTER();
 
@@ -281,7 +284,9 @@ AcquireLock(IN PIO_CSQ Csq, OUT PKIRQL Irql)
     // As we are using a spin lock, acquire that one
 
     DBG_IRQL( <= DISPATCH_LEVEL);
-    KeAcquireSpinLock(&queue->IrpListSpinlock, Irql);
+    KeAcquireSpinLock(&queue->IrpListSpinlock, &irql);
+
+    *Irql = irql;
 
     FUNC_LEAVE();
 }

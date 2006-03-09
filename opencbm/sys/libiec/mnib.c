@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.4 2005-12-14 09:08:19 strik Exp $ \n
+** \version $Id: mnib.c,v 1.5 2006-03-09 17:31:35 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -259,8 +259,8 @@ cbm_nib_write(PDEVICE_EXTENSION Pdx, char Data, int Toggle)
     FUNC_LEAVE_INT(retval);
 }
 
-#define enable()  cbmiec_release_irq()
-#define disable() cbmiec_block_irq()
+#define enable()  cbmiec_release_irq(Pdx)
+#define disable() cbmiec_block_irq(Pdx)
 
 NTSTATUS
 cbmiec_mnib_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG ReturnLength)

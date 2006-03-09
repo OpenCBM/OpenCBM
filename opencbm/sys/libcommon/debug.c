@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.15 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: debug.c,v 1.16 2006-03-09 17:31:35 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -1071,10 +1071,14 @@ static VOID
 DbgBufferSynchronizeStart(VOID)
 {
     LONG tmp;
+    KIRQL irql; // do not use Irql directly, but only indirectly,
+                // as suggested by Doron Holan at
+                // http://blogs.msdn.com/doronh/archive/2006/03/08/546934.aspx
 
 #ifdef USE_SPINLOCK
 
-    KeAcquireSpinLock(&DbgMemoryBufferSpinLock, &DbgMemoryBufferSpinLockIrql);
+    KeAcquireSpinLock(&DbgMemoryBufferSpinLock, &irql);
+    DbgMemoryBufferSpinLockIrql = irql;
 
 #else // #ifdef USE_SPINLOCK
 

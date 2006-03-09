@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/util.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util.c,v 1.6 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: util.c,v 1.7 2006-03-09 17:31:35 strik Exp $ \n
 ** \n
 ** \brief Some utility functions for the IEC library
 **
@@ -84,12 +84,6 @@ cbmiec_udelay(IN ULONG Howlong)
 }
 
 
-/*! Helper for cbmiec_block_irq */
-static KIRQL i_blockirq_previous_irql;
-
-/*! Helper for cbmiec_block_irq */
-DBGDO(static LONG i_blockirq_usage_count = 0;)
-
 /*! \brief Block all interrupts
 
  This function blocks all interrupt, thus that we cannot
@@ -98,13 +92,19 @@ DBGDO(static LONG i_blockirq_usage_count = 0;)
  This should not be used for big time periods.
 */
 VOID
-cbmiec_block_irq(VOID)
+cbmiec_block_irq(PDEVICE_EXTENSION Pdx)
 {
+    KIRQL irql; // do not use Irql directly, but only indirectly,
+                // as suggested by Doron Holan at
+                // http://blogs.msdn.com/doronh/archive/2006/03/08/546934.aspx
+
     FUNC_ENTER();
 
-    DBGDO(DBG_ASSERT(InterlockedIncrement(&i_blockirq_usage_count)==1));
+    DBGDO(DBG_ASSERT(InterlockedIncrement(&Pdx->IecBlockIrqUsageCount)==1));
 
-    KeRaiseIrql(HIGH_LEVEL, &i_blockirq_previous_irql);
+    KeRaiseIrql(HIGH_LEVEL, &irql);
+    Pdx->IecBlockIrqPreviousIrql = irql;
+
     CLI();
 
     FUNC_LEAVE();
@@ -116,14 +116,15 @@ cbmiec_block_irq(VOID)
  previous cbmiec_block_irq() call.
 */
 VOID
-cbmiec_release_irq(VOID)
+cbmiec_release_irq(PDEVICE_EXTENSION Pdx)
 {
     FUNC_ENTER();
 
     STI();
-    KeLowerIrql(i_blockirq_previous_irql);
 
-    DBGDO(DBG_ASSERT(InterlockedDecrement(&i_blockirq_usage_count)==0));
+    KeLowerIrql(Pdx->IecBlockIrqPreviousIrql);
+
+    DBGDO(DBG_ASSERT(InterlockedDecrement(&Pdx->IecBlockIrqUsageCount)==0));
 
     FUNC_LEAVE();
 }

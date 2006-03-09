@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/sendbyte.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: sendbyte.c,v 1.6 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: sendbyte.c,v 1.7 2006-03-09 17:31:35 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -54,7 +54,7 @@ cbmiec_send_byte(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
 
     PERF_EVENT_VERBOSE(0x1052, 0);
 
-    cbmiec_block_irq();
+    cbmiec_block_irq(Pdx);
 
     PERF_EVENT_VERBOSE(0x1053, 0);
 
@@ -80,7 +80,7 @@ cbmiec_send_byte(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
     }
 
     PERF_EVENT_VERBOSE(0x1058, 0);
-    cbmiec_release_irq();
+    cbmiec_release_irq(Pdx);
     PERF_EVENT_VERBOSE(0x1059, 0);
 
     for(i=0; (i<libiec_global_timeouts.T_17_Times) && !(ack=CBMIEC_GET(PP_DATA_IN)); i++)

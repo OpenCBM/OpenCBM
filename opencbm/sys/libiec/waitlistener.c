@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/waitlistener.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: waitlistener.c,v 1.5 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: waitlistener.c,v 1.6 2006-03-09 17:31:35 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -185,7 +185,7 @@ cbmiec_wait_for_listener(IN PDEVICE_EXTENSION Pdx, IN BOOLEAN SendEoi)
          *  thus, do not use it!
          */
 
-        cbmiec_block_irq();
+        cbmiec_block_irq(Pdx);
 
         // Give the LISTENer the sign: We want to send something
 
@@ -221,7 +221,7 @@ cbmiec_wait_for_listener(IN PDEVICE_EXTENSION Pdx, IN BOOLEAN SendEoi)
 
         // Our timing is not critical anymore, go back to the old IRQL
 
-        cbmiec_release_irq();
+        cbmiec_release_irq(Pdx);
     }
 
     PERF_EVENT_VERBOSE(0x1107, 0);

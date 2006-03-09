@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.8 2006-03-06 12:58:39 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.9 2006-03-09 17:31:35 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -95,7 +95,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
 
         // As we need very exact timing, don't allow anyone to disturb us
 
-        cbmiec_block_irq();
+        cbmiec_block_irq(Pdx);
 
         // Signal "We're ready for reading" to the other side
 
@@ -208,7 +208,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
 
         // Our timing is not critical anymore, go back to the old IRQL
 
-        cbmiec_release_irq();
+        cbmiec_release_irq(Pdx);
 
         // If everything went fine, remember the read byte
 

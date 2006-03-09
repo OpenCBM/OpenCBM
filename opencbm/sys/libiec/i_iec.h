@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.7 2006-03-04 14:08:19 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.8 2006-03-09 17:31:35 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -216,10 +216,10 @@ extern NTSTATUS
 cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *buf, ULONG cnt, ULONG *pSent, BOOLEAN atn, BOOLEAN talk);
 
 extern VOID
-cbmiec_block_irq(VOID);
+cbmiec_block_irq(PDEVICE_EXTENSION Pdx);
 
 extern VOID
-cbmiec_release_irq(VOID);
+cbmiec_release_irq(PDEVICE_EXTENSION Pdx);
 
 #ifdef USE_DPC
 
