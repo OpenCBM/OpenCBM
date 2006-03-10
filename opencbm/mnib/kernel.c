@@ -7,10 +7,10 @@
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *
  *	Modified for DOS use by Markus Brenner <markus(at)brenner(dot)de>
- *	XM1541 support by Wolfgang Moser <womo(at)d81(dot)de>
+ *	XM1541 support by Wolfgang Moser <cbm(a)d81(o)de>
  *
  *  MNIB Write support + consolidation by Pete Rittwage <peter(at)rittwage(dot)com>
-*/
+ */
 
 // #define DEBUG
 

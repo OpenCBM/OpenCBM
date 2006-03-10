@@ -5,10 +5,8 @@
  *	2 of the License, or (at your option) any later version.
  *
  *  Copyright (C) 1999      Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright (C) 2005,2006 Wolfgang Moser <womo(at)d81(dot)de>
- *
- *  Development version of the next generation CBM formatter: 0.1.0.34-mo20060201
-*/
+ *  Copyright (C) 2005,2006 Wolfgang Moser <cbm(a)d81(o)de>
+ */
 
 #include "opencbm.h"
 

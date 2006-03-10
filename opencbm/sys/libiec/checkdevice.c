@@ -5,7 +5,7 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1997-2005 Joe Forster <sta(at)c64(dot)org>
- *  Copyright 1997-2005 Wolfgang Moser <womo(at)d81(dot)de>
+ *  Copyright 1997-2005 Wolfgang Moser <cbm(a)d81(o)de>
  *  Copyright      2005 Spiro Trikaliotis
  *
  */
@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/checkdevice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: checkdevice.c,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: checkdevice.c,v 1.4 2006-03-10 23:31:03 wmsr Exp $ \n
 ** \authors Based on code from SC written by 
 **    Joe Forster & Wolfgang Moser
 ** \n
