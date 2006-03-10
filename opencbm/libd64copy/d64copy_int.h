@@ -7,7 +7,7 @@
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: d64copy_int.h,v 1.3 2006-02-24 12:21:42 strik Exp $ */
+/* $Id: d64copy_int.h,v 1.4 2006-03-10 15:43:36 strik Exp $ */
 
 #ifndef D64COPY_INT_H
 #define D64COPY_INT_H
@@ -40,8 +40,8 @@ typedef int(*turbo_start)(CBM_FILE,unsigned char);
 typedef struct {
     int  (*open_disk)(CBM_FILE,d64copy_settings*,const void*,int,
                       turbo_start,d64copy_message_cb);
-    int  (*read_block)(unsigned char,unsigned char,char*);
-    int  (*write_block)(unsigned char,unsigned char,const char*,int,int);
+    int  (*read_block)(unsigned char,unsigned char,unsigned char*);
+    int  (*write_block)(unsigned char,unsigned char,const unsigned char*,int,int);
     void (*close_disk)(void);
     int  is_cbm_drive;
     int  needs_turbo;

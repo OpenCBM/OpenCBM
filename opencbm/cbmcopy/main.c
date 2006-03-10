@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.9 2006-02-24 12:21:39 strik Exp $";
+    "@(#) $Id: main.c,v 1.10 2006-03-10 15:43:35 strik Exp $";
 #endif
 
 #include <ctype.h>
@@ -149,7 +149,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
     int c;
     unsigned char *filedata;
     size_t filesize;
-    unsigned char buf[48];
+    char buf[48];
     int num_entries;
     int num_files;
     int rv;

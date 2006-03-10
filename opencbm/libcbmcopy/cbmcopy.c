@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.6 2006-02-24 12:21:41 strik Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.7 2006-03-10 15:43:36 strik Exp $";
 #endif
 
 #include <stdio.h>
@@ -124,7 +124,7 @@ static int cbmcopy_read(CBM_FILE fd,
                         cbmcopy_settings *settings,
                         unsigned char drive,
                         int track, int sector,
-                        const unsigned char *cbmname,
+                        const char *cbmname,
                         int cbmname_len,
                         unsigned char **filedata,
                         size_t *filedata_size,
@@ -138,7 +138,7 @@ static int cbmcopy_read(CBM_FILE fd,
     unsigned char c;
     unsigned char *cptr;
     unsigned char buf[48];
-    const char *turbo;
+    const unsigned char *turbo;
     const transfer_funcs *trf;
     int blocks_read;
 
@@ -189,7 +189,7 @@ static int cbmcopy_read(CBM_FILE fd,
         /* start by track/sector */
         cbm_open( fd, drive, 0, "#", 1 );
     }
-    rv = cbm_device_status( fd, drive, buf, sizeof(buf) );
+    rv = cbm_device_status( fd, drive, (char*)buf, sizeof(buf) );
 
     if(rv)
     {
@@ -205,7 +205,7 @@ static int cbmcopy_read(CBM_FILE fd,
     {
         msg_cb( sev_debug, "start read at %d/%d", track, sector );
     }
-    sprintf( buf, "U4:%c%c", (unsigned char)track, (unsigned char)sector );
+    sprintf( (char*)buf, "U4:%c%c", (unsigned char)track, (unsigned char)sector );
 
     if(send_turbo(fd, drive, 0, settings,
                   turbo, turbo_size, buf, 5, msg_cb) == 0)
@@ -407,7 +407,7 @@ cbmcopy_settings *cbmcopy_get_default_settings(void)
 int cbmcopy_write_file(CBM_FILE fd,
                        cbmcopy_settings *settings,
                        int drivei,
-                       const unsigned char *cbmname,
+                       const char *cbmname,
                        int cbmname_len,
                        const unsigned char *filedata,
                        int filedata_size,
@@ -421,7 +421,7 @@ int cbmcopy_write_file(CBM_FILE fd,
     int error;
     unsigned char c;
     unsigned char buf[48];
-    const char *turbo;
+    const unsigned char *turbo;
     const transfer_funcs *trf;
     int blocks_written;
 
@@ -471,7 +471,7 @@ int cbmcopy_write_file(CBM_FILE fd,
     error = 0;
 
     if(send_turbo(fd, drive, 1, settings,
-                  turbo, turbo_size, "U4:", 3, msg_cb) == 0)
+                  turbo, turbo_size, (unsigned char*)"U4:", 3, msg_cb) == 0)
     {
         msg_cb( sev_debug, "start of copy" );
         status_cb( blocks_written );
@@ -542,7 +542,7 @@ int cbmcopy_read_file_ts(CBM_FILE fd,
 int cbmcopy_read_file(CBM_FILE fd,
                       cbmcopy_settings *settings,
                       int drive,
-                      const unsigned char *cbmname,
+                      const char *cbmname,
                       int cbmname_len,
                       unsigned char **filedata,
                       size_t *filedata_size,

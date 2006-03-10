@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: std.c,v 1.3 2006-02-24 12:21:42 strik Exp $";
+    "@(#) $Id: std.c,v 1.4 2006-03-10 15:43:36 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -21,7 +21,7 @@ static char *rcsid =
 static unsigned char drive = 0;
 static CBM_FILE fd_cbm = (CBM_FILE) -1;
 
-static int read_block(unsigned char tr, unsigned char se, char *block)
+static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
 {
     char cmd[48];
     int rv = 1;
@@ -41,7 +41,7 @@ static int read_block(unsigned char tr, unsigned char se, char *block)
     return rv;
 }
 
-static int write_block(unsigned char tr, unsigned char se, const char *blk, int size, int read_status)
+static int write_block(unsigned char tr, unsigned char se, const unsigned char *blk, int size, int read_status)
 {
     char cmd[48];
     int  rv = 1;

@@ -340,7 +340,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 		prepareFmtPattern(cmd, orig, endtrack, name[id_ofs+1], name[id_ofs+2]);
 		cmd[30]=starttrack;		// start track parameter
 		cmd[31]=endtrack+1;		// end track parameter
-		cmd[32]=retries & ~0xC0 | (bump?0x40:0xC0);
+		cmd[32]=(retries & ~0xC0) | (bump?0x40:0xC0);
 								// number of retries (per disk, not per track)
 		cmd[33]=bump;			// flag, if an initial head bump should be done
 		cmd[34]=demagnetize;	// flag, if the disk should be demagnetized
@@ -394,7 +394,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 #if defined(DebugFormat) && DebugFormat!=0	// verbose output
         {
         	float RPMval;
-           	int sectors, virtGAPsze, remainder, trackTailGAP, flags, retry, lastTr;
+           	int sectors, virtGAPsze, remainder, trackTailGAP, flags, retry = 0, lastTr;
            	const char *vrfy;
             unsigned char data[0x100];
 

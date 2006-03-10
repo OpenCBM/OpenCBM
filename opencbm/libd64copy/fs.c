@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: fs.c,v 1.8 2006-02-24 12:21:42 strik Exp $";
+    "@(#) $Id: fs.c,v 1.9 2006-03-10 15:43:36 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -36,7 +36,7 @@ static int block_offset(int tr, int se)
     return (sectors + se) * BLOCKSIZE;
 }
 
-static int read_block(__u_char tr, __u_char se, char *block)
+static int read_block(__u_char tr, __u_char se, __u_char *block)
 {
     if(fseek(the_file, block_offset(tr, se), SEEK_SET) == 0)
     {
@@ -51,11 +51,11 @@ static int read_block(__u_char tr, __u_char se, char *block)
 static int atom_execute = 0;
 static __u_char atom_tr;
 static __u_char atom_se;
-static const char *atom_blk;
+static const unsigned char *atom_blk;
 static int atom_size;
 static int atom_read_status;
 
-static int write_block(__u_char tr, __u_char se, const char *blk, int size, int read_status)
+static int write_block(__u_char tr, __u_char se, const unsigned char *blk, int size, int read_status)
 {
     long ofs;
     int ret;

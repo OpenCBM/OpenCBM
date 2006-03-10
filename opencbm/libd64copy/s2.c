@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s2.c,v 1.7 2006-02-24 12:21:42 strik Exp $";
+    "@(#) $Id: s2.c,v 1.8 2006-03-10 15:43:36 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -87,7 +87,7 @@ static int s2_write_byte(CBM_FILE fd, unsigned char c)
     return 0;
 }
 
-static int read_block(unsigned char tr, unsigned char se, char *block)
+static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
 {
     int  i;
     unsigned char status;
@@ -103,10 +103,10 @@ static int read_block(unsigned char tr, unsigned char se, char *block)
     return status;
 }
 
-static int write_block(unsigned char tr, unsigned char se, const char *blk, int size, int read_status)
+static int write_block(unsigned char tr, unsigned char se, const unsigned char *blk, int size, int read_status)
 {
     int  i;
-    char status;
+    unsigned char status;
 
     s2_write_byte(fd_cbm, tr);
     s2_write_byte(fd_cbm, se);

@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.9 2006-02-24 12:21:42 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.10 2006-03-10 15:43:36 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -85,7 +85,7 @@ static const unsigned char turbo_write_1571[] =
 static const struct drive_prog
 {
     int size;
-    const char *prog;
+    const unsigned char *prog;
 } drive_progs[] =
 {
     {sizeof(turbo_read_1541), turbo_read_1541},

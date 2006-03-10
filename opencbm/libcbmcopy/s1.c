@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.3 2006-02-24 12:21:41 strik Exp $";
+    "@(#) $Id: s1.c,v 1.4 2006-03-10 15:43:36 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -17,25 +17,25 @@ static char *rcsid =
 
 #include <stdlib.h>
 
-static unsigned char s1r15x1[] = {
+static const unsigned char s1r15x1[] = {
 #include "s1r.inc"
 };
 
-static unsigned char s1w15x1[] = {
+static const unsigned char s1w15x1[] = {
 #include "s1w.inc"
 };
 
-static unsigned char s1r1581[] = {
+static const unsigned char s1r1581[] = {
 #include "s1r-1581.inc"
 };
 
-static unsigned char s1w1581[] = {
+static const unsigned char s1w1581[] = {
 #include "s1w-1581.inc"
 };
 
 static struct drive_prog
 {
-    const char *prog;
+    const unsigned char *prog;
     size_t size;
 } drive_progs[] =
 {

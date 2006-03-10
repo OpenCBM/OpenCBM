@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.17 2006-03-10 12:59:28 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.18 2006-03-10 15:43:36 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -257,8 +257,8 @@ static int do_write(CBM_FILE fd, char *argv[])
  */
 static int do_status(CBM_FILE fd, char *argv[])
 {
-    unsigned char buf[40];
-    unsigned char unit;
+    char buf[40];
+    char unit;
     int rv;
 
     unit = arch_atoc(argv[0]);
@@ -299,9 +299,9 @@ static int do_command_p(CBM_FILE fd, char *argv[])
  */
 static int do_dir(CBM_FILE fd, char *argv[])
 {
-    unsigned char c, buf[40];
+    char c, buf[40];
     int rv;
-    unsigned char unit;
+    char unit;
 
     unit = arch_atoc(argv[0]);
     rv = cbm_open(fd, unit, 0, "$", strlen("$"));

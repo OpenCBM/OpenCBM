@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.5 2006-02-24 12:21:44 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.6 2006-03-10 15:43:36 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -876,9 +876,9 @@ int cbm_init(void)
 
 int cbm_mnib_read_track(unsigned char *buffer)
 {
-	IRQSTOPVARS;
-
 	int i, byte;
+
+	IRQSTOPVARS;
 
 	disable();
 
@@ -901,9 +901,9 @@ int cbm_mnib_read_track(unsigned char *buffer)
 
 int cbm_mnib_write_track(unsigned char *buffer, int length)
 {
-	IRQSTOPVARS;
-
 	int i;
+
+	IRQSTOPVARS;
 
 	disable();
 
@@ -934,7 +934,6 @@ void cbm_mnib_send_cmd(unsigned char cmd)
 unsigned char cbm_mnib_par_read(void)
 {
 	int rv = 0;
-	int j;
 
 	RELEASE(DATA_OUT|CLK_OUT);
 	SET(ATN_OUT);
@@ -975,7 +974,6 @@ unsigned char cbm_mnib_par_read(void)
 
 int cbm_mnib_par_write(unsigned char c)
 {
-	int j,to;
 	RELEASE(DATA_OUT|CLK_OUT);
 	SET(ATN_OUT);
 	msleep(20);

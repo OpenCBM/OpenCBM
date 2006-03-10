@@ -7,7 +7,7 @@
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbmcopy.h,v 1.4 2006-02-24 12:21:41 strik Exp $ */
+/* $Id: cbmcopy.h,v 1.5 2006-03-10 15:43:36 strik Exp $ */
 
 #ifndef CBMCOPY_H
 #define CBMCOPY_H
@@ -63,7 +63,7 @@ extern cbmcopy_settings *cbmcopy_get_default_settings(void);
 extern int cbmcopy_write_file(CBM_FILE cbm_fd,
                               cbmcopy_settings *settings,
                               int drive,
-                              const unsigned char *cbmname,
+                              const char *cbmname,
                               int cbmname_size,
                               const unsigned char *filedata,
                               int filedata_size,
@@ -73,7 +73,7 @@ extern int cbmcopy_write_file(CBM_FILE cbm_fd,
 extern int cbmcopy_read_file(CBM_FILE cbm_fd,
                              cbmcopy_settings *settings,
                              int drive,
-                             const unsigned char *cbmname,
+                             const char *cbmname,
                              int cbmname_size,
                              unsigned char **filedata,
                              size_t *filedata_size,

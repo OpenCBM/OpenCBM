@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/petscii.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: petscii.c,v 1.3 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: petscii.c,v 1.4 2006-03-10 15:43:36 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -136,10 +136,10 @@ cbm_ascii2petscii_c(char Character)
 char * CBMAPIDECL
 cbm_petscii2ascii(char *Str)
 {
-    unsigned char *p;
+    char *p;
     for (p = Str; *p; p++) 
     {
-        *p = (unsigned char) cbm_petscii2ascii_c(*p);
+        *p = cbm_petscii2ascii_c(*p);
     }
     return Str;
 }
@@ -160,10 +160,10 @@ cbm_petscii2ascii(char *Str)
 char * CBMAPIDECL 
 cbm_ascii2petscii(char *Str)
 {
-    unsigned char *p;
+    char *p;
     for (p = Str; *p; p++)
     {
-        *p = (unsigned char) cbm_ascii2petscii_c(*p);
+        *p = cbm_ascii2petscii_c(*p);
     }
     return Str;
 }
