@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.16 2006-03-10 12:43:33 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.17 2006-03-10 12:59:28 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -105,6 +105,15 @@ static int do_untalk(CBM_FILE fd, char *argv[])
 static int do_open(CBM_FILE fd, char *argv[])
 {
     return cbm_open(fd, arch_atoc(argv[0]), arch_atoc(argv[1]), argv[2], strlen(argv[2]));
+}
+
+/*
+ * Simple wrapper for open, but convert from ASCII to PETSCII before doing so.
+ */
+static int do_open_p(CBM_FILE fd, char *argv[])
+{
+    cbm_ascii2petscii(argv[2]);
+    return do_open(fd, argv);
 }
 
 /*
@@ -274,6 +283,15 @@ static int do_command(CBM_FILE fd, char *argv[])
         rv = cbm_unlisten(fd);
     }
     return rv;
+}
+
+/*
+ * send device command, but convert from ASCII to PETSCII before doing so.
+ */
+static int do_command_p(CBM_FILE fd, char *argv[])
+{
+    cbm_ascii2petscii(argv[1]);
+    return do_command(fd, argv);
 }
 
 /*
@@ -687,6 +705,10 @@ static struct prog prog_table[] =
         "      Although a CBM machine (i.e., a C64) allows this,\n"
         "      this is an internal operation to the computer only." },
 
+    {1, "popen"   , do_open_p  , 3, 3, "<device> <secadr> <filename>",
+        "same as open, but convert the filename from ASCII to PETSCII.",
+        "" },
+
     {1, "close"   , do_close   , 2, 2, "<device> <secadr>",
         "perform a close on the IEC bus",
         "Undo a previous open command." },
@@ -720,6 +742,16 @@ static struct prog prog_table[] =
         "<cmdstr> is the command to execute in the drive.\n"
         "NOTE: You have to give the commands in upper-case letters.\n"
         "      Lower case will NOT work!" },
+
+    {1, "pcommand", do_command_p, 2, 2, "<device> <cmdstr>",
+        "same as command, but convert the cmdstr from ASCII to PETSCII.",
+        "This command issues a command to a specific drive.\n"
+        "This command is a command that you normally give to\n"
+        "channel 15 (i.e., n: to format a drive, v: to validate, etc.).\n\n"
+        "<device> is the device number of the drive.\n\n"
+        "<cmdstr> is the command to execute in the drive.\n"
+        "NOTE: You have to give the commands in lower-case letters.\n"
+        "      Upper case will NOT work!" },
 
     {1, "dir"     , do_dir     , 1, 1, "<device>",
         "output the directory of the disk in the specified drive",
