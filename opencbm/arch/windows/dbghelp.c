@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file arch/windows/dbghelp.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dbghelp.c,v 1.1 2005-04-17 15:32:17 strik Exp $ \n
+** \version $Id: dbghelp.c,v 1.2 2006-03-10 17:49:44 strik Exp $ \n
 ** \n
 ** \brief Some debugging help functions
 **
@@ -51,7 +51,7 @@ dbg_memdump(const char *Where, const unsigned char *InputBuffer, const unsigned 
 
     p = outputBuffer;
 
-    DBG_PRINT((DBG_PREFIX "%s: (0x%04x)", Where, (unsigned) Count));
+    DBG_PRINT((DBG_PREFIX "%s: (0x%04x)", Where, Count));
 
     for (i=0; i<Count; i++) 
     {
@@ -68,7 +68,7 @@ dbg_memdump(const char *Where, const unsigned char *InputBuffer, const unsigned 
         {
             outputBufferChars[(i % 16) + 1] = 0;
             DBG_PRINT((DBG_PREFIX "%04x: %-50s  %s",
-                (unsigned) i & 0xfff0, outputBuffer, outputBufferChars));
+                i & 0xfff0, outputBuffer, outputBufferChars));
             p = outputBuffer;
         }
     }
@@ -77,7 +77,7 @@ dbg_memdump(const char *Where, const unsigned char *InputBuffer, const unsigned 
     {
         outputBufferChars[i % 16] = 0;
         DBG_PRINT((DBG_PREFIX "%04x: %-50s  %s",
-            (unsigned) i & 0xfff0, outputBuffer, outputBufferChars));
+            i & 0xfff0, outputBuffer, outputBufferChars));
     }
 }
 

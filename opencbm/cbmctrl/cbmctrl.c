@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.18 2006-03-10 15:43:36 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.19 2006-03-10 17:49:44 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -161,7 +161,7 @@ static int do_read(CBM_FILE fd, char *argv[])
     while(0 < (size = cbm_raw_read(fd, buf, sizeof(buf))))
     {
             /* write that to the file */
-        if(size != fwrite(buf, 1, size, f))
+        if(size != (int) fwrite(buf, 1, size, f))
         {
             rv=1;   /* error condition from cbm_raw_read */
             break;  /* do fclose(f) before exiting       */
@@ -181,7 +181,7 @@ static int do_read(CBM_FILE fd, char *argv[])
 static int do_write(CBM_FILE fd, char *argv[])
 {
     char *fn;
-    size_t size;
+    int size;
     unsigned char buf[2048];
     FILE *f;
 
