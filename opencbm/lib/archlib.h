@@ -6,6 +6,8 @@
 extern const char * cbmarch_get_driver_name(int PortNumber);
 extern int  cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber);
 extern void cbmarch_driver_close(CBM_FILE HandleDevice);
+extern void cbmarch_lock(CBM_FILE HandleDevice);
+extern void cbmarch_unlock(CBM_FILE HandleDevice);
 extern int  cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count);
 extern int  cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count);
 extern int  cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);

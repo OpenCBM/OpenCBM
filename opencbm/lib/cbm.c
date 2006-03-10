@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.13 2006-03-08 17:27:16 strik Exp $ \n
+** \version $Id: cbm.c,v 1.14 2006-03-10 19:25:16 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -146,6 +146,8 @@ cbm_lock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+    cbmarch_lock(HandleDevice);
+
     FUNC_LEAVE();
 }
 
@@ -170,6 +172,8 @@ void CBMAPIDECL
 cbm_unlock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    cbmarch_unlock(HandleDevice);
 
     FUNC_LEAVE();
 }

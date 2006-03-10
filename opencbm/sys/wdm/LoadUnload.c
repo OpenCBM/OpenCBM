@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/wdm/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.8 2006-02-24 12:21:44 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.9 2006-03-10 19:25:17 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **
@@ -209,6 +209,13 @@ DriverUnload(IN PDRIVER_OBJECT DriverObject)
         PDEVICE_EXTENSION pdx = currentDevice->DeviceExtension;
 
         DBG_ASSERT(pdx);
+
+        // Unlock the parallel port, if necessary
+
+        if (pdx->ParallelPortIsLocked)
+        {
+            cbm_unlock_parport(pdx);
+        }
 
         // Stop the thread of that device, if necessary
 

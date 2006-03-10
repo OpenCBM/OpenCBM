@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.6 2006-03-07 15:17:52 strik Exp $ \n
+** \version $Id: openclose.c,v 1.7 2006-03-10 19:25:17 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **
@@ -136,61 +136,17 @@ cbm_execute_createopen(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 
     DBG_IRPPATH_EXECUTE("create/open");
 
-    // Try to allocate the parallel port
-
-    ntStatus = ParPortAllocate(Pdx);
-
-    // Set the appropriate mode of the parallel port
-    // Normally, this will be either BYTE MODE, or SPP
-
-    if (NT_SUCCESS(ntStatus))
+    if (Pdx->ParallelPortLock)
     {
-        ntStatus = ParPortSetMode(Pdx);
+        // as we keep the parallel port locked all the time,
+        // do not lock it now.
+        ntStatus = STATUS_SUCCESS;
     }
-
-    // Try to allocate the interrupt
-
-    if (NT_SUCCESS(ntStatus))
+    else
     {
-        /*! \todo
-         * As we will try to cope without interrupt,
-         * do not handle it as an open failure if we
-         * do not succeed!
-         */
+        // Try to allocate the parallel port
 
-        // ntStatus =
-        ParPortAllocInterrupt(Pdx, cbm_isr);
-    }
-
-    // Initialize the IEC serial port
-
-    if (NT_SUCCESS(ntStatus))
-    {
-        cbmiec_init(Pdx);
-    }
-
-    // Did we fail any call? If yes, free and release
-    // any resource we might happen to have allocated
-    // before we failed
-
-
-    if (!NT_SUCCESS(ntStatus))
-    {
-        // The functions themselves test if the resource
-        // is allocated, thus, we do not need to protect
-        // against freeing non-allocated resources here.
-
-        ParPortFreeInterrupt(Pdx);
-        ParPortUnsetMode(Pdx);
-        ParPortFree(Pdx);
-    }
-
-    // release the bus (to be able to share it with other
-    // controllers
-
-    if (NT_SUCCESS(ntStatus) && !Pdx->DoNotReleaseBus)
-    {
-        cbmiec_release_bus(Pdx);
+        ntStatus = cbm_lock_parport(Pdx);
     }
 
     // We're done, complete the IRP
@@ -229,20 +185,19 @@ cbm_execute_close(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 
     DBG_IRPPATH_PROCESS("close");
 
-    ntStatus = STATUS_SUCCESS;
-
-    // release the bus (to be able to share it with other controllers)
-
-    if (!Pdx->DoNotReleaseBus)
+    if (Pdx->ParallelPortLock)
     {
-        cbmiec_release_bus(Pdx);
+        // as we keep the parallel port locked all the time,
+        // do not unlock it now.
+        ntStatus = STATUS_SUCCESS;
+    }
+    else
+    {
+        // Unlock the parallel port
+
+        ntStatus = cbm_unlock_parport(Pdx);
     }
 
-    // release all resources we have previously allocated
-
-    ParPortFreeInterrupt(Pdx);
-    ParPortUnsetMode(Pdx);
-    ParPortFree(Pdx);
 
     // Now, complete the IRP
 

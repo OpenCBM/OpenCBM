@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/lockunlock.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: lockunlock.c,v 1.1 2006-03-08 17:27:24 strik Exp $ \n
+** \version $Id: lockunlock.c,v 1.2 2006-03-10 19:25:17 strik Exp $ \n
 ** \n
 ** \brief Functions for locking und unlocking the driver onto the parallel port
 **
@@ -19,8 +19,131 @@
 
 #include <wdm.h>
 #include "cbm_driver.h"
+#include "iec.h"
 
 #include "version.h"
+
+/*! \brief Lock the parallel port for the driver
+
+ This functions locks the driver onto the parallel port, so
+ we can use the port afterwards.
+
+ \param Pdx
+   Pointer to the device extension.
+
+ \return 
+   If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
+   returns one of the error status values.
+*/
+
+NTSTATUS
+cbm_lock_parport(IN PDEVICE_EXTENSION Pdx)
+{
+    NTSTATUS ntStatus;
+
+    FUNC_ENTER();
+
+    DBG_PRINT((DBG_PREFIX "+++ LOCK PARPORT"));
+    DBG_ASSERT(Pdx->ParallelPortIsLocked == FALSE);
+
+    ntStatus = ParPortAllocate(Pdx);
+
+    // Set the appropriate mode of the parallel port
+    // Normally, this will be either BYTE MODE, or SPP
+
+    if (NT_SUCCESS(ntStatus))
+    {
+        ntStatus = ParPortSetMode(Pdx);
+    }
+
+    // Try to allocate the interrupt
+
+    if (NT_SUCCESS(ntStatus))
+    {
+        /*! \todo
+         * As we will try to cope without interrupt,
+         * do not handle it as an open failure if we
+         * do not succeed!
+         */
+
+        // ntStatus =
+        ParPortAllocInterrupt(Pdx, cbm_isr);
+    }
+
+    // Initialize the IEC serial port
+
+    if (NT_SUCCESS(ntStatus))
+    {
+        Pdx->ParallelPortIsLocked = TRUE;
+
+        cbmiec_init(Pdx);
+    }
+
+    // Did we fail any call? If yes, free and release
+    // any resource we might happen to have allocated
+    // before we failed
+
+
+    if (!NT_SUCCESS(ntStatus))
+    {
+        // The functions themselves test if the resource
+        // is allocated, thus, we do not need to protect
+        // against freeing non-allocated resources here.
+
+        ParPortFreeInterrupt(Pdx);
+        ParPortUnsetMode(Pdx);
+        ParPortFree(Pdx);
+    }
+
+    // release the bus (to be able to share it with other
+    // controllers
+
+    if (NT_SUCCESS(ntStatus) && !Pdx->DoNotReleaseBus)
+    {
+        cbmiec_release_bus(Pdx);
+    }
+
+    FUNC_LEAVE_NTSTATUS(ntStatus);
+}
+
+/*! \brief Unlock the parallel port for the driver
+
+ This functions unlocks the driver from the parallel port
+ after the port has been used.
+
+ \param Pdx
+   Pointer to the device extension.
+
+ \return 
+   If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
+   returns one of the error status values.
+*/
+
+NTSTATUS
+cbm_unlock_parport(IN PDEVICE_EXTENSION Pdx)
+{
+    FUNC_ENTER();
+
+    DBG_PRINT((DBG_PREFIX "--- UNLOCK PARPORT"));
+    DBG_ASSERT(Pdx->ParallelPortIsLocked == TRUE);
+
+    Pdx->ParallelPortIsLocked = FALSE;
+
+    // release the bus (to be able to share it with other controllers)
+
+    if (!Pdx->DoNotReleaseBus)
+    {
+        cbmiec_release_bus(Pdx);
+    }
+
+    // release all resources we have previously allocated
+
+    ParPortFreeInterrupt(Pdx);
+    ParPortUnsetMode(Pdx);
+    ParPortFree(Pdx);
+
+    FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
+}
 
 /*! \brief Lock the parallel port for the driver
 
@@ -52,6 +175,9 @@ cbm_lock(IN PDEVICE_EXTENSION Pdx)
 {
     FUNC_ENTER();
 
+    DBG_PRINT((DBG_PREFIX "*** LOCK"));
+    Pdx->ParallelPortLock = TRUE;
+
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
 
@@ -77,6 +203,9 @@ NTSTATUS
 cbm_unlock(IN PDEVICE_EXTENSION Pdx)
 {
     FUNC_ENTER();
+
+    DBG_PRINT((DBG_PREFIX "*** UNLOCK"));
+    Pdx->ParallelPortLock = FALSE;
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }

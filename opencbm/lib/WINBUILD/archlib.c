@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.7 2006-03-09 17:31:35 strik Exp $ \n
+** \version $Id: archlib.c,v 1.8 2006-03-10 19:25:17 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -255,6 +255,67 @@ cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
     FUNC_LEAVE_INT(cbm_i_i_driver_install(Buffer, BufferLen));
 }
 
+
+/*! \brief Lock the parallel port for the driver
+
+ This functions locks the driver onto the parallel port. This way,
+ no other program or driver can allocate the parallel port and
+ interfere with the communication.
+
+ \param HandleDevice  
+   A CBM_FILE which contains the file handle of the driver.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call cbm_driver_close().
+
+ \remark
+ A call to cbm_lock() is undone with a call to cbm_unlock().
+
+ Note that it is *not* necessary to call this function
+ (or cbm_unlock()) when all communication is done with
+ the handle to opencbm open (that is, between 
+ cbm_driver_open() and cbm_driver_close(). You only
+ need this function to pin the driver to the port even
+ when cbm_driver_close() is to be executed (for example,
+ because the program terminates).
+*/
+
+void
+cbmarch_lock(CBM_FILE HandleDevice)
+{
+    FUNC_ENTER();
+
+    cbm_ioctl(HandleDevice, CBMCTRL(PARPORT_LOCK), NULL, 0, NULL, 0);
+
+    FUNC_LEAVE();
+}
+
+/*! \brief Unlock the parallel port for the driver
+
+ This functions unlocks the driver from the parallel port.
+ This way, other programs and drivers can allocate the
+ parallel port and do their own communication with
+ whatever device they use.
+
+ \param HandleDevice  
+   A CBM_FILE which contains the file handle of the driver.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call cbm_driver_close().
+
+ \remark
+ Look at cbm_lock() for an explanation of this function.
+*/
+
+void
+cbmarch_unlock(CBM_FILE HandleDevice)
+{
+    FUNC_ENTER();
+
+    cbm_ioctl(HandleDevice, CBMCTRL(PARPORT_UNLOCK), NULL, 0, NULL, 0);
+
+    FUNC_LEAVE();
+}
 
 /*! \brief Write data to the IEC serial bus
 

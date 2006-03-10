@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.8 2006-03-09 17:31:35 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.9 2006-03-10 19:25:17 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **
@@ -86,6 +86,12 @@ struct _ARCH_DEVICE_EXTENSION {
         wait_for_listener() again */
     KEVENT EventWaitForListener;
 
+    /*! FLAG: Is the parallel port currently locked? */
+    BOOLEAN ParallelPortIsLocked;
+
+    /*! FLAG: Lock the parallel port, regardless if the driver is uninstalled. */
+    BOOLEAN ParallelPortLock;
+
     /*! FLAG: We already allocated the parallel port */
     BOOLEAN ParallelPortAllocated;
     
@@ -139,6 +145,12 @@ cbm_lock(IN PDEVICE_EXTENSION Pdx);
 
 extern NTSTATUS
 cbm_unlock(IN PDEVICE_EXTENSION Pdx);
+
+extern NTSTATUS
+cbm_lock_parport(IN PDEVICE_EXTENSION Pdx);
+
+extern NTSTATUS
+cbm_unlock_parport(IN PDEVICE_EXTENSION Pdx);
 
 #if DBG
 extern NTSTATUS
