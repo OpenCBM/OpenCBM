@@ -79,6 +79,8 @@ to build the tools in every scenario.
 
   B. Using the DDK, DDKBUILD, and MSVC:
 
+  This is the recommended way to compile cbm4win.
+  
   DDKBUILD is a tool which helps you compiling drivers using the MS VC++ IDE.
   DDKBUILD is available in two different versions, from OSR
   (http://www.osronline.com/article.cfm?article=43), or from Hollistech
@@ -93,21 +95,29 @@ to build the tools in every scenario.
     but version 5 should work, too, as well as the MS .NET IDE)
   - Install the DDK on your machine. Make sure the install the Win 2000 build
     environment.
-  - Get DDKBUILD from the OSR (http://www.osronline.com/article.cfm?article=43)
-    and install it into a directory which is in the search path.
+  - Get DDKBUILD from the OSR
+    (http://www.osronline.com/article.cfm?article=43), or the version from
+    Hollistech (http://www.hollistech.com/Resources/ddkbuild/ddkbuild.htm).
+    Personally, I prefer the Hollistech version.  Install ddkbuild.bat into a
+    directory which is in the search path.
   - Unzip the cbm4win source package into a directory.
-  - Adjust the directories for the DDK in the file DDKBUILD_START.BAT in the
-    cbm4win source directory. As you should use the Win 2003 DDK, adjust the
-    WNETBASE variable.
-  - Start the cbm4win.dsw file from there, and compile the "all" project.
+  - Copy the file WINDOWS/ddkbuild_local.bat.sample into the directory *above*
+    (!) the cbm4win directory. That is, if you unpacked cbm4win into
+    X:\somedir\cbm4win, copy it into X:\somedir. Rename the file by removing
+    the .sample suffix, and adjust the directories in there.
+  - Start the cbm4win.dsw file from the WINDOWS/ subdirectory, and compile the
+    "all" project. To compile the AMD64 version, compile the "allamd64"
+    project. To compile the iA64 version, compile the "allia64" project.
   - After compilation has finished, you can get the compiled files in the
-    bin\i386 directory.
+    bin\i386 directory (for the i386 version), in the bin\amd64 directory (for
+    the AMD64 version), or in the bin\ia64 version (for the iA64 version).
 
   C. Using MSVC:
 
   If you do not have the DDK, you can compile most of cbm4win with MSVC only. I
   only tested MSVC 6, but other versions might work, too. Anyway, no drivers
-  will be built, only the user tools can be compiled this way.
+  will be built, only the user tools can be compiled this way. You cannot build
+  AMD64 or iA64 versions with MSVC, either.
 
   Now, do the following to compile using MSVC only.
 
@@ -116,17 +126,30 @@ to build the tools in every scenario.
   - Unzip the cbm4win source package into a directory.
   - Start the cbm4win.dsw file from there, and compile the "allvs" project.
   - After compilation has finished, you can get the compiled files in the
-    bin\i386 directory.
+    Debug/ directory (or in the Release/ directory if you have performed a
+    release build).
 
   NOTES:
-    For B., DDKBUILD_START.BAT understands the following optional parameters:
-      * ddkbuild_start fre         - create the free build (i386)
-      * ddkbuild_start chk         - create the checked build (i386)
+    For B., DDKBUILD_START.BAT some parameters. The format is:
 
-    And the modification switches:
-      * -amd64                     - create a build for the AMD64 platform
-      * -ia64                      - create a build for the iA64 platform
-      * -cefZ                      - recommended additional DDK switches
+    DDKBUILD_START <PLATFORM> <chk|fre> <build parameters>
+
+    That is, <PLATFORM> selects on of the platforms to compile. It may be
+    either be empty, in which case the i386 version is compiled, or one of the
+    following:
+      * -amd64    - create a build for the AMD64 platform
+      * -ia64     - create a build for the iA64 platform
+ 
+    The next parameter describes if you want to perform a free build ("release
+    build"), or a checked build ("debug build"):
+    understands the following optional parameters:
+      * fre       - create the free build (i386)
+      * chk       - create the checked build (i386)
+
+    The build parameters are optional parameters which will be given verbatim
+    to the BUILD.EXE tool from the DDK. A possible parameter for rebuilding
+    everything is:
+      * -cefZ     - recommended additional DDK switches
 
 
 4. BUILDING THE ASSEMBLER FILES
@@ -142,9 +165,9 @@ To be able to compile them, you need:
   well as the "od" and "sed" tools
 
 Just install the CC65 package and run the buildinc bash script from the cbm4win
-source directory to recompile all assembler files. This will be included in the
-generic build process in the future.
-
+source directory to recompile all assembler files. Make sure you have adjusted
+the ddkbuild_local.bat file, as described in B. above. Make sure you provide
+the paths to the cc65 tools, bash, od and sed.
 
 
 If you manage to compile cbm4win with another compiler, feel free tell me.
