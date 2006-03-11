@@ -9,8 +9,6 @@ round after the format.
   GAP probing and further improvements: (C) 2005      Spiro Trikaliotis
   All rewritten parts:                  (C) 2005,2006 Wolfgang Moser
 
-The current development version of the next generation
-CBM formatter states to:  0.1.0.34-mo20060201
 License change: Take note that I changed the licensing of all the
   6502 code parts to the GNU Lesser General Public License to get a
   chance to remove the special agreement again and have a clean
