@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: archlib.c,v 1.3 2006-02-24 12:21:41 strik Exp $";
+    "@(#) $Id: archlib.c,v 1.4 2006-03-12 10:27:23 strik Exp $";
 #endif
 
 #include <fcntl.h>
@@ -39,6 +39,57 @@ void cbmarch_driver_close(CBM_FILE f)
     if(f >= 0) {
         close(f);
     }
+}
+
+/*! \brief Lock the parallel port for the driver
+
+ This functions locks the driver onto the parallel port. This way,
+ no other program or driver can allocate the parallel port and
+ interfere with the communication.
+
+ \param HandleDevice  
+   A CBM_FILE which contains the file handle of the driver.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call cbm_driver_close().
+
+ \remark
+ A call to cbm_lock() is undone with a call to cbm_unlock().
+
+ Note that it is *not* necessary to call this function
+ (or cbm_unlock()) when all communication is done with
+ the handle to opencbm open (that is, between 
+ cbm_driver_open() and cbm_driver_close(). You only
+ need this function to pin the driver to the port even
+ when cbm_driver_close() is to be executed (for example,
+ because the program terminates).
+*/
+
+void
+cbmarch_lock(CBM_FILE f)
+{
+}
+
+/*! \brief Unlock the parallel port for the driver
+
+ This functions unlocks the driver from the parallel port.
+ This way, other programs and drivers can allocate the
+ parallel port and do their own communication with
+ whatever device they use.
+
+ \param HandleDevice  
+   A CBM_FILE which contains the file handle of the driver.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call cbm_driver_close().
+
+ \remark
+ Look at cbm_lock() for an explanation of this function.
+*/
+
+void
+cbmarch_unlock(CBM_FILE f)
+{
 }
 
 int cbmarch_raw_write(CBM_FILE f, const void *buf, size_t size)
