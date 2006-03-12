@@ -1,4 +1,4 @@
-.\" $Id: cbmctrl.1,v 1.3 2006-03-04 10:58:57 wmsr Exp $
+.\" $Id: cbmctrl.1,v 1.4 2006-03-12 18:46:51 wmsr Exp $
 .\"
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
@@ -107,6 +107,16 @@ understands the following subcommand actions
 .br
 .ns
 .TP 10
+.B lock
+\- Lock the parallel port for cbm4win/cbm4linux use
+.br
+.ns
+.TP 10
+.B unlock
+\- Unlock the parallel port from exclusive usage
+.br
+.ns
+.TP 10
 .B listen
 \- Perform a listen on the IEC bus
 .br
@@ -137,6 +147,11 @@ understands the following subcommand actions
 .br
 .ns
 .TP 10
+.B popen
+\- Same as open, but with ASCII to PETSCII conversion
+.br
+.ns
+.TP 10
 .B read
 \- Get a stream of raw data from an IEC bus device
 .br
@@ -154,6 +169,11 @@ understands the following subcommand actions
 .TP 10
 .B command
 \- Issue a command to a specified drive
+.br
+.ns
+.TP 10
+.B pcommand
+\- Same as command, with ASCII to PETSCII conversion
 .br
 .ns
 .TP 10
@@ -229,6 +249,29 @@ read some bytes from its memory. If a devices is detected, its name
 is output. Additionally, this routine determines if the device is
 connected via a parallel cable (XP1541 companion cable, may be true
 for disk drives only).
+.TP
+.BI lock
+This command locks the parallel port for exclusive use by cbm4win/cbm4linux, so
+that sequences of e.g. talk/read/untalk commands are not broken by concurrent
+processes wanting to access the parallel port.
+.RS
+.PP
+(For Windows resp. cbm4win) it is recommended to enclose each such sequence
+that contains either talk, untalk, listen, unlisten, open, close, read or write
+by a lock/unlock pair of commands. Scripting systems or other software systems
+using cbmctrl instead of the OpenCBM API should issue a 
+.B cbmctrl lock
+command on startup and a
+.B cbmctrl unlock
+upon (each) exit. This all (locking/unlocking) can be circumvented, if the
+driver gets installed in a special manner, so that the parallel port is locked
+and made exclusive to cbm4win/cbm4linux all the way (as long as
+cbm4win/cbm4linux is uninstalled again).
+.RE
+.TP
+.BI unlock
+Ends exclusive parallel port access by cbm4win/cbm4linux so that other
+processes are allowed to access the parallel port.
 .TP
 .BI listen " <device> <secadr>"
 Tell device
@@ -373,6 +416,28 @@ on device
 .IR <device> .
 This undoes a previous open command.
 .TP
+.BI popen " <device> <secadr> <filename>"
+The
+.B popen
+action is the very same as the
+.B open
+action and all parameters act the same. The difference is that the
+.I <filename>
+string is converted from ASCII to PETSCII before beeing used.
+.PP
+.RS
+.PD 0
+Notes:
+.RS 2
+The same notes as with the
+.B open
+action apply to the
+.B popen
+action.
+.RE
+.PD
+.RE
+.TP
 .BI read " [<file>]"
 Reads raw data from a device, after it has been set into
 .B talk
@@ -403,11 +468,13 @@ characters are changed to lower case. Carriage return (0x0d) is also changed
 to linefeed (0x0a).
 .PP
 .RS
-This command is similar to (in this case, no character conversions would be
+This action is similar to (in this case, no character conversions would be
 made):
 .PP
 .PD 0
 .RS
+cbmctrl lock
+.P
 cbmctrl talk
 .I <device>
 15
@@ -415,6 +482,8 @@ cbmctrl talk
 cbmctrl read
 .P
 cbmctrl untalk
+.P
+cbmctrl unlock
 .PD
 .RE
 .RE
@@ -433,6 +502,8 @@ This command is identical to:
 .PP
 .PD 0
 .RS
+cbmctrl lock
+.P
 cbmctrl listen
 .I <device>
 15
@@ -442,8 +513,37 @@ echo -n
 | cbmctrl write
 .P
 cbmctrl unlisten
+.P
+cbmctrl unlock
 .PD
 .RE
+.RE
+.TP
+.BI pcommand " <device> <cmdstr>"
+The
+.B pcommand
+action is the very same as the
+.B command
+action and the
+.I <device>
+parameter acts the same. The difference is that the
+.I <cmdstr>
+string is converted from ASCII to PETSCII before beeing used.
+.PP
+.RS
+.PD 0
+Notes:
+.RS 2
+.TP 2
+*
+Despite the
+.B command
+action command, all commands (stated within
+.IR <cmdstr> )
+have to be given in lower case letters. The letter case conversion is one of
+the things the ASCII to PETSCII conversion does.
+.RE
+.PD
 .RE
 .TP
 .BI dir " <device>"
@@ -535,23 +635,37 @@ Thus
 .RE
 .PP
 for an example does not work and leads to an error message.
+.PP
+The
+.B lock/unlock
+actions are currently without any functionality within the cbm4linux driver.
+They can be issued without any failure, but actually the parallel port becomes
+not explicitly locked/unlocked to the driver. That way scripts containing
+.B lock/unlock
+commands can be ported from Windows to Linux without changes.
 .SH EXAMPLES
 .TP
 Send file contents to printer #4:
 .RS
 .PD 0
+cbmctrl lock
+.P
 cbmctrl listen 4 0
 .P
 cbmctrl write
 .I filename
 .P
 cbmctrl unlisten
+.P
+cbmctrl unlock
 .PD
 .RE
 .TP
 Copy file to disk drive #8:
 .RS
 .PD 0
+cbmctrl lock
+.P
 cbmctrl open 8 2
 .IR CBMNAME ,P,W
 .P
@@ -563,12 +677,16 @@ cbmctrl write
 cbmctrl unlisten
 .P
 cbmctrl close 8 2
+.P
+cbmctrl unlock
 .PD
 .RE
 .TP
 Copy file from disk drive #8:
 .RS
 .PD 0
+cbmctrl lock
+.P
 cbmctrl open 8 2
 .IR CBMNAME ,P,R
 .P
@@ -580,6 +698,8 @@ cbmctrl read
 cbmctrl untalk
 .P
 cbmctrl close 8 2
+.P
+cbmctrl unlock
 .PD
 .RE
 .TP
@@ -599,4 +719,4 @@ Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
 additions and reworks by Spiro Trikaliotis, additions by Wolfgang Moser
 <cbm(a)d81(o)de>.
 .SH DATE
-Mar 04 2006
+Mar 12 2006
