@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.19 2006-03-10 17:49:44 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.20 2006-03-12 14:12:09 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -665,10 +665,15 @@ static struct prog prog_table[] =
         "for more info, use \"cbmctrl --help --version\"." },
 
     {1, "lock"    , do_lock    , 0, 0, "",
-        "Lock the parallel port for the use by cbm4win/cbm4linux." },
+        "Lock the parallel port for the use by cbm4win/cbm4linux.",
+        "This command locks the parallel port for the use by cbm4win/cbm4linux,\n"
+        "so that sequences of e.g. talk/read/untalk commands are not broken by\n"
+        "concurrent processes wanting to access the parallel port." },
 
     {1, "unlock"  , do_unlock  , 0, 0, "",
-        "Unlock the parallel port for the use by cbm4win/cbm4linux." },
+        "Unlock the parallel port for the use by cbm4win/cbm4linux.",
+        "This command unlocks the parallel port again so that other processes\n"
+        "get a chance to access the parallel port." },
 
     {1, "listen"  , do_listen  , 2, 2, "<device> <secadr>",
         "perform a listen on the IEC bus",
@@ -707,7 +712,14 @@ static struct prog prog_table[] =
 
     {1, "popen"   , do_open_p  , 3, 3, "<device> <secadr> <filename>",
         "same as open, but convert the filename from ASCII to PETSCII.",
-        "" },
+        "Output an open command on the IEC bus.\n"
+        "<device> is the device number,\n"
+        "<secadr> the secondary address to use for this.\n"
+        "<filename> is the name of the file to be opened.\n\n"
+        "This has to be undone later with a close command.\n\n"
+        "NOTE: You cannot do an open without a filename.\n"
+        "      Although a CBM machine (i.e., a C64) allows this,\n"
+        "      this is an internal operation to the computer only." },
 
     {1, "close"   , do_close   , 2, 2, "<device> <secadr>",
         "perform a close on the IEC bus",
