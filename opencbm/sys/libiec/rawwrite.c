@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: rawwrite.c,v 1.5 2006-03-04 14:08:19 strik Exp $ \n
+** \version $Id: rawwrite.c,v 1.6 2006-03-12 16:35:44 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -64,7 +64,7 @@ cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx,
 #if DBG
     for (i=0;i<Size;i++)
     {
-        FUNC_PARAM((DBG_PREFIX "   output %2u: 0x%02x '%c'", i, (unsigned) Buffer[i], (UCHAR) Buffer[i]));
+        FUNC_PARAM((DBG_PREFIX "   output %2u: 0x%02x '%c'", i, (unsigned int) Buffer[i], (UCHAR) Buffer[i]));
     }
 #endif
 

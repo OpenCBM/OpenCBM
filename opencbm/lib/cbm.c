@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.14 2006-03-10 19:25:16 strik Exp $ \n
+** \version $Id: cbm.c,v 1.15 2006-03-12 16:35:32 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -874,7 +874,7 @@ cbm_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress,
             int bytesRead = cbm_raw_read(HandleDevice, bufferToWrite, BufferLength);
 
             DBG_ASSERT(bytesRead >= 0);
-            DBG_ASSERT(((unsigned)bytesRead) <= BufferLength);
+            DBG_ASSERT(((unsigned int)bytesRead) <= BufferLength);
 
             // make sure we have a trailing zero at the end of the status:
 

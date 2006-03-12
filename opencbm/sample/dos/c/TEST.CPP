@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/test.cpp \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: TEST.CPP,v 1.4 2005-01-22 19:50:41 strik Exp $ \n
+** \version $Id: TEST.CPP,v 1.5 2006-03-12 16:35:35 strik Exp $ \n
 ** \n
 ** \brief Some tests for the DOS API
 **
@@ -264,7 +264,7 @@ int main(int argc, char **argv)
 
     n = cbm_identify(f, drive, &devicetype, &devicetype_str);
     printf("cbm_identify %s!\n", n==0 ? "success" : "FAILED");
-    printf("cbm_identify returned: %u - '%s'.\n\n", (unsigned) devicetype,
+    printf("cbm_identify returned: %u - '%s'.\n\n", (unsigned int) devicetype,
                          devicetype_str);
 
     n = cbm_exec_command(f, drive, "S0:CBM4WIN.VDD", 0);

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.9 2006-03-09 17:31:35 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.10 2006-03-12 16:35:40 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -187,7 +187,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
             else
             {
                 // An error occurred, it does not make sense to get more bits 
-                DBG_ERROR((DBG_PREFIX "BREAKING OUT OF BIT-LOOP, no CLK pulse received. Bit %u, Value = %u", (unsigned) bit, (unsigned) b));
+                DBG_ERROR((DBG_PREFIX "BREAKING OUT OF BIT-LOOP, no CLK pulse received. Bit %u, Value = %u", (unsigned int) bit, (unsigned int) b));
                 break;
             }
         }

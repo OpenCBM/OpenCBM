@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file arch/windows/dbghelp.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dbghelp.c,v 1.2 2006-03-10 17:49:44 strik Exp $ \n
+** \version $Id: dbghelp.c,v 1.3 2006-03-12 16:35:31 strik Exp $ \n
 ** \n
 ** \brief Some debugging help functions
 **
@@ -55,7 +55,7 @@ dbg_memdump(const char *Where, const unsigned char *InputBuffer, const unsigned 
 
     for (i=0; i<Count; i++) 
     {
-        p += sprintf(p, "%02x ", (unsigned) InputBuffer[i]);
+        p += sprintf(p, "%02x ", (unsigned int) InputBuffer[i]);
 
         if (i % 16 == 7)
         {

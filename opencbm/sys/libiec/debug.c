@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: debug.c,v 1.4 2006-03-12 16:35:36 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for libiec
 **
@@ -42,9 +42,9 @@ cbmiec_show_port(IN UCHAR *Str)
     DBG_PORT((DBG_PREFIX 
         "%s: 0x378 = 0x%02x, 0x379 = 0x%02x, 0x37a = 0x%02x",
         Str,
-        (unsigned) READ_PORT_UCHAR((PUCHAR) 0x378),
-        (unsigned) READ_PORT_UCHAR((PUCHAR) 0x379),
-        (unsigned) READ_PORT_UCHAR((PUCHAR) 0x37A)
+        (unsigned int) READ_PORT_UCHAR((PUCHAR) 0x378),
+        (unsigned int) READ_PORT_UCHAR((PUCHAR) 0x379),
+        (unsigned int) READ_PORT_UCHAR((PUCHAR) 0x37A)
         ));
 }
 

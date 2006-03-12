@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.10 2006-02-12 15:52:56 strik Exp $ \n
+** \version $Id: debug.h,v 1.11 2006-03-12 16:35:32 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -267,13 +267,13 @@ int __cdecl main(int argc, char *argv[])
        /*! leave the function with a return value of type BOOL */
        #define FUNC_LEAVE_BOOLEAN(_xxx ) { const BOOLEAN _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with BOOL=%s",   __FUNCTION__, (_OUT_)?"TRUE":"FALSE" )); } return _OUT_; }
        /*! leave the function with a return value of type INT */
-       #define FUNC_LEAVE_INT(    _xxx ) { const int     _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with INT=%u (%d)",    __FUNCTION__, (unsigned)(_OUT_), (signed)(_OUT_) )); }      return _OUT_; }
+       #define FUNC_LEAVE_INT(    _xxx ) { const int     _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with INT=%u (%d)",    __FUNCTION__, (unsigned int)(_OUT_), (signed int)(_OUT_) )); } return _OUT_; }
        /*! leave the function with a return value of type INT */
-       #define FUNC_LEAVE_USHORT( _xxx ) { const USHORT  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with INT=%u (%d)",    __FUNCTION__, (unsigned)(_OUT_), (signed)(_OUT_) )); }      return _OUT_; }
+       #define FUNC_LEAVE_USHORT( _xxx ) { const USHORT  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with INT=%u (%d)",    __FUNCTION__, (unsigned int)(_OUT_), (signed int)(_OUT_) )); } return _OUT_; }
        /*! leave the function with a return value of type UCHAR */
-       #define FUNC_LEAVE_UCHAR(  _xxx ) { const UCHAR   _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with UCHAR=%u",  __FUNCTION__, (unsigned)(_OUT_) )); }      return _OUT_; }
+       #define FUNC_LEAVE_UCHAR(  _xxx ) { const UCHAR   _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with UCHAR=%u",  __FUNCTION__, (unsigned int)(_OUT_) )); }  return _OUT_; }
        /*! leave the function with a return value of type HANDLE */
-       #define FUNC_LEAVE_HANDLE( _xxx ) { const HANDLE  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with HANDLE=%u", __FUNCTION__, (unsigned)(_OUT_) )); }      return _OUT_; }
+       #define FUNC_LEAVE_HANDLE( _xxx ) { const HANDLE  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with HANDLE=%u", __FUNCTION__, (unsigned int)(_OUT_) )); }  return _OUT_; }
        /*! leave the function with a return value of type STRING */
        #define FUNC_LEAVE_STRING( _xxx ) { const char *  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with '%s'",      __FUNCTION__,           (_OUT_) )); }      return _xxx;  }
        /*! leave the function with a return value of type ULONG */

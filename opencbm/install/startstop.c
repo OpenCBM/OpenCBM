@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.9 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: startstop.c,v 1.10 2006-03-12 16:35:32 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -90,11 +90,11 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
             (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version) 
                 ? "%u.%u.%u%s.%u (Development)" 
                 : "%u.%u.%u%s"),
-            (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_MAJOR(Version),
-            (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_MINOR(Version),
-            (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_SUBMINOR(Version),
+            (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_MAJOR(Version),
+            (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_MINOR(Version),
+            (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_SUBMINOR(Version),
             bugfixVersion,
-            (unsigned) CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version));
+            (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version));
     }
     else
     {
