@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.5 2006-03-09 17:31:35 strik Exp $ \n
+** \version $Id: mnib.c,v 1.6 2006-03-13 14:20:45 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -157,26 +157,6 @@ cbmiec_mnib_par_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
     PERF_EVENT_MNIB_PAR_WRITE_DUMMY_READ(dummy);
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
-}
-
-static void
-cbm_mnib_send_cmd(PDEVICE_EXTENSION Pdx, UCHAR cmd)
-{
-    FUNC_ENTER();
-
-    PERF_EVENT_MNIB_SEND_CMD(0);
-    cbmiec_mnib_par_write(Pdx, 0x00);
-    PERF_EVENT_MNIB_SEND_CMD(1);
-    cbmiec_mnib_par_write(Pdx, 0x55);
-    PERF_EVENT_MNIB_SEND_CMD(2);
-    cbmiec_mnib_par_write(Pdx, 0xaa);
-    PERF_EVENT_MNIB_SEND_CMD(3);
-    cbmiec_mnib_par_write(Pdx, 0xff);
-    PERF_EVENT_MNIB_SEND_CMD(4);
-    cbmiec_mnib_par_write(Pdx, cmd);
-    PERF_EVENT_MNIB_SEND_CMD(5);
-
-    FUNC_LEAVE();
 }
 
 static int
