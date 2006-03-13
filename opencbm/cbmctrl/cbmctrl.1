@@ -1,4 +1,4 @@
-.\" $Id: cbmctrl.1,v 1.4 2006-03-12 18:46:51 wmsr Exp $
+.\" $Id: cbmctrl.1,v 1.5 2006-03-13 21:06:11 wmsr Exp $
 .\"
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
@@ -7,7 +7,7 @@
 .\" Process this file with
 .\"    groff -t -e -mandoc -Tps cbmctrl.1 > cbmctrl.1.ps
 .\" Test it with
-.\"    nroff -man cbmctrl.1 | less -R
+.\"    nroff -man cbmctrl.1 | less -r
 .\"
 .TH CBMCTRL 1
 .SH NAME
@@ -256,17 +256,14 @@ that sequences of e.g. talk/read/untalk commands are not broken by concurrent
 processes wanting to access the parallel port.
 .RS
 .PP
-(For Windows resp. cbm4win) it is recommended to enclose each such sequence
-that contains either talk, untalk, listen, unlisten, open, close, read or write
-by a lock/unlock pair of commands. Scripting systems or other software systems
-using cbmctrl instead of the OpenCBM API should issue a 
+Best practice is it to enclose each such sequence that contains either talk,
+untalk, listen, unlisten, open, close, read or write by a lock/unlock pair of
+commands. Scripting systems or other software systems using cbmctrl instead of
+the OpenCBM API should issue a 
 .B cbmctrl lock
 command on startup and a
 .B cbmctrl unlock
-upon (each) exit. This all (locking/unlocking) can be circumvented, if the
-driver gets installed in a special manner, so that the parallel port is locked
-and made exclusive to cbm4win/cbm4linux all the way (as long as
-cbm4win/cbm4linux is uninstalled again).
+upon (each) exit.
 .RE
 .TP
 .BI unlock
@@ -516,6 +513,8 @@ cbmctrl unlisten
 .P
 cbmctrl unlock
 .PD
+.P
+(NOTE: "echo -n" does natively work under Linux only)
 .RE
 .RE
 .TP
@@ -628,13 +627,13 @@ Due to the nature of
 .B cbmctrl
 beeing a command (sub-) processor, the global options are currently
 also beeing interpreted as commands and therefore cannot be combined.
-Thus
+For example,
 .PP
 .RS
 .BI cbmtrl " -V --help" " change"
 .RE
 .PP
-for an example does not work and leads to an error message.
+does not work and leads to an error message.
 .PP
 The
 .B lock/unlock
@@ -719,4 +718,4 @@ Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
 additions and reworks by Spiro Trikaliotis, additions by Wolfgang Moser
 <cbm(a)d81(o)de>.
 .SH DATE
-Mar 12 2006
+Mar 13 2006
