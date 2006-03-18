@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.20 2006-03-12 14:12:09 wmsr Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.21 2006-03-18 18:45:34 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -316,7 +316,7 @@ static int do_dir(CBM_FILE fd, char *argv[])
                 {
                     if(cbm_raw_read(fd, buf, 2) == 2)
                     {
-                        printf("%u ", buf[0] | (buf[1] << 8));
+                        printf("%u ", (unsigned char)buf[0] | (unsigned char)buf[1] << 8 );
                         while((cbm_raw_read(fd, &c, 1) == 1) && c)
                         {
                             putchar(cbm_petscii2ascii_c(c));
