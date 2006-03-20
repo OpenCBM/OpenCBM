@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.15 2006-03-12 16:35:32 strik Exp $ \n
+** \version $Id: cbm.c,v 1.16 2006-03-20 11:45:53 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -933,9 +933,9 @@ cbm_exec_command(CBM_FILE HandleDevice, __u_char DeviceAddress,
     FUNC_LEAVE_INT(rv);
 }
 
-/*! \brief MNIB: Read from the parallel port
+/*! \brief PARBURST: Read from the parallel port
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It reads from the parallel port.
 
  \param HandleDevice
@@ -949,16 +949,16 @@ cbm_exec_command(CBM_FILE HandleDevice, __u_char DeviceAddress,
 */
 
 __u_char CBMAPIDECL
-cbm_mnib_par_read(CBM_FILE HandleDevice)
+cbm_parallel_burst_read(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_UCHAR(cbmarch_mnib_par_read(HandleDevice));
+    FUNC_LEAVE_UCHAR(cbmarch_parallel_burst_read(HandleDevice));
 }
 
-/*! \brief MNIB: Write to the parallel port
+/*! \brief PARBURST: Write to the parallel port
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It writes to the parallel port.
 
  \param HandleDevice
@@ -972,18 +972,18 @@ cbm_mnib_par_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbm_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
+cbm_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     FUNC_ENTER();
 
-    cbmarch_mnib_par_write(HandleDevice, Value);
+    cbmarch_parallel_burst_write(HandleDevice, Value);
 
     FUNC_LEAVE();
 }
 
-/*! \brief MNIB: Read a complete track
+/*! \brief PARBURST: Read a complete track
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It reads a complete track from the disk
 
  \param HandleDevice
@@ -1003,16 +1003,16 @@ cbm_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
 */
 
 int CBMAPIDECL
-cbm_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbm_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_mnib_read_track(HandleDevice, Buffer, Length));
+    FUNC_LEAVE_INT(cbmarch_parallel_burst_read_track(HandleDevice, Buffer, Length));
 }
 
-/*! \brief MNIB: Write a complete track
+/*! \brief PARBURST: Write a complete track
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It writes a complete track to the disk
 
  \param HandleDevice
@@ -1032,9 +1032,9 @@ cbm_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length
 */
 
 int CBMAPIDECL
-cbm_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbm_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbmarch_mnib_write_track(HandleDevice, Buffer, Length));
+    FUNC_LEAVE_INT(cbmarch_parallel_burst_write_track(HandleDevice, Buffer, Length));
 }

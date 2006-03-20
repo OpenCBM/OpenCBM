@@ -7,7 +7,7 @@
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbm_module.h,v 1.4 2006-02-24 12:21:41 strik Exp $ */
+/* $Id: cbm_module.h,v 1.5 2006-03-20 11:45:52 strik Exp $ */
 
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H
@@ -35,15 +35,15 @@
 #define CBMCTRL_IEC_WAIT    _IO(CBMCTRL_BASE, 15)
 #define CBMCTRL_IEC_SETRELEASE _IO(CBMCTRL_BASE, 16)
 
-/*linux constants needed by mnib */
-#define CBMCTRL_MNIB_PAR_READ    _IO(CBMCTRL_BASE, 17)
-#define CBMCTRL_MNIB_PAR_WRITE   _IO(CBMCTRL_BASE, 18)
-#define CBMCTRL_MNIB_READ_TRACK        _IO(CBMCTRL_BASE, 19)
-#define CBMCTRL_MNIB_WRITE_TRACK _IO(CBMCTRL_BASE, 20)
+/*linux constants needed by parallel burst */
+#define CBMCTRL_PARBURST_READ    _IO(CBMCTRL_BASE, 17)
+#define CBMCTRL_PARBURST_WRITE   _IO(CBMCTRL_BASE, 18)
+#define CBMCTRL_PARBURST_READ_TRACK        _IO(CBMCTRL_BASE, 19)
+#define CBMCTRL_PARBURST_WRITE_TRACK _IO(CBMCTRL_BASE, 20)
 
-typedef struct MNIB_RW_VALUE {     // all values needed by MNIB_READ_TRACK and MNIB_WRITE_TRACK
+typedef struct PARBURST_RW_VALUE {     // all values needed by PARBURST_READ_TRACK and PARBURST_WRITE_TRACK
        unsigned char *buffer;
        int length;
-} MNIB_RW_VALUE;
+} PARBURST_RW_VALUE;
 
 #endif

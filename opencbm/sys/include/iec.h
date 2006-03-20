@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.10 2006-03-04 14:08:16 strik Exp $ \n
+** \version $Id: iec.h,v 1.11 2006-03-20 11:45:53 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -116,15 +116,15 @@ extern NTSTATUS
 cbmiec_check_device(IN PDEVICE_EXTENSION Pdx, OUT IEC_CHECKDEVICE *CheckDevice);
 
 extern NTSTATUS
-cbmiec_mnib_par_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Byte);
+cbmiec_parallel_burst_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Byte);
 
 extern NTSTATUS
-cbmiec_mnib_par_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte);
+cbmiec_parallel_burst_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte);
 
 extern NTSTATUS
-cbmiec_mnib_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG BufferLength);
+cbmiec_parallel_burst_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG BufferLength);
 
 extern NTSTATUS
-cbmiec_mnib_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR* Buffer, IN ULONG BufferLength);
+cbmiec_parallel_burst_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR* Buffer, IN ULONG BufferLength);
 
 #endif /* #ifndef CBMIEC_H */

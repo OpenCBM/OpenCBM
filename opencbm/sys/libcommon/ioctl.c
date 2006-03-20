@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.11 2006-03-08 17:27:24 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.12 2006-03-20 11:45:53 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -232,24 +232,24 @@ cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
                          cbm_checkinputbuffer(irpSp, sizeof(CBMT_IEC_WAIT_IN), STATUS_SUCCESS));
             break;
 
-        case CBMCTRL_MNIB_PAR_READ:
-            DBG_IRP(CBMCTRL_MNIB_PAR_READ);
-            ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_MNIB_PREAD_OUT), STATUS_SUCCESS);
+        case CBMCTRL_PARBURST_READ:
+            DBG_IRP(CBMCTRL_PARBURST_READ);
+            ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_PARBURST_PREAD_OUT), STATUS_SUCCESS);
             break;
 
-        case CBMCTRL_MNIB_PAR_WRITE:
-            DBG_IRP(CBMCTRL_MNIB_PAR_WRITE);
-            ntStatus = cbm_checkinputbuffer(irpSp, sizeof(CBMT_MNIB_PWRITE_IN), STATUS_SUCCESS);
+        case CBMCTRL_PARBURST_WRITE:
+            DBG_IRP(CBMCTRL_PARBURST_WRITE);
+            ntStatus = cbm_checkinputbuffer(irpSp, sizeof(CBMT_PARBURST_PWRITE_IN), STATUS_SUCCESS);
             break;
 
-        case CBMCTRL_MNIB_READ_TRACK:
-            DBG_IRP(CBMCTRL_MNIB_READ_TRACK);
-            ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_MNIB_READ_TRACK_OUT), STATUS_SUCCESS);
+        case CBMCTRL_PARBURST_READ_TRACK:
+            DBG_IRP(CBMCTRL_PARBURST_READ_TRACK);
+            ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_PARBURST_READ_TRACK_OUT), STATUS_SUCCESS);
             break;
 
-        case CBMCTRL_MNIB_WRITE_TRACK:
-            DBG_IRP(CBMCTRL_MNIB_WRITE_TRACK);
-            ntStatus = cbm_checkinputbuffer(irpSp, sizeof(CBMT_MNIB_WRITE_TRACK_IN), STATUS_SUCCESS);
+        case CBMCTRL_PARBURST_WRITE_TRACK:
+            DBG_IRP(CBMCTRL_PARBURST_WRITE_TRACK);
+            ntStatus = cbm_checkinputbuffer(irpSp, sizeof(CBMT_PARBURST_WRITE_TRACK_IN), STATUS_SUCCESS);
             break;
 
         case CBMCTRL_I_INSTALL:
@@ -455,35 +455,35 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
                                        &(OUTPUTVALUE(CBMT_IEC_WAIT_OUT)->Line));
             break;
 
-        case CBMCTRL_MNIB_PAR_READ:
-            DBG_IRP(CBMCTRL_MNIB_PAR_READ);
+        case CBMCTRL_PARBURST_READ:
+            DBG_IRP(CBMCTRL_PARBURST_READ);
             returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
-            ntStatus = cbmiec_mnib_par_read(Pdx, &(OUTPUTVALUE(CBMT_MNIB_PREAD_OUT)->Byte));
+            ntStatus = cbmiec_parallel_burst_read(Pdx, &(OUTPUTVALUE(CBMT_PARBURST_PREAD_OUT)->Byte));
             break;
 
-        case CBMCTRL_MNIB_PAR_WRITE:
-            DBG_IRP(CBMCTRL_MNIB_PAR_READ);
+        case CBMCTRL_PARBURST_WRITE:
+            DBG_IRP(CBMCTRL_PARBURST_READ);
             returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
-            ntStatus = cbmiec_mnib_par_write(Pdx, INPUTVALUE(CBMT_MNIB_PWRITE_IN)->Byte);
+            ntStatus = cbmiec_parallel_burst_write(Pdx, INPUTVALUE(CBMT_PARBURST_PWRITE_IN)->Byte);
             break;
 
-        case CBMCTRL_MNIB_READ_TRACK:
-            DBG_IRP(CBMCTRL_MNIB_READ_TRACK);
+        case CBMCTRL_PARBURST_READ_TRACK:
+            DBG_IRP(CBMCTRL_PARBURST_READ_TRACK);
             returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
 
-            DBG_ASSERT(sizeof(CBMT_MNIB_READ_TRACK_OUT) == 1);
-//            returnLength -= sizeof(CBMT_MNIB_READ_TRACK_OUT);
-            ntStatus = cbmiec_mnib_read_track(Pdx, 
-                (OUTPUTVALUE(CBMT_MNIB_READ_TRACK_OUT)->Buffer), (ULONG) returnLength);
-//            returnLength += sizeof(CBMT_MNIB_READ_TRACK_OUT);
+            DBG_ASSERT(sizeof(CBMT_PARBURST_READ_TRACK_OUT) == 1);
+//            returnLength -= sizeof(CBMT_PARBURST_READ_TRACK_OUT);
+            ntStatus = cbmiec_parallel_burst_read_track(Pdx, 
+                (OUTPUTVALUE(CBMT_PARBURST_READ_TRACK_OUT)->Buffer), (ULONG) returnLength);
+//            returnLength += sizeof(CBMT_PARBURST_READ_TRACK_OUT);
             break;
 
-        case CBMCTRL_MNIB_WRITE_TRACK:
-            DBG_IRP(CBMCTRL_MNIB_WRITE_TRACK);
+        case CBMCTRL_PARBURST_WRITE_TRACK:
+            DBG_IRP(CBMCTRL_PARBURST_WRITE_TRACK);
             returnLength = irpSp->Parameters.DeviceIoControl.InputBufferLength;
-            ntStatus = cbmiec_mnib_write_track(Pdx,
-                INPUTVALUE(CBMT_MNIB_WRITE_TRACK_IN)->Buffer,
-                (ULONG) returnLength - sizeof(CBMT_MNIB_WRITE_TRACK_IN));
+            ntStatus = cbmiec_parallel_burst_write_track(Pdx,
+                INPUTVALUE(CBMT_PARBURST_WRITE_TRACK_IN)->Buffer,
+                (ULONG) returnLength - sizeof(CBMT_PARBURST_WRITE_TRACK_IN));
             break;
 
         case CBMCTRL_I_INSTALL:

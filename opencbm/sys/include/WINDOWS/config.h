@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file config.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: config.h,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: config.h,v 1.4 2006-03-20 11:45:53 strik Exp $ \n
 ** \n
 ** \brief Definitions for the configuration of the cbm4win driver
 **
@@ -26,8 +26,8 @@
 /*! Only define if verbose performance evaluation is to be used. */
 /* #define PERFEVAL_VERBOSE 1 /**/
 
-/*! Only define if performance evaluation for mnib should be used */
-/* #define PERFEVAL_MNIB 1 /**/
+/*! Only define if performance evaluation for parallel burst should be used */
+/* #define PERFEVAL_PARBURST 1 /**/
 
 /*! If this is defined, the QUEUE uses an implementation which
     changes fast to the working thread */

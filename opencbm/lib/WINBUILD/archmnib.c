@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archmnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: archmnib.c,v 1.4 2005-11-20 13:50:28 strik Exp $ \n
+** \version $Id: archmnib.c,v 1.5 2006-03-20 11:45:53 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **
@@ -42,9 +42,9 @@
 #include "archlib.h"
 
 
-/*! \brief MNIB: Read from the parallel port
+/*! \brief PARBURST: Read from the parallel port
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It reads from the parallel port.
 
  \param HandleDevice
@@ -58,20 +58,20 @@
 */
 
 __u_char
-cbmarch_mnib_par_read(CBM_FILE HandleDevice)
+cbmarch_parallel_burst_read(CBM_FILE HandleDevice)
 {
-    CBMT_MNIB_PREAD_OUT result;
+    CBMT_PARBURST_PREAD_OUT result;
 
     FUNC_ENTER();
 
-    cbm_ioctl(HandleDevice, CBMCTRL(MNIB_PAR_READ), NULL, 0, &result, sizeof(result));
+    cbm_ioctl(HandleDevice, CBMCTRL(PARBURST_READ), NULL, 0, &result, sizeof(result));
 
     FUNC_LEAVE_UCHAR(result.Byte);
 }
 
-/*! \brief MNIB: Write to the parallel port
+/*! \brief PARBURST: Write to the parallel port
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It writes to the parallel port.
 
  \param HandleDevice
@@ -85,22 +85,22 @@ cbmarch_mnib_par_read(CBM_FILE HandleDevice)
 */
 
 void
-cbmarch_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
+cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
-    CBMT_MNIB_PWRITE_IN parameter;
+    CBMT_PARBURST_PWRITE_IN parameter;
 
     FUNC_ENTER();
 
     parameter.Byte = Value;
 
-    cbm_ioctl(HandleDevice, CBMCTRL(MNIB_PAR_WRITE), &parameter, sizeof(parameter), NULL, 0);
+    cbm_ioctl(HandleDevice, CBMCTRL(PARBURST_WRITE), &parameter, sizeof(parameter), NULL, 0);
 
     FUNC_LEAVE();
 }
 
-/*! \brief MNIB: Read a complete track
+/*! \brief PARBURST: Read a complete track
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It reads a complete track from the disk
 
  \param HandleDevice
@@ -120,10 +120,10 @@ cbmarch_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
 */
 
 int
-cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
-    CBMT_MNIB_READ_TRACK_OUT *result;
-    int bufferlength = Length + sizeof(CBMT_MNIB_READ_TRACK_OUT);
+    CBMT_PARBURST_READ_TRACK_OUT *result;
+    int bufferlength = Length + sizeof(CBMT_PARBURST_READ_TRACK_OUT);
     int retval = 0;
 
     FUNC_ENTER();
@@ -132,13 +132,13 @@ cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Le
 
     if (result)
     {
-        retval = cbm_ioctl(HandleDevice, CBMCTRL(MNIB_READ_TRACK),
+        retval = cbm_ioctl(HandleDevice, CBMCTRL(PARBURST_READ_TRACK),
             NULL, 0,
             result, bufferlength);
 
         if (retval == 0)
         {
-            DBG_WARN((DBG_PREFIX "opencbm: cbm.c: mnib_read_track: ioctl returned with error %u", retval));
+            DBG_WARN((DBG_PREFIX "opencbm: cbm.c: parallel_burst_read_track: ioctl returned with error %u", retval));
         }
         else
         {
@@ -151,9 +151,9 @@ cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Le
     FUNC_LEAVE_INT(retval);
 }
 
-/*! \brief MNIB: Write a complete track
+/*! \brief PARBURST: Write a complete track
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It writes a complete track to the disk
 
  \param HandleDevice
@@ -173,11 +173,11 @@ cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Le
 */
 
 int
-cbmarch_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbmarch_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
-    CBMT_MNIB_WRITE_TRACK_IN *parameter;
+    CBMT_PARBURST_WRITE_TRACK_IN *parameter;
 
-    int bufferlength = Length + sizeof(CBMT_MNIB_WRITE_TRACK_IN);
+    int bufferlength = Length + sizeof(CBMT_PARBURST_WRITE_TRACK_IN);
 
     int retval = 0;
 
@@ -189,13 +189,13 @@ cbmarch_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int L
     {
         memcpy(parameter->Buffer, Buffer, Length);
 
-        retval = cbm_ioctl(HandleDevice, CBMCTRL(MNIB_WRITE_TRACK),
+        retval = cbm_ioctl(HandleDevice, CBMCTRL(PARBURST_WRITE_TRACK),
             parameter, bufferlength,
             NULL, 0);
 
         if (retval == 0)
         {
-            DBG_WARN((DBG_PREFIX "opencbm: cbm.c: mnib_write_track: ioctl returned with error %u", retval));
+            DBG_WARN((DBG_PREFIX "opencbm: cbm.c: parallel_burst_write_track: ioctl returned with error %u", retval));
         }
 
         GlobalFree(parameter);

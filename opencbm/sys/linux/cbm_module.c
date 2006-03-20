@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.7 2006-03-13 14:20:45 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.8 2006-03-20 11:45:53 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -51,25 +51,24 @@ static char *rcsid =
 
 
 
-/* Defines needed by mnib-routines: */
-#include <linux/spinlock.h> /* the spinlock-system, used for mnib */
+/* Defines needed by parallel burst-routines: */
+#include <linux/spinlock.h> /* the spinlock-system, used for parallel burst */
 
-#define IRQSTOPVARS	unsigned long flags; spinlock_t mnib_lock = SPIN_LOCK_UNLOCKED;
-#define disable()	spin_lock_irqsave(&mnib_lock, flags)
-#define enable()	spin_unlock_irqrestore(&mnib_lock, flags)
+#define IRQSTOPVARS	unsigned long flags; spinlock_t parallel_burst_lock = SPIN_LOCK_UNLOCKED;
+#define disable()	spin_lock_irqsave(&parallel_burst_lock, flags)
+#define enable()	spin_unlock_irqrestore(&parallel_burst_lock, flags)
 #define printf(x)	printk(x)
 #define msleep(x)	udelay(x) /* delay for x microseconds */
 
-/* forward references for mnib routines */
-int cbm_mnib_read_track(unsigned char *buffer);
-int cbm_mnib_write_track(unsigned char *buffer, int length);
-void cbm_mnib_send_cmd(unsigned char cmd);
-unsigned char cbm_mnib_par_read(void);
-int cbm_mnib_par_write(unsigned char c);
-int cbm_nib_read(int toggle);
-int cbm_nib_write(char data, int toggle);
+/* forward references for parallel burst routines */
+int cbm_parallel_burst_read_track(unsigned char *buffer);
+int cbm_parallel_burst_write_track(unsigned char *buffer, int length);
+unsigned char cbm_parallel_burst_read(void);
+int cbm_parallel_burst_write(unsigned char c);
+int cbm_handshaked_read(int toggle);
+int cbm_handshaked_write(char data, int toggle);
 
-/* Defines needed for mnib end */
+/* Defines needed for parallel burst end */
 
 
 
@@ -468,10 +467,10 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                      unsigned int cmd, unsigned long arg)
 {
 
-	/*linux mnib */
-	MNIB_RW_VALUE *user_val;
-	MNIB_RW_VALUE kernel_val;
-	/*linux mnib end*/
+	/*linux parallel burst */
+	PARBURST_RW_VALUE *user_val;
+	PARBURST_RW_VALUE kernel_val;
+	/*linux parallel burst end*/
 
 
         unsigned char buf[2], c, talk, mask, state, i;
@@ -633,37 +632,37 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                         return 0;
 
 
-/* and now the mnib-routines */
+/* and now the parallel burst-routines */
 
 
-                case CBMCTRL_MNIB_PAR_READ:
-			return cbm_mnib_par_read();
+                case CBMCTRL_PARBURST_READ:
+			return cbm_parallel_burst_read();
 
-                case CBMCTRL_MNIB_PAR_WRITE:
-			return cbm_mnib_par_write(arg);
+                case CBMCTRL_PARBURST_WRITE:
+			return cbm_parallel_burst_write(arg);
 
-		case CBMCTRL_MNIB_READ_TRACK:
-			printf("MNIB_READ_TRACK");
-			user_val=(MNIB_RW_VALUE *) arg; // cast arg to structure pointer
+		case CBMCTRL_PARBURST_READ_TRACK:
+			printf("PARBURST_READ_TRACK");
+			user_val=(PARBURST_RW_VALUE *) arg; // cast arg to structure pointer
 			/* copy the data to the kernel: */
 			if (copy_from_user(&kernel_val,		// kernel buffer
 						user_val,	// user buffer
-                           			sizeof(MNIB_RW_VALUE))) return -EFAULT;
+                           			sizeof(PARBURST_RW_VALUE))) return -EFAULT;
 			/* verify if it's ok to write into the buffer */
 			if(access_ok(VERIFY_WRITE, kernel_val.buffer, 0x2000)==0) return -EFAULT;
 			/* and do it: */
-			return cbm_mnib_read_track(kernel_val.buffer);
+			return cbm_parallel_burst_read_track(kernel_val.buffer);
 			
-		case CBMCTRL_MNIB_WRITE_TRACK:
-			user_val=(MNIB_RW_VALUE *) arg; // cast arg to structure pointer
+		case CBMCTRL_PARBURST_WRITE_TRACK:
+			user_val=(PARBURST_RW_VALUE *) arg; // cast arg to structure pointer
 			/* copy the data to the kernel: */
 			if (copy_from_user(&kernel_val,		// kernel buffer
 						user_val,	// user buffer
-                           			sizeof(MNIB_RW_VALUE))) return -EFAULT;
+                           			sizeof(PARBURST_RW_VALUE))) return -EFAULT;
 			/* verify if it's ok to read from the buffer */
 			if(access_ok(VERIFY_READ, (void *)kernel_val.buffer, 0x2000)==0) return -EFAULT;
 			/* and do it: */
-			return cbm_mnib_write_track(kernel_val.buffer, kernel_val.length);
+			return cbm_parallel_burst_write_track(kernel_val.buffer, kernel_val.length);
         }
         return -EINVAL;
 }
@@ -870,11 +869,11 @@ int cbm_init(void)
 
 
 /* 
-	And here are the functions, used by mnib 
+	And here are the functions, used by parallel burst 
 	(they are all called by the ioctl-function)
 */
 
-int cbm_mnib_read_track(unsigned char *buffer)
+int cbm_parallel_burst_read_track(unsigned char *buffer)
 {
 	int i, byte;
 
@@ -884,7 +883,7 @@ int cbm_mnib_read_track(unsigned char *buffer)
 
 	for (i = 0; i < 0x2000; i += 1)//2)
 	{
-		byte = cbm_nib_read(i&1);
+		byte = cbm_handshaked_read(i&1);
 		if (byte == -1)
 		{
 			enable();
@@ -893,13 +892,13 @@ int cbm_mnib_read_track(unsigned char *buffer)
 		buffer[i] = byte;
 	}
 
-	cbm_mnib_par_read();
+	cbm_parallel_burst_read();
 	enable();
 	return 1;
 }
 
 
-int cbm_mnib_write_track(unsigned char *buffer, int length)
+int cbm_parallel_burst_write_track(unsigned char *buffer, int length)
 {
 	int i;
 
@@ -909,20 +908,20 @@ int cbm_mnib_write_track(unsigned char *buffer, int length)
 
 	for (i = 0; i < length; i++)
 	{
-		if(cbm_nib_write(buffer[i], i&1))
+		if(cbm_handshaked_write(buffer[i], i&1))
 		{
 			// timeout
 			enable();
     			return 0;
 		}
 	}
-	cbm_nib_write(0, i&1);
-	cbm_mnib_par_read();
+	cbm_handshaked_write(0, i&1);
+	cbm_parallel_burst_read();
 	enable();
 	return 1;
 }
 
-unsigned char cbm_mnib_par_read(void)
+unsigned char cbm_parallel_burst_read(void)
 {
 	int rv = 0;
 
@@ -963,7 +962,7 @@ unsigned char cbm_mnib_par_read(void)
 **/
 }
 
-int cbm_mnib_par_write(unsigned char c)
+int cbm_parallel_burst_write(unsigned char c)
 {
 	RELEASE(DATA_OUT|CLK_OUT);
 	SET(ATN_OUT);
@@ -1014,7 +1013,7 @@ int cbm_mnib_par_write(unsigned char c)
 **/
 }
 
-int cbm_nib_read(int toggle)
+int cbm_handshaked_read(int toggle)
 {
 
     int to = 0;
@@ -1040,7 +1039,7 @@ int cbm_nib_read(int toggle)
 		return XP_READ();
 }
 
-int cbm_nib_write(char data, int toggle)
+int cbm_handshaked_write(char data, int toggle)
 {
 	int to=0;
 

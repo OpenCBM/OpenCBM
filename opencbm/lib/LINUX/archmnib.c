@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: archmnib.c,v 1.3 2005-11-20 13:37:43 strik Exp $";
+    "@(#) $Id: archmnib.c,v 1.4 2006-03-20 11:45:53 strik Exp $";
 #endif
 
 #include <fcntl.h>
@@ -25,38 +25,38 @@ static char *rcsid =
 #include <linux/errno.h>  /* error codes */
 
 
-/*linux functions needed by mnib */
+/*linux functions needed by parallel burst */
 
-__u_char cbmarch_mnib_par_read(CBM_FILE f)
+__u_char cbmarch_parallel_burst_read(CBM_FILE f)
 {
-	return ioctl(f, CBMCTRL_MNIB_PAR_READ);
+	return ioctl(f, CBMCTRL_PARBURST_READ);
 }
 
-void cbmarch_mnib_par_write(CBM_FILE f, __u_char c)
+void cbmarch_parallel_burst_write(CBM_FILE f, __u_char c)
 {
-	ioctl(f, CBMCTRL_MNIB_PAR_WRITE, c);
+	ioctl(f, CBMCTRL_PARBURST_WRITE, c);
 }
 
-int cbmarch_mnib_read_track(CBM_FILE f, __u_char *buffer, unsigned int length)
+int cbmarch_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int length)
 {
 	int retval;
 
-	MNIB_RW_VALUE mv;
+	PARBURST_RW_VALUE mv;
 	mv.buffer=buffer;
 	mv.length=length; /* only needed in write_track */
-	retval=ioctl(f, CBMCTRL_MNIB_READ_TRACK, &mv);  /* we have to catch retval to check on EFAULT */
-	if(retval==(-EFAULT)) {printf("cbm4linux: cbm.c: cbm_mnib_read_track: ioctl returned -EFAULT"); return 0;}
+	retval=ioctl(f, CBMCTRL_PARBURST_READ_TRACK, &mv);  /* we have to catch retval to check on EFAULT */
+	if(retval==(-EFAULT)) {printf("cbm4linux: cbm.c: cbm_parallel_burst_read_track: ioctl returned -EFAULT"); return 0;}
 	return retval;
 }
 
-int cbmarch_mnib_write_track(CBM_FILE f,  __u_char *buffer, unsigned int length)
+int cbmarch_parallel_burst_write_track(CBM_FILE f,  __u_char *buffer, unsigned int length)
 {
 	int retval;
 	
-	MNIB_RW_VALUE mv;
+	PARBURST_RW_VALUE mv;
 	mv.buffer=buffer;
 	mv.length=length;
-	retval=ioctl(f, CBMCTRL_MNIB_WRITE_TRACK, &mv);
-	if(retval==(-EFAULT)) {printf("cbm4linux: cbm.c: cbm_mnib_write_track: ioctl returned -EFAULT"); return 0;}
+	retval=ioctl(f, CBMCTRL_PARBURST_WRITE_TRACK, &mv);
+	if(retval==(-EFAULT)) {printf("cbm4linux: cbm.c: cbm_parallel_burst_write_track: ioctl returned -EFAULT"); return 0;}
 	return retval;
 }

@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.7 2006-03-08 17:27:11 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.8 2006-03-20 11:45:53 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -118,19 +118,19 @@ struct CBMT_BOOLEAN
 
 } CBMT_BOOLEAN;
 
-/*! out for MNIB_READ_TRACK */
+/*! out for PARBURST_READ_TRACK */
 typedef
-struct CBMT_MNIB_READ_TRACK_OUT
+struct CBMT_PARBURST_READ_TRACK_OUT
 {
     UCHAR Buffer[1];
-} CBMT_MNIB_READ_TRACK_OUT;
+} CBMT_PARBURST_READ_TRACK_OUT;
 
-/*! in for MNIB_WRITE_TRACK */
+/*! in for PARBURST_WRITE_TRACK */
 typedef
-struct CBMT_MNIB_WRITE_TRACK_IN
+struct CBMT_PARBURST_WRITE_TRACK_IN
 {
     UCHAR Buffer[0];
-} CBMT_MNIB_WRITE_TRACK_IN;
+} CBMT_PARBURST_WRITE_TRACK_IN;
 
 /*! These macros define how to extract version information 
  * from CBMT_I_INSTALL_OUT.DriverVersion and/or .DllVersion
@@ -207,10 +207,10 @@ typedef CBMT_LINE       CBMT_IEC_RELEASE_IN;
 typedef CBMT_BOOLEAN    CBMT_GET_EOI_OUT;
 /*! Input buffer for IEC_SET */
 typedef CBMT_LINE_STATE CBMT_IEC_SETRELEASE_IN;
-/*! Output buffer for IEC_MNIB_PAR_READ */
-typedef CBMT_SINGLEBYTE CBMT_MNIB_PREAD_OUT;
-/*! Input buffer for IEC_MNIB_PAR_WRITE */
-typedef CBMT_SINGLEBYTE CBMT_MNIB_PWRITE_IN;
+/*! Output buffer for IEC_PARBURST_READ */
+typedef CBMT_SINGLEBYTE CBMT_PARBURST_PREAD_OUT;
+/*! Input buffer for IEC_PARBURST_PAR_WRITE */
+typedef CBMT_SINGLEBYTE CBMT_PARBURST_PWRITE_IN;
 
 
 /*! BASE number of the custom IOCTL */
@@ -266,21 +266,21 @@ typedef CBMT_SINGLEBYTE CBMT_MNIB_PWRITE_IN;
 //! IOCTL for setting and releasing IEC lines at once
 #define CBMCTRL_IEC_SETRELEASE _CBMIO(CBMCTRL_BASE, 18) // CBMT_IEC_SETRELEASE_IN -
 
-//! IOCTL for reading from the parallel port (for controlling mnib)
-#define CBMCTRL_MNIB_PAR_READ \
-                            _CBMIO(CBMCTRL_BASE, 19) // CBMT_IEC_MNIB_PREAD_IN -
+//! IOCTL for reading from the parallel port (for controlling parallel burst)
+#define CBMCTRL_PARBURST_READ \
+                            _CBMIO(CBMCTRL_BASE, 19) // CBMT_IEC_PARBURST_PREAD_IN -
 
-//! IOCTL for writing to the parallel port (for controlling mnib)
-#define CBMCTRL_MNIB_PAR_WRITE \
-                            _CBMIO(CBMCTRL_BASE, 20) // -                    CBMT_IEC_MNIB_PWRITE_OUT
+//! IOCTL for writing to the parallel port (for controlling parallel burst)
+#define CBMCTRL_PARBURST_WRITE \
+                            _CBMIO(CBMCTRL_BASE, 20) // -                    CBMT_IEC_PARBURST_PWRITE_OUT
 
-//! IOCTL for reading a complete track (for mnib)
-#define CBMCTRL_MNIB_READ_TRACK \
-                            _CBMIO(CBMCTRL_BASE, 21) // -                    CBMT_MNIB_READ_TRACK_OUT
+//! IOCTL for reading a complete track (for parallel burst)
+#define CBMCTRL_PARBURST_READ_TRACK \
+                            _CBMIO(CBMCTRL_BASE, 21) // -                    CBMT_PARBURST_READ_TRACK_OUT
 
-//! IOCTL for writing a complete track (for mnib)
-#define CBMCTRL_MNIB_WRITE_TRACK \
-                            _CBMIO(CBMCTRL_BASE, 22) // CBMT_MNIB_WRITE_TRACK_IN -
+//! IOCTL for writing a complete track (for parallel burst)
+#define CBMCTRL_PARBURST_WRITE_TRACK \
+                            _CBMIO(CBMCTRL_BASE, 22) // CBMT_PARBURST_WRITE_TRACK_IN -
 
 //! IOCTL for locking the driver onto the parallel port
 #define CBMCTRL_PARPORT_LOCK  \

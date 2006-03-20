@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archmnib_vice.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: archmnib_vice.c,v 1.3 2005-11-20 13:37:43 strik Exp $ \n
+** \version $Id: archmnib_vice.c,v 1.4 2006-03-20 11:45:53 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code for VICE emulation
 **
@@ -42,9 +42,9 @@
 #include "archlib.h"
 
 
-/*! \brief MNIB: Read from the parallel port
+/*! \brief PARBURST: Read from the parallel port
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It reads from the parallel port.
 
  \param HandleDevice
@@ -58,16 +58,16 @@
 */
 
 __u_char
-cbmarch_mnib_par_read(CBM_FILE HandleDevice)
+cbmarch_parallel_burst_read(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
     FUNC_LEAVE_UCHAR(0);
 }
 
-/*! \brief MNIB: Write to the parallel port
+/*! \brief PARBURST: Write to the parallel port
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It writes to the parallel port.
 
  \param HandleDevice
@@ -81,16 +81,16 @@ cbmarch_mnib_par_read(CBM_FILE HandleDevice)
 */
 
 void
-cbmarch_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
+cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     FUNC_ENTER();
 
     FUNC_LEAVE();
 }
 
-/*! \brief MNIB: Read a complete track
+/*! \brief PARBURST: Read a complete track
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It reads a complete track from the disk
 
  \param HandleDevice
@@ -110,16 +110,16 @@ cbmarch_mnib_par_write(CBM_FILE HandleDevice, __u_char Value)
 */
 
 int
-cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
 
     FUNC_LEAVE_INT(0);
 }
 
-/*! \brief MNIB: Write a complete track
+/*! \brief PARBURST: Write a complete track
 
- This function is a helper function for mnib:
+ This function is a helper function for parallel burst:
  It writes a complete track to the disk
 
  \param HandleDevice
@@ -139,7 +139,7 @@ cbmarch_mnib_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Le
 */
 
 int
-cbmarch_mnib_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbmarch_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
 
