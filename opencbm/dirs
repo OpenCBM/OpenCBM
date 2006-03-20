@@ -11,3 +11,6 @@ DIRS= \
 	lib \
 	demo \
 	sys
+
+OPTIONAL_DIRS= \
+	mnib36
