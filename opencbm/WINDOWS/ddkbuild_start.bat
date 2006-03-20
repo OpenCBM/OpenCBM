@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.5 2006-02-23 17:32:06 strik Exp $
+rem $Id: ddkbuild_start.bat,v 1.6 2006-03-20 19:43:06 strik Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -108,6 +108,8 @@ if %DDKBUILD_HOLLIS% EQU 1 (
 )
 
 shift
+
+if exist ..\mnib36 set CMDARGUMENTS=%CMDARGUMENTS% mnib36
 
 set CMDLINE=%TARGETSPEC% %DDKBUILD_ARGUMENTS% %CHECKEDFREE% .. %OPTIONAL_DIRS% %0 %1 %2 %3 %4 %5 %6 %7 %8 %9 %CMDARGUMENTS% -F
 
