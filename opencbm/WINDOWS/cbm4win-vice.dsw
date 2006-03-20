@@ -81,21 +81,6 @@ Package=<4>
     Project_Dep_Name demorpm1541
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name mnib
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name mnibn2d
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name mnibn2g
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name mnibpscan
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name mnibpshift
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name cbmforng
     End Project Dependency
 }}}
@@ -308,72 +293,6 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name arch
     End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "mnib"=..\mnib\WINBUILD\mnib.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name arch
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name opencbm
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "mnibn2d"="..\mnib\WINBUILD-n2d\mnibn2d.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "mnibn2g"="..\mnib\WINBUILD-n2g\mnibn2g.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "mnibpscan"="..\mnib\WINBUILD-pscan\mnibpscan.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "mnibpshift"="..\mnib\WINBUILD-pshift\mnibpshift.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
 }}}
 
 ###############################################################################

@@ -1,5 +1,0 @@
-DIRS=WINBUILD \
-     WINBUILD-n2d \
-     WINBUILD-n2g \
-     WINBUILD-pscan \
-     WINBUILD-pshift
