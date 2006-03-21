@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.21 2006-03-18 18:45:34 wmsr Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.22 2006-03-21 18:15:27 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -324,10 +324,15 @@ static int do_dir(CBM_FILE fd, char *argv[])
                         putchar('\n');
                     }
                 }
+                cbm_untalk(fd);
                 cbm_device_status(fd, unit, buf, sizeof(buf));
                 printf("%s", cbm_petscii2ascii(buf));
             }
-            cbm_untalk(fd);
+            else
+            {
+                cbm_untalk(fd);
+            }
+
         }
         else
         {
