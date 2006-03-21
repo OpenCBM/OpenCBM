@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2006-02-12 15:13:29 strik Exp $
+# $Id: Makefile,v 1.2 2006-03-21 18:48:32 wmsr Exp $
 
 include ../LINUX/config.make
 
@@ -25,9 +25,9 @@ install: install-files
 uninstall:
 	rm -f $(BINDIR)/$(PROG) $(MANDIR)/$(MAN1)
 
-cbmforng.inc: cbmforng.a65 cbmfmacs.i65 cbmfsubs.i65
+cbmforng.inc: cbmforng.a65 cbmfmacs.i65 cbmfsubs.i65 cbmforng.idh
 
-cbmforng.o: cbmforng.c cbmforng.inc
+cbmforng.o: cbmforng.c cbmforng.inc cbmforng.h cbmforng.idh
 	$(CC) $(CFLAGS) -c cbmforng.c -o $@
 
 cbmforng: cbmforng.o

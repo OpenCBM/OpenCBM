@@ -4,13 +4,13 @@
 ; *
 ; * Copyright (C) 2005,2006 Wolfgang Moser <cbm(a)d81(o)de>
 ; *
-; *	This library is free software; you can redistribute it and/or
-; *	modify it under the terms of the GNU Lesser General Public
-; *	License as published by the Free Software Foundation; either
-; *	version 2.1 of the License, or (at your option) any later version.
+; * This library is free software; you can redistribute it and/or
+; * modify it under the terms of the GNU Lesser General Public
+; * License as published by the Free Software Foundation; either
+; * version 2.1 of the License, or (at your option) any later version.
 ; */
 
-	; calculate the offset address for the format pattern buffer
+    ; calculate the offset address for the format pattern buffer
 BaseAddress = CGCRBUF & $ff00
 
 ;****************************************************************************
@@ -87,24 +87,24 @@ BaseAddress = CGCRBUF & $ff00
 ;****************************************************************************
 
 BufferedWrite
-	lda #$04
+    lda #$04
 BufferedWriteLoop
-	ldx BaseAddress,y		;  6(*)   : 15(*)
-	__syncBR				;  8(*)   : 17(*)
-	sbc #$01				;         :  6
-	stx DC_DATA				;         :  4
-	iny						;         :  8
-	bcs BufferedWriteLoop	; 10      : 11
+    ldx BaseAddress,y       ;  6(*)   : 15(*)
+    __syncBR                ;  8(*)   : 17(*)
+    sbc #$01                ;         :  6
+    stx DC_DATA             ;         :  4
+    iny                     ;         :  8
+    bcs BufferedWriteLoop   ; 10      : 11
 
-	__checkPageCrossing BufferedWriteLoop
+    __checkPageCrossing BufferedWriteLoop
 
-	ldx BaseAddress,y		; 14
-	iny						; 16
-	__syncBR				; 18
-	clv						;  2
-	stx DC_DATA				;  6
+    ldx BaseAddress,y       ; 14
+    iny                     ; 16
+    __syncBR                ; 18
+    clv                     ;  2
+    stx DC_DATA             ;  6
 
-	rts						; 12
+    rts                     ; 12
 
 ;****************************************************************************
 ;
@@ -142,15 +142,15 @@ BufferedWriteLoop
 ;****************************************************************************
 
 WriteGAPnSYNC
-	ldx #$55				; 2
-	jsr SequentialWrite		; 6
+    ldx #$55                ; 2
+    jsr SequentialWrite     ; 6
 
-	ora SECTCNT				;    :    : 17	; combine both bit-0's
-	ror						;    :    : 19	; and put the result to C
+    ora SECTCNT             ;    :    : 17  ; combine both bit-0's
+    ror                     ;    :    : 19  ; and put the result to C
 
-	ldx #$ff				;    :    : 21
-	lda #$08				;    :    : 23	; an even value is required
-				; normally this SYNC length would be too short
+    ldx #$ff                ;    :    : 21
+    lda #$08                ;    :    : 23  ; an even value is required
+                ; normally this SYNC length would be too short
 
 
 ;****************************************************************************
@@ -167,7 +167,7 @@ WriteGAPnSYNC
 ;                         due to the overflow flag not cleared
 ;          X            - The byte to be written
 ;          C            - Must be cleared, otherwise one more GCR byte
-;						  is written sometimes (see note)
+;                         is written sometimes (see note)
 ;
 ;  output: A            - $ff, if A is even and C=0, or if A is odd and C=1
 ;                         $fe, if A is even and C=1, or if A is odd and C=0
@@ -176,14 +176,14 @@ WriteGAPnSYNC
 ;****************************************************************************
 
 SequentialWrite
-	__syncBR				;  8 : 11 : 25
-	sbc #$02				;         :  2
-	stx DC_DATA				;         :  6
-	bcs SequentialWrite 	;    :  9 :  8
+    __syncBR                ;  8 : 11 : 25
+    sbc #$02                ;         :  2
+    stx DC_DATA             ;         :  6
+    bcs SequentialWrite     ;    :  9 :  8
 
-	__checkPageCrossing SequentialWrite
+    __checkPageCrossing SequentialWrite
 
-	rts						;    :    : 14
+    rts                     ;    :    : 14
 
 
 ;##############################################################################
@@ -215,33 +215,33 @@ SequentialWrite
 ;****************************************************************************
 
 BufferedCompare
-	ldx #$03				;  2
+    ldx #$03                ;  2
 
 BufferedCmpLoop
-	__syncBR				;  4      : 21(*)
-	clv						;         :  2
-	lda DC_DATA				;         :  6
+    __syncBR                ;  4      : 21(*)
+    clv                     ;         :  2
+    lda DC_DATA             ;         :  6
 
-	eor BaseAddress,y		;         : 10(*)
-	bne ErrorHandler		;         : 12(*)
-
-
-	iny						;         : 14(*)
-	dex						;         : 16(*)
-
-	bpl BufferedCmpLoop		; 18(*)   : 19(*)
-
-	__checkPageCrossing BufferedCmpLoop
+    eor BaseAddress,y       ;         : 10(*)
+    bne ErrorHandler        ;         : 12(*)
 
 
-	lda BaseAddress,y		; 22(**)
-	iny						; 24(**)
-	__syncBR				; 26(**)
-	clv						;  2
-	eor DC_DATA				;  6
-	bne ErrorHandler		;  8
+    iny                     ;         : 14(*)
+    dex                     ;         : 16(*)
 
-	rts						; 14
+    bpl BufferedCmpLoop     ; 18(*)   : 19(*)
+
+    __checkPageCrossing BufferedCmpLoop
+
+
+    lda BaseAddress,y       ; 22(**)
+    iny                     ; 24(**)
+    __syncBR                ; 26(**)
+    clv                     ;  2
+    eor DC_DATA             ;  6
+    bne ErrorHandler        ;  8
+
+    rts                     ; 14
 
 ;****************************************************************************
 ;
@@ -256,9 +256,9 @@ BufferedCmpLoop
 ;****************************************************************************
 
 WaitForNextSYNC
-	clv
-	__syncBR		; Wait for end of the SYNC, the first byte coming in
-	ldy #$80 - $40	; Wait for at least:  $40 * 17 / 2 bytes
+    clv
+    __syncBR        ; Wait for end of the SYNC, the first byte coming in
+    ldy #$80 - $40  ; Wait for at least:  $40 * 17 / 2 bytes
 
 ;****************************************************************************
 ;
@@ -288,40 +288,40 @@ WaitForNextSYNC
 ;****************************************************************************
 
 WaitForSYNCwithProbing
-	bvc WaitByteReadyWithSYNC
-	; clv	; not needed since the following SBC perfectly clears out
-			; the overflow flag (if A is not in the range of $80..$82)
+    bvc WaitByteReadyWithSYNC
+    ; clv   ; not needed since the following SBC perfectly clears out
+            ; the overflow flag (if A is not in the range of $80..$82)
 
-	sbc #$02
+    sbc #$02
 
-	bcs WaitByteReadyWithSYNC
+    bcs WaitByteReadyWithSYNC
 
-		; Carry is already cleared
-		; A contains either $fe or $ff, dependent from the oddity of
-		; MAXSECT. This effectively implements a fixed point based
-		; division:
-		;  If  MAXSECT  is odd, one time  MAXSECT/2  number of bytes
-		;  are substracted, the other round  MAXSECT/2+1  bytes
-	adc MAXSECT
-		; since A was  $fe  or  $ff  and since  MAXSECT  is always
-		; greater than 2, the Carry is set now again.
+        ; Carry is already cleared
+        ; A contains either $fe or $ff, dependent from the oddity of
+        ; MAXSECT. This effectively implements a fixed point based
+        ; division:
+        ;  If  MAXSECT  is odd, one time  MAXSECT/2  number of bytes
+        ;  are substracted, the other round  MAXSECT/2+1  bytes
+    adc MAXSECT
+        ; since A was  $fe  or  $ff  and since  MAXSECT  is always
+        ; greater than 2, the Carry is set now again.
 
-	iny	; Increase the GAP adjustment counter, if MAXSECT number of
-		; GAP nibbles (half a GAP byte) fit into the track tail GAP
+    iny ; Increase the GAP adjustment counter, if MAXSECT number of
+        ; GAP nibbles (half a GAP byte) fit into the track tail GAP
 
-	bmi	ErrorHandler			; Prevent an endless loop, if no SYNC
-								; can be found, this jump is done, after
-								; $80*MAXSECT/2 >= $40*17 = 1088 bytes
-								; were read without a SYNC
+    bmi ErrorHandler            ; Prevent an endless loop, if no SYNC
+                                ; can be found, this jump is done, after
+                                ; $80*MAXSECT/2 >= $40*17 = 1088 bytes
+                                ; were read without a SYNC
 WaitByteReadyWithSYNC
-	ldx DC_SETTINGS
-	bmi WaitForSYNCwithProbing
+    ldx DC_SETTINGS
+    bmi WaitForSYNCwithProbing
 
-	ldx DC_DATA	; clear the value from the buffer, unlock tha buffer latch
+    ldx DC_DATA ; clear the value from the buffer, unlock tha buffer latch
 
-	clv			; V should be cleared normally, but there seem to be
-				; circumstances, where it is not, so clear it again
-	rts
+    clv         ; V should be cleared normally, but there seem to be
+                ; circumstances, where it is not, so clear it again
+    rts
 
 ;****************************************************************************
 ;
@@ -333,55 +333,55 @@ WaitByteReadyWithSYNC
 ;****************************************************************************
 
 ErrorHandler
-	; not needed, if the error handler of the DOS ROM is called
-	; since it automatically restores the stack pointer
+    ; not needed, if the error handler of the DOS ROM is called
+    ; since it automatically restores the stack pointer
 .if 0
-	pla							; remove the current return address
-	pla							; from the stack, get to the stack frame
-								; of the job code routine
+    pla                         ; remove the current return address
+    pla                         ; from the stack, get to the stack frame
+                                ; of the job code routine
 .endif
 
 .ifdef DebugFormat
-	ldy DBGBPTR					; Save the result of the SYNC check.
-	dey							; Decrease Y, because we already did
-	lda DebugFormatBuffer,y		; advance the pointer
+    ldy DBGBPTR                 ; Save the result of the SYNC check.
+    dey                         ; Decrease Y, because we already did
+    lda DebugFormatBuffer,y     ; advance the pointer
 
-	ora #$c0					; Mark bits 6 and 7 of the remainder
-	sta DebugFormatBuffer,y		; complementary for verify fail
+    ora #$c0                    ; Mark bits 6 and 7 of the remainder
+    sta DebugFormatBuffer,y     ; complementary for verify fail
 
 
 
-	ldx ERREXCP
-	bpl CompareError
+    ldx ERREXCP
+    bpl CompareError
 
 ;****************************************************************************
 
-	and #$7f					; Mark bit 6 of the remainder
-	sta DebugFormatBuffer,y		; complementary only for SYNC fail
+    and #$7f                    ; Mark bit 6 of the remainder
+    sta DebugFormatBuffer,y     ; complementary only for SYNC fail
 .else
-	lda ERREXCP
-	bpl CompareError
+    lda ERREXCP
+    bpl CompareError
 .endif
 
-	lda BASEGAP			; the following SYNC was overwritten, so make
-	lsr					; the new GAP a lot smaller (divide by two)
-	bne StoreGAP
-	lda #MinGAPn		; if it got zero, load the MinGAP value
+    lda BASEGAP         ; the following SYNC was overwritten, so make
+    lsr                 ; the new GAP a lot smaller (divide by two)
+    bne StoreGAP
+    lda #MinGAPn        ; if it got zero, load the MinGAP value
 StoreGAP
-	sta BASEGAP			; store the new value and reformat this track
+    sta BASEGAP         ; store the new value and reformat this track
 
 .ifdef DebugFormat
-	ldx #$03
+    ldx #$03
 CompareError
-	txa
+    txa
 .else
-	lda #$03
+    lda #$03
 CompareError
 .endif
 
-	.byte $ae			; eat up the following operation
+    .byte $ae           ; eat up the following operation
 WriteProtectError
-	lda #$08			; Write protect error
-	jmp ERRR
+    lda #$08            ; Write protect error
+    jmp ERRR
 
 ;****************************************************************************
