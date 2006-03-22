@@ -46,7 +46,7 @@ static void hint(char *s)
     fprintf(stderr, "Try `%s' -h for more information.\n", s);
 }
 
-static void encodeGCR_to_buffer(char dest[5], char source[4])
+static void encodeGCR_to_buffer(unsigned char dest[5], unsigned char source[4])
 {
     unsigned char GCRdeTab[]={
       10, 11, 18, 19, 14, 15, 22, 23, 9, 25, 26, 27, 13, 29, 30, 21
@@ -68,8 +68,8 @@ static void encodeGCR_to_buffer(char dest[5], char source[4])
 
 static void prepareFmtPattern(struct FormatParameters *GCRbuf, unsigned char pattern, unsigned char maxtrack, char HID1, char HID2)
 {
-    char T1_sig, Tn_sig, DBfiller, HD1_fill, HD2_fill;
-    char source[4];
+    unsigned char T1_sig, Tn_sig, DBfiller, HD1_fill, HD2_fill;
+    unsigned char source[4];
     int i;
 
     T1_sig   = 0x4b;
