@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.14 2006-03-22 18:22:21 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.15 2006-03-22 19:55:12 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -262,6 +262,12 @@ struct parameter_s
     /*! --lpt was given, the number which was there */
     ULONG Lpt;
 
+    /*! the IEC cable type was specified */
+    ULONG IecCableType;
+    
+    /*! It was specified that the driver is to be permanently locked */
+    ULONG PermanentlyLock;
+
     /*! --automatic or --on-demand was given */
     BOOL AutomaticOrOnDemandStart;
 
@@ -437,6 +443,8 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { "lpt",        required_argument, NULL, 'l' },
         { "update",     no_argument,       NULL, 'u' },
         { "check",      no_argument,       NULL, 'c' },
+        { "cabletype",  required_argument, NULL, 't' },
+        { "lock",       required_argument, NULL, 'L' },
 #if DBG
         { "debugflags", required_argument, NULL, 'D' },
         { "buffer",     no_argument,       NULL, 'B' },
@@ -447,7 +455,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { NULL,         0,                 NULL, 0   }
     };
 
-    const char shortopts[] = "hreFl:nucAOV"
+    const char shortopts[] = "hreFl:nuctLAOV"
 #if DBG
                              "D:B"
 #endif // #if DBG
@@ -465,6 +473,14 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
     // We have not specified an LPT port yet
 
     Parameter->Lpt = (ULONG) -1;
+
+    // No IEC cable type was specified
+
+    Parameter->IecCableType = (ULONG) -2;
+
+    // It was not specified if the driver is to be permenently locked
+
+    Parameter->PermanentlyLock = (ULONG) -1;
 
     // set the default: automaticstart -A
 
@@ -518,6 +534,44 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
             {
                 Parameter->ExecuteParameterGiven = TRUE;
                 Parameter->EnumerateParport = TRUE;
+            }
+            break;
+
+        case 't':
+            DBG_PRINT((DBG_PREFIX " -------------------------- t '%s'", optarg));
+            if (strcmp(optarg, "xa1541") == 0)
+                Parameter->IecCableType = 1;
+            else if (strcmp(optarg, "xm1541") == 0)
+                Parameter->IecCableType = 0;
+            else if (strcmp(optarg, "auto") == 0)
+                Parameter->IecCableType = -1;
+            else
+            {
+                fprintf(stderr, "you must specify 'xa1541', 'xm1541' or 'auto' for --cabletype\n");
+                error = TRUE;
+            }
+            break;
+
+        case 'L':
+            DBG_PRINT((DBG_PREFIX " -------------------------- L '%s'", optarg));
+            if (   (strcmp(optarg, "1") == 0)
+                || (strcmp(optarg, "yes") == 0)
+                || (strcmp(optarg, "true") == 0)
+               )
+            {
+                Parameter->PermanentlyLock = 1;
+            }
+            else if (   (strcmp(optarg, "0") == 0)
+                     || (strcmp(optarg, "no") == 0)
+                     || (strcmp(optarg, "false") == 0)
+                    )
+            {
+                Parameter->PermanentlyLock = 0;
+            }
+            else
+            {
+                fprintf(stderr, "you must specify 'yes' or 'no' for --lock\n");
+                error = TRUE;
             }
             break;
 
@@ -1069,6 +1123,7 @@ InstallDriver(parameter_t *Parameter)
             break;
 
         if (!CbmUpdateParameter(Parameter->Lpt,
+            Parameter->IecCableType, Parameter->PermanentlyLock,
 #if DBG
             Parameter->DebugFlagsDriverWereGiven, Parameter->DebugFlagsDriver,
             Parameter->DebugFlagsDllWereGiven, Parameter->DebugFlagsDll
@@ -1119,6 +1174,7 @@ UpdateDriver(parameter_t *Parameter)
         }
 
         if (!CbmUpdateParameter(Parameter->Lpt,
+            Parameter->IecCableType, Parameter->PermanentlyLock,
 #if DBG
             Parameter->DebugFlagsDriverWereGiven, Parameter->DebugFlagsDriver,
             Parameter->DebugFlagsDllWereGiven, Parameter->DebugFlagsDll

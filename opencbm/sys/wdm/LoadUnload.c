@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/wdm/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.9 2006-03-10 19:25:17 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.10 2006-03-22 19:55:12 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **
@@ -170,6 +170,16 @@ AddDevice(IN PDRIVER_OBJECT DriverObject, IN PDEVICE_OBJECT PdoUNUSED, IN PCWSTR
         fdo->Flags &= ~DO_DEVICE_INITIALIZING;
         }
 */
+
+        //
+        // Initialize PDX related parts from registry
+        //
+
+        {
+            PDEVICE_EXTENSION pdx = fdo->DeviceExtension;
+
+            cbm_init_registry(NULL, pdx);
+        }
     }
 
     FUNC_LEAVE_NTSTATUS(ntStatus);

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.6 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: init.c,v 1.7 2006-03-22 19:55:12 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
@@ -43,7 +43,7 @@ static UNICODE_STRING ServiceKeyRegistryPath;
    updated.
 
  The RegistryPath parameter can be NULL, but this is only
- allowed on first call.
+ allowed on a second or subsequent call.
 
  Pdx can be NULL, too. If it is NULL, no device-specific
  data is read at all.
@@ -117,11 +117,22 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx)
 
             if (Pdx)
             {
+                //
                 // update the cable type
+                //
 
                 cbm_registry_read_ulong(hKey, L"CableType", &iecCable);
 
                 cbmiec_set_cabletype(Pdx, iecCable);
+
+                //
+                // update if we are requested to permanently lock the parallel port
+                //
+
+                iecCable = 0;
+                cbm_registry_read_ulong(hKey, L"PermanentlyLock", &iecCable);
+                Pdx->ParallelPortLock = iecCable ? TRUE : FALSE;
+
             }
 
             // initialize the libiec library
@@ -146,6 +157,15 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx)
         // In this case, initialize the libiec with defaults
 
         cbmiec_global_init(NULL);
+    }
+
+    //
+    // If requested by the registry, lock the parallel port
+    //
+
+    if (Pdx && Pdx->ParallelPortLock && Pdx->ParallelPortIsLocked == FALSE)
+    {
+        cbm_lock_parport(Pdx);
     }
 
     FUNC_LEAVE();

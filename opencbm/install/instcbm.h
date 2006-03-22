@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.h,v 1.5 2006-03-22 18:22:21 strik Exp $ \n
+** \version $Id: instcbm.h,v 1.6 2006-03-22 19:55:12 strik Exp $ \n
 ** \n
 ** \brief Header for installation routines
 **
@@ -35,6 +35,8 @@ extern BOOL CbmCheckCorrectInstallation(VOID);
 extern VOID CbmParportRestart(VOID);
 
 extern BOOL CbmUpdateParameter(IN ULONG DefaultLpt,
+                               IN ULONG IecCableType,
+                               IN ULONG PermanentlyLock,
                                IN BOOL DebugFlagsDriverPresent, IN ULONG DebugFlagsDriver,
                                IN BOOL DebugFlagsDllPresent, IN ULONG DebugFlagsDll);
 

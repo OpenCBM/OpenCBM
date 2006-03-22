@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.9 2006-03-22 18:22:20 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.10 2006-03-22 19:55:10 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -29,6 +29,14 @@
 /*! Registry entry (under CBM_REGKEY_SERVICE) of the default LPT port 
  */
 #define CBM_REGKEY_SERVICE_DEFAULTLPT "DefaultLpt"
+
+/*! Registry entry (under CBM_REGKEY_SERVICE) for the cable type
+ */
+#define CBM_REGKEY_SERVICE_IECCABLE "IecCable"
+
+/*! Registry entry (under CBM_REGKEY_SERVICE) for determining if the parport is to be permanently locked
+ */
+#define CBM_REGKEY_SERVICE_PERMLOCK "PermanentlyLock"
 
 /*! Registry entry (under CBM_REGKEY_SERVICE) of the DebugFlags */
 #define CBM_REGKEY_SERVICE_DEBUGFLAGS "DebugFlags"

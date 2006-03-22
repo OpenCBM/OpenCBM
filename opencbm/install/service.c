@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file service.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: service.c,v 1.5 2006-03-22 18:22:21 strik Exp $ \n
+** \version $Id: service.c,v 1.6 2006-03-22 19:55:12 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the service control manager for the OPENCBM driver
 **
@@ -56,6 +56,8 @@ RegSetDWORD(HKEY RegKey, char *SubKey, DWORD Value)
     DWORD rc;
 
     FUNC_ENTER();
+
+    DBG_PRINT((DBG_PREFIX "Setting %s to %u", SubKey, Value));
 
     rc = RegSetValueEx(RegKey, SubKey, 0, REG_DWORD, (LPBYTE)&Value, 4);
 
@@ -155,6 +157,13 @@ CreateLogRegistryKeys(IN LPCTSTR ServiceExe)
  \param DefaultLpt
    The number of the default LPT
 
+ \param IecCableType
+   The IEC cable type
+
+ \param PermanentlyLock
+   Zero if driver should not permanently lock the parallel port,
+   not zero otherwise.
+
  \param DebugFlagsDriverPresent
    Specifies if the following DebugFlagsDriver field should be used or not
 
@@ -173,6 +182,8 @@ CreateLogRegistryKeys(IN LPCTSTR ServiceExe)
 
 static BOOL
 CreateDefaultRegistryKeys(IN ULONG DefaultLpt,
+                          IN ULONG IecCableType,
+                          IN ULONG PermanentlyLock,
                           IN BOOL DebugFlagsDriverPresent, IN ULONG DebugFlagsDriver,
                           IN BOOL DebugFlagsDllPresent, IN ULONG DebugFlagsDll)
 {
@@ -183,63 +194,62 @@ CreateDefaultRegistryKeys(IN ULONG DefaultLpt,
 
     success = FALSE;
 
-#if DBG
-        if ((DefaultLpt != -1) || DebugFlagsDriverPresent)
-#else
-        if  (DefaultLpt != -1)
-#endif // #if DBG
+    // Open a registry key to HKLM\<%CBM_REGKEY_SERVICE%>
+
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+                     CBM_REGKEY_SERVICE,
+                     0,
+                     KEY_ALL_ACCESS,
+                     &RegKey) 
+        != ERROR_SUCCESS)
+
     {
-        // Open a registry key to HKLM\<%CBM_REGKEY_SERVICE%>
+        DWORD error = GetLastError();
 
-        if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-                         CBM_REGKEY_SERVICE,
-                         0,
-                         KEY_ALL_ACCESS,
-                         &RegKey) 
-            != ERROR_SUCCESS)
-
-        {
-            DWORD error = GetLastError();
-
-            DBG_WARN((DBG_PREFIX "COULD NOT OPEN HKLM\\" CBM_REGKEY_SERVICE " (0x%x) '%s'",
-                error, FormatErrorMessage(error)));
-            printf("WARNING: COULD NOT OPEN HKLM\\" CBM_REGKEY_SERVICE " (0x%x) '%s'\n",
-                error, FormatErrorMessage(error));
-        }
-        else
-        {
-            // Set the value for DefaultLpt
-
-            if (DefaultLpt != -1)
-            {
-                RegSetDWORD(RegKey, CBM_REGKEY_SERVICE_DEFAULTLPT, DefaultLpt);
-            }
-
-#if DBG
-
-            // Set the value for the DebugFlags
-
-            if (DebugFlagsDriverPresent)
-            {
-                RegSetDWORD(RegKey, CBM_REGKEY_SERVICE_DEBUGFLAGS, DebugFlagsDriver);
-            }
-
-            if (DebugFlagsDllPresent)
-            {
-                RegSetDWORD(RegKey, CBM_REGKEY_SERVICE_DLL_DEBUGFLAGS, DebugFlagsDll);
-            }
-
-#endif // #if DBG
-
-            // We're done, close the registry handle.
-
-            RegCloseKey(RegKey);
-
-            success = TRUE;
-        }
+        DBG_WARN((DBG_PREFIX "COULD NOT OPEN HKLM\\" CBM_REGKEY_SERVICE " (0x%x) '%s'",
+            error, FormatErrorMessage(error)));
+        printf("WARNING: COULD NOT OPEN HKLM\\" CBM_REGKEY_SERVICE " (0x%x) '%s'\n",
+            error, FormatErrorMessage(error));
     }
     else
     {
+        // Set the value for DefaultLpt
+
+        if (DefaultLpt != -1)
+        {
+            RegSetDWORD(RegKey, CBM_REGKEY_SERVICE_DEFAULTLPT, DefaultLpt);
+        }
+
+        if (IecCableType != -2)
+        {
+            RegSetDWORD(RegKey, CBM_REGKEY_SERVICE_IECCABLE, IecCableType);
+        }
+
+        if (PermanentlyLock != -1)
+        {
+            RegSetDWORD(RegKey, CBM_REGKEY_SERVICE_PERMLOCK, PermanentlyLock);
+        }
+
+#if DBG
+
+        // Set the value for the DebugFlags
+
+        if (DebugFlagsDriverPresent)
+        {
+            RegSetDWORD(RegKey, CBM_REGKEY_SERVICE_DEBUGFLAGS, DebugFlagsDriver);
+        }
+
+        if (DebugFlagsDllPresent)
+        {
+            RegSetDWORD(RegKey, CBM_REGKEY_SERVICE_DLL_DEBUGFLAGS, DebugFlagsDll);
+        }
+
+#endif // #if DBG
+
+        // We're done, close the registry handle.
+
+        RegCloseKey(RegKey);
+
         success = TRUE;
     }
 
@@ -322,7 +332,7 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
 
         // Create the registry setting for the default LPT port
 
-        CreateDefaultRegistryKeys(-1, FALSE, 0, FALSE, 0);
+        CreateDefaultRegistryKeys(-1, -2, 0, FALSE, 0, FALSE, 0);
 
         CloseServiceHandle(scManager);
 
@@ -354,6 +364,13 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
  \param DefaultLpt
    The default LPT to be set
 
+ \param IecCableType
+   The IEC cable type
+
+ \param PermanentlyLock
+   Zero if driver should not permanently lock the parallel port,
+   not zero otherwise.
+
  \param DebugFlagsDriverPresent
    Specifies if the following DebugFlagsDriver field should be used or not
 
@@ -372,6 +389,8 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
 
 BOOL
 CbmUpdateParameter(IN ULONG DefaultLpt,
+                   IN ULONG IecCableType,
+                   IN ULONG PermanentlyLock,
                    IN BOOL DebugFlagsDriverPresent, IN ULONG DebugFlagsDriver,
                    IN BOOL DebugFlagsDllPresent, IN ULONG DebugFlagsDll)
 {
@@ -379,7 +398,7 @@ CbmUpdateParameter(IN ULONG DefaultLpt,
 
     FUNC_ENTER();
 
-    ret = CreateDefaultRegistryKeys(DefaultLpt,
+    ret = CreateDefaultRegistryKeys(DefaultLpt, IecCableType, PermanentlyLock,
                 DebugFlagsDriverPresent, DebugFlagsDriver,
                 DebugFlagsDllPresent, DebugFlagsDll);
 
