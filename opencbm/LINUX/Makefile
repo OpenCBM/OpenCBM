@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2006-03-20 10:42:29 strik Exp $
+# $Id: Makefile,v 1.5 2006-03-22 09:13:59 strik Exp $
 
 include LINUX/config.make
 
@@ -10,21 +10,32 @@ SUBDIRS  = sys/linux include arch/$(ARCH) lib compat \
            cbmctrl cbmformat cbmforng d64copy cbmcopy \
            demo/flash demo/morse docs
 
+SUBDIRS_OPTIONAL = mnib36
+
 .PHONY: all clean mrproper dist install uninstall dev install-files
 
 all: 
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
+	-@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
+	done
 
 clean:
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
+	-@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
+	done
 
 mrproper:
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
+	done
+	-@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
 	done
 
 dist: all clean
@@ -36,15 +47,24 @@ install-files: all
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
+	-@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
+	done
 
 install: install-files
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
+	-@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
+	done
 
 uninstall: 
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
+	done
+	-@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
 	done
 
 dev:
