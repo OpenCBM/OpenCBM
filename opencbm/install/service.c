@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file service.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: service.c,v 1.4 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: service.c,v 1.5 2006-03-22 18:22:21 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the service control manager for the OPENCBM driver
 **
@@ -382,6 +382,8 @@ CbmUpdateParameter(IN ULONG DefaultLpt,
     ret = CreateDefaultRegistryKeys(DefaultLpt,
                 DebugFlagsDriverPresent, DebugFlagsDriver,
                 DebugFlagsDllPresent, DebugFlagsDll);
+
+    CbmInstallUpdate();
 
     FUNC_LEAVE_BOOL(ret);
 }

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.7 2006-03-10 19:25:17 strik Exp $ \n
+** \version $Id: openclose.c,v 1.8 2006-03-22 18:22:21 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **
@@ -76,15 +76,6 @@ cbm_createopenclose(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
     }
     else
     {
-        // Initialize the settings from the registry. This allows
-        // us to change the registry settings
-
-        /*! \todo This should not be needed if the driver can be
-         * reloaded!
-         */
-
-        cbm_init_registry(NULL, pdx);
-
         switch (irpSp->MajorFunction)
         {
         case IRP_MJ_CREATE:

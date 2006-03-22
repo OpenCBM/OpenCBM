@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.h,v 1.4 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: instcbm.h,v 1.5 2006-03-22 18:22:21 strik Exp $ \n
 ** \n
 ** \brief Header for installation routines
 **
@@ -37,6 +37,8 @@ extern VOID CbmParportRestart(VOID);
 extern BOOL CbmUpdateParameter(IN ULONG DefaultLpt,
                                IN BOOL DebugFlagsDriverPresent, IN ULONG DebugFlagsDriver,
                                IN BOOL DebugFlagsDllPresent, IN ULONG DebugFlagsDll);
+
+extern VOID CbmInstallUpdate(VOID);
 
 #if DBG
 extern VOID CbmOutputDebuggingBuffer(VOID);

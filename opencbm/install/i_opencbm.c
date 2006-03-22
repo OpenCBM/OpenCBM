@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file install/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.7 2006-03-09 17:31:34 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.8 2006-03-22 18:22:21 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the driver
 **
@@ -30,6 +30,34 @@
 
 #include "../lib/WINBUILD/i_opencbm.c"
 
+
+/*! \brief Tell the driver to update its settings
+
+ This functions tells the driver to update its settings
+ after they have been changed.
+
+ \param HandleDevice  
+   A CBM_FILE which contains the file handle of the driver.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call cbm_driver_close().
+*/
+
+VOID
+CbmInstallUpdate(VOID)
+{
+    CBM_FILE HandleDevice;
+
+    FUNC_ENTER();
+
+    if (cbmarch_driver_open(&HandleDevice, 0) == 0)
+    {
+        cbm_ioctl(HandleDevice, CBMCTRL(UPDATE), NULL, 0, NULL, 0);
+        cbmarch_driver_close(HandleDevice);
+    }
+
+    FUNC_LEAVE();
+}
 
 #if DBG
 

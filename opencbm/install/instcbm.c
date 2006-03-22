@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.13 2006-03-09 17:31:35 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.14 2006-03-22 18:22:21 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -213,11 +213,12 @@ usage(VOID)
             "  -c, --check     only check if the installation is ok\n"
             "  -F, --forcent4  force NT4 driver on a Win 2000, XP, or newer systems\n" 
             "                  (NOT RECOMMENDED!)\n"
-            "  -A, --automatic automatically start the driver on system boot. If you\n"
-            "                  specify this option, you can use the driver as normal\n"
-            "                  user, you do not need administrator rights.\n"
-            "                  Handle with care, have a look at the documentation\n"
-            "                  before using this option!\n"
+            "  -A, --automatic (default) automatically start the driver on system boot.\n"
+            "                  The driver can be used from a normal user, no need for\n"
+            "                  administrator rights.\n"
+            "                  The opposite of --on-demand.\n"
+            "  -O, --on-demand start the driver only on demand.\n"
+            "                  The opposite of --automatic.\n"
             "\n");
 
     FUNC_LEAVE();
@@ -260,6 +261,9 @@ struct parameter_s
 
     /*! --lpt was given, the number which was there */
     ULONG Lpt;
+
+    /*! --automatic or --on-demand was given */
+    BOOL AutomaticOrOnDemandStart;
 
     /*! --automatic was given, start the driver automatically */
     BOOL AutomaticStart;
@@ -439,10 +443,11 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
 #endif // #if DBG
         { "nocopy",     no_argument,       NULL, 'n' },
         { "automatic",  no_argument,       NULL, 'A' },
+        { "on-demand",  no_argument,       NULL, 'O' },
         { NULL,         0,                 NULL, 0   }
     };
 
-    const char shortopts[] = "hreFl:nucAV"
+    const char shortopts[] = "hreFl:nucAOV"
 #if DBG
                              "D:B"
 #endif // #if DBG
@@ -460,6 +465,10 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
     // We have not specified an LPT port yet
 
     Parameter->Lpt = (ULONG) -1;
+
+    // set the default: automaticstart -A
+
+    Parameter->AutomaticStart = TRUE;
 
 #if DBG
 
@@ -584,7 +593,29 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
             break;
 
         case 'A':
-            Parameter->AutomaticStart = TRUE;
+            if (Parameter->AutomaticOrOnDemandStart)
+            {
+                fprintf(stderr, "--automatic and --on-demand cannot be specified at the same time!\n");
+                error = TRUE;
+            }
+            else
+            {
+                Parameter->AutomaticStart = TRUE;
+                Parameter->AutomaticOrOnDemandStart = TRUE;
+            }
+            break;
+
+        case 'O':
+            if (Parameter->AutomaticOrOnDemandStart)
+            {
+                fprintf(stderr, "--automatic and --on-demand cannot be specified at the same time!\n");
+                error = TRUE;
+            }
+            else
+            {
+                Parameter->AutomaticStart = FALSE;
+                Parameter->AutomaticOrOnDemandStart = TRUE;
+            }
             break;
 
         default:
@@ -595,6 +626,141 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
     }
 
     FUNC_LEAVE_BOOL(error);
+}
+
+/*! \internal \brief Concatenate two string
+
+ This function concatenates two strings and returns the
+ result in a malloc()ed memory region.
+
+ \param String1
+   The first string to concatenate.
+
+ \param String2
+   The second string to concatenate.
+
+ \return
+   The malloc()ed memory for the concatenated string, or NULL
+   if there was not enough memory.
+*/
+static char *
+AllocateConcatenatedString(const char *String1, const char *String2)
+{
+    char *string;
+
+    FUNC_ENTER();
+
+    DBG_ASSERT(String1 != NULL);
+    DBG_ASSERT(String2 != NULL);
+
+    string = malloc(strlen(String1) + strlen(String2) + 1);
+
+    if (string)
+    {
+        strcpy(string, String1);
+        strcat(string, String2);
+
+        DBG_ASSERT(strlen(string) == strlen(String1) + strlen(String2));
+    }
+
+    FUNC_LEAVE_STRING(string);
+}
+
+/*! \internal \brief Copy a file from a path to another
+
+ This function copies a file from a source directory to a
+ destination directory.
+
+ \param SourcePath
+   The path from where to copy the file.
+   The path has to be terminated with a backslash ("\").
+
+ \param DestPath
+   The path where to copy the file to.
+   The path has to be terminated with a backslash ("\").
+
+ \param Filename
+   The name of the file to copy.
+
+ \param ErrorCode
+   The error code to return if the copy fails.
+
+ \return
+   0 on success, or ErrorCode in case of an error.
+*/
+static int
+CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *Filename, const int ErrorCode)
+{
+    char *sourceFile = NULL;
+    char *destFile = NULL;
+    int error = 0;
+
+    FUNC_ENTER();
+
+    sourceFile = AllocateConcatenatedString(SourcePath, Filename);
+    destFile = AllocateConcatenatedString(DestPath, Filename);
+
+    if (sourceFile && destFile)
+    {
+        DBG_PRINT((DBG_PREFIX "Copying '%s' to '%s'", sourceFile, destFile));
+
+        printf("Copying '%s' to '%s'", sourceFile, destFile);
+        if (!CopyFile(sourceFile, destFile, FALSE))
+        {
+            error = ErrorCode;
+            DBG_PRINT((DBG_PREFIX "--> FAILED!" ));
+            printf(" FAILED!\n");
+        }
+    }
+    else
+    {
+        DBG_ERROR((DBG_PREFIX "Error allocating memory buffers for copying '%s'!", Filename));
+        fprintf(stderr, "Error allocating memory buffers for copying '%s'.\n", Filename);
+    }
+
+    if (sourceFile)
+        free(sourceFile);
+
+    if (destFile)
+        free(destFile);
+
+    FUNC_LEAVE_INT(error);
+}
+
+/*! \internal \brief Delete a file at a path
+
+ This function deletes a file at a specified path.
+
+ \param Path
+   The path from where to delete the file.
+   The path has to be terminated with a backslash ("\").
+
+ \param Filename
+   The name of the file to copy.
+*/
+static VOID
+DeleteFileInDirectory(const char *Path, const char *Filename)
+{
+    char *file = NULL;
+
+    FUNC_ENTER();
+
+    do {
+        file = AllocateConcatenatedString(Path, Filename);
+
+        if (!file)
+            break;
+
+        DBG_PRINT((DBG_PREFIX "Trying to delete %s", file));
+
+        DeleteFile(file);
+
+    } while (0);
+
+    if (file)
+        free(file);
+
+    FUNC_LEAVE();
 }
 
 /*! \internal \brief Process a remove request
@@ -612,14 +778,21 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
 static int
 RemoveDriver(parameter_t *Parameter)
 {
+    char *driverSystemPath = NULL;
+    char *driverPath = NULL;
+
     FUNC_ENTER();
 
     UNREFERENCED_PARAMETER(Parameter);
 
-    if (CbmCheckPresence(OPENCBM_DRIVERNAME))
-    {
-        char driverSystemPath[MAX_PATH];
-        int driverSystemLen;
+    do {
+        char tmpPathString[MAX_PATH];
+
+        if (!CbmCheckPresence(OPENCBM_DRIVERNAME))
+        {
+            printf("No driver installed, cannot remove.\n");
+            break;
+        }
 
         printf("REMOVING driver...\n");
 
@@ -629,46 +802,36 @@ RemoveDriver(parameter_t *Parameter)
         // system directory. If this is the case, delete them from
         // there.
 
-        GetSystemDirectory(driverSystemPath, sizeof(driverSystemPath));
+        GetSystemDirectory(tmpPathString, sizeof(tmpPathString));
+        driverSystemPath = AllocateConcatenatedString(tmpPathString, "\\");
+        driverPath = AllocateConcatenatedString(tmpPathString, "\\DRIVERS\\");
 
-        // Remember the length of the system path
-
-        driverSystemLen = strlen(driverSystemPath);
+        if (!driverSystemPath || !driverPath)
+            break;
 
         // try to delete opencbm.dll
 
-        strcpy(&driverSystemPath[driverSystemLen ++], "\\OPENCBM.DLL");
-        DBG_PRINT((DBG_PREFIX "Trying to delete %s", driverSystemPath));
-        DeleteFile(driverSystemPath);
+        DeleteFileInDirectory(driverSystemPath, "OPENCBM.DLL");
 
         // try to delete opencbmvdd.dll
 
-        strcpy(&driverSystemPath[driverSystemLen], "OPENCBMVDD.DLL");
-        DBG_PRINT((DBG_PREFIX "Trying to delete %s", driverSystemPath));
-        DeleteFile(driverSystemPath);
-
-        strcpy(&driverSystemPath[driverSystemLen], "DRIVERS\\");
-
-        // Remember the new length of the system driver path
-
-        driverSystemLen = strlen(driverSystemPath);
+        DeleteFileInDirectory(driverSystemPath, "OPENCBMVDD.DLL");
 
         // try to delete cbm4nt.sys
 
-        strcpy(&driverSystemPath[driverSystemLen], "CBM4NT.SYS");
-        DBG_PRINT((DBG_PREFIX "Trying to delete %s", driverSystemPath));
-        DeleteFile(driverSystemPath);
+        DeleteFileInDirectory(driverPath, "CBM4NT.SYS");
 
         // try to delete cbm4wdm.sys
 
-        strcpy(&driverSystemPath[driverSystemLen], "CBM4WDM.SYS");
-        DBG_PRINT((DBG_PREFIX "Trying to delete %s", driverSystemPath));
-        DeleteFile(driverSystemPath);
-    }
-    else
-    {
-        printf("No driver installed, cannot remove.\n");
-    }
+        DeleteFileInDirectory(driverPath, "CBM4WDM.SYS");
+
+    } while (0);
+
+    if (driverSystemPath)
+        free(driverSystemPath);
+
+    if (driverPath)
+        free(driverPath);
 
     FUNC_LEAVE_INT(0);
 }
@@ -716,7 +879,7 @@ CheckDriver(parameter_t *Parameter)
             No problems found in current configuration:
 
             Driver configuration:
-             Port:               automatic (0), actually using LPT 1
+             Port:               automatic (0), currently using LPT 1
              IRQ mode:           enabled
              Driver start mode:  manually (3)
         */
@@ -752,6 +915,128 @@ EnumParportDriver(parameter_t *Parameter)
     FUNC_LEAVE_INT(0);
 }
 
+/*! \internal \brief Copy the driver files to the system path
+
+ This function copies the driver files to the system path.
+
+ \param Parameter
+   Pointer to parameter_t struct which contains the
+   description of the parameters given on the command-line.
+
+ \return 
+   Return value which will be given on return from main()
+   That is, 0 on success, everything else indicates an error.
+*/
+static int
+CopyDriverFiles(parameter_t *Parameter)
+{
+    char tmpPathString[MAX_PATH];
+
+    char *driverSystemPath = NULL;
+    char *driverPath = NULL;
+    char *driverLocalPath = NULL;
+    char *driverFilename = NULL;
+
+    const char *driverToUse;
+
+    int error = 0;
+
+    FUNC_ENTER();
+
+    printf("Installing driver...\n");
+
+    do {
+        //
+        // First of all, determine the current working directory
+        //
+
+        if (GetCurrentDirectory(sizeof(tmpPathString), tmpPathString) == 0)
+        {
+            DBG_PRINT((DBG_PREFIX "Could not determine the current working directory!"));
+            printf("Could not determine the current working directory!\n");
+            error = 4;
+            break;
+        }
+
+        driverLocalPath = AllocateConcatenatedString(tmpPathString, "\\");
+
+        //
+        // Get the system directory
+        //
+
+        GetSystemDirectory(tmpPathString, sizeof(tmpPathString));
+        driverSystemPath = AllocateConcatenatedString(tmpPathString, "\\");
+        driverPath = AllocateConcatenatedString(tmpPathString, "\\DRIVERS\\");
+
+        if (!driverLocalPath || !driverSystemPath || !driverPath)
+        {
+            DBG_ERROR((DBG_PREFIX "error allocating memory for the paths" ));
+            fprintf(stderr, "error allocating memory for the paths\n");
+            error = 15;
+            break;
+        }
+
+        //
+        // Find out which driver to use (cbm4wdm.sys, cbm4nt.sys)
+        //
+        
+        driverToUse = ((Parameter->OsVersion > WINNT4) && !Parameter->ForceNt4) ? "cbm4wdm.sys" : "cbm4nt.sys";
+
+        printf("Using driver '%s'\n", driverLocalPath);
+
+        //
+        // If we have to copy the files, perform the copy operation for them.
+        //
+
+        if (!Parameter->NoCopy)
+        {
+            // copy the driver into the appropriate directory
+
+            if ((error = CopyFileToNewPath(driverLocalPath, driverPath, driverToUse, 6)) != 0)
+                break;
+
+            if ((error = CopyFileToNewPath(driverLocalPath, driverSystemPath, "opencbm.dll", 7)) != 0)
+                break;
+
+#ifdef _X86_
+            if ((error = CopyFileToNewPath(driverLocalPath, driverSystemPath, "opencbmvdd.dll", 10)) != 0)
+                break;
+#endif // #ifdef _X86_
+        }
+
+        printf("\n");
+
+        //
+        // Install the driver
+        //
+
+        driverFilename = AllocateConcatenatedString(Parameter->NoCopy ? driverLocalPath : driverPath, driverToUse);
+
+        if (!driverFilename)
+        {
+            error = 14;
+            break;
+        }
+
+        CbmInstall(OPENCBM_DRIVERNAME, driverFilename, Parameter->AutomaticStart);
+
+    } while (0);
+
+    if (driverSystemPath)
+        free(driverSystemPath);
+
+    if (driverPath)
+        free(driverPath);
+
+    if (driverFilename)
+        free(driverFilename);
+
+    if (driverLocalPath)
+        free(driverLocalPath);
+
+    FUNC_LEAVE_INT(error);
+}
+
 /*! \internal \brief Install the driver
 
  This function installs the driver on the current machine.
@@ -767,145 +1052,22 @@ EnumParportDriver(parameter_t *Parameter)
 static int
 InstallDriver(parameter_t *Parameter)
 {
-    int error;
+    int error = 0;
 
     FUNC_ENTER();
 
-    error = 0;
-
-    if (CbmCheckPresence(OPENCBM_DRIVERNAME))
-    {
-        if (!Parameter->Update)
+    do {
+        if (CbmCheckPresence(OPENCBM_DRIVERNAME))
         {
             printf("Driver is already installed, remove it before you try a new installation,\n"
                 "or use the --update option!\n");
             error = 8;
+            break;
         }
-    }
-    else
-    {
-        char *workingDirectory;
 
-        printf("Installing driver...\n");
+        if ((error = CopyDriverFiles(Parameter)) != 0)
+            break;
 
-        //! \todo Replace with GetCurrentDirectory()
-
-        workingDirectory = _getcwd(NULL,1);
-
-        if (!workingDirectory)
-        {
-            DBG_PRINT((DBG_PREFIX "Could not determine the current working directory!"));
-            printf("Could not determine the current working directory!\n");
-            error = 4;
-        }
-        else
-        {
-            char driverSystemPath[MAX_PATH];
-            char driverLocalPath[MAX_PATH];
-
-//          printf("Current working directory is '%s'\n", workingDirectory);
-
-            GetSystemDirectory(driverSystemPath, sizeof(driverSystemPath));
-
-            if (!driverLocalPath)
-            {
-                DBG_PRINT((DBG_PREFIX 
-                    "Could not allocate memory for driver path, exiting!"));
-                printf("Could not allocate memory for driver path, exiting!\n");
-                error = 5;
-            }
-            else
-            {
-                const char *driverToUse;
-                BOOL useWdm;
-                int driverSystemLen;
-                int driverLocalLen;
-
-                strcpy(driverLocalPath, workingDirectory);
-                strcat(driverLocalPath, "\\");
-                driverLocalLen = strlen(driverLocalPath);
-
-                driverSystemLen = strlen(driverSystemPath);
-                strcpy(&driverSystemPath[driverSystemLen ++], "\\DRIVERS\\");
-
-                if (Parameter->OsVersion > WINNT4)
-                {
-                    useWdm = TRUE;
-
-                    if (Parameter->ForceNt4)
-                    {
-                        useWdm = FALSE;
-                    }
-                }
-                else
-                {
-                    useWdm = FALSE;
-                }
-
-                driverToUse = useWdm ? "cbm4wdm.sys" : "cbm4nt.sys";
-
-                strcpy(&driverLocalPath[driverLocalLen], driverToUse);
-                strcat(&driverSystemPath[driverSystemLen], driverToUse);
-
-                printf("Using driver '%s'\n", driverLocalPath);
-
-                if (Parameter->NoCopy)
-                {
-                    CbmInstall(OPENCBM_DRIVERNAME, driverLocalPath,
-                        Parameter->AutomaticStart);
-                }
-                else
-                {
-                    // copy the driver into the appropriate directory
-
-                    printf("Copying '%s' to '%s'", driverLocalPath, driverSystemPath);
-                    if (!CopyFile(driverLocalPath, driverSystemPath, FALSE))
-                    {
-                        error = 6;
-                        printf(" FAILED!\n");
-                    }
-                    else
-                    {
-                        strcpy(&driverLocalPath[driverLocalLen], "opencbm.dll");
-                        strcpy(&driverSystemPath[driverSystemLen], "opencbm.dll");
-                        printf("\nCopying '%s' to '%s'", driverLocalPath, driverSystemPath);
-                        if (!CopyFile(driverLocalPath, driverSystemPath, FALSE))
-                        {
-                            error = 7;
-                            printf(" FAILED!\n");
-                        }
-                        else
-                        {
-#ifdef _X86_
-                            strcpy(&driverLocalPath[driverLocalLen], "opencbmvdd.dll");
-                            strcpy(&driverSystemPath[driverSystemLen], "opencbmvdd.dll");
-                            printf("\nCopying '%s' to '%s'", driverLocalPath, driverSystemPath);
-                            if (!CopyFile(driverLocalPath, driverSystemPath, FALSE))
-                            {
-                                error = 10;
-                                printf(" FAILED!\n");
-                            }
-                            else
-#endif // #ifdef _X86_
-                            {
-                                printf("\n");
-                                strcpy(driverSystemPath, "System32\\DRIVERS\\");
-                                strcat(driverSystemPath, driverToUse);
-                                CbmInstall(OPENCBM_DRIVERNAME, driverSystemPath,
-                                    Parameter->AutomaticStart);
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            free(workingDirectory);
-        }
-    }
-
-    if (error == 0)
-    {
         if (!CbmUpdateParameter(Parameter->Lpt,
 #if DBG
             Parameter->DebugFlagsDriverWereGiven, Parameter->DebugFlagsDriver,
@@ -916,14 +1078,63 @@ InstallDriver(parameter_t *Parameter)
             ))
         {
             error = 9;
+            break;
         }
-    }
 
-    if (error == 0)
-    {
+        printf("\n");
+
+        if ((error = CheckDriver(Parameter)) != 0)
+            break;
+        
+    } while (0);
+
+    FUNC_LEAVE_INT(error);
+}
+
+/*! \internal \brief Update driver settings
+
+ This function updates settings for the already installed driver.
+
+ \param Parameter
+   Pointer to parameter_t struct which contains the
+   description of the parameters given on the command-line.
+
+ \return 
+   Return value which will be given on return from main()
+   That is, 0 on success, everything else indicates an error.
+*/
+static int
+UpdateDriver(parameter_t *Parameter)
+{
+    int error = 0;
+
+    FUNC_ENTER();
+
+    do {
+        if (!CbmCheckPresence(OPENCBM_DRIVERNAME))
+        {
+            printf("Driver is not installed, cannot update the parameters,\n");
+            error = 12;
+            break;
+        }
+
+        if (!CbmUpdateParameter(Parameter->Lpt,
+#if DBG
+            Parameter->DebugFlagsDriverWereGiven, Parameter->DebugFlagsDriver,
+            Parameter->DebugFlagsDllWereGiven, Parameter->DebugFlagsDll
+#else
+            0, 0, 0, 0
+#endif // #if DBG
+            ))
+        {
+            error = 13;
+            break;
+        }
+
         printf("\n");
         error = CheckDriver(Parameter);
-    }
+
+    } while (0);
 
     FUNC_LEAVE_INT(error);
 }
@@ -978,22 +1189,18 @@ int __cdecl
 main(int Argc, char **Argv)
 {
     parameter_t parameter;
-    int retValue;
+    int retValue = 0;
 
     FUNC_ENTER();
 
-    if (processargs(Argc, Argv, &parameter))
-    {
-        DBG_PRINT((DBG_PREFIX "Error processing command line arguments"));
-        retValue = 1;
-    }
-    else
-    {
-        retValue = 0;
-    }
+    do {
+        if (processargs(Argc, Argv, &parameter))
+        {
+            DBG_PRINT((DBG_PREFIX "Error processing command line arguments"));
+            retValue = 1;
+            break;
+        }
 
-    if (retValue == 0)
-    {
         parameter.OsVersion = GetOsVersion();
 
         if (parameter.OsVersion == WINUNSUPPORTED)
@@ -1001,51 +1208,56 @@ main(int Argc, char **Argv)
             DBG_PRINT((DBG_PREFIX "This version of Windows is not supported!"));
             printf("Sorry, this version of Windows is not supported!\n");
             retValue = 2;
+            break;
         }
-    }
 
-    if (!parameter.NoExecute)
-    {
-        if (retValue == 0)
+    if (parameter.NoExecute)
+        break;
+
+        if (!NeededAccessRights())
         {
-            if (!NeededAccessRights())
-            {
-                retValue = 3;
-                DBG_PRINT((DBG_PREFIX "You do not have necessary privileges. " 
-                    "Please try installing only as administrator."));
-                printf("You do not have necessary privileges.\n"
-                    "Please try installing only as administrator.\n");
-            }
+            DBG_PRINT((DBG_PREFIX "You do not have necessary privileges. " 
+                "Please try installing only as administrator."));
+            printf("You do not have necessary privileges.\n"
+                "Please try installing only as administrator.\n");
+
+            retValue = 3;
+            break;
         }
 
-        if (retValue == 0)
+        //
+        // execute the command
+        //
+
+        if (parameter.CheckInstall)
         {
-            // now, execute the command
-
-            if (parameter.CheckInstall)
-            {
-                retValue = CheckDriver(&parameter);
-            }
-            else if (parameter.Remove)
-            {
-                // The driver should be removed
-
-                retValue = RemoveDriver(&parameter);
-            }
-            else if (parameter.EnumerateParport)
-            {
-                // The driver should be removed
-
-                retValue = EnumParportDriver(&parameter);
-            }
-            else
-            {
-                // The driver should be installed
-
-                retValue = InstallDriver(&parameter);
-            }
+            retValue = CheckDriver(&parameter);
         }
-    }
+        else if (parameter.Remove)
+        {
+            // The driver should be removed
+
+            retValue = RemoveDriver(&parameter);
+        }
+        else if (parameter.EnumerateParport)
+        {
+            // The driver should be removed
+
+            retValue = EnumParportDriver(&parameter);
+        }
+        else if (parameter.Update)
+        {
+            // Update driver parameters
+
+            retValue = UpdateDriver(&parameter);
+        }
+        else
+        {
+            // The driver should be installed
+
+            retValue = InstallDriver(&parameter);
+        }
+    } while (0);
 
 #if DBG
 

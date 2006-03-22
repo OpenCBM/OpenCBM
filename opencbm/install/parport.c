@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file parport.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: parport.c,v 1.5 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: parport.c,v 1.6 2006-03-22 18:22:21 strik Exp $ \n
 ** \n
 ** \brief Program to handle the parallel port for the OPENCBM driver
 **
@@ -47,7 +47,7 @@ output_error(void)
 
     if (error)
     {
-        DBG_PRINT((DBG_PREFIX "error: (0x%x) '%s'", error, FormatErrorMessage(error)));
+        DBG_ERROR((DBG_PREFIX "error: (0x%x) '%s'", error, FormatErrorMessage(error)));
         printf("error: (0x%x) '%s'\n", error, FormatErrorMessage(error));
     }
 }
@@ -104,11 +104,11 @@ FreeDynamicalAddresses(PSETUPAPI SetupApi)
     { \
         SetupApi->_xxx##_p = (P_##_xxx) GetProcAddress(SetupApi->HandleSetupApiDll, #_xxx); \
         \
-        DBG_PRINT((DBG_PREFIX "p_CM_Get_Device_ID_Ex = %p", SetupApi->_xxx##_p)); \
+        DBG_SUCCESS((DBG_PREFIX "p_CM_Get_Device_ID_Ex = %p", SetupApi->_xxx##_p)); \
         \
         if (SetupApi->_xxx##_p == NULL) \
         { \
-            DBG_PRINT((DBG_PREFIX "GetProcAddress(\"" #_xxx "\") FAILED!")); \
+            DBG_WARN((DBG_PREFIX "GetProcAddress(\"" #_xxx "\") FAILED!")); \
             FreeDynamicalAddresses(SetupApi); \
         } \
      }
@@ -124,7 +124,7 @@ GetDynamicalAddresses(PSETUPAPI SetupApi)
 
     SetupApi->HandleSetupApiDll = LoadLibrary("SETUPAPI.DLL");
 
-    DBG_PRINT((DBG_PREFIX "SetupApi->HandleSetupApiDll = %p",
+    DBG_SUCCESS((DBG_PREFIX "SetupApi->HandleSetupApiDll = %p",
         SetupApi->HandleSetupApiDll));
 
     GET_PROC_ADDRESS(CM_Get_Device_ID_ExA);
@@ -175,7 +175,7 @@ CbmParportRestart(VOID)
 
                 if (!setupApi.SetupDiGetDeviceInfoListDetailA_p(hdevInfo, &sdld))
                 {
-                    DBG_PRINT((DBG_PREFIX "SetupDiGetDeviceInfoListDetail FAILED!"));
+                    DBG_ERROR((DBG_PREFIX "SetupDiGetDeviceInfoListDetail FAILED!"));
                     printf("SetupDiGetDeviceInfoListDetail FAILED!\n");
                 }       
             
@@ -193,7 +193,7 @@ CbmParportRestart(VOID)
                     {
                         deviceId[0] = 0;
                     }
-                    DBG_PRINT((DBG_PREFIX "No. %u: Returned deviceId = '%s'", i, deviceId));
+                    DBG_SUCCESS((DBG_PREFIX "No. %u: Returned deviceId = '%s'", i, deviceId));
 
                     spp.ClassInstallHeader.cbSize = sizeof(spp.ClassInstallHeader);
                     spp.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;
@@ -204,22 +204,22 @@ CbmParportRestart(VOID)
                     if (SetupDiSetClassInstallParams(hdevInfo, &sdd,
                         (PSP_CLASSINSTALL_HEADER) &spp, sizeof(spp)))
                     {
-                        DBG_PRINT((DBG_PREFIX "SET CLASS INSTALL PARAMS WAS SUCCESSFULL!"));
+                        DBG_SUCCESS((DBG_PREFIX "SET CLASS INSTALL PARAMS WAS SUCCESSFULL!"));
                     }
                     else
                     {
-                        DBG_PRINT((DBG_PREFIX "SET CLASS INSTALL PARAMS NOT SUCCESSFULL"));
+                        DBG_ERROR((DBG_PREFIX "SET CLASS INSTALL PARAMS NOT SUCCESSFULL"));
                         printf("SET CLASS INSTALL PARAMS NOT SUCCESSFULL!\n");
                         output_error();
                     }
 
                     if (SetupDiCallClassInstaller(DIF_PROPERTYCHANGE, hdevInfo, &sdd))
                     {
-                        DBG_PRINT((DBG_PREFIX "CALL CLASS INSTALLER WAS SUCCESSFULL!"));
+                        DBG_SUCCESS((DBG_PREFIX "CALL CLASS INSTALLER WAS SUCCESSFULL!"));
                     }
                     else
                     {
-                        DBG_PRINT((DBG_PREFIX "CALL CLASS INSTALLER NOT SUCCESSFULL"));
+                        DBG_ERROR((DBG_PREFIX "CALL CLASS INSTALLER NOT SUCCESSFULL"));
                         printf("CALL CLASS INSTALLER NOT SUCCESSFULL!\n");
                         output_error();
                     }
@@ -228,7 +228,7 @@ CbmParportRestart(VOID)
                     {
                         if (devParams.Flags & (DI_NEEDRESTART | DI_NEEDREBOOT))
                         {
-                            DBG_PRINT((DBG_PREFIX "NEED REBOOT TO TAKE EFFECT!"));
+                            DBG_ERROR((DBG_PREFIX "NEED REBOOT TO TAKE EFFECT!"));
                             printf("NEED REBOOT TO TAKE EFFECT!\n");
                         }
                     }
@@ -249,7 +249,7 @@ CbmParportRestart(VOID)
     }
     else
     {
-        DBG_PRINT((DBG_PREFIX "SetupDiGetClassDevs FAILED!"));
+        DBG_ERROR((DBG_PREFIX "SetupDiGetClassDevs FAILED!"));
         printf("SetupDiGetClassDevs FAILED!");
         output_error();
     }
