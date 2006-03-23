@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.7 2006-03-22 19:55:12 strik Exp $ \n
+** \version $Id: init.c,v 1.8 2006-03-23 19:26:56 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
@@ -129,7 +129,7 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx)
                 // update if we are requested to permanently lock the parallel port
                 //
 
-                iecCable = 0;
+                iecCable = 1; // default is: Yes, lock
                 cbm_registry_read_ulong(hKey, L"PermanentlyLock", &iecCable);
                 Pdx->ParallelPortLock = iecCable ? TRUE : FALSE;
 

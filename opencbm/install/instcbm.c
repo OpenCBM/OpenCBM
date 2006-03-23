@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.15 2006-03-22 19:55:12 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.16 2006-03-23 19:26:55 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -209,6 +209,8 @@ usage(VOID)
             "  -e, --enumpport re-enumerate the parallel port driver\n"
             "  -u, --update    update parameters if driver is already installed.\n"
             "  -l, --lpt=no    set default LPT port\n"
+            "  -t, --cabletype=TYPE set cabletype to 'auto' (default), 'xa1541' or 'xm1541'.\n"
+            "  -L, --lock=WHAT automatically lock the driver 'yes' (default) or not 'no'.\n"
             "  -n, --nocopy    do not copy the driver files into the system directory\n"
             "  -c, --check     only check if the installation is ok\n"
             "  -F, --forcent4  force NT4 driver on a Win 2000, XP, or newer systems\n" 
@@ -538,7 +540,6 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
             break;
 
         case 't':
-            DBG_PRINT((DBG_PREFIX " -------------------------- t '%s'", optarg));
             if (strcmp(optarg, "xa1541") == 0)
                 Parameter->IecCableType = 1;
             else if (strcmp(optarg, "xm1541") == 0)
@@ -553,7 +554,6 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
             break;
 
         case 'L':
-            DBG_PRINT((DBG_PREFIX " -------------------------- L '%s'", optarg));
             if (   (strcmp(optarg, "1") == 0)
                 || (strcmp(optarg, "yes") == 0)
                 || (strcmp(optarg, "true") == 0)
@@ -764,6 +764,10 @@ CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *File
             error = ErrorCode;
             DBG_PRINT((DBG_PREFIX "--> FAILED!" ));
             printf(" FAILED!\n");
+        }
+        else
+        {
+            printf("\n");
         }
     }
     else

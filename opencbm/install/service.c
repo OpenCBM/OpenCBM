@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file service.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: service.c,v 1.6 2006-03-22 19:55:12 strik Exp $ \n
+** \version $Id: service.c,v 1.7 2006-03-23 19:26:56 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the service control manager for the OPENCBM driver
 **
@@ -332,7 +332,7 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
 
         // Create the registry setting for the default LPT port
 
-        CreateDefaultRegistryKeys(-1, -2, 0, FALSE, 0, FALSE, 0);
+        CreateDefaultRegistryKeys(-1, -2, -1, FALSE, 0, FALSE, 0);
 
         CloseServiceHandle(scManager);
 

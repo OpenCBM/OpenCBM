@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.10 2006-03-12 16:35:32 strik Exp $ \n
+** \version $Id: startstop.c,v 1.11 2006-03-23 19:26:56 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -391,6 +391,7 @@ CbmCheckCorrectInstallation(VOID)
 {
     CBMT_I_INSTALL_OUT outBuffer;
     BOOL error;
+    BOOL driverAlreadyStarted = FALSE;
     int tries;
 
     FUNC_ENTER();
@@ -399,7 +400,11 @@ CbmCheckCorrectInstallation(VOID)
 
     for (tries = 1; tries >= 0; --tries)
     {
+        if (driverAlreadyStarted)
+            cbm_i_driver_stop();
+
         error = cbm_i_driver_start() ? FALSE : TRUE;
+        driverAlreadyStarted = TRUE;
 
         if (error)
         {
@@ -411,8 +416,6 @@ CbmCheckCorrectInstallation(VOID)
         {
             error = cbm_i_i_driver_install((PULONG) &outBuffer, sizeof(outBuffer));
             outBuffer.DllVersion = 0;
-
-            cbm_i_driver_stop();
 
             if (error)
             {
@@ -427,7 +430,17 @@ CbmCheckCorrectInstallation(VOID)
             {
                 if (tries > 0)
                 {
+                    //
+                    // stop the driver to be able to restart the parallel port
+                    //
+
+                    cbm_i_driver_stop();
+                    driverAlreadyStarted = FALSE;
+
+                    //
                     // No IRQ available: Try to restart the parallel port to enable it.
+                    //
+
                     printf("Please wait some seconds...\n");
                     CbmParportRestart();
                 }
@@ -447,11 +460,13 @@ CbmCheckCorrectInstallation(VOID)
         }
     }
 
-    // If the driver is set to be started automatically, restart it now
+    //
+    // If the driver is not set to be started automatically, stop it now
+    //
 
-    if (IsDriverStartedAutomatically())
+    if (!IsDriverStartedAutomatically())
     {
-        cbm_i_driver_start();
+        cbm_i_driver_stop();
     }
 
     if (CheckVersions(&outBuffer))
