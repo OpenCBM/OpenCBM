@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.10 2006-03-22 19:55:10 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.11 2006-03-26 14:35:09 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -125,20 +125,6 @@ struct CBMT_BOOLEAN
     BOOLEAN Decision;
 
 } CBMT_BOOLEAN;
-
-/*! out for PARBURST_READ_TRACK */
-typedef
-struct CBMT_PARBURST_READ_TRACK_OUT
-{
-    UCHAR Buffer[1];
-} CBMT_PARBURST_READ_TRACK_OUT;
-
-/*! in for PARBURST_WRITE_TRACK */
-typedef
-struct CBMT_PARBURST_WRITE_TRACK_IN
-{
-    UCHAR Buffer[0];
-} CBMT_PARBURST_WRITE_TRACK_IN;
 
 /*! These macros define how to extract version information 
  * from CBMT_I_INSTALL_OUT.DriverVersion and/or .DllVersion

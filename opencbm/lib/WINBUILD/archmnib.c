@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archmnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: archmnib.c,v 1.5 2006-03-20 11:45:53 strik Exp $ \n
+** \version $Id: archmnib.c,v 1.6 2006-03-26 14:35:09 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **
@@ -122,30 +122,17 @@ cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 int
 cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
-    CBMT_PARBURST_READ_TRACK_OUT *result;
-    int bufferlength = Length + sizeof(CBMT_PARBURST_READ_TRACK_OUT);
     int retval = 0;
 
     FUNC_ENTER();
 
-    result = GlobalAlloc(GMEM_FIXED, bufferlength);
+    retval = cbm_ioctl(HandleDevice, CBMCTRL(PARBURST_READ_TRACK),
+        NULL, 0,
+        Buffer, Length);
 
-    if (result)
+    if (retval == 0)
     {
-        retval = cbm_ioctl(HandleDevice, CBMCTRL(PARBURST_READ_TRACK),
-            NULL, 0,
-            result, bufferlength);
-
-        if (retval == 0)
-        {
-            DBG_WARN((DBG_PREFIX "opencbm: cbm.c: parallel_burst_read_track: ioctl returned with error %u", retval));
-        }
-        else
-        {
-            memcpy(Buffer, result->Buffer, Length);
-        }
-
-        GlobalFree(result);
+        DBG_WARN((DBG_PREFIX "opencbm: cbm.c: parallel_burst_read_track: ioctl returned with error %u", retval));
     }
 
     FUNC_LEAVE_INT(retval);
@@ -175,30 +162,17 @@ cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsig
 int
 cbmarch_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
-    CBMT_PARBURST_WRITE_TRACK_IN *parameter;
-
-    int bufferlength = Length + sizeof(CBMT_PARBURST_WRITE_TRACK_IN);
-
     int retval = 0;
 
     FUNC_ENTER();
 
-    parameter = GlobalAlloc(GMEM_FIXED, bufferlength);
+    retval = cbm_ioctl(HandleDevice, CBMCTRL(PARBURST_WRITE_TRACK),
+        Buffer, Length,
+        NULL, 0);
 
-    if (parameter)
+    if (retval == 0)
     {
-        memcpy(parameter->Buffer, Buffer, Length);
-
-        retval = cbm_ioctl(HandleDevice, CBMCTRL(PARBURST_WRITE_TRACK),
-            parameter, bufferlength,
-            NULL, 0);
-
-        if (retval == 0)
-        {
-            DBG_WARN((DBG_PREFIX "opencbm: cbm.c: parallel_burst_write_track: ioctl returned with error %u", retval));
-        }
-
-        GlobalFree(parameter);
+        DBG_WARN((DBG_PREFIX "opencbm: cbm.c: parallel_burst_write_track: ioctl returned with error %u", retval));
     }
 
     FUNC_LEAVE_INT(retval);

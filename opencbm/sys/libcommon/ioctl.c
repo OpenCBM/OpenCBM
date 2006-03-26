@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.13 2006-03-22 18:22:21 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.14 2006-03-26 14:35:09 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -244,12 +244,12 @@ cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
 
         case CBMCTRL_PARBURST_READ_TRACK:
             DBG_IRP(CBMCTRL_PARBURST_READ_TRACK);
-            ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_PARBURST_READ_TRACK_OUT), STATUS_SUCCESS);
+            ntStatus = cbm_checkoutputbuffer(irpSp, 1, STATUS_SUCCESS);
             break;
 
         case CBMCTRL_PARBURST_WRITE_TRACK:
             DBG_IRP(CBMCTRL_PARBURST_WRITE_TRACK);
-            ntStatus = cbm_checkinputbuffer(irpSp, sizeof(CBMT_PARBURST_WRITE_TRACK_IN), STATUS_SUCCESS);
+            ntStatus = cbm_checkinputbuffer(irpSp, 1, STATUS_SUCCESS);
             break;
 
         case CBMCTRL_I_INSTALL:
@@ -476,20 +476,15 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
         case CBMCTRL_PARBURST_READ_TRACK:
             DBG_IRP(CBMCTRL_PARBURST_READ_TRACK);
             returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
-
-            DBG_ASSERT(sizeof(CBMT_PARBURST_READ_TRACK_OUT) == 1);
-//            returnLength -= sizeof(CBMT_PARBURST_READ_TRACK_OUT);
             ntStatus = cbmiec_parallel_burst_read_track(Pdx, 
-                (OUTPUTVALUE(CBMT_PARBURST_READ_TRACK_OUT)->Buffer), (ULONG) returnLength);
-//            returnLength += sizeof(CBMT_PARBURST_READ_TRACK_OUT);
+                Irp->AssociatedIrp.SystemBuffer, (ULONG) returnLength);
             break;
 
         case CBMCTRL_PARBURST_WRITE_TRACK:
             DBG_IRP(CBMCTRL_PARBURST_WRITE_TRACK);
             returnLength = irpSp->Parameters.DeviceIoControl.InputBufferLength;
             ntStatus = cbmiec_parallel_burst_write_track(Pdx,
-                INPUTVALUE(CBMT_PARBURST_WRITE_TRACK_IN)->Buffer,
-                (ULONG) returnLength - sizeof(CBMT_PARBURST_WRITE_TRACK_IN));
+                Irp->AssociatedIrp.SystemBuffer, (ULONG) returnLength);
             break;
 
         case CBMCTRL_I_INSTALL:
