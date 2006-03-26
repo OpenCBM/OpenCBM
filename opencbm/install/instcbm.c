@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.16 2006-03-23 19:26:55 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.17 2006-03-26 12:43:49 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -209,8 +209,8 @@ usage(VOID)
             "  -e, --enumpport re-enumerate the parallel port driver\n"
             "  -u, --update    update parameters if driver is already installed.\n"
             "  -l, --lpt=no    set default LPT port\n"
-            "  -t, --cabletype=TYPE set cabletype to 'auto' (default), 'xa1541' or 'xm1541'.\n"
-            "  -L, --lock=WHAT automatically lock the driver 'yes' (default) or not 'no'.\n"
+            "  -t, --cabletype=TYPE set cabletype to 'auto', 'xa1541' or 'xm1541'.\n"
+            "  -L, --lock=WHAT automatically lock the driver 'yes' or not 'no'.\n"
             "  -n, --nocopy    do not copy the driver files into the system directory\n"
             "  -c, --check     only check if the installation is ok\n"
             "  -F, --forcent4  force NT4 driver on a Win 2000, XP, or newer systems\n" 
@@ -221,6 +221,9 @@ usage(VOID)
             "                  The opposite of --on-demand.\n"
             "  -O, --on-demand start the driver only on demand.\n"
             "                  The opposite of --automatic.\n"
+            "\n"
+            "  If --lock is not specified, --lock=yes is assumed.\n"
+            "  If --cabletype is not specified, --cabletype=auto is assumed.\n"
             "\n");
 
     FUNC_LEAVE();
@@ -457,7 +460,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { NULL,         0,                 NULL, 0   }
     };
 
-    const char shortopts[] = "hreFl:nuctLAOV"
+    const char shortopts[] = "hreFl:nuct:L:AOV"
 #if DBG
                              "D:B"
 #endif // #if DBG
@@ -540,7 +543,9 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
             break;
 
         case 't':
-            if (strcmp(optarg, "xa1541") == 0)
+            if (optarg == NULL)
+                Parameter->IecCableType = -1;
+            else if (strcmp(optarg, "xa1541") == 0)
                 Parameter->IecCableType = 1;
             else if (strcmp(optarg, "xm1541") == 0)
                 Parameter->IecCableType = 0;
@@ -554,16 +559,19 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
             break;
 
         case 'L':
-            if (   (strcmp(optarg, "1") == 0)
+            if (optarg == NULL
+                || (strcmp(optarg, "+") == 0)
                 || (strcmp(optarg, "yes") == 0)
                 || (strcmp(optarg, "true") == 0)
                )
             {
                 Parameter->PermanentlyLock = 1;
             }
-            else if (   (strcmp(optarg, "0") == 0)
+            else if (optarg != NULL &&
+                    (   (strcmp(optarg, "-") == 0)
                      || (strcmp(optarg, "no") == 0)
                      || (strcmp(optarg, "false") == 0)
+                    )
                     )
             {
                 Parameter->PermanentlyLock = 0;
