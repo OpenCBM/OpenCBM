@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.22 2006-03-21 18:15:27 wmsr Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.23 2006-03-26 00:42:58 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -498,7 +498,7 @@ static int do_upload(CBM_FILE fd, char *argv[])
         addr = addr_buf[0] | (addr_buf[1] << 8);
     }
 
-    size = fread(buf, 1, sizeof(buf), f);
+    size = fread(buf, 1, buflen, f);
     if(ferror(f))
     {
         arch_error(0, 0, "could not read %s", fn);
