@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.8 2006-03-20 11:45:53 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.9 2006-03-28 13:31:28 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -642,7 +642,6 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 			return cbm_parallel_burst_write(arg);
 
 		case CBMCTRL_PARBURST_READ_TRACK:
-			printf("PARBURST_READ_TRACK");
 			user_val=(PARBURST_RW_VALUE *) arg; // cast arg to structure pointer
 			/* copy the data to the kernel: */
 			if (copy_from_user(&kernel_val,		// kernel buffer
