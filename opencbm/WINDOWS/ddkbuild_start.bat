@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.7 2006-04-05 08:44:06 wmsr Exp $
+rem $Id: ddkbuild_start.bat,v 1.8 2006-04-05 20:32:15 wmsr Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -14,8 +14,10 @@ rem Another option is to use DDKBUILD from Hollies Technologies,
 rem downloadable from ...
 rem To use that one, just define DDKBUILD_HOLLIS to be 1 on startup.
 
+set CBM4WIN_SRC_HOME=%0\..\..
+
 rem set default local settings (not controlled by CVS)
-if exist ..\..\DDKBUILD_LOCAL.BAT call ..\..\DDKBUILD_LOCAL.BAT %0
+if exist %CBM4WIN_SRC_HOME%\..\DDKBUILD_LOCAL.BAT call %CBM4WIN_SRC_HOME%\..\DDKBUILD_LOCAL.BAT %CBM4WIN_SRC_HOME%
 
 rem Set this to 1 if you are using DDKBUILD.BAT from Hollis Technology
 rem Solutions.  Do not set if using DDKBUILD from OSR
@@ -50,6 +52,16 @@ rem --------------------------------------------------------------------------
 
 rem Here, the skript starts. DO NOT CHANGE ANYTHING below this point if you're
 rem not totally sure what you're doing.
+
+for /f "tokens=2" %%f in ("%CBM4WIN_SRC_HOME%") do (
+	echo ERROR: The calling path to this script contains spaces
+	echo.	%0
+	echo.
+	echo This cannot be handled by ddkbuild.bat -- OSR as well as Hollis. Please
+	echo CD into the directory containing ddkbuild_start.bat and start from there
+	endlocal
+	exit /b 1
+	)
 
 shift
 
@@ -109,9 +121,9 @@ if %DDKBUILD_HOLLIS% EQU 1 (
 
 shift
 
-if exist ..\mnib36 set CMDARGUMENTS=%CMDARGUMENTS% mnib36
+if exist %CBM4WIN_SRC_HOME%\mnib36 set CMDARGUMENTS=%CMDARGUMENTS% mnib36
 
-set CMDLINE=%TARGETSPEC% %DDKBUILD_ARGUMENTS% %CHECKEDFREE% .. %OPTIONAL_DIRS% %0 %1 %2 %3 %4 %5 %6 %7 %8 %9 %CMDARGUMENTS% -F
+set CMDLINE=%TARGETSPEC% %DDKBUILD_ARGUMENTS% %CHECKEDFREE% %CBM4WIN_SRC_HOME% %OPTIONAL_DIRS% %0 %1 %2 %3 %4 %5 %6 %7 %8 %9 %CMDARGUMENTS% -F
 
 rem Make sure no error files are present before starting!
 if exist build*.err del build*.err
@@ -122,7 +134,7 @@ echo COPYTARGET="%COPYTARGET%"
 call %DDKBUILD% %CMDLINE%
 
 rem Copy the INF file into the bin directory
-copy ..\sys\wdm\*.inf ..\bin\%DDKBUILD_PLATFORM%
+copy %CBM4WIN_SRC_HOME%\sys\wdm\*.inf %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%
 
 if not exist build*.err (
 
@@ -133,19 +145,19 @@ if not exist build*.err (
 			echo.
 			echo =============== copying files to target =============
 
-			xcopy /y ..\bin\%DDKBUILD_PLATFORM%\*.inf %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.inf %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy INF file to %COPYTARGET%"
-			xcopy /y ..\bin\%DDKBUILD_PLATFORM%\*.sys %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.sys %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy SYS files to %COPYTARGET%"
-			xcopy /y ..\bin\%DDKBUILD_PLATFORM%\*.exe %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.exe %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy EXE files to %COPYTARGET%"
-			xcopy /y ..\bin\%DDKBUILD_PLATFORM%\*.dll %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.dll %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy DLL files to %COPYTARGET%"
 		)
 
 		if "%COPYSYM%" NEQ "" (
 			echo Copying debugging information
-			xcopy /y ..\bin\%DDKBUILD_PLATFORM%\*.pdb %COPYSYM%
+			xcopy /y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.pdb %COPYSYM%
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy PDB files for debugging %COPYSYM%"
 		)
 	)
