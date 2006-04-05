@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.6 2006-03-20 19:43:06 strik Exp $
+rem $Id: ddkbuild_start.bat,v 1.7 2006-04-05 08:44:06 wmsr Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -15,7 +15,7 @@ rem downloadable from ...
 rem To use that one, just define DDKBUILD_HOLLIS to be 1 on startup.
 
 rem set default local settings (not controlled by CVS)
-if exist ..\..\DDKBUILD_LOCAL.BAT call ..\..\DDKBUILD_LOCAL.BAT
+if exist ..\..\DDKBUILD_LOCAL.BAT call ..\..\DDKBUILD_LOCAL.BAT %0
 
 rem Set this to 1 if you are using DDKBUILD.BAT from Hollis Technology
 rem Solutions.  Do not set if using DDKBUILD from OSR
