@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.11 2006-03-23 19:26:56 strik Exp $ \n
+** \version $Id: startstop.c,v 1.12 2006-04-06 10:11:15 wmsr Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -124,6 +124,8 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
     ULONG instcbmVersionEx;
     DWORD startMode;
     DWORD lptPort;
+    DWORD lptLocking;
+    DWORD cableType;
     char dllPath[MAX_PATH] = "<unknown>";
     char driverPath[MAX_PATH] = "<unknown>";
     BOOL error;
@@ -132,8 +134,12 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 
     error = FALSE;
 
+    // Default value for unset/unconfigured registry settings
+
     startMode = -1;
     lptPort = 0;
+    lptLocking = 1;
+    cableType = -1;
 
     // Try to find out the version and path of the DLL
 
@@ -284,6 +290,14 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 
             RegGetDWORD(regKey, CBM_REGKEY_SERVICE_DEFAULTLPT, &lptPort);
 
+            // find out the configured LPT port locking behaviour
+
+            RegGetDWORD(regKey, CBM_REGKEY_SERVICE_PERMLOCK, &lptLocking);
+
+            // find out the configured cable type
+
+            RegGetDWORD(regKey, CBM_REGKEY_SERVICE_IECCABLE, &cableType);
+
             // We're done, close the registry handle.
 
             RegCloseKey(regKey);
@@ -327,7 +341,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
     printf("Driver configuration:\n");
     DBG_PRINT((DBG_PREFIX "Driver configuration:"));
 
-    printf("  Default port: ........ LPT%i\n", lptPort ? lptPort : 1);
+    printf(               "  Default port: ........ LPT%i\n", lptPort ? lptPort : 1);
     DBG_PRINT((DBG_PREFIX "  Default port: ........ LPT%i", lptPort ? lptPort : 1));
 
     {
@@ -364,9 +378,39 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
                 break;
         }
 
-        printf("  Driver start mode: ... %s (%i)\n\n", startModeName, startMode);
+        printf("  Driver start mode: ... %s (%i)\n", startModeName, startMode);
         DBG_PRINT((DBG_PREFIX "  Driver start mode: ... %s (%i)", startModeName,
             startMode));
+    }
+
+    printf(               "  LPT port locking: .... %s\n", lptLocking ? "yes" : "no");
+    DBG_PRINT((DBG_PREFIX "  LPT port locking: .... %s", lptLocking ? "yes" : "no"));
+
+    {
+        const char *cableTypeName;
+
+        switch (cableType)
+        {
+            case -1:
+                cableTypeName = "auto";
+                break; 
+
+            case 0:
+                cableTypeName = "xm1541";
+                break;
+
+            case 1:
+                cableTypeName = "xa1541";
+                break;
+
+            default:
+                cableTypeName = "<UNKNOWN>";
+                break;
+        }
+
+        printf("  Cable type: .......... %s (%i)\n\n", cableTypeName, cableType);
+        DBG_PRINT((DBG_PREFIX "  Cable type: .......... %s (%i)", cableTypeName,
+            cableType));
     }
 
     FUNC_LEAVE_BOOL(error);
