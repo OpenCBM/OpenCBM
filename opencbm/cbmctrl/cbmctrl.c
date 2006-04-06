@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.23 2006-03-26 00:42:58 wmsr Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.24 2006-04-06 17:22:06 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -589,9 +589,37 @@ static int do_change(CBM_FILE fd, char *argv[])
     do
     {
         /*
+         * Determine if we have a supported drive type.
+         * Note: As we do not recognize all drives reliably,
+         *       we only block a 1581. If we cannot determine
+         *       the drive type, just allow using it!
+         * \todo: Fix this!
+         */
+
+        enum cbm_device_type_e device_type;
+
+        if (cbm_identify(fd, unit, &device_type, NULL) == 0)
+        {
+            if (device_type == cbm_dt_cbm1581)
+            {
+                fprintf(stderr, "Drive %u is a 1581, which is not supported (yet).\n", unit);
+                rv = 1;
+                break;
+            }
+        }
+
+        /*
          * Make sure the drive is on track 18
          */
-        cbm_exec_command(fd, unit, "I0:", 0);
+        if (cbm_exec_command(fd, unit, "I0:", 0) != 0)
+        {
+            /*
+             * The drive did not react; most probably, there is none,
+             * thus quit.
+             */
+            rv = 1;
+            break;
+        }
 
         rv = cbm_upload(fd, unit, 0x500, prog_tdchange, sizeof(prog_tdchange));
     
