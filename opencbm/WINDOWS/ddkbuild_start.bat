@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.8 2006-04-05 20:32:15 wmsr Exp $
+rem $Id: ddkbuild_start.bat,v 1.9 2006-04-06 20:01:38 wmsr Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -58,7 +58,7 @@ for /f "tokens=2" %%f in ("%CBM4WIN_SRC_HOME%") do (
 	echo.	%0
 	echo.
 	echo This cannot be handled by ddkbuild.bat -- OSR as well as Hollis. Please
-	echo CD into the directory containing ddkbuild_start.bat and start from there
+	echo ensure that ddkbuild_start.bat resides in a path without spaces in it.
 	endlocal
 	exit /b 1
 	)
