@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.10 2006-03-10 15:43:36 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.11 2006-04-06 16:52:27 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -155,7 +155,7 @@ d64copy_settings *d64copy_get_default_settings(void)
 
     if(NULL != settings)
     {
-        settings->warp        = 0;
+        settings->warp        = -1;
         settings->retries     = 0;
         settings->bam_mode    = bm_ignore;
         settings->interleave  = -1; /* set later on */

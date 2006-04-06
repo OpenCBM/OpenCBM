@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.7 2006-02-24 12:21:40 strik Exp $";
+    "@(#) $Id: main.c,v 1.8 2006-04-06 16:52:27 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -84,8 +84,12 @@ static void help()
 "                           if data transfer is very slow, increasing this\n"
 "                           value may help.\n"
 "\n"
-"  -w, --warp               enable warp mode; this is not possible when\n"
+"  -w, --warp               enable warp mode; this is not possible if\n"
 "                           TRANSFER is set to `original'\n"
+"                           This is the default if transfer is not `original`.\n"
+"\n"
+"      --no-warp            disable warp mode; this is the default if\n"
+"                           TRANSFER is set to `original'.\n"
 "\n"
 "  -b, --bam-only           BAM-only copy; only allocated blocks are copied;\n"
 "                           for extended tracks (36-40), SpeedDOS BAM format\n"
@@ -204,7 +208,7 @@ static int my_status_cb(d64copy_status status)
 
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
-    d64copy_settings *settings;
+    d64copy_settings *settings = d64copy_get_default_settings();
 
     char *tm = NULL;
     char *src_arg;
@@ -222,6 +226,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         { "help"       , no_argument      , NULL, 'h' },
         { "version"    , no_argument      , NULL, 'V' },
         { "warp"       , no_argument      , NULL, 'w' },
+        { "no-warp"    , no_argument      , &settings->warp, 0 },
         { "quiet"      , no_argument      , NULL, 'q' },
         { "verbose"    , no_argument      , NULL, 'v' },
         { "no-progress", no_argument      , NULL, 'n' },
@@ -239,8 +244,6 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     };
 
     const char shortopts[] ="hVwqbBt:i:s:e:d:r:2vnE:";
-
-    settings = d64copy_get_default_settings();
 
     while((c=getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
@@ -311,6 +314,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                           return 1;
                       }
                       break;
+            case 0:   break; // needed for --no-warp
             default : hint(argv[0]);
                       return 1;
         }
