@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.17 2006-03-26 12:43:49 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.18 2006-04-07 09:45:27 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -210,7 +210,9 @@ usage(VOID)
             "  -u, --update    update parameters if driver is already installed.\n"
             "  -l, --lpt=no    set default LPT port\n"
             "  -t, --cabletype=TYPE set cabletype to 'auto', 'xa1541' or 'xm1541'.\n"
+            "                  If not specified, --cabletype=auto is assumed.\n"
             "  -L, --lock=WHAT automatically lock the driver 'yes' or not 'no'.\n"
+            "                  If not specified, --lock=yes is assumed.\n"
             "  -n, --nocopy    do not copy the driver files into the system directory\n"
             "  -c, --check     only check if the installation is ok\n"
             "  -F, --forcent4  force NT4 driver on a Win 2000, XP, or newer systems\n" 
@@ -221,9 +223,6 @@ usage(VOID)
             "                  The opposite of --on-demand.\n"
             "  -O, --on-demand start the driver only on demand.\n"
             "                  The opposite of --automatic.\n"
-            "\n"
-            "  If --lock is not specified, --lock=yes is assumed.\n"
-            "  If --cabletype is not specified, --cabletype=auto is assumed.\n"
             "\n");
 
     FUNC_LEAVE();
