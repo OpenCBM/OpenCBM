@@ -5,12 +5,19 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2002 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright 1997-2005 Joe Forster <sta(at)c64(dot)org> (Device Detection Code)
+ *  Copyright 1997-2005 Wolfgang Moser <cbm(a)d81(o)de>  (Device Detection Code)
+ *  Copyright 2000-2005 Markus Brenner                   (Parallel Burst Routines)
+ *  Copyright 2000-2005 Pete Rittwage                    (Parallel Burst Routines)
+ *  Copyright 2005      Tim Schürmann                    (Parallel Burst Routines)
+ *  Copyright 2005-2006 Spiro Trikaliotis                (Parallel Burst Routines)
+ *
  *
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.10 2006-04-07 10:34:28 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.11 2006-04-07 11:35:47 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -109,6 +116,13 @@ MODULE_PARM(cable,"i");
 MODULE_PARM_DESC(cable, "cable type: <0=autodetect, 0=non-inverted (XM1541), >0=inverted (XA1541). (default -1)");
 
 MODULE_PARM(reset,"i");
+MODULE_PARM_DESC(reset, "reset at module load: <0=smart reset, 0=no reset, >0 force reset (default: "
+#ifdef DIRECT_PORT_ACCESS
+                "-1"
+#else                                   /* =0 => no reset in cbm_init() */
+                "1"
+#endif
+                ")");
 MODULE_PARM(hold_clk,"i");
 MODULE_PARM_DESC(hold_clk, "0=release CLK when idle, >0=strict C64 behaviour. (default 1)");
 
@@ -211,6 +225,65 @@ static void show( char *s )
 }
 #endif /* DEBUG */
 
+static void timeout_us(int us)
+{
+        current->state = TASK_INTERRUPTIBLE;
+        schedule_timeout(HZ/1000000*us);
+}
+
+static int check_if_bus_free(void)
+{
+    int ret = 0;
+
+    do {
+        RELEASE(ATN_OUT | CLK_OUT | DATA_OUT | RESET);
+
+        // wait for the drive to have time to react
+        timeout_us(100);
+
+        // assert ATN
+        SET(ATN_OUT);
+
+        // now, wait for the drive to have time to react
+        timeout_us(100);
+
+        // if DATA is still unset, we have a problem.
+        if (!GET(DATA_IN))
+            break;
+
+        // ok, at least one drive reacted. Now, test releasing ATN:
+
+        RELEASE(ATN_OUT);
+        timeout_us(100);
+
+        if (!GET(DATA_IN))
+            ret = 1;
+
+    } while (0);
+
+    RELEASE(ATN_OUT | CLK_OUT | DATA_OUT | RESET);
+
+    return ret;
+}
+
+static void wait_for_free_bus(void)
+{
+        int i=1;
+
+        while (1) {
+                if (check_if_bus_free())
+                        break;
+
+                ++i;
+
+                if (i == 1000) {
+                        printk("Quiting because of timeout");
+                        break;
+                }
+                timeout_us(1000);
+        }
+}
+
 static void do_reset( void )
 {
         printk("cbm: resetting devices\n");
@@ -225,14 +298,8 @@ static void do_reset( void )
 #endif
         RELEASE(RESET);
 
-        printk("cbm: sleeping 5 seconds...\n");
-        current->state = TASK_INTERRUPTIBLE;
-#ifdef KERNEL_VERSION
-        schedule_timeout(HZ*5); /* 5s */
-#else
-        current->timeout = jiffies + 500;
-        schedule();
-#endif
+        printk("cbm: waiting for free bus...\n");
+        wait_for_free_bus();
 }
 
 /*
