@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.8 2006-03-29 06:00:32 strik Exp $ \n
+** \version $Id: mnib.c,v 1.9 2006-04-07 08:08:10 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -291,7 +291,7 @@ cbmiec_parallel_burst_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN
         enable();
         DBG_PRINT((DBG_PREFIX "timeout failure! Wanted to read %u, but only read %u",
             ReturnLength, i));
-        ntStatus = STATUS_TIMEOUT;
+        ntStatus = STATUS_DATA_ERROR;
     }
 
     PERF_EVENT_PARBURST_READ_TRACK_EXIT(ntStatus);
@@ -344,8 +344,9 @@ cbmiec_parallel_burst_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR* Buffer, IN
     else
     {
         enable();
-        DBG_PRINT((DBG_PREFIX "timeout failure!"));
-        ntStatus = STATUS_TIMEOUT;
+        DBG_PRINT((DBG_PREFIX "timeout failure! Wanted to write %u, but only wrote %u",
+            BufferLength, i));
+        ntStatus = STATUS_DATA_ERROR;
     }
 
     PERF_EVENT_PARBURST_WRITE_TRACK_EXIT(ntStatus);
