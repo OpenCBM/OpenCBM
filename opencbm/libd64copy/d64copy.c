@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.11 2006-04-06 16:52:27 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.12 2006-04-07 09:49:38 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -298,7 +298,8 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
         }
         if(settings->warp)
         {
-            message_cb(1, "`-w' for .d71 transfer in warp mode ignored");
+            if(settings->warp>0)
+                message_cb(1, "`-w' for .d71 transfer in warp mode ignored");
             settings->warp = 0;
         }
         cbm_exec_command(fd_cbm, cbm_drive, "U0>M1", 0);
@@ -308,7 +309,8 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
 
     if(settings->warp && (cbm_transf->read_gcr_block == NULL))
     {
-        message_cb(1, "`-w' for this transfer mode ignored");
+        if(settings->warp>0)
+            message_cb(1, "`-w' for this transfer mode ignored");
         settings->warp = 0;
     }
 
