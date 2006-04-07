@@ -60,7 +60,7 @@ make install-files \
 	MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 \
 	INFODIR=$RPM_BUILD_ROOT/%{_infodir} \
 	INCDIR=$RPM_BUILD_ROOT/%{_includedir} \
-	MODDIR=$RPM_BUILD_ROOT/"`for d in /lib/modules/\`uname -r\`/{misc,kernel/drivers/char}; do test -d $d && echo $d; done | head -1`"
+	MODDIR=$RPM_BUILD_ROOT/"`for d in /lib/modules/\`uname -r\`/{extra,misc,kernel/drivers/char}; do test -d $d && echo $d; done | head -n 1`"
 
 %files
 %defattr(-,root,root)

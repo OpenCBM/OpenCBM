@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.5 2006-02-24 12:21:39 strik Exp $
+# $Id: config.make,v 1.6 2006-04-07 10:23:08 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -16,7 +16,7 @@ LIBDIR      = $(PREFIX)/lib
 MANDIR      = $(PREFIX)/man/man1
 INFODIR     = $(PREFIX)/info
 INCDIR      = $(PREFIX)/include
-MODDIR      = `for d in /lib/modules/\`uname -r\`/{misc,kernel/drivers/char}; do test -d $$d && echo $$d; done | head -1`
+MODDIR      = `for d in /lib/modules/\`uname -r\`/{extra,misc,kernel/drivers/char}; do test -d $$d && echo $$d; done | head -n 1`
 
 
 #
@@ -35,9 +35,13 @@ LDCONFIG     = /sbin/ldconfig
 
 #
 # location of the kernel source directory
-#
-KERNEL_SOURCE = /usr/src/linux                      # for kernel 2.4
+# (removed, use the later implementation instead. I left them in in case the
+#  later implementation does not work on a particular machine.)
+#KERNEL_SOURCE = /usr/src/linux                      # for kernel 2.4
 #KERNEL_SOURCE = /lib/modules/`uname -r`/build       # for kernel 2.6
+
+# from patch #1189489 on SourceForge, with fix from #1189492):
+KERNEL_SOURCE = `for d in {/lib/modules/\`uname -r\`/build,/usr/src/linux}; do test -d $$d && echo $$d; done | head -n 1`
 
 #
 # kernel driver compile flags.
