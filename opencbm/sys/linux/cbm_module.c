@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.9 2006-03-28 13:31:28 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.10 2006-04-07 10:34:28 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -96,13 +96,21 @@ int hold_clk         =  1;              /* >0 => strict C64 behaviour   */
 #ifdef KERNEL_VERSION
 # ifdef DIRECT_PORT_ACCESS
 MODULE_PARM(port,"i");
+MODULE_PARM_DESC(port, "IO portnumber of parallel port. (default 0x378)");
+
 MODULE_PARM(irq,"i");
+MODULE_PARM_DESC(irq, "IRQ number of parallel port. (default 7)");
 # else
 MODULE_PARM(lp,"i");
+MODULE_PARM_DESC(lp, "parallel port number. (default 0)");
 # endif  /* DIRECT_PORT_ACCESS */
+
 MODULE_PARM(cable,"i");
+MODULE_PARM_DESC(cable, "cable type: <0=autodetect, 0=non-inverted (XM1541), >0=inverted (XA1541). (default -1)");
+
 MODULE_PARM(reset,"i");
 MODULE_PARM(hold_clk,"i");
+MODULE_PARM_DESC(hold_clk, "0=release CLK when idle, >0=strict C64 behaviour. (default 1)");
 
 MODULE_AUTHOR("Michael Klein");
 MODULE_DESCRIPTION("Serial CBM bus driver module");
