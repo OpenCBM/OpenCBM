@@ -9,9 +9,9 @@
  */
 
 /*! ************************************************************** 
-** \file sys/include/util.h \n
+** \file sys/include/WINDOWS/util.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util.h,v 1.2 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: util.h,v 1.3 2006-04-08 13:41:20 strik Exp $ \n
 ** \n
 ** \brief Some utility helpers
 **

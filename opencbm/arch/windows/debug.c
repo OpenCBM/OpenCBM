@@ -1,7 +1,7 @@
 /*! ************************************************************** 
-** \file arch/debug.c \n
+** \file arch/windows/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.3 2006-02-12 15:52:56 strik Exp $ \n
+** \version $Id: debug.c,v 1.4 2006-04-08 13:41:14 strik Exp $ \n
 ** \n
 ** \brief Debugging help functions and definitions
 **

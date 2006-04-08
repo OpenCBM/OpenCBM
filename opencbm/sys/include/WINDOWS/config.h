@@ -9,9 +9,9 @@
  */
 
 /*! ************************************************************** 
-** \file config.h \n
+** \file sys/include/WINDOWS/config.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: config.h,v 1.4 2006-03-20 11:45:53 strik Exp $ \n
+** \version $Id: config.h,v 1.5 2006-04-08 13:41:19 strik Exp $ \n
 ** \n
 ** \brief Definitions for the configuration of the cbm4win driver
 **
