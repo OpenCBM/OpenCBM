@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.5 2006-04-08 13:46:08 strik Exp $";
+    "@(#) $Id: s1.c,v 1.6 2006-04-09 10:34:01 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -162,7 +162,7 @@ static int start_turbo(CBM_FILE fd, int write)
 
 static void exit_turbo(CBM_FILE fd, int write)
 {
-    cbm_iec_wait(fd, IEC_DATA, 0);
+//    cbm_iec_wait(fd, IEC_DATA, 0);
 }
 
 DECLARE_TRANSFER_FUNCS(s1_transfer);
