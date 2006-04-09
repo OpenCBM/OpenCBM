@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.8 2006-03-10 19:25:17 strik Exp $ \n
+** \version $Id: archlib.c,v 1.9 2006-04-09 09:53:12 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -966,6 +966,7 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 int
 cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
+/*
     CBMT_IEC_WAIT_IN parameter;
     CBMT_IEC_WAIT_OUT result;
 
@@ -979,6 +980,22 @@ cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
         &result, sizeof(result));
 
     FUNC_LEAVE_INT(result.Line);
+*/
+    int state;
+
+    FUNC_ENTER();
+    if (State)
+    {
+        while((state = cbm_iec_get(HandleDevice, Line)) == 0)
+            ;
+    }
+    else
+    {
+        while((state = cbm_iec_get(HandleDevice, Line)) != 0)
+            ;
+    }
+
+    FUNC_LEAVE_INT(state);
 }
 
 #if DBG
