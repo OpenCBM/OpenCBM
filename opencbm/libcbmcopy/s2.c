@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s2.c,v 1.6 2006-04-08 13:46:08 strik Exp $";
+    "@(#) $Id: s2.c,v 1.7 2006-04-09 09:47:38 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -83,14 +83,14 @@ static unsigned char read_byte(CBM_FILE fd)
         while(cbm_iec_get(fd, IEC_CLOCK));
         c = (c>>1) | (cbm_iec_get(fd, IEC_DATA) ? 0x80 : 0);
 #else
-        c = (c>>1) | ((cbm_iec_wait(fd, IEC_CLOCK, 0) & IEC_DATA) ? 0x80 : 02 > );
+        c = (c>>1) | ((cbm_iec_wait(fd, IEC_CLOCK, 0) & IEC_DATA) ? 0x80 : 0 );
 #endif
         cbm_iec_release(fd, IEC_ATN);
 #ifndef USE_CBM_IEC_WAIT
         while(!cbm_iec_get(fd,IEC_CLOCK));
         c = (c>>1) | (cbm_iec_get(fd, IEC_DATA) ? 0x80 : 0);
 #else   
-        c = (c>>1) | ((cbm_iec_wait(fd, IEC_CLOCK, 1) & IEC_DATA) ? 0x80 : 02 > );    
+        c = (c>>1) | ((cbm_iec_wait(fd, IEC_CLOCK, 1) & IEC_DATA) ? 0x80 : 0 );    
 #endif  
         cbm_iec_set(fd, IEC_ATN);
     }   
