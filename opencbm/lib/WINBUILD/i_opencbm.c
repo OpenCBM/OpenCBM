@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.8 2006-04-10 14:08:09 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.9 2006-04-10 15:49:51 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -373,8 +373,6 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
                 // wait for the operation to finish
                 if (WaitForMultipleObjects(2, handleList, FALSE, INFINITE) == WAIT_OBJECT_0)
                 {
-                    DBG_PRINT((DBG_PREFIX "CANCELLED"));
-
                     CancelIo(HandleDevice);
 
                     // we are told to cancel this event
