@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.10 2006-04-10 10:29:58 strik Exp $ \n
+** \version $Id: archlib.c,v 1.11 2006-04-10 10:32:12 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -180,6 +180,8 @@ opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
                 }
             }
 
+            WaitForIoCompletionInit();
+
             /* If the DLL loaded successfully, ask for fast scheduling */
             if (Status)
             {
@@ -218,6 +220,8 @@ opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
             {
                 fastschedule_stop();
             }
+
+            WaitForIoCompletionDeinit();
             break;
 
         default:
@@ -345,16 +349,22 @@ int
 cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
     DWORD BytesWritten;
+    OVERLAPPED overlapped;
+    BOOL result;
 
     FUNC_ENTER();
 
-    WriteFile(
+    WaitForIoCompletionConstruct(&overlapped);
+
+    result = WriteFile(
         HandleDevice,
         Buffer,
         Count,
         &BytesWritten,
-        NULL
+        &overlapped
         );
+
+    WaitForIoCompletion(result, HandleDevice, &overlapped, &BytesWritten);
 
     FUNC_LEAVE_INT(BytesWritten);
 }
@@ -388,15 +398,22 @@ cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
     DWORD bytesToRead = Count;
     DWORD bytesRead;
 
+    OVERLAPPED overlapped;
+    BOOL result;
+
     FUNC_ENTER();
 
-    ReadFile(
+    WaitForIoCompletionConstruct(&overlapped);
+
+    result = ReadFile(
         HandleDevice,
         Buffer,
         bytesToRead,
         &bytesRead,
-        NULL
+        &overlapped
         );
+
+    WaitForIoCompletion(result, HandleDevice, &overlapped, &bytesRead);
 
     FUNC_LEAVE_INT(bytesRead);
 }
@@ -717,6 +734,9 @@ cbmarch_reset(CBM_FILE HandleDevice)
     USHORT returnValue;
 
     FUNC_ENTER();
+
+    // try to cancel any pending io operations.
+    CancelIo(HandleDevice);
 
     returnValue = cbm_ioctl(HandleDevice, CBMCTRL(RESET), NULL, 0, NULL, 0) ? 0 : 1;
 
