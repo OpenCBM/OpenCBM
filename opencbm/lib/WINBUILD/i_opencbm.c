@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.9 2006-04-10 15:49:51 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.10 2006-04-10 18:18:28 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -218,6 +218,7 @@ cbm_i_get_debugging_flags(VOID)
 
 static HANDLE CancelEvent = NULL;
 static HANDLE CancelCallbackEvent = NULL;
+static ULONG  InCancellableState  = 0;
 
 /*! \brief Initialize WaitForIoCompletion()
 
@@ -281,19 +282,22 @@ WaitForIoCompletionCancelAll(VOID)
 {
     FUNC_ENTER();
 
-    //
-    // signal the event which is used for prematurely 
-    // cancelling I/O request
-    //
+    if (InterlockedExchange(&InCancellableState, 0) != 0)
+    {
+        //
+        // signal the event which is used for prematurely 
+        // cancelling I/O request
+        //
 
-    SetEvent(CancelEvent);
+        SetEvent(CancelEvent);
 
-    //
-    // Wait to be signalled that the current I/O request
-    // has been cancelled.
-    //
+        //
+        // Wait to be signalled that the current I/O request
+        // has been cancelled.
+        //
 
-    WaitForSingleObject(CancelCallbackEvent, INFINITE);
+        WaitForSingleObject(CancelCallbackEvent, INFINITE);
+    }
 
     FUNC_LEAVE();
 }
@@ -363,14 +367,28 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
     DBG_ASSERT(Overlapped != NULL);
     DBG_ASSERT(BytesTransferred != NULL);
 
+    DbgFlags |= DBGF_BREAK;
+
     if (!Result)
     {
         // deal with the error code 
         switch (GetLastError()) 
         { 
             case ERROR_IO_PENDING:
+            {
+                int tmp;
 
+                //
+                // Make sure WaitForIoCompletionCancelAll() knows it has to signal us
+                //
+
+                tmp = InterlockedExchange(&InCancellableState, 1);
+                DBG_ASSERT(tmp == 0);
+
+                //
                 // wait for the operation to finish
+                //
+
                 if (WaitForMultipleObjects(2, handleList, FALSE, INFINITE) == WAIT_OBJECT_0)
                 {
                     CancelIo(HandleDevice);
@@ -382,11 +400,26 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
                 }
                 else
                 {
+                    //
+                    // WaitForIoCompletionCancelAll() does not need to alert us anymore
+                    //
+
+                    if (InterlockedExchange(&InCancellableState, 0) == 0)
+                    {
+                        //
+                        // In case we were signalled, make sure 
+                        // WaitForIoCompletionCancelAll() does not hang
+                        //
+
+                        SetEvent(CancelCallbackEvent);
+                    }
+
                     // check on the results of the asynchronous read 
                     result = GetOverlappedResult(HandleDevice, Overlapped, 
                         BytesTransferred, FALSE) ; 
                 }
                 break;
+            }
          }
     }
 
