@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.9 2006-04-09 09:53:12 strik Exp $ \n
+** \version $Id: archlib.c,v 1.10 2006-04-10 10:29:58 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -258,7 +258,7 @@ cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
 
 /*! \brief Lock the parallel port for the driver
 
- This functions locks the driver onto the parallel port. This way,
+ This function locks the driver onto the parallel port. This way,
  no other program or driver can allocate the parallel port and
  interfere with the communication.
 
@@ -292,7 +292,7 @@ cbmarch_lock(CBM_FILE HandleDevice)
 
 /*! \brief Unlock the parallel port for the driver
 
- This functions unlocks the driver from the parallel port.
+ This function unlocks the driver from the parallel port.
  This way, other programs and drivers can allocate the
  parallel port and do their own communication with
  whatever device they use.

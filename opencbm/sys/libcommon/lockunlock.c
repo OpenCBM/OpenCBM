@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/lockunlock.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: lockunlock.c,v 1.2 2006-03-10 19:25:17 strik Exp $ \n
+** \version $Id: lockunlock.c,v 1.3 2006-04-10 10:29:58 strik Exp $ \n
 ** \n
 ** \brief Functions for locking und unlocking the driver onto the parallel port
 **
@@ -25,7 +25,7 @@
 
 /*! \brief Lock the parallel port for the driver
 
- This functions locks the driver onto the parallel port, so
+ This function locks the driver onto the parallel port, so
  we can use the port afterwards.
 
  \param Pdx
@@ -108,7 +108,7 @@ cbm_lock_parport(IN PDEVICE_EXTENSION Pdx)
 
 /*! \brief Unlock the parallel port for the driver
 
- This functions unlocks the driver from the parallel port
+ This function unlocks the driver from the parallel port
  after the port has been used.
 
  \param Pdx
@@ -147,7 +147,7 @@ cbm_unlock_parport(IN PDEVICE_EXTENSION Pdx)
 
 /*! \brief Lock the parallel port for the driver
 
- This functions locks the driver onto the parallel port. This way,
+ This function locks the driver onto the parallel port. This way,
  no other program or driver can allocate the parallel port and
  interfere with the communication.
 
@@ -183,7 +183,7 @@ cbm_lock(IN PDEVICE_EXTENSION Pdx)
 
 /*! \brief Unlock the parallel port for the driver
 
- This functions unlocks the driver from the parallel port.
+ This function unlocks the driver from the parallel port.
  This way, other programs and drivers can allocate the
  parallel port and do their own communication with
  whatever device they use.

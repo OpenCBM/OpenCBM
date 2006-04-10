@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file install/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.8 2006-03-22 18:22:21 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.9 2006-04-10 10:29:57 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the driver
 **
@@ -33,7 +33,7 @@
 
 /*! \brief Tell the driver to update its settings
 
- This functions tells the driver to update its settings
+ This function tells the driver to update its settings
  after they have been changed.
 
  \param HandleDevice  

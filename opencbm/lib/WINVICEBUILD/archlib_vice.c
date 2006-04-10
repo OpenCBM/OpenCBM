@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archlib_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: archlib_vice.c,v 1.7 2006-03-10 19:25:17 strik Exp $ \n
+** \version $Id: archlib_vice.c,v 1.8 2006-04-10 10:29:58 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        This variant is for accessing VICE instead of a real device
@@ -219,7 +219,7 @@ cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
 
 /*! \brief Lock the parallel port for the driver
 
- This functions locks the driver onto the parallel port. This way,
+ This function locks the driver onto the parallel port. This way,
  no other program or driver can allocate the parallel port and
  interfere with the communication.
 
@@ -251,7 +251,7 @@ cbmarch_lock(CBM_FILE HandleDevice)
 
 /*! \brief Unlock the parallel port for the driver
 
- This functions unlocks the driver from the parallel port.
+ This function unlocks the driver from the parallel port.
  This way, other programs and drivers can allocate the
  parallel port and do their own communication with
  whatever device they use.

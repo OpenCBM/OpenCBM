@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: archlib.c,v 1.4 2006-03-12 10:27:23 strik Exp $";
+    "@(#) $Id: archlib.c,v 1.5 2006-04-10 10:29:58 strik Exp $";
 #endif
 
 #include <fcntl.h>
@@ -43,7 +43,7 @@ void cbmarch_driver_close(CBM_FILE f)
 
 /*! \brief Lock the parallel port for the driver
 
- This functions locks the driver onto the parallel port. This way,
+ This function locks the driver onto the parallel port. This way,
  no other program or driver can allocate the parallel port and
  interfere with the communication.
 
@@ -72,7 +72,7 @@ cbmarch_lock(CBM_FILE f)
 
 /*! \brief Unlock the parallel port for the driver
 
- This functions unlocks the driver from the parallel port.
+ This function unlocks the driver from the parallel port.
  This way, other programs and drivers can allocate the
  parallel port and do their own communication with
  whatever device they use.

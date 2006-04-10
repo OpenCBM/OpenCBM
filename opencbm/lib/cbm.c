@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.16 2006-03-20 11:45:53 strik Exp $ \n
+** \version $Id: cbm.c,v 1.17 2006-04-10 10:29:58 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -119,7 +119,7 @@ cbm_driver_close(CBM_FILE HandleDevice)
 
 /*! \brief Lock the parallel port for the driver
 
- This functions locks the driver onto the parallel port. This way,
+ This function locks the driver onto the parallel port. This way,
  no other program or driver can allocate the parallel port and
  interfere with the communication.
 
@@ -153,7 +153,7 @@ cbm_lock(CBM_FILE HandleDevice)
 
 /*! \brief Unlock the parallel port for the driver
 
- This functions unlocks the driver from the parallel port.
+ This function unlocks the driver from the parallel port.
  This way, other programs and drivers can allocate the
  parallel port and do their own communication with
  whatever device they use.
