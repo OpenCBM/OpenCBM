@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.9 2006-04-06 20:01:38 wmsr Exp $
+rem $Id: ddkbuild_start.bat,v 1.10 2006-04-10 16:39:26 wmsr Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -161,6 +161,10 @@ if not exist build*.err (
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy PDB files for debugging %COPYSYM%"
 		)
 	)
+)
+
+if "%USERDEFPOSTBUILD%" NEQ "" (
+	if exist %CBM4WIN_SRC_HOME%\%USERDEFPOSTBUILD% call %CBM4WIN_SRC_HOME%\%USERDEFPOSTBUILD% %CBM4WIN_SRC_HOME%
 )
 
 endlocal
