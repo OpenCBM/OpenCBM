@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.9 2006-04-07 08:08:10 strik Exp $ \n
+** \version $Id: mnib.c,v 1.10 2006-04-10 18:15:11 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -164,6 +164,7 @@ cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
 {
     int to = 0;
     int j;
+    int returnValue;
 
     FUNC_ENTER();
 
@@ -191,7 +192,27 @@ cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
     }
 
     PERF_EVENT_PARBURST_NREAD_EXIT(to > 1000000 ? -1 : 0);
-    return to > 1000000 ? -1 : READ_PORT_UCHAR(PAR_PORT);
+
+    if (to > 1000000)
+    {
+        returnValue = -1;
+    }
+    else
+    {
+        int returnValue2 = READ_PORT_UCHAR(PAR_PORT);
+
+        do {
+            returnValue = returnValue2;
+            returnValue2 = READ_PORT_UCHAR(PAR_PORT);
+
+            if (returnValue != returnValue2)
+            {
+                DBG_PRINT((DBG_PREFIX "DIFFERENCES: 0x%02x != 0x%02x", returnValue, returnValue2));
+            }
+        } while (returnValue != returnValue2);
+    }
+
+    return returnValue;
 }
 
 static int
