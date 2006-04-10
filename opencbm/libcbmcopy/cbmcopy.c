@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.7 2006-03-10 15:43:36 strik Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.8 2006-04-10 15:08:11 wmsr Exp $";
 #endif
 
 #include <stdio.h>
@@ -64,6 +64,17 @@ transfers[] =
     { NULL, NULL, NULL }
 };
 
+#ifdef CBMCOPY_DEBUG
+unsigned int debugTransferMode=0, debugBlockCount=0, debugByteCount=0;
+#endif
+
+void printDebugCounters(cbmcopy_message_cb msg_cb)
+{
+#ifdef CBMCOPY_DEBUG
+	msg_cb( sev_info, "transferMode=%u, blockCount=%u, byteCount=%u\n",
+	                  debugTransferMode, debugBlockCount, debugByteCount);
+#endif
+}
 
 static int check_drive_type(CBM_FILE fd, unsigned char drive,
                             cbmcopy_settings *settings,
@@ -213,6 +224,11 @@ static int cbmcopy_read(CBM_FILE fd,
         msg_cb( sev_debug, "start of copy" );
         status_cb( blocks_read );
 
+#ifdef CBMCOPY_DEBUG
+		debugTransferMode=1;	// read mode
+		debugBlockCount=0;
+#endif
+
         for(c = 0xff;
             c == 0xff && (error = trf->check_error(fd, 0)) == 0;
             /* nothing */ )
@@ -220,6 +236,10 @@ static int cbmcopy_read(CBM_FILE fd,
             c = trf->read_byte( fd );
             i = (c == 0xff) ? 0xfe : c;
             *filedata_size += i;
+
+#ifdef CBMCOPY_DEBUG
+			debugBlockCount++;
+#endif 
 
             /* @SRT: FIXME! the next statement is dangerous: If there 
              * is no memory block large enough for reallocating, the
@@ -231,9 +251,13 @@ static int cbmcopy_read(CBM_FILE fd,
             {
 #ifdef CBMCOPY_DEBUG
                 msg_cb( sev_debug, "receive block data (%d)", c );
+				debugByteCount=0;
 #endif 
                 for(cptr = (*filedata) + blocks_read * 254; i; i--)
                 {
+#ifdef CBMCOPY_DEBUG
+					debugByteCount++;
+#endif
                     *(cptr++) = trf->read_byte( fd );
                 }
                 /* (drive is busy now) */
@@ -470,6 +494,10 @@ int cbmcopy_write_file(CBM_FILE fd,
     blocks_written = 0;
     error = 0;
 
+#ifdef CBMCOPY_DEBUG
+	debugTransferMode=2;	// write mode
+	debugBlockCount=0;
+#endif
     if(send_turbo(fd, drive, 1, settings,
                   turbo, turbo_size, (unsigned char*)"U4:", 3, msg_cb) == 0)
     {
@@ -489,6 +517,7 @@ int cbmcopy_write_file(CBM_FILE fd,
             }
 #ifdef CBMCOPY_DEBUG
             msg_cb( sev_debug, "send byte count: %d", c );
+			debugBlockCount++;
 #endif
             trf->write_byte( fd, c );
 
@@ -496,10 +525,14 @@ int cbmcopy_write_file(CBM_FILE fd,
             {
 #ifdef CBMCOPY_DEBUG
                 msg_cb( sev_debug, "send block data" );
+				debugByteCount=0;
 #endif 
                 if( c == 0xff ) c = 0xfe;
                 while(c)
                 {
+#ifdef CBMCOPY_DEBUG
+					debugByteCount++;
+#endif 
                     trf->write_byte( fd, *(filedata++) );
                     c--;
                 }

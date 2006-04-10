@@ -7,12 +7,16 @@
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbmcopy_int.h,v 1.2 2006-02-24 12:21:41 strik Exp $ */
+/* $Id: cbmcopy_int.h,v 1.3 2006-04-10 15:08:11 wmsr Exp $ */
 
 #ifndef CBMCOPY_INT_H
 #define CBMCOPY_INT_H
 
 #include "opencbm.h"
+
+/*
+ * #define CBMCOPY_DEBUG
+ */
 
 typedef struct {
     int  (*write_byte)(CBM_FILE, unsigned char); 

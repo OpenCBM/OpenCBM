@@ -7,7 +7,7 @@
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbmcopy.h,v 1.5 2006-03-10 15:43:36 strik Exp $ */
+/* $Id: cbmcopy.h,v 1.6 2006-04-10 15:08:11 wmsr Exp $ */
 
 #ifndef CBMCOPY_H
 #define CBMCOPY_H
@@ -33,6 +33,12 @@ typedef enum
 typedef void (*cbmcopy_message_cb)(cbmcopy_severity_e sev, const char *format, ...);
 
 typedef int (*cbmcopy_status_cb)(int blocks_processed);
+
+/*
+ * print out the state of internal counters that are used on read
+ * and write transfers for debugging rare protocol races and hangups
+ */
+extern void printDebugCounters(cbmcopy_message_cb msg_cb);
 
 /*
  * Build '\0'-terminated list of '\0'-terminated transfer mode names.
