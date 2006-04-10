@@ -1,0 +1,56 @@
+rem $Id: postbuild_local.bat.sample,v 1.1 2006-04-10 17:54:52 wmsr Exp $
+rem
+rem THIS IS A SAMPLE FILE FOR POSTBUILD_LOCAL.BAT
+rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
+rem CURRENT CBM4WIN DIRECTORY.
+rem
+rem EXAMPLE:
+rem
+rem If the cbm4win sources are in ~/somedir/cbm4win/,
+rem then store this file in ~/somedir/postbuild_local.bat
+rem
+rem
+rem PARAMETERS:
+rem
+rem This script file is called with the cbm4win
+rem source home directory as parameter %1
+
+
+set INSTALL_BASE=C:\_DDK_Test\cbm4win\
+set SYMBOL_STORE=C:\_DDK_Test\DebugSymbols\NewSymbols
+set EXE_I_TARGET=C:\WINDOWS
+
+if not defined DDKBUILD_PLATFORM set DDKBUILD_PLATFORM=i386
+
+for /f "tokens=3 delims=, " %%f in ('%1\bin\%DDKBUILD_PLATFORM%\cbmctrl.exe --version') do set VERSION=%%f
+echo Version is set to: %VERSION%
+
+set INSTL_TARGET=%INSTALL_BASE%\%VERSION%
+if not exist %INSTL_TARGET% (
+	mkdir %INSTL_TARGET%
+	mkdir %INSTL_TARGET%\pdb
+)
+
+
+xcopy /y %1\bin\%DDKBUILD_PLATFORM%\*.inf %INSTL_TARGET%
+if errorlevel 1 echo "INSTALL_current_cbm4win.bat(1) : error : could not copy INF file to %INSTL_TARGET%"
+xcopy /y %1\bin\%DDKBUILD_PLATFORM%\*.sys %INSTL_TARGET%
+if errorlevel 1 echo "INSTALL_current_cbm4win.bat(1) : error : could not copy SYS files to %INSTL_TARGET%"
+xcopy /y %1\bin\%DDKBUILD_PLATFORM%\*.exe %INSTL_TARGET%
+if errorlevel 1 echo "INSTALL_current_cbm4win.bat(1) : error : could not copy EXE files to %INSTL_TARGET%"
+xcopy /y %1\bin\%DDKBUILD_PLATFORM%\*.dll %INSTL_TARGET%
+if errorlevel 1 echo "INSTALL_current_cbm4win.bat(1) : error : could not copy DLL files to %INSTL_TARGET%"
+
+xcopy /y %1\bin\%DDKBUILD_PLATFORM%\*.exe %EXE_I_TARGET%
+if errorlevel 1 echo "INSTALL_current_cbm4win.bat(1) : error : could not copy EXE files to %EXE_I_TARGET%"
+xcopy /y %1\bin\%DDKBUILD_PLATFORM%\*.dll %EXE_I_TARGET%
+if errorlevel 1 echo "INSTALL_current_cbm4win.bat(1) : error : could not copy DLL files to %EXE_I_TARGET%"
+
+xcopy /y %1\bin\%DDKBUILD_PLATFORM%\*.pdb %INSTL_TARGET%\pdb
+if errorlevel 1 echo "INSTALL_current_cbm4win.bat(1) : error : could not copy PDB files to %INSTL_TARGET%\pdb"
+
+xcopy /y %1\bin\%DDKBUILD_PLATFORM%\*.pdb %SYMBOL_STORE%
+if errorlevel 1 echo "INSTALL_current_cbm4win.bat(1) : error : could not copy PDB files for debugging to %SYMBOL_STORE%"
+
+echo Next job is: runas /user:Administrator "cmd /c cd /d %INSTL_TARGET% & instcbm -r & instcbm -n"
+runas /user:Administrator "cmd /c cd /d %INSTL_TARGET% & instcbm -r & instcbm -n"
