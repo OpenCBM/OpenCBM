@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.8 2006-04-10 15:08:11 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.9 2006-04-10 15:50:16 strik Exp $";
 #endif
 
 #include <stdio.h>
@@ -66,15 +66,13 @@ transfers[] =
 
 #ifdef CBMCOPY_DEBUG
 unsigned int debugTransferMode=0, debugBlockCount=0, debugByteCount=0;
-#endif
 
 void printDebugCounters(cbmcopy_message_cb msg_cb)
 {
-#ifdef CBMCOPY_DEBUG
 	msg_cb( sev_info, "transferMode=%u, blockCount=%u, byteCount=%u\n",
 	                  debugTransferMode, debugBlockCount, debugByteCount);
-#endif
 }
+#endif
 
 static int check_drive_type(CBM_FILE fd, unsigned char drive,
                             cbmcopy_settings *settings,

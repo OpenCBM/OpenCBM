@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.11 2006-04-10 15:08:11 wmsr Exp $";
+    "@(#) $Id: main.c,v 1.12 2006-04-10 15:50:15 strik Exp $";
 #endif
 
 #include <ctype.h>
@@ -112,7 +112,9 @@ static void hint(char *prog)
 static void ARCH_SIGNALDECL reset(int dummy)
 {
     fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
+#ifdef CBMCOPY_DEBUG
     printDebugCounters(my_message_cb);
+#endif
     arch_sleep(1);
     cbm_reset(fd_cbm);
     cbm_driver_close(fd_cbm);
