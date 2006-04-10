@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.11 2006-04-10 10:32:12 strik Exp $ \n
+** \version $Id: archlib.c,v 1.12 2006-04-10 14:08:09 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -735,8 +735,10 @@ cbmarch_reset(CBM_FILE HandleDevice)
 
     FUNC_ENTER();
 
+    //
     // try to cancel any pending io operations.
-    CancelIo(HandleDevice);
+    //
+    WaitForIoCompletionCancelAll();
 
     returnValue = cbm_ioctl(HandleDevice, CBMCTRL(RESET), NULL, 0, NULL, 0) ? 0 : 1;
 
@@ -986,7 +988,6 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 int
 cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
-/*
     CBMT_IEC_WAIT_IN parameter;
     CBMT_IEC_WAIT_OUT result;
 
@@ -1000,22 +1001,6 @@ cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
         &result, sizeof(result));
 
     FUNC_LEAVE_INT(result.Line);
-*/
-    int state;
-
-    FUNC_ENTER();
-    if (State)
-    {
-        while((state = cbm_iec_get(HandleDevice, Line)) == 0)
-            ;
-    }
-    else
-    {
-        while((state = cbm_iec_get(HandleDevice, Line)) != 0)
-            ;
-    }
-
-    FUNC_LEAVE_INT(state);
 }
 
 #if DBG

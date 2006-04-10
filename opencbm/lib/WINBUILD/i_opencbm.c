@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.7 2006-04-10 10:32:12 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.8 2006-04-10 14:08:09 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -217,6 +217,7 @@ cbm_i_get_debugging_flags(VOID)
  * prematurely cancel an I/O request  */
 
 static HANDLE CancelEvent = NULL;
+static HANDLE CancelCallbackEvent = NULL;
 
 /*! \brief Initialize WaitForIoCompletion()
 
@@ -231,11 +232,14 @@ WaitForIoCompletionInit(VOID)
     FUNC_ENTER();
 
     //
-    // Create the event for prematurely cancelling I/O request
+    // Create the events for prematurely cancelling I/O request
     //
 
-    CancelEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    CancelEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     DBG_ASSERT(CancelEvent != NULL);
+
+    CancelCallbackEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    DBG_ASSERT(CancelCallbackEvent != NULL);
 
     FUNC_LEAVE();
 }
@@ -262,6 +266,34 @@ WaitForIoCompletionDeinit(VOID)
     //
     if (CancelEvent != NULL)
         CloseHandle(CancelEvent);
+
+    FUNC_LEAVE();
+}
+
+/*! \brief Cancel any running WaitForIoCompletion()
+
+ This function cancels the running WaitForIoCompletion()
+ function.
+*/
+
+VOID
+WaitForIoCompletionCancelAll(VOID)
+{
+    FUNC_ENTER();
+
+    //
+    // signal the event which is used for prematurely 
+    // cancelling I/O request
+    //
+
+    SetEvent(CancelEvent);
+
+    //
+    // Wait to be signalled that the current I/O request
+    // has been cancelled.
+    //
+
+    WaitForSingleObject(CancelCallbackEvent, INFINITE);
 
     FUNC_LEAVE();
 }
@@ -341,9 +373,14 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
                 // wait for the operation to finish
                 if (WaitForMultipleObjects(2, handleList, FALSE, INFINITE) == WAIT_OBJECT_0)
                 {
+                    DBG_PRINT((DBG_PREFIX "CANCELLED"));
+
+                    CancelIo(HandleDevice);
+
                     // we are told to cancel this event
                     *BytesTransferred = 0;
                     result = FALSE;
+                    SetEvent(CancelCallbackEvent);
                 }
                 else
                 {
