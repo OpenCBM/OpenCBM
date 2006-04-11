@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.12 2006-04-10 15:50:15 strik Exp $";
+    "@(#) $Id: main.c,v 1.13 2006-04-11 15:55:24 wmsr Exp $";
 #endif
 
 #include <ctype.h>
@@ -57,7 +57,21 @@ static void my_message_cb(cbmcopy_severity_e severity,
 
 static int my_status_cb(int blocks_written)
 {
-    if(!no_progress) printf("."); fflush(stdout);
+	char *statstr;
+
+    // if(!no_progress) printf("."); fflush(stdout);
+    if(!no_progress)
+    {
+		switch (blocks_written%4)
+    	{
+	    	case 3: statstr="\010-"; break;
+	    	case 2: statstr="\010/"; break;
+	    	case 1: statstr="\010|"; break;
+	    	default: statstr="\010.\\";
+	    }
+		printf("%s",statstr);
+		fflush(stdout);
+	}
     return 0;
 }
 
