@@ -1,4 +1,4 @@
-rem $Id: postbuild_local.bat.sample,v 1.1 2006-04-10 17:54:52 wmsr Exp $
+rem $Id: postbuild_local.bat.sample,v 1.2 2006-04-11 11:52:09 wmsr Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR POSTBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
@@ -19,6 +19,7 @@ rem source home directory as parameter %1
 set INSTALL_BASE=C:\_DDK_Test\cbm4win\
 set SYMBOL_STORE=C:\_DDK_Test\DebugSymbols\NewSymbols
 set EXE_I_TARGET=C:\WINDOWS
+
 
 if not defined DDKBUILD_PLATFORM set DDKBUILD_PLATFORM=i386
 
@@ -53,4 +54,4 @@ xcopy /y %1\bin\%DDKBUILD_PLATFORM%\*.pdb %SYMBOL_STORE%
 if errorlevel 1 echo "INSTALL_current_cbm4win.bat(1) : error : could not copy PDB files for debugging to %SYMBOL_STORE%"
 
 echo Next job is: runas /user:Administrator "cmd /c cd /d %INSTL_TARGET% & instcbm -r & instcbm -n"
-runas /user:Administrator "cmd /c cd /d %INSTL_TARGET% & instcbm -r & instcbm -n"
+runas /user:Administrator "cmd /c cd /d %INSTL_TARGET% & instcbm -r & instcbm -n & pause"
