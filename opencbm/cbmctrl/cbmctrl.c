@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.24 2006-04-06 17:22:06 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.25 2006-04-11 20:24:35 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -228,7 +228,7 @@ static int do_write(CBM_FILE fd, char *argv[])
             /* write that to the the IEC bus */
         if(size != cbm_raw_write(fd, buf, size))
         {
-        	/* exit the loop with another error condition */
+                /* exit the loop with another error condition */
             break;
         }
 
@@ -236,7 +236,7 @@ static int do_write(CBM_FILE fd, char *argv[])
         size = fread(buf, 1, sizeof(buf), f);
         if(size == 0 && feof(f))
         {
-        	/* nothing more to read */
+                /* nothing more to read */
             if(f != stdin) fclose(f);
             return 0;
         }
