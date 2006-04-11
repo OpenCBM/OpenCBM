@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.10 2006-04-10 18:18:28 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.11 2006-04-11 16:25:58 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -366,8 +366,6 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
 
     DBG_ASSERT(Overlapped != NULL);
     DBG_ASSERT(BytesTransferred != NULL);
-
-    DbgFlags |= DBGF_BREAK;
 
     if (!Result)
     {
