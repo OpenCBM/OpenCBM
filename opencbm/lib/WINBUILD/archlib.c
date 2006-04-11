@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.12 2006-04-10 14:08:09 strik Exp $ \n
+** \version $Id: archlib.c,v 1.13 2006-04-11 17:00:03 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -180,8 +180,6 @@ opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
                 }
             }
 
-            WaitForIoCompletionInit();
-
             /* If the DLL loaded successfully, ask for fast scheduling */
             if (Status)
             {
@@ -220,8 +218,6 @@ opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
             {
                 fastschedule_stop();
             }
-
-            WaitForIoCompletionDeinit();
             break;
 
         default:
@@ -349,22 +345,16 @@ int
 cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
     DWORD BytesWritten;
-    OVERLAPPED overlapped;
-    BOOL result;
 
     FUNC_ENTER();
 
-    WaitForIoCompletionConstruct(&overlapped);
-
-    result = WriteFile(
+    WriteFile(
         HandleDevice,
         Buffer,
         Count,
         &BytesWritten,
-        &overlapped
+        NULL
         );
-
-    WaitForIoCompletion(result, HandleDevice, &overlapped, &BytesWritten);
 
     FUNC_LEAVE_INT(BytesWritten);
 }
@@ -398,22 +388,15 @@ cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
     DWORD bytesToRead = Count;
     DWORD bytesRead;
 
-    OVERLAPPED overlapped;
-    BOOL result;
-
     FUNC_ENTER();
 
-    WaitForIoCompletionConstruct(&overlapped);
-
-    result = ReadFile(
+    ReadFile(
         HandleDevice,
         Buffer,
         bytesToRead,
         &bytesRead,
-        &overlapped
+        NULL
         );
-
-    WaitForIoCompletion(result, HandleDevice, &overlapped, &bytesRead);
 
     FUNC_LEAVE_INT(bytesRead);
 }
@@ -735,11 +718,6 @@ cbmarch_reset(CBM_FILE HandleDevice)
 
     FUNC_ENTER();
 
-    //
-    // try to cancel any pending io operations.
-    //
-    WaitForIoCompletionCancelAll();
-
     returnValue = cbm_ioctl(HandleDevice, CBMCTRL(RESET), NULL, 0, NULL, 0) ? 0 : 1;
 
     FUNC_LEAVE_INT(returnValue);
@@ -988,6 +966,7 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 int
 cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
+/*
     CBMT_IEC_WAIT_IN parameter;
     CBMT_IEC_WAIT_OUT result;
 
@@ -1001,6 +980,22 @@ cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
         &result, sizeof(result));
 
     FUNC_LEAVE_INT(result.Line);
+*/
+    int state;
+
+    FUNC_ENTER();
+    if (State)
+    {
+        while((state = cbm_iec_get(HandleDevice, Line)) == 0)
+            ;
+    }
+    else
+    {
+        while((state = cbm_iec_get(HandleDevice, Line)) != 0)
+            ;
+    }
+
+    FUNC_LEAVE_INT(state);
 }
 
 #if DBG

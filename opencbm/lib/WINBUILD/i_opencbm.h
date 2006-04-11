@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.5 2006-04-10 14:08:09 strik Exp $ \n
+** \version $Id: i_opencbm.h,v 1.6 2006-04-11 17:00:03 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **
@@ -54,12 +54,5 @@ extern BOOL IsDriverStartedAutomatically(VOID);
 #if DBG
     extern VOID cbm_i_get_debugging_flags(VOID);
 #endif
-
-extern VOID WaitForIoCompletionInit(VOID);
-extern VOID WaitForIoCompletionDeinit(VOID);
-extern VOID WaitForIoCompletionCancelAll(VOID);
-extern VOID WaitForIoCompletionConstruct(LPOVERLAPPED Overlapped);
-extern BOOL WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped, DWORD *BytesTransferred);
-
 
 #endif /* I_OPENCBM_H */
