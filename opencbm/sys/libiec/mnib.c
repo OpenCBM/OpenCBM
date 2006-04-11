@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.10 2006-04-10 18:15:11 strik Exp $ \n
+** \version $Id: mnib.c,v 1.11 2006-04-11 17:17:16 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -200,16 +200,25 @@ cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
     else
     {
         int returnValue2 = READ_PORT_UCHAR(PAR_PORT);
+        int returnValue3;
+        int count = 0;
+
+        cbmiec_udelay(1);
+
+        returnValue3 = READ_PORT_UCHAR(PAR_PORT);
 
         do {
+            cbmiec_udelay(1);
             returnValue = returnValue2;
-            returnValue2 = READ_PORT_UCHAR(PAR_PORT);
+            returnValue2 = returnValue3;
+            returnValue3 = READ_PORT_UCHAR(PAR_PORT);
 
-            if (returnValue != returnValue2)
+            if ((returnValue != returnValue2) || (returnValue != returnValue3))
             {
-                DBG_PRINT((DBG_PREFIX "DIFFERENCES: 0x%02x != 0x%02x", returnValue, returnValue2));
+                DBG_PRINT((DBG_PREFIX "DIFFERENCES: 0x%02x, 0x%02x, 0x%02x (%u)",
+                    returnValue, returnValue2, returnValue3, count++));
             }
-        } while (returnValue != returnValue2);
+        } while ((returnValue != returnValue2) || (returnValue != returnValue3));
     }
 
     return returnValue;
