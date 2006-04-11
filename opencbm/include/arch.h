@@ -33,7 +33,7 @@
 #define arch_strncasecmp(_x,_y,_z) ARCH_CBM_LINUX_WIN(strncasecmp(_x,_y,_z), _strnicmp(_x,_y,_z))
 
 #define arch_sleep(_x)  ARCH_CBM_LINUX_WIN(sleep(_x), Sleep((_x) * 1000))
-#define arch_usleep(_x) ARCH_CBM_LINUX_WIN(usleep(_x), Sleep((_x) / 1000))
+#define arch_usleep(_x) ARCH_CBM_LINUX_WIN(usleep(_x), Sleep( ((_x) + 999) / 1000))
 
 #ifdef WIN32
  extern void arch_error(int AUnused, unsigned int ErrorCode, const char *format, ...);
