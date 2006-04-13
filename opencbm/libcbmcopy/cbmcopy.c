@@ -1,15 +1,15 @@
 /*
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.11 2006-04-11 20:24:35 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.12 2006-04-13 15:25:33 wmsr Exp $";
 #endif
 
 #include <stdio.h>
@@ -66,13 +66,21 @@ transfers[] =
 };
 
 #ifdef CBMCOPY_DEBUG
-signed int debugTransferMode=0, debugBlockCount=0, debugByteCount=0;
+signed int debugLineNumber=0, debugBlockCount=0, debugByteCount=0;
+
+#   define SETSTATEDEBUG(_x)  \
+    debugLineNumber=__LINE__; \
+    (_x)
 
 void printDebugCounters(cbmcopy_message_cb msg_cb)
 {
-    msg_cb( sev_info, "transferMode=%d, blockCount=%d, byteCount=%d\n",
-                      debugTransferMode, debugBlockCount, debugByteCount);
+    msg_cb( sev_info, "file: " __FILE__
+                      "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
+                      "\n\tlineNumber=%d, blockCount=%d, byteCount=%d\n",
+                      debugLineNumber, debugBlockCount, debugByteCount);
 }
+#else
+#    define SETSTATEDEBUG(_x) (void)0
 #endif
 
 static int check_drive_type(CBM_FILE fd, unsigned char drive,
@@ -217,22 +225,24 @@ static int cbmcopy_read(CBM_FILE fd,
     }
     sprintf( (char*)buf, "U4:%c%c", (unsigned char)track, (unsigned char)sector );
 
+    SETSTATEDEBUG((void)0);    // pre send_turbo condition
     if(send_turbo(fd, drive, 0, settings,
                   turbo, turbo_size, buf, 5, msg_cb) == 0)
     {
         msg_cb( sev_debug, "start of copy" );
         status_cb( blocks_read );
 
-#ifdef CBMCOPY_DEBUG
-        debugTransferMode=1;    // read mode
-        debugBlockCount=0;
-        debugByteCount=-99;    // not actually in use
-#endif
+        // Fix proposion: add a little delay after the turbo start
+        arch_usleep(1000);
+
+        SETSTATEDEBUG(debugBlockCount=0);   // turbo sent condition
 
         for(c = 0xff;
             c == 0xff && (error = trf->check_error(fd, 0)) == 0;
             /* nothing */ )
         {
+            SETSTATEDEBUG((void)0);    // after check_error condition
+
                 // Hangup position following? Yes, seems so.
                 //
                 //  debugByteCount ==
@@ -243,16 +253,13 @@ static int cbmcopy_read(CBM_FILE fd,
                 // Fix proposion: add a little delay at the end of the loop
 
             c = trf->read_byte( fd );
-#ifdef CBMCOPY_DEBUG
-            debugByteCount=-90;    // afterwait condition
-#endif 
+
+            SETSTATEDEBUG((void)0);    // afterwait condition
+
             i = (c == 0xff) ? 0xfe : c;
             *filedata_size += i;
 
-#ifdef CBMCOPY_DEBUG
-            debugBlockCount++;
-            debugByteCount=-80;    // preset condition
-#endif 
+            SETSTATEDEBUG(debugBlockCount++);    // preset condition
 
             /* @SRT: FIXME! the next statement is dangerous: If there 
              * is no memory block large enough for reallocating, the
@@ -260,20 +267,21 @@ static int cbmcopy_read(CBM_FILE fd,
              * thus, we have a memory leak.
              */
             *filedata = realloc(*filedata, *filedata_size);
+
+            SETSTATEDEBUG((void)0);    // after check_error condition
             if(*filedata)
             {
+                SETSTATEDEBUG(debugByteCount=0);
 #ifdef CBMCOPY_DEBUG
                 msg_cb( sev_debug, "receive block data (%d)", c );
-                debugByteCount=0;
 #endif 
                 for(cptr = (*filedata) + blocks_read * 254; i; i--)
                 {
-#ifdef CBMCOPY_DEBUG
-                    debugByteCount++;
-#endif
+                    SETSTATEDEBUG(debugByteCount++);
                     *(cptr++) = trf->read_byte( fd );
                 }
                 /* (drive is busy now) */
+                SETSTATEDEBUG((void)0);    // after blockloop condition
 
                 // Fix proposion: add a little delay at the end of the loop
                 //    "hmmmm, if we know that the drive is busy now,
@@ -342,13 +350,7 @@ static int cbmcopy_read(CBM_FILE fd,
                 // IEC bus state instead of sillily waiting a dedicated
                 // amount of time and perhaps too less time?
 
-#if CBMCOPY_DEBUG+0>=5
-                msg_cb( sev_info, "After block byteCount=%u", debugByteCount );
-#endif
-                
-#ifdef CBMCOPY_DEBUG
-                debugByteCount=-1;    // afterread condition
-#endif 
+                SETSTATEDEBUG((void)0);    // afterread condition
                 status_cb( ++blocks_read );
             }
             else
@@ -356,18 +358,12 @@ static int cbmcopy_read(CBM_FILE fd,
                 /* FIXME */
             }
 
-#ifdef CBMCOPY_DEBUG
-            debugByteCount=-10;    // pre loop condition
-#endif 
+            SETSTATEDEBUG((void)0);    // pre loop condition
         }
         msg_cb( sev_debug, "done" );
-#ifdef CBMCOPY_DEBUG
-        debugByteCount=-200;    // end loop condition
-#endif 
+        SETSTATEDEBUG((void)0);    // end loop condition
         trf->exit_turbo( fd, 0 );
-#ifdef CBMCOPY_DEBUG
-        debugByteCount=-300;    // turbo exited condition
-#endif 
+        SETSTATEDEBUG((void)0);    // turbo exited condition
     }
 
     return rv;
@@ -591,17 +587,17 @@ int cbmcopy_write_file(CBM_FILE fd,
     blocks_written = 0;
     error = 0;
 
+    SETSTATEDEBUG((void)0);    // pre send_turbo condition
     if(send_turbo(fd, drive, 1, settings,
                   turbo, turbo_size, (unsigned char*)"U4:", 3, msg_cb) == 0)
     {
         msg_cb( sev_debug, "start of copy" );
         status_cb( blocks_written );
 
-#ifdef CBMCOPY_DEBUG
-        debugTransferMode=2;    // write mode
-        debugBlockCount=0;
-        debugByteCount=-99;    // not actually in use
-#endif
+        // Fix proposion: add a little delay after the turbo start
+        arch_usleep(1000);
+
+        SETSTATEDEBUG(debugBlockCount=0);
 
         for(i = 0;
             (i == 0) || (i < filedata_size && !error );
@@ -615,9 +611,9 @@ int cbmcopy_write_file(CBM_FILE fd,
             {
                 c = 255;
             }
+            SETSTATEDEBUG(debugBlockCount++);
 #ifdef CBMCOPY_DEBUG
             msg_cb( sev_debug, "send byte count: %d", c );
-            debugBlockCount++;
 #endif
                 // Hangup position following?
                 //
@@ -633,41 +629,28 @@ SIGINT caught X-(  Resetting IEC bus...
 
 */
             trf->write_byte( fd, c );
-#ifdef CBMCOPY_DEBUG
-            debugByteCount=-90;    // afterwait condition
-#endif 
+            SETSTATEDEBUG((void)0);
 
             if(c)
             {
+                SETSTATEDEBUG(debugByteCount=0);
 #ifdef CBMCOPY_DEBUG
                 msg_cb( sev_debug, "send block data" );
-                debugByteCount=0;
 #endif 
                 if( c == 0xff ) c = 0xfe;
                 while(c)
                 {
-#ifdef CBMCOPY_DEBUG
-                    debugByteCount++;
-#endif 
+                    SETSTATEDEBUG(debugByteCount++);
                     trf->write_byte( fd, *(filedata++) );
                     c--;
                 }
 
                 /* (drive is busy now) */
-
-#if CBMCOPY_DEBUG+0>=5
-                msg_cb( sev_info, "After block byteCount=%u", debugByteCount );
-#endif
                 
-#ifdef CBMCOPY_DEBUG
-                debugByteCount=-1;    // afterread condition
-#endif 
-
+                SETSTATEDEBUG((void)0);
             }
             error = trf->check_error( fd, 1 );
-#ifdef CBMCOPY_DEBUG
-            debugByteCount=-4;    // aftercheck condition
-#endif 
+            SETSTATEDEBUG((void)0);
 
             // Fix proposion: add a little delay at the end of the loop
             //    "hmmmm, if we know that the drive is busy now,
@@ -681,16 +664,13 @@ SIGINT caught X-(  Resetting IEC bus...
             {
                 status_cb( ++blocks_written );
             }
-#ifdef CBMCOPY_DEBUG
-            debugByteCount=-10;    // pre loop condition
-#endif 
+            SETSTATEDEBUG((void)0);
         }
         msg_cb( sev_debug, "done" );
 
-#ifdef CBMCOPY_DEBUG
-        debugByteCount=-200;    // end loop condition
-#endif 
+        SETSTATEDEBUG((void)0);
         trf->exit_turbo( fd, 0 );
+        SETSTATEDEBUG((void)0);
     }
     return rv;
 }
