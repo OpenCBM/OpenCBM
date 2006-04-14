@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.12 2006-04-13 15:25:33 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.13 2006-04-14 16:01:53 wmsr Exp $";
 #endif
 
 #include <stdio.h>
@@ -232,7 +232,8 @@ static int cbmcopy_read(CBM_FILE fd,
         msg_cb( sev_debug, "start of copy" );
         status_cb( blocks_read );
 
-        // Fix proposion: add a little delay after the turbo start
+        // Fix proposion for the 1581 protocols:
+        //    add a little delay after the turbo start
         arch_usleep(1000);
 
         SETSTATEDEBUG(debugBlockCount=0);   // turbo sent condition
@@ -242,15 +243,6 @@ static int cbmcopy_read(CBM_FILE fd,
             /* nothing */ )
         {
             SETSTATEDEBUG((void)0);    // after check_error condition
-
-                // Hangup position following? Yes, seems so.
-                //
-                //  debugByteCount ==
-                //      -99  -- if coming from loop entry
-                //      -10  -- if coming from loop repetation
-                //
-                //
-                // Fix proposion: add a little delay at the end of the loop
 
             c = trf->read_byte( fd );
 
@@ -283,72 +275,11 @@ static int cbmcopy_read(CBM_FILE fd,
                 /* (drive is busy now) */
                 SETSTATEDEBUG((void)0);    // after blockloop condition
 
-                // Fix proposion: add a little delay at the end of the loop
-                //    "hmmmm, if we know that the drive is busy now,
-                //     shouldn't we wait for it then?"
-                {
-#if CBMCOPY_DEBUG+0>=3
-                    int s1=0, s2=0;
-                    s1=cbm_iec_poll(fd);
-#endif
-                    // arch_usleep(1000);
-                    // arch_usleep(50000);
-                    
-                        // even a simple task schedule seems to be enough
-                        // to fix for the hangup issues
-                    // arch_usleep(0);
-                        // no, not at Spiro's setup
-
-                    arch_usleep(1000);
-#if CBMCOPY_DEBUG+0>=3
-                    s2=cbm_iec_poll(fd);
-
-                    if(s1!=s2)
-                    {
-                        msg_cb( sev_warning, "pre- and postdelay IEC bus conditions differ: 0x%02X!=0x%02X", s1, s2);
-                        /*
-                         * [Warning] pre- and postdelay IEC bus conditions differ: 0x0B!=0x0A
-                         * [Warning] pre- and postdelay IEC bus conditions differ: 0x0B!=0x0A
-                         * [Warning] pre- and postdelay IEC bus conditions differ: 0x0B!=0x0A
-                         * [Warning] pre- and postdelay IEC bus conditions differ: 0x0B!=0x0A
-                         * ...
-                         * This really happens very often !!!
-                         *
-                         * Result: Do a wait for DATA becoming 0 (active)
-                         * ATTENTION: This may be protocol dependent and may not work!
-                         */
-                    }
-                    else if(s2!=0x0b)
-                    {
-                        msg_cb( sev_warning, "postdelay IEC bus condition !=0x0B: 0x%02X", s2);
-                        /*
-                         * 0x0B seems to be the standard value after the last transferred
-                         * byte, hmmm....
-                         *
-                         * Why is the bus state sometimes 0x0A after the wait then?
-                         *     And why doesn't this produce hangups then?
-                         * Would we see that 0x0A value more often, if the delay
-                         * becomes much bigger, e.g.: 50000 ?
-                         *
-                         * OK, after such a long delay of 50000 the pre- and postdelay
-                         * bus conditions almost always differ and the final IEC bus
-                         * state becomes 0x0A.
-                         *
-                         *
-                         * Since waiting for a dedicated line state seems to be not
-                         * applicable in respect to the different protocols, what's
-                         * the effect, if we do only a 0ms-sleep (effectively giving
-                         * up one time slice)?
-                         * This also seems to fix the hangups. Even more, pre-/
-                         * postdelay differencies can be watched very, very rarely.
-                         *
-                         */
-                    }
-#endif
-                }
-                // Is there another possibility to wait for a decent
-                // IEC bus state instead of sillily waiting a dedicated
-                // amount of time and perhaps too less time?
+                // Fix proposion for the 1581 protocols:
+                //    add a little delay at the end of the loop
+                //       "hmmmm, if we know that the drive is busy
+                //        now, shouldn't we wait for it then?"
+                arch_usleep(1000);
 
                 SETSTATEDEBUG((void)0);    // afterread condition
                 status_cb( ++blocks_read );
@@ -594,7 +525,8 @@ int cbmcopy_write_file(CBM_FILE fd,
         msg_cb( sev_debug, "start of copy" );
         status_cb( blocks_written );
 
-        // Fix proposion: add a little delay after the turbo start
+        // Fix proposion for the 1581 protocols:
+        //    add a little delay after the turbo start
         arch_usleep(1000);
 
         SETSTATEDEBUG(debugBlockCount=0);
@@ -615,19 +547,6 @@ int cbmcopy_write_file(CBM_FILE fd,
 #ifdef CBMCOPY_DEBUG
             msg_cb( sev_debug, "send byte count: %d", c );
 #endif
-                // Hangup position following?
-                //
-                //  debugByteCount ==
-                //      -99  -- if coming from loop entry
-                //      -10  -- if coming from loop repetation
-                //
-                //
-                // Fix proposion: add a little delay at the end of the loop
-/*
-SIGINT caught X-(  Resetting IEC bus...
-[Info] transferMode=2, blockCount=502, byteCount=-10                
-
-*/
             trf->write_byte( fd, c );
             SETSTATEDEBUG((void)0);
 
@@ -652,13 +571,11 @@ SIGINT caught X-(  Resetting IEC bus...
             error = trf->check_error( fd, 1 );
             SETSTATEDEBUG((void)0);
 
-            // Fix proposion: add a little delay at the end of the loop
-            //    "hmmmm, if we know that the drive is busy now,
-            //     shouldn't we wait for it then?"
+            // Fix proposion for the 1581 protocols:
+            //    add a little delay at the end of the loop
+            //       "hmmmm, if we know that the drive is busy
+            //        now, shouldn't we wait for it then?"
             arch_usleep(1000);
-            // Is there another possibility to wait for a decent
-            // IEC bus state instead of sillily waiting a dedicated
-            // amount of time and perhaps too less time?
 
             if(!error)
             {
@@ -669,7 +586,7 @@ SIGINT caught X-(  Resetting IEC bus...
         msg_cb( sev_debug, "done" );
 
         SETSTATEDEBUG((void)0);
-        trf->exit_turbo( fd, 0 );
+        trf->exit_turbo( fd, 1 );
         SETSTATEDEBUG((void)0);
     }
     return rv;
