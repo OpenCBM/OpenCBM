@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.13 2006-04-14 16:01:53 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.14 2006-04-15 12:08:58 wmsr Exp $";
 #endif
 
 #include <stdio.h>
@@ -232,8 +232,14 @@ static int cbmcopy_read(CBM_FILE fd,
         msg_cb( sev_debug, "start of copy" );
         status_cb( blocks_read );
 
-        // Fix proposion for the 1581 protocols:
-        //    add a little delay after the turbo start
+        /*
+         * FIXME: Find and eliminate the real protocol races to
+         *        eliminate the rare hangups with the 1581 based
+         *        turbo routines (bugs suspected in 6502 code)
+         *
+         * Hotfix proposion for the 1581 protocols:
+         *    add a little delay after the turbo start
+         */
         arch_usleep(1000);
 
         SETSTATEDEBUG(debugBlockCount=0);   // turbo sent condition
@@ -275,10 +281,17 @@ static int cbmcopy_read(CBM_FILE fd,
                 /* (drive is busy now) */
                 SETSTATEDEBUG((void)0);    // after blockloop condition
 
-                // Fix proposion for the 1581 protocols:
-                //    add a little delay at the end of the loop
-                //       "hmmmm, if we know that the drive is busy
-                //        now, shouldn't we wait for it then?"
+                /*
+                 * FIXME: Find and eliminate the real protocol races to
+                 *        eliminate the rare hangups with the 1581 based
+                 *        turbo routines (bugs suspected in 6502 code)
+                 *
+                 * Hotfix proposion for the 1581 protocols:
+                 *    add a little delay at the end of the loop
+                 *       "hmmmm, if we know that the drive is busy
+                 *        now, shouldn't we wait for it then?"
+                 *    add a little delay after the turbo start
+                 */
                 arch_usleep(1000);
 
                 SETSTATEDEBUG((void)0);    // afterread condition
@@ -295,6 +308,16 @@ static int cbmcopy_read(CBM_FILE fd,
         SETSTATEDEBUG((void)0);    // end loop condition
         trf->exit_turbo( fd, 0 );
         SETSTATEDEBUG((void)0);    // turbo exited condition
+        /*
+         * FIXME: Find and eliminate the real protocol race to
+         *        eliminate a rare "99, DRIVER ERROR,00,00" with the
+         *        1571 disk drive and the serial-2 read turbo
+         *
+         * Hotfix proposion for the 1571 protocol:
+         *    add a little delay at the end of the routine
+         */
+        arch_usleep(1000);
+        SETSTATEDEBUG((void)0);    // turbo exited, waited for drive
     }
 
     return rv;
@@ -525,8 +548,14 @@ int cbmcopy_write_file(CBM_FILE fd,
         msg_cb( sev_debug, "start of copy" );
         status_cb( blocks_written );
 
-        // Fix proposion for the 1581 protocols:
-        //    add a little delay after the turbo start
+        /*
+         * FIXME: Find and eliminate the real protocol races to
+         *        eliminate the rare hangups with the 1581 based
+         *        turbo routines (bugs suspected in 6502 code)
+         *
+         * Hotfix proposion for the 1581 protocols:
+         *    add a little delay after the turbo start
+         */
         arch_usleep(1000);
 
         SETSTATEDEBUG(debugBlockCount=0);
@@ -571,10 +600,17 @@ int cbmcopy_write_file(CBM_FILE fd,
             error = trf->check_error( fd, 1 );
             SETSTATEDEBUG((void)0);
 
-            // Fix proposion for the 1581 protocols:
-            //    add a little delay at the end of the loop
-            //       "hmmmm, if we know that the drive is busy
-            //        now, shouldn't we wait for it then?"
+            /*
+             * FIXME: Find and eliminate the real protocol races to
+             *        eliminate the rare hangups with the 1581 based
+             *        turbo routines (bugs suspected in 6502 code)
+             *
+             * Hotfix proposion for the 1581 protocols:
+             *    add a little delay at the end of the loop
+             *       "hmmmm, if we know that the drive is busy
+             *        now, shouldn't we wait for it then?"
+             *    add a little delay after the turbo start
+             */
             arch_usleep(1000);
 
             if(!error)
