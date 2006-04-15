@@ -357,26 +357,6 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             printf("%s\n", cmd);
         }
 
-        if(!berror && (endtrack > 35))
-        {
-            cbm_open(fd, drive, 2, "#", 1);
-            cbm_exec_command(fd, drive, "U1:2 0 18 0", 11);
-            cbm_exec_command(fd, drive, "B-P2 192", 8);
-            cbm_listen(fd, drive, 2);
-            while(endtrack > 35)
-            {
-                cbm_raw_write(fd, "\021\377\377\001", 4);
-                endtrack--;
-            }
-            cbm_unlisten(fd);
-            cbm_exec_command(fd, drive, "U2:2 0 18 0", 11);
-            cbm_close(fd, drive, 2);
-        }
-        if(!berror && status)
-        {
-            cbm_device_status(fd, drive, cmd, sizeof(cmd));
-            printf("%s\n", cmd);
-        }
 #if defined(DebugFormat) && DebugFormat!=0  // verbose output
         {
             float RPMval;
@@ -479,7 +459,28 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                 fprintf(stderr, "error reading debug logging data!\n");
             }
         }
+        berror = cbm_device_status(fd, drive, cmd, sizeof(cmd));
 #endif
+        if(!berror && (endtrack > 35))
+        {
+            cbm_open(fd, drive, 2, "#", 1);
+            cbm_exec_command(fd, drive, "U1:2 0 18 0", 11);
+            cbm_exec_command(fd, drive, "B-P2 192", 8);
+            cbm_listen(fd, drive, 2);
+            while(endtrack > 35)
+            {
+                cbm_raw_write(fd, "\021\377\377\001", 4);
+                endtrack--;
+            }
+            cbm_unlisten(fd);
+            cbm_exec_command(fd, drive, "U2:2 0 18 0", 11);
+            cbm_close(fd, drive, 2);
+        }
+        if(!berror && status)
+        {
+            cbm_device_status(fd, drive, cmd, sizeof(cmd));
+            printf("%s\n", cmd);
+        }
         cbm_driver_close(fd);
         return 0;
     }
