@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.14 2006-04-15 12:08:58 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.15 2006-04-17 18:46:17 wmsr Exp $";
 #endif
 
 #include <stdio.h>
@@ -308,15 +308,18 @@ static int cbmcopy_read(CBM_FILE fd,
         SETSTATEDEBUG((void)0);    // end loop condition
         trf->exit_turbo( fd, 0 );
         SETSTATEDEBUG((void)0);    // turbo exited condition
+
         /*
          * FIXME: Find and eliminate the real protocol race to
          *        eliminate a rare "99, DRIVER ERROR,00,00" with the
          *        1571 disk drive and the serial-2 read turbo
          *
          * Hotfix proposion for the 1571 protocol:
-         *    add a little delay at the end of the routine
+         *    add a listen/unlisten sequence, just doing a decent
+         *    arch_usleep() and waiting some time did not work
          */
-        arch_usleep(1000);
+        cbm_listen(fd, drive, 0);
+        cbm_unlisten(fd);
         SETSTATEDEBUG((void)0);    // turbo exited, waited for drive
     }
 
