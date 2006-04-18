@@ -1,36 +1,51 @@
 #!/bin/bash
 
-# $Id: cbmcopy_rcmp.sh,v 1.1 2006-04-15 08:56:13 wmsr Exp $
+# $Id: cbmcopy_rcmp.sh,v 1.2 2006-04-18 15:21:23 wmsr Exp $
 
 function error_info {
-	echo "cbmcopy_fill.sh <drivetype> [<cbmcopy parameters>]" 1>&2
+	echo "cbmcopy_rcmp.sh <testfileset> <drivetype> [<cbmcopy parameters>]" 1>&2
 	echo  1>&2
-	echo "drivetype: 1581, 1571, 1541"  1>&2
+	echo "testfileset: mass | fill"  1>&2
+	echo  1>&2
+	echo "drivetype:   1581, 1571, 1541"  1>&2
 	rm -f shelltst.pid
 	exit 1
 	}
 
-if [ $# -lt 1 ]
+if [ $# -lt 2 ]
 then
 	error_info
 fi
 
-./checkNcreateTestData.sh
+case $1 in
+	mass)
+		checkNcreateMassData.sh
+		;;
+	file)
+		./checkNcreateTestData.sh
+		;;
+	   *)
+		echo 1>&2
+        echo testfileset unknown 1>&2
+		echo 1>&2
+		error_info
+        ;;
+esac
 
-
-DRIVENO=`cbmctrl detect | fgrep " $1 " | cut -d: -f1 | tail -n 1 | tr -d "[:space:]"`
+DRIVENO=`cbmctrl detect | fgrep " $2 " | cut -d: -f1 | tail -n 1 | tr -d "[:space:]"`
 if [ _ != _$DRIVENO ]
 then
 	echo $$ > shelltst.pid
     echo using drive $DRIVENO
 
-    case $1 in
+
+    case $2 in
         1581)
-            FILESPEC=a-1581-890123456.prg
+            FILESPEC=`ls cbmcopy_files | egrep "[0-9][0-9][0-9][0-9]-1581.*\.prg" | head -n 1`
             ;;
         1571)
         	cbmctrl command $DRIVENO "U0>M1"
-            FILESPEC=b-158171-0123456.prg
+			FILESPEC=`ls cbmcopy_files | egrep "[0-9][0-9][0-9][0-9]-158171.*\.prg" | head -n 1`
             ;;
         1541)
             BLOCKSFREE=`cbmctrl dir $DRIVENO | \
@@ -42,10 +57,10 @@ then
 
             case $BLOCKSFREE in
 		        749)	# 40 tracks format (SpeedDOS and alike)
-		            FILESPEC=c-15817141-40-56.prg
+					FILESPEC=`ls cbmcopy_files | egrep "[0-9][0-9][0-9][0-9]-158171414.*\.prg" | head -n 1`
             		;;
 		        664)	# 35 tracks standard format
-		            FILESPEC=d-15817141-40-35.prg
+					FILESPEC=`ls cbmcopy_files | egrep "[0-9][0-9][0-9][0-9]-15817141435\.prg" | head -n 1`
             		;;
 		          *)	# unknown 1541 disk format
 					echo 1>&2
@@ -63,6 +78,7 @@ then
             ;;
     esac
 
+    shift
     shift
 
 	echo beginning transfer
