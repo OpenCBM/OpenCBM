@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# $Id: do_1571_repeat_test.sh,v 1.2 2006-04-18 20:45:37 wmsr Exp $
+
 # Before starting this script, do a:
 #
 #	d64copy -2 tstimg_rcmp_1571_-ts2.d71 $DRIVENO
