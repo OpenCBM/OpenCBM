@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.12 2006-04-06 10:11:15 wmsr Exp $ \n
+** \version $Id: startstop.c,v 1.13 2006-04-18 20:03:10 wmsr Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -434,7 +434,12 @@ BOOL
 CbmCheckCorrectInstallation(VOID)
 {
     CBMT_I_INSTALL_OUT outBuffer;
-    BOOL error;
+#if 1	// enable compiler error workaround
+	volatile BOOL error;
+#else
+	BOOL error;
+	#define VOLATILE_BOOL_DISABLED_TESTING 1
+#endif
     BOOL driverAlreadyStarted = FALSE;
     int tries;
 
@@ -513,10 +518,18 @@ CbmCheckCorrectInstallation(VOID)
         cbm_i_driver_stop();
     }
 
+#if VOLATILE_BOOL_DISABLED_TESTING+0 >= 1
+printf("VOLATILE_BOOL_DSIABLED_TESTING line %d:: error=%d\n", __LINE__, error);
+fflush(stdout);
+#endif
     if (CheckVersions(&outBuffer))
     {
         error = TRUE;
     }
 
+#if VOLATILE_BOOL_DISABLED_TESTING+0 >= 1
+printf("VOLATILE_BOOL_DSIABLED_TESTING line %d:: error=%d\n", __LINE__, error);
+fflush(stdout);
+#endif
     FUNC_LEAVE_BOOL(error);
 }
