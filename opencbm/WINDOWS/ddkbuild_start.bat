@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.11 2006-04-10 17:13:40 wmsr Exp $
+rem $Id: ddkbuild_start.bat,v 1.12 2006-04-18 14:47:49 wmsr Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -136,7 +136,7 @@ call %DDKBUILD% %CMDLINE%
 rem Copy the INF file into the bin directory
 copy %CBM4WIN_SRC_HOME%\sys\wdm\*.inf %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%
 
-if not exist build*.err (
+if not exist %CBM4WIN_SRC_HOME%\build*.err (
 
 	rem If we are not called from the root, do not copy!
 	if exist ddkbuild_start.bat (
@@ -165,6 +165,9 @@ if not exist build*.err (
 	if "%USERDEFPOSTBUILD%" NEQ "" (
 		if exist %USERDEFPOSTBUILD% call %USERDEFPOSTBUILD% %CBM4WIN_SRC_HOME%
 	)
+) else (
+	echo.
+	echo Omitting post build actions due to the existence of build error files
 )
 
 
