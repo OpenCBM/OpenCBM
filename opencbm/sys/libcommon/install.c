@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/install.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: install.c,v 1.4 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: install.c,v 1.5 2006-04-19 16:51:45 strik Exp $ \n
 ** \n
 ** \brief Install the driver and check if anything needed is there
 **
@@ -64,7 +64,7 @@ cbm_install(IN PDEVICE_EXTENSION Pdx, OUT PCBMT_I_INSTALL_OUT ReturnBuffer, IN O
                                         CBM4WIN_VERSION_SUBMINOR, CBM4WIN_VERSION_DEVEL);
 
     result.DriverVersionEx = 
-        CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(CBM4WIN_VERSION_BUGFIX);
+        CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(CBM4WIN_VERSION_PATCHLEVEL);
 
     // first of all, assume there is nothing to report
 

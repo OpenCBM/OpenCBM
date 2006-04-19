@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.14 2006-04-19 11:56:12 strik Exp $ \n
+** \version $Id: startstop.c,v 1.15 2006-04-19 16:51:45 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -77,24 +77,27 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
 
     if (Version != 0)
     {
-        char bugfixVersion[2] = "";
+        char patchlevelVersion[4] = "pl0";
 
         if (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) != 0)
         {
-            bugfixVersion[0] = 
-                (char) (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) + 'a' - 1);
-            bugfixVersion[1] = 0;
+            patchlevelVersion[2] = 
+                (char) (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) + '0');
+        }
+        else
+        {
+            patchlevelVersion[0] = 0;
         }
 
         _snprintf(buffer, sizeof(buffer)-1,
             (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version) 
-                ? "%u.%u.%u%s.%u (Development)" 
+                ? "%u.%u.%u.%u%s (Development)" 
                 : "%u.%u.%u%s"),
             (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_MAJOR(Version),
             (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_MINOR(Version),
             (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_SUBMINOR(Version),
-            bugfixVersion,
-            (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version));
+            (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version),
+            patchlevelVersion);
     }
     else
     {
@@ -315,7 +318,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
                                         CBM4WIN_VERSION_DEVEL);
 
     instcbmVersionEx =
-        CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(CBM4WIN_VERSION_BUGFIX);
+        CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(CBM4WIN_VERSION_PATCHLEVEL);
 
     OutputVersionString("INSTCBM version: ", instcbmVersion, instcbmVersionEx);
 
