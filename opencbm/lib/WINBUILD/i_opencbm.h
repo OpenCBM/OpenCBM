@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.6 2006-04-11 17:00:03 strik Exp $ \n
+** \version $Id: i_opencbm.h,v 1.7 2006-04-19 11:56:12 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **
@@ -46,7 +46,7 @@ extern BOOL cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen);
 
 EXTERN BOOL CBMAPIDECL cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen);
 /*! Function pointer for the cbm_i_driver_install() function */
-typedef BOOL (*P_CBM_I_DRIVER_INSTALL)(OUT PULONG Buffer, IN ULONG BufferLen);
+typedef BOOL (CBMAPIDECL *P_CBM_I_DRIVER_INSTALL)(OUT PULONG Buffer, IN ULONG BufferLen);
 
 extern LONG RegGetDWORD(IN HKEY RegKey, IN char *SubKey, OUT LPDWORD Value);
 extern BOOL IsDriverStartedAutomatically(VOID);
