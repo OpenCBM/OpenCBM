@@ -14,13 +14,16 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.13 2006-04-18 08:05:57 strik Exp $ \n
+** \version $Id: mnib.c,v 1.14 2006-04-19 16:09:21 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
 ** \brief Nibble a complete track
 **
 ****************************************************************/
+
+#define TO_HANDSHAKED_READ  100000
+#define TO_HANDSHAKED_WRITE 100000
 
 #include <wdm.h>
 #include "cbm_driver.h"
@@ -178,7 +181,7 @@ cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
     {
         while (CBMIEC_GET(PP_DATA_IN))
         {
-            if (to++ > 1000000)
+            if (to++ > TO_HANDSHAKED_READ)
                 break;
         }
     }
@@ -186,45 +189,39 @@ cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
     {
         while (!CBMIEC_GET(PP_DATA_IN))
         {
-            if (to++ > 1000000)
+            if (to++ > TO_HANDSHAKED_READ)
                 break;
         }
     }
 
-    PERF_EVENT_PARBURST_NREAD_EXIT(to > 1000000 ? -1 : 0);
+    PERF_EVENT_PARBURST_NREAD_EXIT(to > TO_HANDSHAKED_READ ? -1 : 0);
 
-    if (to > 1000000)
+    if (to > TO_HANDSHAKED_READ)
     {
         returnValue = -1;
     }
     else
     {
-//        static int oldValue = -1;
+        static int oldValue = -1;
  
-        int returnValue2 = READ_PORT_UCHAR(PAR_PORT);
-        int returnValue3;
-        int count = 0;
-
-//        cbmiec_udelay(1);
+        int returnValue2, returnValue3, timeoutCount=0;
 
         returnValue3 = READ_PORT_UCHAR(PAR_PORT);
+        returnValue2 = ~returnValue3;    // ensure to read once more
 
         do {
-//            cbmiec_udelay(1);
-            returnValue = returnValue2;
+            if (++timeoutCount >= 8)
+            {
+                DBG_PRINT((DBG_PREFIX "Triple-Debounce TIMEOUT: 0x%02x, 0x%02x, 0x%02x (%d, 0x%02x)",
+                    returnValue, returnValue2, returnValue3, timeoutCount, oldValue));
+                break;
+            }
+            returnValue  = returnValue2;
             returnValue2 = returnValue3;
             returnValue3 = READ_PORT_UCHAR(PAR_PORT);
-
-/*
-            if ((returnValue != returnValue2) || (returnValue != returnValue3))
-            {
-                DBG_PRINT((DBG_PREFIX "DIFFERENCES: 0x%02x, 0x%02x, 0x%02x (%u, 0x%02x)",
-                    returnValue, returnValue2, returnValue3, count++, oldValue));
-            }
-*/
         } while ((returnValue != returnValue2) || (returnValue != returnValue3));
 
-//        oldValue = returnValue;
+        oldValue = returnValue3;
     }
 
     return returnValue;
@@ -249,7 +246,7 @@ cbm_handshaked_write(PDEVICE_EXTENSION Pdx, char Data, int Toggle)
         {
             while (CBMIEC_GET(PP_DATA_IN)) // @@@ CLK_IN ???
             {
-                if (to++ > 1000000)
+                if (to++ > TO_HANDSHAKED_WRITE)
                     break;
             }
         }
@@ -257,12 +254,12 @@ cbm_handshaked_write(PDEVICE_EXTENSION Pdx, char Data, int Toggle)
         {
             while (!CBMIEC_GET(PP_DATA_IN)) // @@@ CLK_IN ???
             {
-                if (to++ > 1000000)
+                if (to++ > TO_HANDSHAKED_WRITE)
                     break;
             }
         }
 
-        if (to++ <= 1000000)
+        if (to++ <= TO_HANDSHAKED_WRITE)
         {
             PERF_EVENT_PARBURST_NWRITE_VALUE(Data);
             cbmiec_pp_write(Pdx, Data);
