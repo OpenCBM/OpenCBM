@@ -1,4 +1,4 @@
-rem $Id: ddkbuild_local.bat.sample,v 1.3 2006-04-10 17:54:52 wmsr Exp $
+rem $Id: ddkbuild_local.bat.sample,v 1.4 2006-04-20 14:28:26 wmsr Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR DDKBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
@@ -51,7 +51,11 @@ rem if not defined DDKBUILD_ARGUMENTS set DDKBUILD_ARGUMENTS=-prefast
 	rem to additionally compile these components
 rem if exist %1\libopencbmtransfer set CMDARGUMENTS=%CMDARGUMENTS% libopencbmtransfer sample
 
-
+	rem preset C macro definitions that are addd to the CFLAGS make
+	rem macro definition within the DDK build process
+	rem here, inclusion of the CVS ID strings into the binaries is
+	rem enabled, but only if USER_C_FLAGS was not defined before
+if not defined USER_C_FLAGS set USER_C_FLAGS=/DSAVE_RCSID=1
 
 rem Settings for the BASH CC65 build process:
 
