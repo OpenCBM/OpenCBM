@@ -8,6 +8,11 @@
  *  Copyright (C) 2005,2006 Wolfgang Moser <cbm(a)d81(o)de>
  */
 
+#ifdef SAVE_RCSID
+static char *rcsid =
+    "@(#) $Id: cbmforng.c,v 1.9 2006-04-20 13:04:26 wmsr Exp $";
+#endif
+
 #include "cbmforng.h"
 
 static unsigned char dskfrmt[] = {
