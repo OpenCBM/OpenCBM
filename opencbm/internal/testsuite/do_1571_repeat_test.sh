@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $Id: do_1571_repeat_test.sh,v 1.2 2006-04-18 20:45:37 wmsr Exp $
+# $Id: do_1571_repeat_test.sh,v 1.3 2006-04-20 18:19:43 wmsr Exp $
 
 # Before starting this script, do a:
 #
@@ -27,5 +27,5 @@ echo Logfile base name is: "$LOGFILEBASENAME"
 
 for (( i=1001 ; i<=9999 ; i=i+1 ))
 do
-	cbmcopy_rcmp.sh 1571 -ts2 2>&1 | tee $LOGFILEBASENAME$i.log
+	cbmcopy_rcmp.sh fill 1571 -ts2 2>&1 | tee $LOGFILEBASENAME$i.log
 done
