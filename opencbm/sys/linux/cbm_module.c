@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.11 2006-04-07 11:35:47 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.12 2006-04-21 15:20:51 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -1087,10 +1087,15 @@ int cbm_parallel_burst_write(unsigned char c)
 **/
 }
 
+#define TO_HANDSHAKED_READ  100000
+#define TO_HANDSHAKED_WRITE 100000
+
 int cbm_handshaked_read(int toggle)
 {
-
-    int to = 0;
+        static int oldvalue = -1;
+        int returnvalue = 0;
+        int returnvalue2, returnvalue3, timeoutcount;
+        int to = 0;
 
 	RELEASE(DATA_IN);  // not really needed?
 	
@@ -1102,15 +1107,34 @@ int cbm_handshaked_read(int toggle)
 	if(!toggle)
 	{
 	    while (GET(DATA_IN))
-	        if (to++ > 1000000) return (-1);
+	        if (to++ > TO_HANDSHAKED_READ) return (-1);
 	}
 	else
 	{
 	    while (!GET(DATA_IN))
-		    if (to++ > 1000000) return (-1);
+		    if (to++ > TO_HANDSHAKED_READ) return (-1);
 	}
-	/*linux return inportb(parport); */
-		return XP_READ();
+
+        timeoutcount = 0;
+        
+        returnvalue3 = XP_READ();
+        returnvalue2 = ~returnvalue3;    // ensure to read once more
+
+        do {
+                if (++timeoutcount >= 8)
+                {
+                        printk("Triple-Debounce TIMEOUT: 0x%02x, 0x%02x, 0x%02x (%d, 0x%02x)\n",
+                            returnvalue, returnvalue2, returnvalue3, timeoutcount, oldvalue);
+                        break;
+                }
+                returnvalue  = returnvalue2;
+                returnvalue2 = returnvalue3;
+                returnvalue3 = XP_READ();
+        } while ((returnvalue != returnvalue2) || (returnvalue != returnvalue3));
+
+        oldvalue = returnvalue;
+
+        return returnvalue;
 }
 
 int cbm_handshaked_write(char data, int toggle)
@@ -1122,12 +1146,12 @@ int cbm_handshaked_write(char data, int toggle)
 	if (!toggle)
 	{
 		while (GET(DATA_IN))
-		if (to++ > 1000000) return 1;
+		if (to++ > TO_HANDSHAKED_WRITE) return 1;
 	}
 	else
 	{
 		while (!GET(DATA_IN))
-		if (to++ > 1000000) return 1;
+		if (to++ > TO_HANDSHAKED_WRITE) return 1;
 	}
 	/*linux outportb(parport, data); */
 		if(out_bits & LP_BIDIR) {
