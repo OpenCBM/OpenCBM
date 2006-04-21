@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.14 2006-04-11 20:24:34 wmsr Exp $";
+    "@(#) $Id: main.c,v 1.15 2006-04-21 09:32:14 strik Exp $";
 #endif
 
 #include <ctype.h>
@@ -494,11 +494,15 @@ int ARCH_MAINDECL main(int argc, char **argv)
                                                   my_message_cb,
                                                   my_status_cb) == 0)
                             {
+                                printf("\n");
                                 rv = cbm_device_status( fd, drive,
                                                         buf, sizeof(buf) );
                                 my_message_cb( rv ?  sev_warning : sev_info,
                                                "%s", buf );
                             }
+                            else
+                                printf("\n");
+
                             if(filedata)
                             {
                                 free(filedata);
