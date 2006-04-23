@@ -1,13 +1,6 @@
 #!/bin/bash
 
-# $Id: do_1571_repeat_test.sh,v 1.5 2006-04-23 15:22:10 wmsr Exp $
-
-# Before starting this script, do a:
-#
-#	d64copy -2 tstimg_rcmp_1571_-ts2.d71 $DRIVENO
-#
-# not needed anymore, it does it on its own now
-#
+# $Id: do_1571_repeat_test.sh,v 1.6 2006-04-23 15:26:29 wmsr Exp $
 
 DRIVETYPE=1571
 IMAGEFILENAME=tstimg_rcmp_1571.d71
