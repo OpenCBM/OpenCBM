@@ -1,0 +1,39 @@
+#! /bin/bash
+
+if [ "$1" == "" ]; then
+	echo Usage: $0 VERSION
+	echo
+	echo Example: $0 0.1.0.86
+	exit 1
+fi
+
+VERSION=$1
+
+(
+cd bin/
+for A in amd64 amd64free amd64checked i386 i386free i386checked ia64 ia64free ia64checked; do
+	if [ -d $A ]; then
+		(
+		echo $A
+		cd $A
+
+		mkdir exe/ pdb/
+		mv *.exe *.sys *.dll exe/
+		chmod 644 *.pdb
+		mv *.pdb pdb/
+
+		mv exe/cbm4w98.sys .
+		mv exe/opencbmvice.dll .
+
+		mv pdb/cbm4w98.pdb .
+		mv pdb/opencbmvice.pdb .
+
+		zip ../opencbm-$VERSION-$A.zip exe/*
+		zip ../opencbm-$VERSION-$A-pdb.zip pdb/*
+
+		mv exe/* pdb/* .
+		rmdir exe/ pdb/
+		)
+	fi
+done
+)
