@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $Id: checkNcreateMassData.sh,v 1.1 2006-04-18 15:21:23 wmsr Exp $
+# $Id: checkNcreateMassData.sh,v 1.2 2006-04-23 15:22:10 wmsr Exp $
 
 # omitting char that may disturb CVS
 # ELIMCHARS="\000\a\b\n\r\\$"
@@ -15,10 +15,14 @@ TESTFILEDIR=cbmcopy_files
 function createXblocksFile {
 	# Params: <pathNfilename> <numofblocks>
 
-	# create files of the size: ( $2 - 1 ) * 254 + 253
-	COUNT=`echo "( $2 - 1 ) * 254" | bc`
-    tr -d $ELIMCHARS < /dev/random | dd ibs=1 count=$COUNT            of="$1" 2> /dev/null
-    tr -d $ELIMCHARS < /dev/random | dd ibs=1 count=253 oflags=append of="$1" 2> /dev/null
+	# this doesn't work, sometimes files get to small
+	# COUNT=`echo "  $2 * 254 - 1 " | bc`
+	# tr -d $ELIMCHARS < /dev/random | dd bs=$COUNT count=1 > "$1" 2> /dev/null
+
+	COUNT=`echo " ( $2 * 254 - 1 ) / 512 " | bc`
+	tr -d $ELIMCHARS < /dev/random | dd bs=512 count=$COUNT  > "$1" 2> /dev/null
+	COUNT=`echo " ( $2 * 254 - 1 ) % 512 " | bc`
+	tr -d $ELIMCHARS < /dev/random | dd   bs=1 count=$COUNT >> "$1" 2> /dev/null
 	}
 
 if ! [ -d $TESTFILEDIR ]
