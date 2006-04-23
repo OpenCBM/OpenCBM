@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.14 2006-04-19 16:09:21 strik Exp $ \n
+** \version $Id: mnib.c,v 1.15 2006-04-23 11:24:01 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -22,8 +22,8 @@
 **
 ****************************************************************/
 
-#define TO_HANDSHAKED_READ  100000
-#define TO_HANDSHAKED_WRITE 100000
+#define TO_HANDSHAKED_READ  200000
+#define TO_HANDSHAKED_WRITE 200000
 
 #include <wdm.h>
 #include "cbm_driver.h"
