@@ -1,14 +1,16 @@
 <!doctype linuxdoc system>
 
 <article>
-<title>cbm4linux 0.3.3 Users Guide
-<author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">
-<!-- _DATE_ --><date>2004-11-19
+<title>opencbm 0.4.0 Users Guide
+<author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
+Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
+name="cbm4win@trikaliotis.net">
+<!-- _DATE_ --><date>2006-04-28
 
 <abstract>
-This document describes the cbm4linux package, a linux kernel module and a few
-user space support programs to control and use serial devices as used by most
-Commodore (CBM) 8-bit machines.
+This document describes the opencbm package, a Linux kernel module and Windows
+kernel mode driver, and a few user space support programs to control and use
+serial devices as used by most Commodore (CBM) 8-bit machines.
 </abstract>
 
 <!-- Table of contents -->
@@ -22,32 +24,48 @@ Commodore (CBM) 8-bit machines.
 <p>
 The popular Commodore 8-bit home-computers like the C-64 and the VIC-20 are
 using a custom serial bus to talk to attached devices (disk drive, printer).
-The cbm4linux kernel module provides an interface to this bus at TALK/LISTEN
+The opencbm kernel module provides an interface to this bus at TALK/LISTEN
 level, similar to the one provided by the Commodore kernel routines, but low
 level bus control is available as well. The serial devices are connected to
-the PC's parallel port via a XM1541 or XA1541 and, optionally, a XP1541 or
+the PC's parallel port via an XM1541 or XA1541 and, optionally, an XP1541 or
 XP1571 add-on.
 
 <sect>Utilities<label id="utilities">
 
-<p>cbm4linux comes with the following utilities:
+<p>opencbm comes with the following utilities:
 
 <sect1>cbmctrl<label id="cbmctrl">
-
-<p>Synopsis: <tt/cbmctrl ACTION .../
 
 <p><it/cbmctrl/ is used to send commands to external devices.
 
 <sect2>Actions<label id="cbmctrl actions">
 
+<p>Synopsis: <tt/cbmctrl ACTION .../
+
 <p>Here's a list of all valid actions for <it/cbmctrl/:
 
 <descrip>
+<label id="action-lock">
+<tag>lock</tag>
+This command locks the parallel port for the use by opencbm, so that
+sequences of e.g. <it/talk//<it/read//untalk or <it/listen//<it/write//<it/unlisten/
+are not broken by concurrent processes wanting to access the parallel port.
+
+You should issue <it/cbmctrl lock/ before doing any access to opencbm tools,
+and <it/cbmctrl unlock/ after you are done.
+
+<label id="action-unlock">
+<tag>unlock</tag>
+This command unlocks the parallel port after the use by opencbm.
+
+You should issue <it/cbmctrl lock/ before doing any access to opencbm tools,
+and <it/cbmctrl unlock/ after you are done.
+
 <label id="action-listen">
 <tag>listen <it/device secadr/</tag>
 Tell device <it>device</it> to listen on secondary address
 <it/secadr/. Until the next <it/unlisten/ command,
-everything written to the special device <it>/dev/cbm</it> will be
+everything output with <it>cbmctrl write</it> will be
 received by this device.<p>
 
 This command corresponds to the following 6502 assembly code on a C64:
@@ -63,7 +81,7 @@ jsr $ff93
 <tag>talk <it/device secadr/</tag>
 Tell device <it/device/ to talk on secondary address <it/secadr/. Until
 the next <it/untalk/ command, data from this device can be received device by
-reading from the special device <it>/dev/cbm</it>.<p>
+using the command <it>cbmctrl read</it>.<p>
 
 This command corresponds to the following 6502 assembly code on a C64:
 <code>
@@ -95,10 +113,34 @@ specified by appending <tt/,type,mode/ to <it/filename/. Valid types are
 D, P, S, U, R (DEL, PRG, SEQ, USR, REL), valid modes are R for reading and W
 for writing.
 
+Note: You cannot do an open without a filename. Although a CBM machine (i.e., a
+C64) allows this, this is an internal operation for the Computer only. It does
+not have any effect on the IEC bus.
+
+<it/cbmctrl open/ does not change any character encoding, that is, it does not
+convert between ASCII (used by the PC) and PETSCII (used by the CBM device). If
+this is needed, use <it/cbmctrl popen/ instead.
+
+<label id="popen">
+<tag>popen <it/device secadr filename/</tag>
+Like <it/cbmctrl open/, but converts the filename from ASCII to PetSCII before
+sending it to the floppy.
+
 <label id="action-close">
 <tag>close <it/device secadr/</tag>
 Close the file associated with secondary address <it/secadr/ on device
 <it/device/.
+
+<label id="action-read">
+<tag>read <it/[file]/</tag>
+This command reads raw data from the IEC bus and outputs it into the given
+file, or to stdout if no file is given (or if it is a simple dash, "-").
+
+<label id="action-write">
+<tag>write <it/[file]/</tag>
+This command writes raw data to the IEC bus; the data is taken from the given
+file, or from stdin if no filename is given (or if it is a simple dash, "-").
+
 
 <label id="action-status">
 <tag>status <it/device/</tag>
@@ -111,7 +153,7 @@ This command is similar to (in this case, no character conversions would be
 made)
 <code>
 cbmctrl talk device 15
-cat /dev/cbm
+cbmctrl read
 cbmctrl untalk
 </code>
 
@@ -122,12 +164,20 @@ channel). Since there is no PetSCII->ASCII conversion, commands must be sent
 in <em/upper case/ (kind of poor man's PetSCII conversion). This is because
 charset conversion would break the <tt/M-W/ and <tt/M-E/ commands.
 
-This command is identical to
+Note: If you need PetSCII->ASCII conversion, use pcommand instead.
+
+This command is identical to (Note: This does not work on Windows, because
+<it/echo/ there does not know the <it/-n/ option.)
 <code>
 cbmctrl listen device 15
-echo -n cmdstr > /dev/cbm
+echo -n cmdstr|cbmctrl write -
 cbmctrl unlisten
 </code>
+
+<label id="pcommand">
+<tag>pcommand <it/device cmdstr/</tag>
+Like <it/command/, but converts the data from ASCII to PetSCII before sending
+it.
 
 <label id="action-dir">
 <tag>dir <it/device/</tag>
@@ -137,7 +187,7 @@ Read directory from disk in device <it/device/, print on standard out.
 <tag>download <it/device address count [file]/</tag>
 Read <it/count/ bytes from drive memory, starting at <it/address/ via one
 or more <tt/M-R/ commands. Memory contents are written to standard output
-unless <it/file/ is ommited or equivalent to <tt/"-"/.
+if <it/file/ is ommited or equivalent to <tt/"-"/.
 
 <label id="action-upload">
 <tag>upload <it/device address [file]/</tag>
@@ -149,11 +199,17 @@ ommited or equivalent to <tt/"-"/.
 <label id="action-reset">
 <tag>reset</tag>
 Triggers hardware reset on all attached devices. Control is returned after a
-five second delay to make sure all devices are ready.
+delay to make sure all devices are ready.
 
 <label id="action-detect">
 <tag>detect</tag>
 Identify connected devices (considers devices 8-15)
+
+<label id="change">
+<tag>change <it/device/</tag>
+Wait for a disc to be changed in the specified device. It waits for the current
+disc to be removed, for a new disc to be inserted and for the drive door to be
+closed. It does not return until the disc is ready to be read or written.
 
 </descrip>
 
@@ -162,29 +218,35 @@ Identify connected devices (considers devices 8-15)
 <p>
 Send file contents to printer 4:
 <code>
+cbmctrl lock
 cbmctrl listen 4 0
-cat file > /dev/cbm
+cbmctrl write file
 cbmctrl unlisten
+cbmctrl unlock
 </code>
 
 <p>
 Copy file to disk drive 8:
 <code>
+cbmctrl lock
 cbmctrl open 8 2 FILENAME,P,W
 cbmctrl listen 8 2
-cat file > /dev/cbm
+cbmctrl write file
 cbmctrl unlisten
 cbmctrl close 8 2
+cbmctrl unlock
 </code>
 
 <p>
 Copy file from disk drive 8:
 <code>
+cbmctrl lock
 cbmctrl open 8 2 FILENAME,P,R
 cbmctrl talk 8 2
-cat /dev/cbm > file
+cbmctrl read file
 cbmctrl untalk
 cbmctrl close 8 2
+cbmctrl unlock
 </code>
 
 <p>
@@ -192,17 +254,34 @@ Dump 1541 ROM:
 <code>
 cbmctrl download 8 0xc000 0x4000 > 1541.rom
 </code>
+or
+<code>
+cbmctrl download 8 0xc000 0x4000 1541.rom
+</code>
+
+<p>
+Write file buffer2.bin to drive 9, address 0x500:
+<code/cbmctrl upload 9 0x500 buffer2.bin/
 
 <sect1>cbmformat<label id="cbmformat">
 <p>
-Synopsis: <tt/cbmformat [OPTION]... DRIVE NAME,ID/
-
-<p>
 <it/cbmformat/ is a fast low-level disk formatter for the 1541 and compatible
 devices (1570, 1571, third-party clones). The drive routine was taken from the
-Star Commander ((C) Joe Forster/STA).
+Star Commander ((C) Joe Forster/STA) and highly improved.
+
+There is also another, very similar tool, <ref id="cbmforng" name="cbmforng">.
 
 <sect2>cbmformat invocation<label id="invoking-cbmformat">
+<p>
+Synopsis: <tt/cbmformat [OPTION]... DRIVE NAME,ID/
+
+<it/DRIVE#/ has to be the drive number of the disc drive, <it/NAME/ is a name
+with up to 16 characters which will be the name of the disc after formatting,
+<it/ID/ is the 2-letter disc ID.
+
+<p>Note: Unlike the <it/N0/ command of the drive, the ID must be given (thus,
+no so-called "short format" is possible).
+
 <p>
 Here's a complete list of known options:
 
@@ -220,11 +299,26 @@ misaligned drives.
 <tag/-x, --extended/
 Format 40 track disk. BAM format is SpeedDOS compatible.
 
+<tag/-c, --clear/
+clear (demagnetize) this disc.
+This is highly recommended if the disc is used for the first time,
+or if it was previously formatted for another system (i.e., MS-DOS).
+Note that this option takes much time.
+
+<tag/-v, --verify/
+verify each track after it is written.
+As this needs an extra round of the drive for each track, the formatting time
+is almost doubled.
+
+cf. <ref id="note-1571-cbmformat" name="cbmformat Notes for 1571 drives">
+
 <tag/-o, --original/
 Fill sectors with the original pattern (0x4b, 0x01, 0x01...) instead of zeroes.
 The original pattern is probably due to a bug in the drive ROM, apart from
 this, zeroing out unused sectors should give (slightly) better results for
 compressed disk images.
+
+cf. <ref id="note-1571-cbmformat" name="cbmformat Notes for 1571 drives">
 
 <tag/-s, --status/
 Display drive status after formatting. Normally, <it/cbmformat/ exits after
@@ -237,13 +331,32 @@ Display a hash mark ('#') for each formatted track. Slows formatting down a
 bit.
 </descrip>
 
+<sect2>cbmformat Notes for 1571 drives<label id="note-1571-cbmformat">
+<p>
+We encountered problems with 1571 drives when using cbmformat.
+We highly recommend to use <it/--original/ and <it/--verify/ with 1571 drives.
+From our experience, with <it/--original/, the problem does not occur; with
+<it/--verify/, the drive tests itself to make sure the problem did not occur.
+
+We did not encounter these problems with either of 1541 (1541-II, 1541C), 1570
+or 1571CR (the drive which is part of the C128DCR) drives, only with original
+1571 drives.
+
+In the current state, cbmformat is not able to format double-sided discs on a
+1571 drive.
+
 <sect2>cbmformat Examples<label id="cbmformat examples">
 
 <p>
-Format standard disk (35 tracks) in drive 8, use (buggy) 1541 sector pattern,
-show drive status when done:
+Format standard disk (35 tracks) in drive 8:
 <code>
-cbmformat -os 8 GAMES,42
+cbmformat 8 GAMES,42
+</code>
+
+<p>
+Format standard disk (35 tracks) in drive 9, use (buggy) 1541 sector pattern (for example, because this is a 1571 drive), show drive status when done:
+<code>
+cbmformat -os 9 1571disc,71
 </code>
 
 <p>
@@ -253,17 +366,120 @@ no head banging:
 cbmformat -npx 8 "40 TRACKS,OK"
 </code>
 
-<sect1>d64copy<label id="d64copy">
+<sect1>cbmforng<label id="cbmforng">
 <p>
-Synopsis: <tt/d64copy [OPTION]... SOURCE TARGET/
+<it/cbmforng/ is a fast low-level disk formatter for the 1541 and compatible
+devices (1570, 1571, third-party clones). It was based on <ref id="cbmformat"
+name="cbmformat">, but was even higher improved than that one.
+
+<sect2>cbmforng invocation<label id="invoking-cbmforng">
+<p>
+Synopsis: <tt/cbmforng [OPTION]... DRIVE NAME,ID/
+
+<it/DRIVE#/ has to be the drive number of the disc drive, <it/NAME/ is a name
+with up to 16 characters which will be the name of the disc after formatting,
+<it/ID/ is the 2-letter disc ID.
+
+<p>Note: Unlike the <it/N0/ command of the drive, the ID must be given (thus,
+no so-called "short format" is possible).
 
 <p>
+Here's a complete list of known options:
+
+<descrip>
+<tag/-h, --help/
+Display help and exit.
+
+<tag/-V, --version/
+Display version information and exit.
+
+<tag/-n, --no-bump/
+Do not bump drive head at the beginning. Don't use this on eventually
+misaligned drives.
+
+<tag/-r, --retries n/
+Set the maximum number of retries on errors. This account for all
+errors on the disc.
+
+<tag/-x, --extended/
+Format 40 track disk. BAM format is SpeedDOS compatible.
+
+<tag/-c, --clear/
+clear (demagnetize) this disc.
+This is highly recommended if the disc is used for the first time,
+or if it was previously formatted for another system (i.e., MS-DOS).
+Note that this option takes much time.
+
+<tag/-v, --verify/
+verify each track after it is written.
+As this needs an extra round of the drive for each track, the formatting time
+is almost doubled.
+
+cf. <ref id="note-1571-cbmforng" name="cbmforng Notes for 1571 drives">
+
+<tag/-o, --original/
+Fill sectors with the original pattern (0x4b, 0x01, 0x01...) instead of zeroes.
+The original pattern is probably due to a bug in the drive ROM, apart from
+this, zeroing out unused sectors should give (slightly) better results for
+compressed disk images.
+
+cf. <ref id="note-1571-cbmforng" name="cbmforng Notes for 1571 drives">
+
+<tag/-s, --status/
+Display drive status after formatting. Normally, <it/cbmforng/ exits after
+executing the drive code. With this option turned on, <it/cbmforng/ waits
+until the drive has finished formatting and prints the drive status after
+initializing the BAM on standard out.
+
+</descrip>
+
+<sect2>cbmforng Notes for 1571 drives<label id="note-1571-cbmforng">
+<p>
+We encountered problems with 1571 drives when using cbmforng.
+We highly recommend to use <it/--original/ and <it/--verify/ with 1571 drives.
+From our experience, with <it/--original/, the problem does not occur; with
+<it/--verify/, the drive tests itself to make sure the problem did not occur.
+
+We did not encounter these problems with either of 1541 (1541-II, 1541C), 1570
+or 1571CR (the drive which is part of the C128DCR) drives, only with original
+1571 drives.
+
+In the current state, cbmforng is not able to format double-sided discs on a
+1571 drive.
+
+<sect2>cbmforng Examples<label id="cbmforng examples">
+
+<p>
+Format standard disk (35 tracks) in drive 8:
+<code>
+cbmforng 8 GAMES,42
+</code>
+
+<p>
+Format standard disk (35 tracks) in drive 9, use (buggy) 1541 sector pattern (for example, because this is a 1571 drive), show drive status when done:
+<code>
+cbmforng -os 9 1571disc,71
+</code>
+
+<p>
+SpeedDOS disk (40 tracks), show progress indicator, all sectors zeroed out,
+no head banging:
+<code>
+cbmforng -npx 8 "40 TRACKS,OK"
+</code>
+
+
+<sect1>d64copy<label id="d64copy">
+<p>
 <it/d64copy/ is a fast disk image transfer (both read and write) program for
-the 1541 and compatible devices (1570, 1571, third-party clones). Maximum
-transfer speed is achieved by custom drive- and transfer-routines based
+the 1541 and compatible devices (1570, 1571, third-party clones). A 1581 drive is <it/not/ supported!
+Maximum transfer speed is achieved by custom drive- and transfer-routines based
 on the Star Commander ((C) Joe Forster/STA) routines.
 
 <sect2>d64copy invocation<label id="invoking-d64copy">
+<p>
+Synopsis: <tt/d64copy [OPTION]... SOURCE TARGET/
+
 <p>
 Either SOURCE or TARGET must be an external drive, valid names are 8, 9, 10 and
 11.  The other parameter specifies the file name of the .d64 image.
@@ -298,6 +514,7 @@ in double sided (.d71) mode.
 <tag>-t, --transfer=<it/transfer mode/</tag>
 Set transfermode. Valid modes are:
 <itemize>
+<item><tt/auto/     (default)
 <item><tt/original/ (slowest)
 <item><tt/serial1/
 <item><tt/serial2/
@@ -306,7 +523,12 @@ Set transfermode. Valid modes are:
 <tt/original/ and <tt/serial1/ should work in any case.
 <tt/serial2/ won't work with more than one device is
 connected to the IEC bus, 
-<tt/parallel/ requires a XP1541/XP1571 cable
+<tt/parallel/ requires a XP1541/XP1571 cable.
+
+<p>
+If <tt/auto/ is used, d64copy itself determines the best transfer mode usable
+with the current setup, and uses that one. Thus, you will seldom want to use
+this option.
 
 <tag>-i, --interleave=<it/interleave/</tag>
 Set interleave value. This is ignored when reading in warp mode. Default is 16
@@ -323,11 +545,15 @@ Lower values might slightly reduce transfer times, but if set a bit to low,
 transfer times will dramatically increase.
 
 <tag>-w, --warp</tag>
-Enable warp mode. this is not possible when <it/transfer mode/ is set to
-<tt/original/. Warp mode is usually a good idea for transferring disk images
-unless you have a very slow CPU and/or bad disk material. Warp mode sends raw
-GCR data over the bus, which assures data integrity on the PC side and relieves
-the drive's CPU.
+Enable warp mode. This is default now; this option is only supported for
+backward-compatibility with opencbm (cbm4linux/cbm4win) versions before 0.4.0.
+
+<tag>--no-warp</tag>
+Disable warp mode. Warp mode is usually a good idea for transferring disk
+images unless you have a very slow CPU and/or bad disk material. Warp mode
+sends raw GCR data over the bus, which assures data integrity on the PC side
+and relieves the drive's CPU. Thus, it is unlikely you will want to use that
+option.
 
 <tag>-b, --bam-only</tag>
 BAM-only copy. Only blocks marked as allocated are copied. For extended tracks
@@ -361,10 +587,31 @@ Allowed values for <tt/mode/ are (abbreviations allowed):
 
 </descrip>
 
-<sect1>cbmcopy<label id="cbmcopy">
-<p>
-Synopsis: <tt/cbmcopy [OPTION]... DEVICE# FILE.../
+<sect2>d64copy Examples<label id="d64copy examples">
 
+<p>
+Read a D64 disc image from the floppy in drive 8 to the file image.d64,
+automatically selecting the fastest transfer method:
+<code>
+d64copy 8 image.d64
+</code>
+
+<p>
+Copy the D64 disc image in image.d64 to the floppy in drive 9, automatically
+selecting the fastest transfer method:
+<code>
+d64copy image.d64 9
+</code>
+
+<p>
+Copy a double-sided disc from a 1571 drive 9 to image.d71, using
+<tt/serial1/ transfer method and only reading the blocks which are
+marked as used in the BAM:
+<code>
+d64copy -2 -B --transfer=serial1 9 image.d64
+</code>
+
+<sect1>cbmcopy<label id="cbmcopy">
 <p>
 <it/cbmcopy/ is a fast file transfer program for various disk drives,
 in particular the 1541, 1570, 1571 and 1581 devices.
@@ -373,11 +620,15 @@ on the Star Commander ((C) Joe Forster/STA) routines.
 
 <sect2>cbmcopy invocation<label id="invoking-cbmcopy">
 <p>
+Synopsis: <tt/cbmcopy [OPTION]... DEVICE# FILE.../
+
+<p>
 DEVICE# specifies the drive number for file copy.
 The remaining arguments specify the files to be sent to/read from the disk
 drive. This version supports 
-Raw, PC64 (P00) and T64 files are recognized when sending files to the disk
-drive, files read from external devices are always stored as raw binary data.
+Raw, PC64 (P00) and T64 files. They are recognized when sending files to the
+disk drive, files read from external devices are always stored as raw binary
+data.
 
 Here's a complete list of known options:
 
@@ -408,14 +659,18 @@ Starting <it/cbmcopy/ as <it/cbmwrite/ has the same effect.
 <tag>-t, --transfer=<it/transfer mode/</tag>
 Set transfermode. Valid modes are:
 <itemize>
+<item><tt/auto/    (default)
 <item><tt/serial1/  (slowest)
 <item><tt/serial2/
-<item><tt/parallel/ (fastest, not with 1581)
+<item><tt/parallel/ (fastest, not possible with a 1581)
 </itemize>
 <tt/serial1/ should work in any case.
 <tt/serial2/ won't work with more than one device is
 connected to the IEC bus, 
 <tt/parallel/ requires a XP1541/XP1571 cable in addition to the XM/XA1541.
+If <tt/auto/ is given, or this option is completely omitted, cbmcopy
+will automatically determine the fastest possible transfer method possible
+with the current setup. Thus, you will seldom want to use this option.
 
 <tag>-d, --drive-type=<tt/type/</tag>
 Skip drive type detection.
@@ -432,7 +687,8 @@ Skip file type detection. File data is sent as is.
 This option is only valid in write-mode.
 
 <tag>-f, --file-type=<tt/type/</tag>
-Specifies/overrides file type. Supported types are <tt/P/, <tt/S/, <tt/D/, <tt/U/.
+Specifies/overrides file type. Supported types are <tt/P/, <tt/S/, <tt/D/,
+<tt/U/.
 Raw files default to <tt/P/, whereas the T64 format contains meta data
 which includes the file type. For PC64 files, <it/cbmwrite/ tries to guess
 the file type from the file extension.
@@ -440,16 +696,111 @@ This option is only valid in write-mode.
 
 </descrip>
 
+<sect2>cbmcopy Examples<label id="cbmcopy examples">
 
-<sect>cbm4linux API<label id="cbm4linux-API">
+<p>
+Read a file called <it/cbmfile/ from drive 8 and store its binary value into
+the file file.bin, automatically selecting the fastest transfer method:
+<code>
+cbmcopy -r 8 cbmfile -o file.bin
+</code>
+
+<p>
+Write out the file file.p00 in P64 format to the disc in drive 9, using
+<tt/serial1/ transfer method:
+<code>
+cbmcopy -w 9 file.p00
+</code>
+
+<sect1>rpm1541<label id="rpm1541">
+<p>
+rpm1541 is a demo program. It finds out the rotation speed (in rounds per
+minute, rpm) of the drive motor of a 1541, 1570 or 1571 drive.
+A 1581 drive is <it/not/ supported.
+
+For cbm4linux, rpm1541 is not installed automatically. You have to compile it
+yourself if you want to use it. For cbm4win, it is part of the distribution.
+
+<sect2>rpm1541 usage<label id="rpm1541-usage">
+<p>
+Synopsis: <tt>rpm1541 <it>[device]</it></tt>
+<p>
+The optional parameter <it>device</it> is the device number of the drive which
+should be tested. If not specified, <tt/rpm1541/ utilizes drive 8.
+
+<sect2>rpm1541 Example<label id="rpm1541-example">
+<p>
+
+Find out the rotation speed of drive 11:
+<code>
+cbmctrl lock
+rpm1541 11
+cbmctrl unlock
+</code>
+
+<sect1>flash<label id="flash">
+<p>
+flash is a demo program. It flashes the drive LED.
+flash works with 1541, 1570 or 1571 drives. A 1581 drive is <it/not/ supported.
+
+For cbm4linux, flash is not installed automatically. You have to compile it
+yourself if you want to use it. For cbm4win, it is part of the distribution.
+
+<sect2>flash usage<label id="flash-usage">
+<p>
+Synopsis: <tt>flash <it>[device]</it></tt>
+<p>
+The optional parameter <it>device</it> is the device number of the drive which
+should flash its LED. If not specified, <tt/flash/ utilizes drive 8.
+
+<sect2>flash Example<label id="flash-example">
+<p>
+
+Let the drive LED flash on drive 10:
+<code>
+cbmctrl lock
+flash 10
+cbmctrl unlock
+</code>
+
+<sect1>morse<label id="morse">
+<p>
+morse is a demo program. It uses the drive LED to output a text in morse code.
+morse works with 1541, 1570 or 1571 drives. A 1581 drive is <it/not/ supported.
+
+For cbm4linux, morse is not installed automatically. You have to compile it
+yourself if you want to use it. For cbm4win, it is part of the distribution.
+
+<sect2>morse usage<label id="morse-usage">
+<p>
+Synopsis: <tt>morse <it>[device]</it></tt>
+<p>
+The optional parameter <it>device</it> is the device number of the drive which
+should flash its LED. If not specified, <tt/morse/ utilizes drive 8.
+
+<sect2>morse Examples<label id="morse-examples">
+<p>
+
+Morse the text "SOS", "HELLO" and "YOU" (in this order) on drive 9.
+<code>
+cbmctrl lock
+morse 9
+cbmctrl command 9 U3:HELLO
+cbmctrl command 9 U3:YOU
+cbmctrl unlock
+</code>
+
+
+<sect>opencbm API<label id="opencbm-API">
 <p>
 All communication between the user space applications and the kernel module
 is done with ioctl's. Since ioctl's are quite unportable and hardly provide
 any type-safety, there are a number of wrapper-functions along with a couple
-of convenience functions implemented in <tt/libopencbm.a/. The prototypes can
-be found in the header file <tt/opencbm.h/.
+of convenience functions implemented in <tt/libopencbm.a/ (Linux) or
+<tt/opencbm.dll/ (Windows). The prototypes can be found in the header file
+<tt/opencbm.h/.
 
-<sect1>Preprocessor macros<label id="cbm4linux-preproc">
+<sect1>Preprocessor macros<label id="opencbm-preproc">
 <p>
 
 <itemize>
@@ -462,7 +813,7 @@ These defines are used by the <it/cbm_iec_*()/ functions. You will definitely
 need this if you intend to implement your own custom transfer routines. See
 the <tt/libd64copy//<tt/libcbmcopy/ source for more information.
 
-<sect1>Enumeration types<label id="cbm4linux-enum-types">
+<sect1>Enumeration types<label id="opencbm-enum-types">
 <p>
 
 <itemize>
@@ -476,25 +827,55 @@ the <tt/libd64copy//<tt/libcbmcopy/ source for more information.
 </itemize>
 </itemize>
 
-<sect1>Functions<label id="cbm4linux-functions">
+<p>
+<itemize>
+<item>enum cbm_cable_type_e
+<itemize>
+<item/cbm_ct_unknown/
+<item/cbm_ct_none/
+<item/cbm_ct_xp1541/
+</itemize>
+</itemize>
+
+<sect1>Generic types<label id="opencbm-types">
+
+<p>
+<itemize>
+<item>CBM_FILE</item>
+</itemize>
+
+This type is used to take a handle to the CBM driver. Only use this type, as it
+hides the differences between Windows and Linux.
+
+An invalid CBM_FILE has value CBM_FILE_INVALID.
+
+<sect1>Functions<label id="opencbm-functions">
 <p>
 
 (All functions except <tt/cbm_driver_open():/ <it/f/ must be a valid file
 descriptor)
 
-<sect2>Basic I/O<label id="cbm4linux-basic-functions">
+<sect2>Basic I/O<label id="opencbm-basic-functions">
 
 <p><descrip>
 <tag/int cbm_driver_open(CBM_FILE *f, int port);/
 Opens the driver. <tt/port/ isn't used by now and should be 0.
-After successful completition, 0 is returned along with a valid CBM_FILE
+After successful completion, 0 is returned along with a valid CBM_FILE
 descriptor in <tt/f/.
 
 <tag/void cbm_driver_close(CBM_FILE f);/
 Closes the driver.
 
+<tag/void cbm_lock(CBM_FILE f);/
+The equivalent to <it/cbmctrl lock/. Make sure the parallel port is
+kept locked even if the driver is closed with cbm_driver_close().
+
+<tag/void cbm_unlock(CBM_FILE f);/
+The equivalent to <it/cbmctrl unlock/. Unlock the parallel port as soon is the
+driver is closed with cbm_driver_close().
+
 <tag/int cbm_raw_read(CBM_FILE f, void *buf, size_t size);/
-Retrive data after <tt/cbm_talk();/. At most <tt/size/ bytes are read.
+Retrieve data after <tt/cbm_talk();/. At most <tt/size/ bytes are read.
 Return value is the actual number of bytes read. &lt; indicates an error.
 
 <tag/int cbm_raw_write(CBM_FILE f, const void *buf, size_t size);/
@@ -540,7 +921,7 @@ Do a hardware reset on all connected devices. Control is returned after
 a 5 second delay.
 </descrip>
 
-<sect2>Low-level port access<label id="cbm4linux-lowlevel-functions">
+<sect2>Low-level port access<label id="opencbm-lowlevel-functions">
 
 <p><descrip>
 <tag/__u_char cbm_pp_read(CBM_FILE f);/
@@ -557,16 +938,29 @@ Read status of all bus lines. Return value is a combination of
 Get (logical) status of line <it/line/.
 
 <tag/void cbm_iec_set(CBM_FILE f, int line);/
-Activate line <it/line/ (set to 0V).
+Activate lines <it/line/ (set to 0V).
+<it/line/ can be one of or a combination with OR of any of IEC_DATA, IEC_CLOCK,
+IEC_ATN.
 
 <tag/void cbm_iec_release(CBM_FILE f, int line);/
-Release line <it/line/ (set to 5V).
+Release lines <it/line/ (set to 5V).
+<it/line/ can be one of or a combination with OR of any of IEC_DATA, IEC_CLOCK,
+IEC_ATN.
+
+
+<tag/void cbm_iec_setrelease(CBM_FILE f, int setline, int resetline);/
+Set lines <it/setline/ (set to 0V) and release line <it/releaseline/ (set to
+5V)
+<it/setline/ and <it/resetline/ can each be one of or a combination with OR of
+any of IEC_DATA, IEC_CLOCK, IEC_ATN. If a line is part of both <it/setline/ and
+<it/resetline/, the outcome is undefined.
+
 
 <tag/int cbm_iec_wait(CBM_FILE f, int line, int state);/
-Experimental.
+Experimental, do not use.
 </descrip>
 
-<sect2>Helper functions<label id="cbm4linux-helper-functions">
+<sect2>Helper functions<label id="opencbm-helper-functions">
 
 <p><descrip>
 <tag/int cbm_upload(CBM_FILE f, __u_char dev, int adr, void *prog, int size);/
@@ -588,14 +982,57 @@ operating system. Both <it/t/ and <it/type_str/ may be <tt/NULL/ in case the
 caller is not interrested in any of both values.<p>
 The return value is <tt/0/ if the device responded to the <tt/"M-R"/ command,
 even if it could not be identified, &lt; 0 indicates error.
+
+<tag/int cbm_identify_xp1541(CBM_FILE f, __u_char drv, enum cbm_device_type_e *t1, enum cbm_cable_type_e *t2);/
+Tries to identify the device <it/drv/. The hardware type is returned in <it/t1/,
+<it/t2/ contains whether the drive has an parallel (XP1541) cable attached.
+Both <it/t1/ and <it/t2/ may be <tt/NULL/ in case the caller is not interrested
+in any of both values.<p>
+The return value is <tt/0/ if the device responded to the <tt/"M-R"/ command,
+even if it could not be identified, &lt; 0 indicates error.
+
 </descrip>
 
-<sect2>libd64copy <it/TODO/<label id="cbm4linux-libd64copy-functions">
+<sect2>PetSCII functions<label id="opencbm-petscii-functions">
+
+<p><descrip>
+<tag/char cbm_petscii2ascii_c(char character);/
+Converts one character <it/character/ from PetSCII to ASCII.
+
+<tag/char cbm_ascii2petscii_c(char character);/
+Converts one character <it/character/ from ASCII to PetSCII.
+
+<tag/char * cbm_petscii2ascii(char *str);/
+Convert a null-terminated string <it/str/ from PetSCII to ASCII.
+
+<tag/char * cbm_ascii2petscii(char *str);/
+Convert a null-terminated string <it/str/ from ASCII to PetSCII.
+
+</descrip>
+
+<sect2>Parallel Burst functions<label id="opencbm-parburst-functions">
+
+<p><descrip>
+<tag/__u_char cbm_parallel_burst_read(CBM_FILE f);/
+Support function for mnib. Do not use.
+
+<tag/void cbm_parallel_burst_write(CBM_FILE f, __u_char c);/
+Support function for mnib. Do not use.
+
+<tag/int cbm_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int length);/
+Support function for mnib. Do not use.
+
+<tag/int cbm_parallel_burst_write_track(CBM_FILE f, __u_char *buffer, unsigned int length);/
+Support function for mnib. Do not use.
+
+</descrip>
+
+<sect2>libd64copy <it/TODO/<label id="opencbm-libd64copy-functions">
 <p>
 Not documented yet. See <it/libd64copy/ and <it/d64copy/ source.<p>
 Types and prototypes are defined in <tt/d64copy.h/.
 
-<sect2>libcbmcopy <it/TODO/<label id="cbm4linux-libcbmcopy-functions">
+<sect2>libcbmcopy <it/TODO/<label id="opencbm-libcbmcopy-functions">
 <p>
 Not documented yet. See <it/libcbmcopy/ and <it/cbmcopy/ source.<p>
 Types and prototypes are defined in <tt/cbmcopy.h/.
