@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: rpm1541.c,v 1.2 2006-02-24 12:21:40 strik Exp $";
+    "@(#) $Id: rpm1541.c,v 1.3 2006-04-24 17:09:23 strik Exp $";
 #endif
 
 
@@ -44,7 +44,7 @@ main(int argc, char **argv)
 {
     __u_char drive = 8;
     int i;
-    unsigned char cmd[48];
+    unsigned char cmd[] = "M-R\x87\x00\x02";
     static unsigned char rpm_prog[] =
     {
 #include "rpm1541.inc"
@@ -84,8 +84,6 @@ main(int argc, char **argv)
     cbm_exec_command(fd, drive, "I0:", 0);
     cbm_upload(fd, drive, 0x0500, rpm_prog, sizeof(rpm_prog));
 
-    sprintf(cmd, "M-R%c%c%c", 0x87, 0x00, 2);
-
     count = 1ul;
     tsize = 0;
     for (i = 0; i < OCCSZ; ++i)
@@ -99,7 +97,7 @@ main(int argc, char **argv)
         double rpm;
 
         cbm_exec_command(fd, drive, "U4:", 0);
-        cbm_exec_command(fd, drive, cmd, 6);
+        cbm_exec_command(fd, drive, cmd, sizeof(cmd)-1);
         cbm_talk(fd, drive, 15);
         cbm_raw_read(fd, &int_count, 2);
         cbm_untalk(fd);
