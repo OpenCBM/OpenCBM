@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-03-02 18:17:19 strik Exp $
+# $Id: Makefile,v 1.2 2006-04-24 18:37:50 strik Exp $
 
 include ../LINUX/config.make
 
@@ -33,6 +33,7 @@ clean:
 
 mrproper: clean
 	rm -f $(DVI) $(INFO) $(TXT) html/*
+	rmdir html/
 
 install-files:
 	gzip -c9 $(INFO) > $(INFODIR)/$(INFO).gz
