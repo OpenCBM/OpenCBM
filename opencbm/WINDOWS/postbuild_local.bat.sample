@@ -1,4 +1,4 @@
-rem $Id: postbuild_local.bat.sample,v 1.2 2006-04-11 11:52:09 wmsr Exp $
+rem $Id: postbuild_local.bat.sample,v 1.3 2006-04-24 19:18:18 wmsr Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR POSTBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
@@ -25,6 +25,44 @@ if not defined DDKBUILD_PLATFORM set DDKBUILD_PLATFORM=i386
 
 for /f "tokens=3 delims=, " %%f in ('%1\bin\%DDKBUILD_PLATFORM%\cbmctrl.exe --version') do set VERSION=%%f
 echo Version is set to: %VERSION%
+
+(
+	setlocal
+	echo creating exe and version dependent help documentation
+	if not exist %1\bin\helpdoc mkdir %1\bin\helpdoc
+	del /f /q %1\bin\helpdoc\*.1
+	del /f /q %1\bin\helpdoc\*.ps
+	del /f /q %1\bin\helpdoc\*.dvi
+	del /f /q %1\bin\helpdoc\*.pdf
+	del /f /q %1\bin\helpdoc\*.html
+
+	cd %1\bin\%DDKBUILD_PLATFORM%
+	for %%f in (cbmcopy.exe d64copy.exe cbmforng.exe cbmformat.exe) do (
+		echo Creating %%~nf.1
+		which help2man | xargs -i perl {} .\%%f | tr -d "\r" > ..\helpdoc\%%~nf.1
+	)
+
+	cd ..\helpdoc
+	for %%f in (cbmctrl) do (
+		tr -d "\r" < ..\..\%%f\%%f.1 > %%f.1
+	)
+
+	for %%f in (*.1) do (
+		echo Creating %%f.ps
+		groff -t -e -mandoc -Tps  %%f > %%f.ps
+		echo Creating %%~nf.pdf from %%f.ps
+		ps2pdf %%f.ps %%~nf.pdf
+
+		echo Creating %%f.dvi
+		groff -t -e -mandoc -Tdvi %%f > %%f.dvi
+		echo Creating %%f.pdf from %%f.dvi
+		dvipdfm -o %%f.pdf %%f.dvi
+
+		echo Creating %%~nf.html
+		man2html %%f > %%~nf.html
+	)
+	endlocal
+)
 
 set INSTL_TARGET=%INSTALL_BASE%\%VERSION%
 if not exist %INSTL_TARGET% (
