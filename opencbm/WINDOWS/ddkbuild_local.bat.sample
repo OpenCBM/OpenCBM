@@ -1,4 +1,4 @@
-rem $Id: ddkbuild_local.bat.sample,v 1.4 2006-04-20 14:28:26 wmsr Exp $
+rem $Id: ddkbuild_local.bat.sample,v 1.5 2006-04-26 10:47:43 strik Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR DDKBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
@@ -24,7 +24,8 @@ if not defined W2KBASE  set W2KBASE=
 if not defined WXPBASE  set WXPBASE=
 if not defined WNETBASE set WNETBASE=%PROGRAMFILES%\WinDDK\3790.1830
 
-if not defined BASH     set BASH=%PROGRAMFILES%\CygWin\bin\bash
+if not defined CYGWIN   set CYGWIN=%PROGRAMFILES%\Cygwin
+if not defined BASH     set BASH=%CYGWIN%\bin\bash
 
 rem set COPYTARGET=
 rem set COPYSYM=

@@ -1,4 +1,4 @@
-rem $Id: postbuild_local.bat.sample,v 1.4 2006-04-24 22:00:57 wmsr Exp $
+rem $Id: postbuild_local.bat.sample,v 1.5 2006-04-26 10:47:43 strik Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR POSTBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
@@ -15,6 +15,7 @@ rem
 rem This script file is called with the cbm4win
 rem source home directory as parameter %1
 
+PATH=%PATH%;%CYGWIN%\bin
 
 set INSTALL_BASE=C:\_DDK_Test\cbm4win\
 set SYMBOL_STORE=C:\_DDK_Test\DebugSymbols\NewSymbols
@@ -42,23 +43,17 @@ REM set REPLVERSTRING=cat
 	cd %1\bin\%DDKBUILD_PLATFORM%
 
 		REM convert files that don't need any fixups
-	for %%f in (d64copy cbmforng cbmformat) do (
+	for %%f in (d64copy cbmforng cbmformat instcbm) do (
 		echo Creating %%~nf.1
-		which help2man | xargs -i perl {} -N %%f | tr -d "\r" | %REPLVERSTRING% > ..\helpdoc\%%~nf.1
+rem		which help2man | xargs -i %BASH% -c "perl {} -N ./%%f" | tr -d "\r" | %REPLVERSTRING% > ..\helpdoc\%%~nf.1
+		%BASH% -c "help2man -N ./%%f" | tr -d "\r" | %REPLVERSTRING% > ..\helpdoc\%%~nf.1
 	)
 		REM convert files that need path corrections
 	for %%f in (cbmcopy) do (
 		echo Creating %%~nf.1
-		which help2man | xargs -i perl {} -N %%f | tr -d "\r" | sed "s/[^ ]*[^ ""]%%f[^ ]*/%%f/g" | %REPLVERSTRING% > ..\helpdoc\%%~nf.1
+		%BASH% -c "help2man -N ./%%f" | tr -d "\r" | sed "s/[^ ]*[^ ""]%%f[^ ]*/%%f/g" | %REPLVERSTRING% > ..\helpdoc\%%~nf.1
 	)
 		REM convert files that need naming and version string fixups
-	for %%f in (instcbm) do (
-		echo Creating %%~nf.1
-		for /f "tokens=3 delims=, " %%g in ('%%f --version') do (
-			echo Version string fixed to: "%%f %%g"
-			which help2man | xargs -i perl {} -N --version-option="--version | echo %%f %%g" %%f | tr -d "\r" | sed "s/.* Version \([^ ][^ ]*\), built on .* at .*$/%%f \1/g" | %REPLVERSTRING% > ..\helpdoc\%%~nf.1
-		)
-	)
 
 		REM get handcrafted man files and remove DOS line endings
 	cd ..\helpdoc
@@ -70,7 +65,7 @@ REM set REPLVERSTRING=cat
 		echo Creating %%f.ps
 		groff -t -e -mandoc -Tps  %%f > %%f.ps
 		echo Creating %%~nf.pdf from %%f.ps
-		ps2pdf %%f.ps %%~nf.pdf
+		bash -c "ps2pdf %%f.ps %%~nf.pdf"
 
 		echo Creating %%f.dvi
 		groff -t -e -mandoc -Tdvi %%f > %%f.dvi
