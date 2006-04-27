@@ -1,4 +1,4 @@
-.\" $Id: cbmctrl.1,v 1.5 2006-03-13 21:06:11 wmsr Exp $
+.\" $Id: cbmctrl.1,v 1.6 2006-04-27 20:44:22 wmsr Exp $
 .\"
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
@@ -18,7 +18,7 @@ If in doubt, use the Texinfo manual. If the
 .B info
 program is properly installed at your site, the command
 .IP
-.B info cbm4linux
+.B info opencbm
 .PP
 should give you access to the complete manual.
 .SH SYNOPSIS
@@ -239,8 +239,8 @@ understands the following
 .B actions:
 .TP
 .BI reset
-This action performs a hardware reset of all devices attached to the
-IEC bus.
+This action performs a hardware reset of all devices attached to the IEC bus.
+Control is returned after it is made sure that all devices are ready.
 .TP
 .BI detect 
 This action tries to detect all devices attached to the IEC bus.
@@ -267,7 +267,7 @@ upon (each) exit.
 .RE
 .TP
 .BI unlock
-Ends exclusive parallel port access by cbm4win/cbm4linux so that other
+Ends exclusive parallel port access by opencbm so that other
 processes are allowed to access the parallel port.
 .TP
 .BI listen " <device> <secadr>"
@@ -402,16 +402,17 @@ for writing.
 You cannot do an open without a filename. Although a CBM machine
 (i.e., a C64) allows this, it is an internal operation to that
 computer only.
+.TP 2
+*
+.BI cbmctrl " open"
+does not change any character encoding, that is, it does not convert
+between ASCII (used by the PC) and PETSCII (used by the CBM device).
+If this is needed, use
+.BI cbmctrl " popen"
+instead.
 .RE
 .PD
 .RE
-.TP
-.BI close " <device> <secadr>"
-Close the file associated with secondary address
-.I <secadr>
-on device
-.IR <device> .
-This undoes a previous open command.
 .TP
 .BI popen " <device> <secadr> <filename>"
 The
@@ -420,7 +421,8 @@ action is the very same as the
 .B open
 action and all parameters act the same. The difference is that the
 .I <filename>
-string is converted from ASCII to PETSCII before beeing used.
+string is converted from ASCII to PETSCII before beeing sent to the
+device.
 .PP
 .RS
 .PD 0
@@ -434,6 +436,15 @@ action.
 .RE
 .PD
 .RE
+.TP
+.BI close " <device> <secadr>"
+Close the file associated with secondary address
+.I <secadr>
+on device
+.IR <device> .
+This undoes a previous
+.BR open " or" " popen"
+command.
 .TP
 .BI read " [<file>]"
 Reads raw data from a device, after it has been set into
@@ -460,9 +471,10 @@ the standard input channel on the host computer.
 .BI status " <device>"
 Copies input from device
 .IR <device> ,
-secondary address 15 (error channel), to standard out. Note that all upper case
-characters are changed to lower case. Carriage return (0x0d) is also changed
-to linefeed (0x0a).
+secondary address 15 (command/status channel), to standard out. Note that
+all upper case characters are changed to lower case. Carriage return (0x0d)
+is also changed to the current operating systems line ending convention
+(0x0a on Unix oriented systems, 0x0d 0x0a on Windows oriented systems).
 .PP
 .RS
 This action is similar to (in this case, no character conversions would be
@@ -490,9 +502,9 @@ Sends
 .I <cmdstr>
 to device
 .IR <device> ,
-secondary address 15 (command channel). Note that most (all?) devices
-accept upper case commands only, lower case will not work (i.e., N:
-to format a drive, V: to validate, etc.)!
+secondary address 15 (command/status channel). Note that most (all?)
+devices accept upper case commands only, lower case will not work
+(i.e., N: to format a drive, V: to validate, etc.)!
 .PP
 .RS
 This command is identical to:
@@ -541,6 +553,12 @@ action command, all commands (stated within
 .IR <cmdstr> )
 have to be given in lower case letters. The letter case conversion is one of
 the things the ASCII to PETSCII conversion does.
+.TP 2
+*
+Due to the conversion from ASCII to PETSCII, sending
+.IR """m-r""" " and" " ""m-w"""
+device commands will not work in most cases, because the data to be sent
+will be converted too and thus corrupts the stream.
 .RE
 .PD
 .RE
@@ -718,4 +736,4 @@ Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
 additions and reworks by Spiro Trikaliotis, additions by Wolfgang Moser
 <cbm(a)d81(o)de>.
 .SH DATE
-Mar 13 2006
+Apr 27 2006
