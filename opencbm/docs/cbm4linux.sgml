@@ -30,6 +30,395 @@ level bus control is available as well. The serial devices are connected to
 the PC's parallel port via an XM1541 or XA1541 and, optionally, an XP1541 or
 XP1571 add-on.
 
+<sect1>Introduction to opencbm<label id="introduction">
+
+<p>
+This is version 0.4.0 of opencbm, a kernel device driver for the serial CBM bus
+(C64, VIC-20, etc.) for Linux and Windows. opencbm is a join of the two projects
+cbm4linux (latest version: 0.3.2) and cbm4win (latest version: 0.1.0a). It
+should be noted that both projects were highly related from the beginning, as
+cbm4win was just a branch from cbm4linux.
+
+Opencbm should work with any devices that understand the "normal" talk and
+listen commands of the CBM IEC bus. It has been tested with several 1541,
+1541-II, 1571 and 1581 drives, and a MPS-1200. 1541 clones like the OC-118 have
+also been reported to work.
+
+The following cable types are supported: 
+
+<p>
+<tscreen><verb>
+  XP1571             (cbm4linux version >= 0.2.4, cbm4win version >= 0.1.0)
+  XM1541 and XA1541  (cbm4linux version >= 0.2.1, cbm4win version >= 0.1.0)
+  XP1541             (cbm4linux version >= 0.2.0, cbm4win version >= 0.1.0)
+  Modified XE1541    (only on Linux, obsoleted by the XM1541, 
+                      see config.make)
+</verb></tscreen>
+
+More information on the different cable types can be obtained on the Star
+Commander homepage(http://sta.c64.org/xcables.html)and the file CABLE
+(included in this packages).
+
+This package is provided `as is', no warranty of any kind will be
+taken for any damage or data loss caused by it or by anyuseof
+it.
+
+<p>
+*** WARNING *****************************************************
+
+HOTPLUGGING can KILL your hardware. Do not connect anything to
+the parallel port while the system is up. Always SHUT DOWN, CON­
+NECT, REBOOT. Again, absolutely NO WARRANTY.
+
+*****************************************************************
+
+<sect>Installation<label id="installation">
+
+<p>
+Depending on the system you are running opencbm on, there are different ways to
+install opencbm. Use the appropriate category for you:
+
+<sect1>Installing opencbm on Linux (cbm4linux)<label id="cbm4linux-install">
+
+<p>
+The kernel module (cbm.o) does not require any kernel patches and should
+compile right out of the box, at least with kernel 2.2.x and 2.4.x, but 2.0.x
+might still work as well.
+
+If you intend to modify the drive routines for `d64copy' and `cbmformat' you
+also need a crossassembler. `config.make' comes with rules for A.Fachat's `xa'
+(available from funet or http://www.lb.shuttle.de/puffin/cbm4linux) and
+Ullrich von Bassewitz' `cl65' (comes with cc65, http://www.cc65.org).
+Starting with version cbm4linux 0.2.3, opencbm includes precompiled 6502
+binaries, so as long as you don't touch the .a65 files there's no need for a
+crossassembler.
+
+This package comes with a .spec file for those who want to build binary .RPMs.
+See the RPM documentation for details about the build process. If you upgrade
+from a previous (non-RPM) version and want to install a binary RPM, don't
+forget to remove the old files hanging aroung (just do "make uninstall",
+prferably in the *old* source directory).
+
+<sect2>Compile-time configuration
+<p>
+The compile-time configuration is located in `LINUX/config.make'. Check the
+KERN_FLAGS line if you're running kernel 2.0.x or if you don't want to use the
+Linux parport subsystem for some reason. Same goes for SMP machines.
+
+
+<sect2>Compilation
+
+<p>
+Type
+
+<itemize>
+<item>make             (no root priviledges required)
+
+to  build  the  kernel module, libraries and utility programs (no
+root priviledges required),
+
+<item>make dev         (as root)
+
+to   create   the  character  device "/dev/cbm" with major 10 and
+minor 177 (this number is registered,  so  it  shouldn't  collide
+with anything else :)). Finally
+
+<item>make install     (as root)
+
+will  install  all  necessary  stuff  to  /usr/local/...  (can be
+changed in `config.make')
+</itemize>
+
+<sect2>Loading the module
+
+<p>
+If  you're  using  the  parport subsystem (which is default), you
+should now be able to load the driver module by issuing (as root)
+
+<p>
+<itemize>
+<item>/sbin/modprobe parport      (unless compiled into the kernel)
+<item>/sbin/insmod cbm lp=your_lp   (usually 0, which is default)
+</itemize>
+
+<p>
+or, when built with -DDIRECT_PORT_ACCESS:
+
+<p>
+<itemize>
+<item>/sbin/insmod cbm port=your_ioport irq=your_irq
+     (default is 0x378 for port, 7 for irq)
+</itemize>
+
+Check /var/log/messages for the correct cable type (XA1541/XM1541).
+
+
+<sect2>Troubleshooting
+
+<p>
+Finding the cause of a problem can be hard. Anyway, the following
+tips might help you:
+
+<itemize>
+<item>/var/log/messages might give you some hints.
+
+<item>Using the parport subsystem:
+
+<itemize>
+<item>the port is occupied by another device (e.g. lp.o)
+     cbm.o does NOT support port sharing (wouldn't work anyway).
+     (`cat /proc/parport/port/devices')
+
+<item>parport_pc doesn't use an IRQ.
+     /etc/modules.conf should contain something like:
+       alias parport_lowlevel parport_pc
+       options parport_pc io=0x378 irq=7
+     (`cat /proc/interrupts')
+</itemize>
+
+<item>Using direct port access:
+
+<itemize>
+<item>the port/IRQ is occupied by another driver (e.g. parport.o)
+     (`cat /proc/interrupts')
+     (`cat /proc/ioports')
+</itemize>
+</itemize>
+
+
+<sect2>Device access
+
+<p>
+As a first test, I'd suggest something simple like
+
+<tscreen><verb>
+    cbmctrl command 8 I0:    (assuming drive 8)
+    cbmctrl status 8
+</verb></tscreen>
+
+<p>
+(no root privileges required)
+
+<p>
+Failure can be caused by:
+<itemize>
+<item>incorrect module parameters
+<item>wrong BIOS settings (esp. IRQ)
+<item>broken cable
+</itemize>
+
+<sect2>Runtime configuration
+
+<p>
+You really want to add this to /etc/modules.conf to have the driver loaded on
+demand: (/etc/conf.modules on older SuSE systems)
+
+    alias char-major-10-177 cbm
+    options cbm [options]
+
+With [options] being one or more of:
+
+<itemize>
+<item>lp=<it/lp/       (parport only, as used in /sbin/insmod above)
+<item>irq=<it/irq/     (direct port only, as used in /sbin/insmod above)
+<item>port=<it/port/   (direct port only, as used in /sbin/insmod above)
+<item>cable=<it/n/      force cable type:
+                -1  for autodetection (default)
+                 0  for XM1541 (non-inverting)
+                 1  for XA1541 (inverting)
+<item>reset=<it/n/     initializing behaviour:
+                -1  smart IEC reset (direct port default)
+                 0  no IEC reset
+                 1  force IEC reset (parport default)
+</itemize>
+
+<p>
+Congratulation, you have successfully set up your opencbm installation!
+
+
+<sect1>Installing opencbm on Windows (cbm4win)<label id="cbm4win-install">
+
+<p>
+<it/WARNING! If you have already installed a previous version of CBM4WIN on your
+machine, you have to uninstall it before installing a new version. For this, go
+to the directory where the old version is located, and enter instcbm
+--remove./
+
+First of all, Windows must know about the driver. For this, we must install it
+with the instcbm tool. This is done as follows:
+
+<itemize>
+<item>Make sure you have a supported operating system up and running.
+
+<item>You need administrator privileges on the Windows machine to perform the
+following actions.
+
+<item>At first, you have to make sure you have the needed hardware ready. Do the
+following:
+
+<itemize>
+<item>Get your VIC 15xx drive (out of the basement, or wherever it is!
+
+<item><b>Moving cables with equipment turned on can damage either your PC,
+and/or the drive, so, be carefull!</b>
+
+<item>Thus, switch off your PC and your VIC 15xx drive!
+
+<item>Connect your XA1541 or XM1541 cable to your PC. If you have a parallel
+port cable (XP1541), connect that one, too.
+
+<item>Connect your VIC 15xx floppy drive to the cable
+
+<item>Switch on the PC.
+</itemize>
+
+<item>Just download the binary package, and unpack it into an arbitrary
+directory.
+
+<item>Get a command-line, and change into the directory you unpackaged the
+drivers into.
+
+<item>Type "cd exe"
+
+<item>Type "instcbm" and check the outputs. Its last line should look like No
+problems found in current configuration. The program might suggest a reboot,
+which you should follow. If it does not, don't worry, instcbm tries to avoid
+that if possible.
+
+<item>You might want to have a look at the possible options for instcbm. They
+are available by typing "instcbm --help"
+
+<item>If we had to reboot in the previous step, do the following:
+
+<itemize> <item>Go to a command-line, and change into the directory you
+unpackaged the drivers into again.
+
+<item>Type "cd exe"
+
+<item>Type "instcbm --check". There should not be any further suggestion for a
+reboot. If there is, do not proceed, but contact me instead.
+</itemize>
+
+<item>If you want to use another port than LPT1, you must tell this to the
+driver. I assume you want to use LPTX, with X being the correct value, then
+type: "instcbm --lpt=X --update"
+</itemize>
+
+<sect>Checking if the installation is complete
+<p>
+Here, the installation is complete. Anyway, it is wise to check if the
+installation works as expected. For this, do the following:
+
+<itemize>
+<item>Now, it is time to switch on the floppy drive. Depending on the type of
+cable you are using (XA1541 or XM1541) and the parallel port of your PC, this
+drive might keep spinning endless now, because it is continuously resetted.
+
+<item>Now, type "cbmctrl reset" and press enter. If it does not already, the red
+floppy drive LED should light up, and the drive should start spinning. After
+approximately one second, the red LED should switch off again, and the drive
+stops spinning.
+
+<item>Now, type "cbmctrl status 8" to get the status (error) code from the
+attached floppy drive. If everythings works fine, your drive should answer which
+its identification string. For a 1541, this is something like 73,cbm dos v2.6
+1541,00,00, while for a 1571, this line looks like 73,cbm dos v3.0 1571,00,00.
+There might also be some variant of this line, depending on the firmware version
+of your drive.
+
+<item>Type "cbmctrl status 8" to get the status (error) code from the floppy
+drive. As the power on message has been read, your drive should answer with a
+00, ok,00,00 string.
+
+<item>Type "cbmctrl detect". This command tries to detect the types of drive
+which are connected on the cable. You should see the drive which you posess.
+
+<item>Now, we want to check if we can send anything to the floppy drive. Remove
+any diskette from the drive and press "cbmctrl open 8 15 I0". (Make sure the "I"
+is an upper-case "I". A lower-case "I" will not work!) This command tries to
+initialize the disk. Anyway, since we don't have a disk in the drive, an error
+occurs. You should hear the floppy spinning, and in case of a 1541, the R/W-head
+should start bumping. After some seconds, the red LED starts starts flashing,
+indicating that an error occurred.
+
+<item>Now, press again "cbmctrl status 8" to get the status (error) code from
+the floppy drive. As an error occurred before, an error string should be
+displayed. For my setup, it is the "21,read error,18,00" string. Furthermore,
+the red LED should stop flashing.
+</itemize>
+
+If you have come so far, you are sure that you send commands to the floppy, and
+receive answers from it. This is very good so far. Furthermore, don't panic:
+you do not have to enter these commands over and over again, these are only
+tests to make sure that anything is correctly installed.
+
+Now, let's proceed. If you have a D64 file or a floppy disc ready, you can try
+transferring it over the cable. Do not use all of the followinng commands, but
+only these one you want to perform.
+
+<itemize>
+<item>If you want to transfer an existing floppy from the drive to the PC, use
+the following command: "d64copy --transfer=serial2 --warp 8 A.D64", while
+replacing A.D64 by the name you want to give to the file. If you have a parallel
+cable up and ready, just try with that one: "d64copy --transfer=parallel --warp
+8 A.D64".
+
+<item>WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
+BEFORE, so make sure you do not need that floppy anymore. If you have a D64 or
+D71 on your PC, and you want to write it to a new, already formatted disc, enter
+"d64copy --transfer=serial2 --warp A.D64 8" if the file is called A.D64. Again,
+if you have a parallel cable, you might want to replace "--transfer=parallel".
+
+<item>WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
+BEFORE, so make sure you do not need that floppy anymore. If you have a disc
+you want to format, you have two options: Either use the command "cbmctrl
+command 8 N0:NAME,ID", or use the cbmformat program.
+</itemize>
+
+<p>
+If you want to completely remove the cbm4win driver from your machine, you can
+do so by issuing a "instcbm --remove" command.
+
+You can have a look at the available cbmctrl commands by issuing cbmctrl on
+your command line. For the other programs, you get help by issuing the "--help"
+option.
+
+Currently, there is still some documentation missing. Anyway, you can find the
+documentation in the cbm4linux docs. This is not true for the instcbm tool,
+which is for Windows only.
+
+
+
+<sect1>instcbm
+<p>
+The following options are available for the "instcbm" tool:
+
+<itemize>
+<item> instcbm
+	Installs the DLL and the driver on the machine. The driver and the DLL
+	are copied into the Windows system directory.
+
+<item>instcbm --nocopy
+	Installs the DLL and the driver on the machine. Unlike above, both files
+	are not copied, but they are used just "where they are". If you use
+	this option, the directory where your files reside must be accessible
+	for the system while booting. For example, network drives, USB drives or
+	FireWire drives are not allowed.
+
+<item>instcbm --remove
+	Uninstall the driver from the machine. The DLL and the driver file
+	itself are removed if --nocopy was *not* given at installation time.
+
+<item>instcbm --check
+	Check if the installation was set up successfully.
+
+<item>instcbm --lpt=X --update
+	(With X a value from 1 to ...) Choose LptX is default port.
+
+<item>instcbm --help
+	Print out a short help describing the possible options.
+</itemize>
+
 <sect>Utilities<label id="utilities">
 
 <p>opencbm comes with the following utilities:
@@ -456,7 +845,8 @@ cbmforng 8 GAMES,42
 </code>
 
 <p>
-Format standard disk (35 tracks) in drive 9, use (buggy) 1541 sector pattern (for example, because this is a 1571 drive), show drive status when done:
+Format standard disk (35 tracks) in drive 9, use (buggy) 1541 sector pattern
+(for example, because this is a 1571 drive), show drive status when done:
 <code>
 cbmforng -os 9 1571disc,71
 </code>
@@ -482,7 +872,7 @@ Synopsis: <tt/d64copy [OPTION]... SOURCE TARGET/
 
 <p>
 Either SOURCE or TARGET must be an external drive, valid names are 8, 9, 10 and
-11.  The other parameter specifies the file name of the .d64 image.
+11. The other parameter specifies the file name of the .d64 image.
 
 Here's a complete list of known options:
 
@@ -1036,5 +1426,63 @@ Types and prototypes are defined in <tt/d64copy.h/.
 <p>
 Not documented yet. See <it/libcbmcopy/ and <it/cbmcopy/ source.<p>
 Types and prototypes are defined in <tt/cbmcopy.h/.
+
+
+<sect>Misc
+
+<sect1>Credits
+
+<p>
+The fast format drive routine used by `cbmformat' and the turbo and warp drive
+routines used in `libd64copy' and `libcbmcopy' are heavily based on Joe
+Forster/STAs Star Commander routines.
+
+The XP1541 and XP1571 cables (C) by Joe Forster/STA.
+The original XE1541 cable (C) by Nicolas Welte and Wolfgang Moser
+The XA1541 cable (C) by Michael Klein and Nicolas Welte
+
+<sect1>Contributions
+
+<p>
+People who directly or indirectly contributed to opencbm (in no particular
+order):
+
+<itemize>
+<item>
+<it/Michael Klein/ startedg the original cbm4linux work (which was a very big
+part)
+<item>
+<it>Joe Forster/STA</it> made the Star Commander and supplied the source and
+about the X?1541 interfaces; who know, without this work, opencbm might never
+have appeared at all.
+<item>
+<it/Nicolas Welte/ helped with the XA1541 and XM1541 interfaces and supplied a
+free factory-new 1571 mechanic for Michael
+<item>
+<it/Andreas Boose & the VICE team/ made VICE
+<item>
+<it/André Fachat/ made the xa 6502 crossassembler
+<item>
+<it/Ullrich von Bassewitz/ made the ca65 crossassembler
+<item>
+<it/Wolfgang Moser/ contributed <it/many/ discussions, patches, and hardware
+whenever it was needed.
+<item>
+<it/Spiro Trikaliotis/ with discussions, lots of fixes and doing an overall
+great review while porting the driver to "other" operating systems ;-)
+</itemize>
+
+<p>
+And anyone else who sent patches, suggestions, praises & flames!
+
+<sect1>Feedback
+
+<p>
+Feel free to drop me a note if you have ideas, patches etc. or if
+you just want to tell me how happy you are with this program ;-)
+
+
+Have fun,
+The opencbm team.
 
 </article>
