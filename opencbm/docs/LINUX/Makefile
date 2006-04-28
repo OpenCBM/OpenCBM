@@ -1,18 +1,18 @@
-# $Id: Makefile,v 1.3 2006-04-28 12:51:09 strik Exp $
+# $Id: Makefile,v 1.4 2006-04-28 12:57:35 strik Exp $
 
 include ../LINUX/config.make
 
 .PHONY: all clean mrproper install uninstall install-files
 
-SGML = cbm4linux.sgml
+SGML = opencbm.sgml
 
-PDF  = cbm4linux.pdf
-TXT  = cbm4linux.txt
-WINTXT  = cbm4linux.win.txt
-TEX  = cbm4linux.tex
-DVI  = cbm4linux.dvi
-INFO = cbm4linux.info
-HTML = html/cbm4linux.html
+PDF  = opencbm.pdf
+TXT  = opencbm.txt
+WINTXT  = opencbm.win.txt
+TEX  = opencbm.tex
+DVI  = opencbm.dvi
+INFO = opencbm.info
+HTML = html/opencbm.html
 
 %.win.txt: %.txt
 	sed -e 's/.//g;' -e 's/\[[0-9]*m//g;' $< > $@
@@ -29,9 +29,9 @@ HTML = html/cbm4linux.html
 
 %.info: %.sgml
 	sgml2info $<
-	perl -p -i -e 'if(m/^   \\input texinfo/){print "INFO-DIR-SECTION Miscellaneous\nSTART-INFO-DIR-ENTRY\n* cbm4linux: (cbm4linux).	Commodore serial IEC bus support.\nEND-INFO-DIR-ENTRY\n";}' $@
+	perl -p -i -e 'if(m/^   \\input texinfo/){print "INFO-DIR-SECTION Miscellaneous\nSTART-INFO-DIR-ENTRY\n* opencbm: (opencbm).	Commodore serial IEC bus support.\nEND-INFO-DIR-ENTRY\n";}' $@
 
-%.html: cbm4linux.sgml
+%.html: opencbm.sgml
 	-[ ! -d html ] && mkdir html/
 	cd html; sgml2html -s 2 ../$<; cd ..
 
