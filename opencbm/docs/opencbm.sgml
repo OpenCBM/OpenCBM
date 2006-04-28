@@ -1,7 +1,7 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.3 2006-04-28 17:16:29 strik Exp $ -->
+<!-- $Id: opencbm.sgml,v 1.4 2006-04-28 18:16:52 strik Exp $ -->
 <title>opencbm 0.4.0 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
@@ -312,7 +312,7 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 
  <item>Build process (Windows):
   <itemize>
-  <item>reworked build process (<it/DDKBUILD_LOCAL.BAT/)
+  <item>reworked build process (<it/DDKBUILD_START.BAT/)
   <item><it/DDKBUILD_LOCAL.BAT/ contains settings for the CC65 build process, now.
   <item><it/ddkbuild_local.bat.sample/ added as sample for a DDKBUILD_LOCAL.BAT file
   <item><it/postbuild_local.bat.sample/ added as sample for a POSTBUILD_LOCAL.BAT file
@@ -2028,9 +2028,15 @@ There are some known bugs in opencbm:
  remove opencbm whenever you want to access that other device, or install
  opencbm with <it/instcbm --lock=no/ and make sure to issue <it/cbmctrl lock/
  before accessing the drive, and <it/cbmctrl unlock/ afterwards.
-<item>Windows: There are problems with some 3rd party PCI parallel port cards.
- Namely, some SIIG cards do not work. It is currently unknown what is going on,
- but we are investigating.
+<item>Windows: No third party PCI parallel port card does work with
+  opencbm on Windows currently; to say it with other words: there
+  is no proof or positive report that any third party PCI
+  parallel port card does or did work with opencbm on Windows. The exact
+  failure reason is not known to date, but we are investigating
+  further since that feature is a must, when integrated parallel
+  ports were removed from mainstream mainboards in the future.
+</itemize>
+
 </itemize>
 
 <sect>Misc
