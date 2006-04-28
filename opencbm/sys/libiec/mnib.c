@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.15 2006-04-23 11:24:01 strik Exp $ \n
+** \version $Id: mnib.c,v 1.16 2006-04-28 10:48:17 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -22,8 +22,8 @@
 **
 ****************************************************************/
 
-#define TO_HANDSHAKED_READ  200000
-#define TO_HANDSHAKED_WRITE 200000
+#define TO_HANDSHAKED_READ  libiec_global_timeouts.T_PARALLEL_BURST_READ_BYTE_HANDSHAKED
+#define TO_HANDSHAKED_WRITE libiec_global_timeouts.T_PARALLEL_BURST_WRITE_BYTE_HANDSHAKED
 
 #include <wdm.h>
 #include "cbm_driver.h"
@@ -165,7 +165,7 @@ cbmiec_parallel_burst_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
 static int
 cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
 {
-    int to = 0;
+    unsigned int to = 0;
     int j;
     int returnValue;
 
@@ -230,7 +230,7 @@ cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
 static int
 cbm_handshaked_write(PDEVICE_EXTENSION Pdx, char Data, int Toggle)
 {
-    int to=0;
+    unsigned int to=0;
     int retval;
 
     FUNC_ENTER();

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.8 2006-03-09 17:31:35 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.9 2006-04-28 10:48:16 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -158,6 +158,12 @@ struct IEC_TIMEOUTS
 
     //! = 100 us: Granularity: How long to wait for a frame handshake after sending a byte
     ULONG T_17_SEND_FRAME_HANDSHAKE_T_F;
+
+    //! = 300ms, timeout for reading one handshaked byte with parallel burst
+    ULONG T_PARALLEL_BURST_READ_BYTE_HANDSHAKED;
+
+    //! = 300ms, timeout for writing one handshaked byte with parallel burst
+    ULONG T_PARALLEL_BURST_WRITE_BYTE_HANDSHAKED;
 
 } IEC_TIMEOUTS;
 

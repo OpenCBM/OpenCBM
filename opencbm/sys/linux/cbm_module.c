@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.12 2006-04-21 15:20:51 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13 2006-04-28 10:48:17 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -1087,8 +1087,8 @@ int cbm_parallel_burst_write(unsigned char c)
 **/
 }
 
-#define TO_HANDSHAKED_READ  100000
-#define TO_HANDSHAKED_WRITE 100000
+#define TO_HANDSHAKED_READ  300000
+#define TO_HANDSHAKED_WRITE 300000
 
 int cbm_handshaked_read(int toggle)
 {
