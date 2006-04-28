@@ -1,7 +1,7 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.2 2006-04-28 16:25:56 strik Exp $ -->
+<!-- $Id: opencbm.sgml,v 1.3 2006-04-28 17:16:29 strik Exp $ -->
 <title>opencbm 0.4.0 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
@@ -216,6 +216,137 @@ XM1541 or XA1541 cable.
 For more information about the different supported cables (XM1541, XA1541,
 XP1541, XP1571) can be obtained on the Star Commander homepage (<htmlurl
 url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
+
+<sect>News/Changelog
+
+<p>
+<descrip>
+<tag/opencbm v0.4.0:/
+
+<itemize>
+
+ <item>General:
+  <itemize>
+  <item>Reorganized structure so cbm4win and cbm4linux compile from the same sources
+  <item>Fixed many minor and major errors
+  <item>Added mnib36 (<htmlurl url="http://rittwage.com/c64pp/dp.php?pg=mnib"
+  name="http://rittwage.com/c64pp/dp.php?pg=mnib">) support
+  <item><it/cbmforng/: New tool, cf. <ref id="cbmforng" name="cbmforng">
+  <item><it/rpm1541/: New tool, cf. <ref id="rpm1541" name="rpm1541">
+  </itemize>
+
+ <item>General, Windows specific:
+  <itemize>
+  <item>Use a free build instead of a checked build. This significantly reduces
+  the memory footprint.
+  <item>compiles for AMD64, iA64, i386 (Windows only)
+  <item>VDD to allow DOS programs to access cbm4win
+  <item>new unit file for Delphi, to allow to access cbm4win from Delphi
+  <item>New project opencbmvice for debugging with the help of VICE (<htmlurl
+  url="http://www.viceteam.org/" name="http://www.viceteam.org/">). For this, a
+  special version of VICE is needed.
+  </itemize>
+
+ <item>Linux driver:
+  <itemize>
+  <item>Fixed kernel source directory (Dirk Jagdmann)
+  <item>Fixed installation with GNU coreutils head (Dirk Jagdmann)
+  <item>Added correct module installation dir for Linux 2.6 (Dirk Jagdmann)
+  <item>Added descriptions for module parameters (<it/modinfo cbm/) (Dirk Jagdmann)
+  <item>Added "smart reset" for cbm4linux: Delay the reset until all drives are ready.
+  </itemize>
+
+ <item>Windows driver:
+  <itemize>
+  <item>Only access the bus if the parallel port was successfully acquired.
+  <item>Added ECP and EPP support into NT4 driver (allowing XP1541 cable to be used there)
+  <item>On reset, do not wait a fixed timeout anymore, just wait until all drives are ready again
+  </itemize>
+ 
+ <item>instcbm:
+  <itemize>
+  <item><it/--lock/, <it/--cabletype/: New options
+  <item><it/--automatic/ is default now, new option <it/--on-demand/ for old behaviour
+  <item>Added <it/-V/ (<it/--version/) command-line option
+  <item>Reworked start of driver. It was unloaded and loaded before, which does not make sense
+  </itemize>
+
+ <item>cbmctrl:
+  <itemize>
+  <item><it/cbmctrl popen/, <it/cbmctrl pcommand/ to do ASCII -> PETSCII conversions
+  <item><it/cbmctrl status/, <it/cbmctrl dir/: Output the status on stdout, not stderr
+  <item><it/cbmctrl lock/, <it/cbmctrl unlock/: New commands
+  <item><it/cbmctrl read/, <it/cbmctrl write/: New commands
+  <item>Added <it/--version/ and <it/--help/ command-line arguments.
+  <item><it/cbmctrl change drive/: New function (heavily based on Joe Forster/STA's "TDCHANGE" from SC, used with permission)
+  <item><it/cbmctrl detect/ outputs whether we have a parallel cable
+  </itemize>
+
+ <item>cbmcopy:
+  <itemize>
+  <item>Fixed some timing problems which resulted in hanging in rare cases;
+  <item>Cosmetical fix: The device status is written on a separate line on exit.
+  <item>Fixed some races between PC and drive code in the transfer functions serial1, serial2, parallel
+  <item>New option <it/--transfer=auto/, which is default and finds out the best transfer method for the current setup.
+  <item>Do not use $14 in the floppy drive as temporary variable, but $86. This fixes a problem with Rex-DOS.
+  <item>Do not trash the file on the PC side if aborted with Ctrl+C.
+  </itemize>
+
+ <item>d64copy:
+  <itemize>
+  <item>Fixed some timing problems which resulted in hanging in rare cases;
+  <item><it/--warp/ is default now; New option <it/--no-warp/ for disabling it.
+  <item>did not recognize .d71 files as valid images; fixed that.
+  <item>Fixed some races between PC and drive code in the transfer functions <it/serial1/, <it/serial2/, <it/parallel/
+  <item>New option <it/--transfer=auto/, which is default and finds out the best transfer method for the current setup.
+  <item>Do not use $14 in the floppy drive as temporary variable, but $86. This fixes a problem with Rex-DOS.
+  <item>Do not trash the file on the PC side if aborted with Ctrl+C.
+  </itemize>
+
+ <item>API:
+  <itemize>
+  <item><tt/cbm_detect_xp1541()/: New function
+  <item><tt/cbm_iec_setrelease()/: New function
+  <item><tt/cbm_iec_set()/, <tt/cbm_iec_release()/: Extended API to allow setting/resetting more than one line at the same time
+  </itemize>
+
+ <item>Build process (Windows):
+  <itemize>
+  <item>reworked build process (<it/DDKBUILD_LOCAL.BAT/)
+  <item><it/DDKBUILD_LOCAL.BAT/ contains settings for the CC65 build process, now.
+  <item><it/ddkbuild_local.bat.sample/ added as sample for a DDKBUILD_LOCAL.BAT file
+  <item><it/postbuild_local.bat.sample/ added as sample for a POSTBUILD_LOCAL.BAT file
+  </itemize>
+
+ <item>Build process (Linux):
+  <itemize>
+  <item>Moved makefiles into LINUX directory; thus, use <it>make -f LINUX/Makefile</it> to compile now.
+  </itemize>
+
+</itemize>
+
+<tag/cbm4linux 0.3.3 (NEVER RELEASED!)/
+<itemize>
+ <item>documentation in <it/--help/ for <it/d64copy/ and <it/cbmcopy/ fixed:
+  now, it is clearly stated that a XP cable must be used in combination with a
+  serial cable, not as only one. (Spiro Trikaliotis)
+ <item>fixed crash with unkown long options in d64copy, cbmformat and maybe cbmcopy
+  (Spiro Trikaliotis)
+ <item><it/cbmctrl upload/ accepts <it/-/ as filename now (read from stdin)
+ <item><it/cbmctrl download/ takes optionally a file name argument (Spiro Trikaliotis)
+ <item><it/libd64copy/ failed to recognize .d71 images as valid images. Because of this,
+  you could not write a .d71 image back to a real floppy drive
+ <item><it/d64copy/: If you copy a disc to an image which already exists, the error
+  information was not removed from the file if necessary. This is fixed now.
+  (Spiro Trikaliotis)
+ <item><it/libd64copy/: Fixed a crash on exit of d64copy if a .d64 file grows.
+ <item><tt/parport_enumerate()/-fix for kernels>=2.6.4
+ <item>new ioctl <tt/CBMCTRL_CLEAR_EOI/ and API <tt/function cbm_clear_eoi()/ (Robert Norris)
+ <item>minor (still compatible) API changes (Spiro Trikaliotis)
+ <item><it/cbmformat/: make sure disk name is 0-terminated (Spiro Trikaliotis)
+</itemize>
+
+</descrip>
 
 <sect>Installation<label id="installation">
 
@@ -1883,6 +2014,25 @@ Not documented yet. See <it/libcbmcopy/ and <it/cbmcopy/ source.<p>
 Types and prototypes are defined in <tt/cbmcopy.h/.
 
 
+<sect>Known bugs and problems<label id="knownbugs">
+<p>
+There are some known bugs in opencbm:
+
+<itemize>
+<item><it/cbmcopy/ is still known to have some protocol races, especially with
+ 1581 drives; thus, it does not always work reliably.
+<item><it/cbmctrl detect/ as well as <it/cbmcopy/ and <it/d64copy/ do not
+ recognize the drive type if some custom ROM is used.
+<item>Windows: If you have any other devices connected to your parallel port,
+ you cannot use them as long as cbm4win is installed. In this case, either
+ remove opencbm whenever you want to access that other device, or install
+ opencbm with <it/instcbm --lock=no/ and make sure to issue <it/cbmctrl lock/
+ before accessing the drive, and <it/cbmctrl unlock/ afterwards.
+<item>Windows: There are problems with some 3rd party PCI parallel port cards.
+ Namely, some SIIG cards do not work. It is currently unknown what is going on,
+ but we are investigating.
+</itemize>
+
 <sect>Misc
 
 <sect1>Credits
@@ -1933,8 +2083,8 @@ And anyone else who sent patches, suggestions, praises & flames!
 <sect1>Feedback
 
 <p>
-Feel free to drop me a note if you have ideas, patches etc. or if
-you just want to tell me how happy you are with this program ;-)
+Feel free to drop a note if you have ideas, patches etc. or if you just want to
+tell how happy you are with this program ;-)
 
 
 Have fun,
