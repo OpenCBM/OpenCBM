@@ -1,7 +1,7 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.1 2006-04-28 12:57:35 strik Exp $ -->
+<!-- $Id: opencbm.sgml,v 1.2 2006-04-28 16:25:56 strik Exp $ -->
 <title>opencbm 0.4.0 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
@@ -232,8 +232,12 @@ might still work as well.
 
 If you intend to modify the drive routines for `d64copy' and `cbmformat' you
 also need a crossassembler. `LINUX/config.make' comes with rules for A.Fachat's
-`xa' (available from funet or http://www.lb.shuttle.de/puffin/cbm4linux) and
-Ullrich von Bassewitz' `cl65' (comes with cc65, "http://www.cc65.org/").
+`xa' (available from <htmlurl url="http://www.floodgap.com/retrotech/xa/"
+name="http://www.floodgap.com/retrotech/xa/"> or <htmlurl
+url="http://www.lb.shuttle.de/puffin/cbm4linux/"
+name="http://www.lb.shuttle.de/puffin/cbm4linux/">; Note: xa has not been tested
+lately, and might not work anymore) and Ullrich von Bassewitz' `cl65' (comes
+with cc65, <htmlurl url="http://www.cc65.org/" name="http://www.cc65.org/">).
 Starting with version cbm4linux 0.2.3, opencbm includes precompiled 6502
 binaries, so as long as you don't touch the .a65 files, there's no need for a
 crossassembler.
@@ -354,7 +358,7 @@ As a first test, try something simple like
 <p>
 Failure can be caused by:
 <itemize>
-<item>Possible, the shared library in <tt>/usr/local/lib/</tt> cannot be found;
+<item>Possibly, the shared library in <tt>/usr/local/lib/</tt> cannot be found;
 in this case, add <tt>/usr/local/lib/</tt> to <tt>/etc/ld.so.conf</tt> and
 execute <it/ldconfig/ (as root)
 <item>You might not have the necessary rights to the <tt>/dev/cbm</tt> device;
@@ -529,14 +533,14 @@ only the ones you want to perform.
 the following command: "<it/d64copy 8 A.D64/", while replacing A.D64 by the
 name you want to give to the file.
 
-<item>WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
-BEFORE, so make sure you do not need that floppy anymore.
+<item><bf>WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
+BEFORE, so make sure you do not need that floppy anymore.</bf>
 
 If you have a D64 or D71 on your PC, and you want to write it to a new, already
 formatted disc, enter "<it/d64copy A.D64 8/" if the file is called A.D64.
 
-<item>WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
-BEFORE, so make sure you do not need that floppy anymore.
+<item><bf>WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
+BEFORE, so make sure you do not need that floppy anymore.</bf>
 
 If you have a disc you want to format, you have two options: Either use the
 command "<it/cbmctrl command 8 N0:NAME,ID/", or use the cbmformat program, cf.
@@ -613,33 +617,119 @@ programs are included with this package:
 
 <sect1>instcbm (Windows only)<label id="instcbm">
 <p>
-The following options are available for the "instcbm" tool:
+<it/instcbm/ is used on Windows to install the opencbm driver.
 
-<itemize>
-<item> instcbm
-	Installs the DLL and the driver on the machine. The driver and the DLL
-	are copied into the Windows system directory.
+<sect2>instcbm invocation<label id="instcbm command structure">
+<p>Synopsis: <tt>instcbm <it>[options]</it></tt>
 
-<item>instcbm --nocopy
-	Installs the DLL and the driver on the machine. Unlike above, both files
-	are not copied, but they are used just "where they are". If you use
-	this option, the directory where your files reside must be accessible
-	for the system while booting. For example, network drives, USB drives or
-	FireWire drives are not allowed.
+<descrip>
+<tag/-h, --help/
+display help and exit.
 
-<item>instcbm --remove
-	Uninstall the driver from the machine. The DLL and the driver file
-	itself are removed if --nocopy was *not* given at installation time.
+<tag/-V, --version/
+display version information about cbm4win.
 
-<item>instcbm --check
-	Check if the installation was set up successfully.
+<tag/-r, --remove/
+remove (uninstall) the driver.
 
-<item>instcbm --lpt=X --update
-	(With X a value from 1 to ...) Choose LptX is default port.
+<tag/-e, --enumpport/
+re-enumerate the parallel port driver.
 
-<item>instcbm --help
-	Print out a short help describing the possible options.
-</itemize>
+<tag/-u, --update/
+update parameters if driver is already installed. 
+
+<tag/-l, --lpt=*no*/
+set default LPT port to number <it/*no*/. For example, for LPT2, use <it/--lpt=2/.
+
+If not specified, or <it/--lpt=0/ is specified, use the first parallel port.
+
+<tag/-t, --cabletype=*TYPE*/
+set cabletype to <it/*TYPE*/, which can be <it/auto/, <it/xa1541/ or <it/xm1541/.
+
+If not specified, <it/--cabletype=auto/ is assumed.
+
+<tag/-L, --lock=*WHAT*/
+automatically lock the driver. <it/*WHAT*/ can be <it/yes/ (automatically lock)
+or <it/no/ (do not automatically lock).
+
+If not specified, <it/--lock=yes/ is assumed.
+
+<tag/-n, --nocopy/
+do not copy the driver files into the system directory. This is not recommended.
+
+<tag/-c, --check/
+only check if the installation is ok. Do not install or uninstall anything.
+
+<tag/-F, --forcent4/
+force the NT4 driver on a Win 2000, XP, or newer systems (NOT RECOMMENDED!).
+This option is only available on i386 architectures; AMD64 and iA64 do not support it.
+
+<tag/-A, --automatic/
+(default) automatically start the driver on system boot.a
+
+The driver can be used from a normal user, no need for administrator rights.
+The opposite of <it/--on-demand/.
+
+<tag/-O, --on-demand/
+start the driver only on demand.
+
+The opposite of <it/--automatic/.
+
+</descrip>
+
+<sect2>instcbm Examples<label id="instcbm examples">
+
+<p>
+Install the driver and the DLL on the machine. The driver and the DLL
+are copied into the Windows system directory, so opencbm can be used from
+every program:
+<code>
+instcbm
+</code>
+
+<p>
+Install the driver, like above. Additionally, specify that you
+are using an XM1541 cable:
+<code>
+instcbm --cabletype=xm1541
+</code>
+
+<p>
+Check if the installation was set up successfully:
+<code>
+instcbm --check
+</code>
+
+<p>
+Remove the driver from the system. You will not be able to use opencbm
+after this command, unless you re-install it. If files were copied into
+the Windows system directory, they will be removed:
+<code>
+instcbm --remove
+</code>
+
+<p>
+After opencbm has been installed (with <it/instcbm/>), change the parallel
+port to be used to 2:
+<code>
+instcbm --lpt=2 --update
+</code>
+
+<p>
+Install opencbm, directly specifying LPT3 as the parallel port to use:
+<code>
+instcbm --lpt=3
+</code>
+
+<p>
+Install the DLL and the driver on the machine. Do not copy the files to the
+Windows system directory, but leave them "where they are". If you use this
+option, the directory where your files resides must be accessible for the
+system while booting. For example, network drives, USB drives or FireWire
+drives are not allowed.
+<code>
+instcbm --nocopy
+</code>
 
 <sect1>cbmctrl<label id="cbmctrl">
 
