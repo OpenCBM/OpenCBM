@@ -1,4 +1,14 @@
-version 0.3.3:
+These are the NEWS for cbm4linux ONLY!
+
+This file is discontinued, look in the documentation instead (see first
+point for version 0.4.0)
+
+version 0.4.0:
+- cbm4win and cbm4linux have been re-joined to opencbm; for the NEWS,
+  have a look at the documentation (http://opencbm.trikaliotis.net/,
+  or with "info opencbm").
+
+version 0.3.3 (NEVER RELEASED!)
 - documentation in --help for d64copy and cbmcopy fixed: now, it is clearly
   stated that a XP cable must be used in combination with a serial cable, not
   as only one.  (Spiro Trikaliotis)
