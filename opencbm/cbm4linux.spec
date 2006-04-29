@@ -1,6 +1,6 @@
-%define name cbm4linux
-%define ver 0.3.3
-Summary: CBM4Linux kernel module, runtime libraries and utilities
+%define name opencbm
+%define ver 0.4.0
+Summary: OPENCBM/CBM4Linux kernel module, runtime libraries and utilities
 Name: %{name}
 Version: %{ver}
 Release: 1
@@ -13,18 +13,18 @@ Url: http://www.lb.shuttle.de/puffin/cbm4linux
 Group: Applications/System
 
 %description
-The cbm4linux package is a linux kernel module and a few user space support
-programs to control and use serial devices as used by most Commodore (CBM)
-8-bit machines, such as disk drives and printers from your trusty C64.
-A fast .d64 transfer program is included.
+The opencbm (cbm4linux) package is a linux kernel module and a few user space
+support programs to control and use serial devices as used by most Commodore
+(CBM) 8-bit machines, such as disk drives and printers from your trusty C64.  A
+fast .d64 transfer program is included.
 
 %package devel
-Summary: CBM4Linux linktime libraries and header files
+Summary: OPENCBM/CBM4Linux linktime libraries and header files
 Group: Development/Libraries
 Requires: %{name} = %{ver}
 
 %description devel
-Libraries and header files for cbm4linux.
+Libraries and header files for opencbm/cbm4linux.
 
 %prep
 %setup
@@ -44,7 +44,7 @@ else
 	chown root:users /dev/cbm
 	ls -l /dev/cbm
 fi
-install-info --entry="* cbm4linux: (cbm4linux).	cbm4linux users guide" %{_infodir}/%{name}.info.gz %{_infodir}/dir
+install-info --entry="* opencbm: (opencbm).	opencbm users guide" %{_infodir}/%{name}.info.gz %{_infodir}/dir
 
 %preun
 if [ "$1" = 0 ]; then

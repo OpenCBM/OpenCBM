@@ -1,7 +1,7 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.4 2006-04-28 18:16:52 strik Exp $ -->
+<!-- $Id: opencbm.sgml,v 1.5 2006-04-29 07:47:52 strik Exp $ -->
 <title>opencbm 0.4.0 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
@@ -2035,8 +2035,6 @@ There are some known bugs in opencbm:
   failure reason is not known to date, but we are investigating
   further since that feature is a must, when integrated parallel
   ports were removed from mainstream mainboards in the future.
-</itemize>
-
 </itemize>
 
 <sect>Misc

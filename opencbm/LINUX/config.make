@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.6 2006-04-07 10:23:08 strik Exp $
+# $Id: config.make,v 1.7 2006-04-29 07:47:51 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -73,8 +73,8 @@ KERNEL_FLAGS =
 # package version (major.minor.release). Don't touch.
 #
 MAJ = 0
-MIN = 3
-REL = 3
+MIN = 4
+REL = 0
 
 VERSION = '"$(MAJ).$(MIN).$(REL)"'
 
