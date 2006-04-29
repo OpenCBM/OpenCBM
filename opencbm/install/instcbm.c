@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.21 2006-04-25 17:35:37 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.22 2006-04-29 07:45:47 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -215,8 +215,10 @@ usage(VOID)
             "                  If not specified, --lock=yes is assumed.\n"
             "  -n, --nocopy    do not copy the driver files into the system directory\n"
             "  -c, --check     only check if the installation is ok\n"
+#ifdef _X86_
             "  -F, --forcent4  force NT4 driver on a Win 2000, XP, or newer systems\n" 
             "                  (NOT RECOMMENDED!)\n"
+#endif // #ifdef _X86_
             "  -A, --automatic (default) automatically start the driver on system boot.\n"
             "                  The driver can be used from a normal user, no need for\n"
             "                  administrator rights.\n"
@@ -443,7 +445,9 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { "version",    no_argument,       NULL, 'V' },
         { "remove",     no_argument,       NULL, 'r' },
         { "enumpport",  no_argument,       NULL, 'e' },
+#ifdef _X86_
         { "forcent4",   no_argument,       NULL, 'F' },
+#endif // #ifdef _X86_
         { "lpt",        required_argument, NULL, 'l' },
         { "update",     no_argument,       NULL, 'u' },
         { "check",      no_argument,       NULL, 'c' },
@@ -459,7 +463,11 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { NULL,         0,                 NULL, 0   }
     };
 
-    const char shortopts[] = "hreFl:nuct:L:AOV"
+    const char shortopts[] = "hrel:nuct:L:AOV"
+#ifdef _X86_
+                             "F"
+#endif // #ifdef _X86_
+
 #if DBG
                              "D:B"
 #endif // #if DBG
@@ -590,6 +598,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
             Parameter->CheckInstall = TRUE;
             break;
 
+#ifdef _X86_
         case 'F':
             if (Parameter->ExecuteParameterGiven)
             {
@@ -604,6 +613,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
                 Parameter->Remove = FALSE;
             }
             break;
+#endif // #ifdef _X86_
 
         case 'l':
             error = processNumber(optarg, NULL, NULL, &Parameter->Lpt);

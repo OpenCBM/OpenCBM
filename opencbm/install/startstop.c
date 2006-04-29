@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.15 2006-04-19 16:51:45 strik Exp $ \n
+** \version $Id: startstop.c,v 1.16 2006-04-29 07:45:47 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -72,6 +72,7 @@ static VOID
 OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
 {
     char buffer[100];
+    char buffer2[100];
 
     FUNC_ENTER();
 
@@ -89,14 +90,20 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
             patchlevelVersion[0] = 0;
         }
 
-        _snprintf(buffer, sizeof(buffer)-1,
+        _snprintf(buffer2, sizeof(buffer)-1,
             (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version) 
-                ? "%u.%u.%u.%u%s (Development)" 
-                : "%u.%u.%u%s"),
+                ? "%u.%u.%u.%u" 
+                : "%u.%u.%u"),
             (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_MAJOR(Version),
             (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_MINOR(Version),
             (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_SUBMINOR(Version),
-            (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version),
+            (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version));
+
+        _snprintf(buffer, sizeof(buffer)-1,
+            (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version) 
+                ? "%s%s (Development)" 
+                : "%s%s"),
+            buffer2,
             patchlevelVersion);
     }
     else
