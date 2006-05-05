@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.5 2006-02-24 12:21:42 strik Exp $ \n
+** \version $Id: cbm_driver.h,v 1.6 2006-05-05 16:01:22 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **
@@ -94,6 +94,11 @@ struct _DEVICE_EXTENSION {
 
     /*! Start address of the parallel port in the I/O address space */
     PUCHAR ParPortPortAddress;
+
+    /*! Start address of the ECP portion of the parallel port.
+        If this is not an ECP port, this is 0.
+     */
+    PUCHAR ParPortEcpPortAddress;
 
     /*! how many Irqs should we wait in cbmiec_interrupt
      * (for cbmiec_wait_for_listener()? This determines

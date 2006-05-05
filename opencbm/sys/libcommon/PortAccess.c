@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.9 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: PortAccess.c,v 1.10 2006-05-05 16:01:22 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -411,6 +411,12 @@ ParPortGetPnpInformation(PDEVICE_EXTENSION Pdx, PPARALLEL_PNP_INFORMATION PnpInf
     else
     {
         success = TRUE;
+
+        //
+        // remember the ECP port address
+        //
+
+        Pdx->ParPortEcpPortAddress = PnpInfo->EcpController;
 
         // Output some diagnostics for debugging purposes:
 
