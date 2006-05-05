@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.4 2006-03-12 16:35:36 strik Exp $ \n
+** \version $Id: debug.c,v 1.5 2006-05-05 11:42:53 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for libiec
 **
@@ -27,6 +27,10 @@
 #undef READ_PORT_UCHAR
 #undef WRITE_PORT_UCHAR
 
+
+static PUCHAR parportBase = (PUCHAR) 0x378;
+
+
 /*! \brief Show the contents of the parallel port's registers
 
  \param Str
@@ -40,11 +44,11 @@ cbmiec_show_port(IN UCHAR *Str)
     DBG_ASSERT(Str != 0);
 
     DBG_PORT((DBG_PREFIX 
-        "%s: 0x378 = 0x%02x, 0x379 = 0x%02x, 0x37a = 0x%02x",
+        "%s: 0x%p = 0x%02x, 0x%p = 0x%02x, 0x%p = 0x%02x",
         Str,
-        (unsigned int) READ_PORT_UCHAR((PUCHAR) 0x378),
-        (unsigned int) READ_PORT_UCHAR((PUCHAR) 0x379),
-        (unsigned int) READ_PORT_UCHAR((PUCHAR) 0x37A)
+        parportBase,   READ_PORT_UCHAR(parportBase),
+        parportBase+1, READ_PORT_UCHAR(parportBase+1),
+        parportBase+2, READ_PORT_UCHAR(parportBase+2)
         ));
 }
 
@@ -61,7 +65,7 @@ DbgWp(IN PUCHAR Port, IN UCHAR Value)
 {
     FUNC_DEF 
 
-    DBG_PORT((DBG_PREFIX "WRITE_PORT_UCHAR(0x%p, %02x)", Port, (int)Value));
+    DBG_PORT((DBG_PREFIX "WRITE_PORT_UCHAR(0x%p, 0x%02x)", Port, (int)Value));
 
     cbmiec_show_port("Before Writing");
 
@@ -89,7 +93,7 @@ DbgRp(IN PUCHAR Port)
 
     Value = READ_PORT_UCHAR(Port);
 
-    DBG_PORT((DBG_PREFIX "READ_PORT_UCHAR(0x%p) = %02x", Port, (int)Value));
+    DBG_PORT((DBG_PREFIX "READ_PORT_UCHAR(0x%p) = 0x%02x", Port, (int)Value));
 
     cbmiec_show_port("After Reading ");
 
