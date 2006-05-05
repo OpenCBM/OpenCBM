@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.16 2006-04-29 07:45:47 strik Exp $ \n
+** \version $Id: startstop.c,v 1.17 2006-05-05 08:18:58 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -507,6 +507,9 @@ CbmCheckCorrectInstallation(VOID)
             }
             else
             {
+                // no problem so far. Now, check if the IRQ is actually working
+                error = CbmTestIrq();
+
                 // no problem, we can stop the loop
 
                 break;

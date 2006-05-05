@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.11 2006-03-26 14:35:09 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.12 2006-05-05 08:18:57 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -287,6 +287,10 @@ typedef CBMT_SINGLEBYTE CBMT_PARBURST_PWRITE_IN;
 //! IOCTL for updating settings of the driver
 #define CBMCTRL_UPDATE \
                             _CBMIO(CBMCTRL_BASE, 25) // -                    -
+
+//! IOCTL for testing the interrupt facilities of the hardware
+#define CBMCTRL_TEST_IRQ \
+                            _CBMIO(CBMCTRL_BASE, 26) // -                    -
 
 /* these are the return codes of CBMCTRL_I_INSTALL: */
 

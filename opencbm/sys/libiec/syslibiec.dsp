@@ -178,6 +178,10 @@ SOURCE=.\talk.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testirq.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\unlisten.c
 # End Source File
 # Begin Source File

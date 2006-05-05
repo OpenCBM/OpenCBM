@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file install/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.9 2006-04-10 10:29:57 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.10 2006-05-05 08:18:58 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the driver
 **
@@ -57,6 +57,37 @@ CbmInstallUpdate(VOID)
     }
 
     FUNC_LEAVE();
+}
+
+/*! \brief Tell the driver to update its settings
+
+ This function tells the driver to update its settings
+ after they have been changed.
+
+ \param HandleDevice  
+   A CBM_FILE which contains the file handle of the driver.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call cbm_driver_close().
+*/
+
+BOOL
+CbmTestIrq(VOID)
+{
+    CBM_FILE HandleDevice;
+    BOOL error;
+
+    FUNC_ENTER();
+
+    if (cbmarch_driver_open(&HandleDevice, 0) == 0)
+    {
+        DBG_PRINT((DBG_PREFIX "Issuing CBMCTRL_TEST_IRQ"));
+        error = cbm_ioctl(HandleDevice, CBMCTRL(TEST_IRQ), NULL, 0, NULL, 0) ? FALSE : TRUE;
+        DBG_PRINT((DBG_PREFIX "Returning from CBMCTRL_TEST_IRQ"));
+        cbmarch_driver_close(HandleDevice);
+    }
+
+    FUNC_LEAVE_BOOL(error);
 }
 
 #if DBG
