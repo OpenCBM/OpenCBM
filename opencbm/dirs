@@ -9,7 +9,9 @@ DIRS= \
 	cbmctrl \
 	install \
 	lib \
+	libtrans \
 	demo \
+	sample \
 	sys
 
 OPTIONAL_DIRS= \

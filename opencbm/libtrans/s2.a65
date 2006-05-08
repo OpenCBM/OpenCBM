@@ -1,0 +1,99 @@
+
+; This program is free software; you can redistribute it and/or
+; modify it under the terms of the GNU General Public License
+; as published by the Free Software Foundation; either version
+; 2 of the License, or (at your option) any later version.
+;
+; Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+;
+; "$Id: s2.a65,v 1.1 2006-05-08 18:15:57 strik Exp $"
+
+Drive1541       = 1                     ;Compile for 1541 drives
+
+	.include "common.i65"
+
+        *=$0700
+
+        jmp gts         ; get track/sector
+        jmp gbyte
+        jmp gblk        ; receive block
+        jmp sbyte       ; send byte
+        jmp sblk        ; send block
+        
+        lda #IEC_PORT_CLK_IN
+i0      bit IEC_PORT
+        bne i0
+        asl
+        sta IEC_PORT
+i1      lda IEC_PORT
+        bpl i1
+        rts
+
+gts     jsr gbyte
+        pha
+        jsr gbyte
+        tay
+        pla
+        tax
+        rts
+
+gblk    jsr gbyte
+        sta (ptr),y
+        iny
+        bne gblk
+        rts
+
+sblk    lda (ptr),y
+        jsr sbyte
+        iny
+        bne sblk
+        rts
+
+sbyte   sta TMP1
+        ldx #$04
+write0
+write1  lda IEC_PORT
+        bmi write1
+        lda #0
+        lsr TMP1
+        rol
+        asl
+        sta IEC_PORT
+write2  lda IEC_PORT
+        bpl write2
+        lda #$06
+        lsr TMP1
+        rol
+        asl
+        sta IEC_PORT
+        dex
+        bne write0
+write3  lda IEC_PORT
+        bmi write3
+        lda #IEC_PORT_NONE
+        sta IEC_PORT
+write4  lda IEC_PORT
+        bpl write4
+        lda #IEC_PORT_CLK_OUT
+        sta IEC_PORT
+        rts
+
+gbyte   ldx #4
+read0   lda IEC_PORT
+        bmi read0
+        lda IEC_PORT
+        lsr
+        ror TMP1
+        lda #IEC_PORT_ATNA_OUT
+        sta IEC_PORT
+read1   lda IEC_PORT
+        bpl read1
+        lda IEC_PORT
+        lsr
+        ror TMP1
+        lda #IEC_PORT_CLK_OUT
+        sta IEC_PORT
+        dex
+        bne read0
+        lda TMP1
+        rts

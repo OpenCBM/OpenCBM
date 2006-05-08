@@ -83,6 +83,12 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name cbmforng
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtrans
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name samplelibtrans
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -297,6 +303,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "libtrans"=..\libtrans\WINBUILD\libtrans.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "opencbm"=..\lib\WINBUILD\opencbm.dsp - Package Owner=<4>
 
 Package=<5>
@@ -308,6 +326,18 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name arch
     End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "samplelibtrans"=..\sample\libtrans\WINDOWS\samplelibtrans.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
 }}}
 
 ###############################################################################

@@ -1,0 +1,109 @@
+
+; This program is free software; you can redistribute it and/or
+; modify it under the terms of the GNU General Public License
+; as published by the Free Software Foundation; either version
+; 2 of the License, or (at your option) any later version.
+;
+; Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+; Copyright      2005 Spiro Trikaliotis
+;
+; "$Id: pp1571.a65,v 1.1 2006-05-08 18:15:57 strik Exp $"
+
+.if .defined(Drive1541)
+.else
+        Drive1571       = 1                     ;Compile for 1571 drives
+.endif
+
+        .include "common.i65"
+
+        * = $0700
+
+get_ts     jmp gts         ; get track/sector
+get_byte   jmp gbyte       ; get byte
+get_block  jmp gblk        ; receive block
+send_byte  jmp sbyte       ; send byte
+send_block jmp sblk        ; send block
+init    jsr setinput
+        jmp data_1
+
+sblk    jsr setoutput
+sblk0   jsr clk_1
+        lda (ptr),y
+        sta PP_DATA
+        jsr data_0
+        iny
+        jsr clk_0
+        lda (ptr),y
+        sta PP_DATA
+        jsr data_1
+        iny
+        bne sblk0
+
+        ; fall through to sbyte: perform end-handshake
+
+sbyte   pha
+        jsr setoutput
+        jsr clk_1
+        pla
+        sta PP_DATA
+        jsr data_0
+        jsr clk_0
+        jsr data_1
+
+setinput
+        lda #PP_DDR_IN
+        .byte OPCODE_BIT_2BYTE
+setoutput
+        lda #PP_DDR_OUT
+        sta PP_DDR
+        rts
+
+
+; wait for clock to go inactive
+clk_0   lda #IEC_PORT_CLK_IN
+c0      bit IEC_PORT
+        beq c0
+        rts
+ 
+; wait for clock to go active
+clk_1   lda #IEC_PORT_CLK_IN
+c1      bit IEC_PORT
+        bne c1
+        rts
+
+gbyte   tya
+        pha
+        jsr gts
+        pla
+        tay
+        txa
+        rts
+
+gts     jsr clk_1
+        ldx PP_DATA
+        jsr data_0
+        jsr clk_0
+        ldy PP_DATA
+data_1  lda #IEC_PORT_DATA_OUT
+        .byte OPCODE_BIT_2BYTE
+data_0  lda #IEC_PORT_NONE
+        sta IEC_PORT
+        rts
+
+gblk    tya
+        lsr
+        bcc gblk0
+        jsr gbyte
+        iny
+gblk0   jsr clk_1
+        lda PP_DATA
+        sta (ptr),y
+        iny
+        jsr data_0
+        jsr clk_0
+        lda PP_DATA
+        sta (ptr),y
+        jsr data_1
+        iny
+        bne gblk0
+        rts
