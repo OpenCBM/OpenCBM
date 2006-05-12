@@ -6,14 +6,16 @@
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005 Spiro Trikaliotis
+ *  Copyright 2006 Wolfgang Moser, http://wmsr.de
  */
 
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.16 2006-03-20 11:45:52 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.17 2006-05-12 14:25:49 wmsr Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
+** \authors With additions from Wolfgang Moser \n
 ** \n
 ** \brief DLL interface for accessing the driver
 **
@@ -159,6 +161,12 @@ EXTERN char CBMAPIDECL cbm_petscii2ascii_c(char character);
 EXTERN char CBMAPIDECL cbm_ascii2petscii_c(char character);
 EXTERN char * CBMAPIDECL cbm_petscii2ascii(char *str);
 EXTERN char * CBMAPIDECL cbm_ascii2petscii(char *str);
+
+EXTERN int CBMAPIDECL gcr_5_to_4_decode(const unsigned char *source, unsigned char *dest,
+                                        size_t sourceLength,         size_t destLength);
+EXTERN int CBMAPIDECL gcr_4_to_5_encode(const unsigned char *source, unsigned char *dest,
+                                        size_t sourceLength,         size_t destLength);
+
 
 #if DBG
 EXTERN int CBMAPIDECL cbm_get_debugging_buffer(CBM_FILE HandleDevice, char *buffer, size_t len);

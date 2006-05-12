@@ -5,12 +5,12 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright (C) 1999      Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright (C) 2005,2006 Wolfgang Moser <cbm(a)d81(o)de>
+ *  Copyright (C) 2005,2006 Wolfgang Moser, http://wmsr.de
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmforng.c,v 1.9 2006-04-20 13:04:26 wmsr Exp $";
+    "@(#) $Id: cbmforng.c,v 1.10 2006-05-12 14:26:11 wmsr Exp $";
 #endif
 
 #include "cbmforng.h"
@@ -51,26 +51,6 @@ static void hint(char *s)
     fprintf(stderr, "Try `%s' -h for more information.\n", s);
 }
 
-static void encodeGCR_to_buffer(unsigned char dest[5], unsigned char source[4])
-{
-    unsigned char GCRdeTab[]={
-      10, 11, 18, 19, 14, 15, 22, 23, 9, 25, 26, 27, 13, 29, 30, 21
-      };
-    int i;
-    unsigned short tdest=0;     // at least 16 bits for overflow shifting
-
-    for(i=0;i<4;++i)
-    {
-        tdest<<=5;
-        tdest|=GCRdeTab[(source[i]>>4)&0x0f];
-        tdest<<=5;
-        tdest|=GCRdeTab[source[i]&0x0f];
-
-        dest[i]=(tdest>>((i+1)*2))&0xFF;
-    }
-    dest[4]=tdest&0xFF;
-}
-
 static void prepareFmtPattern(struct FormatParameters *GCRbuf, unsigned char pattern, unsigned char maxtrack, char HID1, char HID2)
 {
     unsigned char T1_sig, Tn_sig, DBfiller, HD1_fill, HD2_fill;
@@ -101,16 +81,16 @@ static void prepareFmtPattern(struct FormatParameters *GCRbuf, unsigned char pat
     }
         // prepare intermediate data block section
     for(i=3;i>=0;--i) source[i] = DBfiller;
-    encodeGCR_to_buffer(GCRbuf->CDBGIMT, source);
+    gcr_4_to_5_encode(source, GCRbuf->CDBGIMT, sizeof(source), sizeof(GCRbuf->CDBGIMT));
 
         // prepare start section for tracks > 1
     source[0]=0x07;         // after SYNC data block marker
     source[1]=Tn_sig;
-    encodeGCR_to_buffer(GCRbuf->CDBGSTN, source);
+    gcr_4_to_5_encode(source, GCRbuf->CDBGSTN, sizeof(source), sizeof(GCRbuf->CDBGSTN));
 
         // prepare start section for track 1
     source[1]=T1_sig;
-    encodeGCR_to_buffer(GCRbuf->CDBGST1, source);
+    gcr_4_to_5_encode(source, GCRbuf->CDBGST1, sizeof(source), sizeof(GCRbuf->CDBGST1));
 
         // prepare end section for track 1
     source[0]=DBfiller;
@@ -122,18 +102,18 @@ static void prepareFmtPattern(struct FormatParameters *GCRbuf, unsigned char pat
     source[2]=0x0f;     // for MNib analysing bash script
     source[3]=0x0f;
 #endif
-    encodeGCR_to_buffer(GCRbuf->CDBGEN1, source);
+    gcr_4_to_5_encode(source, GCRbuf->CDBGEN1, sizeof(source), sizeof(GCRbuf->CDBGEN1));
 
         // prepare end section for tracks > 1
     source[1]=Tn_sig^DBfiller;  // data block checksum
-    encodeGCR_to_buffer(GCRbuf->CDBGENN, source);
+    gcr_4_to_5_encode(source, GCRbuf->CDBGENN, sizeof(source), sizeof(GCRbuf->CDBGENN));
 
         // prepare second part of all header blocks
     source[0]=HID2;
     source[1]=HID1;
     source[2]=HD1_fill;
     source[3]=HD2_fill;
-    encodeGCR_to_buffer(GCRbuf->CHDR2ND, source);
+    gcr_4_to_5_encode(source, GCRbuf->CHDR2ND, sizeof(source), sizeof(GCRbuf->CHDR2ND));
 }
 
 #if defined(DebugFormat) && DebugFormat!=0

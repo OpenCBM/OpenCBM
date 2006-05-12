@@ -17,8 +17,9 @@ SOURCES=../cbm.c \
 	../detect.c \
 	../detectxp1541.c \
 	../petscii.c \
+	../gcr_4b5b.c \
 	../upload.c \
-        i_opencbm.c \
+	i_opencbm.c \
 	archlib.c \
 	archmnib.c \
-        opencbm.rc
+	opencbm.rc
