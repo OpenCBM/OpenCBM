@@ -1,7 +1,7 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: cbm4linux.sgml,v 1.5 2006-04-27 20:46:46 wmsr Exp $ -->
+<!-- $Id: cbm4linux.sgml,v 1.6 2006-05-13 16:27:47 strik Exp $ -->
 <title>opencbm 0.4.0 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
@@ -260,8 +260,8 @@ following:
 <itemize>
 <item>Get your VIC 15xx drive (out of the basement, or wherever it is!
 
-<item><b>Moving cables with equipment turned on can damage either your PC,
-and/or the drive, so, be carefull!</b>
+<item>Moving cables with equipment turned on can damage either your PC,
+and/or the drive, so, be carefull!
 
 <item>Thus, switch off your PC and your VIC 15xx drive!
 
@@ -429,6 +429,8 @@ and a MPS-1200 printer.
 <p>The overall format of all <it>cbmctrl</it> actions is:
 
 <p>Synopsis: <tt>cbmctrl <it>[global_options] </it>ACTION <it>[action_args]</it></tt>
+<descrip>
+<label id="action-lock">
 <tag>global_options</tag>
 <p>Some options that are related to <it>cbmctrl</it> in general of which affect
 the oervall behaviour of all actions
@@ -436,19 +438,23 @@ the oervall behaviour of all actions
 <p>One of a bunch of different subcommands that direct <it>cbmctrl</it> what to do
 <tag>action_args</tag>
 <p>Arguments that are required for the subcommand <it>action</it> to work
+</descrip>
 
 <sect3>Global options<label id="cbmctrl global options">
 <p><it>cbmctrl</it> understands the following global options
 
+<descrip>
 <tag>-h <it>[ACTION]</it>, --help <it>[ACTION]</it></tag>
 <p>Outputs the help screen with a short listing of all available actions. If
 the optional <it>ACTION</it> name is given also, you retrieve more information
 on a special action together with its arguments and parameters
 <tag>-V, --version</tag>
 <p>Output version information as well as the built date and time
+</descrip>
 
 <sect3>Actions overview<label id="cbmctrl actions overview">
 <p><it>cbmctrl</it> understands the following subcommand actions
+<descrip>
 <tag>reset</tag>
 <p>Reset all drives on the IEC bus
 <tag>detect</tag>
@@ -489,10 +495,12 @@ on a special action together with its arguments and parameters
 <p>Upload memory contents to a floppy drive
 <tag>change</tag>
 <p>Wait for a disk to be changed in a specified drive
+</descrip>
 
 <sect3>Common action arguments<label id="cbmctrl common action arguments">
 <p>Many of the <it>cbmctrl</it> subcommands understand the following common
 arguments:
+<descrip>
 <tag>[DEVICE]</tag>
 <p>Advice <it>cbmctrl</it> to direct its communication to the IEC bus device
 with the number <it>[DEVICE]</it>. IEC bus device numbers can be denoted in
@@ -511,10 +519,12 @@ used, when a program is loaded, address 1, when a program is saved. Address
 number 15 represents the command channel of the disk drive, so e®ectively,
 for bulk data transfers to and from disk drives, only the logical channel
 numbers 2 to 14 can be used.
+</descrip>
 
 <sect2>Actions<label id="cbmctrl actions">
 <p><it>cbmctrl</it> understands the following actions:
 
+<descrip>
 <label id="action-reset">
 <tag>reset</tag>
 This action performs a hardware reset of all devices attached to the IEC bus.
@@ -529,7 +539,6 @@ is output. Additionally, this routine determines if the device is
 connected via a parallel cable (XP1541 companion cable, may be true
 for disk drives only).
 
-<descrip>
 <label id="action-lock">
 <tag>lock</tag>
 This command locks the parallel port for the use by opencbm, so that
@@ -636,11 +645,11 @@ current operating system's line ending convention (0x0a on Unix oriented
 systems, 0x0d 0x0a on Windows oriented systems or whatever else is appropriate
 for your operating system).
 
-This command is similar to (in this case, no character conversions would be
-made)
+Assuming the device number is 8, this command is similar to (in this case, no
+character conversions would be made)
 <code>
 cbmctrl lock
-cbmctrl talk <it>device</it> 15
+cbmctrl talk 8 15
 cbmctrl read
 cbmctrl untalk
 cbmctrl unlock
@@ -653,19 +662,19 @@ channel). Since there is no PetSCII->ASCII conversion, commands must be sent
 in <em/upper case/ (kind of poor man's PetSCII conversion). This is because
 charset conversion would break the <tt/M-W/ and <tt/M-E/ commands.
 
-Note: If you need PetSCII->ASCII conversion, use pcommand instead.
+Note: If you need PetSCII->ASCII conversion, use <it/pcommand/ instead.
 
-This command is identical to (Note: This does not work on Windows, because
-<it/echo/ there does not know the <it/-n/ option.)
+Assuming the device number is 8, this command is identical to (Note: This does
+not work on Windows, because <it/echo/ there does not know the <it/-n/ option.)
 <code>
 cbmctrl lock
-cbmctrl listen <it>device</it> 15
+cbmctrl listen 8 15
 echo -n cmdstr|cbmctrl write -
 cbmctrl unlisten
 cbmctrl unlock
 </code>
 
-<label id="pcommand">
+<label id="action-pcommand">
 <tag>pcommand <it/device cmdstr/</tag>
 Like <it/command/, but converts the data from ASCII to PetSCII before sending
 it.
@@ -692,7 +701,6 @@ ommited or equivalent to <tt/"-"/.
 Wait for a disc to be changed in the specified device. It waits for the current
 disc to be removed, for a new disc to be inserted and for the drive door to be
 closed. It does not return until the disc is ready to be read or written.
-
 </descrip>
 
 <sect2>cbmctrl Examples<label id="cbmctrl examples">
