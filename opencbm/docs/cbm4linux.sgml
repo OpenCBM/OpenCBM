@@ -1,11 +1,11 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: cbm4linux.sgml,v 1.6 2006-05-13 16:27:47 strik Exp $ -->
+<!-- $Id: cbm4linux.sgml,v 1.7 2006-05-13 16:29:46 strik Exp $ -->
 <title>opencbm 0.4.0 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
-name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de" name="d81.de">
+name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de/" name="d81.de">
 <!-- _DATE_ --><date>2006-04-28
 
 <abstract>
@@ -25,53 +25,197 @@ serial devices as used by most Commodore (CBM) 8-bit machines.
 <p>
 The popular Commodore 8-bit home-computers like the C-64 and the VIC-20 are
 using a custom serial bus to talk to attached devices (disk drive, printer).
-The opencbm kernel module provides an interface to this bus at TALK/LISTEN
-level, similar to the one provided by the Commodore kernel routines, but low
-level bus control is available as well. The serial devices are connected to
-the PC's parallel port via an XM1541 or XA1541 and, optionally, an XP1541 or
-XP1571 add-on.
+The opencbm kernel module provides an interface to this so-called IEC bus at
+the level of simple TALK and LISTEN commands, similar to the one provided by
+the Commodore kernel routines. Additionally, some higher and lower level bus
+control is available as well, allowing for full control of the bus. The serial
+devices are connected to the PC's parallel port via an XM1541 or XA1541 cable
+and, optionally, an XP1541 or XP1571 add-on cable. For cables, cf. <ref
+id="cable" name="cable">.
 
 <sect1>Introduction to opencbm<label id="introduction">
 
 <p>
 This is version 0.4.0 of opencbm, a kernel device driver for the serial CBM bus
-(C64, VIC-20, etc.) for Linux and Windows. opencbm is a join of the two projects
-cbm4linux (latest version: 0.3.2) and cbm4win (latest version: 0.1.0a). It
-should be noted that both projects were highly related from the beginning, as
-cbm4win was just a branch from cbm4linux.
+(C64, VIC-20, etc.) for Linux and Windows. opencbm is a re-join of the two
+projects cbm4linux (latest standalone version: 0.3.2) and cbm4win (latest
+standalone version: 0.1.0a). It should be noted that both projects were highly
+related from the beginning, as cbm4win 0.1.0 was based on cbm4linux 0.3.2.
 
 Opencbm should work with any devices that understand the "normal" talk and
 listen commands of the CBM IEC bus. It has been tested with several 1541,
-1541-II, 1571 and 1581 drives, and a MPS-1200. 1541 clones like the OC-118 have
-also been reported to work.
+1541-II, 1571 and 1581 drives, and a MPS-1200 pritnter. 1541 clones like the
+Oceanic OC-118 have also been reported to work.
 
 The following cable types are supported: 
 
 <p>
-<tscreen><verb>
-  XP1571             (cbm4linux version >= 0.2.4, cbm4win version >= 0.1.0)
-  XM1541 and XA1541  (cbm4linux version >= 0.2.1, cbm4win version >= 0.1.0)
-  XP1541             (cbm4linux version >= 0.2.0, cbm4win version >= 0.1.0)
-  Modified XE1541    (only on Linux, obsoleted by the XM1541, 
-                      see config.make)
-</verb></tscreen>
+<itemize>
+<item>XM1541 and XA1541  (cbm4linux version >= 0.2.1, cbm4win version >= 0.1.0)
+<item>XP1541             (cbm4linux version >= 0.2.0, cbm4win version >= 0.1.0)
+<item>XP1571             (cbm4linux version >= 0.2.4, cbm4win version >= 0.1.0)
+<item>Modified XE1541    (only on Linux, obsoleted by the XM1541, see
+`LINUX/config.make')
+</itemize>
 
-More information on the different cable types can be obtained on the Star
-Commander homepage(http://sta.c64.org/xcables.html)and the file CABLE
-(included in this packages).
+More information on the different cable types can be found in <ref id="cable"
+name="cable">.
 
-This package is provided `as is', no warranty of any kind will be
-taken for any damage or data loss caused by it or by anyuseof
-it.
+This package is provided `as is', no warranty of any kind will be taken for any
+damage or data loss caused by it or by any use of it.
 
 <p>
-*** WARNING *****************************************************
+<tt><it>*** WARNING *****************************************************</it></tt>
 
-HOTPLUGGING can KILL your hardware. Do not connect anything to
-the parallel port while the system is up. Always SHUT DOWN, CON­
-NECT, REBOOT. Again, absolutely NO WARRANTY.
+<tt><it>HOTPLUGGING can KILL your hardware.</it></tt>
 
-*****************************************************************
+<tt><it>Do not connect anything to the parallel port while the system or a drive is up.</it></tt>
+
+<tt><it> Always SHUT DOWN, CONNECT, REBOOT.</it></tt>
+
+<tt><it>Again, absolutely NO WARRANTY.</it></tt>
+
+<tt><it>*****************************************************************</it></tt>
+
+<sect1>Supported operating systems<label id="supported-os">
+
+<p>
+<it/opencbm/ supports the following operating systems:
+
+<itemize>
+<item>Linux 2.4 and 2.6; 2.0 and 2.2 might still work, but have not been tested
+      for ages. For Linux, i386 and AMD64 architectures are supported.
+<item>Windows NT 4.0, 2000, XP and Server 2003. The i386 architecture is fully
+      supported; additionally, there are experimental AMD64 and iA64 versions
+      available.
+</itemize>
+
+<sect1>Supported CBM hardware<label id="supported-drives">
+
+<p>
+Currently, opencbm supports the following CBM devices:
+
+<itemize>
+<item>VIC 1541 (all variants, including VIC 1540 and clones)
+<item>VIC 1570
+<item>VIC 1571
+<item>VIC 1581 (not with d64copy, not with cbmformat or cbmforng)
+<item>other CBM IEC drives, printers, and compatibles (only with cbmctrl)
+</itemize>
+
+<sect1>Cables<label id="cable">
+
+<p>
+A standard X(E)1541 cable won't work with _this_ driver. In fact, there will
+probably never be a multitasking OS which works with one of these, that's why
+we call it XM1541, M for Multi­ tasking. Anyway, if you have a XE1541, the
+necessary modification is simple:
+
+<p>
+ <bf>Exchange pins 5 & 6 on the Commodore DIN plug</bf>
+
+<p>
+The ACK line is the only line on a PC parallel port that can generate a
+hardware interrupt. This way, we get an interrupt when the device releases the
+DATA line to signal "ready to receive". Without an interrupt, you would have to
+poll for this signal about every 100us, which is inacceptable for any
+multitasking system.
+
+Be sure to have your parallel port configured to use an IRQ, usually 7 or 5,
+but both are often also used by soundcards.
+
+(ASCII art taken from the StarCommander README :))
+
+<p>
+The PC parallel plug (male DB-25 connector):
+
+<tscreen><verb>
+        PaperEnd   Busy
+    SelectIn   |   |   Ack        Data 7 - Data 0       Strobe
+           |   |   |   |   +-------------+-------------+   |
+           V   V   V   V   |                           |   V
+        +------------------------------------------------------+
+        | 13  12  11  10   9   8   7   6   5   4   3   2   1   |
+        |  o   o   o   o   o   o   o   o   o   o   o   o   o   |
+        +-+                                                  +-+
+          |  o   o   o   o   o   o   o   o   o   o   o   o   |
+          | 25  24  23  22  21  20  19  18  17  16  15  14   |
+          +--------------------------------------------------+
+             |                           |   ^   ^   ^   ^
+             +-------------+-------------+   |   |   |   |
+                        Ground          Select   |   |   AutoFeed
+                                              Init   Error
+</verb></tscreen>
+
+<p>
+The Commodore drive serial bus plug (male 6-pin DIN connector) looks like:
+
+<tscreen><verb>
+                                 Reset
+                                   |
+                                   V
+                          +-------+ +-------+
+                        +-+       +-+       +-+
+                        |     5         1     |
+               Data --> |     o    6    o     | <-- SrqIn
+                        |          o          |
+                        |     4         2     |
+                Clk --> |     o    3    o     | <-- Gnd
+                        |          o          |
+                        +-+                 +-+
+                          +-----------------+
+                                   ^
+                                   |
+                                  Atn
+</verb></tscreen>
+
+
+This is the XE1541 cable (won't work with this driver):
+
+<tscreen><verb>
+    CBM drive serial port   PC parallel port
+
+        2  Gnd ---------- 18-25  Ground
+        3  Atn --------+---- 13  SelectIn
+                       +->|-- 1  Strobe
+        4  Clk --------+---- 12  PaperEnd
+                       +->|- 14  AutoFeed
+        5  Data -------+---- 11  Busy
+                       +->|- 17  SelectIn
+        6  Reset ------+---- 10  Ack
+                       +->|- 16  Init
+</verb></tscreen>
+
+
+This is the XM1541 (pins 5 & 6 on the CBM end exchanged)
+
+<tscreen><verb>
+    CBM drive serial port   PC parallel port
+
+        2  Gnd ---------- 18-25  Ground
+        3  Atn --------+---- 13  SelectIn
+                       +->|-- 1  Strobe
+        4  Clk --------+---- 12  PaperEnd
+                       +->|- 14  AutoFeed
+        6  Reset ------+---- 11  Busy	
+                       +->|- 17  SelectIn
+        5  Data -------+---- 10  Ack
+                       +->|- 16  Init
+</verb></tscreen>
+
+<p>Besides the XM1541, a XA1541 cable is also supported. That cable consists
+of the same connections as the XM1541, but instead of using diodes, it uses
+transistors which drive the lines better. Because of this difference, the logic
+for outputs is reversed between the XA1541 and the XM1541.
+
+<p>Additionally to the cable types above, opencbm also supports XP1541 and
+XP1571 parallel cables, which have to be used <em>in conjunction</em> with the
+XM1541 or XA1541 cable.
+
+<p>
+For more information about the different supported cables (XM1541, XA1541,
+XP1541, XP1571) can be obtained on the Star Commander homepage (<htmlurl
+url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 
 <sect>Installation<label id="installation">
 
@@ -87,18 +231,21 @@ compile right out of the box, at least with kernel 2.2.x and 2.4.x, but 2.0.x
 might still work as well.
 
 If you intend to modify the drive routines for `d64copy' and `cbmformat' you
-also need a crossassembler. `config.make' comes with rules for A.Fachat's `xa'
-(available from funet or http://www.lb.shuttle.de/puffin/cbm4linux) and
-Ullrich von Bassewitz' `cl65' (comes with cc65, http://www.cc65.org).
+also need a crossassembler. `LINUX/config.make' comes with rules for A.Fachat's
+`xa' (available from funet or http://www.lb.shuttle.de/puffin/cbm4linux) and
+Ullrich von Bassewitz' `cl65' (comes with cc65, "http://www.cc65.org/").
 Starting with version cbm4linux 0.2.3, opencbm includes precompiled 6502
-binaries, so as long as you don't touch the .a65 files there's no need for a
+binaries, so as long as you don't touch the .a65 files, there's no need for a
 crossassembler.
 
 This package comes with a .spec file for those who want to build binary .RPMs.
-See the RPM documentation for details about the build process. If you upgrade
-from a previous (non-RPM) version and want to install a binary RPM, don't
-forget to remove the old files hanging aroung (just do "make uninstall",
-prferably in the *old* source directory).
+See the RPM documentation (outside of this paper) for details about the build
+process. Additionally, all files needed to built Debian .DEB packages are
+included. If you upgrade from a previous (non-RPM and non-DEB) version and want
+to install a packetized binary version (RPM or DEB), don't forget to remove the
+old files hanging aroung (just do "<it/make uninstall/", preferably in the
+*old* source directory. For a >= 0.4.0 version of opencbm, change the line to
+"<it>make -f LINUX/Makefile uninstall</it>".).
 
 <sect2>Compile-time configuration
 <p>
@@ -113,21 +260,21 @@ Linux parport subsystem for some reason. Same goes for SMP machines.
 Type
 
 <itemize>
-<item>make             (no root priviledges required)
+<item><it>make -f LINUX/Makefile</it>    (no root privileges required)
 
 to  build  the  kernel module, libraries and utility programs (no
-root priviledges required),
+root privileges required),
 
-<item>make dev         (as root)
+<item><it>make -f LINUX/Makefile dev</it>    (as root)
 
 to   create   the  character  device "/dev/cbm" with major 10 and
 minor 177 (this number is registered,  so  it  shouldn't  collide
 with anything else :)). Finally
 
-<item>make install     (as root)
+<item><it>make -f LINUX/Makefile install</it>     (as root)
 
 will  install  all  necessary  stuff  to  /usr/local/...  (can be
-changed in `config.make')
+changed in `LINUX/config.make')
 </itemize>
 
 <sect2>Loading the module
@@ -138,8 +285,9 @@ should now be able to load the driver module by issuing (as root)
 
 <p>
 <itemize>
-<item>/sbin/modprobe parport      (unless compiled into the kernel)
-<item>/sbin/insmod cbm lp=your_lp   (usually 0, which is default)
+<item><it>/sbin/depmod</it>
+<item><it>/sbin/modprobe parport</it>      (unless compiled into the kernel)
+<item><it>/sbin/insmod cbm lp=</it>your_lp   (usually 0, which is default)
 </itemize>
 
 <p>
@@ -147,11 +295,12 @@ or, when built with -DDIRECT_PORT_ACCESS:
 
 <p>
 <itemize>
-<item>/sbin/insmod cbm port=your_ioport irq=your_irq
-     (default is 0x378 for port, 7 for irq)
+<item><it>/sbin/insmod cbm port=your_ioport irq=your_irq</it>
+(default is 0x378 for port, 7 for irq)
 </itemize>
 
-Check /var/log/messages for the correct cable type (XA1541/XM1541).
+Check <tt>/var/log/messages</tt> if the correct cable type was recognized
+(XA1541/XM1541).
 
 
 <sect2>Troubleshooting
@@ -161,28 +310,30 @@ Finding the cause of a failure condition can be hard. Anyway, the
 following tips might help you:
 
 <itemize>
-<item>/var/log/messages might give you some hints.
+<item>Check <tt>/var/log/messages</tt>; it might give you some hints.
 
-<item>Using the parport subsystem:
+<item>If you are using the parport subsystem (no -DDIRECT_PORT_ACCESS):
 
 <itemize>
-<item>the port is occupied by another device (e.g. lp.o)
+<item>the port might be occupied by another device (e.g. `lp.o')
      cbm.o does NOT support port sharing (wouldn't work anyway).
-     (`cat /proc/parport/port/devices')
+     Enter <it>cat /proc/parport/port/devices</it> to find out.
 
-<item>parport_pc doesn't use an IRQ.
-     /etc/modules.conf should contain something like:
+<item>parport_pc might not use an IRQ.
+     <it>/etc/modules.conf</it> should contain something like:
+     <tscreen><verb>
        alias parport_lowlevel parport_pc
        options parport_pc io=0x378 irq=7
-     (`cat /proc/interrupts')
+     </verb></tscreen>
+     Check the interrupts with <it>cat /proc/interrupts</it>.
 </itemize>
 
-<item>Using direct port access:
+<item>Using direct port access (with -DDIRECT_PORT_ACCESS):
 
 <itemize>
-<item>the port/IRQ is occupied by another driver (e.g. parport.o)
-     (`cat /proc/interrupts')
-     (`cat /proc/ioports')
+<item>The port/IRQ might occupied by another driver (e.g. parport.o)
+     Enter <it>cat /proc/interrupts</it> and <it>cat /proc/ioports</it> to find
+     out.
 </itemize>
 </itemize>
 
@@ -190,12 +341,12 @@ following tips might help you:
 <sect2>Device access
 
 <p>
-As a first test, I'd suggest something simple like
+As a first test, try something simple like
 
-<tscreen><verb>
-    cbmctrl command 8 I0:    (assuming drive 8)
-    cbmctrl status 8
-</verb></tscreen>
+<itemize>
+<item><it/cbmctrl command 8 I0:/    (assuming drive 8)
+<item><it/cbmctrl status 8/
+</itemize>
 
 <p>
 (no root privileges required)
@@ -203,6 +354,11 @@ As a first test, I'd suggest something simple like
 <p>
 Failure can be caused by:
 <itemize>
+<item>Possible, the shared library in <tt>/usr/local/lib/</tt> cannot be found;
+in this case, add <tt>/usr/local/lib/</tt> to <tt>/etc/ld.so.conf</tt> and
+execute <it/ldconfig/ (as root)
+<item>You might not have the necessary rights to the <tt>/dev/cbm</tt> device;
+try <it>chmod 777 /dev/cbm</it>
 <item>incorrect module parameters
 <item>wrong BIOS settings (esp. IRQ)
 <item>broken cable
@@ -211,26 +367,35 @@ Failure can be caused by:
 <sect2>Runtime configuration
 
 <p>
-You really want to add this to /etc/modules.conf to have the driver loaded on
-demand: (/etc/conf.modules on older SuSE systems)
+Most probably, you will want to add this to <tt>/etc/modules.conf</tt> to have
+the driver loaded on demand: (the file is called <tt>/etc/conf.modules</tt> on
+some older SuSE systems)
 
+<tscreen><verb>
     alias char-major-10-177 cbm
     options cbm [options]
+</verb></tscreen>
 
 With [options] being one or more of:
 
 <itemize>
-<item>lp=<it/lp/       (parport only, as used in /sbin/insmod above)
-<item>irq=<it/irq/     (direct port only, as used in /sbin/insmod above)
-<item>port=<it/port/   (direct port only, as used in /sbin/insmod above)
-<item>cable=<it/n/      force cable type:
-                -1  for autodetection (default)
-                 0  for XM1541 (non-inverting)
-                 1  for XA1541 (inverting)
-<item>reset=<it/n/     initializing behaviour:
-                -1  smart IEC reset (direct port default)
-                 0  no IEC reset
-                 1  force IEC reset (parport default)
+<item><it/lp=*lp*/       (parport only, as used in <it>/sbin/insmod</it> above)
+<item><it/irq=*irq*/     (direct port only, as used in <it>/sbin/insmod</it> above)
+<item><it/port=*port*/   (direct port only, as used in <it>/sbin/insmod</it> above)
+<item><it/cable=*n*/      force cable type:
+ <itemize>
+ <item>               -1  for autodetection (default)
+ <item>                0  for XM1541 (non-inverting)
+ <item>                1  for XA1541 (inverting)
+ </itemize>
+<item><it/reset=*n*/     initializing behaviour:
+ <itemize>
+ <item>               -1  smart IEC reset (direct port default);
+                          only change the status of the reset line if it was set on start
+ <item>                0  no IEC reset on driver start
+ <item>                1  force IEC reset (parport default);
+                          always reset the device on driver start
+ </itemize>
 </itemize>
 
 <p>
@@ -258,7 +423,7 @@ following actions.
 following:
 
 <itemize>
-<item>Get your VIC 15xx drive (out of the basement, or wherever it is!
+<item>Get your supported drive <ref id="supported-drives">.
 
 <item>Moving cables with equipment turned on can damage either your PC,
 and/or the drive, so, be carefull!
@@ -276,75 +441,77 @@ port cable (XP1541), connect that one, too.
 <item>Just download the binary package, and unpack it into an arbitrary
 directory.
 
-<item>Get a command-line, and change into the directory you unpackaged the
-drivers into.
+<item>Get a command-line (Start/Run, and type "<it/cmd.exe/"), change into the
+directory you unpackaged the drivers into (with "<it/cd/").
 
-<item>Type "cd exe"
+<item>Type "<it/cd exe/"
 
-<item>Type "instcbm" and check the outputs. Its last line should look like No
-problems found in current configuration. The program might suggest a reboot,
-which you should follow. If it does not, don't worry, instcbm tries to avoid
-that if possible.
+<item>Type "<it/instcbm/" and check the outputs. Its last line should look like
+<it/No problems found in current configuration/. In this case, you are done. In
+some rare cases, <it/instcbm/ will suggest a reboot, which you should follow.
 
 <item>You might want to have a look at the possible options for instcbm. They
-are available by typing "instcbm --help"
+are available by typing "<it/instcbm --help/". Also, cf. <ref id="instcbm"
+name="instcbm">.
 
-<item>If we had to reboot in the previous step, do the following:
+<item>If you had to reboot in the previous step, do the following:
 
-<itemize> <item>Go to a command-line, and change into the directory you
+<itemize><item>Go to a command-line, and change into the directory you
 unpackaged the drivers into again.
 
-<item>Type "cd exe"
+<item>Type "<it/cd exe/"
 
-<item>Type "instcbm --check". There should not be any further suggestion for a
-reboot. If there is, do not proceed, but contact me instead.
+<item>Type "<it/instcbm --check/". There should not be any further suggestion
+for a reboot. If there is, do not proceed, but contact me instead.
 </itemize>
 
 <item>If you want to use another port than LPT1, you must tell this to the
 driver. I assume you want to use LPTX, with X being the correct value, then
-type: "instcbm --lpt=X --update"
+type: "<it/instcbm --lpt=X --update/"
 </itemize>
 
 <sect>Checking if the installation is complete
 <p>
-Here, the installation is complete. Anyway, it is wise to check if the
-installation works as expected. For this, do the following:
+After you installed opencbm (cf. <ref id="installation" name="Installation">,
+it is wise to check if the installation works as expected. For this, do the
+following:
 
 <itemize>
-<item>Now, it is time to switch on the floppy drive. Depending on the type of
-cable you are using (XA1541 or XM1541) and the parallel port of your PC, this
+<item>Switch on the floppy drive. Depending on the type of
+cable you are using (XA1541 or XM1541) and the parallel port of your PC, the
 drive might keep spinning endless now, because it is continuously resetted.
 
-<item>Now, type "cbmctrl reset" and press enter. If it does not already, the red
+<item>Type "<it/cbmctrl reset/" and press enter. If it does not already, the red
 floppy drive LED should light up, and the drive should start spinning. After
-approximately one second, the red LED should switch off again, and the drive
-stops spinning.
+approximately one second (up to five seconds in the case of a 1581), the red
+LED should switch off again, and the drive stops spinning.
 
-<item>Now, type "cbmctrl status 8" to get the status (error) code from the
-attached floppy drive. If everythings works fine, your drive should answer with
-its identification string. For a 1541, this is something like 73,cbm dos v2.6
-1541,00,00, while for a 1571, this line looks like 73,cbm dos v3.0 1571,00,00.
+<item>Now, type "<it/cbmctrl status 8/" to get the status (error) code from the
+attached floppy drive. If everything works fine, your drive should answer with
+its identification string. For a 1541, this is something like <it/73,cbm dos v2.6
+1541,00,00/, while for a 1571, this line looks like <it/73,cbm dos v3.0
+1571,00,00/.
 There might also be some variant of this line, depending on the firmware version
 of your drive.
 
-<item>Type "cbmctrl status 8" to get the status (error) code from the floppy
-drive. As the power on message has been read, your drive should answer with a
-00, ok,00,00 string.
+<item>Type "<it/cbmctrl status 8/" to get the status (error) code from the floppy
+drive again. As the power on message has been read, your drive should answer with a
+<it/00, ok,00,00/ string.
 
-<item>Type "cbmctrl detect". This command tries to detect the types of drive
+<item>Type "<it/cbmctrl detect/". This command tries to detect the types of drive
 which are connected on the cable. You should see the drive which you posess.
 
 <item>Now, we want to check if we can send anything to the floppy drive. Remove
-any diskette from the drive and press "cbmctrl open 8 15 I0". (Make sure the "I"
+any diskette from the drive and press "<it/cbmctrl open 8 15 I0/". (Make sure the "I"
 is an upper-case "I". A lower-case "I" will not work!) This command tries to
-initialize the disk. Anyway, since we don't have a disk in the drive, an error
+initialize the disk. Anyway, since there isn't a disk in the drive, an error
 occurs. You should hear the floppy spinning, and in case of a 1541, the R/W-head
 should start bumping. After some seconds, the red LED starts starts flashing,
 indicating that an error occurred.
 
-<item>Now, press again "cbmctrl status 8" to get the status (error) code from
+<item>Now, try again "<it/cbmctrl status 8/" to get the status (error) code from
 the floppy drive. As an error occurred before, an error string should be
-displayed. For my setup, it is the "21,read error,18,00" string. Furthermore,
+displayed. For my setup, it is the "<it/21,read error,18,00/" string. Furthermore,
 the red LED should stop flashing.
 </itemize>
 
@@ -354,37 +521,97 @@ you do not have to enter these commands over and over again, these are only
 tests to make sure that anything is correctly installed.
 
 Now, let's proceed. If you have a D64 file or a floppy disc ready, you can try
-transferring it over the cable. Do not use all of the followinng commands, but
+transferring it over the cable. Do not use all of the following commands, but
 only the ones you want to perform.
 
 <itemize>
 <item>If you want to transfer an existing floppy from the drive to the PC, use
-the following command: "d64copy --transfer=serial2 --warp 8 A.D64", while
-replacing A.D64 by the name you want to give to the file. If you have a parallel
-cable up and ready, just try with that one: "d64copy --transfer=parallel --warp
-8 A.D64".
+the following command: "<it/d64copy 8 A.D64/", while replacing A.D64 by the
+name you want to give to the file.
 
 <item>WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
-BEFORE, so make sure you do not need that floppy anymore. If you have a D64 or
-D71 on your PC, and you want to write it to a new, already formatted disc, enter
-"d64copy --transfer=serial2 --warp A.D64 8" if the file is called A.D64. Again,
-if you have a parallel cable, you might want to replace "--transfer=parallel".
+BEFORE, so make sure you do not need that floppy anymore.
+
+If you have a D64 or D71 on your PC, and you want to write it to a new, already
+formatted disc, enter "<it/d64copy A.D64 8/" if the file is called A.D64.
 
 <item>WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
-BEFORE, so make sure you do not need that floppy anymore. If you have a disc
-you want to format, you have two options: Either use the command "cbmctrl
-command 8 N0:NAME,ID", or use the cbmformat program.
+BEFORE, so make sure you do not need that floppy anymore.
+
+If you have a disc you want to format, you have two options: Either use the
+command "<it/cbmctrl command 8 N0:NAME,ID/", or use the cbmformat program, cf.
+<ref id="cbmformat" name="cbmformat">, or the cbmforng program, cf. <ref
+id="cbmforng" name="cbmforng">.
 </itemize>
 
 <p>
 If you want to completely remove the cbm4win driver from your machine, you can
-do so by issuing a "instcbm --remove" command.
+do so by issuing a "<it/instcbm --remove/" command.
 
 You can have a look at the available cbmctrl commands by issuing cbmctrl on
-your command line. For the other programs, you get help by issuing the "--help"
-option.
+your command line, or look at <ref id="cbmctrl" name="cbmctrl">. For the other
+programs, you get help by issuing the "--help" option, or look at the
+appropriate section in <ref id="utilities" name="utilities">.
 
-<sect1>instcbm
+<sect>Utilities<label id="utilities">
+
+<p>
+As the kernel driver is quite useless for itself, the following utility
+programs are included with this package:
+
+<itemize>
+<item><it/cbmctrl/
+
+ command line utility for direct device access at talk/listen level.
+
+<item><it/cbmformat/
+
+ fast 1541 disk formatter (for 1541, 1570 and 1571 drives).
+
+<item><it/cbmforng/
+
+ fast 1541 disk formatter (for 1541, 1570 and 1571 drives).
+
+<item><it/d64copy/
+
+ copies .d64 images to 1541 compatible drives and vice versa. Type `d64copy -h'
+ to get a list of valid options. Use the device number to address the disk
+ drive, e.g. `d64copy -t serial2 8 img.d64'.
+
+ This version contains the StarCommander Turbo and Warp routines and custom
+ transfer routines as well as parallel cable (XP1541) support. These are the
+ benchmarks for Michael Klein's old Pentium-200/MMX system (seconds)
+
+ <tscreen><verb>
+ mode               write     read
+
+ parallel turbo     54.02    53.30
+ parallel warp      32.47    29.56
+ serial1 turbo     168.59   168.58
+ serial1 warp      183.57   158.87
+ serial2 turbo      95.02    95.26
+ serial2 warp       88.29    80.57
+ </verb></tscreen>
+
+<item><it/cbmcopy/
+
+ fast 1541/1570/1571/1581 file copier.
+
+<item><it/rpm1541/ demo
+
+ determines the drive rotation speed of 1541, 1570 and 1571 drives.
+
+<item><it/flash/ demo
+
+ flashes the LED of 1541, 1570 and 1571 drives.
+
+<item><it/morse/ demo
+
+ morses arbitrary texts with the help of the LED of 1541, 1570 and 1571 drives.
+
+</itemize>
+
+<sect1>instcbm (Windows only)<label id="instcbm">
 <p>
 The following options are available for the "instcbm" tool:
 
@@ -414,10 +641,6 @@ The following options are available for the "instcbm" tool:
 	Print out a short help describing the possible options.
 </itemize>
 
-<sect>Utilities<label id="utilities">
-
-<p>opencbm comes with the following utilities:
-
 <sect1>cbmctrl<label id="cbmctrl">
 
 <p><it>cbmctrl</it> is used to send commands to external devices. It can
@@ -430,7 +653,6 @@ and a MPS-1200 printer.
 
 <p>Synopsis: <tt>cbmctrl <it>[global_options] </it>ACTION <it>[action_args]</it></tt>
 <descrip>
-<label id="action-lock">
 <tag>global_options</tag>
 <p>Some options that are related to <it>cbmctrl</it> in general of which affect
 the oervall behaviour of all actions
@@ -460,7 +682,7 @@ on a special action together with its arguments and parameters
 <tag>detect</tag>
 <p>Detect all drives on the IEC bus
 <tag>lock</tag>
-<p>Lock the parallel port for cbm4win/cbm4linux use
+<p>Lock the parallel port for opencbm (cbm4linux/cbm4win) use
 <tag>unlock</tag>
 <p>Unlock the parallel port from exclusive usage
 <tag>listen</tag>
@@ -756,14 +978,16 @@ Write file buffer2.bin to drive 9, address 0x500:
 <sect1>cbmformat<label id="cbmformat">
 <p>
 <it/cbmformat/ is a fast low-level disk formatter for the 1541 and compatible
-devices (1570, 1571, third-party clones). The drive routine was taken from the
-Star Commander ((C) Joe Forster/STA) and highly improved.
+devices (1570, 1571, third-party clones). A 1581 drive is not supported.
+
+The drive routine was taken from the Star Commander ((C) Joe Forster/STA) and
+highly improved.
 
 There is also another, very similar tool, <ref id="cbmforng" name="cbmforng">.
 
 <sect2>cbmformat invocation<label id="invoking-cbmformat">
 <p>
-Synopsis: <tt/cbmformat [OPTION]... DRIVE NAME,ID/
+Synopsis: <tt/cbmformat [OPTION]... DRIVE# NAME,ID/
 
 <it/DRIVE#/ has to be the drive number of the disc drive, <it/NAME/ is a name
 with up to 16 characters which will be the name of the disc after formatting,
@@ -865,6 +1089,9 @@ cbmformat -npx 8 "40 TRACKS,OK"
 on <ref id="cbmformat" name="cbmformat"> and is designed to become the
 designated successor to <ref id="cbmformat" name="cbmformat">, therefore its
 name: <it>CBM-Formatter, the Next Generation</it>.
+
+<it/cbmforng/ does not support a 1581 drive.
+
 <p>
 Because this is the first official release of <it>cbmforng</it> and because
 it was not used in the field by a wider user group, it still contains
@@ -873,17 +1100,16 @@ process was done. When <it>cbmforng</it> prooved its matureness and got back
 some features currently missing (progress bar), it will replace
 <it>cbmformat</it>.
 <p>
-To date <it>cbmforng</it> should considered the more reliable formatter;
-whenever you should encounter any difficulties with <it>cbmformat</it>, go
-for <it>cbmforng</it> . If you like additional informational messages like
-e.g. the RPM value each formatted track was measured, then <it>cbmforng</it>
-is the tool you want to use. Your feedback helps us to decide, if this
-additional output which was needed for developing may find its way into
-future releases.
+To date <it/cbmforng/ should be considered as the more reliable formatter of
+both; whenever you should encounter any difficulties with <it>cbmformat</it>,
+go for <it/cbmforng/. If you like additional informational messages like e.g.
+the RPM value each formatted track was measured, then <it/cbmforng/ is the tool
+you want to use. Your feedback helps us to decide, if this additional output
+which was needed for developing may find its way into future releases.
 
 <sect2>cbmforng invocation<label id="invoking-cbmforng">
 <p>
-Synopsis: <tt/cbmforng [OPTION]... DRIVE NAME,ID/
+Synopsis: <tt/cbmforng [OPTION]... DRIVE# NAME,ID/
 
 <it/DRIVE#/ has to be the drive number of the disc drive, <it/NAME/ is a name
 with up to 16 characters which will be the name of the disc after formatting,
@@ -1239,12 +1465,14 @@ cbmcopy -w 9 file.p00
 
 <sect1>rpm1541<label id="rpm1541">
 <p>
-rpm1541 is a demo program. It finds out the rotation speed (in rounds per
-minute, rpm) of the drive motor of a 1541, 1570 or 1571 drive.
+<it/rpm1541/ is a demo program. It finds out the rotation speed (in rounds per
+minute, rpm) of the drive motor.
+<it/rpm1541/ supports a 1541, 1570 or 1571 drive.
 A 1581 drive is <it/not/ supported.
 
-For cbm4linux, rpm1541 is not installed automatically. You have to compile it
-yourself if you want to use it. For cbm4win, it is part of the distribution.
+For Linux, <it/rpm1541/ is not installed automatically. You have to compile it
+yourself (found in <tt>demo/rpm1541/</tt>) if you want to use it.
+For Windows, it is part of the binary distribution.
 
 <sect2>rpm1541 usage<label id="rpm1541-usage">
 <p>
@@ -1265,11 +1493,12 @@ cbmctrl unlock
 
 <sect1>flash<label id="flash">
 <p>
-flash is a demo program. It flashes the drive LED.
-flash works with 1541, 1570 or 1571 drives. A 1581 drive is <it/not/ supported.
+<it/flash/ is a demo program. It flashes the drive LED.
+<it/flash/ works with 1541, 1570 or 1571 drives. A 1581 drive is <it/not/ supported.
 
-For cbm4linux, flash is not installed automatically. You have to compile it
-yourself if you want to use it. For cbm4win, it is part of the distribution.
+For Linux, <it/flash/ is not installed automatically. You have to
+compile it yourself (found in <tt>demo/flash/</tt>) if you want to use it.
+For Windows, it is part of the binary distribution.
 
 <sect2>flash usage<label id="flash-usage">
 <p>
@@ -1290,11 +1519,12 @@ cbmctrl unlock
 
 <sect1>morse<label id="morse">
 <p>
-morse is a demo program. It uses the drive LED to output a text in morse code.
-morse works with 1541, 1570 or 1571 drives. A 1581 drive is <it/not/ supported.
+<it/morse/ is a demo program. It uses the drive LED to output a text in morse code.
+<it/morse/ works with 1541, 1570 or 1571 drives. A 1581 drive is <it/not/ supported.
 
-For cbm4linux, morse is not installed automatically. You have to compile it
-yourself if you want to use it. For cbm4win, it is part of the distribution.
+For Linux, <it/morse/ is not installed automatically. You have to compile it
+yourself (found in <tt>demo/morse/</tt>) if you want to use it.
+For Windows, it is part of the binary distribution.
 
 <sect2>morse usage<label id="morse-usage">
 <p>
@@ -1618,6 +1848,7 @@ you just want to tell me how happy you are with this program ;-)
 
 
 Have fun,
+
 The opencbm team.
 
 </article>
