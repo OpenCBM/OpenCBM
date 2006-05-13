@@ -112,6 +112,10 @@ SOURCE=..\detectxp1541.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\gcr_4b5b.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\i_opencbm.c
 # End Source File
 # Begin Source File
