@@ -14,9 +14,10 @@ DLLENTRY=opencbm_init
 INCLUDES=../../include;../../include/WINDOWS;../;../WINBUILD/
 
 SOURCES=../cbm.c \
-        ../detect.c \
+	../detect.c \
 	../detectxp1541.c \
 	../petscii.c \
+	../gcr_4b5b.c \
 	../upload.c \
 	i_opencbm_vice.c \
 	archlib_vice.c \
