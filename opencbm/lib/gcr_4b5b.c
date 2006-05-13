@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/gcr_4b5b.c \n
 ** \author Wolfgang Moser \n
-** \version $Id: gcr_4b5b.c,v 1.1 2006-05-12 14:26:12 wmsr Exp $ \n
+** \version $Id: gcr_4b5b.c,v 1.2 2006-05-13 17:48:56 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Commodore GCR conversion functions
@@ -26,7 +26,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: gcr_4b5b.c,v 1.1 2006-05-12 14:26:12 wmsr Exp $";
+    "@(#) $Id: gcr_4b5b.c,v 1.2 2006-05-13 17:48:56 strik Exp $";
 #endif
 
 #include "debug.h"
@@ -35,6 +35,7 @@ static char *rcsid =
 #define DLL
 #include "opencbm.h"
 
+#include <stddef.h>
 
 /*! \brief Decode GCR data
 
