@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2006-04-28 12:57:35 strik Exp $
+# $Id: Makefile,v 1.5 2006-05-13 16:51:50 strik Exp $
 
 include ../LINUX/config.make
 
@@ -32,7 +32,7 @@ HTML = html/opencbm.html
 	perl -p -i -e 'if(m/^   \\input texinfo/){print "INFO-DIR-SECTION Miscellaneous\nSTART-INFO-DIR-ENTRY\n* opencbm: (opencbm).	Commodore serial IEC bus support.\nEND-INFO-DIR-ENTRY\n";}' $@
 
 %.html: opencbm.sgml
-	-[ ! -d html ] && mkdir html/
+	([ ! -d html ] && mkdir html/) || true
 	cd html; sgml2html -s 2 ../$<; cd ..
 
 all: $(TXT) $(DVI) $(INFO) $(HTML) ${PDF}
@@ -41,8 +41,8 @@ clean:
 	rm -f $(TEX)
 
 mrproper: clean
-	rm -f $(DVI) $(INFO) $(TXT) ${PDF} ${WINTXT} html/*
-	rmdir html/
+	rm -f $(DVI) $(INFO) $(TXT) ${PDF} ${WINTXT} html/* || true
+	([ -d html/ ] && rmdir html/) || true
 
 install-files:
 	gzip -c9 $(INFO) > $(INFODIR)/$(INFO).gz

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6 2006-04-24 17:10:27 strik Exp $
+# $Id: Makefile,v 1.7 2006-05-13 16:51:50 strik Exp $
 
 include LINUX/config.make
 
@@ -18,24 +18,24 @@ all:
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
-	-@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
+	@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
 
 clean:
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
-	-@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
+	@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
 
 mrproper:
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
-	-@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
+	@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
 
 dist: all clean
@@ -47,24 +47,25 @@ install-files: all
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
-	-@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
+	@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
 
 install: install-files
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
-	-@for subdir in $(SUBDIRS_OPTIONAL); do \
+	@for subdir in $(SUBDIRS_OPTIONAL); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
 
 uninstall: 
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
-	-@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
+	@for subdir in $(SUBDIRS_OPTIONAL); do \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
 
 dev:
