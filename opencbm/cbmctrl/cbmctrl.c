@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.25 2006-04-11 20:24:35 wmsr Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.26 2006-05-14 10:21:13 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -824,6 +824,8 @@ static struct prog prog_table[] =
         "<device> is the device number of the drive.\n"
         "<adr>    is the starting address of the memory region to write to.\n"
         "         it can be given in decimal or in hex (with a 0x prefix).\n"
+        "         If this is -1, the first two bytes from the file are\n"
+        "         considered as start address.\n"
         "<file>   (optional) file name of a file to read the values from.\n"
         "         If this name is not given or it is a dash ('-'), the\n"
         "         contents will be read from stdin, normally the console."
