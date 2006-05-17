@@ -83,6 +83,8 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name cbmforng
     End Project Dependency
+    Project_Dep_Name cbmrpm41
+    End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libtrans
     End Project Dependency
@@ -163,6 +165,24 @@ Package=<4>
 ###############################################################################
 
 Project: "cbmforng"=..\cbmforng\WINBUILD\cbmforng.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "cbmrpm41"=..\cbmrpm41\WINBUILD\cbmrpm41.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

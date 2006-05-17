@@ -12,7 +12,9 @@ DIRS= \
 	libtrans \
 	demo \
 	sample \
+	cbmrpm41 \
 	sys
 
 OPTIONAL_DIRS= \
+	cbmf_analyzer \
 	mnib36
