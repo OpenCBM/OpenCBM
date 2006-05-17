@@ -1,18 +1,17 @@
-.\" $Id: cbmctrl.1,v 1.7 2006-04-29 07:47:51 strik Exp $
+.\" $Id: cbmctrl.1,v 1.8 2006-05-17 16:54:42 wmsr Exp $
 .\"
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
-.\" additions and rework by Wolfgang Moser <cbm(a)d81(o)de>
+.\" additions and rework by Wolfgang Moser http://d81.de
 .\"
 .\" Process this file with
 .\"    groff -t -e -mandoc -Tps cbmctrl.1 > cbmctrl.1.ps
 .\" Test it with
 .\"    nroff -man cbmctrl.1 | less -r
 .\"
-.TH CBMCTRL "1" "April 2006" "cbmctrl 0.4.0" "User Commands"
+.TH CBMCTRL "1" "May 2006" "cbmctrl 0.4.0" "User Commands"
 .SH NAME
- cbmctrl \- manual page for cbmctrl 0.4.0
- - control serial CBM devices
+cbmctrl \- control serial CBM devices \- manual page for cbmctrl 0.4.0
 .P
 .B This document is poorly maintained and probably outdated. 
 If in doubt, use the Texinfo manual. If the
@@ -527,7 +526,21 @@ cbmctrl unlisten
 cbmctrl unlock
 .PD
 .P
-(NOTE: "echo -n" does natively work under Linux only)
+.RE
+.PD 0
+Notes:
+.RS 2
+.TP 2
+*
+"echo -n" does natively work under Linux only, under Windows you can use
+the following construct as a replacement. Please ensure that there are no
+spaces between the '=' character and the '|' character surrounding
+.IR <cmdstr> :
+.RS 5
+.PD
+.PP
+.RI "echo. | set /p =" <cmdstr> "| cbmctrl write"
+.RE
 .RE
 .RE
 .TP
@@ -735,6 +748,6 @@ cbmctrl upload 10 0x500
 .SH AUTHOR
 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
 additions and reworks by Spiro Trikaliotis, additions by Wolfgang Moser
-<cbm(a)d81(o)de>.
+http://d81.de.
 .SH DATE
-Apr 27 2006
+May 17 2006
