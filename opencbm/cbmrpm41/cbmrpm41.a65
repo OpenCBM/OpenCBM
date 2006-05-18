@@ -36,22 +36,22 @@
 
 ;##############################################################################
 
-JOB_READTS	= $80	; readin a block from track and sector (into current buffer !)
+JOB_READTS  = $80   ; reading a block from track and sector (into current buffer !)
 
-JOB_SEEKTS	= $B0	; search for a decent track and sector
-JOB_BUMP    = $C0	; bump the head
-JOB_EXEC0   = $E0	; execute after drive runs
+JOB_SEEKTS  = $B0   ; search for a decent track and sector
+JOB_BUMP    = $C0   ; bump the head
+JOB_EXEC0   = $E0   ; execute after drive runs
 
 
 JOB0        = $00   ; job code for buffer 0
 TRACK0      = $06   ; track for buffer 0 ($0300-$03ff)
 SECTOR0     = $07   ; sector for buffer 0 ($0300-$03ff)
 
-JOBNUM		= $F9   ; current job number
-CSEPARATOR	= $0279 ; command string parsing separator
+JOBNUM      = $F9   ; current job number
+CSEPARATOR  = $0279 ; command string parsing separator
 
-HIBYTES_A2H = $0280	; up to 5 high bytes from the ascii to hex conversion
-LOBYTES_A2H = $0285	; up to 5 low  bytes from the ascii to hex conversion
+HIBYTES_A2H = $0280 ; up to 5 high bytes from the ascii to hex conversion
+LOBYTES_A2H = $0285 ; up to 5 low  bytes from the ascii to hex conversion
 
 PROGBUF     = $0300
 MAINBUF     = $0500
@@ -69,13 +69,13 @@ DC_SR       = $1C0A
 DC_ACR      = $1C0B
 DC_PCR      = $1C0C
 
-LED_ON		= $c100
-ASCII2HEX	= $cca1
+LED_ON      = $c100
+ASCII2HEX   = $cca1
 EXECUTE_JOB = $D58C
 
 .ifndef T2LowValue
-	.out "T2LowValue symbol not defined externally, setting to default value: 187-2"
-	.define T2LowValue 187-2		; 187 fulfills a couple of criteria
+    .out "T2LowValue symbol not defined externally, setting to default value: 187-2"
+    .define T2LowValue 187-2        ; 187 fulfills a couple of criteria
 .endif
 
 ;##############################################################################
@@ -86,14 +86,14 @@ EXECUTE_JOB = $D58C
 
     * = PROGBUF
 
-			; jop code for this buffer
-		jmp   MeasurementJobCode	; for track and sector
+            ; jop code for this buffer
+        jmp   MeasurementJobCode    ; for track and sector
 
 Timer24bitValuesStore:
-		.tag  Timer24bitValues		; return buffer for a 3 byte timer readout
+        .tag  Timer24bitValues      ; return buffer for a 3 byte timer readout
 
-		.word     UA, UB, UC, UD, UE, UF, UG
-		.word UH, UI, UJ, UK, UL, UM, UN, UO
+        .word     UA, UB, UC, UD, UE, UF, UG
+        .word UH, UI, UJ, UK, UL, UM, UN, UO
 
 
 ;##############################################################################
@@ -117,159 +117,157 @@ Ux_UO_Uservector:
 ;##############################################################################
 
 ResetVIA2ShiftRegConfig:
-		lda #$e3		; mask out the shift register bits
-		sei
-		and DC_ACR		; get the DC_ACR, auxiliary control register
-						; set shift register mode 000, disable it
-		sta DC_ACR		; push back the DC_ACR
-		cli
-		rts
+        lda #$e3        ; mask out the shift register bits
+        sei
+        and DC_ACR      ; get the DC_ACR, auxiliary control register
+                        ; set shift register mode 000, disable it
+        sta DC_ACR      ; push back the DC_ACR
+        cli
+        rts
 
 Init23_BitTimersStd:
-		lda #T2LowValue	; load value, mostly (187 - 2)
+        lda #T2LowValue ; load value, mostly (187 - 2)
 
-		sta DC_T2L		; into timer 2 low and its latch
-			; don't initialise DC_T2H, doesn't matter
+        sta DC_T2L      ; into timer 2 low and its latch
+            ; don't initialise DC_T2H, doesn't matter
 
-		lda #$ff		; select Read mode to
-		sta DC_SR		; configure the shift register
+        lda #$ff        ; select Read mode to
+        sta DC_SR       ; configure the shift register
 
-			; configure VIA 2 shift register and with it timer 2
-		lda #$e3		; mask out the shift register bits
-		sei
-		and DC_ACR		; get the DC_ACR, auxiliary control register
+            ; configure VIA 2 shift register and with it timer 2
+        lda #$e3        ; mask out the shift register bits
+        sei
+        and DC_ACR      ; get the DC_ACR, auxiliary control register
 
 .if 1
-		ora #$04		; set shift register mode 001, shift _in_
-						; under T2 control
+        ora #$04        ; set shift register mode 001, shift _in_
+                        ; under T2 control
 
 .elseif 0
-			; doesn't work with older 1541 model, maybe because of
-			; chip revision differencies that results in another
-			; behaviour of the shift register
-		ora #$10		; set shift register mode 100, shift out
-						; free-running under T2 (low) control
+            ; doesn't work with older 1541 model, maybe because of
+            ; chip revision differencies that results in another
+            ; behaviour of the shift register
+        ora #$10        ; set shift register mode 100, shift out
+                        ; free-running under T2 (low) control
 .else
-			; does not work in general, due to chip revision differencies
-		ora #$14		; set shift register mode 101, shift out under T2
+            ; does not work in general, due to chip revision differencies
+        ora #$14        ; set shift register mode 101, shift out under T2
 .endif
-		sta DC_ACR		; push back the DC_ACR
+        sta DC_ACR      ; push back the DC_ACR
 
-		
-			; configure VIA 1 timer 2
-		lda #$EF		; mask out the Timer 2 Control bit
-		and BC_ACR		; get the DC_ACR, auxiliary control register
-		sta BC_ACR		; push back the DC_ACR
-		cli
+        
+            ; configure VIA 1 timer 2
+        lda #$EF        ; mask out the Timer 2 Control bit
+        and BC_ACR      ; get the DC_ACR, auxiliary control register
+        sta BC_ACR      ; push back the DC_ACR
+        cli
 
-		rts
+        rts
 
 ;##############################################################################
 
 T2_23Bit_TimerSampling:
-		sei				; ensure no breaks in timer read out
-		jsr l5			;  ==>  but only, if not executed as jobcode
-		cli				; timing critial area off
-		rts
+        sei             ; ensure no breaks in timer read out
+        jsr l5          ;  ==>  but only, if not executed as jobcode
+        cli             ; timing critial area off
+        rts
 
 ;#######
 
-	l5:	ldy	DC_T2L		; get VIA2 timer 2 low value
+    l5: ldy DC_T2L      ; get VIA2 timer 2 low value
 
 ;;; Timer 2 rollover fix (for shift register mode)
-		iny				; fix timer 2 shift register roll over
-		sty Timer24bitValuesStore + Timer24bitValues::V2T2__LOW
+        iny             ; fix timer 2 shift register roll over
+        sty Timer24bitValuesStore + Timer24bitValues::V2T2__LOW
 
-		ldy	BC_T2H		; get VIA1 timer 2 high value
-		lda	BC_T2L		; get VIA1 timer 2 low value
+        ldy BC_T2H      ; get VIA1 timer 2 high value
+        lda BC_T2L      ; get VIA1 timer 2 low value
 
-						; store low value
-		sta Timer24bitValuesStore + Timer24bitValues::V1T2__LOW
+                        ; store low value
+        sta Timer24bitValuesStore + Timer24bitValues::V1T2__LOW
 
-		bpl no_T2H_reload
-		ldy	BC_T2H		; get VIA1 timer 2 high value
+        bpl no_T2H_reload
+        ldy BC_T2H      ; get VIA1 timer 2 high value
 
-		.byte $2c		; BIT ABSOLUTE +4 cycles, +2+4 from above
+        .byte $2c       ; BIT ABSOLUTE +4 cycles, +2+4 from above
 no_T2H_reload:
-		pha				; pha/pla: +4+3 = +7 cycles, +3 from above
-		pla
-						; store low value
-		sty Timer24bitValuesStore + Timer24bitValues::V1T2_HIGH
+        pha             ; pha/pla: +4+3 = +7 cycles, +3 from above
+        pla
+                        ; store low value
+        sty Timer24bitValuesStore + Timer24bitValues::V1T2_HIGH
 
-		rts
+        rts
 
 ;##############################################################################
 
 ExecuteJobInBuffer:
 
-.if 1	; this is better to handle from different hosts
+.if 1   ; this is better to handle from different hosts
 
-			; maybe parse input for additional parameters
-			; after the Ux command itself. Just the same
-			; as with the standard U1 and U2 commands
-			; ($cd5f, $cd97), but only for selecting a
-			; track (part of $cc6f)
-			; maybe for selecting track and sector, then
-			; the routine at $cca1 could be used
-		ldy #$03		; Ux 34567890
-		jsr ASCII2HEX	; convert the number(s) beginning at $0200,Y
-			; the last LO-Byte also comes in Accu, HI-Byte in $72
-		sta TRACK0 + 2 * JOB0	; track number for jobcode 0
+            ; maybe parse input for additional parameters
+            ; after the Ux command itself. Just the same
+            ; as with the standard U1 and U2 commands
+            ; ($cd5f, $cd97), but only for selecting a
+            ; track (part of $cc6f)
+            ; maybe for selecting track and sector, then
+            ; the routine at $cca1 could be used
+        ldy #$03                ; Ux 34567890
+        jsr ASCII2HEX           ; convert the number(s) beginning at $0200,Y
+            ; the last LO-Byte also comes in Accu, HI-Byte in $72
+        sta TRACK0 + 2 * JOB0   ; track number for jobcode 0
 
-		ldy CSEPARATOR			; get last interpreted digit
-		iny						; get to next number, skip space
-		jsr ASCII2HEX			; and convert it
-			; the last LO-Byte comes in Accu, HI-Byte in $72
-		sta SECTOR0 + 2 * JOB0	; as sector number
+        ldy CSEPARATOR          ; get last interpreted digit
+        iny                     ; get to next number, skip space
+        jsr ASCII2HEX           ; and convert it
+            ; the last LO-Byte comes in Accu, HI-Byte in $72
+        sta SECTOR0 + 2 * JOB0  ; as sector number
 .else
-		lda $0202	; get track as directly encoded byte
-		sta TRACK0 + 2 * JOB0	; track number for jobcode 0
-		lda $0203	; get sector as directly encoded byte
-		sta SECTOR0 + 2 * JOB0	; as sector number
+        lda $0202               ; get track as directly encoded byte
+        sta TRACK0 + 2 * JOB0   ; track number for jobcode 0
+        lda $0203               ; get sector as directly encoded byte
+        sta SECTOR0 + 2 * JOB0  ; as sector number
 .endif
 
-		lda #$00
-		sta JOBNUM
+        lda #$00
+        sta JOBNUM
 
-		lda #JOB_EXEC0			; execute jobcode in buffer
-		jsr EXECUTE_JOB
+        lda #JOB_EXEC0          ; execute jobcode in buffer
+        jsr EXECUTE_JOB
 
-		cmp #$01
-		bne lError
-		jmp $c194		; 00,OK,00,00
+        cmp #$01
+        bne lError
+        jmp $c194               ; 00,OK,00,00
 
 ;#######
 
-lError:	jmp $e60a		; give out error code
+lError: jmp $e60a               ; give out error code
 
 ;#######
 
 MeasurementJobCode:
-		lda DC_SETTINGS
-		ora #$08		; switch LED to on
-		sta DC_SETTINGS
+        lda DC_SETTINGS
+        ora #$08        ; switch LED to on
+        sta DC_SETTINGS
 .if 0
-		jsr $f510		; search block header
-.elseif 1
-		jsr $f50a		; search block header and wait for data block SYNC
-		bvc *			; wait for data block marker byte
-		clv
-		lda DC_DATA
-		cmp #$55		; GCR encoded data block marker byte ($07)
-						; this is not perfect, because the plain
-						; byte could be $0f instead of $07
-						; but we know for sure, that no other header
-						; block is following
-		bne lNoDBlock
+        jsr $f510       ; search block header, without timesync to SYNC
 .else
-		; do nothing, currently the older 1541 does only work with this setting
+        jsr $f50a       ; search block header and wait for data block SYNC
+        bvc *           ; wait for data block marker byte
+        clv
+        lda DC_DATA
+        cmp #$55        ; GCR encoded data block marker byte ($07)
+                        ; this is not perfect, because the plain
+                        ; byte could be $0f instead of $07
+                        ; but we know for sure, that no other header
+                        ; block is following
+        bne lNoDBlock
 .endif
 
-		jsr l5			; shoot a timer sample
+        jsr l5          ; shoot a timer sample
 
-		lda #$01		; do not report a job error
-		.byte $2c
+        lda #$01        ; do not report a job error
+        .byte $2c
 lNoDBlock:
-		lda #$04		; 22, READ ERROR
-lExit:	jmp $f969
+        lda #$04        ; 22, READ ERROR
+lExit:  jmp $f969
 ;##############################################################################

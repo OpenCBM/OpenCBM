@@ -5,11 +5,12 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright (C) 2006 Wolfgang Moser, http://wmsr.de
+ *  Copyright (C) 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.1 2006-05-17 20:00:23 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.2 2006-05-18 14:42:02 wmsr Exp $";
 #endif
 
 #if _MSC_VER >= 1400
@@ -58,17 +59,17 @@ help()
 {
     printf
     (
-		"Usage: cbmrpm41 [OPTION]... DRIVE\n"
-		"Fast and reliable CBM-1541 disk formatter\n"
-		"\n"
-		"  -h, --help       display this help and exit\n"
-		"  -V, --version    display version information and exit\n"
-		"\n"
+        "Usage: cbmrpm41 [OPTION]... DRIVE\n"
+        "High precision CBM-1541 rpm measurement\n"
+        "\n"
+        "  -h, --help       display this help and exit\n"
+        "  -V, --version    display version information and exit\n"
+        "\n"
         "  -x, --extended   measure out a 40 track disk\n"
         "  -s, --status     display drive status after the measurements\n"
-		"  -r, --retries n  number of measurement retries for each track\n"
-		"\n"
-	);
+        "  -r, --retries n  number of measurement retries for each track\n"
+        "\n"
+    );
 }
 
 static void
@@ -144,12 +145,13 @@ cbm_readTimer(CBM_FILE HandleDevice, __u_char DeviceAddress)
     struct Timer24bitValues TimerTriple;
     register int vTimer;
 
+    // SETSTATEDEBUG((void)0);
         // assume the user command table with the symbolic command
         // "T2_23Bit_TimerSampling" to be installed correctly
-    SETSTATEDEBUG((void)0);
-
         // actually don't do an explicit sample command
     // cbm_sendUxCommand(HandleDevice, DeviceAddress,  T2_23Bit_TimerSampling);
+    SETSTATEDEBUG((void)0);
+
     cbm_exec_command (HandleDevice, DeviceAddress, "M-R\x3\x3\x3", 6);
     SETSTATEDEBUG((void)0);
     cbm_talk         (HandleDevice, DeviceAddress, 15);
@@ -184,13 +186,16 @@ cbm_readTimer(CBM_FILE HandleDevice, __u_char DeviceAddress)
     if ( vTimer > lastVTimer )
     {
             // the timer increased, thus we have got a wrap
-            // around, decrements the 32 bits software timer
-            // by the modulus of the virtual timer
+            // around ==> decrement the 32 bits software
+            // timer by the modulus of the virtual timer
         ModulusDecrementor -= Modulus;
     }
 
     lastVTimer = vTimer;
 
+        // by taking the (( 2^n ) - 1 )-Inverse, we "convert"
+        // the timer an increasing one instead of decreasing
+        // with each tick
     return ~(ModulusDecrementor + vTimer);
 }
 
@@ -267,12 +272,12 @@ main(int argc, char *argv[])
 
         cbm_upload(fd, drive, loadAddress, cbmrpm41, sizeof(cbmrpm41));
 
-			// location of the new U vector user commands table
+            // location of the new U vector user commands table
         sprintf(cmd, "%c%c", UcmdTblAddr & 0xFF, UcmdTblAddr >> 8);
-			// install the new U vector table
+            // install the new U vector table
         cbm_upload(fd, drive, 0x006b, cmd, 2);
 
-			// execute Ux command behind the symbolic name Init23_BitTimersStd
+            // execute Ux command behind the symbolic name Init23_BitTimersStd
         cbm_sendUxCommand(fd, drive, Init23_BitTimersStd);
 
             // read disk ID and initialise other parameters

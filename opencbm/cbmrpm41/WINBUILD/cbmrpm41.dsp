@@ -115,17 +115,6 @@ SOURCE=.\cbmrpm41.rc
 # Begin Source File
 
 SOURCE=..\cbmrpm41.a65
-
-# Begin Custom Build
-IntDir=..
-InputPath=..\cbmrpm41.a65
-InputName=cbmrpm41
-
-"$(InputPath)\..\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-        "$(InputPath)\..\..\WINDOWS\buildoneinc.bat" "$(InputPath)\..\.." "$(InputPath)"
-
-# End Custom Build
-
 # End Source File
 # End Group
 # Begin Source File

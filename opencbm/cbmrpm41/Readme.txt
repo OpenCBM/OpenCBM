@@ -15,7 +15,7 @@ License: GNU General Public License
 
 Some of the features implemented in the rewritten  6502  routine:
 
-* Shift register
+* VIA shift register usage (the core feature)
 * VIA bugs regarding the shift register and more extracts from the
   former "viatimers.a65" testproject
 * virtual 24 Bit timer construction
@@ -37,6 +37,7 @@ Some of the features implemented in the rewritten  6502  routine:
     + measuring out on-track sector distances
     + measuring out on-track SYNC lengths as well as distances
     + measuring mean bitrates
+    + measuring sector distances (on-track) and sector distribution
 
 
-Wolfgang Moser, 2006-05-17
+Wolfgang Moser, 2006-05-18
