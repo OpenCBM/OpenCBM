@@ -48,6 +48,7 @@ TRACK0      = $06   ; track for buffer 0 ($0300-$03ff)
 SECTOR0     = $07   ; sector for buffer 0 ($0300-$03ff)
 
 JOBNUM      = $F9   ; current job number
+CMDSTRBUF   = $0200 ; command string buffer
 CSEPARATOR  = $0279 ; command string parsing separator
 
 HIBYTES_A2H = $0280 ; up to 5 high bytes from the ascii to hex conversion
@@ -69,9 +70,14 @@ DC_SR       = $1C0A
 DC_ACR      = $1C0B
 DC_PCR      = $1C0C
 
-LED_ON      = $c100
-ASCII2HEX   = $cca1
+LED_ON      = $C100
+FINISHCMD   = $C194
+ASCII2HEX   = $CCA1
 EXECUTE_JOB = $D58C
+PREPERROR   = $E60A
+SHDR_N_SYNC = $F50A         ; search for block header and the following SYNC
+SEARCHHEADR = $F510         ; search for block header
+FINISHJOBLP = $F969         ; finish the job loop with given error code in A
 
 .ifndef T2LowValue
     .out "T2LowValue symbol not defined externally, setting to default value: 187-2"
@@ -221,10 +227,11 @@ ExecuteJobInBuffer:
         jsr ASCII2HEX           ; and convert it
             ; the last LO-Byte comes in Accu, HI-Byte in $72
         sta SECTOR0 + 2 * JOB0  ; as sector number
-.else
-        lda $0202               ; get track as directly encoded byte
+
+.else	; this one is shorter in code size
+        lda CMDSTRBUF+2         ; get track as directly encoded byte
         sta TRACK0 + 2 * JOB0   ; track number for jobcode 0
-        lda $0203               ; get sector as directly encoded byte
+        lda CMDSTRBUF+3         ; get sector as directly encoded byte
         sta SECTOR0 + 2 * JOB0  ; as sector number
 .endif
 
@@ -236,11 +243,11 @@ ExecuteJobInBuffer:
 
         cmp #$01
         bne lError
-        jmp $c194               ; 00,OK,00,00
+        jmp FINISHCMD           ; 00,OK,00,00
 
 ;#######
 
-lError: jmp $e60a               ; give out error code
+lError: jmp PREPERROR           ; give out error code
 
 ;#######
 
@@ -249,9 +256,9 @@ MeasurementJobCode:
         ora #$08        ; switch LED to on
         sta DC_SETTINGS
 .if 0
-        jsr $f510       ; search block header, without timesync to SYNC
+        jsr SEARCHHEADR ; search block header, without timesync to SYNC
 .else
-        jsr $f50a       ; search block header and wait for data block SYNC
+        jsr SHDR_N_SYNC ; search block header and wait for data block SYNC
         bvc *           ; wait for data block marker byte
         clv
         lda DC_DATA
@@ -269,5 +276,5 @@ MeasurementJobCode:
         .byte $2c
 lNoDBlock:
         lda #$04        ; 22, READ ERROR
-lExit:  jmp $f969
+lExit:  jmp FINISHJOBLP
 ;##############################################################################
