@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-03-02 18:17:17 strik Exp $
+# $Id: Makefile,v 1.2 2006-05-18 19:11:50 strik Exp $
 
 include ../../LINUX/config.make
 
@@ -9,7 +9,7 @@ CFLAGS += -I../../include
 LIB     = libarch.a
 SRCS    = file.c
 
-OBJS    = $(SRCS:.c=.o)
+OBJS    = $(SRCS:.c=.lo)
 
 all: $(LIB)
 
