@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.2 2006-05-18 14:42:02 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.3 2006-05-19 21:05:23 wmsr Exp $";
 #endif
 
 #if _MSC_VER >= 1400
@@ -41,7 +41,7 @@ static signed int debugLineNumber=0;    // , debugBlockCount=0, debugByteCount=0
 
 void printDebugCounters()
 {
-    printf("file: " __FILE__
+    fprintf(stderr, "file: " __FILE__
            "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
 #   if 1
            "\n\tlineNumber=%d\n", debugLineNumber);
@@ -263,7 +263,7 @@ main(int argc, char *argv[])
     printf("Please remove any diskettes used with production data on it. Insert a freshly\n"
            "formatted disk into drive %d; you can format a disk with e.g. the command:\n\n"
            "        cbmforng -o -v %d freshdisk,fd\n\n"
-           "Press <Enter>, when ready or press <CTRL>-C to abort.", drive, drive);
+           "Press <Enter>, when ready or press <CTRL>-C to abort.\r", drive, drive);
     getchar();
 
     if(cbm_driver_open(&fd, 0) == 0)

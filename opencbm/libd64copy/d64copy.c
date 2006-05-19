@@ -1,8 +1,8 @@
 /*
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU General Public License
+ *    as published by the Free Software Foundation; either version
+ *    2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Modifications for cbm4win Copyright 2001-2004 Spiro Trikaliotis
@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.13 2006-04-11 15:30:53 strik Exp $";
+    "@(#) $Id: d64copy.c,v 1.14 2006-05-19 21:05:23 wmsr Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -110,12 +110,26 @@ static int atom_mustcleanup = 0;
 static const transfer_funcs *atom_dst;
 
 
+#ifdef LIBD64COPY_DEBUG
+    signed int debugLineNumber = 0;
+    char *     debugFileName   = "";
+
+    void printDebugCounters(d64copy_message_cb msg_cb)
+    {
+        msg_cb( sev_info, "file: %s"
+                          "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
+                          "\n\tlineNumber=%d\n",
+                          debugFileName, debugLineNumber);
+    }
+#endif
+
 static int send_turbo(CBM_FILE fd, unsigned char drv, int write, int warp, int drv_type)
 {
     const struct drive_prog *prog;
 
     prog = &drive_progs[drv_type * 4 + warp * 2 + write];
 
+    SETSTATEDEBUG((void)0);
     return cbm_upload(fd, drv, 0x500, prog->prog, prog->size);
 }
 
@@ -171,6 +185,7 @@ d64copy_settings *d64copy_get_default_settings(void)
 
 static int start_turbo(CBM_FILE fd, unsigned char drive)
 {
+    SETSTATEDEBUG((void)0);
     return cbm_exec_command(fd, drive, "U4:", 3);
 }
 
@@ -270,8 +285,11 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
 
     sector_map = settings->two_sided ? d71_sector_map : d64_sector_map;
 
+    SETSTATEDEBUG((void)0);
     cbm_exec_command(fd_cbm, cbm_drive, "I0:", 0);
+    SETSTATEDEBUG((void)0);
     cnt = cbm_device_status(fd_cbm, cbm_drive, buf, sizeof(buf));
+    SETSTATEDEBUG((void)0);
 
     switch( settings->drive_type )
     {
@@ -302,9 +320,11 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
                 message_cb(1, "`-w' for .d71 transfer in warp mode ignored");
             settings->warp = 0;
         }
+        SETSTATEDEBUG((void)0);
         cbm_exec_command(fd_cbm, cbm_drive, "U0>M1", 0);
     }
 
+    SETSTATEDEBUG((void)0);
     cbm_transf = src->is_cbm_drive ? src : dst;
 
     if(settings->warp && (cbm_transf->read_gcr_block == NULL))
@@ -318,10 +338,12 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
 
     if(cbm_transf->needs_turbo)
     {
+        SETSTATEDEBUG((void)0);
         send_turbo(fd_cbm, cbm_drive, dst->is_cbm_drive, settings->warp,
                    settings->drive_type == cbm_dt_cbm1541 ? 0 : 1);
     }
 
+    SETSTATEDEBUG((void)0);
     if(src->open_disk(fd_cbm, settings, src_arg, 0,
                       start_turbo, message_cb) == 0)
     {
@@ -330,6 +352,7 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
             settings->end_track = 
                 settings->two_sided ? D71_TRACKS : STD_TRACKS;
         }
+        SETSTATEDEBUG((void)0);
         if(dst->open_disk(fd_cbm, settings, dst_arg, 1,
                           start_turbo, message_cb) != 0)
         {
@@ -352,15 +375,20 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
             memset(trackmap, bs_dont_copy, sector_map[18]);
             trackmap[0] = bs_must_copy;
             scnt = 1;
+            SETSTATEDEBUG((void)0);
             src->send_track_map(18, trackmap, scnt);
+            SETSTATEDEBUG((void)0);
             st = src->read_gcr_block(&se, gcr);
+            SETSTATEDEBUG((void)0);
             if(st == 0) st = gcr_decode(gcr, bam);
         }
         else
         {
+            SETSTATEDEBUG((void)0);
             st = src->read_block(18, 0, bam);
             if(settings->two_sided && (st == 0))
             {
+                SETSTATEDEBUG((void)0);
                 st = src->read_block(53, 0, bam2);
             }
         }
@@ -370,6 +398,7 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
             settings->bam_mode = bm_ignore;
         }
     }
+    SETSTATEDEBUG((void)0);
 
     memset(&status, 0, sizeof(status));
 
@@ -441,6 +470,7 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
                 errors = resend_trackmap = 0;
                 if(scnt && settings->warp && src->is_cbm_drive)
                 {
+                    SETSTATEDEBUG((void)0);
                     src->send_track_map(tr, trackmap, scnt);
                 }
                 else
@@ -451,9 +481,11 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
                 {
                     if(settings->warp && src->is_cbm_drive)
                     {
+                        SETSTATEDEBUG((void)0);
                         status.read_result = src->read_gcr_block(&se, gcr);
                         if(status.read_result == 0)
                         {
+                            SETSTATEDEBUG((void)0);
                             status.read_result = gcr_decode(gcr, block);
                         }
                         else
@@ -478,18 +510,22 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
                         {
                             if(++se >= sector_map[tr]) se = 0;
                         }
+                        SETSTATEDEBUG((void)0);
                         status.read_result = src->read_block(tr, se, block);
                     }
 
                     if(settings->warp && dst->is_cbm_drive)
                     {
+                        SETSTATEDEBUG((void)0);
                         gcr_encode(block, gcr);
+                        SETSTATEDEBUG((void)0);
                         status.write_result = 
                             dst->write_block(tr, se, gcr, GCRBUFSIZE-1,
                                              status.read_result);
                     }
                     else
                     {
+                        SETSTATEDEBUG((void)0);
                         status.write_result = 
                             dst->write_block(tr, se, block, BLOCKSIZE,
                                              status.read_result);
@@ -577,9 +613,12 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
         }
     }
 
+    SETSTATEDEBUG((void)0);
     dst->close_disk();
+    SETSTATEDEBUG((void)0);
     src->close_disk();
 
+    SETSTATEDEBUG((void)0);
     return cnt;
 }
 
@@ -686,6 +725,7 @@ int d64copy_check_auto_transfer_mode(CBM_FILE cbm_fd, int auto_transfermode, int
              * Test the cable
              */
 
+            SETSTATEDEBUG((void)0);
             if (cbm_identify_xp1541(cbm_fd, (unsigned char)drive, NULL, &cable_type) == 0)
             {
                 if (cable_type == cbm_ct_xp1541)
@@ -693,6 +733,7 @@ int d64copy_check_auto_transfer_mode(CBM_FILE cbm_fd, int auto_transfermode, int
                     /*
                      * We have a parallel cable, use that
                      */
+                    SETSTATEDEBUG((void)0);
                     transfermode = d64copy_get_transfer_mode_index("parallel");
                     break;
                 }
@@ -711,11 +752,13 @@ int d64copy_check_auto_transfer_mode(CBM_FILE cbm_fd, int auto_transfermode, int
                 if (testdrive == drive)
                     continue;
 
+                SETSTATEDEBUG((void)0);
                 if (cbm_identify(cbm_fd, testdrive, &device_type, NULL) == 0)
                 {
                     /*
                      * My bad, there is another drive -> only use serial1
                      */
+                    SETSTATEDEBUG((void)0);
                     transfermode = d64copy_get_transfer_mode_index("serial1");
                     break;
                 }
@@ -725,12 +768,15 @@ int d64copy_check_auto_transfer_mode(CBM_FILE cbm_fd, int auto_transfermode, int
              * If we reached here with transfermode 0, we are the only
              * drive, thus, use serial2.
              */
+            SETSTATEDEBUG((void)0);
             if (transfermode == 0)
                 transfermode = d64copy_get_transfer_mode_index("serial2");
+            SETSTATEDEBUG((void)0);
 
         } while (0);
     }
 
+    SETSTATEDEBUG((void)0);
     return transfermode;
 }
 
@@ -754,6 +800,7 @@ int d64copy_read_image(CBM_FILE cbm_fd,
     atom_dst = dst;
     atom_mustcleanup = 1;
 
+    SETSTATEDEBUG((void)0);
     ret = copy_disk(cbm_fd, settings,
             src, (void*)(ULONG_PTR)src_drive, dst, (void*)dst_image, (unsigned char) src_drive);
 
@@ -778,6 +825,7 @@ int d64copy_write_image(CBM_FILE cbm_fd,
     src = &d64copy_fs_transfer;
     dst = transfers[settings->transfer_mode].trf;
 
+    SETSTATEDEBUG((void)0);
     return copy_disk(cbm_fd, settings,
             src, (void*)src_image, dst, (void*)(ULONG_PTR)dst_drive, (unsigned char) dst_drive);
 }

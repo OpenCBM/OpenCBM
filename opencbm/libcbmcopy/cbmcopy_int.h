@@ -7,12 +7,13 @@
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbmcopy_int.h,v 1.4 2006-04-10 15:50:16 strik Exp $ */
+/* $Id: cbmcopy_int.h,v 1.5 2006-05-19 21:05:23 wmsr Exp $ */
 
 #ifndef CBMCOPY_INT_H
 #define CBMCOPY_INT_H
 
 #include "opencbm.h"
+#include "cbmcopy.h"
 
 typedef struct {
     int  (*write_byte)(CBM_FILE, unsigned char); 
@@ -22,6 +23,17 @@ typedef struct {
     int  (*start_turbo)(CBM_FILE,int);
     void (*exit_turbo)(CBM_FILE,int);
 } transfer_funcs;
+
+#ifdef LIBCBMCOPY_DEBUG
+    extern signed int debugLineNumber;
+    extern char *     debugFileName;
+#   define SETSTATEDEBUG(_x)  \
+        debugLineNumber=__LINE__; \
+        debugFileName  =__FILE__; \
+        (_x)
+#else
+#   define SETSTATEDEBUG(_x) (void)0
+#endif
 
 #define DECLARE_TRANSFER_FUNCS(x) \
     transfer_funcs cbmcopy_ ## x = {write_byte, read_byte, check_error, \

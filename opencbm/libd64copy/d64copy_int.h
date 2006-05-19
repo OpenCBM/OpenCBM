@@ -1,13 +1,13 @@
 /*
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU General Public License
+ *    as published by the Free Software Foundation; either version
+ *    2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: d64copy_int.h,v 1.4 2006-03-10 15:43:36 strik Exp $ */
+/* $Id: d64copy_int.h,v 1.5 2006-05-19 21:05:23 wmsr Exp $ */
 
 #ifndef D64COPY_INT_H
 #define D64COPY_INT_H
@@ -34,6 +34,17 @@
 #define MAX_SECTORS  21
 
 #define NEED_SECTOR(b) ((((b)==bs_error)||((b)==bs_must_copy))?1:0)
+
+#ifdef LIBD64COPY_DEBUG
+    extern signed int debugLineNumber;
+    extern char *     debugFileName;
+#   define SETSTATEDEBUG(_x)  \
+        debugLineNumber=__LINE__; \
+        debugFileName  =__FILE__; \
+        (_x)
+#else
+#   define SETSTATEDEBUG(_x) (void)0
+#endif
 
 typedef int(*turbo_start)(CBM_FILE,unsigned char);
 

@@ -9,16 +9,13 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.15 2006-04-17 18:46:17 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.16 2006-05-19 21:05:23 wmsr Exp $";
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "opencbm.h"
-#include "cbmcopy.h"
-
 #include "cbmcopy_int.h"
 
 #include "arch.h"
@@ -65,22 +62,17 @@ transfers[] =
     { NULL, NULL, NULL }
 };
 
-#ifdef CBMCOPY_DEBUG
-signed int debugLineNumber=0, debugBlockCount=0, debugByteCount=0;
+#ifdef LIBCBMCOPY_DEBUG
+	signed int debugLineNumber=0, debugBlockCount=0, debugByteCount=0;
+	char * debugFileName = "";
 
-#   define SETSTATEDEBUG(_x)  \
-    debugLineNumber=__LINE__; \
-    (_x)
-
-void printDebugCounters(cbmcopy_message_cb msg_cb)
-{
-    msg_cb( sev_info, "file: " __FILE__
-                      "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
-                      "\n\tlineNumber=%d, blockCount=%d, byteCount=%d\n",
-                      debugLineNumber, debugBlockCount, debugByteCount);
-}
-#else
-#    define SETSTATEDEBUG(_x) (void)0
+	void printDebugCounters(cbmcopy_message_cb msg_cb)
+	{
+	    msg_cb( sev_info, "file: %s"
+	                      "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
+	                      "\n\tlineNumber=%d, blockCount=%d, byteCount=%d\n",
+	                      debugFileName, debugLineNumber, debugBlockCount, debugByteCount);
+	}
 #endif
 
 static int check_drive_type(CBM_FILE fd, unsigned char drive,
@@ -270,7 +262,7 @@ static int cbmcopy_read(CBM_FILE fd,
             if(*filedata)
             {
                 SETSTATEDEBUG(debugByteCount=0);
-#ifdef CBMCOPY_DEBUG
+#ifdef LIBCBMCOPY_DEBUG
                 msg_cb( sev_debug, "receive block data (%d)", c );
 #endif 
                 for(cptr = (*filedata) + blocks_read * 254; i; i--)
@@ -576,7 +568,7 @@ int cbmcopy_write_file(CBM_FILE fd,
                 c = 255;
             }
             SETSTATEDEBUG(debugBlockCount++);
-#ifdef CBMCOPY_DEBUG
+#ifdef LIBCBMCOPY_DEBUG
             msg_cb( sev_debug, "send byte count: %d", c );
 #endif
             trf->write_byte( fd, c );
@@ -585,7 +577,7 @@ int cbmcopy_write_file(CBM_FILE fd,
             if(c)
             {
                 SETSTATEDEBUG(debugByteCount=0);
-#ifdef CBMCOPY_DEBUG
+#ifdef LIBCBMCOPY_DEBUG
                 msg_cb( sev_debug, "send block data" );
 #endif 
                 if( c == 0xff ) c = 0xfe;

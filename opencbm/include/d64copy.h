@@ -7,10 +7,12 @@
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: d64copy.h,v 1.4 2006-02-24 12:21:41 strik Exp $ */
+/* $Id: d64copy.h,v 1.5 2006-05-19 21:05:23 wmsr Exp $ */
 
 #ifndef D64COPY_H
 #define D64COPY_H
+
+#define LIBD64COPY_DEBUG    /* enable state logging and debugging */
 
 #define MAX_TRACKS   70   /* for .d71 */
 #define MAX_SECTORS  21
@@ -71,8 +73,24 @@ typedef struct
     char bam[MAX_TRACKS][MAX_SECTORS+1];
 } d64copy_status;
 
-typedef void (*d64copy_message_cb)(int sev, const char *format, ...);
+typedef enum
+{
+    sev_fatal,
+    sev_warning,
+    sev_info,
+    sev_debug
+} d64copy_severity_e;
+
+typedef void (*d64copy_message_cb)(int d64copy_severity_e, const char *format, ...);
 typedef int (*d64copy_status_cb)(d64copy_status status);
+
+#ifdef LIBD64COPY_DEBUG
+/*
+ * print out the state of internal counters that are used on read
+ * and write transfers for debugging rare protocol races and hangups
+ */
+extern void printDebugCounters(d64copy_message_cb msg_cb);
+#endif
 
 /*
  * Build '\0'-terminated list of '\0'-terminated transfer mode names.

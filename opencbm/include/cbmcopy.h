@@ -7,12 +7,12 @@
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbmcopy.h,v 1.7 2006-04-10 15:50:15 strik Exp $ */
+/* $Id: cbmcopy.h,v 1.8 2006-05-19 21:05:23 wmsr Exp $ */
 
 #ifndef CBMCOPY_H
 #define CBMCOPY_H
 
-// #define CBMCOPY_DEBUG
+#define LIBCBMCOPY_DEBUG
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,7 +36,7 @@ typedef void (*cbmcopy_message_cb)(cbmcopy_severity_e sev, const char *format, .
 
 typedef int (*cbmcopy_status_cb)(int blocks_processed);
 
-#ifdef CBMCOPY_DEBUG
+#ifdef LIBCBMCOPY_DEBUG
 /*
  * print out the state of internal counters that are used on read
  * and write transfers for debugging rare protocol races and hangups

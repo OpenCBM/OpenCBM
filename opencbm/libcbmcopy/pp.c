@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.7 2006-04-09 10:34:01 strik Exp $";
+    "@(#) $Id: pp.c,v 1.8 2006-05-19 21:05:23 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -51,21 +51,27 @@ static struct drive_prog
 
 static int write_byte(CBM_FILE fd, unsigned char c)
 {
+    SETSTATEDEBUG((void)0);
     cbm_pp_write(fd, c);
+    SETSTATEDEBUG((void)0);
     cbm_iec_release(fd, IEC_CLOCK);
+    SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
     while(cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
 
+    SETSTATEDEBUG((void)0);
     cbm_iec_set(fd, IEC_CLOCK);
+    SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
     while(!cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
 
+    SETSTATEDEBUG((void)0);
     return 0;
 }
 
@@ -73,20 +79,26 @@ static unsigned char read_byte(CBM_FILE fd)
 {
     unsigned char c;
 
+    SETSTATEDEBUG((void)0);
     cbm_iec_release(fd, IEC_CLOCK);
+    SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
     while(cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
+    SETSTATEDEBUG((void)0);
     c = cbm_pp_read(fd);
+    SETSTATEDEBUG((void)0);
     cbm_iec_set(fd, IEC_CLOCK);
+    SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
     while(!cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
 
+    SETSTATEDEBUG((void)0);
     return c;
 }
 
@@ -94,18 +106,27 @@ static int check_error(CBM_FILE fd, int write)
 {
     int error;
 
+    SETSTATEDEBUG((void)0);
     cbm_iec_release(fd, IEC_CLOCK);
+    SETSTATEDEBUG((void)0);
     cbm_iec_wait(fd, IEC_DATA, 0);
+    SETSTATEDEBUG((void)0);
     error = cbm_iec_get(fd, IEC_CLOCK) == 0;
     if(!error)
     {
+        SETSTATEDEBUG((void)0);
         cbm_iec_set(fd, IEC_DATA);
+        SETSTATEDEBUG((void)0);
         cbm_iec_wait(fd, IEC_CLOCK, 0); 
+        SETSTATEDEBUG((void)0);
         cbm_iec_release(fd, IEC_DATA);
+        SETSTATEDEBUG((void)0);
         cbm_iec_set(fd, IEC_CLOCK);
+        SETSTATEDEBUG((void)0);
         cbm_iec_wait(fd, IEC_DATA, 1);
     }
     
+    SETSTATEDEBUG((void)0);
     return error;
 }
 
@@ -132,19 +153,25 @@ static int upload_turbo(CBM_FILE fd, unsigned char drive,
 
     p = &drive_progs[dt * 2 + (write != 0)];
     
+    SETSTATEDEBUG((void)0);
     cbm_upload(fd, drive, 0x680, p->prog, p->size);
+    SETSTATEDEBUG((void)0);
     return 0;
 }
 
 static int start_turbo(CBM_FILE fd, int write)
 {
+    SETSTATEDEBUG((void)0);
     cbm_iec_wait(fd, IEC_DATA, 1);
+    SETSTATEDEBUG((void)0);
     return 0;
 }
 
 static void exit_turbo(CBM_FILE fd, int write)
 {
+    SETSTATEDEBUG((void)0);
 //    cbm_iec_wait(fd, IEC_DATA, 0);
+    SETSTATEDEBUG((void)0);
 }
 
 DECLARE_TRANSFER_FUNCS(pp_transfer);

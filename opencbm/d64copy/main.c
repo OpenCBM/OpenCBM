@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.8 2006-04-06 16:52:27 strik Exp $";
+    "@(#) $Id: main.c,v 1.9 2006-05-19 21:05:23 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -26,7 +26,7 @@ static char *rcsid =
 
 
 /* setable via command line */
-static int verbosity = 1;
+static d64copy_severity_e verbosity = sev_warning;
 static int no_progress = 0;
 
 /* other globals */
@@ -122,17 +122,6 @@ static void hint(char *s)
     fprintf(stderr, "Try `%s' --help for more information.\n", s);
 }
 
-static void ARCH_SIGNALDECL reset(int dummy)
-{
-    fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
-    arch_sleep(1);
-    d64copy_cleanup();
-    cbm_reset(fd_cbm);
-    cbm_driver_close(fd_cbm);
-    exit(1);
-}
-
-
 static void my_message_cb(int severity, const char *format, ...)
 {
     va_list args;
@@ -203,6 +192,20 @@ static int my_status_cb(d64copy_status status)
 
     fflush(stdout);
     return 0;
+}
+
+
+static void ARCH_SIGNALDECL reset(int dummy)
+{
+    fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
+#ifdef LIBD64COPY_DEBUG
+    printDebugCounters(my_message_cb);
+#endif
+    arch_sleep(1);
+    d64copy_cleanup();
+    cbm_reset(fd_cbm);
+    cbm_driver_close(fd_cbm);
+    exit(1);
 }
 
 
