@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.14 2006-05-19 21:05:23 wmsr Exp $";
+    "@(#) $Id: d64copy.c,v 1.15 2006-05-20 16:59:48 wmsr Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -111,15 +111,15 @@ static const transfer_funcs *atom_dst;
 
 
 #ifdef LIBD64COPY_DEBUG
-    signed int debugLineNumber = 0;
-    char *     debugFileName   = "";
+    signed int debugLibD64LineNumber = 0;
+    char *     debugLibD64FileName   = "";
 
-    void printDebugCounters(d64copy_message_cb msg_cb)
+    void printDebugLibD64Counters(d64copy_message_cb msg_cb)
     {
         msg_cb( sev_info, "file: %s"
                           "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
                           "\n\tlineNumber=%d\n",
-                          debugFileName, debugLineNumber);
+                          debugLibD64FileName, debugLibD64LineNumber);
     }
 #endif
 

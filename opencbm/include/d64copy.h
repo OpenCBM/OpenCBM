@@ -7,7 +7,7 @@
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: d64copy.h,v 1.5 2006-05-19 21:05:23 wmsr Exp $ */
+/* $Id: d64copy.h,v 1.6 2006-05-20 16:59:48 wmsr Exp $ */
 
 #ifndef D64COPY_H
 #define D64COPY_H
@@ -89,7 +89,7 @@ typedef int (*d64copy_status_cb)(d64copy_status status);
  * print out the state of internal counters that are used on read
  * and write transfers for debugging rare protocol races and hangups
  */
-extern void printDebugCounters(d64copy_message_cb msg_cb);
+extern void printDebugLibD64Counters(d64copy_message_cb msg_cb);
 #endif
 
 /*

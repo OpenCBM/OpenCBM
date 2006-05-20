@@ -7,7 +7,7 @@
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbmcopy_int.h,v 1.5 2006-05-19 21:05:23 wmsr Exp $ */
+/* $Id: cbmcopy_int.h,v 1.6 2006-05-20 16:59:48 wmsr Exp $ */
 
 #ifndef CBMCOPY_INT_H
 #define CBMCOPY_INT_H
@@ -25,11 +25,11 @@ typedef struct {
 } transfer_funcs;
 
 #ifdef LIBCBMCOPY_DEBUG
-    extern signed int debugLineNumber;
-    extern char *     debugFileName;
+    extern signed int debugCBMcopyLineNumber;
+    extern char *     debugCBMcopyFileName;
 #   define SETSTATEDEBUG(_x)  \
-        debugLineNumber=__LINE__; \
-        debugFileName  =__FILE__; \
+        debugCBMcopyLineNumber=__LINE__; \
+        debugCBMcopyFileName  =__FILE__; \
         (_x)
 #else
 #   define SETSTATEDEBUG(_x) (void)0

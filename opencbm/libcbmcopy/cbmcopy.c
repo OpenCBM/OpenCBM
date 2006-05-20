@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.16 2006-05-19 21:05:23 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.17 2006-05-20 16:59:48 wmsr Exp $";
 #endif
 
 #include <stdio.h>
@@ -63,15 +63,15 @@ transfers[] =
 };
 
 #ifdef LIBCBMCOPY_DEBUG
-	signed int debugLineNumber=0, debugBlockCount=0, debugByteCount=0;
-	char * debugFileName = "";
+	signed int debugCBMcopyLineNumber=0, debugCBMcopyBlockCount=0, debugCBMcopyByteCount=0;
+	char * debugCBMcopyFileName = "";
 
-	void printDebugCounters(cbmcopy_message_cb msg_cb)
+	void printDebugCBMcopyCounters(cbmcopy_message_cb msg_cb)
 	{
 	    msg_cb( sev_info, "file: %s"
 	                      "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
 	                      "\n\tlineNumber=%d, blockCount=%d, byteCount=%d\n",
-	                      debugFileName, debugLineNumber, debugBlockCount, debugByteCount);
+	                      debugCBMcopyFileName, debugCBMcopyLineNumber, debugCBMcopyBlockCount, debugCBMcopyByteCount);
 	}
 #endif
 
@@ -234,7 +234,7 @@ static int cbmcopy_read(CBM_FILE fd,
          */
         arch_usleep(1000);
 
-        SETSTATEDEBUG(debugBlockCount=0);   // turbo sent condition
+        SETSTATEDEBUG(debugCBMcopyBlockCount=0);   // turbo sent condition
 
         for(c = 0xff;
             c == 0xff && (error = trf->check_error(fd, 0)) == 0;
@@ -249,7 +249,7 @@ static int cbmcopy_read(CBM_FILE fd,
             i = (c == 0xff) ? 0xfe : c;
             *filedata_size += i;
 
-            SETSTATEDEBUG(debugBlockCount++);    // preset condition
+            SETSTATEDEBUG(debugCBMcopyBlockCount++);    // preset condition
 
             /* @SRT: FIXME! the next statement is dangerous: If there 
              * is no memory block large enough for reallocating, the
@@ -261,13 +261,13 @@ static int cbmcopy_read(CBM_FILE fd,
             SETSTATEDEBUG((void)0);    // after check_error condition
             if(*filedata)
             {
-                SETSTATEDEBUG(debugByteCount=0);
+                SETSTATEDEBUG(debugCBMcopyByteCount=0);
 #ifdef LIBCBMCOPY_DEBUG
                 msg_cb( sev_debug, "receive block data (%d)", c );
 #endif 
                 for(cptr = (*filedata) + blocks_read * 254; i; i--)
                 {
-                    SETSTATEDEBUG(debugByteCount++);
+                    SETSTATEDEBUG(debugCBMcopyByteCount++);
                     *(cptr++) = trf->read_byte( fd );
                 }
                 /* (drive is busy now) */
@@ -553,7 +553,7 @@ int cbmcopy_write_file(CBM_FILE fd,
          */
         arch_usleep(1000);
 
-        SETSTATEDEBUG(debugBlockCount=0);
+        SETSTATEDEBUG(debugCBMcopyBlockCount=0);
 
         for(i = 0;
             (i == 0) || (i < filedata_size && !error );
@@ -567,7 +567,7 @@ int cbmcopy_write_file(CBM_FILE fd,
             {
                 c = 255;
             }
-            SETSTATEDEBUG(debugBlockCount++);
+            SETSTATEDEBUG(debugCBMcopyBlockCount++);
 #ifdef LIBCBMCOPY_DEBUG
             msg_cb( sev_debug, "send byte count: %d", c );
 #endif
@@ -576,14 +576,14 @@ int cbmcopy_write_file(CBM_FILE fd,
 
             if(c)
             {
-                SETSTATEDEBUG(debugByteCount=0);
+                SETSTATEDEBUG(debugCBMcopyByteCount=0);
 #ifdef LIBCBMCOPY_DEBUG
                 msg_cb( sev_debug, "send block data" );
 #endif 
                 if( c == 0xff ) c = 0xfe;
                 while(c)
                 {
-                    SETSTATEDEBUG(debugByteCount++);
+                    SETSTATEDEBUG(debugCBMcopyByteCount++);
                     trf->write_byte( fd, *(filedata++) );
                     c--;
                 }

@@ -7,7 +7,7 @@
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: d64copy_int.h,v 1.5 2006-05-19 21:05:23 wmsr Exp $ */
+/* $Id: d64copy_int.h,v 1.6 2006-05-20 16:59:48 wmsr Exp $ */
 
 #ifndef D64COPY_INT_H
 #define D64COPY_INT_H
@@ -36,11 +36,11 @@
 #define NEED_SECTOR(b) ((((b)==bs_error)||((b)==bs_must_copy))?1:0)
 
 #ifdef LIBD64COPY_DEBUG
-    extern signed int debugLineNumber;
-    extern char *     debugFileName;
+    extern signed int debugLibD64LineNumber;
+    extern char *     debugLibD64FileName;
 #   define SETSTATEDEBUG(_x)  \
-        debugLineNumber=__LINE__; \
-        debugFileName  =__FILE__; \
+        debugLibD64LineNumber=__LINE__; \
+        debugLibD64FileName  =__FILE__; \
         (_x)
 #else
 #   define SETSTATEDEBUG(_x) (void)0
