@@ -5,13 +5,13 @@
  *	2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2004-2005 Andreas Boose, Wolfgang Moser
+ *  Copyright 2004-2005 Andreas Boose, Wolfgang Moser (http://d81.de)
  *  Copyright      2005 Spiro Trikaliotis
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: rpm1541.c,v 1.3 2006-04-24 17:09:23 strik Exp $";
+    "@(#) $Id: rpm1541.c,v 1.4 2006-05-20 08:35:47 wmsr Exp $";
 #endif
 
 

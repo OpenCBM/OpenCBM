@@ -5,7 +5,7 @@
  * 2 of the License, or (at your option) any later version.
  *
  * Copyright (C) 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- * Copyright (C) 2006 Wolfgang Moser <cbm(a)d81(o)de>
+ * Copyright (C) 2006 Wolfgang Moser (http://d81.de)
  */
 
 #ifndef __CBMFORMAT_NEXT_GENERATION_INTERFACE_DESCFRIPTION_HEADER_INCLUDE_

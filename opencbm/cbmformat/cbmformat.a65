@@ -7,7 +7,7 @@
 ; *  Copyright      Joe Forster/STA <sta(at)c64(dot)org>
 ; *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ; *  Copyright 2005 Spiro Trikaliotis
-; *  Copyright 2005 Wolfgang Moser
+; *  Copyright 2005 Wolfgang Moser (http://d81.de)
 ;
 ; AGREEMENT: Joe Forster and the programmers of cbm4linux/cbm4win agreed
 ;            to allow cross-using this routines, even for non-GPLed code
@@ -16,7 +16,7 @@
 ; This program is heavily based on Joe Forster/STAs <sta(at)c64(dot)org>
 ; StarCommander Turbo routines.
 ;
-; "$Id: cbmformat.a65,v 1.5 2006-02-24 12:21:39 strik Exp $"
+; "$Id: cbmformat.a65,v 1.6 2006-05-20 08:35:47 wmsr Exp $"
 
 
 JOB_BUMP	= $C0 ; bump the head

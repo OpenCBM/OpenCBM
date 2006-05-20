@@ -6,7 +6,7 @@
  *
  *  Copyright 1999-2002 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 1997-2005 Joe Forster <sta(at)c64(dot)org> (Device Detection Code)
- *  Copyright 1997-2005 Wolfgang Moser <cbm(a)d81(o)de>  (Device Detection Code)
+ *  Copyright 1997-2005 Wolfgang Moser (http://d81.de)   (Device Detection Code)
  *  Copyright 2000-2005 Markus Brenner                   (Parallel Burst Routines)
  *  Copyright 2000-2005 Pete Rittwage                    (Parallel Burst Routines)
  *  Copyright 2005      Tim Schürmann                    (Parallel Burst Routines)
@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.14 2006-05-18 15:29:11 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.15 2006-05-20 08:35:47 wmsr Exp $";
 #endif
 
 #include <linux/config.h>

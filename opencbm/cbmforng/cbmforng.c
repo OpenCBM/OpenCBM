@@ -5,12 +5,12 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright (C) 1999      Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright (C) 2005,2006 Wolfgang Moser, http://wmsr.de
+ *  Copyright (C) 2005,2006 Wolfgang Moser (http://d81.de)
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmforng.c,v 1.10 2006-05-12 14:26:11 wmsr Exp $";
+    "@(#) $Id: cbmforng.c,v 1.11 2006-05-20 08:35:47 wmsr Exp $";
 #endif
 
 #include "cbmforng.h"

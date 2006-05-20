@@ -4,14 +4,14 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2006 Wolfgang Moser, http://wmsr.de
+ *  Copyright 2006 Wolfgang Moser (http://d81.de)
  *
  */
 
 /*! ************************************************************** 
 ** \file lib/gcr_4b5b.c \n
 ** \author Wolfgang Moser \n
-** \version $Id: gcr_4b5b.c,v 1.2 2006-05-13 17:48:56 strik Exp $ \n
+** \version $Id: gcr_4b5b.c,v 1.3 2006-05-20 08:35:47 wmsr Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Commodore GCR conversion functions
@@ -26,7 +26,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: gcr_4b5b.c,v 1.2 2006-05-13 17:48:56 strik Exp $";
+    "@(#) $Id: gcr_4b5b.c,v 1.3 2006-05-20 08:35:47 wmsr Exp $";
 #endif
 
 #include "debug.h"

@@ -2,7 +2,7 @@ _CMT(" /*                                                                       
 _CMT("  * cbmformat.o65 - 6502 based fast formatting routine with probing for      ")
 _CMT("  *                 the Commodore 1541 floppy disk drive and compatibles     ")
 _CMT("  *                                                                          ")
-_CMT("  * Copyright (C) 2005,2006 Wolfgang Moser <cbm(a)d81(o)de>                  ")
+_CMT("  * Copyright (C) 2005,2006 Wolfgang Moser (http://d81.de)                   ")
 _CMT("  *                                                                          ")
 _CMT("  * This library is free software; you can redistribute it and/or            ")
 _CMT("  * modify it under the terms of the GNU Lesser General Public               ")

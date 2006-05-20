@@ -4,12 +4,12 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2006 Wolfgang Moser, http://d81.de
+ *  Copyright 2006 Wolfgang Moser (http://d81.de)
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: gcr.c,v 1.4 2006-05-12 14:26:12 wmsr Exp $";
+    "@(#) $Id: gcr.c,v 1.5 2006-05-20 08:35:47 wmsr Exp $";
 #endif
 
 #include "gcr.h"

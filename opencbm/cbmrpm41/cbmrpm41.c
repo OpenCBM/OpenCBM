@@ -4,13 +4,13 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright (C) 2006 Wolfgang Moser, http://wmsr.de
+ *  Copyright (C) 2006 Wolfgang Moser (http://d81.de)
  *  Copyright (C) 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.3 2006-05-19 21:05:23 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.4 2006-05-20 08:35:47 wmsr Exp $";
 #endif
 
 #if _MSC_VER >= 1400

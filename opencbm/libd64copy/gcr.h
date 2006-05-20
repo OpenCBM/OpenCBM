@@ -5,10 +5,10 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2006 Wolfgang Moser, http://d81.de
+ *  Copyright 2006 Wolfgang Moser (http://d81.de)
  */
 
-/* $Id: gcr.h,v 1.4 2006-05-12 14:26:12 wmsr Exp $ */
+/* $Id: gcr.h,v 1.5 2006-05-20 08:35:47 wmsr Exp $ */
 
 #ifndef GCR_H
 #define GCR_H

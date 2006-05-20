@@ -1,7 +1,7 @@
 _CMT(" /*                                                                          ")
 _CMT("  * cbmrpm41.o65 - 6502 based high precision 1541 rpm measurement            ")
 _CMT("  *                                                                          ")
-_CMT("  * Copyright (C) 2006 Wolfgang Moser, http://d81.de                         ")
+_CMT("  * Copyright (C) 2006 Wolfgang Moser (http://d81.de)                        ")
 _CMT("  *                                                                          ")
 _CMT("  * This program is free software; you can redistribute it and/or            ")
 _CMT("  * modify it under the terms of the GNU General Public License              ")

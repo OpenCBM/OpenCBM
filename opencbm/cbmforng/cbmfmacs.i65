@@ -2,7 +2,7 @@
 ; * cbmformat.o65 - 6502 based fast formatting routine with probing for
 ; *                 the Commodore 1541 floppy disk drive and compatibles
 ; *
-; * Copyright (C) 2005,2006 Wolfgang Moser <cbm(a)d81(o)de>
+; * Copyright (C) 2005,2006 Wolfgang Moser (http://d81.de)
 ; *
 ; * This library is free software; you can redistribute it and/or
 ; * modify it under the terms of the GNU Lesser General Public

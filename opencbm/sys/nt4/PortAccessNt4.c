@@ -5,7 +5,7 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 2004-2006 Spiro Trikaliotis
- *  Copyright 1998      Wolfgang Moser
+ *  Copyright 1998      Wolfgang Moser (http://d81.de)
  *
  *  This file is heavily based on LPTDTC by Wolfgang Moser.
  */
@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/PortAccessNt4.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccessNt4.c,v 1.3 2006-02-24 12:21:44 strik Exp $ \n
+** \version $Id: PortAccessNt4.c,v 1.4 2006-05-20 08:35:47 wmsr Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver,
 **        NT4 version

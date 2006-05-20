@@ -6,12 +6,12 @@
  *
  *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Modifications for cbm4win and general rework Copyright 2001-2006 Spiro Trikaliotis
- *  Additions Copyright 2006 Wolfgang Moser <cbm(a)d81(o)de>
+ *  Additions Copyright 2006 Wolfgang Moser (http://d81.de)
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.26 2006-05-14 10:21:13 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.27 2006-05-20 08:35:47 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
