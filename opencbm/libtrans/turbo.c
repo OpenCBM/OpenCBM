@@ -1,6 +1,8 @@
 #include "libtrans.h"
 #include "libtrans_int.h"
 
+#include <stdio.h>
+
 static const unsigned char turbomain_drive_prog[] = {
 #include "turbomain.inc"
 };

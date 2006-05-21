@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.7 2006-05-13 16:51:50 strik Exp $
+# $Id: Makefile,v 1.8 2006-05-21 13:39:44 strik Exp $
 
 include LINUX/config.make
 
@@ -7,8 +7,10 @@ CBMPERM  = 666
 DEVMAJOR = 10
 DEVMINOR = 177
 SUBDIRS  = sys/linux include arch/$(ARCH) lib compat \
+	   libtrans \
            cbmctrl cbmformat cbmforng d64copy cbmcopy \
-           demo/flash demo/morse demo/rpm1541 docs
+           demo/flash demo/morse demo/rpm1541 docs \
+	   sample/libtrans
 
 SUBDIRS_OPTIONAL = mnib36
 

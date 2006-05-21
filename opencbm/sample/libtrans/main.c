@@ -3,6 +3,10 @@
 
 #include "arch.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
+
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
 
@@ -11,11 +15,11 @@
 
 #include "debug.h"
 
-#define DRIVE 8
-
 static int transferlength = 0x110;
 static int writedumpfile = 0;
 static int outputdump = 0;
+static int compare = 0;
+static unsigned char drive = 8;
 static unsigned int count = -1;
 
 static void
@@ -47,7 +51,7 @@ read_from_file(unsigned char Buffer[], const unsigned int BufferSize, const char
 }
 
 static void
-processParameter(const int argc, const char * const * const argv)
+processParameter(const int argc, char ** argv)
 {
     int i;
 
@@ -82,6 +86,14 @@ processParameter(const int argc, const char * const * const argv)
                 count = atoi(&argv[i][2]);
                 break;
 
+            case 'C':
+                compare = 1;
+                break;
+
+            case 'D':
+                drive = (char) atoi(&argv[i][2]);
+                break;
+
             case 'd':
                 outputdump = 1;
                 break;
@@ -112,6 +124,8 @@ processParameter(const int argc, const char * const * const argv)
     }
 
 }
+
+#if 0
 
 #include "o65.h"
 
@@ -147,6 +161,7 @@ main_o65(int argc, char **argv)
 
     FUNC_LEAVE_INT(0);
 }
+#endif
 
 static int
 main_testtransfer(int argc, char **argv)
@@ -177,20 +192,21 @@ main_testtransfer(int argc, char **argv)
     }
 
     DBG_PRINT((DBG_PREFIX "before install"));
-    libopencbmtransfer_install(fd, DRIVE);
+    libopencbmtransfer_install(fd, drive);
 
     memset(buffer, 0, sizeof(buffer));
 
-    read_from_file(compare_buffer, sizeof(compare_buffer), "rom.image");
+    if (compare)
+        read_from_file(compare_buffer, sizeof(compare_buffer), "rom.image");
 
     DBG_PRINT((DBG_PREFIX "before read_mem"));
 
 #if 0
     transferlength = 0x100;
     printf("write $0300\n");
-    libopencbmtransfer_write_mem(fd, DRIVE, compare_buffer, 0x300, transferlength);
+    libopencbmtransfer_write_mem(fd, drive, compare_buffer, 0x300, transferlength);
     printf("read $0300\n");
-    libopencbmtransfer_read_mem(fd, DRIVE, buffer, 0x300, transferlength);
+    libopencbmtransfer_read_mem(fd, drive, buffer, 0x300, transferlength);
 
     printf("compare\n");
     if (memcmp(buffer, compare_buffer, transferlength) != 0)
@@ -201,29 +217,39 @@ main_testtransfer(int argc, char **argv)
     while (count--)
     {
         printf("read:  %i, error = %u: \n", count+1, error);
-        libopencbmtransfer_read_mem(fd, DRIVE, buffer, 0x8000, transferlength);
-        if (memcmp(buffer, compare_buffer, transferlength) != 0)
+        libopencbmtransfer_read_mem(fd, drive, buffer, 0x8000, transferlength);
+        if (compare)
         {
-            char filename[128];
-            int n;
+            if (memcmp(buffer, compare_buffer, transferlength) != 0)
+            {
+                char filename[128];
+                int n;
 
-            printf("\n\n***** ERROR COMPARING DATA! *****\n\n");
-            ++error;
+                printf("\n\n***** ERROR COMPARING DATA! *****\n\n");
+                ++error;
 
-            strcpy(filename, "image.err.");
-            n = strlen(filename);
+                strcpy(filename, "image.err.");
+                n = strlen(filename);
 
-            if (error > 9999) filename[n++] = ((error / 10000) % 10) + '0';
-            if (error >  999) filename[n++] = ((error /  1000) % 10) + '0';
-            if (error >   99) filename[n++] = ((error /   100) % 10) + '0';
-            if (error >    9) filename[n++] = ((error /    10) % 10) + '0';
-            if (error >    0) filename[n++] = ((error /     1) % 10) + '0';
+                if (error > 9999) filename[n++] = ((error / 10000) % 10) + '0';
+                if (error >  999) filename[n++] = ((error /  1000) % 10) + '0';
+                if (error >   99) filename[n++] = ((error /   100) % 10) + '0';
+                if (error >    9) filename[n++] = ((error /    10) % 10) + '0';
+                if (error >    0) filename[n++] = ((error /     1) % 10) + '0';
 
-            filename[n] = 0;
-            write_to_file(buffer, transferlength, filename);
+                filename[n] = 0;
+                write_to_file(buffer, transferlength, filename);
+            }
+            else
+            {
+                printf("       compare success\n");
+            }
         }
+
+#if 0
         printf("write: %i, error = %u: \n", count+1, error);
-        libopencbmtransfer_write_mem(fd, DRIVE, compare_buffer, 0x8000, transferlength);
+        libopencbmtransfer_write_mem(fd, drive, compare_buffer, 0x8000, transferlength);
+#endif
     }
 #endif
 
@@ -234,7 +260,7 @@ main_testtransfer(int argc, char **argv)
         write_to_file(buffer, transferlength, "image.bin");
 
     DBG_PRINT((DBG_PREFIX "before remove"));
-    libopencbmtransfer_remove(fd, DRIVE);
+    libopencbmtransfer_remove(fd, drive);
 
     cbm_driver_close(fd);
 
@@ -359,14 +385,14 @@ int
 ARCH_MAINDECL main(int argc, char **argv)
 {
 #ifdef TEST_LINES
-    main_testlines(argc, argv);
+    return main_testlines(argc, argv);
 #endif
 
 #ifdef TEST_TRANSFER
-    main_testtransfer(argc, argv);
+    return main_testtransfer(argc, argv);
 #endif
 
 #ifdef TEST_O65
-    main_o65(argc, argv);
+    return main_o65(argc, argv);
 #endif
 }
