@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: std.c,v 1.4 2006-03-10 15:43:36 strik Exp $";
+    "@(#) $Id: std.c,v 1.5 2006-05-22 08:34:19 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -32,7 +32,9 @@ static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
         if(rv == 0) {
             if(cbm_exec_command(fd_cbm, drive, "B-P2 0", 0) == 0) {
                 if(cbm_talk(fd_cbm, drive, 2) == 0) {
+                                                                        SETSTATEDEBUG(debugLibD64ByteCount=0);
                     rv = cbm_raw_read(fd_cbm, block, BLOCKSIZE) != BLOCKSIZE;
+                                                                        SETSTATEDEBUG(debugLibD64ByteCount=-1);
                     cbm_untalk(fd_cbm);
                 }
             }
@@ -50,7 +52,9 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
     {
         if(cbm_listen(fd_cbm, drive, 2) == 0)
         {
+                                                                        SETSTATEDEBUG(debugLibD64ByteCount=0);
             rv = cbm_raw_write(fd_cbm, blk, size) != size;
+                                                                        SETSTATEDEBUG(debugLibD64ByteCount=-1);
             cbm_unlisten(fd_cbm);
             if(rv == 0)
             {

@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.17 2006-05-20 16:59:48 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.18 2006-05-22 08:34:19 wmsr Exp $";
 #endif
 
 #include <stdio.h>
@@ -63,15 +63,18 @@ transfers[] =
 };
 
 #ifdef LIBCBMCOPY_DEBUG
-	signed int debugCBMcopyLineNumber=0, debugCBMcopyBlockCount=0, debugCBMcopyByteCount=0;
-	char * debugCBMcopyFileName = "";
+	volatile signed int debugCBMcopyLineNumber=-1, debugCBMcopyBlockCount=-1,
+                        debugCBMcopyByteCount=-1, debugCBMcopyBitCount=-1;
+	volatile char * debugCBMcopyFileName = "";
 
 	void printDebugCBMcopyCounters(cbmcopy_message_cb msg_cb)
 	{
 	    msg_cb( sev_info, "file: %s"
 	                      "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
-	                      "\n\tlineNumber=%d, blockCount=%d, byteCount=%d\n",
-	                      debugCBMcopyFileName, debugCBMcopyLineNumber, debugCBMcopyBlockCount, debugCBMcopyByteCount);
+	                      "\n\tline=%d, blocks=%d, bytes=%d, bits=%d\n",
+	                      debugCBMcopyFileName, debugCBMcopyLineNumber,
+	                      debugCBMcopyBlockCount, debugCBMcopyByteCount,
+	                      debugCBMcopyBitCount);
 	}
 #endif
 
@@ -271,7 +274,7 @@ static int cbmcopy_read(CBM_FILE fd,
                     *(cptr++) = trf->read_byte( fd );
                 }
                 /* (drive is busy now) */
-                SETSTATEDEBUG((void)0);    // after blockloop condition
+                SETSTATEDEBUG(debugCBMcopyByteCount=-1);
 
                 /*
                  * FIXME: Find and eliminate the real protocol races to
@@ -297,7 +300,7 @@ static int cbmcopy_read(CBM_FILE fd,
             SETSTATEDEBUG((void)0);    // pre loop condition
         }
         msg_cb( sev_debug, "done" );
-        SETSTATEDEBUG((void)0);    // end loop condition
+        SETSTATEDEBUG(debugCBMcopyBlockCount=-1);   // turbo sent condition
         trf->exit_turbo( fd, 0 );
         SETSTATEDEBUG((void)0);    // turbo exited condition
 
