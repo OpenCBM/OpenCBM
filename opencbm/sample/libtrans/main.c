@@ -246,10 +246,8 @@ main_testtransfer(int argc, char **argv)
             }
         }
 
-#if 0
         printf("write: %i, error = %u: \n", count+1, error);
         libopencbmtransfer_write_mem(fd, drive, compare_buffer, 0x8000, transferlength);
-#endif
     }
 #endif
 

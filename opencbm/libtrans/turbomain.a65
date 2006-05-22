@@ -6,14 +6,14 @@
 ;
 ; Copyright 2005 Spiro Trikaliotis
 ;
-; "$Id: turbomain.a65,v 1.1 2006-05-08 18:15:57 strik Exp $"
+; "$Id: turbomain.a65,v 1.2 2006-05-22 07:23:56 strik Exp $"
 
 ; libopencbmtransfer routines, main loop
 
         .include "common.i65"
 
 ; define the next if WRITEMEM should be tested
-DefTestWriteMem = 1
+; DefTestWriteMem = 1
 DefFlipLed = 1
 
         *=$0500
