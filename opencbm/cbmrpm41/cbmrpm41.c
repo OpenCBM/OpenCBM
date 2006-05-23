@@ -10,10 +10,13 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.4 2006-05-20 08:35:47 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.5 2006-05-23 12:01:04 wmsr Exp $";
 #endif
 
 #if _MSC_VER >= 1400
+    /* as long as we did not implement arch dependent secure
+     * implementations of standard libc functions
+     */
 #   pragma warning( disable : 4996 )
 #endif
 

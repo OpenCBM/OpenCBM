@@ -1,3 +1,8 @@
+#ifdef SAVE_RCSID
+static char *rcsid =
+    "@(#) $Id: main.c,v 1.4 2006-05-23 12:01:05 wmsr Exp $";
+#endif
+
 #include "opencbm.h"
 #include "libtrans.h"
 
@@ -5,7 +10,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
+#if _MSC_VER >= 1400
+    /* as long as we did not implement arch dependent secure
+     * implementations of standard libc functions
+     */
+#   pragma warning( disable : 4996 )
+#endif
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
@@ -21,6 +33,23 @@ static int outputdump = 0;
 static int compare = 0;
 static unsigned char drive = 8;
 static unsigned int count = -1;
+
+static CBM_FILE fd;
+
+static void ARCH_SIGNALDECL
+handle_CTRL_C(int dummy)
+{
+    fprintf(stderr, "\nSIGINT caught, resetting IEC bus...\n");
+#ifdef LIBOCT_STATE_DEBUG
+    libopencbmtransfer_printStateDebugCounters(stderr);
+#endif
+
+    arch_sleep(1);
+    cbm_reset(fd);
+
+    cbm_driver_close(fd);
+    exit(1);
+}
 
 static void
 write_to_file(const unsigned char Buffer[], const unsigned int BufferSize, const char * const Filename)
@@ -166,7 +195,7 @@ main_o65(int argc, char **argv)
 static int
 main_testtransfer(int argc, char **argv)
 {
-    CBM_FILE fd;
+    /* CBM_FILE fd; */
     unsigned char compare_buffer[0x8000];
     unsigned char buffer[0x8000];
     unsigned int error = 0;
@@ -293,7 +322,7 @@ read_line_status(CBM_FILE fd)
 static int
 main_testlines(int argc, char **argv)
 {
-    CBM_FILE fd;
+    /* CBM_FILE fd; */
     int rv;
 
     FUNC_ENTER();
@@ -382,6 +411,8 @@ main_testlines(int argc, char **argv)
 int
 ARCH_MAINDECL main(int argc, char **argv)
 {
+    signal(SIGINT, handle_CTRL_C);
+
 #ifdef TEST_LINES
     return main_testlines(argc, argv);
 #endif

@@ -1,15 +1,15 @@
 /*
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.1 2006-05-08 18:15:57 strik Exp $";
+    "@(#) $Id: pp.c,v 1.2 2006-05-23 12:01:05 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -32,48 +32,63 @@ static const unsigned char pp1571_drive_prog[] = {
 
 static int pp_write(CBM_FILE fd, unsigned char c1, unsigned char c2)
 {
+                                                                        SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
     while(!cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
+                                                                        SETSTATEDEBUG((void)0);
     cbm_pp_write(fd, c1);
+                                                                        SETSTATEDEBUG((void)0);
     cbm_iec_release(fd, IEC_CLOCK);
+                                                                        SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
     while(cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
 
+                                                                        SETSTATEDEBUG((void)0);
     cbm_pp_write(fd, c2);
+                                                                        SETSTATEDEBUG((void)0);
     cbm_iec_set(fd, IEC_CLOCK);
+                                                                        SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
     while(!cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
 
+                                                                        SETSTATEDEBUG((void)0);
     return 0;
 }
 
 static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 {
+                                                                        SETSTATEDEBUG((void)0);
     cbm_iec_release(fd, IEC_CLOCK);
+                                                                        SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
     while(cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
+                                                                        SETSTATEDEBUG((void)0);
     *c1 = cbm_pp_read(fd);
 
+                                                                        SETSTATEDEBUG((void)0);
     cbm_iec_set(fd, IEC_CLOCK);
+                                                                        SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
     while(!cbm_iec_get(fd, IEC_DATA));
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
+                                                                        SETSTATEDEBUG((void)0);
     *c2 = cbm_pp_read(fd);
 
+                                                                        SETSTATEDEBUG((void)0);
     return 0;
 }
 
@@ -129,9 +144,12 @@ upload(CBM_FILE fd, unsigned char drive)
 static int
 init(CBM_FILE fd, unsigned char drive)
 {
+                                                                        SETSTATEDEBUG((void)0);
     cbm_iec_set(fd, IEC_CLOCK);
+                                                                        SETSTATEDEBUG((void)0);
     cbm_iec_wait(fd, IEC_DATA, 1);
 
+                                                                        SETSTATEDEBUG((void)0);
     return 0;
 }
 
@@ -139,14 +157,21 @@ static int
 read1byte(CBM_FILE fd, unsigned char *c1)
 {
     unsigned char dummy;
-
-    return pp_read(fd, c1, &dummy);
+    int ret;
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -6401);
+    ret = pp_read(fd, c1, &dummy);
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+    return ret;
 }
 
 static int
 read2byte(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 {
-    return pp_read(fd, c1, c2);
+    int ret;
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -12801);
+    ret = pp_read(fd, c1, c2);
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+    return ret;
 }
 
 static int
@@ -154,45 +179,63 @@ readblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
     unsigned char c1;
     unsigned char c2;
-
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = 0);
     for (; length < 0x100; length++)
     {
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount += 2);
         if (pp_read(fd, &c1, &c2))
+        {
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
             return 1;
+        }
 
         *p++ = c1; length++;
 
         if (length < 0x100)
             *p++ = c2;
     }
-
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
     // perform end-handshake
     pp_read(fd, &c1, &c2);
-
+                                                                        SETSTATEDEBUG((void)0);
     return 0;
 }
 
 static int
 write1byte(CBM_FILE fd, unsigned char c1)
 {
-    return pp_write(fd, c1, 0);
+    int ret;
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -6401);
+    ret = pp_write(fd, c1, 0);
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+    return ret;
 }
 
 static int
 write2byte(CBM_FILE fd, unsigned char c1, unsigned char c2)
 {
-    return pp_write(fd, c1, c2);
+    int ret;
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -12801);
+    ret = pp_write(fd, c1, c2);
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+    return ret;
 }
 
 static int
 writeblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = 0);
     for (; length < 0x100; length += 2, p += 2)
     {
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount += 2);
         if (pp_write(fd, p[0], p[1]))
+        {
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
             return 1;
+        }
     }
 
+                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
     return 0;
 }
 

@@ -1,19 +1,20 @@
 /*
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
-/* $Id: libtrans_int.h,v 1.1 2006-05-08 18:15:57 strik Exp $ */
+/* $Id: libtrans_int.h,v 1.2 2006-05-23 12:01:05 wmsr Exp $ */
 
 #ifndef LIBTRANS_INT_H
 #define LIBTRANS_INT_H
 
 #include "opencbm.h"
-#include "d64copy.h"
+// (?) #include "d64copy.h"
+#include "libtrans.h"
 
 #include "arch.h"
 
@@ -25,6 +26,17 @@
 
 #include "debug.h"
 
+#ifdef LIBOCT_STATE_DEBUG
+    extern volatile signed int stDebugLibOCTLineNumber, stDebugLibOCTBlockCount,
+                               stDebugLibOCTByteCount, stDebugLibOCTBitCount;
+    extern volatile char *     stDebugLibOCTFileName;
+#   define SETSTATEDEBUG(_x)  \
+        stDebugLibOCTLineNumber =__LINE__; \
+        stDebugLibOCTFileName   =__FILE__; \
+        (_x)
+#else
+#   define SETSTATEDEBUG(_x) (void)0
+#endif
 
 #if 0
 

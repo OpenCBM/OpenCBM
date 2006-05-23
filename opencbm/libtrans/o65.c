@@ -1,13 +1,16 @@
 /*
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 2005 Spiro Trikaliotis
 */
 
-/* $Id: o65.c,v 1.1 2006-05-08 18:15:57 strik Exp $ */
+#ifdef SAVE_RCSID
+static char *rcsid =
+    "@(#) $Id: o65.c,v 1.2 2006-05-23 12:01:05 wmsr Exp $";
+#endif
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
@@ -21,6 +24,13 @@
 
 #include "o65.h"
 #include "o65_int.h"
+
+#if _MSC_VER >= 1400
+    /* as long as we did not implement arch dependent secure
+     * implementations of standard libc functions
+     */
+#   pragma warning( disable : 4996 )
+#endif
 
 #if 1
  #define DBG_O65_SHOW(_x_)              DBG_PRINT(_x_)
