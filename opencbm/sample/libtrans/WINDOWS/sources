@@ -12,8 +12,8 @@ TARGETLIBS=../../../bin/*/opencbm.lib      \
 
 INCLUDES=../../../libtrans/;../../../include;../../../include/WINDOWS
 
-SOURCES=main.c \
-	sample.rc
+SOURCES=../main.c \
+        sample.rc
 
 UMTYPE=console
 #UMBASE=0x100000
