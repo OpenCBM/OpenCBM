@@ -1,13 +1,13 @@
 /*
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbmcopy_int.h,v 1.7 2006-05-22 08:34:19 wmsr Exp $ */
+/* $Id: cbmcopy_int.h,v 1.8 2006-05-23 12:24:31 wmsr Exp $ */
 
 #ifndef CBMCOPY_INT_H
 #define CBMCOPY_INT_H

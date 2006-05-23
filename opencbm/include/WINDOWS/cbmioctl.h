@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.12 2006-05-05 08:18:57 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.13 2006-05-23 12:24:31 wmsr Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -10,10 +10,10 @@
 ****************************************************************/
 
 /*
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2004 Spiro Trikaliotis
@@ -208,7 +208,7 @@ typedef CBMT_SINGLEBYTE CBMT_PARBURST_PWRITE_IN;
 
 
 /*! BASE number of the custom IOCTL */
-#define CBMCTRL_BASE	0x0000A424
+#define CBMCTRL_BASE    0x0000A424
 /*! INDEX number of the custom IOCTLs */
 #define CBM4WIN_IOCTL_INDEX  0x823
 
@@ -218,9 +218,9 @@ typedef CBMT_SINGLEBYTE CBMT_PARBURST_PWRITE_IN;
 
                                                   // INPUT:               OUTPUT:
 //! IOCTL for sending a TALK command
-#define CBMCTRL_TALK	    _CBMIO(CBMCTRL_BASE, 0)  // CBMT_TALK_IN         -
+#define CBMCTRL_TALK        _CBMIO(CBMCTRL_BASE, 0)  // CBMT_TALK_IN         -
 //! IOCTL for sending a LISTEN command
-#define CBMCTRL_LISTEN	    _CBMIO(CBMCTRL_BASE, 1)  // CBMT_LISTEN_IN       -
+#define CBMCTRL_LISTEN      _CBMIO(CBMCTRL_BASE, 1)  // CBMT_LISTEN_IN       -
 //! IOCTL for sending an UNTALK command
 #define CBMCTRL_UNTALK      _CBMIO(CBMCTRL_BASE, 2)  // -                    -
 //! IOCTL for sending an UNLISTEN command

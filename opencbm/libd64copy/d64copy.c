@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.16 2006-05-22 08:34:19 wmsr Exp $";
+    "@(#) $Id: d64copy.c,v 1.17 2006-05-23 12:24:31 wmsr Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -111,7 +111,7 @@ static const transfer_funcs *atom_dst;
 
 
 #ifdef LIBD64COPY_DEBUG
-	volatile signed int debugLibD64LineNumber=-1, debugLibD64BlockCount=-1,
+    volatile signed int debugLibD64LineNumber=-1, debugLibD64BlockCount=-1,
                         debugLibD64ByteCount=-1,  debugLibD64BitCount=-1;
     volatile char *     debugLibD64FileName   = "";
 
@@ -119,10 +119,10 @@ static const transfer_funcs *atom_dst;
     {
         msg_cb( sev_info, "file: %s"
                           "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
-	                      "\n\tline=%d, blocks=%d, bytes=%d, bits=%d\n",
-	                      debugLibD64FileName, debugLibD64LineNumber,
-	                      debugLibD64BlockCount, debugLibD64ByteCount,
-	                      debugLibD64BitCount);
+                          "\n\tline=%d, blocks=%d, bytes=%d, bits=%d\n",
+                          debugLibD64FileName, debugLibD64LineNumber,
+                          debugLibD64BlockCount, debugLibD64ByteCount,
+                          debugLibD64BitCount);
     }
 #endif
 

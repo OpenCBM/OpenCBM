@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/util.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util.c,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: util.c,v 1.4 2006-05-23 12:24:31 wmsr Exp $ \n
 ** \n
 ** \brief Some utility functions for the driver
 **
@@ -143,5 +143,5 @@ LogError(IN PDEVICE_OBJECT Fdo,
         }
     }
 
-	FUNC_LEAVE();
+    FUNC_LEAVE();
 }

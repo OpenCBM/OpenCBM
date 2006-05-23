@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/PortAccessNt4.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccessNt4.c,v 1.4 2006-05-20 08:35:47 wmsr Exp $ \n
+** \version $Id: PortAccessNt4.c,v 1.5 2006-05-23 12:24:31 wmsr Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver,
 **        NT4 version
@@ -32,26 +32,26 @@
 
 enum lptMode
 {
-	lptN_A	= 0,
-	lptSPP	= 1,
-	lptPS2	= 2,
-	lptEPP	= 3,
-	lptECP	= 4,
-	lptEPPc	= 5,			// EPP with special control word to enable
+    lptN_A    = 0,
+    lptSPP    = 1,
+    lptPS2    = 2,
+    lptEPP    = 3,
+    lptECP    = 4,
+    lptEPPc    = 5,            // EPP with special control word to enable
 };
 
 enum ecpMode
 {
-	ecpNOECR   = 0,      // no ECP-Port found!!!
+    ecpNOECR   = 0,      // no ECP-Port found!!!
 
-	ecpSTNDRD  = 1,
-	ecpBYTE    = 2,
-	ecpSTDFIFO = 3,
-	ecpECPFIFO = 4,
-	ecpEPP     = 5,
-	ecpRESVRD  = 6,
-	ecpFIFOTST = 7,
-	ecpCONFIG  = 8
+    ecpSTNDRD  = 1,
+    ecpBYTE    = 2,
+    ecpSTDFIFO = 3,
+    ecpECPFIFO = 4,
+    ecpEPP     = 5,
+    ecpRESVRD  = 6,
+    ecpFIFOTST = 7,
+    ecpCONFIG  = 8
 };
 
 // set the Bidirectional-Flag to output (normal mode)
@@ -95,7 +95,7 @@ ECPdetect(PUCHAR port)
         WRITE_PORT_UCHAR(port+0x402,0x34);
         WRITE_PORT_UCHAR(port+2,0xC6);
         if(READ_PORT_UCHAR(port+0x402)!=0x35){
-        ECR=0xC4;							// There's no ECR,
+        ECR=0xC4;                            // There's no ECR,
         break;
     }
 
@@ -221,8 +221,8 @@ enum lptMode AdvEPP(PUCHAR port){
     // check all control words to free up the EPP
     do
     {
-        EPPctrl |= 0x04;	// don't do a reset
-	    // write the special Control word, for freeing up the EPP
+        EPPctrl |= 0x04;    // don't do a reset
+        // write the special Control word, for freeing up the EPP
         WRITE_PORT_UCHAR(port+2,EPPctrl);
 
         if (EPPdWOC(port)!=lptN_A)
@@ -250,7 +250,7 @@ EPPcontrol(PUCHAR port){
 
     do
     {
-        EPPctrl|=0x04;	// don't do a reset
+        EPPctrl|=0x04;    // don't do a reset
         // write the special Control word, for freeing up the EPP
         WRITE_PORT_UCHAR(port+2,EPPctrl);
         if(EPPdWOC(port)!=lptN_A)
@@ -274,12 +274,12 @@ EPPcontrol(PUCHAR port){
     {
         if(done0[i]==done1[i])
         {
-            if(!done0[i]) 	 ctrlWord[i]='!';	// Control-Word could not found
-            else			  	 ctrlWord[i]='X';	// This Bit cares nobody
+            if(!done0[i])      ctrlWord[i]='!';    // Control-Word could not found
+            else                   ctrlWord[i]='X';    // This Bit cares nobody
         }
         else if(!done0[i]) ctrlWord[i]='1'; // This Bit must be 1
-        else if(!done1[i]) ctrlWord[i]='0';	// This Bit must be 0
-        else               ctrlWord[i]='?';	// This Bit depends on other Bits
+        else if(!done1[i]) ctrlWord[i]='0';    // This Bit must be 0
+        else               ctrlWord[i]='?';    // This Bit depends on other Bits
     }
     return ctrlWord;
 }
@@ -302,11 +302,11 @@ LPTmode(PUCHAR port)
     if((((ULONG_PTR)port) & ~0x1fc)!=0x200)
         return lptN_A;
 
-	//	if(!(port&0x07)){
-	// test for ECP/EPP only at 0/8-bases
+    //    if(!(port&0x07)){
+    // test for ECP/EPP only at 0/8-bases
 
     ResetLPT(port);
-    //	ECP test doesn't touch any data registers, so no reset is needed
+    //    ECP test doesn't touch any data registers, so no reset is needed
 
     do
     {

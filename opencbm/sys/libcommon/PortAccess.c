@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.10 2006-05-05 16:01:22 strik Exp $ \n
+** \version $Id: PortAccess.c,v 1.11 2006-05-23 12:24:31 wmsr Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -767,8 +767,8 @@ ParPortAllowInterruptIoctl(PDEVICE_EXTENSION Pdx)
         // to get the interrupt itself in the first place. If the parallel port
         // does not have an interrupt, we cannot obtain it ourselves.
         // The possible values are:
-	// - 0: Try to not obtain the interrupt, if such a hardware
-	//      configuration exists
+        // - 0: Try to not obtain the interrupt, if such a hardware
+        //      configuration exists
         // - 1: Force not to use the interrupt (default)
         // - 2: Always use the interrupt
         // Unfortunately, this entry is only checked on device initialization.

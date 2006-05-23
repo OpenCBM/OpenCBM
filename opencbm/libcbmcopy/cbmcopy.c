@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.18 2006-05-22 08:34:19 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.19 2006-05-23 12:24:31 wmsr Exp $";
 #endif
 
 #include <stdio.h>
@@ -63,19 +63,19 @@ transfers[] =
 };
 
 #ifdef LIBCBMCOPY_DEBUG
-	volatile signed int debugCBMcopyLineNumber=-1, debugCBMcopyBlockCount=-1,
+    volatile signed int debugCBMcopyLineNumber=-1, debugCBMcopyBlockCount=-1,
                         debugCBMcopyByteCount=-1, debugCBMcopyBitCount=-1;
-	volatile char * debugCBMcopyFileName = "";
+    volatile char * debugCBMcopyFileName = "";
 
-	void printDebugCBMcopyCounters(cbmcopy_message_cb msg_cb)
-	{
-	    msg_cb( sev_info, "file: %s"
-	                      "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
-	                      "\n\tline=%d, blocks=%d, bytes=%d, bits=%d\n",
-	                      debugCBMcopyFileName, debugCBMcopyLineNumber,
-	                      debugCBMcopyBlockCount, debugCBMcopyByteCount,
-	                      debugCBMcopyBitCount);
-	}
+    void printDebugCBMcopyCounters(cbmcopy_message_cb msg_cb)
+    {
+        msg_cb( sev_info, "file: %s"
+                          "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
+                          "\n\tline=%d, blocks=%d, bytes=%d, bits=%d\n",
+                          debugCBMcopyFileName, debugCBMcopyLineNumber,
+                          debugCBMcopyBlockCount, debugCBMcopyByteCount,
+                          debugCBMcopyBitCount);
+    }
 #endif
 
 static int check_drive_type(CBM_FILE fd, unsigned char drive,

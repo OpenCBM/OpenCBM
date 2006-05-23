@@ -1,8 +1,8 @@
 /*
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Modifications for cbm4win and general rework Copyright 2001-2006 Spiro Trikaliotis
@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.27 2006-05-20 08:35:47 wmsr Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.28 2006-05-23 12:24:31 wmsr Exp $";
 #endif
 
 #include "opencbm.h"

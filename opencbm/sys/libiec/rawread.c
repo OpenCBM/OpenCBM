@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: rawread.c,v 1.6 2006-03-12 16:35:42 strik Exp $ \n
+** \version $Id: rawread.c,v 1.7 2006-05-23 12:24:31 wmsr Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -47,8 +47,8 @@
    returns one of the error status values.
 */
 NTSTATUS cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx, 
-						 OUT PUCHAR Buffer, IN ULONG Size, 
-						 OUT ULONG* Read)
+                         OUT PUCHAR Buffer, IN ULONG Size, 
+                         OUT ULONG* Read)
 {
     NTSTATUS ntStatus;
 

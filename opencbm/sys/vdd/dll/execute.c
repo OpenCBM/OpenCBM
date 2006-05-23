@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.9 2006-02-20 12:11:16 strik Exp $ \n
+** \version $Id: execute.c,v 1.10 2006-05-23 12:24:31 wmsr Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **
@@ -141,7 +141,7 @@ vdd_driver_open(VOID)
     {
         translatedhandle = vdd_cbmfile_store(cbmfile);
         if (translatedhandle == (WORD) -1)
-	{
+        {
             cbm_driver_close(cbmfile);
             translatedhandle = -1;
         }

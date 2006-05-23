@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/memtags.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: memtags.h,v 1.3 2006-04-08 13:41:20 strik Exp $ \n
+** \version $Id: memtags.h,v 1.4 2006-05-23 12:24:31 wmsr Exp $ \n
 ** \n
 ** \brief Define tags for ExAllocatePoolWithTag()
 **
@@ -20,7 +20,7 @@
 
 /*! Make sure we *never* use untagged memory allocation */
 #ifdef ExAllocatePool
-	#undef ExAllocatePool
+    #undef ExAllocatePool
 #endif
 
 /*! memory tag for the device name */

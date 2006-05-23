@@ -1,13 +1,13 @@
 /*
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version
- *	2 of the License, or (at your option) any later version.
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbm_module.h,v 1.5 2006-03-20 11:45:52 strik Exp $ */
+/* $Id: cbm_module.h,v 1.6 2006-05-23 12:24:31 wmsr Exp $ */
 
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H
@@ -15,10 +15,10 @@
 #include <linux/ioctl.h>
 #include <linux/types.h>
 
-#define CBMCTRL_BASE	0xcb
+#define CBMCTRL_BASE        0xcb
 
-#define CBMCTRL_TALK	    _IO(CBMCTRL_BASE, 0)
-#define CBMCTRL_LISTEN	    _IO(CBMCTRL_BASE, 1)
+#define CBMCTRL_TALK        _IO(CBMCTRL_BASE, 0)
+#define CBMCTRL_LISTEN      _IO(CBMCTRL_BASE, 1)
 #define CBMCTRL_UNTALK      _IO(CBMCTRL_BASE, 2)
 #define CBMCTRL_UNLISTEN    _IO(CBMCTRL_BASE, 3)
 #define CBMCTRL_OPEN        _IO(CBMCTRL_BASE, 4)
