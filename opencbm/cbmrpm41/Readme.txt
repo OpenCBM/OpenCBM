@@ -10,12 +10,14 @@ License: GNU General Public License
   On request I perhaps may want to publish the 6502 based code under
   the GNU Lesser General Public License to allow others to link that
   code to proprietary programs or other software products, which
-  licensing terms are incompatible to the GPL, The Star Commander
+  licensing terms are incompatible to the GPL; The Star Commander
   for example.
 
 Some of the features implemented in the rewritten  6502  routine:
 
-* VIA shift register usage (the core feature)
+* VIA shift register usage (the core feature), but not the shift
+  register itself is used but the 8 bit latchable timer that drives
+  the shift register's clock
 * VIA bugs regarding the shift register and more extracts from the
   former "viatimers.a65" testproject
 * virtual 24 Bit timer construction
@@ -30,6 +32,11 @@ Some of the features implemented in the rewritten  6502  routine:
   (maybe as an idea for the on-demand o65 linker)
 * Using ASCII-2-HEX (PETSCII ?) conversion routines in the 1541
   for parameter passing instead of transferring plain bytes
+* For RPM measurements the block head to look for is measured out
+  with a jitter of 0...1 regarding synchronization to the Byte
+  Ready signal. The jitter is 0...2 with a standard  "bvc *"  loop,
+  by precisely adjusting a so named "sync in" area, the jitter
+  could be reduced by one.
 
 
 * Possible applications for the high precision timer system
@@ -40,4 +47,4 @@ Some of the features implemented in the rewritten  6502  routine:
     + measuring sector distances (on-track) and sector distribution
 
 
-Wolfgang Moser, 2006-05-18
+Wolfgang Moser, 2006-05-31

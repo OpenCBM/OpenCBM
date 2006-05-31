@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.5 2006-05-23 12:01:04 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.6 2006-05-31 14:07:04 wmsr Exp $";
 #endif
 
 #if _MSC_VER >= 1400
@@ -27,16 +27,33 @@ static unsigned char cbmrpm41[] = {
 };
 
 #define _ASCII_PARAMETER_PASSING 1
-
-const unsigned short loadAddress  = 0x0300;
-const unsigned short timerValAddr = 0x0303;    // not used currently
-const unsigned short UcmdTblAddr  = 0x0306;
+#define _MINMAX_VALUES_PRINTOUT  0
 
 static CBM_FILE fd;
 static unsigned char drive;
 
+const static unsigned short timerShotMain = sizeof(cbmDev_StartAddress) + offsetof(struct ExecBuffer_MemoryLayout, Timer24BitGroup);
+const static unsigned short UcmdTblAddr   = sizeof(cbmDev_StartAddress) + offsetof(struct ExecBuffer_MemoryLayout, CommandVectorsTable_impl);
+
+   /*
+    * The virtual 23.589 bit timer value is reconstructed from
+    * a 16 bit timer and an 8 bit timer with a modulus of 187
+    * with the help of the Chinese Remainder Theorem. All the
+    * constants below are precalculated coefficients for a
+    * modulus of 65536 for one timer and a modulus of 187 for
+    * the other timer.
+    */
+#define Via1Timer2Max (256 * 256)           // 16 bit timer
+#define Via2Timer2Max (185 + 2)             // == 187, with latch value 185
+
+const static int Modulus  = Via1Timer2Max * Via2Timer2Max;
+const static int V1T2rec1 =    27081;       // --16-Bit timer (inverse of a mod b)
+const static int V1T2rec2 =      121;       // -´
+const static int V2T2rec  =  8978432;       // 7.89-Bit timer (inverse of b mod a)
+
+
 #ifdef CBMRPM41_DEBUG
-static signed int debugLineNumber=0;    // , debugBlockCount=0, debugByteCount=0;
+static signed int debugLineNumber=0;
 
 #   define SETSTATEDEBUG(_x)  \
     debugLineNumber=__LINE__; \
@@ -46,16 +63,12 @@ void printDebugCounters()
 {
     fprintf(stderr, "file: " __FILE__
            "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
-#   if 1
            "\n\tlineNumber=%d\n", debugLineNumber);
-#   else
-           "\n\tlineNumber=%d, blockCount=%d, byteCount=%d\n",
-           debugLineNumber, debugBlockCount, debugByteCount);
-#   endif
 }
 #else
 #    define SETSTATEDEBUG(_x) (void)0
 #endif
+
 
 static void
 help()
@@ -84,7 +97,7 @@ hint(char *s)
 static void ARCH_SIGNALDECL
 handle_CTRL_C(int dummy)
 {
-    const static char CmdBuffer[]="M-W\013\034\001\101";
+//    const static char CmdBuffer[]="M-W\013\034\001\101\r";
 
     fprintf(stderr, "\nSIGINT caught, resetting IEC bus...\n");
 #ifdef CBMRPM41_DEBUG
@@ -93,7 +106,7 @@ handle_CTRL_C(int dummy)
     arch_sleep(1);
     cbm_reset(fd);
 
-#if 0
+#if 0   // reset automatically restores the VIA shift register
     arch_usleep(100000);
     fprintf(stderr, "Emergency resetting VIA2 shift register to default.\n");
     cbm_exec_command(fd, drive, CmdBuffer, sizeof(CmdBuffer));
@@ -113,72 +126,67 @@ cbm_sendUxCommand(CBM_FILE HandleDevice, __u_char DeviceAddress, enum UcmdVector
     return cbm_exec_command(HandleDevice, DeviceAddress, UxCmdBuffer, 2);
 }
 
-static unsigned int
-cbm_readTimer(CBM_FILE HandleDevice, __u_char DeviceAddress)
+static int
+cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
+             unsigned short remoteBuf, __u_char numBytes,
+             __u_char *localBuf, int lBufSize)
 {
-       /*
-        * The virtual 23.589 bit timer value is reconstructed from
-        * a 16 bit timer and an 8 bit timer with a modulus of 187
-        * with the help of the Chinese Remainder Theorem. All the
-        * constants below are precalculated coefficients for a
-        * modulus of 65536 for one timer and a modulus of 187 for
-        * the other timer.
-        */
-    const static int Via1Timer2Max = 256 * 256;
-    const static int Via2Timer2Max = (185 + 2);   // == 187
+    unsigned char cmd[8];
+    int rv;
 
-    const static int Modulus  = 12255232;
-    const static int V1T2rec1 =    27081;      // 16-Bit timer
-    const static int V1T2rec2 =      121;
-    const static int V2T2rec  =  8978432;      // 7.89-Bit timer
+        // always get the trailing '\r' also, if possible
+    if (lBufSize > numBytes) lBufSize = 1 + numBytes;
 
+        // the trailing '\r' is needed. In one scenario  numBytes
+        // became '\r' which was misinterpreted as an end-of-line
+        // by the IEC device and therefore was ignored.
+    sprintf(cmd, "M-R%c%c%c\r", remoteBuf & 0xFF, remoteBuf >> 8, numBytes);
+                                                                            SETSTATEDEBUG((void)0);
+    if( cbm_exec_command (HandleDevice, DeviceAddress, cmd, sizeof(cmd)) != 0) return -1;
+                                                                            SETSTATEDEBUG((void)0);
+    if( cbm_talk         (HandleDevice, DeviceAddress, 15) != 0) return -1;
+                                                                            SETSTATEDEBUG((void)0);
+    rv = cbm_raw_read(HandleDevice, localBuf, lBufSize);
+//    printf("\n::cbm_download with buf=0x%08x, size=0x%02x, numbytes=0x%02x, result=0x%02x\n", localBuf, lBufSize, numBytes, rv);
+                                                                            SETSTATEDEBUG((void)0);
+    if( cbm_untalk       (HandleDevice) != 0) return -1;
+                                                                            SETSTATEDEBUG((void)0);
+    return rv;
+}
+
+static unsigned int
+reconstruct_v32bitInc(struct Timer24bitValues TimerRegisters)
+{
        /*
         * The virtual 23.589 bit timer can further be extended to
         * 32 bits with a software method. But this works only
         * correctly, as long as two consecutive time measurements
-        * always differ in less than a complete wrap around of
-        * the virtual timer. On a base clock of 1Mhz this is a
-        * time window of somewhat around 12s (Modulus / 1MHz).
+        * (from the very same timing source of course) always
+        * differ in less than a complete wrap around of the
+        * virtual timer. On a base clock of 1Mhz and the Modulus
+        * of 256*256*187 this is a time window of somewhat around
+        * 12s (Modulus / 1MHz).
         */
     static int lastVTimer = 0;
     static unsigned int ModulusDecrementor = 0;
 
-
-    static unsigned char trashcan[16];
-    struct Timer24bitValues TimerTriple;
     register int vTimer;
-
-    // SETSTATEDEBUG((void)0);
-        // assume the user command table with the symbolic command
-        // "T2_23Bit_TimerSampling" to be installed correctly
-        // actually don't do an explicit sample command
-    // cbm_sendUxCommand(HandleDevice, DeviceAddress,  T2_23Bit_TimerSampling);
-    SETSTATEDEBUG((void)0);
-
-    cbm_exec_command (HandleDevice, DeviceAddress, "M-R\x3\x3\x3", 6);
-    SETSTATEDEBUG((void)0);
-    cbm_talk         (HandleDevice, DeviceAddress, 15);
-    cbm_raw_read     (HandleDevice, &TimerTriple, sizeof(TimerTriple));
-        // sends one more than the requested 3 bytes, get the rest into the trashcan
-    cbm_raw_read     (HandleDevice, trashcan, sizeof(trashcan));
-    cbm_untalk       (HandleDevice);
-    SETSTATEDEBUG((void)0);
 
 // #define Timer23Debug 1
 #if Timer23Debug >= 1
     printf("Plain 23.589 bit timer values read: 0x%02x 0x%02x 0x%02x\n",
-           TimerTriple.V2T2__LOW , TimerTriple.V1T2__LOW, TimerTriple.V1T2_HIGH);
+           TimerRegisters.V2T2__LOW , TimerRegisters.V1T2__LOW, TimerRegisters.V1T2_HIGH);
 #endif
 
-    vTimer   = TimerTriple.V1T2_HIGH;
+    vTimer   = TimerRegisters.V1T2_HIGH;
     vTimer <<= 8;
-    vTimer  |= TimerTriple.V1T2__LOW;
+    vTimer  |= TimerRegisters.V1T2__LOW;
     vTimer  *= V1T2rec1;
     vTimer  %= Modulus;
     vTimer  *= V1T2rec2;
     vTimer  %= Modulus;
 
-    vTimer  += TimerTriple.V2T2__LOW * V2T2rec;
+    vTimer  += V2T2rec * TimerRegisters.V2T2__LOW;
     vTimer  %= Modulus;
 
 #if Timer23Debug >= 1
@@ -202,15 +210,87 @@ cbm_readTimer(CBM_FILE HandleDevice, __u_char DeviceAddress)
     return ~(ModulusDecrementor + vTimer);
 }
 
+static float
+measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char diskTrack, __u_char count)
+{
+    unsigned char cmd[10], insts[40];
+    unsigned int mNo, timerValue, lastTvalue, firstTvalue;
+#if _MINMAX_VALUES_PRINTOUT
+    unsigned int dMin=~0, dMax=0;
+#endif
+    struct Timer24bitValues T24Sample;
+
+    SETSTATEDEBUG((void)0);
+
+#if _ASCII_PARAMETER_PASSING
+        // must be: "Ux <track> <sector>"
+        // sprintf(cmd, "U%c %d %d", ExecuteJobInBuffer, i, i & 0x0f);
+    sprintf(cmd, "U%c %d 0", ExecuteJobInBuffer, diskTrack);
+#else
+        // must be: "Ux<track><sector>" with directly encoded bytes
+    sprintf(cmd, "U%c%c%c", ExecuteJobInBuffer, diskTrack, 1);
+#endif
+
+        // for each track do 1 initialisation and then
+        // several measurements
+    timerValue = 0;
+    for(mNo = 0; mNo <= count; mNo++)
+    {
+        lastTvalue = timerValue;
+
+#if _ASCII_PARAMETER_PASSING
+        if( cbm_exec_command(HandleDevice, DeviceAddress, cmd, strlen(cmd))
+            != 0) return -1.0;
+#else
+        if( cbm_exec_command(HandleDevice, DeviceAddress, cmd, 4)
+            != 0) return -1.0;
+#endif
+        SETSTATEDEBUG((void)0);
+
+            // wait for job to finish
+        if( cbm_device_status(HandleDevice, DeviceAddress, insts, sizeof(insts)) )
+        {
+            printf("%s\n", insts);
+        }
+
+        if( cbm_download(HandleDevice, DeviceAddress,
+                     timerShotMain, sizeof(struct Timer24bitValues),
+                     (__u_char *) & T24Sample, sizeof(T24Sample))
+             < 0) return -1.0;
+
+            // read out sample that was shot by the jobcode
+        timerValue = reconstruct_v32bitInc(T24Sample);
+
+        if(mNo > 0){
+            lastTvalue = timerValue - lastTvalue;
+            printf("%6u ", lastTvalue);
+#if _MINMAX_VALUES_PRINTOUT
+            if(lastTvalue > dMax) dMax = lastTvalue;
+            if(lastTvalue < dMin) dMin = lastTvalue;
+#endif
+        }
+        else
+        {
+            firstTvalue = timerValue;
+            printf(" %2d | %10u ||", diskTrack, timerValue);
+        }
+    }
+#if _MINMAX_VALUES_PRINTOUT
+    printf(" %6u..%6u=%2u", dMin, dMax, dMax - dMin);
+#endif
+    return (float)(timerValue - firstTvalue) / (mNo - 1);
+}
+
+
 int ARCH_MAINDECL
 main(int argc, char *argv[])
 {
     int status = 0;
-    unsigned char cmd[40], insts[40], endtrack = 35, retries = 5;
-    unsigned int track, mNo, timerValue, lastTvalue, firstTvalue;
+    unsigned char cmd[40], endtrack = 35, retries = 5;
+    __u_char track;
     char c, *arg;
-    int berror = 0;
     float meanTime;
+    int berror = 0;
 
     struct option longopts[] =
     {
@@ -269,97 +349,82 @@ main(int argc, char *argv[])
            "Press <Enter>, when ready or press <CTRL>-C to abort.\r", drive, drive);
     getchar();
 
-    if(cbm_driver_open(&fd, 0) == 0)
+    if(cbm_driver_open(&fd, 0) == 0) do
     {
         signal(SIGINT, handle_CTRL_C);
 
-        cbm_upload(fd, drive, loadAddress, cbmrpm41, sizeof(cbmrpm41));
+        SETSTATEDEBUG((void)0);
+        if( cbm_upload(fd, drive, sizeof(cbmDev_StartAddress), cbmrpm41, sizeof(cbmrpm41))
+            != sizeof(cbmrpm41)) break;
 
             // location of the new U vector user commands table
         sprintf(cmd, "%c%c", UcmdTblAddr & 0xFF, UcmdTblAddr >> 8);
             // install the new U vector table
-        cbm_upload(fd, drive, 0x006b, cmd, 2);
+        SETSTATEDEBUG((void)0);
+        if( cbm_upload(fd, drive, sizeof(cbmDev_UxCMDtVector), cmd, 2)
+            != 2) break;
 
             // execute Ux command behind the symbolic name Init23_BitTimersStd
-        cbm_sendUxCommand(fd, drive, Init23_BitTimersStd);
+        SETSTATEDEBUG((void)0);
+        if( cbm_sendUxCommand(fd, drive, Init23_BitTimersStd)
+            != 0) break;
 
             // read disk ID and initialise other parameters
             // from the currently inserted disk into the
             // drive's RAM locations
-        cbm_exec_command(fd, drive, "I0", 2);
+        SETSTATEDEBUG((void)0);
+        if( cbm_exec_command(fd, drive, "I0", 2)
+            != 0) break;
 
-        berror = cbm_device_status(fd, drive, insts, sizeof(insts));
+        SETSTATEDEBUG((void)0);
+        berror = cbm_device_status(fd, drive, cmd, sizeof(cmd));
         if(berror && status)
         {
-            printf("%s\n", insts);
+            printf("%s\n", cmd);
         }
 
-        printf(" TR | timer abs. ||delta1,delta2,...                 | mean DLT |   mean rpm\n"
-               "----+------------++------+---------------------------+----------+------------\n");
+        printf(" TR | timer abs. ||delta1,delta2,...                 |mean delta|mean rpm\n"
+               "----+------------++------+---------------------------+----------+---------\n");
+#if 1
         for(track=1; track <= endtrack; track++)
         {
-            SETSTATEDEBUG((void)0);
-
-#if _ASCII_PARAMETER_PASSING
-                // must be: "Ux <track> <sector>"
-                // sprintf(cmd, "U%c %d %d", ExecuteJobInBuffer, i, i & 0x0f);
-            sprintf(cmd, "U%c %d 0", ExecuteJobInBuffer, track);
-#else
-                // must be: "Ux<track><sector>" with directly encoded bytes
-            sprintf(cmd, "U%c%c%c", ExecuteJobInBuffer, track, 1);
-#endif
-
-                // for each track do 1 initialisation and then
-                // several measurements
-            timerValue = 0;
-            for(mNo = 0; mNo <= retries; mNo++)
-            {
-                lastTvalue = timerValue;
-
-#if _ASCII_PARAMETER_PASSING
-                cbm_exec_command(fd, drive, cmd, strlen(cmd));
-#else
-                cbm_exec_command(fd, drive, cmd, 4);
-#endif
-                SETSTATEDEBUG((void)0);
-
-                    // wait for job to finish
-                if( cbm_device_status(fd, drive, insts, sizeof(insts)) )
-                {
-                    printf("%s\n", insts);
-                }
-
-                    // read out sample that was shot by the jobcode
-                timerValue = cbm_readTimer(fd, drive);
-
-                if(mNo == 0)
-                {
-                    firstTvalue = timerValue;
-                    printf(" %2d | %10u ||", track, timerValue);
-                } else {
-                    printf("%6u|", timerValue - lastTvalue);
-                }
-            }
-            meanTime = (float)(timerValue - firstTvalue) / (mNo - 1);
-            printf(" %8.1f | %10.6f\n", meanTime, 60000000.0 / meanTime);
+            meanTime = measure_2cyleJitter(fd, drive, track, retries);
+            if(meanTime < 0.0) break;
+            printf(" %8.1f | %7.3f\n", meanTime, 60000000.0 / meanTime);
         }
+#else
+        for( track=17; track<=31; track += (track == 18 ? 12 : 1) ) // 17,18,30,31 for all zones
+        {
+            // meanTime = 
+            measure_2cyleJitter(fd, drive, track, retries);
+            // printf(" %8.1f | %10.6f\n", meanTime, 60000000.0 / meanTime);
+            printf("\n");
+        }
+#endif
 
-        cbm_sendUxCommand(fd, drive, ResetVIA2ShiftRegConfig);
-        cbm_sendUxCommand(fd, drive,      ResetUxVectorTable);
+        if( cbm_sendUxCommand(fd, drive, ResetVIA2ShiftRegConfig)
+            !=0 ) break;
+        if( cbm_sendUxCommand(fd, drive,      ResetUxVectorTable)
+            !=0 ) break;
 
-        cbm_exec_command(fd, drive, "I", 2);
+        if( cbm_exec_command(fd, drive, "I", 2)
+            !=0 ) break;
 
         if(!berror && status)
         {
-            cbm_device_status(fd, drive, insts, sizeof(insts));
-            printf("%s\n", insts);
+            cbm_device_status(fd, drive, cmd, sizeof(cmd));
+            printf("%s\n", cmd);
         }
         cbm_driver_close(fd);
         return 0;
-    }
+    } while(0);
     else
     {
         arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
         return 1;
     }
+        // if the do{}while(0) loop is exited with a break, we get here
+    arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
+    cbm_driver_close(fd);
+    return 1;
 }
