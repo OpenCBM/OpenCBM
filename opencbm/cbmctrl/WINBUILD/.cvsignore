@@ -7,4 +7,3 @@ build*.log
 build*.err
 build*.wrn
 *.plg
-Makefile.inc
