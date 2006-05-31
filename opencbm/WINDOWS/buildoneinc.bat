@@ -2,7 +2,7 @@
 rem start buildoneinc
 
 rem set default local settings (not controlled by CVS)
-if exist ..\..\..\DDKBUILD_LOCAL.BAT call ..\..\..\DDKBUILD_LOCAL.BAT
+if exist %1\..\DDKBUILD_LOCAL.BAT call %1\..\DDKBUILD_LOCAL.BAT
 
 
 if not defined BASH set BASH=bash
