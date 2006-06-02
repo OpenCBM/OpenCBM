@@ -10,14 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.6 2006-05-31 14:07:04 wmsr Exp $";
-#endif
-
-#if _MSC_VER >= 1400
-    /* as long as we did not implement arch dependent secure
-     * implementations of standard libc functions
-     */
-#   pragma warning( disable : 4996 )
+    "@(#) $Id: cbmrpm41.c,v 1.7 2006-06-02 22:51:55 wmsr Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -126,34 +119,6 @@ cbm_sendUxCommand(CBM_FILE HandleDevice, __u_char DeviceAddress, enum UcmdVector
     return cbm_exec_command(HandleDevice, DeviceAddress, UxCmdBuffer, 2);
 }
 
-static int
-cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
-             unsigned short remoteBuf, __u_char numBytes,
-             __u_char *localBuf, int lBufSize)
-{
-    unsigned char cmd[8];
-    int rv;
-
-        // always get the trailing '\r' also, if possible
-    if (lBufSize > numBytes) lBufSize = 1 + numBytes;
-
-        // the trailing '\r' is needed. In one scenario  numBytes
-        // became '\r' which was misinterpreted as an end-of-line
-        // by the IEC device and therefore was ignored.
-    sprintf(cmd, "M-R%c%c%c\r", remoteBuf & 0xFF, remoteBuf >> 8, numBytes);
-                                                                            SETSTATEDEBUG((void)0);
-    if( cbm_exec_command (HandleDevice, DeviceAddress, cmd, sizeof(cmd)) != 0) return -1;
-                                                                            SETSTATEDEBUG((void)0);
-    if( cbm_talk         (HandleDevice, DeviceAddress, 15) != 0) return -1;
-                                                                            SETSTATEDEBUG((void)0);
-    rv = cbm_raw_read(HandleDevice, localBuf, lBufSize);
-//    printf("\n::cbm_download with buf=0x%08x, size=0x%02x, numbytes=0x%02x, result=0x%02x\n", localBuf, lBufSize, numBytes, rv);
-                                                                            SETSTATEDEBUG((void)0);
-    if( cbm_untalk       (HandleDevice) != 0) return -1;
-                                                                            SETSTATEDEBUG((void)0);
-    return rv;
-}
-
 static unsigned int
 reconstruct_v32bitInc(struct Timer24bitValues TimerRegisters)
 {
@@ -254,9 +219,9 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char disk
         }
 
         if( cbm_download(HandleDevice, DeviceAddress,
-                     timerShotMain, sizeof(struct Timer24bitValues),
-                     (__u_char *) & T24Sample, sizeof(T24Sample))
-             < 0) return -1.0;
+                     timerShotMain, (__u_char *) & T24Sample,
+                     sizeof(T24Sample))
+             != sizeof(T24Sample)) return -1.0;
 
             // read out sample that was shot by the jobcode
         timerValue = reconstruct_v32bitInc(T24Sample);

@@ -1,6 +1,6 @@
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.4 2006-05-23 12:01:05 wmsr Exp $";
+    "@(#) $Id: main.c,v 1.5 2006-06-02 22:51:55 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -11,13 +11,6 @@ static char *rcsid =
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-
-#if _MSC_VER >= 1400
-    /* as long as we did not implement arch dependent secure
-     * implementations of standard libc functions
-     */
-#   pragma warning( disable : 4996 )
-#endif
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE

@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmforng.c,v 1.11 2006-05-20 08:35:47 wmsr Exp $";
+    "@(#) $Id: cbmforng.c,v 1.12 2006-06-02 22:51:55 wmsr Exp $";
 #endif
 
 #include "cbmforng.h"
@@ -115,76 +115,6 @@ static void prepareFmtPattern(struct FormatParameters *GCRbuf, unsigned char pat
     source[3]=HD2_fill;
     gcr_4_to_5_encode(source, GCRbuf->CHDR2ND, sizeof(source), sizeof(GCRbuf->CHDR2ND));
 }
-
-#if defined(DebugFormat) && DebugFormat!=0
-static int cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress, 
-                        int DriveMemAddress, void *Program, size_t Size)
-{
-    char *bufferToProgram = Program;
-
-    unsigned char command[] = { 'M', '-', 'R', ' ', ' ', ' ' };
-    size_t i;
-    int rv = 0;
-    int c;
-
-    for(i = 0; i < Size; i += 32)
-    {
-        cbm_listen(HandleDevice, DeviceAddress, 15);
-
-        // Calculate how much bytes are left
-
-        c = Size - i;
-
-        // Do we have more than 32? Than, restrict to 32
-
-        if (c > 32)
-        {
-            c = 32;
-        }
-
-        // The command M-R consists of:
-        // M-R <lowaddress> <highaddress> <count>
-        // build that command:
-
-        command[3] = (unsigned char) (DriveMemAddress % 256);
-        command[4] = (unsigned char) (DriveMemAddress / 256);
-        command[5] = (unsigned char) c; 
-
-        // Write the M-W command to the drive...
-
-        cbm_raw_write(HandleDevice, command, sizeof(command));
-
-        // The UNLISTEN is the signal for the drive 
-        // to start execution of the command
-
-        cbm_unlisten(HandleDevice);
-
-        cbm_talk(HandleDevice, DeviceAddress, 15);
-
-        // ... as well as the (up to 32) data bytes
-
-        cbm_raw_read(HandleDevice, bufferToProgram, c);
-
-        // Now, advance the pointer into drive memory
-        // as well to the program in PC's memory in case we
-        // might need to use it again for another M-W command
-
-        DriveMemAddress += c;
-        bufferToProgram += c;
-
-        // Advance the return value of send bytes, too.
-
-        rv += c;
-
-        // The UNLISTEN is the signal for the drive 
-        // to start execution of the command
-
-        cbm_untalk(HandleDevice);
-    }
-
-    return rv;
-}
-#endif
 
 int ARCH_MAINDECL main(int argc, char *argv[])
 {

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.3 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: upload.c,v 1.4 2006-06-02 22:51:55 wmsr Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -130,6 +130,92 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
         // to start execution of the command
 
         cbmarch_unlisten(HandleDevice);
+    }
+
+    FUNC_LEAVE_INT(rv);
+}
+
+/*! \brief Download data from a floppy's drive memory.
+
+ This function reads data from the drive's memory via
+ use of "M-R" commands.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param DeviceAddress
+   The address of the device on the IEC serial bus. This
+   is known as primary address, too.
+
+ \param DriveMemAddress
+   The address in the drive's memory where the program is to be
+   stored.
+   
+ \param StoreBuffer
+   Pointer to a byte buffer where the data from the drive's
+   memory is stored.
+
+ \param Size
+   The size of the data block to be stored, in bytes.
+
+ \return
+   Returns the number of bytes written into the storage buffer.
+   If it does not equal Size, than an error occurred.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+int CBMAPIDECL
+cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress, 
+             int DriveMemAddress, void *const Buffer, size_t Size)
+{
+    __u_char command[] = { 'M', '-', 'R', ' ', ' ', '\0', '\r' };
+    __u_char *StoreBuffer = Buffer;
+
+    size_t i;
+    int rv = 0;
+    int c;
+
+    FUNC_ENTER();
+
+    DBG_ASSERT(sizeof(command) == 7);
+
+    for(i = 0; i < Size; i += 0x100)
+    {
+        // Calculate how much bytes are left
+        c = Size - i;
+
+        // Do we have more than 256? Then, restrict to 256
+        if (c > 0x100)
+        {
+            c = 0x100;
+        }
+
+        // The command M-R consists of:
+        // M-R <lowaddress> <highaddress> <count> '\r'
+        // build that command:
+        command[3] = (__u_char) (DriveMemAddress & 0xFF);   // 0x100 becomes 0x00
+        command[4] = (__u_char) (DriveMemAddress >>   8);
+        command[5] = (__u_char) (c & 0xFF); 
+
+        // Write the M-R command to the drive...
+        cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command));
+
+        cbmarch_talk(HandleDevice, DeviceAddress, 15);
+
+        // now read the (up to 256) data bytes
+        // and advance the return value of send bytes, too.
+        rv += cbmarch_raw_read(HandleDevice, StoreBuffer, c);
+
+        // Now, advance the pointer into drive memory
+        // as well to the program in PC's memory in case we
+        // might need to use it again for another M-W command
+        DriveMemAddress += c;
+        StoreBuffer     += c;
+
+        // The UNTALK is the signal for end of transmission
+        cbmarch_untalk(HandleDevice);
     }
 
     FUNC_LEAVE_INT(rv);

@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: o65.c,v 1.2 2006-05-23 12:01:05 wmsr Exp $";
+    "@(#) $Id: o65.c,v 1.3 2006-06-02 22:51:55 wmsr Exp $";
 #endif
 
 /*! Mark: We are in user-space (for debug.h) */
@@ -24,13 +24,6 @@ static char *rcsid =
 
 #include "o65.h"
 #include "o65_int.h"
-
-#if _MSC_VER >= 1400
-    /* as long as we did not implement arch dependent secure
-     * implementations of standard libc functions
-     */
-#   pragma warning( disable : 4996 )
-#endif
 
 #if 1
  #define DBG_O65_SHOW(_x_)              DBG_PRINT(_x_)

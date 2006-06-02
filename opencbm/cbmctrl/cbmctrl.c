@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.28 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.29 2006-06-02 22:51:54 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -295,6 +295,41 @@ static int do_command_p(CBM_FILE fd, char *argv[])
 }
 
 /*
+ * send device command, but convert from convert from
+ * single bytes into a command string first.
+ */
+static int do_command_b(CBM_FILE fd, char *argv[])
+{
+    char *tail, cmd[42];
+    int i, c;
+
+    argv++;
+    for( i = 0; (i < 40) && (argv[i] != NULL) ;i++ )
+    {
+        c =  strtol(argv[i], &tail, 0);
+        if(c < 0 || c > 0xff || *tail)
+        {
+            arch_error(0, 0, "invalid byte: %s", argv[i]);
+            return 1;
+        }
+        cmd[i] = (char)c;
+    }
+    argv--;
+
+    cmd[i++] = '\r';    // needed, when the last byte is a '\r'
+    cmd[i]   = '\0';
+
+    c = cbm_listen(fd, arch_atoc(argv[0]), 15);
+    if(c == 0)
+    {
+        cbm_raw_write(fd, cmd, i);
+        c = cbm_unlisten(fd);
+    }
+
+    return c;
+}
+
+/*
  * display directory
  */
 static int do_dir(CBM_FILE fd, char *argv[])
@@ -348,10 +383,18 @@ static int do_dir(CBM_FILE fd, char *argv[])
  */
 static int do_download(CBM_FILE fd, char *argv[])
 {
+    // const static char monkey[]={"¸,ø¤*º°´`°º*¤ø,¸"};     // for fast moves
+    // const static char monkey[]={"\\|/-"};    // from cbmcopy
+    // const static char monkey[]={"-\\|/"};    // from libtrans (reversed)
+    // const static char monkey[]={"\\-/|"};    // from cbmcopy  (reversed)
+    // const static char monkey[]={"-/|\\"};       // from libtrans
+    // const static char monkey[]={",;:!^*Oo"};// for fast moves
+    const static char monkey[]={",oO*^!:;"};// for fast moves
+
     unsigned char unit;
     unsigned short c;
-    int addr, count, i, rv = 0;
-    char *tail, buf[32], cmd[7];
+    int addr, count, rv = 0;
+    char *tail, buf[256];
     FILE *f;
 
     unit = arch_atoc(argv[0]);
@@ -394,29 +437,26 @@ static int do_download(CBM_FILE fd, char *argv[])
         return 1;
     }
 
-    for(i = 0; (rv == 0) && (i < count); i+=32)
+        // download in chunks of sizeof(buf) (currently: 256) bytes
+    while(count > 0)
     {
-        c = count - i;
-        if(c > 32) 
+        c = (count / sizeof(buf)) % (sizeof(monkey) - 1);
+        fprintf(stderr, (c != 0) ? "\b%c" : "\b.%c" , monkey[c]);
+        fflush(stderr);
+
+        c = (count > sizeof(buf)) ? sizeof(buf) : count;
+
+        if(c != cbm_download(fd, unit, addr, buf, c))
         {
-            c = 32;
+            rv = 1;
+            break;
         }
-        sprintf(cmd, "M-R%c%c%c", addr%256, addr/256, c);
-        cbm_listen(fd, unit, 15);
-        rv = cbm_raw_write(fd, cmd, 6) == 6 ? 0 : 1;
-        cbm_unlisten(fd);
-        if(rv == 0)
-        {
-            addr += c;
-            cbm_talk(fd, unit, 15);
-            rv = cbm_raw_read(fd, buf, c) == c ? 0 : 1;
-            cbm_untalk(fd);
-            if(rv == 0)
-            {
-                fwrite(buf, 1, c, f);
-            }
-        }
+        fwrite(buf, 1, c, f);
+
+        addr  += sizeof(buf);
+        count -= sizeof(buf);
     }
+
     fclose(f);
     return rv;
 }
@@ -797,6 +837,14 @@ static struct prog prog_table[] =
         "<cmdstr> is the command to execute in the drive.\n"
         "NOTE: You have to give the commands in lower-case letters.\n"
         "      Upper case will NOT work!" },
+
+    {1, "bcommand", do_command_b, 2, 41, "<device> <cmd1> [<cmd2> ... <cmd40>]",
+        "same as command, but the command string is given in single bytes.",
+        "This command issues a command to a specific drive.\n\n"
+        "<device>   is the device number of the drive.\n\n"
+        "<cmd1..40> are byte, the command string is constructed from.\n"
+        "NOTE: Single bytes can be given as decimal or sedecimal (0x prefix) "
+        "values" },
 
     {1, "dir"     , do_dir     , 1, 1, "<device>",
         "output the directory of the disk in the specified drive",

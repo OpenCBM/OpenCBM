@@ -1,19 +1,12 @@
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: turbo.c,v 1.3 2006-05-23 12:01:05 wmsr Exp $";
+    "@(#) $Id: turbo.c,v 1.4 2006-06-02 22:51:55 wmsr Exp $";
 #endif
 
 #include "libtrans.h"
 #include "libtrans_int.h"
 
 #include <stdio.h>
-
-#if _MSC_VER >= 1400
-    /* as long as we did not implement arch dependent secure
-     * implementations of standard libc functions
-     */
-#   pragma warning( disable : 4996 )
-#endif
 
 static const unsigned char turbomain_drive_prog[] = {
 #include "turbomain.inc"
@@ -207,25 +200,19 @@ libopencbmtransfer_read_write_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
                                   __u_char Buffer[], unsigned int MemoryAddress, unsigned int Length,
                                   ll_read_write_mem function)
 {
+    const static char monkey[]={",oO*^!:;"};// for fast moves
+
     FUNC_ENTER();
 
     // If we have to transfer more than one page, process the complete pages first
                                                                         SETSTATEDEBUG(stDebugLibOCTBlockCount = 0);
     while (Length >= 0x100)
     {
-        char *statstr;
-                                                                        SETSTATEDEBUG(stDebugLibOCTBlockCount++);
-        //fprintf(stderr, "+"); fflush(stderr);
-        switch ( (Length >> 8) & 3 )
-        {
-            case 0:  statstr = "\010.-"; break;
-            case 1:  statstr = "\010/";  break;
-            case 2:  statstr = "\010|";  break;
-            default: statstr = "\010\\";
-        }
-        fprintf(stderr, "%s",statstr);
+        int c = (Length >> 8) % (sizeof(monkey) - 1);
+        fprintf(stderr, (c != 0) ? "\b%c" : "\b.%c" , monkey[c]);
         fflush(stderr);
 
+                                                                        SETSTATEDEBUG(stDebugLibOCTBlockCount++);
         function(HandleDevice, DeviceAddress, Buffer, MemoryAddress, 0x00);
 
         Buffer += 0x100;
