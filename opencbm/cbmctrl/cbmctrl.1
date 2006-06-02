@@ -1,4 +1,4 @@
-.\" $Id: cbmctrl.1,v 1.9 2006-05-20 08:35:47 wmsr Exp $
+.\" $Id: cbmctrl.1,v 1.10 2006-06-02 23:19:44 wmsr Exp $
 .\"
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
@@ -174,6 +174,11 @@ understands the following subcommand actions
 .TP 10
 .B pcommand
 \- Same as command, with ASCII to PETSCII conversion
+.br
+.ns
+.TP 10
+.B bcommand
+\- Like command, command string given as single bytes
 .br
 .ns
 .TP 10
@@ -576,6 +581,19 @@ will be converted too and thus corrupts the stream.
 .RE
 .PD
 .RE
+.TP
+.BI bcommand " <device> <cmd1> [<cmd2> ... <cmd40>]"
+The
+.B pcommand
+action is the very same as the
+.B command
+action and the
+.I <device>
+parameter acts the same. The difference is that the command string does not
+consist of actually a string, but single bytes given by
+.IR <cmd1> " up to " <cmd40> "."
+The byte values can either be denoted as decimal values or as sedecimal
+ones, if they are prefixed by 0x or 0X.
 .TP
 .BI dir " <device>"
 Display the directory from the disk in the specified disk drive

@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.29 2006-06-02 22:51:54 wmsr Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.30 2006-06-02 23:19:44 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -842,7 +842,7 @@ static struct prog prog_table[] =
         "same as command, but the command string is given in single bytes.",
         "This command issues a command to a specific drive.\n\n"
         "<device>   is the device number of the drive.\n\n"
-        "<cmd1..40> are byte, the command string is constructed from.\n"
+        "<cmd1..40> are the bytes, the command string is constructed from.\n"
         "NOTE: Single bytes can be given as decimal or sedecimal (0x prefix) "
         "values" },
 
