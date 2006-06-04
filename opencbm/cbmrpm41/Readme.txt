@@ -40,11 +40,11 @@ Some of the features implemented in the rewritten  6502  routine:
 
 
 * Possible applications for the high precision timer system
-    + measuring out track-to-track alignment
+    + measuring out track-to-track alignment (done as job ID 2)
     + measuring out on-track sector distances
     + measuring out on-track SYNC lengths as well as distances
     + measuring mean bitrates
     + measuring sector distances (on-track) and sector distribution
 
 
-Wolfgang Moser, 2006-05-31
+Wolfgang Moser, 2006-06-04

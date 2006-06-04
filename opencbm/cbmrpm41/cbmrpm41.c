@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.7 2006-06-02 22:51:55 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.8 2006-06-04 11:47:23 wmsr Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -74,9 +74,22 @@ help()
         "  -h, --help       display this help and exit\n"
         "  -V, --version    display version information and exit\n"
         "\n"
-        "  -x, --extended   measure out a 40 track disk\n"
+        "  -j, --job=JOBID  measurement job to do:\n"
+        "                       1 - detailed RPM printout (default),\n"
+        "                       2 - track synchronization\n"
+        "\n"
         "  -s, --status     display drive status after the measurements\n"
-        "  -r, --retries n  number of measurement retries for each track\n"
+        "  -x, --extended   measure out a 40 track disk\n"
+        "  -r, --retries=n  number of measurement retries for each track\n"
+        "\n"
+        "  -b, --begin-track=TRACK  set start track (1 <= start <= end)\n"
+        "  -e, --end-track=TRACK    set end track  (start <= end <= 42)\n"
+        /*
+        "\n"
+        "  -q, --quiet              quiet output\n"
+        "  -v, --verbose            control verbosity (repeatedly, up to 3 times)\n"
+        "  -n, --no-progress        do not display progress information\n"
+        */
         "\n"
     );
 }
@@ -175,11 +188,14 @@ reconstruct_v32bitInc(struct Timer24bitValues TimerRegisters)
     return ~(ModulusDecrementor + vTimer);
 }
 
-static float
-measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char diskTrack, __u_char count)
+static int
+measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
+                    __u_char diskTrack, __u_char count,
+                    unsigned int *pStartTvalue, unsigned int *pEndTvalue,
+                    int printDeltas)
 {
     unsigned char cmd[10], insts[40];
-    unsigned int mNo, timerValue, lastTvalue, firstTvalue;
+    unsigned int mNo, timerValue, lastTvalue;
 #if _MINMAX_VALUES_PRINTOUT
     unsigned int dMin=~0, dMax=0;
 #endif
@@ -205,10 +221,10 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char disk
 
 #if _ASCII_PARAMETER_PASSING
         if( cbm_exec_command(HandleDevice, DeviceAddress, cmd, strlen(cmd))
-            != 0) return -1.0;
+            != 0) return 1;
 #else
         if( cbm_exec_command(HandleDevice, DeviceAddress, cmd, 4)
-            != 0) return -1.0;
+            != 0) return 1;
 #endif
         SETSTATEDEBUG((void)0);
 
@@ -221,14 +237,14 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char disk
         if( cbm_download(HandleDevice, DeviceAddress,
                      timerShotMain, (__u_char *) & T24Sample,
                      sizeof(T24Sample))
-             != sizeof(T24Sample)) return -1.0;
+             != sizeof(T24Sample)) return 1;
 
             // read out sample that was shot by the jobcode
         timerValue = reconstruct_v32bitInc(T24Sample);
 
         if(mNo > 0){
             lastTvalue = timerValue - lastTvalue;
-            printf("%6u ", lastTvalue);
+            if( printDeltas ) printf("%6u ", lastTvalue);
 #if _MINMAX_VALUES_PRINTOUT
             if(lastTvalue > dMax) dMax = lastTvalue;
             if(lastTvalue < dMin) dMin = lastTvalue;
@@ -236,38 +252,136 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char disk
         }
         else
         {
-            firstTvalue = timerValue;
-            printf(" %2d | %10u ||", diskTrack, timerValue);
+            *pStartTvalue = timerValue;
+            if( printDeltas ) printf(" %10u ||", timerValue);
         }
     }
 #if _MINMAX_VALUES_PRINTOUT
-    printf(" %6u..%6u=%2u", dMin, dMax, dMax - dMin);
+    if( printDeltas ) printf(" %6u..%6u=%2u", dMin, dMax, dMax - dMin);
 #endif
-    return (float)(timerValue - firstTvalue) / (mNo - 1);
+
+    *pEndTvalue = timerValue;
+    return 0;
 }
+
+int
+do_RPMmeasurment(__u_char start, __u_char end, __u_char retries)
+{
+    __u_char track;
+    unsigned int firstT, lastT;
+    float meanTime;
+
+    printf(" TR | timer abs. ||delta1,delta2,...                 |mean delta|mean rpm\n"
+           "  # |      (~us) || (~us), (~us),...                 |     (~us)| (1/min)\n"
+           "----+------------++------+---------------------------+----------+---------\n");
+    for(track = start; track <= end; track++)
+    {
+        printf(" %2d |", track);
+        if( measure_2cyleJitter(fd, drive, track, retries,
+            &firstT, &(lastT), 1
+            ) != 0) return 1;
+
+        meanTime = (float)(lastT - firstT) / retries;
+        printf(" %8.1f | %7.3f\n", meanTime, 60000000.0 / meanTime);
+    }
+
+    return 0;
+}
+
+
+int
+do_SKEWmeasurment(__u_char start, __u_char end, __u_char retries)
+{
+    __u_char track;
+    unsigned int firstT, lastT, prevFirstT, prevLastT;
+    float meanDelta, skewDelta;
+
+    printf(" Tracks |mean delta|meanrpm||  skew| skew mod|  degree|  radians\n"
+           "    (#) |     (~us)|(1/min)|| (~us)|    (~us)|     (o)|    (rad)\n"
+           "--------+----------+-------++------+---------+--------+----------\n");
+
+
+    track = start;
+
+    if(track <= end)
+    {
+        if( measure_2cyleJitter(fd, drive, track, retries,
+            &firstT, &(lastT), 0
+            ) != 0) return 1;
+
+        prevLastT  = firstT;
+        prevFirstT = (prevLastT << 1) - lastT;
+
+        switch(1)
+        {
+            do {
+                prevFirstT = firstT;
+                prevLastT  = lastT;
+
+                if( measure_2cyleJitter(fd, drive, track, retries,
+                    &firstT, &(lastT), 0
+                    ) != 0) return 1;
+            case 1:
+
+                meanDelta = (float)(lastT - firstT + prevLastT - prevFirstT) / (retries << 1);
+                printf(" %2d..%2d |%10.3f|%7.3f||", track - 1, track, meanDelta, 60000000.0f * retries / (lastT - firstT));
+
+                skewDelta = (float)fmod(firstT - prevLastT, meanDelta);
+                    // move from range 0...1 into range -0.5...0.5
+                if( (2 * skewDelta) > meanDelta ) skewDelta -= meanDelta;
+                printf("%6u|%9.1f|", firstT - prevLastT, skewDelta);
+
+                skewDelta /= meanDelta;     // relative fractional value 0...1.0
+                printf("%8.3f|%9.6f\n", skewDelta * 360, skewDelta * 2 * 3.14159265358979323846);
+
+                track++;
+            } while(track <= end);
+        }
+    }
+
+    return 0;
+}
+
 
 
 int ARCH_MAINDECL
 main(int argc, char *argv[])
 {
     int status = 0;
-    unsigned char cmd[40], endtrack = 35, retries = 5;
-    __u_char track;
+        /*
+         * FIXME: cbmrpm41 doesn not really support extended disks
+         *        with more than 35 tracks on its own. It relies on
+         *        the capabilities of a drive extension or replacement
+         *        DOS ROM for this.
+         *        The drive routines need enhancements like a custom
+         *        step motor routine to support more than 35 tracks in
+         *        each and every drive.
+         */
+    __u_char cmd[40], job = 1, begintrack = 1, endtrack = 35, retries = 5;
     char c, *arg;
-    float meanTime;
     int berror = 0;
 
     struct option longopts[] =
     {
         { "help"       , no_argument      , NULL, 'h' },
         { "version"    , no_argument      , NULL, 'V' },
-        { "extended"   , no_argument      , NULL, 'x' },
-        { "status"     , no_argument      , NULL, 's' },
+        { "job"        , no_argument      , NULL, 'j' },
         { "retries"    , required_argument, NULL, 'r' },
+        { "extended"   , no_argument      , NULL, 'x' },
+        { "retries"    , required_argument, NULL, 'r' },
+        { "begin-track", required_argument, NULL, 'b' },
+        { "end-track"  , required_argument, NULL, 'e' },
+/*
+        { "quiet"      , no_argument      , NULL, 'q' },
+        { "verbose"    , no_argument      , NULL, 'v' },
+        { "no-progress", no_argument      , NULL, 'n' },
+*/
         { NULL         , 0                , NULL, 0   }
     };
 
-    const char shortopts[] ="hVxsr:";
+    // const char shortopts[] ="hVj:sr:xb:e:qvn";
+    const char shortopts[] ="hVj:sxr:b:e:";
+
 
     while((c=(unsigned char)getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
@@ -275,16 +389,23 @@ main(int argc, char *argv[])
         {
             case 'h': help();
                       return 0;
-            case 'V': printf("cbmrpm41 %s\n", OPENCBM_VERSION ", built on " __DATE__ " at " __TIME__ "\n");
+            case 'V': printf("cbmrpm41 Version %s\n", OPENCBM_VERSION ", built on " __DATE__ " at " __TIME__ "\n");
                       return 0;
+            case 'j': job = arch_atoc(optarg);
+                      break;
             case 's': status = 1;
                       break;
-            case 'x': endtrack = 40;
+            case 'x': begintrack = 1;
+                      endtrack = 40;
                       break;
 
             case 'r': retries = arch_atoc(optarg);
-                      if(retries<1)       retries= 1;
-                      else if(retries>63) retries=63;
+                      if(retries<1)       retries =  1;
+                      else if(retries>63) retries = 63;
+                      break;
+            case 'b': begintrack = arch_atoc(optarg);
+                      break;
+            case 'e': endtrack = arch_atoc(optarg);
                       break;
 
             default : hint(argv[0]);
@@ -306,11 +427,29 @@ main(int argc, char *argv[])
         fprintf(stderr, "Invalid drive number (%s)\n", arg);
         return 1;
     }
+    if(begintrack < 1)
+    {
+        fprintf(stderr, "Beginning track is less than 1, it should be 1 or greater.\n");
+        return 1;
+    }
+    if(endtrack > 42)
+    {
+        fprintf(stderr, "Ending track is greater than 42, it should be 42 or less.\n");
+        return 1;
+    }
+    if(begintrack > endtrack)
+    {
+        fprintf(stderr, "Beginning track is greater than ending track, it should be less or equal.");
+        return 1;
+    }
+
 
     SETSTATEDEBUG((void)0);
     printf("Please remove any diskettes used with production data on it. Insert a freshly\n"
            "formatted disk into drive %d; you can format a disk with e.g. the command:\n\n"
            "        cbmforng -o -v %d freshdisk,fd\n\n"
+           "If you desperately need to examine a production disk or even an original\n"
+           "diskette, then please protect the disk with a write protect adhesive label.\n\n"
            "Press <Enter>, when ready or press <CTRL>-C to abort.\r", drive, drive);
     getchar();
 
@@ -348,32 +487,24 @@ main(int argc, char *argv[])
             printf("%s\n", cmd);
         }
 
-        printf(" TR | timer abs. ||delta1,delta2,...                 |mean delta|mean rpm\n"
-               "----+------------++------+---------------------------+----------+---------\n");
-#if 1
-        for(track=1; track <= endtrack; track++)
+        switch(job)
         {
-            meanTime = measure_2cyleJitter(fd, drive, track, retries);
-            if(meanTime < 0.0) break;
-            printf(" %8.1f | %7.3f\n", meanTime, 60000000.0 / meanTime);
+        case 2:
+            if( do_SKEWmeasurment(begintrack, endtrack, retries)
+                != 0 ) continue;    // jump to begin of do{}while(0);
+            break;
+        default:
+            if( do_RPMmeasurment (begintrack, endtrack, retries)
+                != 0 ) continue;    // jump to begin of do{}while(0);
         }
-#else
-        for( track=17; track<=31; track += (track == 18 ? 12 : 1) ) // 17,18,30,31 for all zones
-        {
-            // meanTime = 
-            measure_2cyleJitter(fd, drive, track, retries);
-            // printf(" %8.1f | %10.6f\n", meanTime, 60000000.0 / meanTime);
-            printf("\n");
-        }
-#endif
 
         if( cbm_sendUxCommand(fd, drive, ResetVIA2ShiftRegConfig)
-            !=0 ) break;
+            != 0 ) break;
         if( cbm_sendUxCommand(fd, drive,      ResetUxVectorTable)
-            !=0 ) break;
+            != 0 ) break;
 
         if( cbm_exec_command(fd, drive, "I", 2)
-            !=0 ) break;
+            != 0 ) break;
 
         if(!berror && status)
         {
