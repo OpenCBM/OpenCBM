@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.9 2006-06-11 17:30:16 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.10 2006-06-11 18:31:49 wmsr Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -293,7 +293,7 @@ do_RPMmeasurment(__u_char start, __u_char end, __u_char retries)
             ) != 0) return 1;
 
         meanTime = (float)(measureGroup.endValue - measureGroup.startValue) / measureGroup.trueNumberOfIntervals;
-        printf(" %8.1f | %7.3f\n", meanTime, 60000000.0 / meanTime);
+        printf(" %8.1f%c| %7.3f\n", meanTime, (retries == measureGroup.trueNumberOfIntervals) ? '_' : 'c', 60000000.0 / meanTime);
     }
 
     return 0;
