@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.8 2006-06-04 11:47:23 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.9 2006-06-11 17:30:16 wmsr Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -44,6 +44,10 @@ const static int V1T2rec1 =    27081;       // --16-Bit timer (inverse of a mod 
 const static int V1T2rec2 =      121;       // -´
 const static int V2T2rec  =  8978432;       // 7.89-Bit timer (inverse of b mod a)
 
+typedef struct
+{
+    unsigned int startValue, endValue, trueNumberOfIntervals;
+} GroupOfMeasurements;
 
 #ifdef CBMRPM41_DEBUG
 static signed int debugLineNumber=0;
@@ -191,7 +195,7 @@ reconstruct_v32bitInc(struct Timer24bitValues TimerRegisters)
 static int
 measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
                     __u_char diskTrack, __u_char count,
-                    unsigned int *pStartTvalue, unsigned int *pEndTvalue,
+                    GroupOfMeasurements *pDeltaGroup,
                     int printDeltas)
 {
     unsigned char cmd[10], insts[40];
@@ -211,6 +215,8 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
         // must be: "Ux<track><sector>" with directly encoded bytes
     sprintf(cmd, "U%c%c%c", ExecuteJobInBuffer, diskTrack, 1);
 #endif
+
+    pDeltaGroup->trueNumberOfIntervals = 0;
 
         // for each track do 1 initialisation and then
         // several measurements
@@ -244,6 +250,11 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
         if(mNo > 0){
             lastTvalue = timerValue - lastTvalue;
+
+                // increase by the number of overflows
+            pDeltaGroup->trueNumberOfIntervals +=
+                (lastTvalue + 100000) / 200000;
+
             if( printDeltas ) printf("%6u ", lastTvalue);
 #if _MINMAX_VALUES_PRINTOUT
             if(lastTvalue > dMax) dMax = lastTvalue;
@@ -252,7 +263,7 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
         }
         else
         {
-            *pStartTvalue = timerValue;
+            pDeltaGroup->startValue = timerValue;
             if( printDeltas ) printf(" %10u ||", timerValue);
         }
     }
@@ -260,7 +271,7 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
     if( printDeltas ) printf(" %6u..%6u=%2u", dMin, dMax, dMax - dMin);
 #endif
 
-    *pEndTvalue = timerValue;
+    pDeltaGroup->endValue = timerValue;
     return 0;
 }
 
@@ -268,7 +279,7 @@ int
 do_RPMmeasurment(__u_char start, __u_char end, __u_char retries)
 {
     __u_char track;
-    unsigned int firstT, lastT;
+    GroupOfMeasurements measureGroup;
     float meanTime;
 
     printf(" TR | timer abs. ||delta1,delta2,...                 |mean delta|mean rpm\n"
@@ -278,10 +289,10 @@ do_RPMmeasurment(__u_char start, __u_char end, __u_char retries)
     {
         printf(" %2d |", track);
         if( measure_2cyleJitter(fd, drive, track, retries,
-            &firstT, &(lastT), 1
+            &measureGroup, 1
             ) != 0) return 1;
 
-        meanTime = (float)(lastT - firstT) / retries;
+        meanTime = (float)(measureGroup.endValue - measureGroup.startValue) / measureGroup.trueNumberOfIntervals;
         printf(" %8.1f | %7.3f\n", meanTime, 60000000.0 / meanTime);
     }
 
@@ -293,7 +304,7 @@ int
 do_SKEWmeasurment(__u_char start, __u_char end, __u_char retries)
 {
     __u_char track;
-    unsigned int firstT, lastT, prevFirstT, prevLastT;
+    GroupOfMeasurements measureGroup, prevMeasureGroup;
     float meanDelta, skewDelta;
 
     printf(" Tracks |mean delta|meanrpm||  skew| skew mod|  degree|  radians\n"
@@ -306,30 +317,36 @@ do_SKEWmeasurment(__u_char start, __u_char end, __u_char retries)
     if(track <= end)
     {
         if( measure_2cyleJitter(fd, drive, track, retries,
-            &firstT, &(lastT), 0
+            &measureGroup, 0
             ) != 0) return 1;
 
-        prevLastT  = firstT;
-        prevFirstT = (prevLastT << 1) - lastT;
+        prevMeasureGroup.endValue   = measureGroup.startValue;
+        prevMeasureGroup.startValue = ((measureGroup.startValue) << 1) -  measureGroup.endValue;
+        prevMeasureGroup.trueNumberOfIntervals = measureGroup.trueNumberOfIntervals;
 
         switch(1)
         {
             do {
-                prevFirstT = firstT;
-                prevLastT  = lastT;
+                prevMeasureGroup = measureGroup;
 
                 if( measure_2cyleJitter(fd, drive, track, retries,
-                    &firstT, &(lastT), 0
+                    &measureGroup, 0
                     ) != 0) return 1;
             case 1:
 
-                meanDelta = (float)(lastT - firstT + prevLastT - prevFirstT) / (retries << 1);
-                printf(" %2d..%2d |%10.3f|%7.3f||", track - 1, track, meanDelta, 60000000.0f * retries / (lastT - firstT));
+                // meanDelta = (float)(lastT - firstT + prevLastT - prevFirstT) / (retries << 1);
 
-                skewDelta = (float)fmod(firstT - prevLastT, meanDelta);
+                meanDelta = (float)(measureGroup.endValue - measureGroup.startValue +
+                                    prevMeasureGroup.endValue - prevMeasureGroup.startValue) /
+                            (measureGroup.trueNumberOfIntervals + prevMeasureGroup.trueNumberOfIntervals);
+                printf(" %2d..%2d |%10.3f|%7.3f||", track - 1, track, meanDelta,
+                       60000000.0f * measureGroup.trueNumberOfIntervals /
+                       (measureGroup.endValue - measureGroup.startValue));
+
+                skewDelta = (float)fmod(measureGroup.startValue - prevMeasureGroup.endValue, meanDelta);
                     // move from range 0...1 into range -0.5...0.5
                 if( (2 * skewDelta) > meanDelta ) skewDelta -= meanDelta;
-                printf("%6u|%9.1f|", firstT - prevLastT, skewDelta);
+                printf("%6u|%9.1f|", measureGroup.startValue - prevMeasureGroup.endValue, skewDelta);
 
                 skewDelta /= meanDelta;     // relative fractional value 0...1.0
                 printf("%8.3f|%9.6f\n", skewDelta * 360, skewDelta * 2 * 3.14159265358979323846);
