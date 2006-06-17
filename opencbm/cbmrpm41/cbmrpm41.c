@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.10 2006-06-11 18:31:49 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.11 2006-06-17 22:34:12 wmsr Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -81,6 +81,7 @@ help()
         "  -j, --job=JOBID  measurement job to do:\n"
         "                       1 - detailed RPM printout (default),\n"
         "                       2 - track synchronization\n"
+        "                       3 - RPM with linear regression and ANOVAR\n"
         "\n"
         "  -s, --status     display drive status after the measurements\n"
         "  -x, --extended   measure out a 40 track disk\n"
@@ -88,6 +89,7 @@ help()
         "\n"
         "  -b, --begin-track=TRACK  set start track (1 <= start <= end)\n"
         "  -e, --end-track=TRACK    set end track  (start <= end <= 42)\n"
+        "  -c, --sector=SECTOR      set trigger sector number (0 <= sector <= 16)\n"
         /*
         "\n"
         "  -q, --quiet              quiet output\n"
@@ -194,7 +196,7 @@ reconstruct_v32bitInc(struct Timer24bitValues TimerRegisters)
 
 static int
 measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
-                    __u_char diskTrack, __u_char count,
+                    __u_char diskTrack, __u_char sector, __u_char count,
                     GroupOfMeasurements *pDeltaGroup,
                     int printDeltas)
 {
@@ -210,10 +212,10 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
 #if _ASCII_PARAMETER_PASSING
         // must be: "Ux <track> <sector>"
         // sprintf(cmd, "U%c %d %d", ExecuteJobInBuffer, i, i & 0x0f);
-    sprintf(cmd, "U%c %d 0", ExecuteJobInBuffer, diskTrack);
+    sprintf(cmd, "U%c %d %d", ExecuteJobInBuffer, diskTrack, sector);
 #else
         // must be: "Ux<track><sector>" with directly encoded bytes
-    sprintf(cmd, "U%c%c%c", ExecuteJobInBuffer, diskTrack, 1);
+    sprintf(cmd, "U%c%c%c", ExecuteJobInBuffer, diskTrack, sector);
 #endif
 
     pDeltaGroup->trueNumberOfIntervals = 0;
@@ -275,8 +277,9 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
     return 0;
 }
 
+
 int
-do_RPMmeasurment(__u_char start, __u_char end, __u_char retries)
+do_RPMmeasurment(__u_char start, __u_char end, __u_char sec, __u_char retries)
 {
     __u_char track;
     GroupOfMeasurements measureGroup;
@@ -288,7 +291,7 @@ do_RPMmeasurment(__u_char start, __u_char end, __u_char retries)
     for(track = start; track <= end; track++)
     {
         printf(" %2d |", track);
-        if( measure_2cyleJitter(fd, drive, track, retries,
+        if( measure_2cyleJitter(fd, drive, track, sec, retries,
             &measureGroup, 1
             ) != 0) return 1;
 
@@ -299,9 +302,8 @@ do_RPMmeasurment(__u_char start, __u_char end, __u_char retries)
     return 0;
 }
 
-
 int
-do_SKEWmeasurment(__u_char start, __u_char end, __u_char retries)
+do_SKEWmeasurment(__u_char start, __u_char end, __u_char sec, __u_char retries)
 {
     __u_char track;
     GroupOfMeasurements measureGroup, prevMeasureGroup;
@@ -316,7 +318,7 @@ do_SKEWmeasurment(__u_char start, __u_char end, __u_char retries)
 
     if(track <= end)
     {
-        if( measure_2cyleJitter(fd, drive, track, retries,
+        if( measure_2cyleJitter(fd, drive, track, sec, retries,
             &measureGroup, 0
             ) != 0) return 1;
 
@@ -329,7 +331,7 @@ do_SKEWmeasurment(__u_char start, __u_char end, __u_char retries)
             do {
                 prevMeasureGroup = measureGroup;
 
-                if( measure_2cyleJitter(fd, drive, track, retries,
+                if( measure_2cyleJitter(fd, drive, track, sec, retries,
                     &measureGroup, 0
                     ) != 0) return 1;
             case 1:
@@ -359,6 +361,85 @@ do_SKEWmeasurment(__u_char start, __u_char end, __u_char retries)
     return 0;
 }
 
+int
+do_RPMregression(__u_char start, __u_char end, __u_char sec, __u_char retries)
+{
+    int i, x;
+    __u_char track;
+    GroupOfMeasurements measureGroup;
+    unsigned int lastTValue;
+
+    long long int Sy, Syy, Sxy;
+    unsigned int  Sx, Sxx;
+    double meanTime, variance;
+
+    printf(" TR | measurment points |   rotation | variance | meanrpm | variance\n"
+           "  # |      abscissa (x) | time (~us) |   (us^2) | (1/min) |(1/min^2)\n"
+           "----+-------------------|------------+----------|---------+----------\n");
+    for(track = start; track <= end; track++)
+    {
+
+        x = 0;
+        if( measure_2cyleJitter(fd, drive, track, sec, 0,
+            &measureGroup, 0
+            ) != 0) return 1;
+        printf(" %2d | %2d", track, x);
+
+        Sx  = Sxx = 0;      // initialise least squares summarization terms
+        Sxy = 0ll;
+        Sy  = measureGroup.startValue;
+        Syy = (long long int)measureGroup.startValue * measureGroup.startValue;
+
+        for( i = 1; i <= retries; i++)
+        {
+            lastTValue = measureGroup.startValue;
+
+            if( measure_2cyleJitter(fd, drive, track, sec, 0,
+                &measureGroup, 0
+                ) != 0) return 1;
+
+            x += (measureGroup.startValue - lastTValue + 100000) / 200000;
+
+            // printf("%9u/%u|", measureGroup.startValue, x);
+            printf(" %2d", x);
+
+            Sx  += x;                           // can be calculated easily
+            Sxx += x * x;    // maybe also calculatable (?)
+            Sy  += measureGroup.startValue;
+            Syy += (long long int)measureGroup.startValue * measureGroup.startValue;
+            Sxy += (long long int)measureGroup.startValue * x;
+
+            // printf("\n\tValue: %10d\tSums: %d, %d, %I64d, %I64d, %I64d\n",measureGroup.startValue , Sx, Sxx, Sy, Syy, Sxy);
+        }
+
+        // http://en.wikipedia.org/wiki/Linear_regression
+        meanTime  = (double)( i * Sxy - Sx * Sy ) / ( i * Sxx - Sx * Sx );    // b
+        // a = (Sy - meanTime * Sx) / i;
+
+        // http://www.forst.tu-dresden.de/Biometrie/formeln/form10.html
+        // the following formulae were derived from the page above, where
+        // all the Q...-terms were multiplicated by n to eliminate as
+        // much divisions as possible
+        variance  = (double)(i * Sxy - Sx * Sy);
+        variance *= -variance;                      // make the term negative
+        variance /= (double)(i * Sxx - Sx * Sx);
+        variance += (double)(i * Syy - Sy * Sy);
+        variance /= (double)(i * (i - 2));
+        // useful also for the (division reduced) variance formulae:
+        // http://fresh.t-systems-sfr.com/linux/src/xmstat-2.2.tar.gz:t/xmstat-2.2/src/s_cb.cc
+
+        printf(" | %10.3f | %8.3f", meanTime, variance);
+
+        
+        variance /= meanTime;   // relativate variance
+        meanTime  = 60e6 / meanTime;
+        variance *= meanTime;  // and accomodate it to the new meanTime again
+
+        printf(" | %7.3f | %8.6f\n", meanTime, variance);
+    }
+
+    return 0;
+}
 
 
 int ARCH_MAINDECL
@@ -374,7 +455,7 @@ main(int argc, char *argv[])
          *        step motor routine to support more than 35 tracks in
          *        each and every drive.
          */
-    __u_char cmd[40], job = 1, begintrack = 1, endtrack = 35, retries = 5;
+    __u_char cmd[40], job = 1, begintrack = 1, endtrack = 35, sector = 0, retries = 5;
     char c, *arg;
     int berror = 0;
 
@@ -388,6 +469,7 @@ main(int argc, char *argv[])
         { "retries"    , required_argument, NULL, 'r' },
         { "begin-track", required_argument, NULL, 'b' },
         { "end-track"  , required_argument, NULL, 'e' },
+        { "sector"     , required_argument, NULL, 'c' },
 /*
         { "quiet"      , no_argument      , NULL, 'q' },
         { "verbose"    , no_argument      , NULL, 'v' },
@@ -396,8 +478,8 @@ main(int argc, char *argv[])
         { NULL         , 0                , NULL, 0   }
     };
 
-    // const char shortopts[] ="hVj:sr:xb:e:qvn";
-    const char shortopts[] ="hVj:sxr:b:e:";
+    // const char shortopts[] ="hVj:sr:xb:e:c:qvn";
+    const char shortopts[] ="hVj:sxr:b:e:c:";
 
 
     while((c=(unsigned char)getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
@@ -424,7 +506,8 @@ main(int argc, char *argv[])
                       break;
             case 'e': endtrack = arch_atoc(optarg);
                       break;
-
+            case 'c': sector = arch_atoc(optarg);
+                      break;
             default : hint(argv[0]);
                       return 1;
         }
@@ -457,6 +540,11 @@ main(int argc, char *argv[])
     if(begintrack > endtrack)
     {
         fprintf(stderr, "Beginning track is greater than ending track, it should be less or equal.");
+        return 1;
+    }
+    if(sector > 16)
+    {
+        fprintf(stderr, "Sector numbers greater 16 are not allowed on certain disk zones.");
         return 1;
     }
 
@@ -506,12 +594,16 @@ main(int argc, char *argv[])
 
         switch(job)
         {
+        case 3:
+            if( do_RPMregression (begintrack, endtrack, sector, retries)
+                != 0 ) continue;    // jump to begin of do{}while(0);
+            break;
         case 2:
-            if( do_SKEWmeasurment(begintrack, endtrack, retries)
+            if( do_SKEWmeasurment(begintrack, endtrack, sector, retries)
                 != 0 ) continue;    // jump to begin of do{}while(0);
             break;
         default:
-            if( do_RPMmeasurment (begintrack, endtrack, retries)
+            if( do_RPMmeasurment (begintrack, endtrack, sector, retries)
                 != 0 ) continue;    // jump to begin of do{}while(0);
         }
 
@@ -538,6 +630,7 @@ main(int argc, char *argv[])
     }
         // if the do{}while(0) loop is exited with a break, we get here
     arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
+    cbm_reset(fd);
     cbm_driver_close(fd);
     return 1;
 }
