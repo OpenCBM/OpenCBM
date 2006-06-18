@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.19 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.20 2006-06-18 13:34:55 wmsr Exp $";
 #endif
 
 #include <stdio.h>
@@ -243,11 +243,12 @@ static int cbmcopy_read(CBM_FILE fd,
             c == 0xff && (error = trf->check_error(fd, 0)) == 0;
             /* nothing */ )
         {
-            SETSTATEDEBUG((void)0);    // after check_error condition
+            SETSTATEDEBUG((void)0); // after check_error condition
 
+            arch_usleep(1000);      // fix for Tim's environment
             c = trf->read_byte( fd );
 
-            SETSTATEDEBUG((void)0);    // afterwait condition
+            SETSTATEDEBUG((void)0); // afterwait condition
 
             i = (c == 0xff) ? 0xfe : c;
             *filedata_size += i;
