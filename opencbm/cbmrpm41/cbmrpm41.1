@@ -21,7 +21,8 @@ display version information and exit
 \fB\-j\fR, \fB\-\-job\fR=\fIJOBID\fR
 measurement job to do:
 1 \- detailed RPM printout (default),
-2 \- track synchronization
+2 \- track synchronization,
+3 \- RPM with linear regression and ANOVAR
 .PP
 
 .TP
@@ -41,6 +42,10 @@ set start track (1 <= start <= end)
 .TP
 \fB\-e\fR, \fB\-\-end\-track\fR=\fITRACK\fR
 set end track  (start <= end <= 42)
+.TP
+\fB\-c\fR, \fB\-\-sector\fR=\fISECTOR\fR
+set trigger sector number (>=0, gets modulo limited
+by the max number of sectors for a track)
 .PP
 
 .PP

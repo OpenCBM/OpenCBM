@@ -58,6 +58,7 @@ JOB0        = $00   ; job code for buffer 0
 TRACK0      = $06   ; track  for buffer 0 ($0300-$03ff)
 SECTOR0     = $07   ; sector for buffer 0 ($0300-$03ff)
 
+DRIVENUMBER = $7F
 JOBNUM      = $F9   ; current job number
 CMDSTRBUF   = $0200 ; command string buffer
 CSEPARATOR  = $0279 ; command string parsing separator
@@ -88,6 +89,11 @@ PREPERROR   = $E60A
 SHDR_N_SYNC = $F50A         ; search for block header and the following SYNC
 SEARCHHEADR = $F510         ; search for block header
 FINISHJOBLP = $F969         ; finish the job loop with given error code in A
+
+
+
+STORECMD_DC = $D57D
+VERIFY_EXEC = $D599
 
 .ifndef T2LowValue
     .out "T2LowValue symbol not defined externally, setting to default value: 187-2"
@@ -125,8 +131,8 @@ Ux_UO_Uservector:
 
 ;##############################################################################
 
-T2_23Bit_ShootSample:   ; this is the not timing compensated variant
-
+T2_23Bit_ShootSample:   ; this is the not timing compensated
+                        ; variant, on exit some jitter gets added
         php             ; don't do a cli but restore the old state
         sei             ; ensure no breaks in timer read out
 
@@ -277,7 +283,17 @@ ExecuteJobInBuffer:
         sta JOBNUM
 
         lda #JOB_EXEC0          ; execute jobcode in buffer
+
+.if 1   ; this allows usage on tracks beyond 35
+        ora DRIVENUMBER
+        ldx JOBNUM
+            ; set job code without checking parameters
+            ; for illegal track or sector
+        jsr STORECMD_DC         ; store job code as command
+        jsr VERIFY_EXEC         ; wait for end of job
+.else
         jsr EXECUTE_JOB
+.endif
 
         cmp #$01
         bne lError

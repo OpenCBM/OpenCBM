@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.11 2006-06-17 22:34:12 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.12 2006-06-18 13:38:28 wmsr Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -80,7 +80,7 @@ help()
         "\n"
         "  -j, --job=JOBID  measurement job to do:\n"
         "                       1 - detailed RPM printout (default),\n"
-        "                       2 - track synchronization\n"
+        "                       2 - track synchronization,\n"
         "                       3 - RPM with linear regression and ANOVAR\n"
         "\n"
         "  -s, --status     display drive status after the measurements\n"
@@ -89,7 +89,8 @@ help()
         "\n"
         "  -b, --begin-track=TRACK  set start track (1 <= start <= end)\n"
         "  -e, --end-track=TRACK    set end track  (start <= end <= 42)\n"
-        "  -c, --sector=SECTOR      set trigger sector number (0 <= sector <= 16)\n"
+        "  -c, --sector=SECTOR      set trigger sector number (>=0, gets modulo limited\n"
+        "                           by the max number of sectors for a track)\n"
         /*
         "\n"
         "  -q, --quiet              quiet output\n"
@@ -278,8 +279,37 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
 }
 
 
-int
-do_RPMmeasurment(__u_char start, __u_char end, __u_char sec, __u_char retries)
+static __u_char
+limitSectorNo41(register __u_char track, int secno)
+{
+    // 17/18, 24/25, 30/31
+
+    if(track > 24)      // unrolled bipartition algorithm
+    {                   // could be done with a shifting bitmask also
+        if(track > 30)
+        {
+            return secno % 17;
+        }
+        else
+        {
+            return secno % 18;
+        }
+    }
+    else
+    {
+        if(track > 17)
+        {
+            return secno % 19;
+        }
+        else
+        {
+            return secno % 21;
+        }
+    }
+}
+
+static int
+do_RPMmeasurment(__u_char start, __u_char end, int sec, __u_char retries)
 {
     __u_char track;
     GroupOfMeasurements measureGroup;
@@ -291,34 +321,34 @@ do_RPMmeasurment(__u_char start, __u_char end, __u_char sec, __u_char retries)
     for(track = start; track <= end; track++)
     {
         printf(" %2d |", track);
-        if( measure_2cyleJitter(fd, drive, track, sec, retries,
+        if( measure_2cyleJitter(fd, drive, track, limitSectorNo41(track, sec), retries,
             &measureGroup, 1
             ) != 0) return 1;
 
         meanTime = (float)(measureGroup.endValue - measureGroup.startValue) / measureGroup.trueNumberOfIntervals;
-        printf(" %8.1f%c| %7.3f\n", meanTime, (retries == measureGroup.trueNumberOfIntervals) ? '_' : 'c', 60000000.0 / meanTime);
+        printf(" %8.1f%c| %7.3f\n", meanTime, (retries == measureGroup.trueNumberOfIntervals) ? '\'' : 'c', 60000000.0 / meanTime);
     }
 
     return 0;
 }
 
-int
-do_SKEWmeasurment(__u_char start, __u_char end, __u_char sec, __u_char retries)
+static int
+do_SKEWmeasurment(__u_char start, __u_char end, int sec, __u_char retries)
 {
     __u_char track;
     GroupOfMeasurements measureGroup, prevMeasureGroup;
     float meanDelta, skewDelta;
 
-    printf(" Tracks |mean delta|meanrpm||  skew| skew mod|  degree|  radians\n"
-           "    (#) |     (~us)|(1/min)|| (~us)|    (~us)|     (o)|    (rad)\n"
-           "--------+----------+-------++------+---------+--------+----------\n");
+    printf(" Tracks | Sc |mean delta|meanrpm||  skew| skew mod|  degree|  radians\n"
+           "    (#) |    |     (~us)|(1/min)|| (~us)|    (~us)|     (o)|    (rad)\n"
+           "--------+----+----------+-------++------+---------+--------+----------\n");
 
 
     track = start;
 
     if(track <= end)
     {
-        if( measure_2cyleJitter(fd, drive, track, sec, retries,
+        if( measure_2cyleJitter(fd, drive, track, limitSectorNo41(track, sec), retries,
             &measureGroup, 0
             ) != 0) return 1;
 
@@ -331,7 +361,7 @@ do_SKEWmeasurment(__u_char start, __u_char end, __u_char sec, __u_char retries)
             do {
                 prevMeasureGroup = measureGroup;
 
-                if( measure_2cyleJitter(fd, drive, track, sec, retries,
+                if( measure_2cyleJitter(fd, drive, track, limitSectorNo41(track, sec), retries,
                     &measureGroup, 0
                     ) != 0) return 1;
             case 1:
@@ -341,7 +371,7 @@ do_SKEWmeasurment(__u_char start, __u_char end, __u_char sec, __u_char retries)
                 meanDelta = (float)(measureGroup.endValue - measureGroup.startValue +
                                     prevMeasureGroup.endValue - prevMeasureGroup.startValue) /
                             (measureGroup.trueNumberOfIntervals + prevMeasureGroup.trueNumberOfIntervals);
-                printf(" %2d..%2d |%10.3f|%7.3f||", track - 1, track, meanDelta,
+                printf(" %2d..%2d | %2d |%10.3f|%7.3f||", track - 1, track, limitSectorNo41(track, sec), meanDelta,
                        60000000.0f * measureGroup.trueNumberOfIntervals /
                        (measureGroup.endValue - measureGroup.startValue));
 
@@ -361,8 +391,8 @@ do_SKEWmeasurment(__u_char start, __u_char end, __u_char sec, __u_char retries)
     return 0;
 }
 
-int
-do_RPMregression(__u_char start, __u_char end, __u_char sec, __u_char retries)
+static int
+do_RPMregression(__u_char start, __u_char end, int sec, __u_char retries)
 {
     int i, x;
     __u_char track;
@@ -380,7 +410,7 @@ do_RPMregression(__u_char start, __u_char end, __u_char sec, __u_char retries)
     {
 
         x = 0;
-        if( measure_2cyleJitter(fd, drive, track, sec, 0,
+        if( measure_2cyleJitter(fd, drive, track, limitSectorNo41(track, sec), 0,
             &measureGroup, 0
             ) != 0) return 1;
         printf(" %2d | %2d", track, x);
@@ -394,7 +424,7 @@ do_RPMregression(__u_char start, __u_char end, __u_char sec, __u_char retries)
         {
             lastTValue = measureGroup.startValue;
 
-            if( measure_2cyleJitter(fd, drive, track, sec, 0,
+            if( measure_2cyleJitter(fd, drive, track, limitSectorNo41(track, sec), 0,
                 &measureGroup, 0
                 ) != 0) return 1;
 
@@ -455,9 +485,9 @@ main(int argc, char *argv[])
          *        step motor routine to support more than 35 tracks in
          *        each and every drive.
          */
-    __u_char cmd[40], job = 1, begintrack = 1, endtrack = 35, sector = 0, retries = 5;
+    __u_char cmd[40], job = 1, begintrack = 1, endtrack = 35, retries = 5;
     char c, *arg;
-    int berror = 0;
+    int sector = 0, berror = 0;
 
     struct option longopts[] =
     {
@@ -506,7 +536,7 @@ main(int argc, char *argv[])
                       break;
             case 'e': endtrack = arch_atoc(optarg);
                       break;
-            case 'c': sector = arch_atoc(optarg);
+            case 'c': sector = atoi(optarg);
                       break;
             default : hint(argv[0]);
                       return 1;
@@ -542,9 +572,9 @@ main(int argc, char *argv[])
         fprintf(stderr, "Beginning track is greater than ending track, it should be less or equal.");
         return 1;
     }
-    if(sector > 16)
+    if(sector < 0)
     {
-        fprintf(stderr, "Sector numbers greater 16 are not allowed on certain disk zones.");
+        fprintf(stderr, "Sector numbers less than zero are not allowed.");
         return 1;
     }
 
