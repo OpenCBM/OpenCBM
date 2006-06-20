@@ -8,3 +8,4 @@ build*.err
 build*.wrn
 *.plg
 *.inc
+*.lo
