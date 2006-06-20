@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.16 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: cbm_module.c,v 1.17 2006-06-20 18:22:32 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -100,22 +100,34 @@ int reset            =  1;              /* >1 => force reset            */
 int hold_clk         =  1;              /* >0 => strict C64 behaviour   */
                                         /* =0 => release CLK when idle  */
 
+/* if module_param() is defined as a macro, use that. If not, use the old,
+ * deprecated MODULE_PARM() implementation. */
+
+#ifdef module_param
+        #define CBM_MODULE_PARAM(_var, _type, _perm, _oldtype) \
+                      module_param(_var, _type, _perm);
+#else
+        #define CBM_MODULE_PARAM(_var, _type, _perm, _oldtype) \
+                      MODULE_PARM(_var, _oldtype);
+#endif
+
+
 #ifdef KERNEL_VERSION
 # ifdef DIRECT_PORT_ACCESS
-MODULE_PARM(port,"i");
+CBM_MODULE_PARAM(port,int,0444,"i");
 MODULE_PARM_DESC(port, "IO portnumber of parallel port. (default 0x378)");
 
-MODULE_PARM(irq,"i");
+CBM_MODULE_PARAM(irq,int,0444,"i");
 MODULE_PARM_DESC(irq, "IRQ number of parallel port. (default 7)");
 # else
-MODULE_PARM(lp,"i");
+CBM_MODULE_PARAM(lp,int,0444,"i");
 MODULE_PARM_DESC(lp, "parallel port number. (default 0)");
 # endif  /* DIRECT_PORT_ACCESS */
 
-MODULE_PARM(cable,"i");
+CBM_MODULE_PARAM(cable,int,0444,"i");
 MODULE_PARM_DESC(cable, "cable type: <0=autodetect, 0=non-inverted (XM1541), >0=inverted (XA1541). (default -1)");
 
-MODULE_PARM(reset,"i");
+CBM_MODULE_PARAM(reset,int,0444,"i");
 MODULE_PARM_DESC(reset, "reset at module load: <0=smart reset, 0=no reset, >0 force reset (default: "
 #ifdef DIRECT_PORT_ACCESS
                 "-1"
@@ -123,7 +135,7 @@ MODULE_PARM_DESC(reset, "reset at module load: <0=smart reset, 0=no reset, >0 fo
                 "1"
 #endif
                 ")");
-MODULE_PARM(hold_clk,"i");
+CBM_MODULE_PARAM(hold_clk,int,0444,"i");
 MODULE_PARM_DESC(hold_clk, "0=release CLK when idle, >0=strict C64 behaviour. (default 1)");
 
 MODULE_AUTHOR("Michael Klein");
