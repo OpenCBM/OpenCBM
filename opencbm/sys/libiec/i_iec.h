@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.9 2006-04-28 10:48:16 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.10 2006-06-21 10:11:55 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -226,6 +226,9 @@ cbmiec_block_irq(PDEVICE_EXTENSION Pdx);
 
 extern VOID
 cbmiec_release_irq(PDEVICE_EXTENSION Pdx);
+
+extern LONG
+cbmiec_i_pp_read_debounced(IN PDEVICE_EXTENSION Pdx);
 
 #ifdef USE_DPC
 

@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.11 2006-03-12 16:35:32 strik Exp $ \n
+** \version $Id: debug.h,v 1.12 2006-06-21 10:11:55 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -279,7 +279,10 @@ int __cdecl main(int argc, char *argv[])
        /*! leave the function with a return value of type ULONG */
        #define FUNC_LEAVE_ULONG(  _xxx ) { const ULONG   _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with ULONG=%ul", __FUNCTION__, (ULONG)   (_OUT_) )); }      return _OUT_; }
        /*! leave the function with a return value of type ULONG */
+       #define FUNC_LEAVE_LONG(  _xxx )  { const LONG    _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with LONG=%l",   __FUNCTION__, (LONG)    (_OUT_) )); }      return _OUT_; }
+       /*! leave the function with a return value of a specific type */
        #define FUNC_LEAVE_TYPE(  _xxx, _TYPE, _FORMAT) { _TYPE _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with " #_TYPE "=" _FORMAT, __FUNCTION__, (_OUT_) )); }      return _OUT_; }
+       /*! leave the function with a return value of a pointer type */
        #define FUNC_LEAVE_PTR(  _xxx, _TYPE )  FUNC_LEAVE_TYPE( _xxx, _TYPE, "0x%p")
 
        #ifdef DBG_KERNELMODE
