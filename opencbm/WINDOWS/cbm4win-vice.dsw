@@ -11,11 +11,35 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name allamd64
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name alli386
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name allia64
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name allvs
+    End Project Dependency
 }}}
 
 ###############################################################################
 
 Project: "allamd64"=.\allamd64.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "alli386"=.\alli386.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -82,9 +106,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name cbmforng
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name cbmrpm41
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libtrans
