@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.31 2006-07-16 12:14:38 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.32 2006-07-16 15:09:55 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -202,12 +202,119 @@ static int get_argument_file_for_read(OPTIONS * const options, FILE **f, char **
     return 0;
 }
 
+static int
+process_individual_option(OPTIONS * const options, const char short_options[], struct option long_options[])
+{
+    static int firstcall = 1;
+    int c;
+
+    if (firstcall)
+    {
+        firstcall = 0;
+
+        optind = 0;
+
+        --options->argv;
+        ++options->argc;
+    }
+
+
+    c = getopt_long(options->argc, options->argv, short_options, long_options, NULL);
+
+    if (c == EOF)
+    {
+        // skip the options that are already processed
+        //optind --;
+
+        options->argc -= optind;
+        options->argv += optind;
+    }
+
+    return c;
+}
+
+
+static int
+skip_options(OPTIONS * const options)
+{
+    if (process_individual_option(options, "+", NULL) != EOF)
+        return 1;
+    else
+        return 0;
+}
+
+static int hex2val(const char ch)
+{
+    if (ch>='0' && ch<='9')
+        return ch - '0';
+
+    if (ch>='A' && ch<='F')
+        return ch - 'A' + 10;
+
+    if (ch>='a' && ch<='f')
+        return ch - 'a' + 10;
+
+    fprintf(stderr, 
+        (ch==0) ? "Not enough digits for hex value given\n" 
+                : "Unknown hex character '%c'.\n", ch);
+    return -1;
+}
+
+static int
+process_specific_byte_parameter(char *string, int stringlen)
+{
+    int size = 0;
+    char *pread = string;
+    char *pwrite = pread;
+
+    while (*pread != 0)
+    {
+        char ch = *pread++;
+
+        if (ch == '%')
+        {
+            ch = *pread++;
+
+            if (ch != '%')
+            {
+                int val = hex2val(ch);
+                int val2;
+
+                if (val < 0)
+                    return -1;
+
+                val2 = hex2val(*pread++);
+
+                if (val2 < 0)
+                    return -1;
+
+                ch = (val << 4) | val2;
+            }
+
+            *pwrite++ = ch;
+            size++;
+        }
+        else
+        {
+            *pwrite++ = ch;
+            size++;
+        }
+    }
+
+    *pwrite = 0;
+
+    return size;
+}
+
+
 /*
  * Simple wrapper for lock
  */
 static int do_lock(CBM_FILE fd, OPTIONS * const options)
 {
-    int rv = check_if_parameters_ok(options);
+    int rv = skip_options(options);
+    
+    rv = rv || check_if_parameters_ok(options);
 
     if (rv == 0)
         cbm_lock(fd);
@@ -220,7 +327,9 @@ static int do_lock(CBM_FILE fd, OPTIONS * const options)
  */
 static int do_unlock(CBM_FILE fd, OPTIONS * const options)
 {
-    int rv = check_if_parameters_ok(options);
+    int rv = skip_options(options);
+    
+    rv = rv || check_if_parameters_ok(options);
 
     if (rv == 0)
         cbm_unlock(fd);
@@ -233,7 +342,9 @@ static int do_unlock(CBM_FILE fd, OPTIONS * const options)
  */
 static int do_reset(CBM_FILE fd, OPTIONS * const options)
 {
-    int rv = check_if_parameters_ok(options);
+    int rv = skip_options(options);
+    
+    rv = rv || check_if_parameters_ok(options);
 
     if (rv == 0)
         rv = cbm_reset(fd);
@@ -250,7 +361,9 @@ static int do_listen(CBM_FILE fd, OPTIONS * const options)
     unsigned char unit;
     unsigned char secondary;
 
-    rv = get_argument_char(options, &unit);
+    rv = skip_options(options);
+    
+    rv = rv || get_argument_char(options, &unit);
     rv = rv || get_argument_char(options, &secondary);
 
     if (rv || check_if_parameters_ok(options))
@@ -268,7 +381,9 @@ static int do_talk(CBM_FILE fd, OPTIONS * const options)
     unsigned char unit;
     unsigned char secondary;
 
-    rv = get_argument_char(options, &unit);
+    rv = skip_options(options);
+    
+    rv = rv || get_argument_char(options, &unit);
     rv = rv || get_argument_char(options, &secondary);
 
     if (rv || check_if_parameters_ok(options))
@@ -282,7 +397,9 @@ static int do_talk(CBM_FILE fd, OPTIONS * const options)
  */
 static int do_unlisten(CBM_FILE fd, OPTIONS * const options)
 {
-    int rv = check_if_parameters_ok(options);
+    int rv = skip_options(options);
+    
+    rv = rv || check_if_parameters_ok(options);
 
     if (rv == 0)
         rv = cbm_unlisten(fd);
@@ -295,7 +412,9 @@ static int do_unlisten(CBM_FILE fd, OPTIONS * const options)
  */
 static int do_untalk(CBM_FILE fd, OPTIONS * const options)
 {
-    int rv = check_if_parameters_ok(options);
+    int rv = skip_options(options);
+    
+    rv = rv || check_if_parameters_ok(options);
 
     if (rv == 0)
         rv = cbm_untalk(fd);
@@ -314,7 +433,9 @@ static int do_open(CBM_FILE fd, OPTIONS * const options)
     char *filename;
     unsigned int filenamelen = 0;
 
-    rv = get_argument_char(options, &unit);
+    rv = skip_options(options);
+    
+    rv = rv || get_argument_char(options, &unit);
     rv = rv || get_argument_char(options, &secondary);
     rv = rv || get_argument_string(options, &filename, &filenamelen);
 
@@ -336,7 +457,9 @@ static int do_close(CBM_FILE fd, OPTIONS * const options)
     unsigned char unit;
     unsigned char secondary;
 
-    rv = get_argument_char(options, &unit);
+    rv = skip_options(options);
+    
+    rv = rv || get_argument_char(options, &unit);
     rv = rv || get_argument_char(options, &secondary);
 
     if (rv || check_if_parameters_ok(options))
@@ -354,6 +477,9 @@ static int do_read(CBM_FILE fd, OPTIONS * const options)
     unsigned char buf[2048];
     FILE *f;
 
+    if (skip_options(options))
+        return 1;
+    
     if (get_argument_file_for_write(options, &f))
         return 1;
 
@@ -394,6 +520,9 @@ static int do_write(CBM_FILE fd, OPTIONS * const options)
     unsigned char buf[2048];
     FILE *f;
 
+    if (skip_options(options))
+        return 1;
+    
     if (get_argument_file_for_read(options, &f, &fn))
         return 1;
 
@@ -455,7 +584,9 @@ static int do_status(CBM_FILE fd, OPTIONS * const options)
     unsigned char unit;
     int rv;
 
-    rv = get_argument_char(options, &unit);
+    rv = skip_options(options);
+    
+    rv = rv || get_argument_char(options, &unit);
 
     if (rv || check_if_parameters_ok(options))
         return 1;
@@ -470,6 +601,7 @@ static int do_status(CBM_FILE fd, OPTIONS * const options)
     return (rv == 99) ? 1 : 0;
 }
 
+
 /*
  * send device command
  */
@@ -478,7 +610,31 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
     int  rv;
     unsigned char unit;
     char *commandline;
-    unsigned int commandlinelen = 0;
+    int commandlinelen = 0;
+
+    int extended = 0;
+    int c;
+    static const char short_options[] = "+e";
+    static struct option long_options[] =
+    {
+        {"extended", no_argument, NULL, 'e'},
+        {NULL,       no_argument, NULL, 0  }
+    };
+
+    // first of all, process the options given
+
+    while ((c = process_individual_option(options, short_options, long_options)) != EOF)
+    {
+        switch (c)
+        {
+        case 'e':
+            extended = 1;
+            break;
+
+        default:
+            return 1;
+        }
+    }
 
     rv = get_argument_char(options, &unit);
     rv = get_argument_string(options, &commandline, &commandlinelen);
@@ -488,6 +644,14 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
 
     if (options->petsciiascii == PA_PETSCII)
         cbm_ascii2petscii(commandline);
+
+    if (extended)
+    {
+        commandlinelen = process_specific_byte_parameter(commandline, commandlinelen);
+
+        if (commandlinelen < 0)
+            return 1;
+    }
 
     rv = cbm_listen(fd, unit, 15);
     if(rv == 0)
@@ -499,43 +663,6 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
 }
 
 /*
- * send device command, but convert from convert from
- * single bytes into a command string first.
- */
-/*
-static int do_command_b(CBM_FILE fd, OPTIONS * const options)
-{
-    char *tail, cmd[42];
-    int i, c;
-
-    options->argv++;
-    for( i = 0; (i < 40) && (options->argv[i] != NULL) ;i++ )
-    {
-        c =  strtol(options->argv[i], &tail, 0);
-        if(c < 0 || c > 0xff || *tail)
-        {
-            arch_error(0, 0, "invalid byte: %s", options->argv[i]);
-            return 1;
-        }
-        cmd[i] = (char)c;
-    }
-    options->argv--;
-
-    cmd[i++] = '\r';    // needed, when the last byte is a '\r'
-    cmd[i]   = '\0';
-
-    c = cbm_listen(fd, arch_atoc(options->argv[0]), 15);
-    if(c == 0)
-    {
-        cbm_raw_write(fd, cmd, i);
-        c = cbm_unlisten(fd);
-    }
-
-    return c;
-}
-*/
-
-/*
  * display directory
  */
 static int do_dir(CBM_FILE fd, OPTIONS * const options)
@@ -544,7 +671,10 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
     int rv;
     unsigned char unit;
 
-    rv = get_argument_char(options, &unit);
+    rv = skip_options(options);
+    
+    rv = rv || get_argument_char(options, &unit);
+
     if (rv || check_if_parameters_ok(options))
         return 1;
 
@@ -618,6 +748,9 @@ static int do_download(CBM_FILE fd, OPTIONS * const options)
 
     char *tmpstring;
 
+    if (skip_options(options))
+        return 1;
+    
     // process the drive number (unit)
 
     if (get_argument_char(options, &unit))
@@ -694,6 +827,9 @@ static int do_upload(CBM_FILE fd, OPTIONS * const options)
     unsigned char *buf;
     FILE *f;
 
+    if (skip_options(options))
+        return 1;
+    
     // process the drive number (unit)
 
     if (get_argument_char(options, &unit))
@@ -783,6 +919,9 @@ static int do_detect(CBM_FILE fd, OPTIONS * const options)
     unsigned char device;
     const char *type_str;
 
+    if (skip_options(options))
+        return 1;
+    
     if (check_if_parameters_ok(options))
         return 1;
 
@@ -830,7 +969,9 @@ static int do_change(CBM_FILE fd, OPTIONS * const options)
     unsigned char unit;
     int rv;
 
-    rv = get_argument_char(options, &unit);
+    rv = skip_options(options);
+    
+    rv = rv || get_argument_char(options, &unit);
 
     if (rv || check_if_parameters_ok(options))
         return 1;
@@ -925,27 +1066,6 @@ struct prog
 
 static struct prog prog_table[] =
 {
-/**
-    {0, "--help"  , PA_UNSPEC,  do_help    , "[<command>]",
-        "output this help screen",
-        "This command outputs some help information for cbmctrl.\n\n"
-        "<command> is the (optional) command to get information about.\n\n"
-        "If you use it without parameter, it outputs a list of all\n"
-        "available commands." },
-
-    {0, "-h"      , PA_UNSPEC,  do_help    , "",
-        "same as --help",
-        "for more info, use \"cbmctrl --help --help\"." },
-
-    {0, "--version",PA_UNSPEC,  do_version , "",
-        "output version information",
-        "This command just outputs the version number and\n"
-        "build date of cbmctrl." },
-
-    {0, "-V"      , PA_UNSPEC,  do_version , "",
-        "same as --version",
-        "for more info, use \"cbmctrl --help --version\"." },
-*/
     {1, "lock"    , PA_UNSPEC,  do_lock    , "",
         "Lock the parallel port for the use by cbm4win/cbm4linux.",
         "This command locks the parallel port for the use by cbm4win/cbm4linux,\n"
@@ -993,15 +1113,8 @@ static struct prog prog_table[] =
         "      this is an internal operation to the computer only." },
 
     {1, "popen"   , PA_PETSCII, do_open    , "<device> <secadr> <filename>",
-        "same as open, but convert the filename from ASCII to PETSCII",
-        "Output an open command on the IEC bus.\n"
-        "<device> is the device number,\n"
-        "<secadr> the secondary address to use for this.\n"
-        "<filename> is the name of the file to be opened.\n\n"
-        "This has to be undone later with a close command.\n\n"
-        "NOTE: You cannot do an open without a filename.\n"
-        "      Although a CBM machine (i.e., a C64) allows this,\n"
-        "      this is an internal operation to the computer only." },
+        "obsolete; use `cbmctrl --petscii open´ instead!",
+        "This command is obsolete; use `cbmctrl -p open´ instead!" },
 
     {1, "close"   , PA_UNSPEC,  do_close   , "<device> <secadr>",
         "perform a close on the IEC bus",
@@ -1011,51 +1124,48 @@ static struct prog prog_table[] =
         "read raw data from the IEC bus",
         "With this command, you can read raw data from the IEC bus.\n"
         "<file>   (optional) file name of a file to write the contents to.\n"
-        "         If this name is not given or it is a dash ('-'), the\n"
+        "         If this name is not given or it is a dash (`-´), the\n"
         "         contents will be written to stdout, normally the console." },
 
     {1, "write"   , PA_UNSPEC,  do_write   , "[<file>]",
         "write raw data to the IEC bus",
         "With this command, you can write raw data to the IEC bus.\n"
         "<file>   (optional) file name of a file to read the values from.\n"
-        "         If this name is not given or it is a dash ('-'), the\n"
+        "         If this name is not given or it is a dash (`-´), the\n"
         "         contents will be read from stdin, normally the console." },
 
     {1, "status"  , PA_PETSCII, do_status  , "<device>",
         "give the status of the specified drive",
-        "This command gets the status (the so-called 'error channel')"
+        "This command gets the status (the so-called `error channel´)"
         "of the given drive and outputs it on the screen.\n"
         "<device> is the device number of the drive." },
 
-    {1, "command" , PA_ASCII,   do_command , "<device> <cmdstr>",
+    {1, "command" , PA_ASCII,   do_command , "[-e|--extended] <device> <cmdstr>",
         "issue a command to the specified drive",
         "This command issues a command to a specific drive.\n"
         "This command is a command that you normally give to\n"
         "channel 15 (i.e., N: to format a drive, V: to validate, etc.).\n\n"
         "<device> is the device number of the drive.\n\n"
-        "<cmdstr> is the command to execute in the drive.\n"
-        "NOTE: You have to give the commands in upper-case letters.\n"
-        "      Lower case will NOT work!" },
+        "<cmdstr> is the command to execute in the drive.\n\n"
+        "If the option -e or --extended is given, an extended format is used:\n"
+        "  You can specify extra characters by given their value in hex with\n"
+        "  prepended `%´, that is: `%20´ => SPACE, `%41´ => `A´, `%35´ => `%5´,\n"
+        "  and-so-on. A `%´ is given by doubling it: `%%´ => `%´.\n\n"
+        "Example: Write the bytes $20, $21 into memory locations $0304 and $0305\n"
+        "         of drive 8:\n"
+        "         cbmctrl -p command -e m-w%04%03%02%20%21\n\n"
+        "NOTE:  You have to give the commands in upper-case letters.\n"
+        "       Lower case will NOT work!\n"
+        "NOTE2: If used with the global -p option, this action is equivalent\n"
+        "       to pcommand\n"
+        "NOTE3: If using both PETSCII and --extended option, the bytes given\n"
+        "       via the `%´ meta-character are *not* converted to petscii." },
 
-    {1, "pcommand", PA_PETSCII, do_command , "<device> <cmdstr>",
-        "same as command, but convert the cmdstr from ASCII to PETSCII.",
-        "This command issues a command to a specific drive.\n"
-        "This command is a command that you normally give to\n"
-        "channel 15 (i.e., n: to format a drive, v: to validate, etc.).\n\n"
-        "<device> is the device number of the drive.\n\n"
-        "<cmdstr> is the command to execute in the drive.\n"
+    {1, "pcommand", PA_PETSCII, do_command , "[-e|--extended] <device> <cmdstr>",
+        "obsolete; use `cbmctrl --petscii command´ instead!",
+        "This command is obsolete; use `cbmctrl -p command´ instead!\n\n"
         "NOTE: You have to give the commands in lower-case letters.\n"
-        "      Upper case will NOT work!" },
-
-/*
-    {1, "bcommand", PA_UNSPEC,  do_command_b, "<device> <cmd1> [<cmd2> ... <cmd40>]",
-        "same as command, but the command string is given in single bytes.",
-        "This command issues a command to a specific drive.\n\n"
-        "<device>   is the device number of the drive.\n\n"
-        "<cmd1..40> are the bytes, the command string is constructed from.\n"
-        "NOTE: Single bytes can be given as decimal or sedecimal (0x prefix) "
-        "values" },
-*/
+        "      Upper case will NOT work!\n" },
 
     {1, "dir"     , PA_PETSCII, do_dir     , "<device>",
         "output the directory of the disk in the specified drive",
@@ -1071,7 +1181,7 @@ static struct prog prog_table[] =
         "<count>  is the number of bytes to read.\n"
         "         it can be given in decimal or in hex (with a 0x prefix).\n"
         "<file>   (optional) file name of a file to write the contents to.\n"
-        "         If this name is not given or it is a dash ('-'), the\n"
+        "         If this name is not given or it is a dash (`-´), the\n"
         "         contents will be written to stdout, normally the console.\n\n" 
         "Example:\n"
         " cbmctrl download 8 0xc000 0x4000 1541ROM.BIN\n"
@@ -1086,7 +1196,7 @@ static struct prog prog_table[] =
         "         If this is -1, the first two bytes from the file are\n"
         "         considered as start address.\n"
         "<file>   (optional) file name of a file to read the values from.\n"
-        "         If this name is not given or it is a dash ('-'), the\n"
+        "         If this name is not given or it is a dash (`-´), the\n"
         "         contents will be read from stdin, normally the console."
         "Example:\n"
         " cbmctrl upload 8 0x500 BUFFER2.BIN\n"
@@ -1156,12 +1266,34 @@ static int do_help(CBM_FILE fd, OPTIONS * const options)
 
     if (options->argc == 0)
     {
+        printf("control serial CBM devices\n"
+            "\n"
+            " Synopsis:  cbmctrl  [global_options] [action] [action_opt] [--] [action_args]\n"
+            "\n"
+            " Global options:\n"
+            "\n"
+            "   -h, --help:    Output this help screen if specified without an action.\n"
+            "                  Outputs some help information about a specific action\n"
+            "                  if an action is specified.\n"
+            "   -V, --version: Output version information\n"
+            "   -p, --petscii: Convert input or output parameter from CBM format (PETSCII)\n"
+            "                  into PC format (ASCII). Default with all actions but `open´\n"
+            "                  and `command´\n"
+            "   -a, --ascii    Do not convert data between CBM and PC format.\n"
+            "                  Default with `open´ and `command´.\n"
+            "   --             Delimiter between action_opt and action_args; if any of the\n"
+            "                  arguments in action_args starts with a `-´, make sure to set\n"
+            "                  the `--´ so the argument is not treated as an option, accidentially.\n"
+            "\n"
+            " action: one of:\n"
+            "\n");
+
         for(i=0; prog_table[i].prog; i++)
         {
             printf("  %-9s %s\n", prog_table[i].name, prog_table[i].shorthelp_text);
         }
 
-        printf("\nFor more information on a specific command, try --help <COMMAND>.\n");
+        printf("\nFor more information on a specific action, try --help <action>.\n");
 
     }
     else
@@ -1192,7 +1324,7 @@ set_option(int *Where, int NewValue, int OldValue, const char * const Descriptio
     if (*Where != OldValue)
     {
         error = 1;
-        fprintf(stderr, "Specified option '%s', but there is a conflicting option,\n"
+        fprintf(stderr, "Specified option `%s´, but there is a conflicting option,\n"
             "or it is specified twice!\n", Description);
     }
 
@@ -1209,7 +1341,7 @@ set_option_petsciiascii(PETSCII_ASCII *Where, PETSCII_ASCII NewValue, int Ignore
     if (!IgnoreError && (*Where != PA_UNSPEC))
     {
         error = 1;
-        fprintf(stderr, "Specified option '--petscii' and '--ascii' in one command!\n");
+        fprintf(stderr, "Specified option `--petscii´ and `--ascii´ in one command!\n");
     }
 
     *Where = NewValue;
@@ -1259,7 +1391,6 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
 
     // now, we start the "real" scanning
     optind = 0;
-    opterr = 1;
 
     while ((c = getopt_long(options->argc, options->argv, short_options, long_options, &option_index)) != EOF)
     {
@@ -1373,15 +1504,6 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             }
             break;
         }
-
-        // check if number of arguments is o.k.!
-#if 0 // @TBD
-        if((p->req_args_min > argc-2) || (p->req_args_max < argc-2))
-        {
-            fprintf(stderr, "wrong number of arguments:\n\n  %s %s %s\n",
-                        argv[0], argv[1], p->arglist);
-        }
-#endif
 
         rv = pprog->prog(fd, &options) != 0;
         if (rv && arch_get_errno())
