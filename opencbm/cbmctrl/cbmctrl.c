@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.30 2006-06-02 23:19:44 wmsr Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.31 2006-07-16 12:14:38 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -19,24 +19,185 @@ static char *rcsid =
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
- 
-typedef int (*mainfunc)(CBM_FILE fd, char *argv[]);
+#include <getopt.h>
+#include <assert.h>
 
 #include "arch.h"
+
+typedef
+enum {
+    PA_UNSPEC = 0,
+    PA_PETSCII,
+    PA_ASCII
+} PETSCII_ASCII;
+
+//! struct to remember the general options to the program
+typedef struct {
+    int argc;    //!< a (modifieable) copy of the number of arguments, as given to main()
+    char **argv; //!< a (modifieable) copy of the argument list, as given to main()
+    int ownargv; //!< remember: This is the original argv (=0), or this is a malloc()ed copy of it (=1)
+    int error;   //!< there was an error in processing the options (=1), or not (=0)
+    int help;    //!< option: the user requested help for the specified command
+    int version; //!< option: print version information
+    PETSCII_ASCII petsciiascii; //!< option: The user requested PETSCII or ASCII, or nothing 
+} OPTIONS;
+
+typedef int (*mainfunc)(CBM_FILE fd, OPTIONS * const options);
+
 
 static const unsigned char prog_tdchange[] = {
 #include "tdchange.inc"
 };
 
 
-static int do_help(CBM_FILE fd, char *argv[]);
-
 /*
  * Output version information
  */
-static int do_version(CBM_FILE fd, char *argv[])
+static int do_version(CBM_FILE fd, OPTIONS * const options)
 {
     printf("cbmctrl version " OPENCBM_VERSION ", built on " __DATE__ " at " __TIME__ "\n");
+
+    return 0;
+}
+
+static int check_if_parameters_ok(OPTIONS * const options)
+{
+    if (options->argc != 0)
+    {
+        fprintf(stderr, "Extra parameter, aborting...\n");
+        return 1;
+    }
+    return 0;
+}
+
+static int get_argument_char(OPTIONS * const options, unsigned char *where)
+{
+    if (options->argc > 0)
+    {
+        *where = arch_atoc(options->argv[0]);
+        options->argv++;
+        options->argc--;
+        return 0;
+    }
+    else
+    {
+        fprintf(stderr, "Not enough parameters, aborting!\n");
+        return 1;
+    }
+}
+
+static int get_argument_string(OPTIONS * const options, char *where[], unsigned int *len)
+{
+    if (options->argc > 0)
+    {
+        if (where)
+           *where = options->argv[0];
+
+        if (len)
+            *len = strlen(*where);
+
+        options->argv++;
+        options->argc--;
+        return 0;
+    }
+    else
+    {
+        fprintf(stderr, "Not enough parameters, aborting!\n");
+        return 1;
+    }
+}
+
+static int get_argument_file_for_write(OPTIONS * const options, FILE **f)
+{
+    char *filename;
+
+    assert(f);
+
+    if (options->argc > 0)
+    {
+        get_argument_string(options, &filename, NULL);
+
+        if (filename && strcmp(filename, "-") == 0)
+            filename = NULL;
+    }
+
+    if (check_if_parameters_ok(options))
+        return 1;
+
+    if(filename != 0)
+    {
+        /* a filename (other than simply "-") was given, open that file */
+
+        *f = fopen(filename, "wb");
+    }
+    else
+    {
+        /* no filename was given, open stdout in binary mode */
+
+        *f = arch_fdopen(arch_fileno(stdout), "wb");
+
+        /* set binary mode for output stream */
+
+        if (*f != NULL)
+            arch_setbinmode(arch_fileno(stdout));
+    }
+
+    if(*f == NULL)
+    {
+        arch_error(0, arch_get_errno(), "could not open output file: %s",
+              (filename != 0) ? filename : "stdout");
+
+        return 1;
+    }
+
+    return 0;
+}
+
+static int get_argument_file_for_read(OPTIONS * const options, FILE **f, char **fn)
+{
+    char *filename;
+
+    assert(f);
+
+    if (options->argc > 0)
+    {
+        get_argument_string(options, &filename, NULL);
+
+        if (filename && strcmp(filename, "-") == 0)
+            filename = NULL;
+    }
+
+    if (check_if_parameters_ok(options))
+        return 1;
+
+    if(filename == 0)
+    {
+        filename = "(stdin)";
+        *f = stdin;
+
+        // set binary mode for input stream
+
+        arch_setbinmode(arch_fileno(stdin));
+    }
+    else
+    {
+        off_t filesize;
+
+        *f = fopen(filename, "rb");
+        if(*f == NULL)
+        {
+            arch_error(0, arch_get_errno(), "could not open %s", filename);
+            return 1;
+        }
+        if(arch_filesize(filename, &filesize))
+        {
+            arch_error(0, arch_get_errno(), "could not stat %s", filename);
+            return 1;
+        }
+    }
+
+    if (fn)
+        *fn = filename;
 
     return 0;
 }
@@ -44,123 +205,171 @@ static int do_version(CBM_FILE fd, char *argv[])
 /*
  * Simple wrapper for lock
  */
-static int do_lock(CBM_FILE fd, char *argv[])
+static int do_lock(CBM_FILE fd, OPTIONS * const options)
 {
-    cbm_lock(fd);
-    return 0;
+    int rv = check_if_parameters_ok(options);
+
+    if (rv == 0)
+        cbm_lock(fd);
+
+    return rv;
 }
 
 /*
  * Simple wrapper for unlock
  */
-static int do_unlock(CBM_FILE fd, char *argv[])
+static int do_unlock(CBM_FILE fd, OPTIONS * const options)
 {
-    cbm_unlock(fd);
-    return 0;
+    int rv = check_if_parameters_ok(options);
+
+    if (rv == 0)
+        cbm_unlock(fd);
+
+    return rv;
 }
 
 /*
  * Simple wrapper for reset
  */
-static int do_reset(CBM_FILE fd, char *argv[])
+static int do_reset(CBM_FILE fd, OPTIONS * const options)
 {
-    return cbm_reset(fd);
+    int rv = check_if_parameters_ok(options);
+
+    if (rv == 0)
+        rv = cbm_reset(fd);
+
+    return rv;
 }
 
 /*
  * Simple wrapper for listen
  */
-static int do_listen(CBM_FILE fd, char *argv[])
+static int do_listen(CBM_FILE fd, OPTIONS * const options)
 {
-    return cbm_listen(fd, arch_atoc(argv[0]), arch_atoc(argv[1]));
+    int rv;
+    unsigned char unit;
+    unsigned char secondary;
+
+    rv = get_argument_char(options, &unit);
+    rv = rv || get_argument_char(options, &secondary);
+
+    if (rv || check_if_parameters_ok(options))
+        return 1;
+
+    return cbm_listen(fd, unit, secondary);
 }
 
 /*
  * Simple wrapper for talk
  */
-static int do_talk(CBM_FILE fd, char *argv[])
+static int do_talk(CBM_FILE fd, OPTIONS * const options)
 {
-    return cbm_talk(fd, arch_atoc(argv[0]), arch_atoc(argv[1]));
+    int rv;
+    unsigned char unit;
+    unsigned char secondary;
+
+    rv = get_argument_char(options, &unit);
+    rv = rv || get_argument_char(options, &secondary);
+
+    if (rv || check_if_parameters_ok(options))
+        return 1;
+
+    return cbm_talk(fd, unit, secondary);
 }
 
 /*
  * Simple wrapper for unlisten
  */
-static int do_unlisten(CBM_FILE fd, char *argv[])
+static int do_unlisten(CBM_FILE fd, OPTIONS * const options)
 {
-    return cbm_unlisten(fd);
+    int rv = check_if_parameters_ok(options);
+
+    if (rv == 0)
+        rv = cbm_unlisten(fd);
+
+    return rv;
 }
 
 /*
  * Simple wrapper for untalk
  */
-static int do_untalk(CBM_FILE fd, char *argv[])
+static int do_untalk(CBM_FILE fd, OPTIONS * const options)
 {
-    return cbm_untalk(fd);
+    int rv = check_if_parameters_ok(options);
+
+    if (rv == 0)
+        rv = cbm_untalk(fd);
+
+    return rv;
 }
 
 /*
  * Simple wrapper for open
  */
-static int do_open(CBM_FILE fd, char *argv[])
+static int do_open(CBM_FILE fd, OPTIONS * const options)
 {
-    return cbm_open(fd, arch_atoc(argv[0]), arch_atoc(argv[1]), argv[2], strlen(argv[2]));
-}
+    int rv;
+    unsigned char unit;
+    unsigned char secondary;
+    char *filename;
+    unsigned int filenamelen = 0;
 
-/*
- * Simple wrapper for open, but convert from ASCII to PETSCII before doing so.
- */
-static int do_open_p(CBM_FILE fd, char *argv[])
-{
-    cbm_ascii2petscii(argv[2]);
-    return do_open(fd, argv);
+    rv = get_argument_char(options, &unit);
+    rv = rv || get_argument_char(options, &secondary);
+    rv = rv || get_argument_string(options, &filename, &filenamelen);
+
+    if (rv || check_if_parameters_ok(options))
+        return 1;
+
+    if (options->petsciiascii == PA_PETSCII)
+        cbm_ascii2petscii(filename);
+
+    return cbm_open(fd, unit, secondary, filename, filenamelen);
 }
 
 /*
  * Simple wrapper for close
  */
-static int do_close(CBM_FILE fd, char *argv[])
+static int do_close(CBM_FILE fd, OPTIONS * const options)
 {
-    return cbm_close(fd, arch_atoc(argv[0]), arch_atoc(argv[1]));
+    int rv;
+    unsigned char unit;
+    unsigned char secondary;
+
+    rv = get_argument_char(options, &unit);
+    rv = rv || get_argument_char(options, &secondary);
+
+    if (rv || check_if_parameters_ok(options))
+        return 1;
+
+    return cbm_close(fd, unit, secondary);
 }
 
 /*
  * read raw data from the IEC bus
  */
-static int do_read(CBM_FILE fd, char *argv[])
+static int do_read(CBM_FILE fd, OPTIONS * const options)
 {
     int size, rv = 0;
     unsigned char buf[2048];
     FILE *f;
 
-    if(argv[0] && strcmp(argv[0],"-") != 0)
-    {
-        /* a filename (other than simply "-") was given, open that file */
-
-        f = fopen(argv[0], "wb");
-    }
-    else
-    {
-        /* no filename was given, open stdout in binary mode */
-
-        f = arch_fdopen(arch_fileno(stdout), "wb");
-
-        /* set binary mode for output stream */
-
-        arch_setbinmode(arch_fileno(stdout));
-    }
-
-    if(!f)
-    {
-        arch_error(0, arch_get_errno(), "could not open output file: %s",
-              (argv[0] && strcmp(argv[0], "-") != 0) ? argv[0] : "stdout");
+    if (get_argument_file_for_write(options, &f))
         return 1;
-    }
 
-        /* fill a buffer with up to 64k of bytes from the IEC bus */
+    /* fill a buffer with up to 64k of bytes from the IEC bus */
     while(0 < (size = cbm_raw_read(fd, buf, sizeof(buf))))
     {
-            /* write that to the file */
+        // if PETSCII was recognized, convert the data before writing
+
+        if (options->petsciiascii == PA_PETSCII)
+        {
+            int i;
+            for (i=0; i < size; i++)
+                buf[i] = cbm_petscii2ascii_c(buf[i]);
+        }
+
+        /* write that to the file */
         if(size != (int) fwrite(buf, 1, size, f))
         {
             rv=1;   /* error condition from cbm_raw_read */
@@ -178,43 +387,19 @@ static int do_read(CBM_FILE fd, char *argv[])
 /*
  * write raw data to the IEC bus
  */
-static int do_write(CBM_FILE fd, char *argv[])
+static int do_write(CBM_FILE fd, OPTIONS * const options)
 {
-    char *fn;
+    char *fn = NULL;
     int size;
     unsigned char buf[2048];
     FILE *f;
 
-    if(!argv[0] || strcmp(argv[0], "-") == 0 || strcmp(argv[0], "") == 0)
-    {
-        fn = "(stdin)";
-        f = stdin;
+    if (get_argument_file_for_read(options, &f, &fn))
+        return 1;
 
-        // set binary mode for input stream
-
-        arch_setbinmode(arch_fileno(stdin));
-    }
-    else
-    {
-        off_t filesize;
-
-        fn = argv[0];
-        f = fopen(argv[0], "rb");
-        if(f == NULL)
-        {
-            arch_error(0, arch_get_errno(), "could not open %s", fn);
-            return 1;
-        }
-        if(arch_filesize(argv[0], &filesize))
-        {
-            arch_error(0, arch_get_errno(), "could not stat %s", fn);
-            return 1;
-        }
-    }
-
-        /* fill a buffer with up to 64k of bytes from file/console */
+    /* fill a buffer with up to 64k of bytes from file/console */
     size = fread(buf, 1, sizeof(buf), f);
-        /* do this test only on the very first run */
+    /* do this test only on the very first run */
     if(size == 0 && feof(f))
     {
         arch_error(0, 0, "no data: %s", fn);
@@ -222,17 +407,25 @@ static int do_write(CBM_FILE fd, char *argv[])
         return 1;
     }
     
-        /* as long as no error occurred */
+    /* as long as no error occurred */
     while( ! ferror(f))
     {
-            /* write that to the the IEC bus */
+        /* if requested, convert to PETSCII before writing */
+        if (options->petsciiascii == PA_PETSCII)
+        {
+            int i;
+            for (i=0; i < size; i++)
+                buf[i] = cbm_ascii2petscii_c(buf[i]);
+        }
+
+        /* write that to the the IEC bus */
         if(size != cbm_raw_write(fd, buf, size))
         {
-                /* exit the loop with another error condition */
+            /* exit the loop with another error condition */
             break;
         }
 
-            /* fill a buffer with up to 64k of bytes from file/console */
+        /* fill a buffer with up to 64k of bytes from file/console */
         size = fread(buf, 1, sizeof(buf), f);
         if(size == 0 && feof(f))
         {
@@ -241,7 +434,8 @@ static int do_write(CBM_FILE fd, char *argv[])
             return 0;
         }
     }
-        /* the loop has exited, because of an error, check, which one */
+
+    /* the loop has exited, because of an error, check, which one */
     if(ferror(f))
     {
         arch_error(0, 0, "could not read %s", fn);
@@ -255,16 +449,23 @@ static int do_write(CBM_FILE fd, char *argv[])
 /*
  * display device status w/ PetSCII conversion
  */
-static int do_status(CBM_FILE fd, char *argv[])
+static int do_status(CBM_FILE fd, OPTIONS * const options)
 {
     char buf[40];
-    char unit;
+    unsigned char unit;
     int rv;
 
-    unit = arch_atoc(argv[0]);
+    rv = get_argument_char(options, &unit);
+
+    if (rv || check_if_parameters_ok(options))
+        return 1;
 
     rv = cbm_device_status(fd, unit, buf, sizeof(buf));
-    printf("%s", cbm_petscii2ascii(buf));
+
+    if (options->petsciiascii == PA_PETSCII)
+        cbm_petscii2ascii(buf);
+
+    printf("%s", buf);
 
     return (rv == 99) ? 1 : 0;
 }
@@ -272,54 +473,58 @@ static int do_status(CBM_FILE fd, char *argv[])
 /*
  * send device command
  */
-static int do_command(CBM_FILE fd, char *argv[])
+static int do_command(CBM_FILE fd, OPTIONS * const options)
 {
     int  rv;
+    unsigned char unit;
+    char *commandline;
+    unsigned int commandlinelen = 0;
 
-    rv = cbm_listen(fd, arch_atoc(argv[0]), 15);
+    rv = get_argument_char(options, &unit);
+    rv = get_argument_string(options, &commandline, &commandlinelen);
+
+    if (rv || check_if_parameters_ok(options))
+        return 1;
+
+    if (options->petsciiascii == PA_PETSCII)
+        cbm_ascii2petscii(commandline);
+
+    rv = cbm_listen(fd, unit, 15);
     if(rv == 0)
     {
-        cbm_raw_write(fd, argv[1], strlen(argv[1]));
+        cbm_raw_write(fd, commandline, commandlinelen);
         rv = cbm_unlisten(fd);
     }
     return rv;
 }
 
 /*
- * send device command, but convert from ASCII to PETSCII before doing so.
- */
-static int do_command_p(CBM_FILE fd, char *argv[])
-{
-    cbm_ascii2petscii(argv[1]);
-    return do_command(fd, argv);
-}
-
-/*
  * send device command, but convert from convert from
  * single bytes into a command string first.
  */
-static int do_command_b(CBM_FILE fd, char *argv[])
+/*
+static int do_command_b(CBM_FILE fd, OPTIONS * const options)
 {
     char *tail, cmd[42];
     int i, c;
 
-    argv++;
-    for( i = 0; (i < 40) && (argv[i] != NULL) ;i++ )
+    options->argv++;
+    for( i = 0; (i < 40) && (options->argv[i] != NULL) ;i++ )
     {
-        c =  strtol(argv[i], &tail, 0);
+        c =  strtol(options->argv[i], &tail, 0);
         if(c < 0 || c > 0xff || *tail)
         {
-            arch_error(0, 0, "invalid byte: %s", argv[i]);
+            arch_error(0, 0, "invalid byte: %s", options->argv[i]);
             return 1;
         }
         cmd[i] = (char)c;
     }
-    argv--;
+    options->argv--;
 
     cmd[i++] = '\r';    // needed, when the last byte is a '\r'
     cmd[i]   = '\0';
 
-    c = cbm_listen(fd, arch_atoc(argv[0]), 15);
+    c = cbm_listen(fd, arch_atoc(options->argv[0]), 15);
     if(c == 0)
     {
         cbm_raw_write(fd, cmd, i);
@@ -328,17 +533,21 @@ static int do_command_b(CBM_FILE fd, char *argv[])
 
     return c;
 }
+*/
 
 /*
  * display directory
  */
-static int do_dir(CBM_FILE fd, char *argv[])
+static int do_dir(CBM_FILE fd, OPTIONS * const options)
 {
     char c, buf[40];
     int rv;
-    char unit;
+    unsigned char unit;
 
-    unit = arch_atoc(argv[0]);
+    rv = get_argument_char(options, &unit);
+    if (rv || check_if_parameters_ok(options))
+        return 1;
+
     rv = cbm_open(fd, unit, 0, "$", strlen("$"));
     if(rv == 0)
     {
@@ -354,7 +563,10 @@ static int do_dir(CBM_FILE fd, char *argv[])
                         printf("%u ", (unsigned char)buf[0] | (unsigned char)buf[1] << 8 );
                         while((cbm_raw_read(fd, &c, 1) == 1) && c)
                         {
-                            putchar(cbm_petscii2ascii_c(c));
+                            if (options->petsciiascii == PA_PETSCII)
+                                putchar(cbm_petscii2ascii_c(c));
+                            else
+                                putchar(c);
                         }
                         putchar('\n');
                     }
@@ -378,10 +590,7 @@ static int do_dir(CBM_FILE fd, char *argv[])
     return rv;
 }
 
-/*
- * read device memory, dump to stdout or a file
- */
-static int do_download(CBM_FILE fd, char *argv[])
+static void show_monkey(unsigned int c)
 {
     // const static char monkey[]={"¸,ø¤*º°´`°º*¤ø,¸"};     // for fast moves
     // const static char monkey[]={"\\|/-"};    // from cbmcopy
@@ -391,58 +600,66 @@ static int do_download(CBM_FILE fd, char *argv[])
     // const static char monkey[]={",;:!^*Oo"};// for fast moves
     const static char monkey[]={",oO*^!:;"};// for fast moves
 
+    c %= sizeof(monkey) - 1;
+    fprintf(stderr, (c != 0) ? "\b%c" : "\b.%c" , monkey[c]);
+    fflush(stderr);
+}
+
+/*
+ * read device memory, dump to stdout or a file
+ */
+static int do_download(CBM_FILE fd, OPTIONS * const options)
+{
     unsigned char unit;
     unsigned short c;
     int addr, count, rv = 0;
     char *tail, buf[256];
     FILE *f;
 
-    unit = arch_atoc(argv[0]);
+    char *tmpstring;
 
-    addr = strtol(argv[1], &tail, 0);
+    // process the drive number (unit)
+
+    if (get_argument_char(options, &unit))
+        return 1;
+
+
+    // process the address
+
+    if (get_argument_string(options, &tmpstring, NULL))
+        return 1;
+
+    addr = strtol(tmpstring, &tail, 0);
     if(addr < 0 || addr > 0xffff || *tail)
     {
-        arch_error(0, 0, "invalid address: %s", argv[1]);
+        arch_error(0, 0, "invalid address: %s", tmpstring);
         return 1;
     }
 
-    count = strtol(argv[2], &tail, 0);
+
+    // process the count of bytes
+
+    if (get_argument_string(options, &tmpstring, NULL))
+        return 1;
+
+    count = strtol(tmpstring, &tail, 0);
     if((count + addr) > 0x10000 || *tail)
     {
-        arch_error(0, arch_get_errno(), "invalid byte count %s", argv[2]);
+        arch_error(0, arch_get_errno(), "invalid byte count %s", tmpstring);
         return 1;
     }
 
-    if(argv[3] && strcmp(argv[3],"-") != 0)
-    {
-        /* a filename (other than simply "-") was given, open that file */
 
-        f = fopen(argv[3], "wb");
-    }
-    else
-    {
-        /* no filename was given, open stdout in binary mode */
+    // process the filename, if any
 
-        f = arch_fdopen(arch_fileno(stdout), "wb");
-
-        /* set binary mode for output stream */
-
-        arch_setbinmode(arch_fileno(stdout));
-    }
-
-    if(!f)
-    {
-        arch_error(0, arch_get_errno(), "could not open output file: %s",
-              (argv[3] && strcmp(argv[3], "-") != 0) ? argv[3] : "stdout");
+    if (get_argument_file_for_write(options, &f))
         return 1;
-    }
 
-        // download in chunks of sizeof(buf) (currently: 256) bytes
+
+    // download in chunks of sizeof(buf) (currently: 256) bytes
     while(count > 0)
     {
-        c = (count / sizeof(buf)) % (sizeof(monkey) - 1);
-        fprintf(stderr, (c != 0) ? "\b%c" : "\b.%c" , monkey[c]);
-        fflush(stderr);
+        show_monkey(count / sizeof(buf));
 
         c = (count > sizeof(buf)) ? sizeof(buf) : count;
 
@@ -464,62 +681,48 @@ static int do_download(CBM_FILE fd, char *argv[])
 /*
  * load binary data from file into device memory
  */
-static int do_upload(CBM_FILE fd, char *argv[])
+static int do_upload(CBM_FILE fd, OPTIONS * const options)
 {
     unsigned char unit;
     int addr;
     int rv;
     size_t size;
     char *tail, *fn;
+    char *tmpstring;
     unsigned char addr_buf[2];
     unsigned int buflen = 65537;
     unsigned char *buf;
     FILE *f;
+
+    // process the drive number (unit)
+
+    if (get_argument_char(options, &unit))
+        return 1;
+
+
+    // process the address
+
+    if (get_argument_string(options, &tmpstring, NULL))
+        return 1;
+
+    addr = strtol(tmpstring, &tail, 0);
+    if(addr < -1 || addr > 0xffff || *tail)
+    {
+        arch_error(0, 0, "invalid address: %s", options->argv[1]);
+        return 1;
+    }
+
+    if (get_argument_file_for_read(options, &f, &fn))
+        return 1;
+
+
+    // allocate memory for the transfer
 
     buf = malloc(buflen);
     if (!buf)
     {
         fprintf(stderr, "Not enough memory for buffer.\n");
         return 1;
-    }
-
-    unit = arch_atoc(argv[0]);
-
-    addr = strtoul(argv[1], &tail, 0);
-    if(addr < -1 || addr > 0xffff || *tail)
-    {
-        arch_error(0, 0, "invalid address: %s", argv[1]);
-        free(buf);
-        return 1;
-    }
-
-    if(!argv[2] || strcmp(argv[2], "-") == 0 || strcmp(argv[2], "") == 0)
-    {
-        fn = "(stdin)";
-        f = stdin;
-
-        // set binary mode for input stream
-
-        arch_setbinmode(arch_fileno(stdin));
-    }
-    else
-    {
-        off_t filesize;
-
-        fn = argv[2];
-        f = fopen(argv[2], "rb");
-        if(f == NULL)
-        {
-            arch_error(0, arch_get_errno(), "could not open %s", fn);
-            free(buf);
-            return 1;
-        }
-        if(arch_filesize(argv[2], &filesize))
-        {
-            arch_error(0, arch_get_errno(), "could not stat %s", fn);
-            free(buf);
-            return 1;
-        }
     }
 
     if(addr == -1)
@@ -574,11 +777,14 @@ static int do_upload(CBM_FILE fd, char *argv[])
 /*
  * identify connected devices
  */
-static int do_detect(CBM_FILE fd, char *argv[])
+static int do_detect(CBM_FILE fd, OPTIONS * const options)
 {
     unsigned int num_devices;
     unsigned char device;
     const char *type_str;
+
+    if (check_if_parameters_ok(options))
+        return 1;
 
     num_devices = 0;
 
@@ -619,12 +825,15 @@ static int do_detect(CBM_FILE fd, char *argv[])
 /*
  * wait until user changes the disk
  */
-static int do_change(CBM_FILE fd, char *argv[])
+static int do_change(CBM_FILE fd, OPTIONS * const options)
 {
     unsigned char unit;
     int rv;
 
-    unit = arch_atoc(argv[0]);
+    rv = get_argument_char(options, &unit);
+
+    if (rv || check_if_parameters_ok(options))
+        return 1;
 
     do
     {
@@ -707,9 +916,8 @@ struct prog
 {
     int      need_driver;
     char    *name;
+    PETSCII_ASCII petsciiascii;
     mainfunc prog;
-    int      req_args_min;
-    int      req_args_max;
     char    *arglist;
     char    *shorthelp_text;
     char    *help_text;
@@ -717,62 +925,63 @@ struct prog
 
 static struct prog prog_table[] =
 {
-    {0, "--help"  , do_help    , 0, 1, "[<command>]",
+/**
+    {0, "--help"  , PA_UNSPEC,  do_help    , "[<command>]",
         "output this help screen",
         "This command outputs some help information for cbmctrl.\n\n"
         "<command> is the (optional) command to get information about.\n\n"
         "If you use it without parameter, it outputs a list of all\n"
         "available commands." },
 
-    {0, "-h"      , do_help    , 0, 1, "",
+    {0, "-h"      , PA_UNSPEC,  do_help    , "",
         "same as --help",
         "for more info, use \"cbmctrl --help --help\"." },
 
-    {0, "--version",do_version , 0, 0, "",
+    {0, "--version",PA_UNSPEC,  do_version , "",
         "output version information",
         "This command just outputs the version number and\n"
         "build date of cbmctrl." },
 
-    {0, "-V"      , do_version , 0, 0, "",
+    {0, "-V"      , PA_UNSPEC,  do_version , "",
         "same as --version",
         "for more info, use \"cbmctrl --help --version\"." },
-
-    {1, "lock"    , do_lock    , 0, 0, "",
+*/
+    {1, "lock"    , PA_UNSPEC,  do_lock    , "",
         "Lock the parallel port for the use by cbm4win/cbm4linux.",
         "This command locks the parallel port for the use by cbm4win/cbm4linux,\n"
         "so that sequences of e.g. talk/read/untalk commands are not broken by\n"
         "concurrent processes wanting to access the parallel port." },
 
-    {1, "unlock"  , do_unlock  , 0, 0, "",
+    {1, "unlock"  , PA_UNSPEC,  do_unlock  , "",
         "Unlock the parallel port for the use by cbm4win/cbm4linux.",
         "This command unlocks the parallel port again so that other processes\n"
         "get a chance to access the parallel port." },
 
-    {1, "listen"  , do_listen  , 2, 2, "<device> <secadr>",
+    {1, "listen"  , PA_UNSPEC,  do_listen  , "<device> <secadr>",
         "perform a listen on the IEC bus",
         "Output a listen command on the IEC bus.\n"
         "<device> is the device number,\n"
         "<secadr> the secondary address to use for this.\n\n"
         "This has to be undone later with an unlisten command." },
 
-    {1, "talk"    , do_talk    , 2, 2, "<device> <secadr>",
+    {1, "talk"    , PA_UNSPEC,  do_talk    , "<device> <secadr>",
         "perform a talk on the IEC bus",
         "Output a talk command on the IEC bus.\n"
         "<device> is the device number,\n"
         "<secadr> the secondary address to use for this.\n\n"
         "This has to be undone later with an untalk command." },
 
-    {1, "unlisten", do_unlisten, 0, 0, "",
+    {1, "unlisten", PA_UNSPEC,  do_unlisten, "",
         "perform an unlisten on the IEC bus",
         "Undo one or more previous listen commands.\n"
         "This affects all drives." },
 
-    {1, "untalk"  , do_untalk  , 0, 0, "",
+    {1, "untalk"  , PA_UNSPEC,  do_untalk  , "",
         "perform an untalk on the IEC bus",
         "Undo one or more previous talk commands.\n"
         "This affects all drives." },
 
-    {1, "open"    , do_open    , 3, 3, "<device> <secadr> <filename>",
+    {1, "open"    , PA_ASCII,   do_open    , "<device> <secadr> <filename>",
         "perform an open on the IEC bus",
         "Output an open command on the IEC bus.\n"
         "<device> is the device number,\n"
@@ -783,8 +992,8 @@ static struct prog prog_table[] =
         "      Although a CBM machine (i.e., a C64) allows this,\n"
         "      this is an internal operation to the computer only." },
 
-    {1, "popen"   , do_open_p  , 3, 3, "<device> <secadr> <filename>",
-        "same as open, but convert the filename from ASCII to PETSCII.",
+    {1, "popen"   , PA_PETSCII, do_open    , "<device> <secadr> <filename>",
+        "same as open, but convert the filename from ASCII to PETSCII",
         "Output an open command on the IEC bus.\n"
         "<device> is the device number,\n"
         "<secadr> the secondary address to use for this.\n"
@@ -794,31 +1003,31 @@ static struct prog prog_table[] =
         "      Although a CBM machine (i.e., a C64) allows this,\n"
         "      this is an internal operation to the computer only." },
 
-    {1, "close"   , do_close   , 2, 2, "<device> <secadr>",
+    {1, "close"   , PA_UNSPEC,  do_close   , "<device> <secadr>",
         "perform a close on the IEC bus",
         "Undo a previous open command." },
 
-    {1, "read"    , do_read    , 0, 1, "[<file>]",
+    {1, "read"    , PA_UNSPEC,  do_read    , "[<file>]",
         "read raw data from the IEC bus",
         "With this command, you can read raw data from the IEC bus.\n"
         "<file>   (optional) file name of a file to write the contents to.\n"
         "         If this name is not given or it is a dash ('-'), the\n"
         "         contents will be written to stdout, normally the console." },
 
-    {1, "write"   , do_write   , 0, 1, "[<file>]",
+    {1, "write"   , PA_UNSPEC,  do_write   , "[<file>]",
         "write raw data to the IEC bus",
         "With this command, you can write raw data to the IEC bus.\n"
         "<file>   (optional) file name of a file to read the values from.\n"
         "         If this name is not given or it is a dash ('-'), the\n"
         "         contents will be read from stdin, normally the console." },
 
-    {1, "status"  , do_status  , 1, 1, "<device>",
+    {1, "status"  , PA_PETSCII, do_status  , "<device>",
         "give the status of the specified drive",
         "This command gets the status (the so-called 'error channel')"
         "of the given drive and outputs it on the screen.\n"
         "<device> is the device number of the drive." },
 
-    {1, "command" , do_command , 2, 2, "<device> <cmdstr>",
+    {1, "command" , PA_ASCII,   do_command , "<device> <cmdstr>",
         "issue a command to the specified drive",
         "This command issues a command to a specific drive.\n"
         "This command is a command that you normally give to\n"
@@ -828,7 +1037,7 @@ static struct prog prog_table[] =
         "NOTE: You have to give the commands in upper-case letters.\n"
         "      Lower case will NOT work!" },
 
-    {1, "pcommand", do_command_p, 2, 2, "<device> <cmdstr>",
+    {1, "pcommand", PA_PETSCII, do_command , "<device> <cmdstr>",
         "same as command, but convert the cmdstr from ASCII to PETSCII.",
         "This command issues a command to a specific drive.\n"
         "This command is a command that you normally give to\n"
@@ -838,20 +1047,22 @@ static struct prog prog_table[] =
         "NOTE: You have to give the commands in lower-case letters.\n"
         "      Upper case will NOT work!" },
 
-    {1, "bcommand", do_command_b, 2, 41, "<device> <cmd1> [<cmd2> ... <cmd40>]",
+/*
+    {1, "bcommand", PA_UNSPEC,  do_command_b, "<device> <cmd1> [<cmd2> ... <cmd40>]",
         "same as command, but the command string is given in single bytes.",
         "This command issues a command to a specific drive.\n\n"
         "<device>   is the device number of the drive.\n\n"
         "<cmd1..40> are the bytes, the command string is constructed from.\n"
         "NOTE: Single bytes can be given as decimal or sedecimal (0x prefix) "
         "values" },
+*/
 
-    {1, "dir"     , do_dir     , 1, 1, "<device>",
+    {1, "dir"     , PA_PETSCII, do_dir     , "<device>",
         "output the directory of the disk in the specified drive",
         "This command gets the directory of the disk in the drive.\n\n"
         "<device> is the device number of the drive." },
 
-    {1, "download", do_download, 3, 4, "<device> <adr> <count> [<file>]",
+    {1, "download", PA_UNSPEC,  do_download, "<device> <adr> <count> [<file>]",
         "download memory contents from the floppy drive",
         "With this command, you can get data from the floppy drive memory.\n"
         "<device> is the device number of the drive.\n"
@@ -866,7 +1077,7 @@ static struct prog prog_table[] =
         " cbmctrl download 8 0xc000 0x4000 1541ROM.BIN\n"
         " * reads the 1541 ROM (from $C000 to $FFFF) from drive 8 into 1541ROM.BIN" },
 
-    {1, "upload"  , do_upload  , 2, 3, "<device> <adr> [<file>]",
+    {1, "upload"  , PA_UNSPEC,  do_upload  , "<device> <adr> [<file>]",
         "upload memory contents to the floppy drive",
         "With this command, you can write data to the floppy drive memory.\n"
         "<device> is the device number of the drive.\n"
@@ -881,19 +1092,19 @@ static struct prog prog_table[] =
         " cbmctrl upload 8 0x500 BUFFER2.BIN\n"
         " * writes the file BUFFER2.BIN to drive 8, address $500." },
 
-    {1, "reset"   , do_reset   , 0, 0, "",
+    {1, "reset"   , PA_UNSPEC,  do_reset   , "",
         "reset all drives on the IEC bus",
         "This command performs a (physical) reset of all drives on the IEC bus." },
 
-    {1, "detect"  , do_detect  , 0, 0, "",
+    {1, "detect"  , PA_UNSPEC,  do_detect  , "",
         "detect all drives on the IEC bus",
         "This command tries to detect all drives on the IEC bus.\n"
-        "For this, this command access all possible drives and tries to read\n"
-        "some bytes from its memory. If a drive is detected, its name is output.\n"
+        "For this, this command accesses all possible drives and tries to read\n"
+        "some bytes from their memory. If a drive is detected, its name is output.\n"
         "Additionally, this routine determines if the drive is connected via a\n"
         "parallel cable (XP1541 companion cable)." },
 
-    {1, "change"  , do_change  , 1, 1, "<device>",
+    {1, "change"  , PA_UNSPEC,  do_change  , "<device>",
         "wait for a disk to be changed in the specified drive",
         "This command waits for a disk to be changed in the specified drive.\n\n"
         "For this, it makes the following assumptions:\n\n"
@@ -904,35 +1115,46 @@ static struct prog prog_table[] =
         "Because of this, just opening the drive and closing it again (without\n"
         "actually removing the disk) will not work in most cases." },
 
-    {0, NULL,NULL}
+    {0, NULL, PA_UNSPEC, NULL, NULL, NULL}
 };
 
-static struct prog *find_main(char *name)
+static struct prog *
+process_cmdline_find_command(OPTIONS *options)
 {
-    int i;
-
-    for(i=0; prog_table[i].name; i++)
+    if (options->argc >= 1)
     {
-        if(strcmp(name, prog_table[i].name) == 0)
+        const char * const name = options->argv[0];
+        int i;
+
+        for (i=0; prog_table[i].name; i++)
         {
-            return &prog_table[i];
+            if (strcmp(name, prog_table[i].name) == 0)
+            {
+                // advance to the next command-line argument
+                options->argc -= 1;
+                options->argv += 1;
+
+                // return: We found the command
+                return &prog_table[i];
+            }
         }
     }
+
     return NULL;
 }
 
 /*
  * Output a help screen
  */
-static int do_help(CBM_FILE fd, char *argv[])
+static int do_help(CBM_FILE fd, OPTIONS * const options)
 {
     int i;
 
-    do_version(fd, argv);
+    do_version(fd, options);
 
     printf("\n");
 
-    if (*argv == 0)
+    if (options->argc == 0)
     {
         for(i=0; prog_table[i].prog; i++)
         {
@@ -944,71 +1166,235 @@ static int do_help(CBM_FILE fd, char *argv[])
     }
     else
     {
-        struct prog *p;
+        struct prog *pprog;
 
-        p = find_main(argv[0]);
+        pprog = process_cmdline_find_command(options);
 
-        if (p)
+        if (pprog)
         {
-            printf(" cbmctrl %s %s\n\n  %s\n\n%s\n", p->name, p->arglist, p->shorthelp_text, p->help_text);
+            printf(" cbmctrl %s %s\n\n  %s\n\n%s\n",
+                pprog->name, pprog->arglist, pprog->shorthelp_text, pprog->help_text);
         }
         else
         {
-            printf(" Nothing known about \"cbmctrl %s\".\n", argv[0]);
+            printf(" Nothing known about \"cbmctrl %s\".\n", options->argv[0]);
         }
     }
-
 
     return 0;
 }
 
+static int
+set_option(int *Where, int NewValue, int OldValue, const char * const Description)
+{
+    int error = 0;
+
+    if (*Where != OldValue)
+    {
+        error = 1;
+        fprintf(stderr, "Specified option '%s', but there is a conflicting option,\n"
+            "or it is specified twice!\n", Description);
+    }
+
+    *Where = NewValue;
+
+    return error;
+}
+
+static int
+set_option_petsciiascii(PETSCII_ASCII *Where, PETSCII_ASCII NewValue, int IgnoreError)
+{
+    int error = 0;
+
+    if (!IgnoreError && (*Where != PA_UNSPEC))
+    {
+        error = 1;
+        fprintf(stderr, "Specified option '--petscii' and '--ascii' in one command!\n");
+    }
+
+    *Where = NewValue;
+
+    return error;
+}
+
+static int
+process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
+{
+    unsigned int use_rc = 1;
+    int option_index;
+    int c;
+
+    static const char short_options[] = "+fhVpa";
+    static struct option long_options[] =
+    {
+        {"forget",  no_argument, NULL, 'f'},
+        {"help",    no_argument, NULL, 'h'},
+        {"version", no_argument, NULL, 'V'},
+        {"petscii", no_argument, NULL, 'p'},
+        {"ascii",   no_argument, NULL, 'a'},
+        {NULL,      no_argument, NULL, 0  }
+    };
+
+    // clear all options
+    memset(options, 0, sizeof(*options));
+
+    // remember argc and argv, so they can be used later
+    options->argc = argc;
+    options->argv = argv;
+
+    // first of all, parse the command-line (before the command):
+    // is -f specified (thus, we should ignore .opencbmrc)?
+    //
+    optind = 0;
+
+    while ((c = getopt_long(options->argc, options->argv, short_options, long_options, &option_index)) != EOF)
+    {
+        if (c == 'f')
+            use_rc = 0;
+    }
+
+    // if we should read .opencbmrc, do it now:
+    if (use_rc)
+        ; // @TODO: TBD
+
+    // now, we start the "real" scanning
+    optind = 0;
+    opterr = 1;
+
+    while ((c = getopt_long(options->argc, options->argv, short_options, long_options, &option_index)) != EOF)
+    {
+        switch (c)
+        {
+        case '?':
+            fprintf(stderr, "unknown option %s specified!\n",
+                options->argv[optind-1]);
+            options->error = 1;
+            break;
+
+        case 'f':
+            // this option has already been processed,
+            // ignore it
+            break;
+
+        case 'h':
+            set_option(&options->help, 1, 0, "--help");
+            break;
+
+        case 'V':
+            set_option(&options->version, 1, 0, "--version");
+            break;
+
+        case 'p':
+            options->error |= set_option_petsciiascii(&options->petsciiascii, PA_PETSCII, 0);
+            break;
+
+        case 'a':
+            options->error |= set_option_petsciiascii(&options->petsciiascii, PA_ASCII, 0);
+            break;
+        };
+    }
+
+    // skip the options that are already processed
+    options->argc -= optind;
+    options->argv += optind;
+
+    return options->error;
+}
+
+static void
+free_options(OPTIONS * const options)
+{
+}
+
+static int
+process_version_help(OPTIONS * const options)
+{
+    int processed = 0;
+
+    if (options->help)
+    {
+        do_help(0, options);
+        processed = 1;
+    }
+
+    if (options->version)
+    {
+        do_version(0, NULL);
+        processed = 1;
+    }
+
+    if (processed && options->argc > 0)
+        fprintf(stderr, "Extra parameters on command-line are ignored.\n");
+
+    return processed;
+}
+
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
-    struct prog *p;
+    struct prog *pprog;
 
-    p = argc < 2 ? NULL : find_main(argv[1]);
-    if(p)
-    {
-        if((p->req_args_min <= argc-2) && (p->req_args_max >= argc-2))
+    OPTIONS options;
+
+    int rv = 0;
+    
+    do {
+        CBM_FILE fd;
+
+        // first of all, process the options which affect all commands
+
+        rv = process_cmdline_common_options(argc, argv, &options);
+
+        // check if we have --version or --help specified:
+
+        if (process_version_help(&options))
+            break;
+
+        pprog = process_cmdline_find_command(&options);
+
+        if (pprog == NULL)
         {
-            CBM_FILE fd;
-            int rv;
-
-            if(p->need_driver)
-                rv = cbm_driver_open(&fd, 0);
-            else
-                rv = 0;
-
-            if(rv == 0)
-            {
-                rv = p->prog(fd, &argv[2]) != 0;
-                if(rv && arch_get_errno())
-                {
-                    arch_error(0, arch_get_errno(), "%s", argv[1]);
-                }
-
-                if(p->need_driver)
-                    cbm_driver_close(fd);
-            }
-            else
-            {
-                if(arch_get_errno())
-                {
-                    arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
-                }
-                rv = 1;
-            }
-            return rv;
+            printf("invalid command. For info on possible commands, try the --help parameter.\n\n");
+            rv = 2;
+            break;
         }
-        else
+
+        // if neither PETSCII or ASCII was specified, use default for that command
+        if (options.petsciiascii == PA_UNSPEC)
+            options.petsciiascii = pprog->petsciiascii;
+
+        if (pprog->need_driver)
+            rv = cbm_driver_open(&fd, 0);
+
+        if (rv != 0)
+        {
+            if (arch_get_errno())
+            {
+                arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
+            }
+            break;
+        }
+
+        // check if number of arguments is o.k.!
+#if 0 // @TBD
+        if((p->req_args_min > argc-2) || (p->req_args_max < argc-2))
         {
             fprintf(stderr, "wrong number of arguments:\n\n  %s %s %s\n",
                         argv[0], argv[1], p->arglist);
         }
-    }
-    else
-    {
-        printf("invalid command. For info on possible commands, try the --help parameter.\n\n");
-    }
-    return 2;
+#endif
+
+        rv = pprog->prog(fd, &options) != 0;
+        if (rv && arch_get_errno())
+        {
+            arch_error(0, arch_get_errno(), "%s", pprog->name);
+        }
+
+        if (pprog->need_driver)
+            cbm_driver_close(fd);
+
+    } while (0);
+
+    free_options(&options);
+
+    return rv;
 }
