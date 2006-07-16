@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.32 2006-07-16 15:09:55 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.33 2006-07-16 17:39:22 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -261,7 +261,7 @@ static int hex2val(const char ch)
 }
 
 static int
-process_specific_byte_parameter(char *string, int stringlen)
+process_specific_byte_parameter(char *string, int stringlen, PETSCII_ASCII petsciiascii)
 {
     int size = 0;
     char *pread = string;
@@ -296,6 +296,9 @@ process_specific_byte_parameter(char *string, int stringlen)
         }
         else
         {
+            if (petsciiascii = PA_PETSCII)
+                ch = cbm_ascii2petscii_c(ch);
+
             *pwrite++ = ch;
             size++;
         }
@@ -610,7 +613,9 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
     int  rv;
     unsigned char unit;
     char *commandline;
-    int commandlinelen = 0;
+    char *extended_commandline = NULL;
+    unsigned int extended_commandline_len = 0;
+    unsigned int commandlinelen = 0;
 
     int extended = 0;
     int c;
@@ -639,24 +644,96 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
     rv = get_argument_char(options, &unit);
     rv = get_argument_string(options, &commandline, &commandlinelen);
 
-    if (rv || check_if_parameters_ok(options))
+    if (rv)
         return 1;
-
-    if (options->petsciiascii == PA_PETSCII)
-        cbm_ascii2petscii(commandline);
 
     if (extended)
     {
-        commandlinelen = process_specific_byte_parameter(commandline, commandlinelen);
+        int n = process_specific_byte_parameter(commandline, commandlinelen, options->petsciiascii);
 
-        if (commandlinelen < 0)
+        if (n < 0)
             return 1;
+
+        commandlinelen = n;
     }
+    else
+    {
+        // only convert ASCII -> PETSCII if we do not have extended syntax
+        // (with extended syntax, this is done "on the fly" while converting
+        // the % - style values into characters.)
+
+        if (options->petsciiascii == PA_PETSCII)
+            cbm_ascii2petscii(commandline);
+    }
+
+    // now, check if there are more command-line parameters
+
+    if (options->argc > 0)
+    {
+        char *p;
+
+        // get memory for the additional data
+
+        // get 2 byte more than we have parameters, as we will append
+        // \r and \0 at the end of the buffer!
+
+        extended_commandline = malloc(options->argc + 2);
+
+        if (extended_commandline == NULL)
+        {
+            fprintf(stderr, "Not enough memory for all parameters, aborting...\n");
+            return 1;
+        }
+
+        // write data in the memory
+
+        p = extended_commandline;
+
+        while (--options->argc >= 0)
+        {
+            char *tail;
+
+            c =  strtol(options->argv[0], &tail, 0);
+
+            if(c < 0 || c > 0xff || *tail)
+            {
+                arch_error(0, 0, "invalid byte: %s", options->argv);
+                return 1;
+            }
+            *p++ = (char) c;
+            extended_commandline_len++;
+
+            options->argv++;
+        }
+
+        ++options->argc;
+
+        // make sure the buffer is ended with a '\r'; this is needed
+        // only if the command ends with a '\r', to work around a bug
+        // in the floppy code.
+
+        *p++ = '\r';
+        extended_commandline_len++;
+
+        // end the string with a \0. This is not really needed, but
+        // convenient when debugging.
+
+        *p   = 0;
+
+    }
+
+    if (check_if_parameters_ok(options))
+        return 1;
 
     rv = cbm_listen(fd, unit, 15);
     if(rv == 0)
     {
         cbm_raw_write(fd, commandline, commandlinelen);
+        if (extended_commandline)
+        {
+            cbm_raw_write(fd, extended_commandline, extended_commandline_len);
+            free(extended_commandline);
+        }
         rv = cbm_unlisten(fd);
     }
     return rv;
@@ -1140,26 +1217,35 @@ static struct prog prog_table[] =
         "of the given drive and outputs it on the screen.\n"
         "<device> is the device number of the drive." },
 
-    {1, "command" , PA_ASCII,   do_command , "[-e|--extended] <device> <cmdstr>",
+    {1, "command" , PA_ASCII,   do_command , "[-e|--extended] <device> <cmdstr> [<cmd1> ... <cmdN>]",
         "issue a command to the specified drive",
         "This command issues a command to a specific drive.\n"
         "This command is a command that you normally give to\n"
         "channel 15 (i.e., N: to format a drive, V: to validate, etc.).\n\n"
         "<device> is the device number of the drive.\n\n"
         "<cmdstr> is the command to execute in the drive.\n\n"
+        "<cmd1..N> are additional bytes to append to the command.\n"
+        "NOTE: Single bytes can be given as decimal, octal (0 prefix) or\n"
+        "      sedecimal (0x prefix).\n\n"
         "If the option -e or --extended is given, an extended format is used:\n"
         "  You can specify extra characters by given their value in hex with\n"
         "  prepended `%´, that is: `%20´ => SPACE, `%41´ => `A´, `%35´ => `%5´,\n"
         "  and-so-on. A `%´ is given by doubling it: `%%´ => `%´.\n\n"
         "Example: Write the bytes $20, $21 into memory locations $0304 and $0305\n"
         "         of drive 8:\n"
-        "         cbmctrl -p command -e m-w%04%03%02%20%21\n\n"
-        "NOTE:  You have to give the commands in upper-case letters.\n"
-        "       Lower case will NOT work!\n"
+        "         cbmctrl -p command -e m-w%04%03%02%20%21\n"
+        "      or cbmctrl -p command -e m-w%04%03 2 0x20 0x21\n\n"
+        "NOTE:  You have to give the commands in upper-case letters if --ascii\n"
+        "       is used (default), lower case will NOT work!\n"
+        "       If --petscii is used, you must give the commands in upper case.\n"
         "NOTE2: If used with the global -p option, this action is equivalent\n"
-        "       to pcommand\n"
+        "       to the obsolete `cbmctrl pcommand´.\n"
         "NOTE3: If using both PETSCII and --extended option, the bytes given\n"
-        "       via the `%´ meta-character are *not* converted to petscii." },
+        "       via the `%´ meta-character or as <cmd1> .. <cmdN> are *not*\n"
+        "       converted to petscii.\n\n"
+        "BUG: Due to an error in the floppy ROM, a last byte of `\\r' will not be\n"
+        "     processed correctly. The work around this, `cbmctrl command´ always\n"
+        "     adds a `\\r´ at the end of the command."},
 
     {1, "pcommand", PA_PETSCII, do_command , "[-e|--extended] <device> <cmdstr>",
         "obsolete; use `cbmctrl --petscii command´ instead!",
