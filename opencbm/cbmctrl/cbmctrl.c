@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.33 2006-07-16 17:39:22 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.34 2006-07-17 10:37:09 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -1230,11 +1230,11 @@ static struct prog prog_table[] =
         "If the option -e or --extended is given, an extended format is used:\n"
         "  You can specify extra characters by given their value in hex with\n"
         "  prepended `%´, that is: `%20´ => SPACE, `%41´ => `A´, `%35´ => `%5´,\n"
-        "  and-so-on. A `%´ is given by doubling it: `%%´ => `%´.\n\n"
-        "Example: Write the bytes $20, $21 into memory locations $0304 and $0305\n"
-        "         of drive 8:\n"
-        "         cbmctrl -p command -e m-w%04%03%02%20%21\n"
-        "      or cbmctrl -p command -e m-w%04%03 2 0x20 0x21\n\n"
+        "  and-so-on. A `%´ is given by giving its ASCII: `%25´ => `%´.\n\n"
+        "Example: Write the bytes $29, $49 into memory locations $0077 and $0079\n"
+        "         of drive 8 (which gives the drive address 9):\n"
+        "         cbmctrl -p command -e 8 m-w 119 0 2 41 73\n"
+        "      or cbmctrl -p command -e 8 m-w%77%00 2 0x29 0x49\n\n"
         "NOTE:  You have to give the commands in upper-case letters if --ascii\n"
         "       is used (default), lower case will NOT work!\n"
         "       If --petscii is used, you must give the commands in upper case.\n"
