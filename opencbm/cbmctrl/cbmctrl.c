@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.34 2006-07-17 10:37:09 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.35 2006-07-17 18:57:50 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -296,7 +296,7 @@ process_specific_byte_parameter(char *string, int stringlen, PETSCII_ASCII petsc
         }
         else
         {
-            if (petsciiascii = PA_PETSCII)
+            if (petsciiascii == PA_PETSCII)
                 ch = cbm_ascii2petscii_c(ch);
 
             *pwrite++ = ch;
@@ -697,7 +697,7 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
 
             if(c < 0 || c > 0xff || *tail)
             {
-                arch_error(0, 0, "invalid byte: %s", options->argv);
+                arch_error(0, 0, "invalid byte: %s", options->argv[0]);
                 return 1;
             }
             *p++ = (char) c;
