@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.2 2006-05-23 12:01:05 wmsr Exp $";
+    "@(#) $Id: pp.c,v 1.3 2006-07-18 10:02:24 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -18,9 +18,6 @@ static char *rcsid =
 #include <stdlib.h>
 
 #include "arch.h"
-
-static CBM_FILE fd_cbm;
-static int two_sided;
 
 static const unsigned char pp1541_drive_prog[] = {
 #include "pp1541.inc"
@@ -97,8 +94,8 @@ static int
 upload(CBM_FILE fd, unsigned char drive)
 {
     enum cbm_device_type_e driveType;
-    const unsigned char *pp_drive_prog;
-    unsigned int pp_drive_prog_length;
+    const unsigned char *pp_drive_prog = 0;
+    unsigned int pp_drive_prog_length = 0;
     unsigned int bytesWritten;
 
     if (cbm_identify(fd, drive, &driveType, NULL))

@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.2 2006-05-23 12:01:05 wmsr Exp $";
+    "@(#) $Id: s1.c,v 1.3 2006-07-18 10:02:24 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -22,9 +22,6 @@ static char *rcsid =
 static const unsigned char s1_drive_prog[] = {
 #include "s1.inc"
 };
-
-static CBM_FILE fd_cbm;
-static int two_sided;
 
 static int s1_write_byte_nohs(CBM_FILE fd, unsigned char c)
 {
