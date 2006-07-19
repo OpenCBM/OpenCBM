@@ -1,4 +1,4 @@
-.\" $Id: cbmctrl.1,v 1.11 2006-07-16 12:14:38 strik Exp $
+.\" $Id: cbmctrl.1,v 1.12 2006-07-19 18:37:28 wmsr Exp $
 .\"
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
@@ -9,9 +9,9 @@
 .\" Test it with
 .\"    nroff -man cbmctrl.1 | less -r
 .\"
-.TH CBMCTRL "1" "May 2006" "cbmctrl 0.4.0" "User Commands"
+.TH CBMCTRL "1" "July 2006" "cbmctrl 0.4.x" "User Commands"
 .SH NAME
-cbmctrl \- control serial CBM devices \- manual page for cbmctrl 0.4.0
+cbmctrl \- control serial CBM devices \- manual page for cbmctrl 0.4.x
 .P
 .B This document is poorly maintained and probably outdated. 
 If in doubt, use the Texinfo manual. If the
@@ -22,7 +22,7 @@ program is properly installed at your site, the command
 .PP
 should give you access to the complete manual.
 .SH SYNOPSIS
-.B cbmctrl " [global_options] [action] [action_args]"
+.B cbmctrl "  [global_options] [action] [action_opt] [\-\-] [action_args]"
 .SH DESCRIPTION
 .B cbmctrl
 can control all kinds of serial CBM devices like floppy drives and printers.
@@ -33,14 +33,14 @@ and a
 .SM MPS-1200
 printer.
 .SH Structure
-.B Overall structure of cbmctrl actionss
-.RS 4
+.SS Overall structure of cbmctrl actions
 The overall format of all
 .B cbmctrl
 actions is:
 .RS 2
+.RS 2
 .TP
-.BI cbmctrl " [global_options]" " [action]" " [action_args]"
+.BI cbmctrl " [global_options]" " [action]" " [action_opt]" " [\-\-]" " [action_args]"
 .RE
 .TP 2
 .BI cbmctrl
@@ -58,14 +58,28 @@ One of a bunch of different subcommands that direct
 .B cbmctrl
 what to do
 .TP 2
+.I action_opt
+Options that are used and useful in the context of a dedicated
+subcommand
+.B action
+only
+.TP 2
+.B \-\-
+Optional delimiter between
+.B action
+.I options
+and
+.I arguments
+to disable option parsing after (for arguments that begin with a
+hyphen)
+.TP 2
 .I action_args
 Arguments that are required for the subcommand
 .B action
 to work
 .RE
 .SH OPTIONS
-.B Global options
-.RS 4
+.SS Global options
 .B cbmctrl
 understands the following global options
 .PP
@@ -87,12 +101,24 @@ action together with its arguments and parameters
 .PD
 .TP
 .B \-V, \-\-version
-Output version information as well as the build date and time.
-.RE
+Output version information as well as the build date and time
+.TP
+.B \-p, \-\-petscii
+Convert input or output parameters between CBM format (PETSCII)
+and PC format (ASCII). Default with all actions but
+.B open
+and
+.B command
+.TP
+.B \-a, \-\-ascii
+Do not convert data between CBM and PC format.
+Default with
+.B open
+and
+.B command
 .RE
 .PP
-.B Actions overview
-.RS 4
+.SS Actions overview
 .B cbmctrl
 understands the following subcommand actions
 .RS 2
@@ -147,11 +173,6 @@ understands the following subcommand actions
 .br
 .ns
 .TP 10
-.B popen
-\- Same as open, but with ASCII to PETSCII conversion
-.br
-.ns
-.TP 10
 .B read
 \- Get a stream of raw data from an IEC bus device
 .br
@@ -169,11 +190,6 @@ understands the following subcommand actions
 .TP 10
 .B command
 \- Issue a command to a specified drive
-.br
-.ns
-.TP 10
-.B pcommand
-\- Same as command, with ASCII to PETSCII conversion
 .br
 .ns
 .TP 10
@@ -195,14 +211,24 @@ understands the following subcommand actions
 .B change
 \- Wait for a disk to be changed in a specified drive
 .RE
+.PP
+.B cbmctrl
+yet supports these deprecated subcommand actions
+.RS 2
+.TP 10
+.B popen
+\- Same as open, but with ASCII to PETSCII conversion
+.br
+.ns
+.TP 10
+.B pcommand
+\- Same as command, with ASCII to PETSCII conversion
 .RE
 .PP
-.B Common action arguments
-.RS 4
+.SS Common action arguments
 Many of the
 .B cbmctrl
 subcommands understand the following common arguments:
-.RS 2
 .TP 2
 .I <device>
 Advice
@@ -231,13 +257,32 @@ is used, when a program is loaded, address 1, when a program is
 saved. Address number 15 represents the command channel of the
 disk drive, so effectively, for bulk data transfers to and from
 disk drives, only the logical channel numbers 2 to 14 can be used.
-.RE
-.RE
-.SH Actions
+.TP
+.IR "<filename>" "," " <cmdstr>" 
+With several
+.B cbmctrl actions
+there is an argument required that either denotes a filename via
+.I <filename>
+at the IEC device or calls a command via
+.I <cmdstr>
+over the IEC bus that the device is able to interprete. Any such
+argument that denotes a string within or for an IEC device is
+subject to optional ASCII<\->PETSCII conversions as well as
+optional percent-encodings known from URIs and specified by
+RFC 3986.
+
+.SS [FIXME, mo-20060718]
+Dies ergibt erst wirklich dann Sinn, wenn auch
+.I \-e
+bzw.
+.I \-\-extended
+als globale Optionen definiert sind.
+
+.SS Actions
 .B cbmctrl
 understands the following
 .B actions:
-.TP
+.TP 2
 .BI reset
 This action performs a hardware reset of all devices attached to the IEC bus.
 Control is returned after it is made sure that all devices are ready.
@@ -246,9 +291,9 @@ Control is returned after it is made sure that all devices are ready.
 This action tries to detect all devices attached to the IEC bus.
 For this, this subcommand accesses all possible devices and tries to
 read some bytes from its memory. If a devices is detected, its name
-is output. Additionally, this routine determines if the device is
-connected via a parallel cable (XP1541 companion cable, may be true
-for disk drives only).
+is printed to the console. Additionally, this routine determines if
+the device is connected via a parallel cable (XP1541 companion cable,
+may be true for disk drives only).
 .TP
 .BI lock
 This command locks the parallel port for exclusive use by cbm4win/cbm4linux, so
@@ -372,7 +417,7 @@ command has to be undone later with a
 .B close
 command.
 .PP
-.RS
+.RS 2
 .PD 0
 Notes:
 .RS 2
@@ -405,38 +450,15 @@ computer only.
 .TP 2
 *
 .BI cbmctrl " open"
-does not change any character encoding, that is, it does not convert
-between ASCII (used by the PC) and PETSCII (used by the CBM device).
-If this is needed, use
-.BI cbmctrl " popen"
-instead.
+does not change any character encoding by default, that is, it
+does not convert between ASCII (used by the PC) and PETSCII (used
+by the CBM device). If this is needed, make use of the global
+.I \-\-petscii
+option.
 .RE
 .PD
 .RE
-.TP
-.BI popen " <device> <secadr> <filename>"
-The
-.B popen
-action is the very same as the
-.B open
-action and all parameters act the same. The difference is that the
-.I <filename>
-string is converted from ASCII to PETSCII before beeing sent to the
-device.
-.PP
-.RS
-.PD 0
-Notes:
-.RS 2
-The same notes as with the
-.B open
-action apply to the
-.B popen
-action.
-.RE
-.PD
-.RE
-.TP
+.TP 2
 .BI close " <device> <secadr>"
 Close the file associated with secondary address
 .I <secadr>
@@ -454,7 +476,7 @@ the optional parameter
 .IR <file> .
 If
 .I <file>
-is omitted or if it is named -, the data stream is put to
+is omitted or if it is named '\-', the data stream is put to
 the standard output channel on the host computer.
 .TP
 .BI write " [<file>]"
@@ -465,7 +487,7 @@ the optional parameter
 .IR <file> .
 If
 .I <file>
-is omitted or if it is named -, the data stream is get from
+is omitted or if it is named '\-', the data stream is get from
 the standard input channel on the host computer.
 .TP
 .BI status " <device>"
@@ -476,9 +498,13 @@ all upper case characters are changed to lower case. Carriage return (0x0d)
 is also changed to the current operating systems line ending convention
 (0x0a on Unix oriented systems, 0x0d 0x0a on Windows oriented systems).
 .PP
-.RS
+.RS 2
 This action is similar to (in this case, no character conversions would be
-made):
+made as with using the
+.B status
+action with the global
+.I \-\-ascii
+option):
 .PP
 .PD 0
 .RS
@@ -496,28 +522,45 @@ cbmctrl unlock
 .PD
 .RE
 .RE
-.TP
-.BI command " <device> <cmdstr>"
+.TP 2
+.BI command " [\-e|\-\-extended]" " <device>" " <cmdstr> [<cmd1> ... <cmdN>]"
 Sends
 .I <cmdstr>
+appended by the optional octets
+.I <cmd1>
+to
+.I <cmdN>
 to device
-.IR <device> ,
-secondary address 15 (command/status channel). Note that most (all?)
-devices accept upper case commands only, lower case will not work
-(i.e., N: to format a drive, V: to validate, etc.)!
-.PP
+.BR <device> ,
+secondary address 15 (command/status channel). The single byte
+arguments
+.I <cmd1>
+to
+.I <cmdN>
+can be either given in decimal, octal (0 prefix) or sedecimal (0x
+prefix) notation.
 .RS
+If the option
+.I \-e
+or
+.I \-\-extended
+is given, an extended format is used: You can specify extra
+characters by giving their value in hex with prepended '%', that
+is: "%20" => SPACE, "%41" => 'A', "%35" => '5', and so on; this
+is the so named percent-encoding as specified for URIs in RFC
+3986. A '%' is given by encoding it with: "%25" => '%'.
+.PP
 This command is identical to:
 .PP
 .PD 0
-.RS
+.RS 7
 cbmctrl lock
 .P
 cbmctrl listen
 .I <device>
 15
 .P
-echo -n
+echo \-n
 .I <cmdstr>
 | cbmctrl write
 .P
@@ -532,7 +575,41 @@ Notes:
 .RS 2
 .TP 2
 *
-"echo -n" does natively work under Linux only, under Windows you can use
+If
+.I \-\-ascii
+is used (this is the default), you should give the commands in
+upper-case letters, lower case will
+.B not
+work! If
+.I \-\-petscii
+is used, you should give the commands in lower case or they will
+not be interpreted with most IEC devices.
+.TP 2
+*
+If used with the global
+.I \-\-petscii
+option, this action is equivalent to the obsolete
+.BR cbmctrl " action"
+.BI "pcommand" " <device> <cmdstr>".
+.TP 2
+*
+The octets given by
+.I <cmd1> ... <cmdN>
+are
+.B not
+converted at all, regardless if the
+.I \-\-petscii
+global option is given or else.
+.TP 2
+*
+The same goes for percent-encoded characters, when the options
+.IR \-\-petscii " and" " \-\-extended"
+are given. The resulting octets after the percent-decoding are
+.B not
+converted from ASCII to PETSCII.
+.TP 2
+*
+"echo \-n" does natively work under Linux only, under Windows you can use
 the following construct as a replacement. Please ensure that there are no
 spaces between the '=' character and the '|' character surrounding
 .IR <cmdstr> :
@@ -543,40 +620,7 @@ spaces between the '=' character and the '|' character surrounding
 .RE
 .RE
 .RE
-.TP
-.BI pcommand " <device> <cmdstr>"
-The
-.B pcommand
-action is the very same as the
-.B command
-action and the
-.I <device>
-parameter acts the same. The difference is that the
-.I <cmdstr>
-string is converted from ASCII to PETSCII before beeing used.
-.PP
-.RS
-.PD 0
-Notes:
-.RS 2
 .TP 2
-*
-Despite the
-.B command
-action command, all commands (stated within
-.IR <cmdstr> )
-have to be given in lower case letters. The letter case conversion is one of
-the things the ASCII to PETSCII conversion does.
-.TP 2
-*
-Due to the conversion from ASCII to PETSCII, sending
-.IR """m-r""" " and" " ""m-w"""
-device commands will not work in most cases, because the data to be sent
-will be converted too and thus corrupts the stream.
-.RE
-.PD
-.RE
-.TP
 .BI dir " <device>"
 Display the directory from the disk in the specified disk drive
 IEC device
@@ -591,7 +635,7 @@ via one or more
 .BI M-R
 commands. Memory contents are written to standard output as long as
 .I <file>
-is ommited or equivalent to -. Note that
+is ommited or denoted by '\-'. Note that
 .I <count>
 and
 .I <address>
@@ -607,11 +651,11 @@ via one or more
 .BI M-W
 commands. If
 .I <address>
-is -1, the first two bytes from
+is \-1, the first two bytes from
 .I <file>
 are considered as start address. Reads standard input if
 .I <file>
-is ommited or equivalent to -.
+is ommited or denoted by '\-'.
 .I <count>
 and
 .I <address>
@@ -624,7 +668,7 @@ to wait for a disk to be exchanged. It makes the following assumptions
 for this:
 .PP
 .PD 0
-.RS 10
+.RS 4
 .TP 2
 *
 there is already a disk in the drive,
@@ -638,16 +682,38 @@ completely inserted and ready to be read/written.
 .PD
 .RE
 .PP
-.RS
+.RS 2
 Because of this, just opening the drive and closing it again (without
 actually removing the disk) will not work in most cases.
+.RE
+.RE
+.PP
+.B cbmctrl
+still supports the following deprecated
+.B actions:
+.RS 4
+.TP 2
+.BI popen " <device> <secadr> <filename>"
+The
+.B popen
+action got obsoleted by the (full) command:
+.RS 2
+.BI cbmctrl " \-\-petscii" " open" " <device> <secadr> <filename>"
+.RE
+.TP 2
+.BI pcommand " <device> <cmdstr>"
+The
+.B pcommand
+action got obsoleted by this (full) command:
+.RS 2
+.BI cbmctrl " \-\-petscii" " command" " <device> <cmdstr>"
 .RE
 .SH EXIT CODES
 .B cbmctrl
 sets the exit code to 0, if the operation completed successfully.
-It exits with 2 if the command parser detected a problem with the
-number of arguments, their size or the combination of commands and
-options.
+It exits with 2 if the command parser detected a failure condition
+with the number of arguments, their size or the combination of
+commands and options.
 .PP
 Take note that each command action does return its own exit codes
 (mostly 0 for success and 1 as a failure indicator). The exact
@@ -657,11 +723,26 @@ system specific error codes are used often.
 .SH BUGS
 The
 .B lock/unlock
-actions are currently without any functionality within the cbm4linux driver.
-They can be issued without any failure, but actually the parallel port becomes
-not explicitly locked/unlocked to the driver. That way scripts containing
+actions are currently without any functionality within the cbm4linux
+driver. They can be issued without any drawback, but actually the
+parallel port becomes not explicitly locked/unlocked to the driver.
+That way scripts containing
 .B lock/unlock
-commands can be ported from Windows to Linux without changes.
+commands can be ported from Windows to Linux without changes. The
+same goes for Windows, if the driver is installed in a way so that
+the parallel port gets locked to the OpenCBM driver all the time.
+In this case too the commands
+.BR lock " and" " unlock"
+can be issued with no drawbacks.
+.PP
+When commands are sent to the floppy with the
+.B command
+action, there is alwas a "\\r" appended at the end of the command
+string by
+.B cbmctrl.
+This is done explicitly, because some IEC devices expect a "\\r"
+in certain circumstances. Otherwise rather incomplete commands
+could be send which may cause unexpected behaviour.
 .SH EXAMPLES
 .TP
 Send file contents to printer #4:
@@ -721,6 +802,23 @@ cbmctrl close 8 2
 cbmctrl unlock
 .PD
 .RE
+
+.TP
+Switch device ID:
+Write the bytes $29, $49 into memory locations $0077 and $0078 of
+drive 8, which alters the drive's setup to recognize commands as
+device 9 further on:
+.PP
+.RS
+cbmctrl \-p command 8 m-w 119 0 2 41 73
+.PP
+.RS 2
+or, alternatively via partial percent-encoding and without PETSCII
+translation:
+.RE
+.PP
+cbmctrl command \-e 8 M-W%77%00 2 0x29 0x49
+.RE
 .TP
 Download the #9 disk drive DOS ROM to file:
 .RS
@@ -738,4 +836,4 @@ Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
 additions and reworks by Spiro Trikaliotis, additions by Wolfgang Moser
 http://d81.de.
 .SH DATE
-May 17 2006
+July 19 2006
