@@ -75,7 +75,7 @@ void arch_error(int AUnused, unsigned int ErrorCode, const char *Format, ...)
     va_list ap;
     char ErrorMessageBuffer[2048];
     char ErrorMessageBuffer2[2048];
-    char *errorText;
+    char *errorText = NULL;
 
     UNREFERENCED_PARAMETER(AUnused);
 
@@ -96,7 +96,10 @@ void arch_error(int AUnused, unsigned int ErrorCode, const char *Format, ...)
 
     // Get the error message
 
-    errorText = arch_strerror(ErrorCode);
+    if (ErrorCode != 0)
+    {
+        errorText = arch_strerror(ErrorCode);
+    }
 
     // Append the message to the buffer. Make sure not to overwrite the buffer
 
