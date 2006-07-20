@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.36 2006-07-20 09:27:09 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.37 2006-07-20 17:03:04 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -86,7 +86,8 @@ static int get_argument_char(OPTIONS * const options, unsigned char *where)
     }
 }
 
-static int get_argument_string(OPTIONS * const options, char *where[], unsigned int *len)
+static int
+get_argument_string(OPTIONS * const options, char *where[], unsigned int *len)
 {
     if (options->argc > 0)
     {
@@ -309,6 +310,127 @@ process_specific_byte_parameter(char *string, int stringlen, PETSCII_ASCII petsc
     return size;
 }
 
+static char *
+string_concat(const char *string1, int len1, const char *string2, int len2)
+{
+    char *buffer;
+
+    if ((string1 != NULL) && (len1 == 0))
+        len1 = strlen(string1);
+
+    if ((string2 != NULL) && (len2 == 0))
+        len2 = strlen(string2);
+
+    buffer = malloc(len1 + len2 + 1);
+
+    if (buffer)
+    {
+        if (string1)
+            strcpy(buffer, string1);
+
+        if (string2)
+            strcpy(buffer + len1, string2);
+    }
+
+    return buffer;
+}
+
+static int
+get_extended_argument_string(int extended, 
+                             OPTIONS * const options,
+                             char *string[], unsigned int *stringlen)
+{
+    int rv;
+    char *commandline = NULL;
+    char *extended_commandline = NULL;
+    unsigned int commandline_len = 0;
+    unsigned int extended_commandline_len = 0;
+
+    rv = get_argument_string(options, &commandline, &commandline_len);
+
+    if (rv)
+        return 1;
+
+    if (extended)
+    {
+        int n = process_specific_byte_parameter(commandline, commandline_len, options->petsciiascii);
+
+        if (n < 0)
+            return 1;
+
+        commandline_len = n;
+    }
+    else
+    {
+        // only convert ASCII -> PETSCII if we do not have extended syntax
+        // (with extended syntax, this is done "on the fly" while converting
+        // the % - style values into characters.)
+
+        if (options->petsciiascii == PA_PETSCII)
+            cbm_ascii2petscii(commandline);
+    }
+
+    // now, check if there are more command-line parameters
+
+    if (options->argc > 0)
+    {
+        char *p;
+
+        // get memory for the additional data
+
+        // get 2 byte more than we have parameters, as we will append
+        // \r and \0 at the end of the buffer!
+
+        extended_commandline = malloc(options->argc + 1);
+
+        if (extended_commandline == NULL)
+        {
+            fprintf(stderr, "Not enough memory for all parameters, aborting...\n");
+            return 1;
+        }
+
+        // write data in the memory
+
+        p = extended_commandline;
+
+        while (--options->argc >= 0)
+        {
+            char *tail;
+            unsigned long c;
+
+            c = strtol(options->argv[0], &tail, 0);
+
+            if(c < 0 || c > 0xff || *tail)
+            {
+                arch_error(0, 0, "invalid byte: %s", options->argv[0]);
+                return 1;
+            }
+            *p++ = (char) c;
+            extended_commandline_len++;
+
+            options->argv++;
+        }
+
+        ++options->argc;
+
+        // end the string with a \0. This is not really needed, but
+        // convenient when debugging.
+
+        *p   = 0;
+
+    }
+
+    *string = string_concat(commandline, commandline_len, extended_commandline, extended_commandline_len);
+    *stringlen = commandline_len + extended_commandline_len;
+
+    if (extended_commandline)
+        free(extended_commandline);
+
+    if (check_if_parameters_ok(options))
+        return 1;
+
+    return 0;
+}
 
 /*
  * Simple wrapper for lock
@@ -436,19 +558,42 @@ static int do_open(CBM_FILE fd, OPTIONS * const options)
     char *filename;
     unsigned int filenamelen = 0;
 
-    rv = skip_options(options);
-    
-    rv = rv || get_argument_char(options, &unit);
-    rv = rv || get_argument_char(options, &secondary);
-    rv = rv || get_argument_string(options, &filename, &filenamelen);
+    int extended = 0;
+    int c;
+    static const char short_options[] = "+e";
+    static struct option long_options[] =
+    {
+        {"extended", no_argument, NULL, 'e'},
+        {NULL,       no_argument, NULL, 0  }
+    };
 
-    if (rv || check_if_parameters_ok(options))
+    // first of all, process the options given
+
+    while ((c = process_individual_option(options, short_options, long_options)) != EOF)
+    {
+        switch (c)
+        {
+        case 'e':
+            extended = 1;
+            break;
+
+        default:
+            return 1;
+        }
+    }
+
+    rv = get_argument_char(options, &unit);
+    rv = rv || get_argument_char(options, &secondary);
+    rv = rv || get_extended_argument_string(extended, options, &filename, &filenamelen);
+
+    if (rv)
         return 1;
 
-    if (options->petsciiascii == PA_PETSCII)
-        cbm_ascii2petscii(filename);
+    rv = cbm_open(fd, unit, secondary, filename, filenamelen);
 
-    return cbm_open(fd, unit, secondary, filename, filenamelen);
+    free(filename);
+
+    return rv;
 }
 
 /*
@@ -613,8 +758,6 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
     int  rv;
     unsigned char unit;
     char *commandline;
-    char *extended_commandline = NULL;
-    unsigned int extended_commandline_len = 0;
     unsigned int commandlinelen = 0;
 
     int extended = 0;
@@ -642,88 +785,7 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
     }
 
     rv = get_argument_char(options, &unit);
-    rv = rv || get_argument_string(options, &commandline, &commandlinelen);
-
-    if (rv)
-        return 1;
-
-    if (extended)
-    {
-        int n = process_specific_byte_parameter(commandline, commandlinelen, options->petsciiascii);
-
-        if (n < 0)
-            return 1;
-
-        commandlinelen = n;
-    }
-    else
-    {
-        // only convert ASCII -> PETSCII if we do not have extended syntax
-        // (with extended syntax, this is done "on the fly" while converting
-        // the % - style values into characters.)
-
-        if (options->petsciiascii == PA_PETSCII)
-            cbm_ascii2petscii(commandline);
-    }
-
-    // now, check if there are more command-line parameters
-
-    if (options->argc > 0)
-    {
-        char *p;
-
-        // get memory for the additional data
-
-        // get 2 byte more than we have parameters, as we will append
-        // \r and \0 at the end of the buffer!
-
-        extended_commandline = malloc(options->argc + 2);
-
-        if (extended_commandline == NULL)
-        {
-            fprintf(stderr, "Not enough memory for all parameters, aborting...\n");
-            return 1;
-        }
-
-        // write data in the memory
-
-        p = extended_commandline;
-
-        while (--options->argc >= 0)
-        {
-            char *tail;
-
-            c =  strtol(options->argv[0], &tail, 0);
-
-            if(c < 0 || c > 0xff || *tail)
-            {
-                arch_error(0, 0, "invalid byte: %s", options->argv[0]);
-                return 1;
-            }
-            *p++ = (char) c;
-            extended_commandline_len++;
-
-            options->argv++;
-        }
-
-        ++options->argc;
-
-        // make sure the buffer is ended with a '\r'; this is needed
-        // only if the command ends with a '\r', to work around a bug
-        // in the floppy code.
-
-        *p++ = '\r';
-        extended_commandline_len++;
-
-        // end the string with a \0. This is not really needed, but
-        // convenient when debugging.
-
-        *p   = 0;
-
-    }
-
-    if (check_if_parameters_ok(options))
-        return 1;
+    rv = rv || get_extended_argument_string(extended, options, &commandline, &commandlinelen);
 
     rv = cbm_listen(fd, unit, 15);
     if(rv == 0)
@@ -731,13 +793,20 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
         if (commandlinelen > 0)
             cbm_raw_write(fd, commandline, commandlinelen);
 
-        if (extended_commandline > 0)
-        {
-            cbm_raw_write(fd, extended_commandline, extended_commandline_len);
-            free(extended_commandline);
-        }
+        // make sure the buffer is ended with a '\r'; this is needed
+        // only if the command ends with a '\r', to work around a bug
+        // in the floppy code.
+
+        cbm_raw_write(fd, "\r", 1);
+
         rv = cbm_unlisten(fd);
     }
+
+    if (commandline != NULL)
+    {
+        free(commandline);
+    }
+
     return rv;
 }
 
@@ -1180,20 +1249,28 @@ static struct prog prog_table[] =
         "Undo one or more previous talk commands.\n"
         "This affects all drives." },
 
-    {1, "open"    , PA_ASCII,   do_open    , "<device> <secadr> <filename>",
+    {1, "open"    , PA_ASCII,   do_open    , "[-e|--extended] <device> <secadr> <filename> [<file1>...<fileN>]",
         "perform an open on the IEC bus",
         "Output an open command on the IEC bus.\n"
         "<device> is the device number,\n"
         "<secadr> the secondary address to use for this.\n"
-        "<filename> is the name of the file to be opened.\n\n"
-        "This has to be undone later with a close command.\n\n"
+        "<filename> is the name of the file to be opened.\n"
+        "           It must be given, but may be empty by specifying it as \"\".\n"
+        "<file1..N> are additional bytes to append to the filename  <filename>.\n"
+        "           Single bytes can be given as decimal, octal (0 prefix) or\n"
+        "           sedecimal (0x prefix).\n\n"
+        "If the option -e or --extended is given, an extended format is used:\n"
+        "  You can specify extra characters by given their ASCII value in hex,\n"
+        "  prepended with " STRING_BACKTICK "%" STRING_TICK ", that is: " STRING_BACKTICK "%20" STRING_TICK " => SPACE, " STRING_BACKTICK "%41" STRING_TICK " => " STRING_BACKTICK "A" STRING_TICK ", " STRING_BACKTICK "%35" STRING_TICK " => " STRING_BACKTICK "5" STRING_TICK ",\n"
+        "  and-so-on. A " STRING_BACKTICK "%" STRING_TICK " is given by giving its hex ASCII: " STRING_BACKTICK "%25" STRING_TICK " => " STRING_BACKTICK "%" STRING_TICK ".\n\n"
+        "Opening a file has to be undone later with a close command.\n\n"
         "NOTE: You cannot do an open without a filename.\n"
         "      Although a CBM machine (i.e., a C64) allows this,\n"
         "      this is an internal operation to the computer only." },
 
     {1, "popen"   , PA_PETSCII, do_open    , "<device> <secadr> <filename>",
-        "obsolete; use " STRING_BACKTICK "cbmctrl --petscii open" STRING_TICK " instead!",
-        "This command is obsolete; use " STRING_BACKTICK "cbmctrl -p open" STRING_TICK " instead!" },
+        "deprecated; use " STRING_BACKTICK "cbmctrl --petscii open" STRING_TICK " instead!",
+        "This command is deprecated; use " STRING_BACKTICK "cbmctrl -p open" STRING_TICK " instead!" },
 
     {1, "close"   , PA_UNSPEC,  do_close   , "<device> <secadr>",
         "perform a close on the IEC bus",
@@ -1245,16 +1322,11 @@ static struct prog prog_table[] =
         "- If used with the global --petscii option, this action is equivalent\n"
         "  to the deprecated command-line " STRING_BACKTICK "cbmctrl pcommand" STRING_TICK ".\n"
         "- If using both PETSCII and --extended option, the bytes given via the\n"
-        "  " STRING_BACKTICK "%" STRING_TICK " meta-character or as <cmd1> .. <cmdN> are *not* converted to petscii.\n\n"
-        "BUGS:\n"
-        "- Due to the way the floppy ROM handles the command-line, there are rare cases\n"
-        "  where a last byte of " STRING_BACKTICK "\\r' (CR, ASCII 13) will not be processed correctly.\n"
-        "  cbmctrl command uses a work around for this: " STRING_BACKTICK "cbmctrl command" STRING_TICK " always\n"
-        "  adds a " STRING_BACKTICK "\\r" STRING_TICK " at the end of the command."},
+        "  " STRING_BACKTICK "%" STRING_TICK " meta-character or as <cmd1> .. <cmdN> are *not* converted to petscii." },
 
     {1, "pcommand", PA_PETSCII, do_command , "[-e|--extended] <device> <cmdstr>",
-        "obsolete; use " STRING_BACKTICK "cbmctrl --petscii command" STRING_TICK " instead!",
-        "This command is obsolete; use " STRING_BACKTICK "cbmctrl -p command" STRING_TICK " instead!\n\n"
+        "deprecated; use " STRING_BACKTICK "cbmctrl --petscii command" STRING_TICK " instead!",
+        "This command is deprecated; use " STRING_BACKTICK "cbmctrl -p command" STRING_TICK " instead!\n\n"
         "NOTE: You have to give the commands in lower-case letters.\n"
         "      Upper case will NOT work!\n" },
 
