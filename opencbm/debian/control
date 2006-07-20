@@ -3,7 +3,7 @@ Section: misc
 Priority: extra
 Maintainer: Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 Build-Depends: debhelper (>= 4.1.16), linuxdoc-tools, linuxdoc-tools-latex, linuxdoc-tools-text
-Standards-Version: 3.6.1
+Standards-Version: 3.7.2.1
 
 Package: cbm4linux
 Architecture: any
