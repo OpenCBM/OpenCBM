@@ -90,4 +90,7 @@ int arch_filesize(const char *Filename, off_t *Filesize);
 #define ARCH_MAINDECL   ARCH_CBM_LINUX_WIN(ARCH_EMPTY, __cdecl)
 #define ARCH_SIGNALDECL ARCH_CBM_LINUX_WIN(ARCH_EMPTY, __cdecl)
 
+typedef void (ARCH_SIGNALDECL *ARCH_CTRLBREAK_HANDLER)(int dummy);
+extern void arch_set_ctrlbreak_handler(ARCH_CTRLBREAK_HANDLER Handler);
+
 #endif /* #ifndef CBM_ARCH_H */

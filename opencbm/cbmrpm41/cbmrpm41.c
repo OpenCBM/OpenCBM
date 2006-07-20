@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.12 2006-06-18 13:38:28 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.13 2006-07-20 11:45:28 strik Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -590,7 +590,7 @@ main(int argc, char *argv[])
 
     if(cbm_driver_open(&fd, 0) == 0) do
     {
-        signal(SIGINT, handle_CTRL_C);
+        arch_set_ctrlbreak_handler(handle_CTRL_C);
 
         SETSTATEDEBUG((void)0);
         if( cbm_upload(fd, drive, sizeof(cbmDev_StartAddress), cbmrpm41, sizeof(cbmrpm41))

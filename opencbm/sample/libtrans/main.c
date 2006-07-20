@@ -1,6 +1,6 @@
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.5 2006-06-02 22:51:55 wmsr Exp $";
+    "@(#) $Id: main.c,v 1.6 2006-07-20 11:45:29 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -10,7 +10,6 @@ static char *rcsid =
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
@@ -404,7 +403,7 @@ main_testlines(int argc, char **argv)
 int
 ARCH_MAINDECL main(int argc, char **argv)
 {
-    signal(SIGINT, handle_CTRL_C);
+    arch_set_ctrlbreak_handler(handle_CTRL_C);
 
 #ifdef TEST_LINES
     return main_testlines(argc, argv);

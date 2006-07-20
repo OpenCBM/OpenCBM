@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.13 2006-04-19 16:51:45 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.14 2006-07-20 11:45:29 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -210,6 +210,225 @@ cbm_i_get_debugging_flags(VOID)
 
 #endif // #if DBG
 
+/*-------------------------------------------------------------------*/
+/*--------- ASYNCHRONOUS IO FUNCTIONS -------------------------------*/
+
+/*! A special "cancel event" which is signalled whenever we want to
+ * prematurely cancel an I/O request  */
+
+static HANDLE CancelEvent = NULL;
+static HANDLE CancelCallbackEvent = NULL;
+static ULONG  InCancellableState  = 0;
+
+/*! \brief Initialize WaitForIoCompletion()
+
+ This function initializes everything needed for the 
+ WaitForIoCompletion...() functions. It has to be called
+ exactly once for each program start.
+*/
+
+VOID
+WaitForIoCompletionInit(VOID)
+{
+    FUNC_ENTER();
+
+    //
+    // Create the events for prematurely cancelling I/O request
+    //
+
+    CancelEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    DBG_ASSERT(CancelEvent != NULL);
+
+    CancelCallbackEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    DBG_ASSERT(CancelCallbackEvent != NULL);
+
+    FUNC_LEAVE();
+}
+
+/*! \brief Uninitialize WaitForIoCompletion()
+
+ This function uninitializes everything needed for the 
+ WaitForIoCompletion...() functions. It has to be called
+ exactly once for each program stop.
+
+ \remark
+   Make sure there are no outstanding I/O requests when this
+   function is called!
+*/
+
+VOID
+WaitForIoCompletionDeinit(VOID)
+{
+    FUNC_ENTER();
+
+    //
+    // Delete the event which is used for prematurely 
+    // cancelling I/O request
+    //
+    if (CancelEvent != NULL)
+        CloseHandle(CancelEvent);
+
+    FUNC_LEAVE();
+}
+
+/*! \brief Cancel any running WaitForIoCompletion()
+
+ This function cancels the running WaitForIoCompletion()
+ function.
+*/
+
+VOID
+WaitForIoCompletionCancelAll(VOID)
+{
+    FUNC_ENTER();
+
+    if (InterlockedExchange(&InCancellableState, 0) != 0)
+    {
+        //
+        // signal the event which is used for prematurely 
+        // cancelling I/O request
+        //
+
+        SetEvent(CancelEvent);
+
+        //
+        // Wait to be signalled that the current I/O request
+        // has been cancelled.
+        //
+
+        WaitForSingleObject(CancelCallbackEvent, INFINITE);
+    }
+
+    FUNC_LEAVE();
+}
+
+/*! \brief Boilerplate code for asynchronous I/O requests
+
+ This function initializes 
+
+ \param Overlapped
+   Pointer to an OVERLAPPED structure that will be initialized.
+
+ \remark
+   This function completely initializes an OVERLAPPED structure
+   to be used with ReadFile(), WriteFile, DeviceIoControl()
+   later, and waited for with WaitForIoCompletion().
+*/
+
+VOID
+WaitForIoCompletionConstruct(LPOVERLAPPED Overlapped)
+{
+    FUNC_ENTER();
+
+    memset(Overlapped, 0, sizeof(*Overlapped));
+    Overlapped->hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+    DBG_ASSERT(Overlapped->hEvent != NULL);
+
+    FUNC_LEAVE();
+}
+
+/*! \brief Wait for the completion of an I/O operation
+
+ This function waits until an I/O operation is completed,
+ or cancelled.
+
+ \param Result
+   The result of the previous I/O operation 
+   (ReadFile(), WriteFile(), DeviceIoControl())
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Overlapped
+   Pointer to an OVERLAPPED structure that was specified when the
+   overlapped operation was started.
+
+ \param BytesTransferred
+   Pointer to a DWORD which will contain the number of bytes
+   transferred in this asynchronous I/O operation.
+
+ \return 
+   FALSE if a failure occurred, TRUE if success.
+
+ \remark
+   A cancelled request is considered as a failure, thus, FALSE
+   is returned in this case.
+*/
+
+BOOL
+WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped, DWORD *BytesTransferred)
+{
+    BOOL result = Result;
+    HANDLE handleList[2] = { CancelEvent, Overlapped->hEvent };
+
+    FUNC_ENTER();
+
+    DBG_ASSERT(Overlapped != NULL);
+    DBG_ASSERT(BytesTransferred != NULL);
+
+    if (!Result)
+    {
+        // deal with the error code 
+        switch (GetLastError()) 
+        { 
+            case ERROR_IO_PENDING:
+            {
+                int tmp;
+
+                //
+                // Make sure WaitForIoCompletionCancelAll() knows it has to signal us
+                //
+
+                tmp = InterlockedExchange(&InCancellableState, 1);
+                DBG_ASSERT(tmp == 0);
+
+                //
+                // wait for the operation to finish
+                //
+
+                if (WaitForMultipleObjects(2, handleList, FALSE, INFINITE) == WAIT_OBJECT_0)
+                {
+                    CancelIo(HandleDevice);
+
+                    // we are told to cancel this event
+                    *BytesTransferred = 0;
+                    result = FALSE;
+                    SetEvent(CancelCallbackEvent);
+                }
+                else
+                {
+                    //
+                    // WaitForIoCompletionCancelAll() does not need to alert us anymore
+                    //
+
+                    if (InterlockedExchange(&InCancellableState, 0) == 0)
+                    {
+                        //
+                        // In case we were signalled, make sure 
+                        // WaitForIoCompletionCancelAll() does not hang
+                        //
+
+                        SetEvent(CancelCallbackEvent);
+                    }
+
+                    // check on the results of the asynchronous read 
+                    result = GetOverlappedResult(HandleDevice, Overlapped, 
+                        BytesTransferred, FALSE) ; 
+                }
+                break;
+            }
+         }
+    }
+
+    CloseHandle(Overlapped->hEvent);
+
+    FUNC_LEAVE_BOOL(result ? TRUE : FALSE);
+}
+
+/*-------------------------------------------------------------------*/
+/*--------- OPENCBM ARCH FUNCTIONS ----------------------------------*/
+
 /*! \brief Get the name of the driver for a specific parallel port
 
  Get the name of the driver for a specific parallel port.
@@ -303,7 +522,7 @@ cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber)
             0,
             NULL,
             OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL,
+            FILE_ATTRIBUTE_NORMAL|FILE_FLAG_OVERLAPPED,
             NULL);
     }
 
@@ -385,16 +604,21 @@ cbm_ioctl(IN CBM_FILE HandleDevice, IN DWORD ControlCode,
 #endif // #if DBG
           IN PVOID InBuffer, IN ULONG InBufferSize, OUT PVOID OutBuffer, IN ULONG OutBufferSize)
 {
+    OVERLAPPED overlapped;
     DWORD dwBytesReturned;
 
     BOOL returnValue;
 
     FUNC_ENTER();
 
+    WaitForIoCompletionConstruct(&overlapped);
+
     // Perform the IOCTL
 
     returnValue = DeviceIoControl(HandleDevice, ControlCode, InBuffer, InBufferSize,
-        OutBuffer, OutBufferSize, &dwBytesReturned, NULL);
+        OutBuffer, OutBufferSize, &dwBytesReturned, &overlapped);
+
+    returnValue = WaitForIoCompletion(returnValue, HandleDevice, &overlapped, &dwBytesReturned);
 
     // If an error occurred, output it (in the DEBUG version of this file
 

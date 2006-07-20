@@ -19,7 +19,6 @@
 #include <ctype.h>
 #include <getopt.h>
 #include <string.h>
-#include <signal.h>
 
 #include "arch.h"
 

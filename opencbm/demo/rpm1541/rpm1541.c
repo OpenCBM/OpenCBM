@@ -11,14 +11,13 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: rpm1541.c,v 1.5 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: rpm1541.c,v 1.6 2006-07-20 11:45:28 strik Exp $";
 #endif
 
 
 #include <opencbm.h>
 #include <arch.h>
 
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -79,7 +78,7 @@ main(int argc, char **argv)
         printf( "Using drive %2d, drive type string: %s\n", drive, type_str );
     }
 
-    signal(SIGINT, reset);
+    arch_set_ctrlbreak_handler(reset);
 
     cbm_exec_command(fd, drive, "I0:", 0);
     cbm_upload(fd, drive, 0x0500, rpm_prog, sizeof(rpm_prog));

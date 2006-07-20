@@ -14,6 +14,7 @@ C_DEFINES = $(C_DEFINES) /DHAVE_STRING_H=1
 
 
 SOURCES=../debug.c \
+        ../ctrlbreak.c \
         ../dbghelp.c \
         ../error.c \
         ../file.c \

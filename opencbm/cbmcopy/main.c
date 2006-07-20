@@ -9,12 +9,11 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.17 2006-05-20 16:59:47 wmsr Exp $";
+    "@(#) $Id: main.c,v 1.18 2006-07-20 11:45:28 strik Exp $";
 #endif
 
 #include <ctype.h>
 #include <getopt.h>
-#include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -125,13 +124,22 @@ static void hint(char *prog)
 
 static void ARCH_SIGNALDECL reset(int dummy)
 {
+    CBM_FILE fd_cbm_local;
+
+    /*
+     * remember fd_cbm, and make the global one invalid
+     * so that no routine can call a cbm_...() routine
+     * once we have cancelled another one
+     */
+    fd_cbm_local = fd_cbm;
+    fd_cbm = CBM_FILE_INVALID;
+
     fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
 #ifdef LIBCBMCOPY_DEBUG
     printDebugCBMcopyCounters(my_message_cb);
 #endif
-    arch_sleep(1);
-    cbm_reset(fd_cbm);
-    cbm_driver_close(fd_cbm);
+    cbm_reset(fd_cbm_local);
+    cbm_driver_close(fd_cbm_local);
     exit(1);
 }
 
@@ -424,7 +432,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
                 settings->transfer_mode,
                 drive);
 
-        signal( SIGINT, reset );
+        arch_set_ctrlbreak_handler(reset);
 
         while(++optind < argc)
         {

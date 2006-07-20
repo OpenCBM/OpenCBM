@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.11 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: main.c,v 1.12 2006-07-20 11:45:28 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -21,7 +21,6 @@ static char *rcsid =
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 #include <string.h>
 
 
@@ -197,17 +196,25 @@ static int my_status_cb(d64copy_status status)
 
 static void ARCH_SIGNALDECL reset(int dummy)
 {
+    CBM_FILE fd_cbm_local;
+
+    /*
+     * remember fd_cbm, and make the global one invalid
+     * so that no routine can call a cbm_...() routine
+     * once we have cancelled another one
+     */
+    fd_cbm_local = fd_cbm;
+    fd_cbm = CBM_FILE_INVALID;
+
     fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
 #ifdef LIBD64COPY_DEBUG
     printDebugLibD64Counters(my_message_cb);
 #endif
-    arch_sleep(1);
     d64copy_cleanup();
-    cbm_reset(fd_cbm);
-    cbm_driver_close(fd_cbm);
+    cbm_reset(fd_cbm_local);
+    cbm_driver_close(fd_cbm_local);
     exit(1);
 }
-
 
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
@@ -374,7 +381,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
         my_message_cb(3, "decided to use transfer mode %d", settings->transfer_mode );
 
-        signal(SIGINT, reset);
+        arch_set_ctrlbreak_handler(reset);
 
         if(src_is_cbm)
         {

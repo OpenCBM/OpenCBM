@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.22 2006-04-29 07:45:47 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.23 2006-07-20 11:45:29 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -26,6 +26,7 @@
 #include "cbmioctl.h"
 #include "version.h"
 #include "arch.h"
+#include "i_opencbm.h"
 
 #include <getopt.h>
 
@@ -1270,6 +1271,8 @@ main(int Argc, char **Argv)
 
     FUNC_ENTER();
 
+    WaitForIoCompletionInit();
+
     do {
         if (processargs(Argc, Argv, &parameter))
         {
@@ -1344,6 +1347,8 @@ main(int Argc, char **Argv)
     }
 
 #endif // #if DBG
+
+    WaitForIoCompletionDeinit();
 
     FUNC_LEAVE_INT(retValue);
 }
