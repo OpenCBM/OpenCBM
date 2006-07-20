@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2006-05-21 13:39:44 strik Exp $
+# $Id: Makefile,v 1.9 2006-07-20 11:31:36 strik Exp $
 
 include LINUX/config.make
 
@@ -58,7 +58,6 @@ install: install-files
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@; \
 	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
 
