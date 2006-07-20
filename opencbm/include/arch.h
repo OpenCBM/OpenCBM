@@ -15,6 +15,12 @@
 # include <io.h>
 # include <fcntl.h>
 
+# define STRING_BACKTICK "`"
+# define STRING_TICK     "'"
+
+# define CHAR_BACKTICK '`'
+# define CHAR_TICK     '\''
+
 #else
 
 # define ARCH_CBM_LINUX_WIN( _linux, _win) _linux
@@ -24,6 +30,12 @@
 # include <error.h>
 
 # define ULONG_PTR unsigned long
+
+# define STRING_BACKTICK "`"
+# define STRING_TICK     "´"
+
+# define CHAR_BACKTICK '`'
+# define CHAR_TICK     '´'
 
 #endif
 

@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.35 2006-07-17 18:57:50 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.36 2006-07-20 09:27:09 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -109,7 +109,7 @@ static int get_argument_string(OPTIONS * const options, char *where[], unsigned 
 
 static int get_argument_file_for_write(OPTIONS * const options, FILE **f)
 {
-    char *filename;
+    char *filename = NULL;
 
     assert(f);
 
@@ -124,7 +124,7 @@ static int get_argument_file_for_write(OPTIONS * const options, FILE **f)
     if (check_if_parameters_ok(options))
         return 1;
 
-    if(filename != 0)
+    if(filename != NULL)
     {
         /* a filename (other than simply "-") was given, open that file */
 
@@ -155,7 +155,7 @@ static int get_argument_file_for_write(OPTIONS * const options, FILE **f)
 
 static int get_argument_file_for_read(OPTIONS * const options, FILE **f, char **fn)
 {
-    char *filename;
+    char *filename = NULL;
 
     assert(f);
 
@@ -170,7 +170,7 @@ static int get_argument_file_for_read(OPTIONS * const options, FILE **f, char **
     if (check_if_parameters_ok(options))
         return 1;
 
-    if(filename == 0)
+    if(filename == NULL)
     {
         filename = "(stdin)";
         *f = stdin;
@@ -642,7 +642,7 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
     }
 
     rv = get_argument_char(options, &unit);
-    rv = get_argument_string(options, &commandline, &commandlinelen);
+    rv = rv || get_argument_string(options, &commandline, &commandlinelen);
 
     if (rv)
         return 1;
@@ -728,8 +728,10 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
     rv = cbm_listen(fd, unit, 15);
     if(rv == 0)
     {
-        cbm_raw_write(fd, commandline, commandlinelen);
-        if (extended_commandline)
+        if (commandlinelen > 0)
+            cbm_raw_write(fd, commandline, commandlinelen);
+
+        if (extended_commandline > 0)
         {
             cbm_raw_write(fd, extended_commandline, extended_commandline_len);
             free(extended_commandline);
@@ -921,7 +923,7 @@ static int do_upload(CBM_FILE fd, OPTIONS * const options)
     addr = strtol(tmpstring, &tail, 0);
     if(addr < -1 || addr > 0xffff || *tail)
     {
-        arch_error(0, 0, "invalid address: %s", options->argv[1]);
+        arch_error(0, 0, "invalid address: %s", tmpstring);
         return 1;
     }
 
@@ -1190,8 +1192,8 @@ static struct prog prog_table[] =
         "      this is an internal operation to the computer only." },
 
     {1, "popen"   , PA_PETSCII, do_open    , "<device> <secadr> <filename>",
-        "obsolete; use `cbmctrl --petscii open´ instead!",
-        "This command is obsolete; use `cbmctrl -p open´ instead!" },
+        "obsolete; use " STRING_BACKTICK "cbmctrl --petscii open" STRING_TICK " instead!",
+        "This command is obsolete; use " STRING_BACKTICK "cbmctrl -p open" STRING_TICK " instead!" },
 
     {1, "close"   , PA_UNSPEC,  do_close   , "<device> <secadr>",
         "perform a close on the IEC bus",
@@ -1201,19 +1203,19 @@ static struct prog prog_table[] =
         "read raw data from the IEC bus",
         "With this command, you can read raw data from the IEC bus.\n"
         "<file>   (optional) file name of a file to write the contents to.\n"
-        "         If this name is not given or it is a dash (`-´), the\n"
+        "         If this name is not given or it is a dash (" STRING_BACKTICK "-" STRING_TICK "), the\n"
         "         contents will be written to stdout, normally the console." },
 
     {1, "write"   , PA_UNSPEC,  do_write   , "[<file>]",
         "write raw data to the IEC bus",
         "With this command, you can write raw data to the IEC bus.\n"
         "<file>   (optional) file name of a file to read the values from.\n"
-        "         If this name is not given or it is a dash (`-´), the\n"
+        "         If this name is not given or it is a dash (" STRING_BACKTICK "-" STRING_TICK "), the\n"
         "         contents will be read from stdin, normally the console." },
 
     {1, "status"  , PA_PETSCII, do_status  , "<device>",
         "give the status of the specified drive",
-        "This command gets the status (the so-called `error channel´)"
+        "This command gets the status (the so-called " STRING_BACKTICK "error channel" STRING_TICK ")"
         "of the given drive and outputs it on the screen.\n"
         "<device> is the device number of the drive." },
 
@@ -1223,33 +1225,36 @@ static struct prog prog_table[] =
         "This command is a command that you normally give to\n"
         "channel 15 (i.e., N: to format a drive, V: to validate, etc.).\n\n"
         "<device> is the device number of the drive.\n\n"
-        "<cmdstr> is the command to execute in the drive.\n\n"
-        "<cmd1..N> are additional bytes to append to the command.\n"
-        "NOTE: Single bytes can be given as decimal, octal (0 prefix) or\n"
-        "      sedecimal (0x prefix).\n\n"
+        "<cmdstr> is the command to execute in the drive.\n"
+        "         It must be given, but may be empty by specifying it as \"\".\n\n"
+        "<cmd1..N> are additional bytes to append to the command string <cmdstr>.\n"
+        "          Single bytes can be given as decimal, octal (0 prefix) or\n"
+        "          sedecimal (0x prefix).\n\n"
         "If the option -e or --extended is given, an extended format is used:\n"
-        "  You can specify extra characters by given their value in hex with\n"
-        "  prepended `%´, that is: `%20´ => SPACE, `%41´ => `A´, `%35´ => `%5´,\n"
-        "  and-so-on. A `%´ is given by giving its ASCII: `%25´ => `%´.\n\n"
-        "Example: Write the bytes $29, $49 into memory locations $0077 and $0079\n"
-        "         of drive 8 (which gives the drive address 9):\n"
+        "  You can specify extra characters by given their ASCII value in hex,\n"
+        "  prepended with " STRING_BACKTICK "%" STRING_TICK ", that is: " STRING_BACKTICK "%20" STRING_TICK " => SPACE, " STRING_BACKTICK "%41" STRING_TICK " => " STRING_BACKTICK "A" STRING_TICK ", " STRING_BACKTICK "%35" STRING_TICK " => " STRING_BACKTICK "5" STRING_TICK ",\n"
+        "  and-so-on. A " STRING_BACKTICK "%" STRING_TICK " is given by giving its hex ASCII: " STRING_BACKTICK "%25" STRING_TICK " => " STRING_BACKTICK "%" STRING_TICK ".\n\n"
+        "Example: Write the bytes $29, $49 into memory locations $0077 and $0078\n"
+        "         of drive 8 (which gives the drive the address 9):\n"
         "         cbmctrl -p command -e 8 m-w 119 0 2 41 73\n"
         "      or cbmctrl -p command -e 8 m-w%77%00 2 0x29 0x49\n\n"
-        "NOTE:  You have to give the commands in upper-case letters if --ascii\n"
-        "       is used (default), lower case will NOT work!\n"
-        "       If --petscii is used, you must give the commands in upper case.\n"
-        "NOTE2: If used with the global -p option, this action is equivalent\n"
-        "       to the obsolete `cbmctrl pcommand´.\n"
-        "NOTE3: If using both PETSCII and --extended option, the bytes given\n"
-        "       via the `%´ meta-character or as <cmd1> .. <cmdN> are *not*\n"
-        "       converted to petscii.\n\n"
-        "BUG: Due to an error in the floppy ROM, a last byte of `\\r' will not be\n"
-        "     processed correctly. The work around this, `cbmctrl command´ always\n"
-        "     adds a `\\r´ at the end of the command."},
+        "NOTES:\n"
+        "- If --ascii is used (default), you have to give the commands in uppercase\n"
+        "  letters, lowercase will NOT work!\n"
+        "  If --petscii is used, you must give the commands in lowercase.\n"
+        "- If used with the global --petscii option, this action is equivalent\n"
+        "  to the deprecated command-line " STRING_BACKTICK "cbmctrl pcommand" STRING_TICK ".\n"
+        "- If using both PETSCII and --extended option, the bytes given via the\n"
+        "  " STRING_BACKTICK "%" STRING_TICK " meta-character or as <cmd1> .. <cmdN> are *not* converted to petscii.\n\n"
+        "BUGS:\n"
+        "- Due to the way the floppy ROM handles the command-line, there are rare cases\n"
+        "  where a last byte of " STRING_BACKTICK "\\r' (CR, ASCII 13) will not be processed correctly.\n"
+        "  cbmctrl command uses a work around for this: " STRING_BACKTICK "cbmctrl command" STRING_TICK " always\n"
+        "  adds a " STRING_BACKTICK "\\r" STRING_TICK " at the end of the command."},
 
     {1, "pcommand", PA_PETSCII, do_command , "[-e|--extended] <device> <cmdstr>",
-        "obsolete; use `cbmctrl --petscii command´ instead!",
-        "This command is obsolete; use `cbmctrl -p command´ instead!\n\n"
+        "obsolete; use " STRING_BACKTICK "cbmctrl --petscii command" STRING_TICK " instead!",
+        "This command is obsolete; use " STRING_BACKTICK "cbmctrl -p command" STRING_TICK " instead!\n\n"
         "NOTE: You have to give the commands in lower-case letters.\n"
         "      Upper case will NOT work!\n" },
 
@@ -1267,7 +1272,7 @@ static struct prog prog_table[] =
         "<count>  is the number of bytes to read.\n"
         "         it can be given in decimal or in hex (with a 0x prefix).\n"
         "<file>   (optional) file name of a file to write the contents to.\n"
-        "         If this name is not given or it is a dash (`-´), the\n"
+        "         If this name is not given or it is a dash (" STRING_BACKTICK "-" STRING_TICK "), the\n"
         "         contents will be written to stdout, normally the console.\n\n" 
         "Example:\n"
         " cbmctrl download 8 0xc000 0x4000 1541ROM.BIN\n"
@@ -1282,7 +1287,7 @@ static struct prog prog_table[] =
         "         If this is -1, the first two bytes from the file are\n"
         "         considered as start address.\n"
         "<file>   (optional) file name of a file to read the values from.\n"
-        "         If this name is not given or it is a dash (`-´), the\n"
+        "         If this name is not given or it is a dash (" STRING_BACKTICK "-" STRING_TICK "), the\n"
         "         contents will be read from stdin, normally the console."
         "Example:\n"
         " cbmctrl upload 8 0x500 BUFFER2.BIN\n"
@@ -1363,13 +1368,14 @@ static int do_help(CBM_FILE fd, OPTIONS * const options)
             "                  if an action is specified.\n"
             "   -V, --version: Output version information\n"
             "   -p, --petscii: Convert input or output parameter from CBM format (PETSCII)\n"
-            "                  into PC format (ASCII). Default with all actions but `open´\n"
-            "                  and `command´\n"
+            "                  into PC format (ASCII). Default with all actions but " STRING_BACKTICK "open" STRING_TICK "\n"
+            "                  and " STRING_BACKTICK "command" STRING_TICK "\n"
             "   -a, --ascii    Do not convert data between CBM and PC format.\n"
-            "                  Default with `open´ and `command´.\n"
+            "                  Default with " STRING_BACKTICK "open" STRING_TICK " and " STRING_BACKTICK "command" STRING_TICK ".\n"
             "   --             Delimiter between action_opt and action_args; if any of the\n"
-            "                  arguments in action_args starts with a `-´, make sure to set\n"
-            "                  the `--´ so the argument is not treated as an option, accidentially.\n"
+            "                  arguments in action_args starts with a " STRING_BACKTICK "-" STRING_TICK ", make sure to set\n"
+            "                  the " STRING_BACKTICK "--" STRING_TICK " so the argument is not treated as an option,\n"
+            "                  accidentially.\n"
             "\n"
             " action: one of:\n"
             "\n");
@@ -1410,7 +1416,7 @@ set_option(int *Where, int NewValue, int OldValue, const char * const Descriptio
     if (*Where != OldValue)
     {
         error = 1;
-        fprintf(stderr, "Specified option `%s´, but there is a conflicting option,\n"
+        fprintf(stderr, "Specified option " STRING_BACKTICK "%s" STRING_TICK ", but there is a conflicting option,\n"
             "or it is specified twice!\n", Description);
     }
 
@@ -1427,7 +1433,7 @@ set_option_petsciiascii(PETSCII_ASCII *Where, PETSCII_ASCII NewValue, int Ignore
     if (!IgnoreError && (*Where != PA_UNSPEC))
     {
         error = 1;
-        fprintf(stderr, "Specified option `--petscii´ and `--ascii´ in one command!\n");
+        fprintf(stderr, "Specified option " STRING_BACKTICK "--petscii" STRING_TICK " and " STRING_BACKTICK "--ascii" STRING_TICK " in one command!\n");
     }
 
     *Where = NewValue;
