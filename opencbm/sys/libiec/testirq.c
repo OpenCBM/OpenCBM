@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/testirq.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: testirq.c,v 1.2 2006-05-05 16:01:22 strik Exp $ \n
+** \version $Id: testirq.c,v 1.3 2006-07-20 14:07:37 strik Exp $ \n
 ** \n
 ** \brief Test for IRQ capabilities
 **
@@ -33,13 +33,27 @@
 */
 
 NTSTATUS
-cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx)
+cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLength)
 {
+    PCBMT_I_TESTIRQ bufferTestIrq = Buffer;
     NTSTATUS ntStatus;
     LONG ret;
     LONG oldDbgFlags = DbgFlags;
 
     FUNC_ENTER();
+
+    if (bufferTestIrq)
+    {
+        if (sizeof(*bufferTestIrq) > BufferLength)
+        {
+            // the buffer is not long enough; don't use it at all!
+            bufferTestIrq = NULL;
+        }
+        else
+        {
+            RtlZeroMemory(bufferTestIrq, BufferLength);
+        }
+    }
 
     ntStatus = STATUS_SUCCESS;
 
@@ -59,6 +73,8 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx)
         if (!Pdx->ParallelPortAllocatedInterrupt)
         {
             ntStatus = STATUS_BIOS_FAILED_TO_CONNECT_INTERRUPT;
+            if (bufferTestIrq)
+                bufferTestIrq->ErrAcquireIrq = 1;
             break;
         }
 
@@ -153,7 +169,12 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx)
         if (ret != 100)
         {
             DBG_ERROR((DBG_PREFIX "Interrupt generated when SETTING"));
-            ntStatus = STATUS_UNSUCCESSFUL;
+
+            if (bufferTestIrq)
+                bufferTestIrq->ErrIrqRisingEdge = -1;
+
+            /* But: This is NO error, thus, no need for setting ntStatus! */
+            /* ntStatus = STATUS_UNSUCCESSFUL; */
         }
 
         DBG_PRINT((DBG_PREFIX "Release all lines"));
@@ -186,6 +207,9 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx)
         {
             DBG_ERROR((DBG_PREFIX "No interrupt generated when RELEASING"));
             ntStatus = STATUS_NO_SUCH_DEVICE;
+
+            if (bufferTestIrq)
+                bufferTestIrq->ErrIrqFallingEdge = 1;
         }
 
     } while (0);

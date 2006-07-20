@@ -5,14 +5,14 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2004 Spiro Trikaliotis
+ *  Copyright 2001-2004, 2006 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.8 2006-04-28 10:48:16 strik Exp $ \n
+** \version $Id: init.c,v 1.9 2006-07-20 14:07:37 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -222,6 +222,38 @@ cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType)
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
 
+/* */
+static VOID
+cbm_check_irq_availability(IN PDEVICE_EXTENSION Pdx)
+{
+    FUNC_ENTER();
+
+    DBG_PRINT((DBG_PREFIX "*"));
+
+    //
+    // If we got an interrupt, test if it works
+    //
+
+    if (Pdx->ParallelPortAllocatedInterrupt)
+    {
+        DBG_PRINT((DBG_PREFIX "* Allocated interrupt"));
+
+        if (!NT_SUCCESS(cbmiec_test_irq(Pdx, NULL, 0)))
+        {
+            //
+            // Interrupt does not work, free it again.
+            //
+
+            DBG_PRINT((DBG_PREFIX "* Interrupt does not work, release it again"));
+
+            ParPortFreeInterrupt(Pdx);
+        }
+
+    }
+
+    FUNC_LEAVE();
+}
+
 /*! \brief Initialize the IEC bus
 
  This function initializes the IEC bus itself, and sets some
@@ -270,6 +302,7 @@ cbmiec_init(IN PDEVICE_EXTENSION Pdx)
     {
         CBMIEC_RELEASE(PP_RESET_OUT | PP_DATA_OUT | PP_ATN_OUT | PP_LP_BIDIR | PP_LP_IRQ);
         CBMIEC_SET(PP_CLK_OUT);
+        cbm_check_irq_availability(Pdx);
     }
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);

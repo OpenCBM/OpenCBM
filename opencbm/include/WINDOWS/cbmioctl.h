@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.13 2006-05-23 12:24:31 wmsr Exp $ \n
+** \version $Id: cbmioctl.h,v 1.14 2006-07-20 14:07:37 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -16,7 +16,7 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2004 Spiro Trikaliotis
+ *  Copyright 2001-2006 Spiro Trikaliotis
 */
 
 #ifndef CBM_IOCTL_H
@@ -175,6 +175,27 @@ struct CBMT_I_INSTALL_OUT
 
 } CBMT_I_INSTALL_OUT, *PCBMT_I_INSTALL_OUT;
 
+/*! Output buffer for CBMCTRL_TEST_IRQ.
+ * Values of 1 indicate an error, values of
+ * -1 are warnings only.
+ */
+typedef
+struct CBMT_I_TESTIRQ
+{
+    /*! Was there an error in acquiring the interrupt
+        from the driver? */
+    CHAR ErrAcquireIrq;
+
+    /*! Was there an error while trying to generate an interrupt 
+        on the rising edge? */
+    CHAR ErrIrqRisingEdge;
+
+    /*! Was there an error while trying to generate an interrupt 
+        on the falling edge? */
+    CHAR ErrIrqFallingEdge;
+
+} CBMT_I_TESTIRQ, *PCBMT_I_TESTIRQ;
+
 /*! Input buffer for TALK */
 typedef CBMT_IECADDRESS CBMT_TALK_IN;
 /*! Input buffer for LISTEN */
@@ -302,4 +323,3 @@ typedef CBMT_SINGLEBYTE CBMT_PARBURST_PWRITE_IN;
 #define CBM_I_DRIVER_INSTALL_0M_NO_INTERRUPT  0x80000000
 
 #endif /* #ifndef CBM_IOCTL_H */
-

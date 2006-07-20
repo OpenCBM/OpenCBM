@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis
+ *  Copyright 2004-2006 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.15 2006-05-05 08:18:59 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.16 2006-07-20 14:07:37 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -517,7 +517,9 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 
         case CBMCTRL_TEST_IRQ:
             DBG_IRP(CBMCTRL_TEST_IRQ);
-            ntStatus = cbmiec_test_irq(Pdx);
+            returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
+            ntStatus = cbmiec_test_irq(Pdx, 
+                Irp->AssociatedIrp.SystemBuffer, (ULONG) returnLength);
             break;
 
 #if DBG
