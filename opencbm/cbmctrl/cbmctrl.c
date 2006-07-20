@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.37 2006-07-20 17:03:04 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.38 2006-07-20 18:20:42 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -396,7 +396,7 @@ get_extended_argument_string(int extended,
         while (--options->argc >= 0)
         {
             char *tail;
-            unsigned long c;
+            long c;
 
             c = strtol(options->argv[0], &tail, 0);
 
@@ -786,6 +786,9 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
 
     rv = get_argument_char(options, &unit);
     rv = rv || get_extended_argument_string(extended, options, &commandline, &commandlinelen);
+
+    if (rv)
+        return 1;
 
     rv = cbm_listen(fd, unit, 15);
     if(rv == 0)
@@ -1264,9 +1267,14 @@ static struct prog prog_table[] =
         "  prepended with " STRING_BACKTICK "%" STRING_TICK ", that is: " STRING_BACKTICK "%20" STRING_TICK " => SPACE, " STRING_BACKTICK "%41" STRING_TICK " => " STRING_BACKTICK "A" STRING_TICK ", " STRING_BACKTICK "%35" STRING_TICK " => " STRING_BACKTICK "5" STRING_TICK ",\n"
         "  and-so-on. A " STRING_BACKTICK "%" STRING_TICK " is given by giving its hex ASCII: " STRING_BACKTICK "%25" STRING_TICK " => " STRING_BACKTICK "%" STRING_TICK ".\n\n"
         "Opening a file has to be undone later with a close command.\n\n"
-        "NOTE: You cannot do an open without a filename.\n"
-        "      Although a CBM machine (i.e., a C64) allows this,\n"
-        "      this is an internal operation to the computer only." },
+        "NOTES:\n"
+        "- You cannot do an open without a filename.\n"
+        "  Although a CBM machine (i.e., a C64) allows this, it is an internal operation\n"
+        "  to the computer only.\n"
+        "- If used with the global --petscii option, this action is equivalent\n"
+        "  to the deprecated command-line " STRING_BACKTICK "cbmctrl popen" STRING_TICK ".\n"
+        "- If using both PETSCII and --extended option, the bytes given via the\n"
+        "  " STRING_BACKTICK "%" STRING_TICK " meta-character or as <file1> .. <fileN> are *not* converted to petscii." },
 
     {1, "popen"   , PA_PETSCII, do_open    , "<device> <secadr> <filename>",
         "deprecated; use " STRING_BACKTICK "cbmctrl --petscii open" STRING_TICK " instead!",
