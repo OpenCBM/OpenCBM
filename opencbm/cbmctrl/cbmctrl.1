@@ -1,4 +1,4 @@
-.\" $Id: cbmctrl.1,v 1.12 2006-07-19 18:37:28 wmsr Exp $
+.\" $Id: cbmctrl.1,v 1.13 2006-07-20 23:34:40 wmsr Exp $
 .\"
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
@@ -117,7 +117,6 @@ Default with
 and
 .B command
 .RE
-.PP
 .SS Actions overview
 .B cbmctrl
 understands the following subcommand actions
@@ -224,7 +223,27 @@ yet supports these deprecated subcommand actions
 .B pcommand
 \- Same as command, with ASCII to PETSCII conversion
 .RE
+.SS Common action options
+Some of
+.B cbmctrl's
+actions understand the following subcommand options:
 .PP
+.PD 0
+.RS 2
+.TP
+.B \-e, \-\-extended
+Some actions require string arguments that either denote a filename
+or command sequences on IEC devices. If this option is given on the
+appropriate subcommand actions, an extended format is used for such
+strings:
+.RS
+You can specify extra characters by giving their value in hex with
+prepended '%', that is: "%20" => SPACE, "%41" => 'A', "%35" => '5',
+and so on; this is the so named percent-encoding as specified for
+URIs in RFC 3986. A '%' is given by encoding it with: "%25" => '%'.
+.RE
+.RE
+.PD
 .SS Common action arguments
 Many of the
 .B cbmctrl
@@ -268,16 +287,7 @@ at the IEC device or calls a command via
 over the IEC bus that the device is able to interprete. Any such
 argument that denotes a string within or for an IEC device is
 subject to optional ASCII<\->PETSCII conversions as well as
-optional percent-encodings known from URIs and specified by
-RFC 3986.
-
-.SS [FIXME, mo-20060718]
-Dies ergibt erst wirklich dann Sinn, wenn auch
-.I \-e
-bzw.
-.I \-\-extended
-als globale Optionen definiert sind.
-
+optional percent-encodings with selected actions.
 .SS Actions
 .B cbmctrl
 understands the following
@@ -400,14 +410,18 @@ or
 commands. This IEC command affects all devices on the bus; it
 corresponds to the C64 kernel routine $ffab.
 .TP
-.BI open " <device> <secadr> <filename>"
+.BI open " [\-e|\-\-extended]" " <device> <secadr>" " <filename> [<file1> ... <fileN>]"
 Open file
 .I <filename>
+appended by the optional octets
+.I <file1>
+to
+.I <fileN>
 on device
 .IR <device> .
 After opening, data can be read/written by sending a
 .B talk
-resp.
+respectively
 .B listen
 command with secondary address
 .IR <secadr> .
@@ -415,7 +429,12 @@ Take note that an
 .B open
 command has to be undone later with a
 .B close
-command.
+command. The single byte arguments
+.I <file1>
+to
+.I <fileN>
+can either be given in decimal, octal (0 prefix) or sedecimal (0x
+prefix) notation.
 .PP
 .RS 2
 .PD 0
@@ -427,7 +446,7 @@ If
 .I <secadr> 
 is greater than 1, file type and access mode must also be specified
 by appending 
-.I ",<type>,<mode>"
+.I """,<type>,<mode>"""
 to
 .IR <filename> .
 Valid types are
@@ -444,6 +463,18 @@ for reading and
 for writing.
 .TP 2
 *
+If
+.I \-\-ascii
+is used (this is the default), you should give the file type and
+access mode in upper-case letters, lower case will
+.B not
+work! If
+.I \-\-petscii
+is used, you should give the file type and access mode letters in
+lower case or they will not be interpreted correctly with most IEC
+devices.
+.TP 2
+*
 You cannot do an open without a filename. Although a CBM machine
 (i.e., a C64) allows this, it is an internal operation to that
 computer only.
@@ -455,6 +486,29 @@ does not convert between ASCII (used by the PC) and PETSCII (used
 by the CBM device). If this is needed, make use of the global
 .I \-\-petscii
 option.
+.TP 2
+*
+If used with the global
+.I \-\-petscii
+option, this action is equivalent to the deprecated
+.BR cbmctrl " action"
+.BI "pcommand" " <device> <cmdstr>".
+.TP 2
+*
+The octets given by
+.I <file1> ... <fileN>
+are
+.B not
+converted at all, regardless if the
+.I \-\-petscii
+global option is given or else.
+.TP 2
+*
+The same goes for percent-encoded characters, when the options
+.IR \-\-petscii " and" " \-\-extended"
+are given. The resulting octets after the percent-decoding are
+.B not
+converted from ASCII to PETSCII.
 .RE
 .PD
 .RE
@@ -537,19 +591,9 @@ arguments
 .I <cmd1>
 to
 .I <cmdN>
-can be either given in decimal, octal (0 prefix) or sedecimal (0x
+can either be given in decimal, octal (0 prefix) or sedecimal (0x
 prefix) notation.
 .RS
-If the option
-.I \-e
-or
-.I \-\-extended
-is given, an extended format is used: You can specify extra
-characters by giving their value in hex with prepended '%', that
-is: "%20" => SPACE, "%41" => 'A', "%35" => '5', and so on; this
-is the so named percent-encoding as specified for URIs in RFC
-3986. A '%' is given by encoding it with: "%25" => '%'.
-.PP
 This command is identical to:
 .PP
 .PD 0
@@ -588,7 +632,7 @@ not be interpreted with most IEC devices.
 *
 If used with the global
 .I \-\-petscii
-option, this action is equivalent to the obsolete
+option, this action is equivalent to the deprecated
 .BR cbmctrl " action"
 .BI "pcommand" " <device> <cmdstr>".
 .TP 2
@@ -632,7 +676,7 @@ Read
 bytes from a disk drive's memory, starting at
 .I <address>
 via one or more
-.BI M-R
+.BI """M-R"""
 commands. Memory contents are written to standard output as long as
 .I <file>
 is ommited or denoted by '\-'. Note that
@@ -648,7 +692,7 @@ Send
 to drive memory, starting at
 .I <address>
 via one or more
-.BI M-W
+.BI """M-W"""
 commands. If
 .I <address>
 is \-1, the first two bytes from
@@ -737,12 +781,12 @@ can be issued with no drawbacks.
 .PP
 When commands are sent to the floppy with the
 .B command
-action, there is alwas a "\\r" appended at the end of the command
-string by
+action, there is alwas a "\\r" appended at the end of the
+command string by
 .B cbmctrl.
-This is done explicitly, because some IEC devices expect a "\\r"
-in certain circumstances. Otherwise rather incomplete commands
-could be send which may cause unexpected behaviour.
+This is done explicitly, because some IEC devices expect that
+"\\r" in certain circumstances. Otherwise rather incomplete
+commands could be send which may cause unexpected behaviour.
 .SH EXAMPLES
 .TP
 Send file contents to printer #4:
@@ -836,4 +880,4 @@ Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
 additions and reworks by Spiro Trikaliotis, additions by Wolfgang Moser
 http://d81.de.
 .SH DATE
-July 19 2006
+July 20 2006
