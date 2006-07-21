@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.11 2006-05-23 12:24:31 wmsr Exp $ \n
+** \version $Id: PortAccess.c,v 1.12 2006-07-21 11:55:35 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -511,6 +511,11 @@ ParPortSetModeWdm(PDEVICE_EXTENSION Pdx)
 
                 DBG_PPORT((DBG_PREFIX "****************************** NO BYTE MODE PRESENT, making sure to have SPP mode!!!"));
                 ParPortUnsetMode(Pdx);
+
+                // Anyway, we don't want to fail this call just because the user
+                // does not have an EPP or ECP port:
+
+                ntStatus = STATUS_SUCCESS;
             }
 #if DBG
             if (pnpInformation.EcpController != 0)
