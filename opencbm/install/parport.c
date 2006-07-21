@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file parport.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: parport.c,v 1.6 2006-03-22 18:22:21 strik Exp $ \n
+** \version $Id: parport.c,v 1.7 2006-07-21 11:52:59 strik Exp $ \n
 ** \n
 ** \brief Program to handle the parallel port for the OPENCBM driver
 **
@@ -242,16 +242,16 @@ CbmParportRestart(VOID)
                 }
             }
         }
+        else
+        {
+            DBG_ERROR((DBG_PREFIX "SetupDiGetClassDevs FAILED!"));
+            printf("SetupDiGetClassDevs FAILED!");
+            output_error();
+        }
 
         SetupDiDestroyDeviceInfoList(hdevInfo);
 
         FreeDynamicalAddresses(&setupApi);
-    }
-    else
-    {
-        DBG_ERROR((DBG_PREFIX "SetupDiGetClassDevs FAILED!"));
-        printf("SetupDiGetClassDevs FAILED!");
-        output_error();
     }
 
     FUNC_LEAVE();
