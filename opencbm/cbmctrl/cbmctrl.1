@@ -1,4 +1,4 @@
-.\" $Id: cbmctrl.1,v 1.13 2006-07-20 23:34:40 wmsr Exp $
+.\" $Id: cbmctrl.1,v 1.14 2006-07-21 18:16:33 wmsr Exp $
 .\"
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
@@ -105,17 +105,19 @@ Output version information as well as the build date and time
 .TP
 .B \-p, \-\-petscii
 Convert input or output parameters between CBM format (PETSCII)
-and PC format (ASCII). Default with all actions but
-.B open
-and
-.B command
+and PC format (ASCII). This charset conversion is the default for
+the actions:
+.BR status " and" " dir" " (both on output strings)."
 .TP
 .B \-a, \-\-ascii
-Do not convert data between CBM and PC format.
-Default with
-.B open
+Do not convert data between CBM and PC format. Not doing charset
+conversion is the default for the actions:
+.B open, command
+(parameter names),
+.B read
 and
-.B command
+.B write
+(input and output channels).
 .RE
 .SS Actions overview
 .B cbmctrl
@@ -705,7 +707,7 @@ and
 .I <address>
 accept decimal as well as hex numbers (with 0x or 0X prefix).
 .TP
-.BI cbmctrl " change <device>"
+.BI change " <device>"
 This action advises a disk drive IEC device with number
 .I <device>
 to wait for a disk to be exchanged. It makes the following assumptions
@@ -735,7 +737,7 @@ actually removing the disk) will not work in most cases.
 .B cbmctrl
 still supports the following deprecated
 .B actions:
-.RS 4
+.\" .RS 4
 .TP 2
 .BI popen " <device> <secadr> <filename>"
 The
@@ -751,7 +753,7 @@ The
 action got obsoleted by this (full) command:
 .RS 2
 .BI cbmctrl " \-\-petscii" " command" " <device> <cmdstr>"
-.RE
+.\" .RE
 .SH EXIT CODES
 .B cbmctrl
 sets the exit code to 0, if the operation completed successfully.
@@ -781,7 +783,7 @@ can be issued with no drawbacks.
 .PP
 When commands are sent to the floppy with the
 .B command
-action, there is alwas a "\\r" appended at the end of the
+action, there is always a "\\r" appended at the end of the
 command string by
 .B cbmctrl.
 This is done explicitly, because some IEC devices expect that
