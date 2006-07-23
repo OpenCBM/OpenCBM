@@ -1,8 +1,9 @@
-.\" $Id: cbmctrl.1,v 1.15 2006-07-23 14:12:00 strik Exp $
+.\" $Id: cbmctrl.1,v 1.16 2006-07-23 20:55:32 wmsr Exp $
 .\"
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
-.\" additions and rework by Wolfgang Moser (http://d81.de)
+.\" additions and rework by Wolfgang Moser (http://d81.de),
+.\" changes and corrections by Spiro Trikaliotis
 .\"
 .\" Process this file with
 .\"    groff -t -e -mandoc -Tps cbmctrl.1 > cbmctrl.1.ps
@@ -114,10 +115,11 @@ Do not convert data between CBM and PC format. Not doing charset
 conversion is the default for the actions:
 .B open, command
 (parameter names),
-.B read
-and
-.B write
-(input and output channels).
+.B read, write
+(input and output channels) and
+.B put
+(parameter)
+.
 .RE
 .SS Actions overview
 .B cbmctrl
@@ -180,7 +182,12 @@ understands the following subcommand actions
 .ns
 .TP 10
 .B write
-\- Put a stream of raw data to an IEC bus device
+\- Write a stream of raw data to an IEC bus device
+.br
+.ns
+.TP 10
+.B put
+\- Put the specified data to an IEC bus device
 .br
 .ns
 .TP 10
@@ -279,17 +286,20 @@ saved. Address number 15 represents the command channel of the
 disk drive, so effectively, for bulk data transfers to and from
 disk drives, only the logical channel numbers 2 to 14 can be used.
 .TP
-.IR "<filename>" "," " <cmdstr>" 
+.IR "<filename>" "," " <cmdstr>" "," " <datstr>" 
 With several
 .B cbmctrl actions
 there is an argument required that either denotes a filename via
 .I <filename>
-at the IEC device or calls a command via
+at the IEC device, calls a command via
 .I <cmdstr>
-over the IEC bus that the device is able to interprete. Any such
-argument that denotes a string within or for an IEC device is
-subject to optional ASCII<\->PETSCII conversions as well as
-optional percent-encodings with selected actions.
+over the IEC bus that the device is able to interprete or sends
+native data denoted by
+.I <datstr>
+to a previously defined channel. Any such argument that denotes a
+string within or for an IEC device is subject to optional
+ASCII<\->PETSCII conversions as well as optional percent-encodings
+with selected actions.
 .SS Actions
 .B cbmctrl
 understands the following
@@ -546,6 +556,46 @@ If
 is omitted or if it is named '\-', the data stream is get from
 the standard input channel on the host computer.
 .TP
+.BI put " [\-e|\-\-extended] <datstr> [<dat1> ... <datN>]"
+Puts
+.I <datstr>
+appended by the optional octets
+.I <dat1>
+to
+.I <datN>
+to a device, after it has been set into
+.B listen
+mode. The single byte arguments
+.I <dat1>
+to
+.I <datN>
+can either be given in decimal, octal (0 prefix) or sedecimal (0x
+prefix) notation.
+.PP
+.RS 2
+.PD 0
+Notes:
+.RS 2
+.TP 2
+*
+The octets given by
+.I <dat1> ... <datN>
+are
+.B not
+converted at all, regardless if the
+.I \-\-petscii
+global option is given or else.
+.TP 2
+*
+The same goes for percent-encoded characters, when the options
+.IR \-\-petscii " and" " \-\-extended"
+are given. The resulting octets after the percent-decoding are
+.B not
+converted from ASCII to PETSCII.
+.RE
+.PD
+.RE
+.TP 2
 .BI status " <device>"
 Copies input from device
 .IR <device> ,
@@ -606,9 +656,9 @@ cbmctrl listen
 .I <device>
 15
 .P
-echo \-n
-.I <cmdstr>
-| cbmctrl write
+cbmctrl put
+.I <cmdstr> [<cmd1> ... <cmdN>]
+0x0d
 .P
 cbmctrl unlisten
 .P
@@ -653,17 +703,7 @@ The same goes for percent-encoded characters, when the options
 are given. The resulting octets after the percent-decoding are
 .B not
 converted from ASCII to PETSCII.
-.TP 2
-*
-"echo \-n" does natively work under Linux only, under Windows you can use
-the following construct as a replacement. Please ensure that there are no
-spaces between the '=' character and the '|' character surrounding
-.IR <cmdstr> :
-.RS 5
 .PD
-.PP
-.RI "echo. | set /p =" <cmdstr> "| cbmctrl write"
-.RE
 .RE
 .RE
 .TP 2
@@ -874,12 +914,16 @@ cbmctrl download 9 0xc000 0x4000
 .TP
 Transfer file to disk drive #10, buffer at address $500:
 .RS
-cbmctrl upload 10 0x500
+ASCII to PETSCII conversion is included for transferring true text
+data into e.g. databases with relative files via direct block
+access.
+.PP
+cbmctrl --petscii upload 10 0x500
 .I BUFFER2.BIN
 .RE
 .SH AUTHOR
 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
-additions and reworks by Spiro Trikaliotis, additions by Wolfgang Moser
+additions and rework by Spiro Trikaliotis, additions by Wolfgang Moser
 http://d81.de.
 .SH DATE
-July 20 2006
+July 23 2006 \" Happy birthday Martin ;-)
