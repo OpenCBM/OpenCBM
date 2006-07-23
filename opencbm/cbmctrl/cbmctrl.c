@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.39 2006-07-23 14:13:25 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.40 2006-07-23 14:23:35 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -728,64 +728,61 @@ static int do_write(CBM_FILE fd, OPTIONS * const options)
  */
 static int do_put(CBM_FILE fd, OPTIONS * const options)
 {
-    char *fn = NULL;
-    int size;
-    unsigned char buf[2048];
-    FILE *f;
+    int  rv;
+    char *commandline;
+    unsigned int commandlinelen = 0;
 
-    if (skip_options(options))
-        return 1;
-    
-    if (get_argument_file_for_read(options, &f, &fn))
-        return 1;
 
-    /* fill a buffer with up to 64k of bytes from file/console */
-    size = fread(buf, 1, sizeof(buf), f);
-    /* do this test only on the very first run */
-    if(size == 0 && feof(f))
+    int extended = 0;
+    int c;
+    static const char short_options[] = "+e";
+    static struct option long_options[] =
     {
-        arch_error(0, 0, "no data: %s", fn);
-        if(f != stdin) fclose(f);
-        return 1;
-    }
-    
-    /* as long as no error occurred */
-    while( ! ferror(f))
-    {
-        /* if requested, convert to PETSCII before writing */
-        if (options->petsciiraw == PA_PETSCII)
-        {
-            int i;
-            for (i=0; i < size; i++)
-                buf[i] = cbm_ascii2petscii_c(buf[i]);
-        }
+        {"extended", no_argument, NULL, 'e'},
+        {NULL,       no_argument, NULL, 0  }
+    };
 
-        /* write that to the the IEC bus */
-        if(size != cbm_raw_write(fd, buf, size))
+    // first of all, process the options given
+
+    while ((c = process_individual_option(options, short_options, long_options)) != EOF)
+    {
+        switch (c)
         {
-            /* exit the loop with another error condition */
+        case 'e':
+            extended = 1;
             break;
-        }
 
-        /* fill a buffer with up to 64k of bytes from file/console */
-        size = fread(buf, 1, sizeof(buf), f);
-        if(size == 0 && feof(f))
-        {
-                /* nothing more to read */
-            if(f != stdin) fclose(f);
-            return 0;
+        default:
+            return 1;
         }
     }
 
-    /* the loop has exited, because of an error, check, which one */
-    if(ferror(f))
+    rv = get_extended_argument_string(extended, options, &commandline, &commandlinelen);
+
+    if (rv)
+        return 1;
+
+    /* if requested, convert to PETSCII before writing */
+    if (options->petsciiraw == PA_PETSCII)
     {
-        arch_error(0, 0, "could not read %s", fn);
+        unsigned int i;
+        for (i=0; i < commandlinelen; i++)
+            commandline[i] = cbm_ascii2petscii_c(commandline[i]);
     }
-    /* else : size number of bytes could not be written to IEC bus */
-    
-    if(f != stdin) fclose(f);
-    return 1;
+
+    /* write that to the IEC bus */
+    rv = cbm_raw_write(fd, commandline, commandlinelen);
+    if(rv < 0 || commandlinelen != (unsigned int) rv)
+    {
+        rv = 1;
+    }
+
+    if (commandline != NULL)
+    {
+        free(commandline);
+    }
+
+    return rv;
 }
 
 /*
