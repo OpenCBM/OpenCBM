@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.38 2006-07-20 18:20:42 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.39 2006-07-23 14:13:25 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -28,8 +28,8 @@ typedef
 enum {
     PA_UNSPEC = 0,
     PA_PETSCII,
-    PA_ASCII
-} PETSCII_ASCII;
+    PA_RAW
+} PETSCII_RAW;
 
 //! struct to remember the general options to the program
 typedef struct {
@@ -39,7 +39,7 @@ typedef struct {
     int error;   //!< there was an error in processing the options (=1), or not (=0)
     int help;    //!< option: the user requested help for the specified command
     int version; //!< option: print version information
-    PETSCII_ASCII petsciiascii; //!< option: The user requested PETSCII or ASCII, or nothing 
+    PETSCII_RAW petsciiraw; //!< option: The user requested PETSCII or RAW, or nothing 
 } OPTIONS;
 
 typedef int (*mainfunc)(CBM_FILE fd, OPTIONS * const options);
@@ -262,7 +262,7 @@ static int hex2val(const char ch)
 }
 
 static int
-process_specific_byte_parameter(char *string, int stringlen, PETSCII_ASCII petsciiascii)
+process_specific_byte_parameter(char *string, int stringlen, PETSCII_RAW petsciiraw)
 {
     int size = 0;
     char *pread = string;
@@ -297,7 +297,7 @@ process_specific_byte_parameter(char *string, int stringlen, PETSCII_ASCII petsc
         }
         else
         {
-            if (petsciiascii == PA_PETSCII)
+            if (petsciiraw == PA_PETSCII)
                 ch = cbm_ascii2petscii_c(ch);
 
             *pwrite++ = ch;
@@ -353,7 +353,7 @@ get_extended_argument_string(int extended,
 
     if (extended)
     {
-        int n = process_specific_byte_parameter(commandline, commandline_len, options->petsciiascii);
+        int n = process_specific_byte_parameter(commandline, commandline_len, options->petsciiraw);
 
         if (n < 0)
             return 1;
@@ -366,7 +366,7 @@ get_extended_argument_string(int extended,
         // (with extended syntax, this is done "on the fly" while converting
         // the % - style values into characters.)
 
-        if (options->petsciiascii == PA_PETSCII)
+        if (options->petsciiraw == PA_PETSCII)
             cbm_ascii2petscii(commandline);
     }
 
@@ -636,7 +636,7 @@ static int do_read(CBM_FILE fd, OPTIONS * const options)
     {
         // if PETSCII was recognized, convert the data before writing
 
-        if (options->petsciiascii == PA_PETSCII)
+        if (options->petsciiraw == PA_PETSCII)
         {
             int i;
             for (i=0; i < size; i++)
@@ -688,7 +688,72 @@ static int do_write(CBM_FILE fd, OPTIONS * const options)
     while( ! ferror(f))
     {
         /* if requested, convert to PETSCII before writing */
-        if (options->petsciiascii == PA_PETSCII)
+        if (options->petsciiraw == PA_PETSCII)
+        {
+            int i;
+            for (i=0; i < size; i++)
+                buf[i] = cbm_ascii2petscii_c(buf[i]);
+        }
+
+        /* write that to the the IEC bus */
+        if(size != cbm_raw_write(fd, buf, size))
+        {
+            /* exit the loop with another error condition */
+            break;
+        }
+
+        /* fill a buffer with up to 64k of bytes from file/console */
+        size = fread(buf, 1, sizeof(buf), f);
+        if(size == 0 && feof(f))
+        {
+                /* nothing more to read */
+            if(f != stdin) fclose(f);
+            return 0;
+        }
+    }
+
+    /* the loop has exited, because of an error, check, which one */
+    if(ferror(f))
+    {
+        arch_error(0, 0, "could not read %s", fn);
+    }
+    /* else : size number of bytes could not be written to IEC bus */
+    
+    if(f != stdin) fclose(f);
+    return 1;
+}
+
+/*
+ * put specified data to the IEC bus
+ */
+static int do_put(CBM_FILE fd, OPTIONS * const options)
+{
+    char *fn = NULL;
+    int size;
+    unsigned char buf[2048];
+    FILE *f;
+
+    if (skip_options(options))
+        return 1;
+    
+    if (get_argument_file_for_read(options, &f, &fn))
+        return 1;
+
+    /* fill a buffer with up to 64k of bytes from file/console */
+    size = fread(buf, 1, sizeof(buf), f);
+    /* do this test only on the very first run */
+    if(size == 0 && feof(f))
+    {
+        arch_error(0, 0, "no data: %s", fn);
+        if(f != stdin) fclose(f);
+        return 1;
+    }
+    
+    /* as long as no error occurred */
+    while( ! ferror(f))
+    {
+        /* if requested, convert to PETSCII before writing */
+        if (options->petsciiraw == PA_PETSCII)
         {
             int i;
             for (i=0; i < size; i++)
@@ -741,7 +806,7 @@ static int do_status(CBM_FILE fd, OPTIONS * const options)
 
     rv = cbm_device_status(fd, unit, buf, sizeof(buf));
 
-    if (options->petsciiascii == PA_PETSCII)
+    if (options->petsciiraw == PA_PETSCII)
         cbm_petscii2ascii(buf);
 
     printf("%s", buf);
@@ -844,7 +909,7 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
                         printf("%u ", (unsigned char)buf[0] | (unsigned char)buf[1] << 8 );
                         while((cbm_raw_read(fd, &c, 1) == 1) && c)
                         {
-                            if (options->petsciiascii == PA_PETSCII)
+                            if (options->petsciiraw == PA_PETSCII)
                                 putchar(cbm_petscii2ascii_c(c));
                             else
                                 putchar(c);
@@ -952,6 +1017,18 @@ static int do_download(CBM_FILE fd, OPTIONS * const options)
             rv = 1;
             break;
         }
+
+        // If the user wants to convert them from PETSCII, do this
+        // (I find it hard to believe someone would want to do this,
+        // but who knows?)
+
+        if (options->petsciiraw == PA_PETSCII)
+        {
+            int i;
+            for (i = 0; i < c; i++)
+                buf[i] = cbm_petscii2ascii_c(buf[i]);
+        }
+
         fwrite(buf, 1, c, f);
 
         addr  += sizeof(buf);
@@ -1053,6 +1130,17 @@ static int do_upload(CBM_FILE fd, OPTIONS * const options)
     }
 
     if(f != stdin) fclose(f);
+
+    // If the user wants to convert them from PETSCII, do this
+    // (I find it hard to believe someone would want to do this,
+    // but who knows?)
+
+    if (options->petsciiraw == PA_PETSCII)
+    {
+        unsigned int i;
+        for (i = 0; i < size; i++)
+            buf[i] = cbm_ascii2petscii_c(buf[i]);
+    }
 
     rv = (cbm_upload(fd, unit, addr, buf, size) == (int)size) ? 0 : 1;
 
@@ -1208,7 +1296,7 @@ struct prog
 {
     int      need_driver;
     char    *name;
-    PETSCII_ASCII petsciiascii;
+    PETSCII_RAW petsciiraw;
     mainfunc prog;
     char    *arglist;
     char    *shorthelp_text;
@@ -1252,7 +1340,7 @@ static struct prog prog_table[] =
         "Undo one or more previous talk commands.\n"
         "This affects all drives." },
 
-    {1, "open"    , PA_ASCII,   do_open    , "[-e|--extended] <device> <secadr> <filename> [<file1>...<fileN>]",
+    {1, "open"    , PA_RAW,     do_open    , "[-e|--extended] <device> <secadr> <filename> [<file1>...<fileN>]",
         "perform an open on the IEC bus",
         "Output an open command on the IEC bus.\n"
         "<device> is the device number,\n"
@@ -1273,7 +1361,7 @@ static struct prog prog_table[] =
         "  to the computer only.\n"
         "- If used with the global --petscii option, this action is equivalent\n"
         "  to the deprecated command-line " STRING_BACKTICK "cbmctrl popen" STRING_TICK ".\n"
-        "- If using both PETSCII and --extended option, the bytes given via the\n"
+        "- If using both --petscii and --extended option, the bytes given via the\n"
         "  " STRING_BACKTICK "%" STRING_TICK " meta-character or as <file1> .. <fileN> are *not* converted to petscii." },
 
     {1, "popen"   , PA_PETSCII, do_open    , "<device> <secadr> <filename>",
@@ -1284,19 +1372,35 @@ static struct prog prog_table[] =
         "perform a close on the IEC bus",
         "Undo a previous open command." },
 
-    {1, "read"    , PA_UNSPEC,  do_read    , "[<file>]",
+    {1, "read"    , PA_RAW,     do_read    , "[<file>]",
         "read raw data from the IEC bus",
         "With this command, you can read raw data from the IEC bus.\n"
         "<file>   (optional) file name of a file to write the contents to.\n"
         "         If this name is not given or it is a dash (" STRING_BACKTICK "-" STRING_TICK "), the\n"
         "         contents will be written to stdout, normally the console." },
 
-    {1, "write"   , PA_UNSPEC,  do_write   , "[<file>]",
+    {1, "write"   , PA_RAW,     do_write   , "[<file>]",
         "write raw data to the IEC bus",
         "With this command, you can write raw data to the IEC bus.\n"
         "<file>   (optional) file name of a file to read the values from.\n"
         "         If this name is not given or it is a dash (" STRING_BACKTICK "-" STRING_TICK "), the\n"
         "         contents will be read from stdin, normally the console." },
+
+    {1, "put"     , PA_RAW,     do_put     , "[-e|--extended] <datastr> [<data1> ... <dataN>]",
+        "put specified data to the IEC bus",
+        "With this command, you can write raw data to the IEC bus.\n"
+        "<datastr> is the string to output to the IEC bus.\n"
+        "          It must be given, but may be empty by specifying it as \"\".\n\n"
+        "<data1..N> are additional bytes to append to the string <datastr>.\n"
+        "           Single bytes can be given as decimal, octal (0 prefix) or\n"
+        "           sedecimal (0x prefix).\n\n"
+        "If the option -e or --extended is given, an extended format is used:\n"
+        "  You can specify extra characters by given their ASCII value in hex,\n"
+        "  prepended with " STRING_BACKTICK "%" STRING_TICK ", that is: " STRING_BACKTICK "%20" STRING_TICK " => SPACE, " STRING_BACKTICK "%41" STRING_TICK " => " STRING_BACKTICK "A" STRING_TICK ", " STRING_BACKTICK "%35" STRING_TICK " => " STRING_BACKTICK "5" STRING_TICK ",\n"
+        "  and-so-on. A " STRING_BACKTICK "%" STRING_TICK " is given by giving its hex ASCII: " STRING_BACKTICK "%25" STRING_TICK " => " STRING_BACKTICK "%" STRING_TICK ".\n\n"
+        "NOTES:\n"
+        "- If using both --pestscii and --extended option, the bytes given via the\n"
+        "  " STRING_BACKTICK "%" STRING_TICK " meta-character or as <data1> .. <dataN> are *not* converted to petscii." },
 
     {1, "status"  , PA_PETSCII, do_status  , "<device>",
         "give the status of the specified drive",
@@ -1304,7 +1408,7 @@ static struct prog prog_table[] =
         "of the given drive and outputs it on the screen.\n"
         "<device> is the device number of the drive." },
 
-    {1, "command" , PA_ASCII,   do_command , "[-e|--extended] <device> <cmdstr> [<cmd1> ... <cmdN>]",
+    {1, "command" , PA_RAW,     do_command , "[-e|--extended] <device> <cmdstr> [<cmd1> ... <cmdN>]",
         "issue a command to the specified drive",
         "This command issues a command to a specific drive.\n"
         "This command is a command that you normally give to\n"
@@ -1324,12 +1428,12 @@ static struct prog prog_table[] =
         "         cbmctrl -p command -e 8 m-w 119 0 2 41 73\n"
         "      or cbmctrl -p command -e 8 m-w%77%00 2 0x29 0x49\n\n"
         "NOTES:\n"
-        "- If --ascii is used (default), you have to give the commands in uppercase\n"
+        "- If --raw is used (default), you have to give the commands in uppercase\n"
         "  letters, lowercase will NOT work!\n"
         "  If --petscii is used, you must give the commands in lowercase.\n"
         "- If used with the global --petscii option, this action is equivalent\n"
         "  to the deprecated command-line " STRING_BACKTICK "cbmctrl pcommand" STRING_TICK ".\n"
-        "- If using both PETSCII and --extended option, the bytes given via the\n"
+        "- If using both --petscii and --extended option, the bytes given via the\n"
         "  " STRING_BACKTICK "%" STRING_TICK " meta-character or as <cmd1> .. <cmdN> are *not* converted to petscii." },
 
     {1, "pcommand", PA_PETSCII, do_command , "[-e|--extended] <device> <cmdstr>",
@@ -1343,7 +1447,7 @@ static struct prog prog_table[] =
         "This command gets the directory of the disk in the drive.\n\n"
         "<device> is the device number of the drive." },
 
-    {1, "download", PA_UNSPEC,  do_download, "<device> <adr> <count> [<file>]",
+    {1, "download", PA_RAW,     do_download, "<device> <adr> <count> [<file>]",
         "download memory contents from the floppy drive",
         "With this command, you can get data from the floppy drive memory.\n"
         "<device> is the device number of the drive.\n"
@@ -1358,7 +1462,7 @@ static struct prog prog_table[] =
         " cbmctrl download 8 0xc000 0x4000 1541ROM.BIN\n"
         " * reads the 1541 ROM (from $C000 to $FFFF) from drive 8 into 1541ROM.BIN" },
 
-    {1, "upload"  , PA_UNSPEC,  do_upload  , "<device> <adr> [<file>]",
+    {1, "upload"  , PA_RAW,     do_upload  , "<device> <adr> [<file>]",
         "upload memory contents to the floppy drive",
         "With this command, you can write data to the floppy drive memory.\n"
         "<device> is the device number of the drive.\n"
@@ -1450,7 +1554,7 @@ static int do_help(CBM_FILE fd, OPTIONS * const options)
             "   -p, --petscii: Convert input or output parameter from CBM format (PETSCII)\n"
             "                  into PC format (ASCII). Default with all actions but " STRING_BACKTICK "open" STRING_TICK "\n"
             "                  and " STRING_BACKTICK "command" STRING_TICK "\n"
-            "   -a, --ascii    Do not convert data between CBM and PC format.\n"
+            "   -r, --raw      Do not convert data between CBM and PC format.\n"
             "                  Default with " STRING_BACKTICK "open" STRING_TICK " and " STRING_BACKTICK "command" STRING_TICK ".\n"
             "   --             Delimiter between action_opt and action_args; if any of the\n"
             "                  arguments in action_args starts with a " STRING_BACKTICK "-" STRING_TICK ", make sure to set\n"
@@ -1506,14 +1610,14 @@ set_option(int *Where, int NewValue, int OldValue, const char * const Descriptio
 }
 
 static int
-set_option_petsciiascii(PETSCII_ASCII *Where, PETSCII_ASCII NewValue, int IgnoreError)
+set_option_petsciiraw(PETSCII_RAW *Where, PETSCII_RAW NewValue, int IgnoreError)
 {
     int error = 0;
 
     if (!IgnoreError && (*Where != PA_UNSPEC))
     {
         error = 1;
-        fprintf(stderr, "Specified option " STRING_BACKTICK "--petscii" STRING_TICK " and " STRING_BACKTICK "--ascii" STRING_TICK " in one command!\n");
+        fprintf(stderr, "Specified option " STRING_BACKTICK "--petscii" STRING_TICK " and " STRING_BACKTICK "--raw" STRING_TICK " in one command!\n");
     }
 
     *Where = NewValue;
@@ -1528,14 +1632,14 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
     int option_index;
     int c;
 
-    static const char short_options[] = "+fhVpa";
+    static const char short_options[] = "+fhVpr";
     static struct option long_options[] =
     {
         {"forget",  no_argument, NULL, 'f'},
         {"help",    no_argument, NULL, 'h'},
         {"version", no_argument, NULL, 'V'},
         {"petscii", no_argument, NULL, 'p'},
-        {"ascii",   no_argument, NULL, 'a'},
+        {"raw",     no_argument, NULL, 'r'},
         {NULL,      no_argument, NULL, 0  }
     };
 
@@ -1588,11 +1692,11 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
             break;
 
         case 'p':
-            options->error |= set_option_petsciiascii(&options->petsciiascii, PA_PETSCII, 0);
+            options->error |= set_option_petsciiraw(&options->petsciiraw, PA_PETSCII, 0);
             break;
 
-        case 'a':
-            options->error |= set_option_petsciiascii(&options->petsciiascii, PA_ASCII, 0);
+        case 'r':
+            options->error |= set_option_petsciiraw(&options->petsciiraw, PA_RAW, 0);
             break;
         };
     }
@@ -1661,9 +1765,9 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             break;
         }
 
-        // if neither PETSCII or ASCII was specified, use default for that command
-        if (options.petsciiascii == PA_UNSPEC)
-            options.petsciiascii = pprog->petsciiascii;
+        // if neither PETSCII or RAW was specified, use default for that command
+        if (options.petsciiraw == PA_UNSPEC)
+            options.petsciiraw = pprog->petsciiraw;
 
         if (pprog->need_driver)
             rv = cbm_driver_open(&fd, 0);
