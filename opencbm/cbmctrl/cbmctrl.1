@@ -1,4 +1,4 @@
-.\" $Id: cbmctrl.1,v 1.14 2006-07-21 18:16:33 wmsr Exp $
+.\" $Id: cbmctrl.1,v 1.15 2006-07-23 14:12:00 strik Exp $
 .\"
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
@@ -109,7 +109,7 @@ and PC format (ASCII). This charset conversion is the default for
 the actions:
 .BR status " and" " dir" " (both on output strings)."
 .TP
-.B \-a, \-\-ascii
+.B \-r, \-\-raw
 Do not convert data between CBM and PC format. Not doing charset
 conversion is the default for the actions:
 .B open, command
@@ -466,7 +466,7 @@ for writing.
 .TP 2
 *
 If
-.I \-\-ascii
+.I \-\-raw
 is used (this is the default), you should give the file type and
 access mode in upper-case letters, lower case will
 .B not
@@ -559,7 +559,7 @@ This action is similar to (in this case, no character conversions would be
 made as with using the
 .B status
 action with the global
-.I \-\-ascii
+.I \-\-raw
 option):
 .PP
 .PD 0
@@ -622,7 +622,7 @@ Notes:
 .TP 2
 *
 If
-.I \-\-ascii
+.I \-\-raw
 is used (this is the default), you should give the commands in
 upper-case letters, lower case will
 .B not
