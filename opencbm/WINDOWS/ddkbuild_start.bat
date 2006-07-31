@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.12 2006-04-18 14:47:49 wmsr Exp $
+rem $Id: ddkbuild_start.bat,v 1.13 2006-07-31 17:16:14 strik Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -11,7 +11,7 @@ rem Furthermore, I have patched it with patch_ddkbuild.diff to show an error sum
 rem after doing its job, but this is not necessary if you do not like.
 rem
 rem Another option is to use DDKBUILD from Hollies Technologies,
-rem downloadable from ...
+rem downloadable from http://www.hollistech.com/Resources/ddkbuild/ddkbuild.htm
 rem To use that one, just define DDKBUILD_HOLLIS to be 1 on startup.
 
 set CBM4WIN_SRC_HOME=%0\..\..
@@ -109,7 +109,7 @@ rem Now, adjust the parameters for the DDKBUILD
 rem version we are using
 if %DDKBUILD_HOLLIS% EQU 1 (
 	set DDKBUILD=%DDKBUILD_CMD_HOLLIS%
-	set TARGETSPEC=-WNET%DDKBUILD_PLATFORM_OPTION%
+	set TARGETSPEC=%DDKBUILD_QUIET_VERBOSE% -WNET%DDKBUILD_PLATFORM_OPTION%
 	set CHECKEDFREE=checked
 	if /i "%0" EQU "fre" set CHECKEDFREE=free
 ) else (

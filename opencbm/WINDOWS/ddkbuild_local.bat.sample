@@ -1,4 +1,4 @@
-rem $Id: ddkbuild_local.bat.sample,v 1.5 2006-04-26 10:47:43 strik Exp $
+rem $Id: ddkbuild_local.bat.sample,v 1.6 2006-07-31 17:16:14 strik Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR DDKBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
@@ -18,6 +18,8 @@ rem source home directory as parameter %1
 
 if not defined DDKBUILD_COMMAND_OSR    set    DDKBUILD_COMMAND_OSR=ddkbuild_osr.bat
 if not defined DDKBUILD_COMMAND_HOLLIS set DDKBUILD_COMMAND_HOLLIS=ddkbuild_hollis-13.bat
+
+if not defined DDKBUILD_QUIET_VERBOSE  set DDKBUILD_QUIET_VERBOSE=-quiet
 
 if not defined BASEDIR  set BASEDIR=
 if not defined W2KBASE  set W2KBASE=
