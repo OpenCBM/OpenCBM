@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.13 2006-07-20 11:45:28 strik Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.14 2006-08-02 11:14:36 strik Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -110,6 +110,16 @@ hint(char *s)
 static void ARCH_SIGNALDECL
 handle_CTRL_C(int dummy)
 {
+    CBM_FILE fd_cbm_local;
+
+    /*
+     * remember fd_cbm, and make the global one invalid
+     * so that no routine can call a cbm_...() routine
+     * once we have cancelled another one
+     */
+    fd_cbm_local = fd;
+    fd = CBM_FILE_INVALID;
+
 //    const static char CmdBuffer[]="M-W\013\034\001\101\r";
 
     fprintf(stderr, "\nSIGINT caught, resetting IEC bus...\n");
@@ -117,7 +127,7 @@ handle_CTRL_C(int dummy)
     printDebugCounters();
 #endif
     arch_sleep(1);
-    cbm_reset(fd);
+    cbm_reset(fd_cbm_local);
 
 #if 0   // reset automatically restores the VIA shift register
     arch_usleep(100000);
