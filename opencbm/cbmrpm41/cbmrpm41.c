@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.14 2006-08-02 11:14:36 strik Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.15 2006-08-08 17:57:40 wmsr Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -82,6 +82,7 @@ help()
         "                       1 - detailed RPM printout (default),\n"
         "                       2 - track synchronization,\n"
         "                       3 - RPM with linear regression and ANOVAR\n"
+        "                       4 - for RPM adjustment, with exponential moving average\n"
         "\n"
         "  -s, --status     display drive status after the measurements\n"
         "  -x, --extended   measure out a 40 track disk\n"
@@ -296,8 +297,8 @@ limitSectorNo41(register __u_char track, int secno)
 
     if(track > 24)      // unrolled bipartition algorithm
     {                   // could be done with a shifting bitmask also
-        if(track > 30)
-        {
+        if(track > 30)  // or maybe by some sort of non-linear
+        {               // hashing and a switch-case
             return secno % 17;
         }
         else
@@ -305,13 +306,13 @@ limitSectorNo41(register __u_char track, int secno)
             return secno % 18;
         }
     }
-    else
+    else    // track is:  <= 24
     {
         if(track > 17)
         {
             return secno % 19;
         }
-        else
+        else    // track is:  <= 17
         {
             return secno % 21;
         }
@@ -481,6 +482,73 @@ do_RPMregression(__u_char start, __u_char end, int sec, __u_char retries)
     return 0;
 }
 
+static int
+do_RPMadjustment(__u_char track, __u_char dummy, int sec, __u_char retries)   // end track not needed
+{
+    // #define ASIZE   sizeof(alpha) / sizeof(float)
+
+    GroupOfMeasurements measureGroup;
+    const float alpha[] = { 0.22f, 0.10f, 0.047f, 0.022f };
+
+    typedef char aSize[sizeof(alpha) / sizeof(float)];
+    // const int ASIZE = sizeof(alpha) / sizeof(float);
+
+    float RPM, expMovAv[sizeof(aSize)];
+    unsigned int delta;
+    int i, j, alph;
+
+    printf("  run |  delta |     RPM | exponentional moving averages\n"
+           "  No. |  (~us) | (1/min) |");
+    for(alph = 0; alph < sizeof(aSize); ++alph) printf(" a=%5.3f", alpha[alph]);
+    printf("\n------+--------+---------+---------------------------------\n");
+
+    if( measure_2cyleJitter(fd, drive, track, limitSectorNo41(track, sec), 0,
+        &measureGroup, 0
+        ) != 0) return 1;
+    delta = measureGroup.startValue;
+    if( measure_2cyleJitter(fd, drive, track, limitSectorNo41(track, sec), 0,
+        &measureGroup, 0
+        ) != 0) return 1;
+    delta = measureGroup.startValue - delta;
+        // overflow correction, needs integer division
+    delta /= (delta + 100000) / 200000;
+    RPM = 60000000.0f / delta;
+
+    for(alph = 0; alph < sizeof(aSize); ++alph) expMovAv[alph] = RPM;
+
+    for(i = 0; i < retries; ++i)
+    {
+        for(j = 1; j <= 100; ++j)
+        {
+            delta = measureGroup.startValue;
+            if( measure_2cyleJitter(fd, drive, track, limitSectorNo41(track, sec), 0,
+                &measureGroup, 0
+                ) != 0) return 1;
+    
+            delta = measureGroup.startValue - delta;
+    
+                // overflow correction, needs integer division
+            delta /= (delta + 100000) / 200000;
+    
+            RPM = 60000000.0f / delta;
+            printf("\r%5d | %6d | %7.3f |", i*100+j, delta, RPM);
+    
+                // Exponential moving average:
+                // see: http://en.wikipedia.org/wiki/Weighted_moving_average
+                // and: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
+            for(alph = 0; alph < sizeof(aSize); ++alph)
+            {
+                expMovAv[alph] = expMovAv[alph] + alpha[alph] * ( RPM - expMovAv[alph] );
+                printf(" %7.3f", expMovAv[alph]);
+            }
+        }
+		printf("\n");
+    }
+    // printf("\n");
+
+    return 0;
+}
+
 
 int ARCH_MAINDECL
 main(int argc, char *argv[])
@@ -634,6 +702,10 @@ main(int argc, char *argv[])
 
         switch(job)
         {
+        case 4:
+            if( do_RPMadjustment (begintrack, endtrack, sector, retries)
+                != 0 ) continue;    // jump to begin of do{}while(0);
+            break;
         case 3:
             if( do_RPMregression (begintrack, endtrack, sector, retries)
                 != 0 ) continue;    // jump to begin of do{}while(0);
