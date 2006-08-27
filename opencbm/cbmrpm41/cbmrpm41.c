@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.15 2006-08-08 17:57:40 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.16 2006-08-27 14:28:23 wmsr Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -542,7 +542,7 @@ do_RPMadjustment(__u_char track, __u_char dummy, int sec, __u_char retries)   //
                 printf(" %7.3f", expMovAv[alph]);
             }
         }
-		printf("\n");
+        printf("\n");
     }
     // printf("\n");
 
