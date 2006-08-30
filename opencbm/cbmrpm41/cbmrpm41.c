@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.16 2006-08-27 14:28:23 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.17 2006-08-30 12:59:46 wmsr Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -28,14 +28,14 @@ static unsigned char drive;
 const static unsigned short timerShotMain = sizeof(cbmDev_StartAddress) + offsetof(struct ExecBuffer_MemoryLayout, Timer24BitGroup);
 const static unsigned short UcmdTblAddr   = sizeof(cbmDev_StartAddress) + offsetof(struct ExecBuffer_MemoryLayout, CommandVectorsTable_impl);
 
-   /*
-    * The virtual 23.589 bit timer value is reconstructed from
-    * a 16 bit timer and an 8 bit timer with a modulus of 187
-    * with the help of the Chinese Remainder Theorem. All the
-    * constants below are precalculated coefficients for a
-    * modulus of 65536 for one timer and a modulus of 187 for
-    * the other timer.
-    */
+/*
+ * The virtual 23.589 bit timer value is reconstructed from
+ * a 16 bit timer and an 8 bit timer with a modulus of 187
+ * with the help of the Chinese Remainder Theorem. All the
+ * constants below are precalculated coefficients for a
+ * modulus of 65536 for one timer and a modulus of 187 for
+ * the other timer.
+ */
 #define Via1Timer2Max (256 * 256)           // 16 bit timer
 #define Via2Timer2Max (185 + 2)             // == 187, with latch value 185
 
@@ -121,8 +121,6 @@ handle_CTRL_C(int dummy)
     fd_cbm_local = fd;
     fd = CBM_FILE_INVALID;
 
-//    const static char CmdBuffer[]="M-W\013\034\001\101\r";
-
     fprintf(stderr, "\nSIGINT caught, resetting IEC bus...\n");
 #ifdef CBMRPM41_DEBUG
     printDebugCounters();
@@ -146,23 +144,22 @@ cbm_sendUxCommand(CBM_FILE HandleDevice, __u_char DeviceAddress, enum UcmdVector
     char UxCmdBuffer[3]="U_";
 
     UxCmdBuffer[1]=UxCommand;
-// printf("Sending user command \"%s\" to floppy\n", UxCmdBuffer);
     return cbm_exec_command(HandleDevice, DeviceAddress, UxCmdBuffer, 2);
 }
 
 static unsigned int
 reconstruct_v32bitInc(struct Timer24bitValues TimerRegisters)
 {
-       /*
-        * The virtual 23.589 bit timer can further be extended to
-        * 32 bits with a software method. But this works only
-        * correctly, as long as two consecutive time measurements
-        * (from the very same timing source of course) always
-        * differ in less than a complete wrap around of the
-        * virtual timer. On a base clock of 1Mhz and the Modulus
-        * of 256*256*187 this is a time window of somewhat around
-        * 12s (Modulus / 1MHz).
-        */
+    /*
+     * The virtual 23.589 bit timer can further be extended to
+     * 32 bits with a software method. But this works only
+     * correctly, as long as two consecutive time measurements
+     * (from the very same timing source of course) always
+     * differ in less than a complete wrap around of the
+     * virtual timer. On a base clock of 1Mhz and the Modulus
+     * of 256*256*187 this is a time window of somewhat around
+     * 12s (Modulus / 1MHz).
+     */
     static int lastVTimer = 0;
     static unsigned int ModulusDecrementor = 0;
 
@@ -189,20 +186,20 @@ reconstruct_v32bitInc(struct Timer24bitValues TimerRegisters)
     printf("Reconstructed 23.589 bit timer value: 0x%06x / %8d\n", vTimer, vTimer);
 #endif
 
-        // obey that the timer decrements on each tick
+    // obey that the timer decrements on each tick
     if ( vTimer > lastVTimer )
     {
-            // the timer increased, thus we have got a wrap
-            // around ==> decrement the 32 bits software
-            // timer by the modulus of the virtual timer
+        // the timer increased, thus we have got a wrap
+        // around ==> decrement the 32 bits software
+        // timer by the modulus of the virtual timer
         ModulusDecrementor -= Modulus;
     }
 
     lastVTimer = vTimer;
 
-        // by taking the (( 2^n ) - 1 )-Inverse, we "convert"
-        // the timer an increasing one instead of decreasing
-        // with each tick
+    // by taking the (( 2^n ) - 1 )-Inverse, we "convert"
+    // the timer an increasing one instead of decreasing
+    // with each tick
     return ~(ModulusDecrementor + vTimer);
 }
 
@@ -222,18 +219,18 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
     SETSTATEDEBUG((void)0);
 
 #if _ASCII_PARAMETER_PASSING
-        // must be: "Ux <track> <sector>"
-        // sprintf(cmd, "U%c %d %d", ExecuteJobInBuffer, i, i & 0x0f);
+    // must be: "Ux <track> <sector>"
+    // sprintf(cmd, "U%c %d %d", ExecuteJobInBuffer, i, i & 0x0f);
     sprintf(cmd, "U%c %d %d", ExecuteJobInBuffer, diskTrack, sector);
 #else
-        // must be: "Ux<track><sector>" with directly encoded bytes
+    // must be: "Ux<track><sector>" with directly encoded bytes
     sprintf(cmd, "U%c%c%c", ExecuteJobInBuffer, diskTrack, sector);
 #endif
 
     pDeltaGroup->trueNumberOfIntervals = 0;
 
-        // for each track do 1 initialisation and then
-        // several measurements
+    // for each track do 1 initialisation and then
+    // several measurements
     timerValue = 0;
     for(mNo = 0; mNo <= count; mNo++)
     {
@@ -248,7 +245,7 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
 #endif
         SETSTATEDEBUG((void)0);
 
-            // wait for job to finish
+        // wait for job to finish
         if( cbm_device_status(HandleDevice, DeviceAddress, insts, sizeof(insts)) )
         {
             printf("%s\n", insts);
@@ -259,13 +256,13 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
                      sizeof(T24Sample))
              != sizeof(T24Sample)) return 1;
 
-            // read out sample that was shot by the jobcode
+        // read out sample that was shot by the jobcode
         timerValue = reconstruct_v32bitInc(T24Sample);
 
         if(mNo > 0){
             lastTvalue = timerValue - lastTvalue;
 
-                // increase by the number of overflows
+            // increase by the number of overflows
             pDeltaGroup->trueNumberOfIntervals +=
                 (lastTvalue + 100000) / 200000;
 
@@ -288,7 +285,6 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
     pDeltaGroup->endValue = timerValue;
     return 0;
 }
-
 
 static __u_char
 limitSectorNo41(register __u_char track, int secno)
@@ -387,7 +383,7 @@ do_SKEWmeasurment(__u_char start, __u_char end, int sec, __u_char retries)
                        (measureGroup.endValue - measureGroup.startValue));
 
                 skewDelta = (float)fmod(measureGroup.startValue - prevMeasureGroup.endValue, meanDelta);
-                    // move from range 0...1 into range -0.5...0.5
+                // move from range 0...1 into range -0.5...0.5
                 if( (2 * skewDelta) > meanDelta ) skewDelta -= meanDelta;
                 printf("%6u|%9.1f|", measureGroup.startValue - prevMeasureGroup.endValue, skewDelta);
 
@@ -485,13 +481,14 @@ do_RPMregression(__u_char start, __u_char end, int sec, __u_char retries)
 static int
 do_RPMadjustment(__u_char track, __u_char dummy, int sec, __u_char retries)   // end track not needed
 {
-    // #define ASIZE   sizeof(alpha) / sizeof(float)
-
     GroupOfMeasurements measureGroup;
     const float alpha[] = { 0.22f, 0.10f, 0.047f, 0.022f };
 
+    // this is a trick for defining some intermediate sort
+    // of constants between lexicalic ones (#define) and
+    // typed ones (const). The latter cannot be used for
+    // array size declarations, but:  sizeof(aSize)  can.
     typedef char aSize[sizeof(alpha) / sizeof(float)];
-    // const int ASIZE = sizeof(alpha) / sizeof(float);
 
     float RPM, expMovAv[sizeof(aSize)];
     unsigned int delta;
@@ -510,7 +507,7 @@ do_RPMadjustment(__u_char track, __u_char dummy, int sec, __u_char retries)   //
         &measureGroup, 0
         ) != 0) return 1;
     delta = measureGroup.startValue - delta;
-        // overflow correction, needs integer division
+    // overflow correction, needs integer division
     delta /= (delta + 100000) / 200000;
     RPM = 60000000.0f / delta;
 
@@ -527,15 +524,15 @@ do_RPMadjustment(__u_char track, __u_char dummy, int sec, __u_char retries)   //
     
             delta = measureGroup.startValue - delta;
     
-                // overflow correction, needs integer division
+            // overflow correction, needs integer division
             delta /= (delta + 100000) / 200000;
     
             RPM = 60000000.0f / delta;
             printf("\r%5d | %6d | %7.3f |", i*100+j, delta, RPM);
     
-                // Exponential moving average:
-                // see: http://en.wikipedia.org/wiki/Weighted_moving_average
-                // and: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
+            // Exponential moving average:
+            // see: http://en.wikipedia.org/wiki/Weighted_moving_average
+            // and: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
             for(alph = 0; alph < sizeof(aSize); ++alph)
             {
                 expMovAv[alph] = expMovAv[alph] + alpha[alph] * ( RPM - expMovAv[alph] );
@@ -554,15 +551,6 @@ int ARCH_MAINDECL
 main(int argc, char *argv[])
 {
     int status = 0;
-        /*
-         * FIXME: cbmrpm41 doesn not really support extended disks
-         *        with more than 35 tracks on its own. It relies on
-         *        the capabilities of a drive extension or replacement
-         *        DOS ROM for this.
-         *        The drive routines need enhancements like a custom
-         *        step motor routine to support more than 35 tracks in
-         *        each and every drive.
-         */
     __u_char cmd[40], job = 1, begintrack = 1, endtrack = 35, retries = 5;
     char c, *arg;
     int sector = 0, berror = 0;
@@ -674,21 +662,21 @@ main(int argc, char *argv[])
         if( cbm_upload(fd, drive, sizeof(cbmDev_StartAddress), cbmrpm41, sizeof(cbmrpm41))
             != sizeof(cbmrpm41)) break;
 
-            // location of the new U vector user commands table
+        // location of the new U vector user commands table
         sprintf(cmd, "%c%c", UcmdTblAddr & 0xFF, UcmdTblAddr >> 8);
-            // install the new U vector table
+        // install the new U vector table
         SETSTATEDEBUG((void)0);
         if( cbm_upload(fd, drive, sizeof(cbmDev_UxCMDtVector), cmd, 2)
             != 2) break;
 
-            // execute Ux command behind the symbolic name Init23_BitTimersStd
+        // execute Ux command behind the symbolic name Init23_BitTimersStd
         SETSTATEDEBUG((void)0);
         if( cbm_sendUxCommand(fd, drive, Init23_BitTimersStd)
             != 0) break;
 
-            // read disk ID and initialise other parameters
-            // from the currently inserted disk into the
-            // drive's RAM locations
+        // read disk ID and initialise other parameters
+        // from the currently inserted disk into the
+        // drive's RAM locations
         SETSTATEDEBUG((void)0);
         if( cbm_exec_command(fd, drive, "I0", 2)
             != 0) break;
@@ -740,7 +728,7 @@ main(int argc, char *argv[])
         arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
         return 1;
     }
-        // if the do{}while(0) loop is exited with a break, we get here
+    // if the do{}while(0) loop is exited with a break, we get here
     arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
     cbm_reset(fd);
     cbm_driver_close(fd);
