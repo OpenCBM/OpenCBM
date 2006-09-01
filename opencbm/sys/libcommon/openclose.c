@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.8 2006-03-22 18:22:21 strik Exp $ \n
+** \version $Id: openclose.c,v 1.9 2006-09-01 17:04:44 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **
@@ -178,8 +178,16 @@ cbm_execute_close(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 
     if (Pdx->ParallelPortLock)
     {
+        // release the bus (to be able to share it with other controllers)
+
+        if (!Pdx->DoNotReleaseBus)
+        {
+            cbmiec_release_bus(Pdx);
+        }
+
         // as we keep the parallel port locked all the time,
         // do not unlock it now.
+
         ntStatus = STATUS_SUCCESS;
     }
     else
