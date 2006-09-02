@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.9 2006-07-20 14:07:37 strik Exp $ \n
+** \version $Id: init.c,v 1.10 2006-09-02 12:19:07 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -244,9 +244,9 @@ cbm_check_irq_availability(IN PDEVICE_EXTENSION Pdx)
             // Interrupt does not work, free it again.
             //
 
-            DBG_PRINT((DBG_PREFIX "* Interrupt does not work, release it again"));
+//            DBG_PRINT((DBG_PREFIX "* Interrupt does not work, release it again"));
 
-            ParPortFreeInterrupt(Pdx);
+//            ParPortFreeInterrupt(Pdx);
         }
 
     }
