@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/testirq.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: testirq.c,v 1.3 2006-07-20 14:07:37 strik Exp $ \n
+** \version $Id: testirq.c,v 1.4 2006-09-04 14:42:29 strik Exp $ \n
 ** \n
 ** \brief Test for IRQ capabilities
 **
@@ -62,7 +62,7 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
         UCHAR  ecr     = READ_PORT_UCHAR(ecrPort);
         UCHAR  ecp0, ecp1;
 
-        DbgFlags |= 0x7;
+//        DbgFlags |= 0x7;
 //        DbgFlags |= 0x7fffffff;
 
         //
@@ -169,6 +169,7 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
         if (ret != 100)
         {
             DBG_ERROR((DBG_PREFIX "Interrupt generated when SETTING"));
+            LogErrorOnly(Pdx->Fdo, CBM_IRQ_WHEN_SETTING);
 
             if (bufferTestIrq)
                 bufferTestIrq->ErrIrqRisingEdge = -1;

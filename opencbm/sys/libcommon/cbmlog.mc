@@ -55,3 +55,19 @@ IEC bus initialized. Using %2%3 cable.
 Language = German
 Der IEC bus wurde initialisiert. Ein %2%3 Kabel wird verwendet.
 .
+
+MessageId=0x0006 Facility=Opencbm Severity=Warning SymbolicName=CBM_IRQ_DOES_NOT_WORK
+Language=English
+Interrupt does not work. Using mode without interrupt. (NOT RECOMMENDED!)
+.
+Language = German
+Der Interrupt funktioniert nicht. Benutze Modus ohne Interrupt. (NICHT EMPFOHLEN!)
+.
+
+MessageId=0x0007 Facility=Opencbm Severity=Informational SymbolicName=CBM_IRQ_WHEN_SETTING
+Language=English
+Interrupt generated when setting the line. This is uncommon, but not bad.
+.
+Language = German
+Ein Interrupt wurde erzeugt beim Setzen der Leitung. Ungewöhnlich, aber nicht weiter tragisch.
+.
