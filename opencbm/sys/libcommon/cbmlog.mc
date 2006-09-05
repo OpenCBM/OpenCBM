@@ -58,10 +58,10 @@ Der IEC bus wurde initialisiert. Ein %2%3 Kabel wird verwendet.
 
 MessageId=0x0006 Facility=Opencbm Severity=Warning SymbolicName=CBM_IRQ_DOES_NOT_WORK
 Language=English
-Interrupt does not work. Using mode without interrupt. (NOT RECOMMENDED!)
+Interrupt was not detected. Using mode without interrupt. (NOT RECOMMENDED!)
 .
 Language = German
-Der Interrupt funktioniert nicht. Benutze Modus ohne Interrupt. (NICHT EMPFOHLEN!)
+Der Interrupt konnte nicht detektiert werden. Benutze Modus ohne Interrupt. (NICHT EMPFOHLEN!)
 .
 
 MessageId=0x0007 Facility=Opencbm Severity=Informational SymbolicName=CBM_IRQ_WHEN_SETTING
