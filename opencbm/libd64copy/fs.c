@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: fs.c,v 1.10 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: fs.c,v 1.11 2006-09-06 17:59:11 strik Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -25,6 +25,9 @@ static d64copy_settings *fs_settings;
 static FILE *the_file;
 static char *error_map;
 static int block_count;
+
+/* always use maximum size for error map */
+#define ERROR_MAP_LENGTH D71_BLOCKS
 
 static int block_offset(int tr, int se)
 {
@@ -71,7 +74,7 @@ static int write_block(__u_char tr, __u_char se, const unsigned char *blk, int s
     ofs = block_offset(tr, se);
     if(fseek(the_file, ofs, SEEK_SET) == 0)
     {
-        error_map[ofs / BLOCKSIZE] = (char) read_status;
+        error_map[ofs / BLOCKSIZE] = (char) ((read_status == 0) ? 1 : read_status);
         ret = fwrite(blk, size, 1, the_file) != 1;
     }
     else
@@ -199,7 +202,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
             }
 
             /* always use maximum size for error map */
-            error_map = calloc(D71_BLOCKS, 1);
+            error_map = calloc(ERROR_MAP_LENGTH, 1);
             if(!error_map)
             {
                 message_cb(0, "no memory for error map");
@@ -289,7 +292,7 @@ static void close_disk(void)
                 {
                     for(i = 0; !has_errors && i < block_count; i++)
                     {
-                        has_errors = error_map[i] != 0;
+                        has_errors = error_map[i] != 1;
                     }
                 }
                 break;
