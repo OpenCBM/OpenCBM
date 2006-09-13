@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.23 2006-07-20 11:45:29 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.24 2006-09-13 15:58:33 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -88,6 +88,39 @@ enum osversion_e
     WINNEWER        //!< newer than WIN XP
 } osversion_t;
 
+
+/*! \internal \brief Check if we have the needed access rights
+
+ This function checks if we have the needed access rights for
+ installing the driver on the machine.
+
+ \param Parameter
+   Pointer to parameter_t struct which contains the
+   description of the parameters given on the command-line.
+
+ \return 
+   Return value which will be given on return from main()
+   That is, 0 on success, everything else indicates an error.
+*/
+static BOOL
+NeededAccessRights(VOID)
+{
+    SC_HANDLE scManager;
+
+    FUNC_ENTER();
+
+    // Check if we have arbitrary execute rights.
+    // For this, open the service control manager
+
+    scManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+
+    if (scManager)
+    {
+        CloseServiceHandle(scManager);
+    }
+
+    FUNC_LEAVE_BOOL(scManager ? TRUE : FALSE);
+}
 
 /*! \brief \internal Check out the operating system version
 
@@ -244,6 +277,9 @@ struct parameter_s
 {
     /*! Do not execute anything */
     BOOL NoExecute;
+
+    /*! Administrator privileges not needed */
+    BOOL NoAdminNeeded;
 
     /*! Find out of more than one "execute" parameter is given */
     BOOL ExecuteParameterGiven;
@@ -515,11 +551,13 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         case 'h':
             usage();
             Parameter->NoExecute = TRUE;
+            Parameter->NoAdminNeeded = TRUE;
             break;
 
         case 'V':
             version();
             Parameter->NoExecute = TRUE;
+            Parameter->NoAdminNeeded = TRUE;
             break;
 
         case 'r':
@@ -597,6 +635,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
 
         case 'c':
             Parameter->CheckInstall = TRUE;
+            Parameter->NoAdminNeeded = TRUE;
             break;
 
 #ifdef _X86_
@@ -656,6 +695,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         case 'B':
             Parameter->OutputDebuggingBuffer = TRUE;
             Parameter->NoExecute = TRUE;
+            Parameter->NoAdminNeeded = TRUE;
             break;
 
 #endif // #if DBG
@@ -936,7 +976,7 @@ CheckDriver(parameter_t *Parameter)
     DBG_PRINT((DBG_PREFIX "Checking configuration for cbm4win"));
     printf("Checking configuration for cbm4win\n");
 
-    if (CbmCheckCorrectInstallation())
+    if (CbmCheckCorrectInstallation(NeededAccessRights()))
     {
         DBG_PRINT((DBG_PREFIX "There were errors in the current configuration."
             "Please fix them before trying to use the driver!"));
@@ -1217,39 +1257,6 @@ UpdateDriver(parameter_t *Parameter)
     FUNC_LEAVE_INT(error);
 }
 
-/*! \internal \brief Check if we have the needed access rights
-
- This function checks if we have the needed access rights for
- installing the driver on the machine.
-
- \param Parameter
-   Pointer to parameter_t struct which contains the
-   description of the parameters given on the command-line.
-
- \return 
-   Return value which will be given on return from main()
-   That is, 0 on success, everything else indicates an error.
-*/
-static BOOL
-NeededAccessRights(VOID)
-{
-    SC_HANDLE scManager;
-
-    FUNC_ENTER();
-
-    // Check if we have arbitrary execute rights.
-    // For this, open the service control manager
-
-    scManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
-
-    if (scManager)
-    {
-        CloseServiceHandle(scManager);
-    }
-
-    FUNC_LEAVE_BOOL(scManager ? TRUE : FALSE);
-}
-
 /*! \brief Main function
 
  This function performs the action the user has given on the command-line.
@@ -1291,10 +1298,10 @@ main(int Argc, char **Argv)
             break;
         }
 
-    if (parameter.NoExecute)
-        break;
+        if (parameter.NoExecute)
+            break;
 
-        if (!NeededAccessRights())
+        if (!parameter.NoAdminNeeded && !NeededAccessRights())
         {
             DBG_PRINT((DBG_PREFIX "You do not have necessary privileges. " 
                 "Please try installing only as administrator."));

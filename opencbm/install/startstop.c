@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.17 2006-05-05 08:18:58 strik Exp $ \n
+** \version $Id: startstop.c,v 1.18 2006-09-13 15:58:33 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -429,6 +429,9 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 
  This function checks if the driver was correctly installed.
 
+ \param HaveAdminRights
+   TRUE if we are running with admin rights; FALSE if not.
+
  \return
    FALSE on success, TRUE on error,
 
@@ -438,10 +441,13 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 
  If there was no interrupt available, it tries to enable it
  on the parallel port.
+
+ If we are running without administrator rights, we do not try to
+ start the driver, as we will not be able to do it.
 */
 
 BOOL
-CbmCheckCorrectInstallation(VOID)
+CbmCheckCorrectInstallation(BOOL HaveAdminRights)
 {
     CBMT_I_INSTALL_OUT outBuffer;
     BOOL error;
@@ -457,7 +463,8 @@ CbmCheckCorrectInstallation(VOID)
         if (driverAlreadyStarted)
             cbm_i_driver_stop();
 
-        error = cbm_i_driver_start() ? FALSE : TRUE;
+        error = HaveAdminRights ? (cbm_i_driver_start() ? FALSE : TRUE) : FALSE;
+
         driverAlreadyStarted = TRUE;
 
         if (error)
