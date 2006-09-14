@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.6 2006-05-05 16:01:22 strik Exp $ \n
+** \version $Id: cbm_driver.h,v 1.7 2006-09-14 19:15:17 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **
@@ -112,18 +112,27 @@ struct _DEVICE_EXTENSION {
 
     // IEC related vars:
 
-    /*! 
-     *  >1 --> autodetect
-     * ==0 --> non-inverted (XM1541)
-     *  =1 --> inverted (XA1541)
+    /*!
+     * The type of the cable, as determined by the automatism:
+     * IEC_CABLETYPE_AUTO --> autodetect
+     * IEC_CABLETYPE_XM   --> non-inverted (XM1541)
+     * IEC_CABLETYPE_XA   --> inverted (XA1541)
      */
-    USHORT IecCable;
+    IEC_CABLETYPE IecCable;
+
+    /*!
+     * The type of the cable, as set by the user
+     */
+    IEC_CABLETYPE IecCableUserSet;
 
     /*! The current state of the output bits of the parallel port */
     UCHAR IecOutBits;
 
     /*! EOR mask for outputting on the parallel port */
     UCHAR IecOutEor;
+
+    /*! EOR mask for inputting from the parallel port */
+    UCHAR IecInEor;
 
     /*! Remember if this device is busy */
     BOOLEAN IecBusy;

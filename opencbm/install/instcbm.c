@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.24 2006-09-13 15:58:33 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.25 2006-09-14 19:15:17 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -306,7 +306,7 @@ struct parameter_s
     ULONG Lpt;
 
     /*! the IEC cable type was specified */
-    ULONG IecCableType;
+    IEC_CABLETYPE IecCableType;
     
     /*! It was specified that the driver is to be permanently locked */
     ULONG PermanentlyLock;
@@ -525,7 +525,7 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
 
     // No IEC cable type was specified
 
-    Parameter->IecCableType = (ULONG) -2;
+    Parameter->IecCableType = IEC_CABLETYPE_UNSPEC;
 
     // It was not specified if the driver is to be permenently locked
 
@@ -589,14 +589,12 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
             break;
 
         case 't':
-            if (optarg == NULL)
-                Parameter->IecCableType = -1;
+            if ((optarg == NULL) || (strcmp(optarg, "auto") == 0))
+                Parameter->IecCableType = IEC_CABLETYPE_AUTO;
             else if (strcmp(optarg, "xa1541") == 0)
-                Parameter->IecCableType = 1;
+                Parameter->IecCableType = IEC_CABLETYPE_XA;
             else if (strcmp(optarg, "xm1541") == 0)
-                Parameter->IecCableType = 0;
-            else if (strcmp(optarg, "auto") == 0)
-                Parameter->IecCableType = -1;
+                Parameter->IecCableType = IEC_CABLETYPE_XM;
             else
             {
                 fprintf(stderr, "you must specify 'xa1541', 'xm1541' or 'auto' for --cabletype\n");

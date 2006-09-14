@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.14 2006-07-20 14:07:37 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.15 2006-09-14 19:15:17 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -21,6 +21,16 @@
 
 #ifndef CBM_IOCTL_H
 #define CBM_IOCTL_H
+
+/*! Tell the type of the cable used */
+typedef
+enum iec_cabletype
+{
+    IEC_CABLETYPE_UNSPEC = -2, /*< don't use! */
+    IEC_CABLETYPE_AUTO = -1, IEC_CABLETYPE_XM = 0, IEC_CABLETYPE_XA = 1
+} IEC_CABLETYPE;
+
+
 
 /*! Registry key (under HKLM) of the service
  */

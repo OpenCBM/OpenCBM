@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.10 2006-06-21 10:11:55 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.11 2006-09-14 19:15:17 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -70,7 +70,7 @@
                                       WRITE_PORT_UCHAR(OUT_PORT,(UCHAR)(Pdx->IecOutEor ^ Pdx->IecOutBits))
 
 /*! get the value of the parallel port */
-#define CBMIEC_GET(_line)             ((READ_PORT_UCHAR(IN_PORT)&_line)==0?1:0)
+#define CBMIEC_GET(_line)             (((READ_PORT_UCHAR(IN_PORT) ^ Pdx->IecInEor) & _line)==0?1:0)
 
 
 /*! The various timeouts of the IEC bus protocol */

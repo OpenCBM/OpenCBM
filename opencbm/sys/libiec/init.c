@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.11 2006-09-04 14:42:29 strik Exp $ \n
+** \version $Id: init.c,v 1.12 2006-09-14 19:15:17 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -101,12 +101,10 @@ cbmiec_timeouts_init(IN PHANDLE HKey)
 }
 #undef READ_TIMEOUT_VALUE
 
-/*! \brief Determine the type of cable (XA1541/XM1541) on the IEC bus
+/*! \brief Check if the cable works at all
 
- This function tries to determine the type of cable with which
- the IEC bus is connected to the PC's parallel port. Afterwards,
- some variables in the device extension are initialized to reflect
- the type.
+ This function tries to find out if there is a cable connected,
+ and if the type given is the right one.
 
  \param Pdx
    Pointer to the device extension.
@@ -121,20 +119,133 @@ cbmiec_timeouts_init(IN PHANDLE HKey)
 static NTSTATUS
 cbmiec_testcable(PDEVICE_EXTENSION Pdx) 
 {
+    NTSTATUS ntStatus = STATUS_PORT_DISCONNECTED;
+    UCHAR ch;
+
+    FUNC_ENTER();
+
+//    CBMIEC_SET(PP_RESET_OUT|PP_ATN_OUT|PP_CLK_OUT|PP_DATA_OUT);
+
+    /* check if the state of all lines is correct */
+
+    ch = READ_PORT_UCHAR(IN_PORT);
+
+    DBG_PRINT((DBG_PREFIX "############ Status: out: $%02x, in: $%02x ($%02x ^ $%02x)",
+        READ_PORT_UCHAR(OUT_PORT), ch, ch ^ Pdx->IecOutEor, Pdx->IecOutEor));
+
+#define READ(_x) ((((READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor)) & (_x)) ? 1 : 0)
+
+#define SHOW(_x, _y) 
+    // DBG_PRINT((DBG_PREFIX "CBMIEC_GET(" #_x ") = $%02x, READ(" #_y ") = $%02x", CBMIEC_GET(_x), READ(_y) ));
+
+    do {
+SHOW(PP_ATN_IN, PP_ATN_OUT);
+        if (CBMIEC_GET(PP_ATN_IN) != READ(PP_ATN_OUT))
+        {
+            DBG_PRINT((DBG_PREFIX "ATN IN != ATN OUT"));
+            break;
+        }
+
+SHOW(PP_CLK_IN, PP_CLK_OUT);
+        if (CBMIEC_GET(PP_CLK_IN) != READ(PP_CLK_OUT))
+        {
+            DBG_PRINT((DBG_PREFIX "CLOCK IN != CLOCK OUT"));
+            break;
+        }
+
+SHOW(PP_DATA_IN, PP_DATA_OUT);
+        if (CBMIEC_GET(PP_DATA_IN) != READ(PP_DATA_OUT))
+        {
+            DBG_PRINT((DBG_PREFIX "DATA IN != DATA OUT"));
+            break;
+        }
+
+SHOW(PP_RESET_IN, PP_RESET_OUT);
+        if (CBMIEC_GET(PP_RESET_IN) != READ(PP_RESET_OUT))
+        {
+            DBG_PRINT((DBG_PREFIX "RESET IN != RESET OUT"));
+            break;
+        }
+
+#undef SHOW
+
+        /* if either ATN or RESET is set, we can play with them
+         * in order to perform an even better test.
+         */
+
+        if (CBMIEC_GET(PP_ATN_IN))
+        {
+            CBMIEC_RELEASE(PP_ATN_OUT);
+
+            if (CBMIEC_GET(PP_ATN_IN) != READ(PP_ATN_OUT))
+            {
+                DBG_PRINT((DBG_PREFIX "ATN still set, although we unset it!"));
+                break;
+            }
+        }
+
+        if (CBMIEC_GET(PP_RESET_IN))
+        {
+            CBMIEC_RELEASE(PP_RESET_OUT);
+
+            if (CBMIEC_GET(PP_RESET_IN) != READ(PP_RESET_OUT))
+            {
+                DBG_PRINT((DBG_PREFIX "RESET still set, although we unset it!"));
+                break;
+            }
+        }
+
+        ntStatus = STATUS_SUCCESS;
+
+    } while (0);
+
+#undef READ
+
+    FUNC_LEAVE_NTSTATUS(ntStatus);
+}
+
+/*! \brief Determine the type of cable (XA1541/XM1541) on the IEC bus
+
+ This function tries to determine the type of cable with which
+ the IEC bus is connected to the PC's parallel port. Afterwards,
+ some variables in the device extension are initialized to reflect
+ the type.
+
+ \param Pdx
+   Pointer to the device extension.
+
+ \return 
+   If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
+   returns one of the error status values.
+*/
+static NTSTATUS
+cbmiec_checkcable(PDEVICE_EXTENSION Pdx) 
+{
+    NTSTATUS ntStatus;
     const wchar_t *msgAuto = L"";
     const wchar_t *msgCable;
     UCHAR in, out;
 
     FUNC_ENTER();
 
+    DBG_PRINT((DBG_PREFIX "*****************" ));
+    DBG_PRINT((DBG_PREFIX "cbmiec_checkcable" ));
+    DBG_PRINT((DBG_PREFIX "*****************" ));
+
 /*! \todo Do a more sophisticated test for the cable */
 
-    switch (Pdx->IecCable)
+    switch (Pdx->IecCableUserSet)
     {
     case IEC_CABLETYPE_XM:
         /* FALL THROUGH */
 
     case IEC_CABLETYPE_XA:
+
+        /* the user specified a cable type, use this 
+         * without questioning
+         */
+
+        Pdx->IecCable = Pdx->IecCableUserSet;
         break;
 
     default:
@@ -148,24 +259,44 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
     switch (Pdx->IecCable)
     {
     case IEC_CABLETYPE_XM:
+        Pdx->IecOutEor = 0xc4;
         msgCable = L"passive (XM1541)";
         break;
 
     case IEC_CABLETYPE_XA:
+        Pdx->IecOutEor = 0xcb;
         msgCable = L"active (XA1541)";
         break;
     }
 
-    Pdx->IecOutEor = Pdx->IecCable ? 0xcb : 0xc4;
+    Pdx->IecInEor = 0x80;
 
-    DBG_SUCCESS((DBG_PREFIX "using %ws cable%ws",
-        Pdx->IecCable ? L"active (XA1541)" : L"passive (XM1541)",
-        msgAuto));
-
-    LogErrorString(Pdx->Fdo, CBM_IEC_INIT, msgCable, msgAuto);
+    /* remember the current state of the output bits */
 
     Pdx->IecOutBits = (READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor) 
                       & (PP_DATA_OUT|PP_CLK_OUT|PP_ATN_OUT|PP_RESET_OUT);
+
+    /* Now, test if the cable really works */
+
+DBG_PRINT((DBG_PREFIX "using %ws cable%ws", msgCable, msgAuto)); // @@@@TODO
+
+    ntStatus = cbmiec_testcable(Pdx);
+
+    if (NT_SUCCESS(ntStatus))
+    {
+        DBG_SUCCESS((DBG_PREFIX "using %ws cable%ws",
+            msgCable, msgAuto));
+
+        LogErrorString(Pdx->Fdo, CBM_IEC_INIT, msgCable, msgAuto);
+    }
+    else
+    {
+        DBG_ERROR((DBG_PREFIX "could not validate that the cable "
+                   "used is really a %ws cable%ws",
+                   msgCable, msgAuto));
+
+        LogErrorString(Pdx->Fdo, CBM_IEC_INIT_FAIL, msgCable, msgAuto);
+    }
 
 /*
     if (Pdx->IecOutBits & PP_RESET_OUT)
@@ -173,6 +304,10 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
        cbmiec_reset(Pdx);
     }
 */
+
+    DBG_PRINT((DBG_PREFIX "*********************" ));
+    DBG_PRINT((DBG_PREFIX "end cbmiec_checkcable" ));
+    DBG_PRINT((DBG_PREFIX "*********************" ));
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
@@ -217,7 +352,8 @@ cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType)
 {
     FUNC_ENTER();
 
-    Pdx->IecCable = CableType;
+    Pdx->IecCableUserSet = CableType;
+    cbmiec_checkcable(Pdx);
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
@@ -292,7 +428,7 @@ cbmiec_init(IN PDEVICE_EXTENSION Pdx)
 
 #endif // #ifdef USE_DPC
 
-    ntStatus = cbmiec_testcable(Pdx);
+    ntStatus = cbmiec_checkcable(Pdx);
 
     if (!NT_SUCCESS(ntStatus)) {
         FUNC_LEAVE_NTSTATUS(ntStatus);

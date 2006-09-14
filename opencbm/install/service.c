@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file service.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: service.c,v 1.7 2006-03-23 19:26:56 strik Exp $ \n
+** \version $Id: service.c,v 1.8 2006-09-14 19:15:17 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the service control manager for the OPENCBM driver
 **
@@ -220,7 +220,7 @@ CreateDefaultRegistryKeys(IN ULONG DefaultLpt,
             RegSetDWORD(RegKey, CBM_REGKEY_SERVICE_DEFAULTLPT, DefaultLpt);
         }
 
-        if (IecCableType != -2)
+        if (IecCableType != IEC_CABLETYPE_UNSPEC)
         {
             RegSetDWORD(RegKey, CBM_REGKEY_SERVICE_IECCABLE, IecCableType);
         }

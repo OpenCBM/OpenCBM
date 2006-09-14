@@ -71,3 +71,11 @@ Interrupt generated when setting the line. This is uncommon, but not bad.
 Language = German
 Ein Interrupt wurde erzeugt beim Setzen der Leitung. Ungewöhnlich, aber nicht weiter tragisch.
 .
+
+MessageId=0x0008 Facility=Opencbm Severity=Error SymbolicName=CBM_IEC_INIT_FAIL
+Language=English
+IEC bus initialized, but could not validate that we are using a %2%3 cable.
+.
+Language = German
+Der IEC bus wurde initialisiert, aber ein %2%3 Kabel konnte nicht validiert werden.
+.

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.13 2006-07-20 14:07:37 strik Exp $ \n
+** \version $Id: iec.h,v 1.14 2006-09-14 19:15:17 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -19,12 +19,6 @@
 
 #ifndef CBMIEC_H
 #define CBMIEC_H
-
-typedef
-enum iec_cabletype
-{
-    IEC_CABLETYPE_AUTO = -1, IEC_CABLETYPE_XM = 0, IEC_CABLETYPE_XA = 1
-} IEC_CABLETYPE;
 
 typedef
 enum iec_checkdevice
