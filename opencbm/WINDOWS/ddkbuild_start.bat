@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.13 2006-07-31 17:16:14 strik Exp $
+rem $Id: ddkbuild_start.bat,v 1.14 2006-09-14 15:23:50 strik Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -145,19 +145,19 @@ if not exist %CBM4WIN_SRC_HOME%\build*.err (
 			echo.
 			echo =============== copying files to target =============
 
-			xcopy /y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.inf %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.inf %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy INF file to %COPYTARGET%"
-			xcopy /y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.sys %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.sys %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy SYS files to %COPYTARGET%"
-			xcopy /y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.exe %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.exe %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy EXE files to %COPYTARGET%"
-			xcopy /y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.dll %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.dll %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy DLL files to %COPYTARGET%"
 		)
 
 		if "%COPYSYM%" NEQ "" (
 			echo Copying debugging information
-			xcopy /y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.pdb %COPYSYM%
+			xcopy /q/y %CBM4WIN_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.pdb %COPYSYM%
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy PDB files for debugging %COPYSYM%"
 		)
 	)
