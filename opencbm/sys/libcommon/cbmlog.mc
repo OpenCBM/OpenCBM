@@ -79,3 +79,11 @@ IEC bus initialized, but could not validate that we are using a %2%3 cable.
 Language = German
 Der IEC bus wurde initialisiert, aber ein %2%3 Kabel konnte nicht validiert werden.
 .
+
+MessageId=0x0009 Facility=Opencbm Severity=Informational SymbolicName=CBM_IEC_INIT_XE1541
+Language=English
+IEC bus initialized. Using %2%3 cable. (THIS IS NOT SUPPORTED YET!)
+.
+Language = German
+Der IEC bus wurde initialisiert. Ein %2%3 Kabel wird verwendet. (DIES WIRD NICHT UNTERSTÜTZT!)
+.

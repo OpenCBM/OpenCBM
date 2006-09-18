@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.12 2006-09-14 19:15:17 strik Exp $ \n
+** \version $Id: init.c,v 1.13 2006-09-18 15:49:52 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -124,8 +124,6 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
 
     FUNC_ENTER();
 
-//    CBMIEC_SET(PP_RESET_OUT|PP_ATN_OUT|PP_CLK_OUT|PP_DATA_OUT);
-
     /* check if the state of all lines is correct */
 
     ch = READ_PORT_UCHAR(IN_PORT);
@@ -138,62 +136,113 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
 #define SHOW(_x, _y) 
     // DBG_PRINT((DBG_PREFIX "CBMIEC_GET(" #_x ") = $%02x, READ(" #_y ") = $%02x", CBMIEC_GET(_x), READ(_y) ));
 
+#define SHOW1() \
+    DBG_PRINT((DBG_PREFIX "############ ATN OUT = %u, CLOCK OUT = %u, DATA OUT = %u, RESET OUT = %u", \
+        READ(PP_ATN_OUT), READ(PP_CLK_OUT), READ(PP_DATA_OUT), READ(PP_RESET_OUT) )); \
+\
+    DBG_PRINT((DBG_PREFIX "############ ATN IN  = %u, CLOCK IN  = %u, DATA IN  = %u, RESET IN  = %u", \
+        CBMIEC_GET(PP_ATN_IN), CBMIEC_GET(PP_CLK_IN), CBMIEC_GET(PP_DATA_IN), CBMIEC_GET(PP_RESET_IN) ));
+
     do {
-SHOW(PP_ATN_IN, PP_ATN_OUT);
-        if (CBMIEC_GET(PP_ATN_IN) != READ(PP_ATN_OUT))
-        {
-            DBG_PRINT((DBG_PREFIX "ATN IN != ATN OUT"));
-            break;
-        }
-
-SHOW(PP_CLK_IN, PP_CLK_OUT);
-        if (CBMIEC_GET(PP_CLK_IN) != READ(PP_CLK_OUT))
-        {
-            DBG_PRINT((DBG_PREFIX "CLOCK IN != CLOCK OUT"));
-            break;
-        }
-
-SHOW(PP_DATA_IN, PP_DATA_OUT);
-        if (CBMIEC_GET(PP_DATA_IN) != READ(PP_DATA_OUT))
-        {
-            DBG_PRINT((DBG_PREFIX "DATA IN != DATA OUT"));
-            break;
-        }
-
-SHOW(PP_RESET_IN, PP_RESET_OUT);
-        if (CBMIEC_GET(PP_RESET_IN) != READ(PP_RESET_OUT))
-        {
-            DBG_PRINT((DBG_PREFIX "RESET IN != RESET OUT"));
-            break;
-        }
-
-#undef SHOW
-
-        /* if either ATN or RESET is set, we can play with them
-         * in order to perform an even better test.
+        /* 
+         * Do some tests
          */
 
-        if (CBMIEC_GET(PP_ATN_IN))
-        {
-            CBMIEC_RELEASE(PP_ATN_OUT);
+        /* First of all: If a line is set by me, it must be set when reading, too. */
 
-            if (CBMIEC_GET(PP_ATN_IN) != READ(PP_ATN_OUT))
-            {
-                DBG_PRINT((DBG_PREFIX "ATN still set, although we unset it!"));
-                break;
-            }
+        if (READ(PP_RESET_OUT) && CBMIEC_GET(PP_RESET_IN) == 0)
+        {
+            DBG_PRINT((DBG_PREFIX "RESET does not follow"));
+            break;
         }
+
+        if (READ(PP_ATN_OUT) && CBMIEC_GET(PP_ATN_IN) == 0)
+        {
+            DBG_PRINT((DBG_PREFIX "ATN does not follow"));
+            break;
+        }
+
+        if (READ(PP_DATA_OUT) && CBMIEC_GET(PP_DATA_IN) == 0)
+        {
+            DBG_PRINT((DBG_PREFIX "DATA does not follow"));
+            break;
+        }
+
+        if (READ(PP_CLK_OUT) && CBMIEC_GET(PP_CLK_IN) == 0)
+        {
+            DBG_PRINT((DBG_PREFIX "CLOCK does not follow"));
+            break;
+        }
+
+
+        if (Pdx->DoNotReleaseBus)
+        {
+            DBG_PRINT((DBG_PREFIX "Pdx->DoNotReleaseBus set, skipping extra tests."));
+
+            ntStatus = STATUS_SUCCESS;
+            break;
+        }
+
+        /* Release all lines */
+
+        CBMIEC_RELEASE(PP_ATN_OUT | PP_RESET_OUT | PP_CLK_OUT | PP_DATA_OUT);
+        cbmiec_schedule_timeout(1000); /* wait 1 ms */
+
+DBG_PRINT((DBG_PREFIX " --- Release all lines" ));
+SHOW1();
+
+        /* Now, check if all lines are unset */
 
         if (CBMIEC_GET(PP_RESET_IN))
         {
-            CBMIEC_RELEASE(PP_RESET_OUT);
+            DBG_PRINT((DBG_PREFIX "RESET is set, but it should not"));
+            break;
+        }
 
-            if (CBMIEC_GET(PP_RESET_IN) != READ(PP_RESET_OUT))
+        if (CBMIEC_GET(PP_ATN_IN))
+        {
+            DBG_PRINT((DBG_PREFIX "ATN is set, but it should not"));
+            break;
+        }
+
+        if (CBMIEC_GET(PP_DATA_IN))
+        {
+            DBG_PRINT((DBG_PREFIX "DATA is set, but it should not"));
+            break;
+        }
+
+        if (CBMIEC_GET(PP_CLK_IN))
+        {
+            DBG_PRINT((DBG_PREFIX "CLOCK is set, but it should not"));
+            break;
+        }
+
+        /* Set ATN and wait 1ms for the drive to react */
+
+        CBMIEC_SET(PP_ATN_OUT);
+
+DBG_PRINT((DBG_PREFIX " --- ATN set" ));
+SHOW1();
+
+        if (CBMIEC_GET(PP_RESET_IN))
+        {
+            DBG_PRINT((DBG_PREFIX "RESET is reacting to ATN - most probably, it is an XE1541 cable!"));
+            Pdx->IecCable = IEC_CABLETYPE_XE;
+        }
+        else
+        {
+            if (CBMIEC_GET(PP_DATA_IN) == 0)
             {
-                DBG_PRINT((DBG_PREFIX "RESET still set, although we unset it!"));
-                break;
+                DBG_PRINT((DBG_PREFIX "DATA does not react to ATN."));
             }
         }
+
+        /* Release ATN again */
+
+        CBMIEC_RELEASE(PP_ATN_OUT);
+
+#undef SHOW
+#undef SHOW1
 
         ntStatus = STATUS_SUCCESS;
 
@@ -284,10 +333,23 @@ DBG_PRINT((DBG_PREFIX "using %ws cable%ws", msgCable, msgAuto)); // @@@@TODO
 
     if (NT_SUCCESS(ntStatus))
     {
-        DBG_SUCCESS((DBG_PREFIX "using %ws cable%ws",
-            msgCable, msgAuto));
+        const wchar_t *msgExtra = L"";
 
-        LogErrorString(Pdx->Fdo, CBM_IEC_INIT, msgCable, msgAuto);
+        if (Pdx->IecCable == IEC_CABLETYPE_XE)
+        {
+            /* the test found out that we have an XE cable, not an XM! */
+
+            msgCable = L"passive (XE1541)";
+
+            msgExtra = L" (THIS IS NOT SUPPORTED YET!)";
+        }
+
+        DBG_SUCCESS((DBG_PREFIX "using %ws cable%ws%s",
+            msgCable, msgAuto, msgExtra));
+
+        LogErrorString(Pdx->Fdo, 
+            (Pdx->IecCable == IEC_CABLETYPE_XE) ? CBM_IEC_INIT_XE1541 : CBM_IEC_INIT,
+            msgCable, msgAuto);
     }
     else
     {
@@ -438,8 +500,7 @@ cbmiec_init(IN PDEVICE_EXTENSION Pdx)
 
     if (!Pdx->DoNotReleaseBus)
     {
-        CBMIEC_RELEASE(PP_RESET_OUT | PP_DATA_OUT | PP_ATN_OUT | PP_LP_BIDIR | PP_LP_IRQ);
-        CBMIEC_SET(PP_CLK_OUT);
+        CBMIEC_RELEASE(PP_RESET_OUT | PP_DATA_OUT | PP_CLK_OUT | PP_ATN_OUT | PP_LP_BIDIR | PP_LP_IRQ);
         cbm_check_irq_availability(Pdx);
     }
 
