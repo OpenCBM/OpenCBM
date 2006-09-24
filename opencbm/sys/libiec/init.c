@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.14 2006-09-21 09:21:26 strik Exp $ \n
+** \version $Id: init.c,v 1.15 2006-09-24 11:16:11 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -139,12 +139,16 @@ cbmiec_cleanup(IN PDEVICE_EXTENSION Pdx)
 NTSTATUS
 cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType)
 {
+    NTSTATUS ntStatus;
+
     FUNC_ENTER();
 
     Pdx->IecCableUserSet = CableType;
-    cbmiec_checkcable(Pdx);
+    cbmiec_setcablestate(Pdx, CABLESTATE_UNKNOWN);
 
-    FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
+    ntStatus = cbmiec_checkcable(Pdx);
+
+    FUNC_LEAVE_NTSTATUS(ntStatus);
 }
 
 /* */

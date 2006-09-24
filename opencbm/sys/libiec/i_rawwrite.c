@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawwrite.c,v 1.9 2006-03-09 17:31:35 strik Exp $ \n
+** \version $Id: i_rawwrite.c,v 1.10 2006-09-24 11:16:11 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -62,7 +62,13 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, ULONG Count, ULON
 
     FUNC_ENTER();
 
-    ntStatus = STATUS_SUCCESS;
+    ntStatus = cbmiec_checkcable(Pdx);
+
+    if (!NT_SUCCESS(ntStatus))
+    {
+        FUNC_LEAVE_NTSTATUS(ntStatus);
+    }
+
     sent = 0;
 
     Pdx->Eoi = 0;

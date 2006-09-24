@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/checkcable.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: checkcable.c,v 1.1 2006-09-21 09:21:26 strik Exp $ \n
+** \version $Id: checkcable.c,v 1.2 2006-09-24 11:16:11 strik Exp $ \n
 ** \n
 ** \brief Check and test the cable type
 **
@@ -21,7 +21,7 @@
 #include "cbm_driver.h"
 #include "i_iec.h"
 
-/*! \brief Check if the cable works at all
+/*! \internal \brief Check if the cable works at all
 
  This function tries to find out if there is a cable connected,
  and if the type given is the right one.
@@ -190,106 +190,148 @@ SHOW1();
 NTSTATUS
 cbmiec_checkcable(PDEVICE_EXTENSION Pdx) 
 {
-    NTSTATUS ntStatus;
+    NTSTATUS ntStatus = STATUS_SUCCESS;
     const wchar_t *msgAuto = L"";
     const wchar_t *msgCable;
     UCHAR in, out;
 
     FUNC_ENTER();
 
-    DBG_PRINT((DBG_PREFIX "*****************" ));
-    DBG_PRINT((DBG_PREFIX "cbmiec_checkcable" ));
-    DBG_PRINT((DBG_PREFIX "*****************" ));
-
-/*! \todo Do a more sophisticated test for the cable */
-
-    switch (Pdx->IecCableUserSet)
-    {
-    case IEC_CABLETYPE_XM:
-        /* FALL THROUGH */
-
-    case IEC_CABLETYPE_XA:
-
-        /* the user specified a cable type, use this 
-         * without questioning
+DBG_PRINT((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSet, Pdx->IecCable));
+    do {
+        /*
+         * If the cabletype is still tested, do not retest again
          */
 
-        Pdx->IecCable = Pdx->IecCableUserSet;
-        break;
+        if (Pdx->IecCableState >= CABLESTATE_TESTED)
+            break;
 
-    default:
-        in = CBMIEC_GET(PP_ATN_IN);
-        out = (READ_PORT_UCHAR(OUT_PORT) & PP_ATN_OUT) ? 1 : 0;
-        Pdx->IecCable = (in != out) ? IEC_CABLETYPE_XA : IEC_CABLETYPE_XM;
-        msgAuto = L" (auto)";
-        break;
-    }
+        DBG_PRINT((DBG_PREFIX "*****************" ));
+        DBG_PRINT((DBG_PREFIX "cbmiec_checkcable" ));
+        DBG_PRINT((DBG_PREFIX "*****************" ));
 
-    switch (Pdx->IecCable)
-    {
-    case IEC_CABLETYPE_XM:
-        Pdx->IecOutEor = 0xc4;
-        msgCable = L"passive (XM1541)";
-        break;
+        switch (Pdx->IecCableUserSet)
+        {
+        case IEC_CABLETYPE_XE:
+            /* FALL THROUGH */
 
-    case IEC_CABLETYPE_XA:
-        Pdx->IecOutEor = 0xcb;
-        msgCable = L"active (XA1541)";
-        break;
-    }
+        case IEC_CABLETYPE_XM:
+            /* FALL THROUGH */
 
-    Pdx->IecInEor = 0x80;
+        case IEC_CABLETYPE_XA:
 
-    /* remember the current state of the output bits */
+            /* the user specified a cable type, use this 
+             * without questioning:
+             */
 
-    Pdx->IecOutBits = (READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor) 
-                      & (PP_DATA_OUT|PP_CLK_OUT|PP_ATN_OUT|PP_RESET_OUT);
+            Pdx->IecCable = Pdx->IecCableUserSet;
 
-    /* Now, test if the cable really works */
+            cbmiec_setcablestate(Pdx, CABLESTATE_TESTED);
+            break;
+
+        default:
+            in = CBMIEC_GET(PP_ATN_IN);
+            out = (READ_PORT_UCHAR(OUT_PORT) & PP_ATN_OUT) ? 1 : 0;
+            Pdx->IecCable = (in != out) ? IEC_CABLETYPE_XA : IEC_CABLETYPE_XM;
+            msgAuto = L" (auto)";
+            cbmiec_setcablestate(Pdx, CABLESTATE_UNKNOWN);
+            break;
+        }
+
+        switch (Pdx->IecCable)
+        {
+        case IEC_CABLETYPE_XE:
+            /* \todo XE and XM are distinguished later */
+
+            /* FALL THROUGH */
+
+        case IEC_CABLETYPE_XM:
+            Pdx->IecOutEor = 0xc4;
+            msgCable = L"passive (XM1541)";
+            break;
+
+        case IEC_CABLETYPE_XA:
+            Pdx->IecOutEor = 0xcb;
+            msgCable = L"active (XA1541)";
+            break;
+        }
+
+        Pdx->IecInEor = 0x80;
+
+        /* remember the current state of the output bits */
+
+        Pdx->IecOutBits = (READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor) 
+                          & (PP_DATA_OUT|PP_CLK_OUT|PP_ATN_OUT|PP_RESET_OUT);
+
+        /* Now, test if the cable really works */
+
+        if (Pdx->IecCableState > CABLESTATE_UNKNOWN)
+            break;
 
 DBG_PRINT((DBG_PREFIX "using %ws cable%ws", msgCable, msgAuto)); // @@@@TODO
 
-    ntStatus = cbmiec_testcable(Pdx);
+        ntStatus = cbmiec_testcable(Pdx);
 
-    if (NT_SUCCESS(ntStatus))
-    {
-        const wchar_t *msgExtra = L"";
-
-        if (Pdx->IecCable == IEC_CABLETYPE_XE)
+        if (NT_SUCCESS(ntStatus))
         {
-            /* the test found out that we have an XE cable, not an XM! */
+            const wchar_t *msgExtra = L"";
 
-            msgCable = L"passive (XE1541)";
+            if (Pdx->IecCable == IEC_CABLETYPE_XE)
+            {
+                /* the test found out that we have an XE cable, not an XM! */
 
-            msgExtra = L" (THIS IS NOT SUPPORTED YET!)";
+                msgCable = L"passive (XE1541)";
+
+                msgExtra = L" (THIS IS NOT SUPPORTED YET!)";
+            }
+
+            DBG_SUCCESS((DBG_PREFIX "using %ws cable%ws%s",
+                msgCable, msgAuto, msgExtra));
+
+            LogErrorString(Pdx->Fdo, 
+                (Pdx->IecCable == IEC_CABLETYPE_XE) ? CBM_IEC_INIT_XE1541 : CBM_IEC_INIT,
+                msgCable, msgAuto);
+
+            cbmiec_setcablestate(Pdx, CABLESTATE_TESTED);
+        }
+        else
+        {
+            DBG_ERROR((DBG_PREFIX "could not validate that the cable "
+                       "used is really a %ws cable%ws",
+                       msgCable, msgAuto));
+
+            LogErrorString(Pdx->Fdo, CBM_IEC_INIT_FAIL, msgCable, msgAuto);
         }
 
-        DBG_SUCCESS((DBG_PREFIX "using %ws cable%ws%s",
-            msgCable, msgAuto, msgExtra));
-
-        LogErrorString(Pdx->Fdo, 
-            (Pdx->IecCable == IEC_CABLETYPE_XE) ? CBM_IEC_INIT_XE1541 : CBM_IEC_INIT,
-            msgCable, msgAuto);
-    }
-    else
-    {
-        DBG_ERROR((DBG_PREFIX "could not validate that the cable "
-                   "used is really a %ws cable%ws",
-                   msgCable, msgAuto));
-
-        LogErrorString(Pdx->Fdo, CBM_IEC_INIT_FAIL, msgCable, msgAuto);
-    }
-
 /*
-    if (Pdx->IecOutBits & PP_RESET_OUT)
-    {
-       cbmiec_reset(Pdx);
-    }
+        if (Pdx->IecOutBits & PP_RESET_OUT)
+        {
+           cbmiec_reset(Pdx);
+        }
 */
+
+    } while (0);
+
+    /*
+     * will be printed even if "start" was not printed!
+     */
 
     DBG_PRINT((DBG_PREFIX "*********************" ));
     DBG_PRINT((DBG_PREFIX "end cbmiec_checkcable" ));
     DBG_PRINT((DBG_PREFIX "*********************" ));
 
-    FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
+    FUNC_LEAVE_NTSTATUS(ntStatus);
+}
+
+
+/*! \brief Set the current state of the cable detection
+*/
+VOID
+cbmiec_setcablestate(PDEVICE_EXTENSION Pdx, CABLESTATE State)
+{
+    FUNC_ENTER();
+
+    Pdx->IecCableState = State;
+
+    FUNC_LEAVE();
 }

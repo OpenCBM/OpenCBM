@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.12 2006-09-21 09:21:26 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.13 2006-09-24 11:16:11 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -232,6 +232,20 @@ cbmiec_checkcable(PDEVICE_EXTENSION Pdx);
 
 extern LONG
 cbmiec_i_pp_read_debounced(IN PDEVICE_EXTENSION Pdx);
+
+
+/*! \brief remember in which state the cable is currently */
+
+typedef
+enum cablestate_e
+{
+    CABLESTATE_UNKNOWN,            /*!< not tested yet */
+    CABLESTATE_TESTED,             /*!< tested, but not used yet */
+    CABLESTATE_SUCCESSFULLY_USED   /*!< tested and successfully used */
+} CABLESTATE;
+
+extern VOID
+cbmiec_setcablestate(PDEVICE_EXTENSION Pdx, CABLESTATE State);
 
 #ifdef USE_DPC
 

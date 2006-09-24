@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.7 2006-09-14 19:15:17 strik Exp $ \n
+** \version $Id: cbm_driver.h,v 1.8 2006-09-24 11:16:11 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **
@@ -85,6 +85,8 @@ typedef struct _DEVICE_EXTENSION DEVICE_EXTENSION, *PDEVICE_EXTENSION;
 /*! Performance evaluation: Writing bit no. _x_ */
 #define PERF_EVENT_WRITE_BIT_NO(_x_)    PERF_EVENT(0x212, _x_)
 
+typedef enum cablestate_e CABLESTATE;
+
 /*! The device extension for the device */
 typedef
 struct _DEVICE_EXTENSION {
@@ -124,6 +126,11 @@ struct _DEVICE_EXTENSION {
      * The type of the cable, as set by the user
      */
     IEC_CABLETYPE IecCableUserSet;
+
+    /*!
+     * The state the cable detection is in
+     */
+    CABLESTATE IecCableState;
 
     /*! The current state of the output bits of the parallel port */
     UCHAR IecOutBits;

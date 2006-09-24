@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.10 2006-03-12 16:35:40 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.11 2006-09-24 11:16:11 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -60,6 +60,13 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
     ok = TRUE;
     received = 0;
     *Received = 0;
+
+    ntStatus = cbmiec_checkcable(Pdx);
+
+    if (!NT_SUCCESS(ntStatus))
+    {
+        FUNC_LEAVE_NTSTATUS(ntStatus);
+    }
 
     // If there was already an eoi, we are ready
 

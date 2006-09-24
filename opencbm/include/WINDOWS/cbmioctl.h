@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.16 2006-09-18 15:49:52 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.17 2006-09-24 11:16:11 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -43,7 +43,7 @@ enum iec_cabletype
 
 /*! Registry entry (under CBM_REGKEY_SERVICE) for the cable type
  */
-#define CBM_REGKEY_SERVICE_IECCABLE "IecCable"
+#define CBM_REGKEY_SERVICE_IECCABLE "CableType"
 
 /*! Registry entry (under CBM_REGKEY_SERVICE) for determining if the parport is to be permanently locked
  */
