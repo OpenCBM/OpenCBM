@@ -5,3 +5,4 @@
 .cbm_module.o.cmd
 cbm.ko
 cbm.mod.c
+Modules.symvers
