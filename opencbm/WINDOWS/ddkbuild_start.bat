@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.14 2006-09-14 15:23:50 strik Exp $
+rem $Id: ddkbuild_start.bat,v 1.15 2006-09-25 17:56:51 strik Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -45,8 +45,8 @@ if not defined CMDARGUMENTS set CMDARGUMENTS=
 
 
 rem Some files which might be useful
-if not defined DDKBUILD_CMD_HOLLIS set DDKBUILD_CMD_HOLLIS=ddkbuild_hollis.bat
-if not defined DDKBUILD_CMD_OSR    set DDKBUILD_CMD_OSR=ddkbuild_osr.bat
+if not defined DDKBUILD_COMMAND_HOLLIS set DDKBUILD_COMMAND_HOLLIS=ddkbuild_hollis.bat
+if not defined DDKBUILD_COMMAND_OSR    set DDKBUILD_COMMAND_OSR=ddkbuild_osr.bat
 
 rem --------------------------------------------------------------------------
 
@@ -68,11 +68,11 @@ shift
 rem first, check if we want to use a specific version of ddkbuild
 
 if /I "%0" EQU "-hollis" (
-	set DDKBUILD=%DDKBUILD_CMD_HOLLIS%
+	set DDKBUILD=%DDKBUILD_COMMAND_HOLLIS%
 	set DDKBUILD_HOLLIS=1
 	shift
 ) else if /I "%0" EQU "-osr" (
-	set DDKBUILD=%DDKBUILD_CMD_OSR%
+	set DDKBUILD=%DDKBUILD_COMMAND_OSR%
 	set DDKBUILD_HOLLIS=0
 	shift
 )
@@ -108,12 +108,12 @@ if /I "%0" EQU "-i386" (
 rem Now, adjust the parameters for the DDKBUILD
 rem version we are using
 if %DDKBUILD_HOLLIS% EQU 1 (
-	set DDKBUILD=%DDKBUILD_CMD_HOLLIS%
+	set DDKBUILD=%DDKBUILD_COMMAND_HOLLIS%
 	set TARGETSPEC=%DDKBUILD_QUIET_VERBOSE% -WNET%DDKBUILD_PLATFORM_OPTION%
 	set CHECKEDFREE=checked
 	if /i "%0" EQU "fre" set CHECKEDFREE=free
 ) else (
-	set DDKBUILD=%DDKBUILD_CMD_OSR%
+	set DDKBUILD=%DDKBUILD_COMMAND_OSR%
 	set TARGETSPEC=-WNET%DDKBUILD_PLATFORM_OPTION%
 	set CHECKEDFREE=chk
 	if /i "%0" EQU ="fre" set CHECKEDFREE=fre
