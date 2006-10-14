@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.14 2006-09-14 19:15:17 strik Exp $ \n
+** \version $Id: iec.h,v 1.15 2006-10-14 16:50:57 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -27,6 +27,9 @@ enum iec_checkdevice
     IEC_CHECKDEVICE_NODEVICE = 1,
     IEC_CHECKDEVICE_BUSBUSY = 2
 } IEC_CHECKDEVICE;
+
+extern NTSTATUS
+cbmiec_wait_for_drives_ready(IN PDEVICE_EXTENSION Pdx);
 
 extern NTSTATUS
 cbmiec_reset(IN PDEVICE_EXTENSION Pdx);

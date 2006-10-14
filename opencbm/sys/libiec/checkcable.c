@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/checkcable.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: checkcable.c,v 1.3 2006-10-14 16:26:20 strik Exp $ \n
+** \version $Id: checkcable.c,v 1.4 2006-10-14 16:50:57 strik Exp $ \n
 ** \n
 ** \brief Check and test the cable type
 **
@@ -110,7 +110,7 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
 
 DBG_PRINT((DBG_PREFIX " --- Release all lines" ));
 SHOW1();
-cbmiec_schedule_timeout(300000); /* wait 300 ms @@@ */
+        cbmiec_wait_for_drives_ready(Pdx);
 DBG_PRINT((DBG_PREFIX " --- Release all lines - 1" ));
 SHOW1();
 
@@ -249,6 +249,7 @@ DBG_PRINT((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSe
         if (iecCableType != Pdx->IecCable)
         {
             cbmiec_setcablestate(Pdx, CABLESTATE_UNKNOWN);
+            Pdx->DoNotReleaseBus = FALSE;
         }
 
         /*
