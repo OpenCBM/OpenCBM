@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/testirq.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: testirq.c,v 1.4 2006-09-04 14:42:29 strik Exp $ \n
+** \version $Id: testirq.c,v 1.5 2006-10-14 16:26:05 strik Exp $ \n
 ** \n
 ** \brief Test for IRQ capabilities
 **
@@ -204,7 +204,14 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
         ret = InterlockedExchange(&Pdx->IrqCount, 0);
         DBG_PRINT((DBG_PREFIX "Pdx->IrqCount = 0, old Value = %u", ret));
 
-        if (ret != 99)
+        /*
+         * Check if an interrupt occurred
+         *
+         * Note: Check for > 99 (and not !=99) because the 1581 issues 
+         *       two IRQs in this short test!
+         */
+
+        if (ret > 99)
         {
             DBG_ERROR((DBG_PREFIX "No interrupt generated when RELEASING"));
             ntStatus = STATUS_NO_SUCH_DEVICE;
