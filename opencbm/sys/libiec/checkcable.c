@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/checkcable.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: checkcable.c,v 1.2 2006-09-24 11:16:11 strik Exp $ \n
+** \version $Id: checkcable.c,v 1.3 2006-10-14 16:26:20 strik Exp $ \n
 ** \n
 ** \brief Check and test the cable type
 **
@@ -110,6 +110,9 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
 
 DBG_PRINT((DBG_PREFIX " --- Release all lines" ));
 SHOW1();
+cbmiec_schedule_timeout(300000); /* wait 300 ms @@@ */
+DBG_PRINT((DBG_PREFIX " --- Release all lines - 1" ));
+SHOW1();
 
         /* Now, check if all lines are unset */
 
@@ -194,17 +197,17 @@ cbmiec_checkcable(PDEVICE_EXTENSION Pdx)
     const wchar_t *msgAuto = L"";
     const wchar_t *msgCable;
     UCHAR in, out;
+    IEC_CABLETYPE iecCableType;
 
     FUNC_ENTER();
 
 DBG_PRINT((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSet, Pdx->IecCable));
     do {
+        CABLESTATE newCableState = CABLESTATE_UNKNOWN;
+
         /*
          * If the cabletype is still tested, do not retest again
          */
-
-        if (Pdx->IecCableState >= CABLESTATE_TESTED)
-            break;
 
         DBG_PRINT((DBG_PREFIX "*****************" ));
         DBG_PRINT((DBG_PREFIX "cbmiec_checkcable" ));
@@ -224,19 +227,45 @@ DBG_PRINT((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSe
              * without questioning:
              */
 
-            Pdx->IecCable = Pdx->IecCableUserSet;
+            iecCableType = Pdx->IecCableUserSet;
 
-            cbmiec_setcablestate(Pdx, CABLESTATE_TESTED);
+            newCableState = CABLESTATE_TESTED;
             break;
 
         default:
             in = CBMIEC_GET(PP_ATN_IN);
             out = (READ_PORT_UCHAR(OUT_PORT) & PP_ATN_OUT) ? 1 : 0;
-            Pdx->IecCable = (in != out) ? IEC_CABLETYPE_XA : IEC_CABLETYPE_XM;
+            iecCableType = (in != out) ? IEC_CABLETYPE_XA : IEC_CABLETYPE_XM;
             msgAuto = L" (auto)";
-            cbmiec_setcablestate(Pdx, CABLESTATE_UNKNOWN);
+            newCableState = CABLESTATE_UNKNOWN;
             break;
         }
+
+        /*
+         * If the cable type recognized does not match the cable
+         * type we think we have, the cable is set to "unknown".
+         */
+
+        if (iecCableType != Pdx->IecCable)
+        {
+            cbmiec_setcablestate(Pdx, CABLESTATE_UNKNOWN);
+        }
+
+        /*
+         * If the cable was at least tested before (and we have no
+         * contradiction to think it is still in this state),
+         * do not do any more tests.
+         */
+        if (Pdx->IecCableState >= CABLESTATE_TESTED)
+            break;
+
+        /*
+         * Remember the cable type we recognized, and the state
+         */
+
+        Pdx->IecCable = iecCableType;
+        cbmiec_setcablestate(Pdx, newCableState);
+
 
         switch (Pdx->IecCable)
         {

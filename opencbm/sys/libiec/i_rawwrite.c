@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawwrite.c,v 1.10 2006-09-24 11:16:11 strik Exp $ \n
+** \version $Id: i_rawwrite.c,v 1.11 2006-10-14 16:26:20 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -200,6 +200,15 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, ULONG Count, ULON
         DBG_ERROR((DBG_PREFIX "%d bytes sent, Status=%s", sent, DebugNtStatus(ntStatus)));
     }
 #endif
+
+    if (ntStatus == STATUS_SUCCESS)
+    {
+        cbmiec_setcablestate(Pdx, CABLESTATE_SUCCESSFULLY_USED);
+    }
+    else
+    {
+        cbmiec_setcablestate(Pdx, CABLESTATE_ERROR_OCCURRED);
+    }
 
     if (ntStatus == STATUS_SUCCESS && Talk)
     {

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.13 2006-09-24 11:16:11 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.14 2006-10-14 16:26:20 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -240,6 +240,7 @@ typedef
 enum cablestate_e
 {
     CABLESTATE_UNKNOWN,            /*!< not tested yet */
+    CABLESTATE_ERROR_OCCURRED,     /*!< cable has been tested, but a transfer ended with an error */
     CABLESTATE_TESTED,             /*!< tested, but not used yet */
     CABLESTATE_SUCCESSFULLY_USED   /*!< tested and successfully used */
 } CABLESTATE;

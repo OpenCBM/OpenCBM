@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.11 2006-09-24 11:16:11 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.12 2006-10-14 16:26:20 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -252,6 +252,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
         DBG_SUCCESS((DBG_PREFIX "received=%d, count=%d, ok=%d, eoi=%d",
             received, Count, ok, Pdx->Eoi));
 
+        cbmiec_setcablestate(Pdx, CABLESTATE_SUCCESSFULLY_USED);
         ntStatus = STATUS_SUCCESS;
     }
     else
@@ -259,6 +260,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
         DBG_ERROR((DBG_PREFIX "I/O error: received=%d, count=%d, ok=%d, eoi=%d",
             received, Count, ok, Pdx->Eoi));
 
+        cbmiec_setcablestate(Pdx, CABLESTATE_ERROR_OCCURRED);
         Pdx->Eoi = 0;
         ntStatus = STATUS_UNEXPECTED_NETWORK_ERROR;
     }
