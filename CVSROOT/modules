@@ -34,11 +34,14 @@ cbm4linux  cbm4win &internal
 #
 opencbm-src cbm4win
 #
+gui4cbm4win gui4cbm4win
+
 oc      -a opencbm
 oc-src  -a opencbm-src
 c4w	-a cbm4win
 c4l     -a cbm4linux
 int     -a internal
+g4c4w   -a gui4cbm4win
 
 # Additional modules
 mnib       cbm4win/mnib
