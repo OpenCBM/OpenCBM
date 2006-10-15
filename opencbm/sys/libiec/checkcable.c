@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/checkcable.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: checkcable.c,v 1.4 2006-10-14 16:50:57 strik Exp $ \n
+** \version $Id: checkcable.c,v 1.5 2006-10-15 16:43:50 strik Exp $ \n
 ** \n
 ** \brief Check and test the cable type
 **
@@ -20,6 +20,133 @@
 #include <wdm.h>
 #include "cbm_driver.h"
 #include "i_iec.h"
+
+/* XA1541: */
+
+#define PP_XA_ATN_OUT    0x01
+#define PP_XA_CLK_OUT    0x02
+#define PP_XA_DATA_OUT   0x04
+#define PP_XA_RESET_OUT  0x08
+#define PP_XA_EOR_OUT    0xcb
+
+#define PP_XA_ATN_IN     0x10
+#define PP_XA_CLK_IN     0x20
+#define PP_XA_DATA_IN    0x40
+#define PP_XA_RESET_IN   0x80
+#define PP_XA_EOR_IN     0x80
+
+
+/* XM1541: */
+
+#define PP_XM_ATN_OUT    PP_XA_ATN_OUT
+#define PP_XM_CLK_OUT    PP_XA_CLK_OUT
+#define PP_XM_DATA_OUT   PP_XA_DATA_OUT
+#define PP_XM_RESET_OUT  PP_XA_RESET_OUT
+#define PP_XM_EOR_OUT    0xc4
+
+#define PP_XM_ATN_IN     PP_XA_ATN_IN
+#define PP_XM_CLK_IN     PP_XA_CLK_IN
+#define PP_XM_DATA_IN    PP_XA_DATA_IN
+#define PP_XM_RESET_IN   PP_XA_RESET_IN
+#define PP_XM_EOR_IN     PP_XA_EOR_IN
+
+/* XE1541: */
+
+#define PP_XE_ATN_OUT    PP_XM_ATN_OUT
+#define PP_XE_CLK_OUT    PP_XM_CLK_OUT
+#define PP_XE_DATA_OUT   PP_XM_RESET_OUT
+#define PP_XE_RESET_OUT  PP_XM_DATA_OUT
+#define PP_XE_EOR_OUT    PP_XM_EOR_OUT
+
+#define PP_XE_ATN_IN     PP_XM_ATN_IN
+#define PP_XE_CLK_IN     PP_XM_CLK_IN
+#define PP_XE_DATA_IN    PP_XM_RESET_IN
+#define PP_XE_RESET_IN   PP_XM_DATA_IN
+#define PP_XE_EOR_IN     PP_XM_EOR_IN
+
+
+/*! \internal \brief Reflect cable type
+
+ This function sets the values for ATN, DATA, RESET and CLK
+ in and out according to the cable detected.
+
+ \param Pdx
+   Pointer to the device extension.
+*/
+static VOID
+cbmiec_set_cablevalues(IN PDEVICE_EXTENSION Pdx)
+{
+    FUNC_ENTER();
+
+    switch (Pdx->IecCable)
+    {
+    case IEC_CABLETYPE_XM:
+        Pdx->IecAtnOut   = PP_XM_ATN_OUT;
+        Pdx->IecClkOut   = PP_XM_CLK_OUT;
+        Pdx->IecDataOut  = PP_XM_DATA_OUT;
+        Pdx->IecResetOut = PP_XM_RESET_OUT;
+
+        Pdx->IecAtnIn    = PP_XM_ATN_IN;
+        Pdx->IecClkIn    = PP_XM_CLK_IN;
+        Pdx->IecDataIn   = PP_XM_DATA_IN;
+        Pdx->IecResetIn  = PP_XM_RESET_IN;
+
+        Pdx->IecInEor    = PP_XM_EOR_IN;
+        Pdx->IecOutEor   = PP_XM_EOR_OUT;
+        break;
+
+    case IEC_CABLETYPE_XA:
+        Pdx->IecAtnOut   = PP_XA_ATN_OUT;
+        Pdx->IecClkOut   = PP_XA_CLK_OUT;
+        Pdx->IecDataOut  = PP_XA_DATA_OUT;
+        Pdx->IecResetOut = PP_XA_RESET_OUT;
+
+        Pdx->IecAtnIn    = PP_XA_ATN_IN;
+        Pdx->IecClkIn    = PP_XA_CLK_IN;
+        Pdx->IecDataIn   = PP_XA_DATA_IN;
+        Pdx->IecResetIn  = PP_XA_RESET_IN;
+
+        Pdx->IecInEor    = PP_XA_EOR_IN;
+        Pdx->IecOutEor   = PP_XA_EOR_OUT;
+        break;
+
+    case IEC_CABLETYPE_XE:
+        DBG_PRINT((DBG_PREFIX "************ XE1541 ***************"));
+        Pdx->IecAtnOut   = PP_XE_ATN_OUT;
+        Pdx->IecClkOut   = PP_XE_CLK_OUT;
+        Pdx->IecDataOut  = PP_XE_DATA_OUT;
+        Pdx->IecResetOut = PP_XE_RESET_OUT;
+
+        Pdx->IecAtnIn    = PP_XE_ATN_IN;
+        Pdx->IecClkIn    = PP_XE_CLK_IN;
+        Pdx->IecDataIn   = PP_XE_DATA_IN;
+        Pdx->IecResetIn  = PP_XE_RESET_IN;
+
+        Pdx->IecInEor    = PP_XE_EOR_IN;
+        Pdx->IecOutEor   = PP_XE_EOR_OUT;
+        break;
+
+    default:
+        DBG_PRINT((DBG_PREFIX "***************************************"));
+        DBG_PRINT((DBG_PREFIX "******************* DEFAULT? **********"));
+        DBG_PRINT((DBG_PREFIX "***************************************"));
+        break;
+    };
+
+    /* remember the current state of the output bits */
+
+    Pdx->IecOutBits = (READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor) 
+                      & (PP_DATA_OUT|PP_CLK_OUT|PP_ATN_OUT|PP_RESET_OUT);
+
+    DBG_PRINT((DBG_PREFIX "IecAtnOut = %02x IecAtnIn = %02x", Pdx->IecAtnOut, Pdx->IecAtnIn));
+    DBG_PRINT((DBG_PREFIX "IecClkOut = %02x IecClkIn = %02x", Pdx->IecClkOut, Pdx->IecClkIn));
+    DBG_PRINT((DBG_PREFIX "IecDataOut = %02x IecDataIn = %02x", Pdx->IecDataOut, Pdx->IecDataIn));
+    DBG_PRINT((DBG_PREFIX "IecResetOut = %02x IecResetIn = %02x", Pdx->IecResetOut, Pdx->IecResetIn));
+    DBG_PRINT((DBG_PREFIX "EOR     Out = %02x EOR     In = %02x - outbits = %02x", Pdx->IecOutEor, 
+        Pdx->IecInEor, Pdx->IecOutBits));
+
+    FUNC_LEAVE();
+}
 
 /*! \internal \brief Check if the cable works at all
 
@@ -230,11 +357,13 @@ DBG_PRINT((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSe
             iecCableType = Pdx->IecCableUserSet;
 
             newCableState = CABLESTATE_TESTED;
+
+            cbmiec_set_cablevalues(Pdx);
             break;
 
         default:
-            in = CBMIEC_GET(PP_ATN_IN);
-            out = (READ_PORT_UCHAR(OUT_PORT) & PP_ATN_OUT) ? 1 : 0;
+            in = CBMIEC_GET(PP_XA_ATN_IN);
+            out = (READ_PORT_UCHAR(OUT_PORT) & PP_XA_ATN_OUT) ? 1 : 0;
             iecCableType = (in != out) ? IEC_CABLETYPE_XA : IEC_CABLETYPE_XM;
             msgAuto = L" (auto)";
             newCableState = CABLESTATE_UNKNOWN;
@@ -267,6 +396,7 @@ DBG_PRINT((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSe
         Pdx->IecCable = iecCableType;
         cbmiec_setcablestate(Pdx, newCableState);
 
+        cbmiec_set_cablevalues(Pdx);
 
         switch (Pdx->IecCable)
         {
@@ -276,29 +406,18 @@ DBG_PRINT((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSe
             /* FALL THROUGH */
 
         case IEC_CABLETYPE_XM:
-            Pdx->IecOutEor = 0xc4;
             msgCable = L"passive (XM1541)";
             break;
 
         case IEC_CABLETYPE_XA:
-            Pdx->IecOutEor = 0xcb;
             msgCable = L"active (XA1541)";
             break;
         }
-
-        Pdx->IecInEor = 0x80;
-
-        /* remember the current state of the output bits */
-
-        Pdx->IecOutBits = (READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor) 
-                          & (PP_DATA_OUT|PP_CLK_OUT|PP_ATN_OUT|PP_RESET_OUT);
 
         /* Now, test if the cable really works */
 
         if (Pdx->IecCableState > CABLESTATE_UNKNOWN)
             break;
-
-DBG_PRINT((DBG_PREFIX "using %ws cable%ws", msgCable, msgAuto)); // @@@@TODO
 
         ntStatus = cbmiec_testcable(Pdx);
 
@@ -313,6 +432,8 @@ DBG_PRINT((DBG_PREFIX "using %ws cable%ws", msgCable, msgAuto)); // @@@@TODO
                 msgCable = L"passive (XE1541)";
 
                 msgExtra = L" (THIS IS NOT SUPPORTED YET!)";
+
+                cbmiec_set_cablevalues(Pdx);
             }
 
             DBG_SUCCESS((DBG_PREFIX "using %ws cable%ws%s",

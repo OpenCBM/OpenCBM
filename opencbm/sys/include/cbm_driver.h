@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.8 2006-09-24 11:16:11 strik Exp $ \n
+** \version $Id: cbm_driver.h,v 1.9 2006-10-15 16:43:50 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **
@@ -140,6 +140,25 @@ struct _DEVICE_EXTENSION {
 
     /*! EOR mask for inputting from the parallel port */
     UCHAR IecInEor;
+
+    /* The values below tell the drive which mask has to be used
+     * to set and/or release a line
+     */
+
+    /* lpt output lines */
+
+    UCHAR IecAtnOut;   //!< The ATN OUT bit
+    UCHAR IecClkOut;   //!< The CLOCK OUT bit
+    UCHAR IecDataOut;  //!< The DATA OUT bit
+    UCHAR IecResetOut; //!< The RESET OUT bit
+
+    /* lpt input lines */
+
+    UCHAR IecAtnIn;   //!< The ATN IN bit
+    UCHAR IecClkIn;   //!< The CLOCK IN bit
+    UCHAR IecDataIn;  //!< The DATA IN bit
+    UCHAR IecResetIn; //!< The RESET IN bit
+
 
     /*! Remember if this device is busy */
     BOOLEAN IecBusy;

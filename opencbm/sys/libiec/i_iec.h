@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.14 2006-10-14 16:26:20 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.15 2006-10-15 16:43:50 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -37,20 +37,20 @@
 /* lpt output lines */
 /* this is correct for a XA1541/XM1541; a XE1541 has DATA and RESET exchanged! */
 
-#define PP_ATN_OUT    0x01 //!< The ATN OUT bit
-#define PP_CLK_OUT    0x02 //!< The CLOCK OUT bit
-#define PP_DATA_OUT   0x04 //!< The DATA OUT bit
-#define PP_RESET_OUT  0x08 //!< The RESET OUT bit
+#define PP_ATN_OUT    (Pdx->IecAtnOut)   //!< The ATN OUT bit
+#define PP_CLK_OUT    (Pdx->IecClkOut)   //!< The CLOCK OUT bit
+#define PP_DATA_OUT   (Pdx->IecDataOut)  //!< The DATA OUT bit
+#define PP_RESET_OUT  (Pdx->IecResetOut) //!< The RESET OUT bit
 
 /* additional LP control */
-#define PP_LP_IRQ     0x10 //!< Bit for allowing interrupts of the LPT
-#define PP_LP_BIDIR   0x20 //!< Bit for setting set bidirectional mode of the LPT
+#define PP_LP_IRQ     0x10            //!< Bit for allowing interrupts of the LPT
+#define PP_LP_BIDIR   0x20            //!< Bit for setting set bidirectional mode of the LPT
 
 /* lpt input lines */
-#define PP_ATN_IN     0x10 //!< The ATN IN bit
-#define PP_CLK_IN     0x20 //!< The CLOCK IN bit
-#define PP_DATA_IN    0x40 //!< The DATA IN bit
-#define PP_RESET_IN   0x80 //!< The RESET IN bit
+#define PP_ATN_IN     (Pdx->IecAtnIn)   //!< The ATN IN bit
+#define PP_CLK_IN     (Pdx->IecClkIn)   //!< The CLOCK IN bit
+#define PP_DATA_IN    (Pdx->IecDataIn)  //!< The DATA IN bit
+#define PP_RESET_IN   (Pdx->IecResetIn) //!< The RESET IN bit
 
 /*! Get the address of the parallel port DATA register out of the Pdx info */
 #define PAR_PORT (Pdx->ParPortPortAddress + PARALLEL_DATA_OFFSET)
