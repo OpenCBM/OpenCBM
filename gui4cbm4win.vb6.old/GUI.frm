@@ -1,16 +1,16 @@
 VERSION 5.00
 Begin VB.Form MainForm 
    Caption         =   "GUI4CBM4WIN"
-   ClientHeight    =   6968
-   ClientLeft      =   65
-   ClientTop       =   351
-   ClientWidth     =   10959
+   ClientHeight    =   6975
+   ClientLeft      =   60
+   ClientTop       =   345
+   ClientWidth     =   10965
    Icon            =   "GUI.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
-   ScaleHeight     =   6968
-   ScaleWidth      =   10959
-   StartUpPosition =   3  'Windows-Standard
+   ScaleHeight     =   6975
+   ScaleWidth      =   10965
+   StartUpPosition =   3  'Windows Default
    Begin VB.DriveListBox Drive1 
       Height          =   315
       Left            =   240
@@ -22,7 +22,7 @@ Begin VB.Form MainForm
       Caption         =   "Commodore Drive"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   7.62
+         Size            =   8.25
          Charset         =   0
          Weight          =   700
          Underline       =   0   'False
@@ -34,6 +34,14 @@ Begin VB.Form MainForm
       TabIndex        =   1
       Top             =   120
       Width           =   5175
+      Begin VB.CommandButton CBMValidate 
+         Caption         =   "Validate"
+         Height          =   375
+         Left            =   4080
+         TabIndex        =   36
+         Top             =   2280
+         Width           =   975
+      End
       Begin VB.CommandButton CBMInitialize 
          Caption         =   "Initialize"
          Height          =   375
@@ -54,7 +62,7 @@ Begin VB.Form MainForm
          BackColor       =   &H00C00000&
          BeginProperty Font 
             Name            =   "Fixedsys"
-            Size            =   8.31
+            Size            =   9
             Charset         =   0
             Weight          =   400
             Underline       =   0   'False
@@ -62,11 +70,11 @@ Begin VB.Form MainForm
             Strikethrough   =   0   'False
          EndProperty
          ForeColor       =   &H00FF8383&
-         Height          =   5317
+         Height          =   5235
          ItemData        =   "GUI.frx":0442
          Left            =   120
          List            =   "GUI.frx":0444
-         MultiSelect     =   2  'Erweitert
+         MultiSelect     =   2  'Extended
          TabIndex        =   9
          Top             =   600
          Width           =   3855
@@ -100,7 +108,7 @@ Begin VB.Form MainForm
          Height          =   375
          Left            =   4080
          TabIndex        =   5
-         Top             =   2640
+         Top             =   3240
          Width           =   975
       End
       Begin VB.CommandButton CBMScratch 
@@ -108,7 +116,7 @@ Begin VB.Form MainForm
          Height          =   375
          Left            =   4080
          TabIndex        =   4
-         Top             =   3120
+         Top             =   3720
          Width           =   975
       End
       Begin VB.Label Label 
@@ -116,7 +124,7 @@ Begin VB.Form MainForm
          Caption         =   "Last Drive Status:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   7.62
+            Size            =   8.25
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -132,10 +140,10 @@ Begin VB.Form MainForm
       End
       Begin VB.Label LastStatus 
          BackColor       =   &H00C00000&
-         BorderStyle     =   1  'Fest Einfach
+         BorderStyle     =   1  'Fixed Single
          BeginProperty Font 
             Name            =   "Fixedsys"
-            Size            =   8.31
+            Size            =   9
             Charset         =   0
             Weight          =   400
             Underline       =   0   'False
@@ -154,7 +162,7 @@ Begin VB.Form MainForm
          Caption         =   "Drive:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   7.62
+            Size            =   8.25
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -170,10 +178,10 @@ Begin VB.Form MainForm
       End
       Begin VB.Label CBMDiskName 
          BackColor       =   &H00FF8383&
-         BorderStyle     =   1  'Fest Einfach
+         BorderStyle     =   1  'Fixed Single
          BeginProperty Font 
             Name            =   "Fixedsys"
-            Size            =   8.31
+            Size            =   9
             Charset         =   0
             Weight          =   400
             Underline       =   0   'False
@@ -189,12 +197,12 @@ Begin VB.Form MainForm
          WordWrap        =   -1  'True
       End
       Begin VB.Label CBMDiskID 
-         Alignment       =   2  'Zentriert
+         Alignment       =   2  'Center
          BackColor       =   &H00FF8383&
-         BorderStyle     =   1  'Fest Einfach
+         BorderStyle     =   1  'Fixed Single
          BeginProperty Font 
             Name            =   "Fixedsys"
-            Size            =   8.31
+            Size            =   9
             Charset         =   0
             Weight          =   400
             Underline       =   0   'False
@@ -213,7 +221,7 @@ Begin VB.Form MainForm
          Caption         =   "Disk:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   7.62
+            Size            =   8.25
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -232,7 +240,7 @@ Begin VB.Form MainForm
          Caption         =   "File(s):"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   7.62
+            Size            =   8.25
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -243,7 +251,7 @@ Begin VB.Form MainForm
          Index           =   4
          Left            =   4080
          TabIndex        =   11
-         Top             =   2400
+         Top             =   3000
          Width           =   1095
       End
    End
@@ -267,7 +275,7 @@ Begin VB.Form MainForm
       Caption         =   "Local Drive"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   7.62
+         Size            =   8.25
          Charset         =   0
          Weight          =   700
          Underline       =   0   'False
@@ -315,7 +323,7 @@ Begin VB.Form MainForm
       Begin VB.FileListBox PCDirectory 
          Height          =   3795
          Left            =   120
-         MultiSelect     =   2  'Erweitert
+         MultiSelect     =   2  'Extended
          TabIndex        =   20
          Top             =   2280
          Width           =   3375
@@ -365,7 +373,7 @@ Begin VB.Form MainForm
          Caption         =   "Current Directory:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   7.62
+            Size            =   8.25
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -384,7 +392,7 @@ Begin VB.Form MainForm
          Caption         =   "Selected:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   7.62
+            Size            =   8.25
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -403,7 +411,7 @@ Begin VB.Form MainForm
          Caption         =   "Disk:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   7.62
+            Size            =   8.25
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -422,7 +430,7 @@ Begin VB.Form MainForm
          Caption         =   "File(s):"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   7.62
+            Size            =   8.25
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -439,15 +447,6 @@ Begin VB.Form MainForm
    End
    Begin VB.CommandButton CopyFromFloppy 
       Caption         =   "<--"
-      BeginProperty Font 
-         Name            =   "MS Sans Serif"
-         Size            =   9
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
       Height          =   495
       Left            =   4920
       TabIndex        =   2
@@ -457,15 +456,6 @@ Begin VB.Form MainForm
    End
    Begin VB.CommandButton CopyToFloppy 
       Caption         =   "-->"
-      BeginProperty Font 
-         Name            =   "MS Sans Serif"
-         Size            =   9
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
       Height          =   495
       Left            =   4920
       TabIndex        =   0
@@ -485,6 +475,7 @@ Option Explicit
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
 ' Copyright (C) 2006      Wolfgang Moser
+' Copyright (C) 2006      Spiro Trikaliotis
 '
 ' This software Is provided 'as-is', without any express or implied
 ' warranty. In no event will the authors be held liable for any damages
@@ -546,7 +537,7 @@ Option Explicit
 '                Added Chr$(34)/'"' quotations to all filename arguments given to DoCommand
 '
 '         0.41 - Fix the scratch command by appending a space character after the drive number
-'
+'                Added a "Validate" button
 'TODO:
 '                Improve the ASCII/PETSCII translation when reading dirs, for rename/scratch
 
@@ -560,7 +551,7 @@ Private Sub About_Click()
            "by Spiro Trikaliotis (www.trikaliotis.net/cbm4win/)" & CR & _
            "cbm4win itself is heavily based on cbm4linux," & Chr$(13) & _
            "written by Michael Klein (http://www.lb.shuttle.de/puffin/)" & CR & _
-           "This is version 0.41 of the GUI," & Chr$(13) & _
+           "This is version 0.4.1 of the GUI," & Chr$(13) & _
            "distributed under the zlib/libpng OpenSource license." _
            , vbInformation, "About"
 End Sub
@@ -693,6 +684,10 @@ Private Sub CBMScratch_Click()
     Next T
 
     RefreshCBMDir
+End Sub
+
+Private Sub CBMValidate_Click()
+     DoCommand "cbmctrl", "command " & DriveNumber & " " & Chr$(34) & "V0:" & Chr$(34), "Validating drive, please wait."
 End Sub
 
 Private Sub CopyFromFloppy_Click()
