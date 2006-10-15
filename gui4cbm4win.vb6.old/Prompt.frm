@@ -1,17 +1,17 @@
 VERSION 5.00
 Begin VB.Form Prompt 
-   BorderStyle     =   1  'Fixed Single
-   ClientHeight    =   2160
-   ClientLeft      =   45
-   ClientTop       =   330
-   ClientWidth     =   4005
+   BorderStyle     =   1  'Fest Einfach
+   ClientHeight    =   2171
+   ClientLeft      =   39
+   ClientTop       =   325
+   ClientWidth     =   4017
    Icon            =   "Prompt.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   2160
-   ScaleWidth      =   4005
-   StartUpPosition =   3  'Windows Default
+   ScaleHeight     =   2171
+   ScaleWidth      =   4017
+   StartUpPosition =   3  'Windows-Standard
    Begin VB.TextBox Reply 
       Height          =   285
       Left            =   360
@@ -36,7 +36,7 @@ Begin VB.Form Prompt
       Width           =   1335
    End
    Begin VB.Label Label 
-      Alignment       =   2  'Center
+      Alignment       =   2  'Zentriert
       BackStyle       =   0  'Transparent
       Caption         =   "Question"
       Height          =   495
@@ -51,6 +51,29 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+' Copyright 2005 Leif Bloomquist
+' Copyright 2006 Wolfgang Moser
+'
+' This software Is provided 'as-is', without any express or implied
+' warranty. In no event will the authors be held liable for any damages
+' arising from the use of this software.
+'
+' Permission is granted to anyone to use this software for any purpose,
+' including commercial applications, and to alter it and redistribute it
+' freely, subject to the following restrictions:
+'
+'     1. The origin of this software must not be misrepresented; you must
+'        not claim that you wrote the original software. If you use this
+'        software in a product, an acknowledgment in the product
+'        documentation would be appreciated but is not required.
+'
+'     2. Altered source versions must be plainly marked as such, and must
+'        not be misrepresented as being the original software.
+'
+'     3. This notice may not be removed or altered from any source
+'        distribution.
+'
+
 Public LastResult As String
 
 Public Sub Ask(Q As String, Optional ClearLast = True)

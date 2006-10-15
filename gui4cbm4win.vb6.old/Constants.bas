@@ -1,4 +1,27 @@
 Attribute VB_Name = "Constants"
+' Copyright 2005 Leif Bloomquist
+' Copyright 2006 Wolfgang Moser
+'
+' This software Is provided 'as-is', without any express or implied
+' warranty. In no event will the authors be held liable for any damages
+' arising from the use of this software.
+'
+' Permission is granted to anyone to use this software for any purpose,
+' including commercial applications, and to alter it and redistribute it
+' freely, subject to the following restrictions:
+'
+'     1. The origin of this software must not be misrepresented; you must
+'        not claim that you wrote the original software. If you use this
+'        software in a product, an acknowledgment in the product
+'        documentation would be appreciated but is not required.
+'
+'     2. Altered source versions must be plainly marked as such, and must
+'        not be misrepresented as being the original software.
+'
+'     3. This notice may not be removed or altered from any source
+'        distribution.
+'
+
 Option Explicit
 
 Public Declare Function ShellExecute _
@@ -35,5 +58,5 @@ Public Declare Sub Sleep Lib "Kernel32" (ByVal dwMilliseconds As Long)
 Public Const STILL_ACTIVE = &H103
 Public Const PROCESS_QUERY_INFORMATION = &H400
 
-Public Const TEMPFILE1 = "\temp1.out"
-Public Const TEMPFILE2 = "\temp2.out"
+Public Const TEMPFILE1 = "\g4c4wout.log"
+Public Const TEMPFILE2 = "\g4c4werr.log"

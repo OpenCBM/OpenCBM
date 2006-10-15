@@ -1,23 +1,23 @@
 VERSION 5.00
 Begin VB.Form OptionsForm 
-   BorderStyle     =   1  'Fixed Single
+   BorderStyle     =   1  'Fest Einfach
    Caption         =   "Options"
-   ClientHeight    =   5280
-   ClientLeft      =   45
-   ClientTop       =   330
-   ClientWidth     =   6285
+   ClientHeight    =   5603
+   ClientLeft      =   39
+   ClientTop       =   325
+   ClientWidth     =   6292
    Icon            =   "Options.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   5280
-   ScaleWidth      =   6285
-   StartUpPosition =   3  'Windows Default
+   ScaleHeight     =   5603
+   ScaleWidth      =   6292
+   StartUpPosition =   3  'Windows-Standard
    Begin VB.CommandButton ApplyChanges 
       Caption         =   "Save+Apply Changes"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   8.25
+         Size            =   7.62
          Charset         =   0
          Weight          =   700
          Underline       =   0   'False
@@ -27,14 +27,14 @@ Begin VB.Form OptionsForm
       Height          =   495
       Left            =   360
       TabIndex        =   10
-      Top             =   4560
+      Top             =   4914
       Width           =   3135
    End
    Begin VB.CommandButton Cancel 
       Caption         =   "Cancel"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   8.25
+         Size            =   7.62
          Charset         =   0
          Weight          =   700
          Underline       =   0   'False
@@ -42,16 +42,16 @@ Begin VB.Form OptionsForm
          Strikethrough   =   0   'False
       EndProperty
       Height          =   495
-      Left            =   4080
+      Left            =   4095
       TabIndex        =   9
-      Top             =   4560
+      Top             =   4914
       Width           =   1695
    End
    Begin VB.Frame Frame 
       Caption         =   "Preferences"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   8.25
+         Size            =   7.62
          Charset         =   0
          Weight          =   700
          Underline       =   0   'False
@@ -59,19 +59,30 @@ Begin VB.Form OptionsForm
          Strikethrough   =   0   'False
       EndProperty
       ForeColor       =   &H00000000&
-      Height          =   4275
+      Height          =   4628
       Index           =   0
       Left            =   120
       TabIndex        =   0
       Top             =   120
       Width           =   6015
+      Begin VB.OptionButton Transfer 
+         Caption         =   "Auto (Recommended)"
+         Height          =   255
+         Index           =   4
+         Left            =   117
+         TabIndex        =   18
+         ToolTipText     =   "Let OpenCBM select the most efficient transfer mode"
+         Top             =   3400
+         Value           =   -1  'True
+         Width           =   3015
+      End
       Begin VB.CheckBox AutoRefreshDir 
          Caption         =   "Automatically refresh directory after write to floppy"
          Height          =   375
          Left            =   120
          TabIndex        =   17
-         Top             =   3840
-         Value           =   1  'Checked
+         Top             =   4095
+         Value           =   1  'Aktiviert
          Width           =   5175
       End
       Begin VB.OptionButton Transfer 
@@ -88,14 +99,14 @@ Begin VB.Form OptionsForm
          Height          =   375
          Left            =   120
          TabIndex        =   14
-         Top             =   3480
+         Top             =   3744
          Width           =   5175
       End
       Begin VB.Frame Frame 
          Caption         =   "System Tools"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.62
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -103,17 +114,27 @@ Begin VB.Form OptionsForm
             Strikethrough   =   0   'False
          EndProperty
          ForeColor       =   &H00000000&
-         Height          =   1395
+         Height          =   1976
          Index           =   1
          Left            =   3960
          TabIndex        =   11
          Top             =   960
          Width           =   1815
+         Begin VB.CommandButton ResetBus 
+            Caption         =   "Reset Bus"
+            Height          =   375
+            Left            =   234
+            TabIndex        =   19
+            ToolTipText     =   "Reset all device on the IEC bus"
+            Top             =   1320
+            Width           =   1335
+         End
          Begin VB.CommandButton CBMDetect 
             Caption         =   "Detect Drive"
             Height          =   375
             Left            =   240
             TabIndex        =   13
+            ToolTipText     =   "Detect all currently active device on the IEC bus"
             Top             =   360
             Width           =   1335
          End
@@ -122,6 +143,7 @@ Begin VB.Form OptionsForm
             Height          =   375
             Left            =   240
             TabIndex        =   12
+            ToolTipText     =   "Send a SOS morse code to the LED of the currently selected device"
             Top             =   840
             Width           =   1335
          End
@@ -133,7 +155,7 @@ Begin VB.Form OptionsForm
          Left            =   120
          TabIndex        =   8
          ToolTipText     =   "Requires a XP1541/XP1571 cable"
-         Top             =   3120
+         Top             =   3150
          Width           =   3015
       End
       Begin VB.OptionButton Transfer 
@@ -143,8 +165,7 @@ Begin VB.Form OptionsForm
          Left            =   120
          TabIndex        =   7
          ToolTipText     =   "This only works with one serial device connected."
-         Top             =   2880
-         Value           =   -1  'True
+         Top             =   2900
          Width           =   3015
       End
       Begin VB.OptionButton Transfer 
@@ -153,27 +174,26 @@ Begin VB.Form OptionsForm
          Index           =   1
          Left            =   120
          TabIndex        =   6
-         Top             =   2640
+         Top             =   2650
          Width           =   3015
       End
-      Begin VB.CheckBox CheckWarpMode 
-         Caption         =   "Use Warp Mode for D64 Transfer"
+      Begin VB.CheckBox CheckNoWarpMode 
+         Caption         =   "Disable Warp Mode for D64 Transfer"
          Height          =   375
          Left            =   120
          TabIndex        =   5
          Top             =   1680
-         Value           =   1  'Checked
          Width           =   2895
       End
       Begin VB.ComboBox DriveNum 
-         Height          =   315
+         Height          =   273
          ItemData        =   "Options.frx":0442
-         Left            =   120
+         Left            =   117
          List            =   "Options.frx":0452
-         Style           =   2  'Dropdown List
+         Style           =   2  'Dropdown-Liste
          TabIndex        =   3
-         Top             =   1200
-         Width           =   855
+         Top             =   1170
+         Width           =   858
       End
       Begin VB.TextBox StartingPath 
          Height          =   285
@@ -220,6 +240,29 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+' Copyright 2005 Leif Bloomquist
+' Copyright 2006 Wolfgang Moser
+'
+' This software Is provided 'as-is', without any express or implied
+' warranty. In no event will the authors be held liable for any damages
+' arising from the use of this software.
+'
+' Permission is granted to anyone to use this software for any purpose,
+' including commercial applications, and to alter it and redistribute it
+' freely, subject to the following restrictions:
+'
+'     1. The origin of this software must not be misrepresented; you must
+'        not claim that you wrote the original software. If you use this
+'        software in a product, an acknowledgment in the product
+'        documentation would be appreciated but is not required.
+'
+'     2. Altered source versions must be plainly marked as such, and must
+'        not be misrepresented as being the original software.
+'
+'     3. This notice may not be removed or altered from any source
+'        distribution.
+'
+
 Option Explicit
 
 Private IsOnTop As Boolean
@@ -229,21 +272,17 @@ Private Sub ApplyChanges_Click()
     Me.Hide
 End Sub
 
-Private Sub CheckWarpMode_Click()
-    If CheckWarpMode.value = vbChecked Then
-        WarpString = "--warp"
+Private Sub CheckNoWarpMode_Click()
+    If CheckNoWarpMode.value = vbChecked Then
+        NoWarpString = "--no-warp"
     Else
-        WarpString = ""
+        NoWarpString = ""
     End If
-End Sub
-
-Private Sub DriveNum_Change()
-    DriveNumber = DriveNum.Text
 End Sub
 
 Private Sub Morse_Click()
     ChDir ExeDir
-    MainForm.PubDoCommand "morse", "", "Morse Code Demo"
+    MainForm.PubDoCommand "morse", "" & DriveNum.Text, "Morse Code Demo"
 End Sub
 
 Public Property Let AlwaysOnTop(ByVal bState As Boolean)
@@ -263,10 +302,24 @@ End Sub
 
 Private Sub CBMDetect_Click()
     Dim What As String
-    What = MainForm.PubDoCommand("cbmctrl", "detect", "Detecting Drives...")
+    MainForm.PubDoCommand "cbmctrl", "detect", "Detecting Drives...", False
+
+    'Read in the complete output file -------------
+    Close #1
+    Open (Environ$("temp") & TEMPFILE1) For Input As #1
+        What = Input(LOF(1), #1)
+    Close #1
+
+    'And delete both temp files, so we're not cluttering things up
+    Kill (Environ$("temp") & TEMPFILE1)
+    Kill (Environ$("temp") & TEMPFILE2)
     
     If (What = "") Then What = "No drives found, please check cbm4win installation and directory paths!"
     MsgBox What, vbOKOnly, "Drive Detection"
+End Sub
+
+Private Sub ResetBus_Click()
+    MainForm.PubDoCommand "cbmctrl", "reset", "Resetting drives, please wait."
 End Sub
 
 Private Sub Transfer_Click(Index As Integer)
@@ -279,5 +332,7 @@ Private Sub Transfer_Click(Index As Integer)
             TransferString = "serial2"
         Case 3:
             TransferString = "parallel"
+        Case 4:
+            TransferString = "auto"
     End Select
 End Sub

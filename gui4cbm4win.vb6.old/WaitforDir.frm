@@ -1,18 +1,18 @@
 VERSION 5.00
 Begin VB.Form Waiting 
-   BorderStyle     =   1  'Fixed Single
+   BorderStyle     =   1  'Fest Einfach
    Caption         =   "Working..."
-   ClientHeight    =   1380
-   ClientLeft      =   45
-   ClientTop       =   330
-   ClientWidth     =   2790
+   ClientHeight    =   1391
+   ClientLeft      =   39
+   ClientTop       =   325
+   ClientWidth     =   2795
    ControlBox      =   0   'False
    LinkTopic       =   "Form2"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   1380
-   ScaleWidth      =   2790
-   StartUpPosition =   1  'CenterOwner
+   ScaleHeight     =   1391
+   ScaleWidth      =   2795
+   StartUpPosition =   1  'Fenstermitte
    Begin VB.Timer LEDTimer 
       Interval        =   300
       Left            =   600
@@ -29,7 +29,7 @@ Begin VB.Form Waiting
    End
    Begin VB.Shape LED 
       BackColor       =   &H00000000&
-      BackStyle       =   1  'Opaque
+      BackStyle       =   1  'Undurchsichtig
       BorderWidth     =   2
       Height          =   255
       Left            =   1080
@@ -37,7 +37,7 @@ Begin VB.Form Waiting
       Width           =   615
    End
    Begin VB.Label Label 
-      Alignment       =   2  'Center
+      Alignment       =   2  'Zentriert
       BackStyle       =   0  'Transparent
       Caption         =   "Please wait."
       Height          =   735
@@ -52,6 +52,29 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+' Copyright 2005 Leif Bloomquist
+' Copyright 2006 Wolfgang Moser
+'
+' This software Is provided 'as-is', without any express or implied
+' warranty. In no event will the authors be held liable for any damages
+' arising from the use of this software.
+'
+' Permission is granted to anyone to use this software for any purpose,
+' including commercial applications, and to alter it and redistribute it
+' freely, subject to the following restrictions:
+'
+'     1. The origin of this software must not be misrepresented; you must
+'        not claim that you wrote the original software. If you use this
+'        software in a product, an acknowledgment in the product
+'        documentation would be appreciated but is not required.
+'
+'     2. Altered source versions must be plainly marked as such, and must
+'        not be misrepresented as being the original software.
+'
+'     3. This notice may not be removed or altered from any source
+'        distribution.
+'
+
 Option Explicit
 
 Private IsOnTop As Boolean

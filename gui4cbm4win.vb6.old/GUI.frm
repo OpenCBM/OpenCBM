@@ -1,16 +1,16 @@
 VERSION 5.00
 Begin VB.Form MainForm 
    Caption         =   "GUI4CBM4WIN"
-   ClientHeight    =   6975
-   ClientLeft      =   60
-   ClientTop       =   345
-   ClientWidth     =   10965
+   ClientHeight    =   6968
+   ClientLeft      =   65
+   ClientTop       =   351
+   ClientWidth     =   10959
    Icon            =   "GUI.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
-   ScaleHeight     =   6975
-   ScaleWidth      =   10965
-   StartUpPosition =   3  'Windows Default
+   ScaleHeight     =   6968
+   ScaleWidth      =   10959
+   StartUpPosition =   3  'Windows-Standard
    Begin VB.DriveListBox Drive1 
       Height          =   315
       Left            =   240
@@ -22,7 +22,7 @@ Begin VB.Form MainForm
       Caption         =   "Commodore Drive"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   8.25
+         Size            =   7.62
          Charset         =   0
          Weight          =   700
          Underline       =   0   'False
@@ -54,7 +54,7 @@ Begin VB.Form MainForm
          BackColor       =   &H00C00000&
          BeginProperty Font 
             Name            =   "Fixedsys"
-            Size            =   9
+            Size            =   8.31
             Charset         =   0
             Weight          =   400
             Underline       =   0   'False
@@ -62,11 +62,11 @@ Begin VB.Form MainForm
             Strikethrough   =   0   'False
          EndProperty
          ForeColor       =   &H00FF8383&
-         Height          =   5460
+         Height          =   5317
          ItemData        =   "GUI.frx":0442
          Left            =   120
          List            =   "GUI.frx":0444
-         MultiSelect     =   2  'Extended
+         MultiSelect     =   2  'Erweitert
          TabIndex        =   9
          Top             =   600
          Width           =   3855
@@ -116,7 +116,7 @@ Begin VB.Form MainForm
          Caption         =   "Last Drive Status:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.62
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -132,10 +132,10 @@ Begin VB.Form MainForm
       End
       Begin VB.Label LastStatus 
          BackColor       =   &H00C00000&
-         BorderStyle     =   1  'Fixed Single
+         BorderStyle     =   1  'Fest Einfach
          BeginProperty Font 
             Name            =   "Fixedsys"
-            Size            =   9
+            Size            =   8.31
             Charset         =   0
             Weight          =   400
             Underline       =   0   'False
@@ -154,7 +154,7 @@ Begin VB.Form MainForm
          Caption         =   "Drive:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.62
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -170,10 +170,10 @@ Begin VB.Form MainForm
       End
       Begin VB.Label CBMDiskName 
          BackColor       =   &H00FF8383&
-         BorderStyle     =   1  'Fixed Single
+         BorderStyle     =   1  'Fest Einfach
          BeginProperty Font 
             Name            =   "Fixedsys"
-            Size            =   9
+            Size            =   8.31
             Charset         =   0
             Weight          =   400
             Underline       =   0   'False
@@ -189,12 +189,12 @@ Begin VB.Form MainForm
          WordWrap        =   -1  'True
       End
       Begin VB.Label CBMDiskID 
-         Alignment       =   2  'Center
+         Alignment       =   2  'Zentriert
          BackColor       =   &H00FF8383&
-         BorderStyle     =   1  'Fixed Single
+         BorderStyle     =   1  'Fest Einfach
          BeginProperty Font 
             Name            =   "Fixedsys"
-            Size            =   9
+            Size            =   8.31
             Charset         =   0
             Weight          =   400
             Underline       =   0   'False
@@ -213,7 +213,7 @@ Begin VB.Form MainForm
          Caption         =   "Disk:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.62
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -232,7 +232,7 @@ Begin VB.Form MainForm
          Caption         =   "File(s):"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.62
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -267,7 +267,7 @@ Begin VB.Form MainForm
       Caption         =   "Local Drive"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   8.25
+         Size            =   7.62
          Charset         =   0
          Weight          =   700
          Underline       =   0   'False
@@ -315,7 +315,7 @@ Begin VB.Form MainForm
       Begin VB.FileListBox PCDirectory 
          Height          =   3795
          Left            =   120
-         MultiSelect     =   2  'Extended
+         MultiSelect     =   2  'Erweitert
          TabIndex        =   20
          Top             =   2280
          Width           =   3375
@@ -365,7 +365,7 @@ Begin VB.Form MainForm
          Caption         =   "Current Directory:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.62
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -384,7 +384,7 @@ Begin VB.Form MainForm
          Caption         =   "Selected:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.62
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -403,7 +403,7 @@ Begin VB.Form MainForm
          Caption         =   "Disk:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.62
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -422,7 +422,7 @@ Begin VB.Form MainForm
          Caption         =   "File(s):"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.62
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -441,7 +441,7 @@ Begin VB.Form MainForm
       Caption         =   "<--"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   9.75
+         Size            =   9
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -459,7 +459,7 @@ Begin VB.Form MainForm
       Caption         =   "-->"
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   9.75
+         Size            =   9
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -482,7 +482,29 @@ Option Explicit
 
 '-----------------
 'GUI4CBM4WIN
-'Copyright 2005 Leif Bloomquist, but feel free to use this code as you wish.
+'
+' Copyright 2005 Leif Bloomquist
+' Copyright 2006 Wolfgang Moser
+'
+' This software Is provided 'as-is', without any express or implied
+' warranty. In no event will the authors be held liable for any damages
+' arising from the use of this software.
+'
+' Permission is granted to anyone to use this software for any purpose,
+' including commercial applications, and to alter it and redistribute it
+' freely, subject to the following restrictions:
+'
+'     1. The origin of this software must not be misrepresented; you must
+'        not claim that you wrote the original software. If you use this
+'        software in a product, an acknowledgment in the product
+'        documentation would be appreciated but is not required.
+'
+'     2. Altered source versions must be plainly marked as such, and must
+'        not be misrepresented as being the original software.
+'
+'     3. This notice may not be removed or altered from any source
+'        distribution.
+'
 
 ' Version 0.06 - First general release.
 '         0.07 - Added quotes around parameters in DoCommand(), to handle paths with spaces.
@@ -496,6 +518,33 @@ Option Explicit
 '                Option to inhibit the automatic directory reread after most operations, so errors aren't covered up.
 '                Fixed hardcoded reference to c:\ drive in two places
 '                Improved handling of default values when INI file has errors.
+'
+'   Additions by Wolfgang Moser, based on Gui4Cbm4Win 0.0.9
+'         0.40 - Renamed all "Warp"-Options into "No-Warp" ones
+'                Added "auto" transfer option
+'                Renamed the stdout and stderr log files to g4c4w*.log
+'                Extended the "Detect" dialog in the options menu so that more than one drive is shown
+'                Fixed the "status" action, the return string now needs to be taken from stdout
+'                Fixed the "dir" action, the status string now needs to be taken from the last line on stdout
+'                The "Morse" code action is now directed to the currently selected IEC bus device
+'                Put the sources under the zlib/libpng license to clearly define usage and reusage
+'                    by further developers, to make a crystal clear definition of this branch of
+'                    Leif's software beeing OpenSource for now and all times without the copyleft
+'                    restriction of the GNU General Public License, but still beeing compatible
+'                    to the GPL and finally to allow distribution via Sourceforge. All in all I
+'                    hope to preserve the will of Leif as much as possible with that license.
+'                Added a "Reset bus" action button to the options dialog
+'                Added a generalized check for error conditions in the commands executor
+'                Format action: Added the switches "-v" and "-o" as well as the missing "-s" for printing the status
+'                Fixed the format action, the status string now needs to be taken from the last line on stdout
+'                Using cbmforng instead of cbmformat now
+'                Initialize: Added querying the status after sending the "I0" command
+'                Options dialog fix: the selected drive number is put to the main window object
+'                Options dialog fix: the selected working directory patch is taken over to the main form
+'                Temporary files are created within the Environ$("temp") (%TEMP%) specified directory
+'                Added the quiet option "-q" to cbmcopy, so only error messages get printed
+'                Added Chr$(34)/'"' quotations to all filename arguments given to DoCommand
+'
 'TODO:
 '                Improve the ASCII/PETSCII translation when reading dirs, for rename/scratch
 
@@ -503,11 +552,14 @@ Option Explicit
 Private Sub About_Click()
     Dim CR As String
     CR = Chr$(13) & Chr$(13)
-    MsgBox "GUI4CBM4WIN by Leif Bloomquist (leif@schemafactor.com)" & CR & _
-           "This is a simple GUI front-end for cbm4win by Spiro Trikaliotis." & Chr$(13) & _
-           "(www.trikaliotis.net/cbm4win/)" & CR & _
-           "cbm4win itself is heavily based on cbm4linux, written by Michael Klein." & CR & _
-           "This is an ALPHA version of the GUI 0.09, designed to work with cbm4win 0.1.0 ." _
+    MsgBox "GUI4CBM4WIN by Leif Bloomquist (no support anymore)" & Chr$(13) & _
+           "adoption to OpenCBM 0.4.0 by Wolfgang Moser (http://d81.de/)            " & CR & _
+           "This is a simple GUI front-end for cbm4win" & Chr$(13) & _
+           "by Spiro Trikaliotis (www.trikaliotis.net/cbm4win/)" & CR & _
+           "cbm4win itself is heavily based on cbm4linux," & Chr$(13) & _
+           "written by Michael Klein (http://www.lb.shuttle.de/puffin/)" & CR & _
+           "This is version 0.40 of the GUI," & Chr$(13) & _
+           "distributed under the zlib/libpng OpenSource license." _
            , vbInformation, "About"
 End Sub
 
@@ -523,7 +575,7 @@ End Sub
 Private Sub CBMDriveStatus_Click()
     Dim Status As ReturnStringType
     Status = DoCommand("cbmctrl", "status " & DriveNumber, "Reading drive status, please wait.")
-    LastStatus.Caption = UCase(Status.Errors)
+    LastStatus.Caption = UCase(Status.Output)
 End Sub
 
 'Format a floppy.
@@ -533,12 +585,12 @@ Private Sub CBMFormat_Click()
     
     Result = MsgBox("This will erase ALL data on the floppy disk.  Are you sure?", vbExclamation Or vbYesNo, "Format Disk")
     If (Result = vbNo) Then Exit Sub
-    
+
     Prompt.Ask "Please Enter Diskname, ID"
     If (Prompt.LastResult = CANCELSTRING) Then Exit Sub
 
-    Status = DoCommand("cbmformat", DriveNumber & " " & UCase(Prompt.LastResult), "Formatting floppy disk, please wait.")
-    LastStatus.Caption = UCase(Status.Errors)
+    Status = DoCommand("cbmforng", " -vso " & DriveNumber & " " & Chr$(34) & UCase(Prompt.LastResult) & Chr$(34), "Formatting floppy disk, please wait.")
+    LastStatus.Caption = UCase(Status.Output)
     Sleep 1000 'Just so message is visible
     
     RefreshCBMDir
@@ -546,6 +598,7 @@ End Sub
 
 Private Sub CBMInitialize_Click()
     DoCommand "cbmctrl", "command " & DriveNumber & " I0", "Initializing Drive"
+    CBMDriveStatus_Click
 End Sub
 
 Private Sub CBMRefresh_Click()
@@ -563,12 +616,14 @@ On Error GoTo CBMRefreshError:
     'Run the program
     Results = DoCommand("cbmctrl", "dir " & DriveNumber, "Reading directory, please wait.", False)
     
-    'The drive status is always returned.
-    LastStatus.Caption = UCase(Results.Errors)
+    ' 'The drive status is always returned.
+    ' LastStatus.Caption = UCase(Results.Errors)
+    '
+    ' It's not that simple anymore, we now need to extract it from the last line of stdout
 
     'Read in the complete output file -------------
     Close #1
-    Open TEMPFILE1 For Input As #1
+    Open (Environ$("temp") & TEMPFILE1) For Input As #1
     
     'Check for empty file
     If EOF(1) Then Exit Sub
@@ -577,16 +632,22 @@ On Error GoTo CBMRefreshError:
     Line Input #1, temp
     CBMDiskName.Caption = UCase(ExtractQuotes(temp))
     CBMDiskID.Caption = UCase(Right$(temp, 5))
-    
+
+    If (Not EOF(1)) Then Line Input #1, temp
+
     While (Not EOF(1))
-        Line Input #1, temp
+        ' Whenever another line is available, store the current one into the panel
         CBMDirectory.AddItem UCase(temp)  'Not only does uppercase look better, but Scratch, Rename need uppercase
+        ' and get a new one
+        Line Input #1, temp
     Wend
+    'The drive status is taken from the last line on stdout
+    LastStatus.Caption = UCase(temp)
     Close #1
     
     'And delete both temp files, so we're not cluttering things up
-    Kill TEMPFILE1
-    Kill TEMPFILE2
+    Kill (Environ$("temp") & TEMPFILE1)
+    Kill (Environ$("temp") & TEMPFILE2)
     
     Exit Sub
     
@@ -625,7 +686,7 @@ Private Sub CBMScratch_Click()
     
     For T = 0 To CBMDirectory.ListCount - 1
         If (CBMDirectory.Selected(T)) Then
-            DoCommand "cbmctrl", "command " & DriveNumber & " S0:" & ExtractQuotes(CBMDirectory.List(T)), "Scratching " & ExtractQuotes(CBMDirectory.List(T))
+            DoCommand "cbmctrl", "command " & DriveNumber & Chr$(34) & "S0:" & ExtractQuotes(CBMDirectory.List(T)) & Chr$(34), "Scratching " & ExtractQuotes(CBMDirectory.List(T))
         End If
     Next T
 
@@ -659,7 +720,7 @@ Private Sub CopyFromFloppy_Click()
             End If
             
             DoCommand "cbmcopy", _
-                      "--transfer=" & TransferString & " -r " & DriveNumber & " " & Chr$(34) & FileName & Chr$(34) & _
+                      "--transfer=" & TransferString & " -q -r " & DriveNumber & " " & Chr$(34) & FileName & Chr$(34) & _
                       " --output=" & Chr$(34) & FileNameOut & Chr$(34), _
                       "Copying '" & ExtractQuotes(CBMDirectory.List(T)) & "' from floppy disk."
             FilesSelected = FilesSelected + 1
@@ -674,7 +735,7 @@ Private Sub CopyFromFloppy_Click()
         Prompt.Ask "Please Enter Filename:"
         If (Prompt.LastResult = CANCELSTRING) Then Exit Sub
     
-        DoCommand "d64copy", "--transfer=" & TransferString & " " & WarpString & " " & DriveNumber & " " & Prompt.LastResult, "Creating D64 image, please wait."
+        DoCommand "d64copy", "--transfer=" & TransferString & " " & NoWarpString & " " & DriveNumber & " " & Chr$(34) & Prompt.LastResult & Chr$(34), "Creating D64 image, please wait."
     End If
 
     PCDirectory.Refresh
@@ -715,7 +776,7 @@ Private Sub CopyToFloppy_Click()
                 End If
                 
                 DoCommand "cbmcopy", _
-                          "--transfer=" & TransferString & " -w " & DriveNumber & " " & Chr$(34) & FileName & Chr$(34) & _
+                          "--transfer=" & TransferString & " -q -w " & DriveNumber & " " & Chr$(34) & FileName & Chr$(34) & _
                           " --output=" & Chr$(34) & FileNameOut & Chr$(34) & SeqType, _
                           "Copying '" & PCDirectory.List(T) & "' to floppy disk as '" & UCase(FileNameOut) & "'"
             End If
@@ -749,7 +810,7 @@ Private Sub WriteD64toFloppy(d64file As String)
     Result = MsgBox("This will overwrite ALL data on the floppy disk.  Are you sure?", vbExclamation Or vbYesNo, "Write D64 to Disk")
     If (Result = vbNo) Then Exit Sub
 
-    DoCommand "d64copy", "--transfer=" & TransferString & " " & WarpString & " " & d64file & " " & DriveNumber, "Creating disk from D64 image, please wait."
+    DoCommand "d64copy", "--transfer=" & TransferString & " " & NoWarpString & " " & Chr$(34) & d64file & Chr$(34) & " " & DriveNumber, "Creating disk from D64 image, please wait."
     
     CBMRefresh_Click
 End Sub
@@ -760,8 +821,8 @@ Private Sub Form_Load()
 On Error Resume Next
 
     If (Command = "-leifdevelopment") Then
-        ChDrive "c"
-        ChDir "\cbm4win\exe"
+        ChDrive "E"
+        ChDir "\_DDK_Test\cbm4win\0.4.0"
         OptionsForm.PreviewCheck.value = vbChecked
     End If
     
@@ -807,6 +868,7 @@ On Error Resume Next
     
     Static InProgress As Boolean
     Dim CmdLine As String
+    Dim ErrorString As String
     
     If (InProgress) Then
         MsgBox "cbm4win command already in progress, cannot continue.", vbCritical
@@ -827,7 +889,8 @@ On Error Resume Next
     InProgress = True
     
     'Show in Progress Dialog
-    Waiting.Show
+    ' Waiting.Show
+    Waiting.Show vbModeless, MainForm
     Waiting.Label = WaitMessage
     
     'cmd /c is needed in order to have a shell write to a file (long, complicated explanation)
@@ -837,23 +900,26 @@ On Error Resume Next
     'cmd /c ""path\command" args "files""
     
     CmdLine = "cmd /c " & Chr$(34) & Chr$(34) & ExeDir & Action & Chr$(34) & " " & Args & Chr$(34) & _
-              " 1>" & TEMPFILE1 & " 2>" & TEMPFILE2
+              " 1>" & Environ$("temp") & TEMPFILE1 & " 2>" & Environ$("temp") & TEMPFILE2
     ShellWait CmdLine, vbHide
     
     'Read in the output file
-    Open TEMPFILE1 For Input As #1
+    Open (Environ$("temp") & TEMPFILE1) For Input As #1
         If (Not EOF(1)) Then Line Input #1, DoCommand.Output
     Close #1
     
     'Read in the error file
-    Open TEMPFILE2 For Input As #2
-        If (Not EOF(2)) Then Line Input #2, DoCommand.Errors
+    Open (Environ$("temp") & TEMPFILE2) For Input As #2
+        ' If (Not EOF(2)) Then Line Input #2, DoCommand.Errors
+        If (Not EOF(2)) Then Line Input #2, ErrorString
+        ' The following is useful for reading multiline messages
+        ' If (Not EOF(2)) Then ErrorString = Input(LOF(2), #2)
     Close #2
 
     'And delete both, so we're not cluttering things up
     If (DeleteOutFile) Then
-        Kill TEMPFILE1
-        Kill TEMPFILE2
+        Kill (Environ$("temp") & TEMPFILE1)
+        Kill (Environ$("temp") & TEMPFILE2)
     End If
     
     'Old, unsafe way
@@ -861,7 +927,8 @@ On Error Resume Next
     
     Waiting.Hide
     InProgress = False
-      
+
+    If (Not ErrorString = "") Then MsgBox ErrorString, vbOKOnly, Action
 End Function
 
 Private Sub MakeDir_Click()
@@ -874,7 +941,12 @@ End Sub
 
 Private Sub Options_Click()
     OptionsForm.StartingPath.Text = AddSlash(PCWorkingDir.Text)
+
     OptionsForm.Show vbModal
+
+    DriveNumber = OptionsForm.DriveNum.Text
+    PCWorkingDir.Text = OptionsForm.StartingPath.Text
+    GotoDir PCWorkingDir.Text
 End Sub
 
 Private Sub PCDelete_Click()
@@ -920,7 +992,14 @@ Private Sub PCDirectory_Click()
     'Refresh the KB/Blocks display
     For T = 0 To PCDirectory.ListCount - 1
         If (PCDirectory.Selected(T)) Then
-            Bytes = Bytes + FileLen(AddSlash(Dir1.path) & PCDirectory.List(T))
+            ' Check if file exists first
+            If (Dir(AddSlash(Dir1.path) & PCDirectory.List(T)) = "") Then
+                ' File does not exist anymore
+                PCDirectory.Refresh
+                Exit For
+            Else
+                Bytes = Bytes + FileLen(AddSlash(Dir1.path) & PCDirectory.List(T))
+            End If
         End If
     Next T
     
@@ -958,7 +1037,8 @@ On Error Resume Next
 
     'Enable Enter Key
     If (KeyCode = 13) Then
-        ChDir PCWorkingDir.Text
+        ' ChDir PCWorkingDir.Text
+        GotoDir PCWorkingDir.Text
         PCRefresh_Click
         Dir1.path = PCWorkingDir.Text
     End If
@@ -1015,7 +1095,7 @@ End Sub
 
 Public Function PubDoCommand(Action As String, Args As String, WaitMessage As String, Optional DeleteOutFile As Boolean = True) As String
     Dim Returns As ReturnStringType
-    Returns = DoCommand(Action, Args, WaitMessage)
+    Returns = DoCommand(Action, Args, WaitMessage, DeleteOutFile)
     PubDoCommand = Returns.Output
 End Function
 
@@ -1023,7 +1103,7 @@ End Function
 Private Sub CheckExes()
     Dim FilesOK As Boolean
     FilesOK = Not (Dir("cbmctrl.exe") = "")
-    
+
     If (FilesOK) Then Exit Sub
     
     MsgBox "Can't find cbmctrl.exe " & Chr$(13) & Chr$(13) & "gui4cbm4win must be run from within the same directory as the cbm4win executable files." & _
