@@ -554,11 +554,12 @@ Private Sub About_Click()
     CR = Chr$(13) & Chr$(13)
     MsgBox "GUI4CBM4WIN by Leif Bloomquist (no support anymore)" & Chr$(13) & _
            "adoption to OpenCBM 0.4.0 by Wolfgang Moser (http://d81.de/)            " & CR & _
+           "bug fix for 0.4.0.1 by Spiro Trikaliotis (2006) " & CR & _
            "This is a simple GUI front-end for cbm4win" & Chr$(13) & _
            "by Spiro Trikaliotis (www.trikaliotis.net/cbm4win/)" & CR & _
            "cbm4win itself is heavily based on cbm4linux," & Chr$(13) & _
            "written by Michael Klein (http://www.lb.shuttle.de/puffin/)" & CR & _
-           "This is version 0.40 of the GUI," & Chr$(13) & _
+           "This is version 0.4.0.1 of the GUI," & Chr$(13) & _
            "distributed under the zlib/libpng OpenSource license." _
            , vbInformation, "About"
 End Sub
@@ -686,7 +687,7 @@ Private Sub CBMScratch_Click()
     
     For T = 0 To CBMDirectory.ListCount - 1
         If (CBMDirectory.Selected(T)) Then
-            DoCommand "cbmctrl", "command " & DriveNumber & Chr$(34) & "S0:" & ExtractQuotes(CBMDirectory.List(T)) & Chr$(34), "Scratching " & ExtractQuotes(CBMDirectory.List(T))
+            DoCommand "cbmctrl", "command " & DriveNumber & " " & Chr$(34) & "S0:" & ExtractQuotes(CBMDirectory.List(T)) & Chr$(34), "Scratching " & ExtractQuotes(CBMDirectory.List(T))
         End If
     Next T
 

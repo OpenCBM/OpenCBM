@@ -74,3 +74,9 @@ Changes from GUI4CBM4WIN 0.09 to 0.4.0:
       arguments given to DoCommand
 
 2006-06-08
+
+Changes from GUI4CBM4WIN 0.4.0 to 0.4.0.1:
+    * "scratch" command did not work, as a SPACE was left out at the
+      command-line. Fixed that.
+
+2006-10-15
