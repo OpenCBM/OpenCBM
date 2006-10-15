@@ -1,6 +1,6 @@
 Attribute VB_Name = "Constants"
-' Copyright 2005 Leif Bloomquist
-' Copyright 2006 Wolfgang Moser
+' Copyright (C) 2004-2005 Leif Bloomquist
+' Copyright (C) 2006      Wolfgang Moser
 '
 ' This software Is provided 'as-is', without any express or implied
 ' warranty. In no event will the authors be held liable for any damages

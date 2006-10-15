@@ -483,8 +483,8 @@ Option Explicit
 '-----------------
 'GUI4CBM4WIN
 '
-' Copyright 2005 Leif Bloomquist
-' Copyright 2006 Wolfgang Moser
+' Copyright (C) 2004-2005 Leif Bloomquist
+' Copyright (C) 2006      Wolfgang Moser
 '
 ' This software Is provided 'as-is', without any express or implied
 ' warranty. In no event will the authors be held liable for any damages
@@ -545,6 +545,8 @@ Option Explicit
 '                Added the quiet option "-q" to cbmcopy, so only error messages get printed
 '                Added Chr$(34)/'"' quotations to all filename arguments given to DoCommand
 '
+'         0.41 - Fix the scratch command by appending a space character after the drive number
+'
 'TODO:
 '                Improve the ASCII/PETSCII translation when reading dirs, for rename/scratch
 
@@ -554,12 +556,11 @@ Private Sub About_Click()
     CR = Chr$(13) & Chr$(13)
     MsgBox "GUI4CBM4WIN by Leif Bloomquist (no support anymore)" & Chr$(13) & _
            "adoption to OpenCBM 0.4.0 by Wolfgang Moser (http://d81.de/)            " & CR & _
-           "bug fix for 0.4.0.1 by Spiro Trikaliotis (2006) " & CR & _
            "This is a simple GUI front-end for cbm4win" & Chr$(13) & _
            "by Spiro Trikaliotis (www.trikaliotis.net/cbm4win/)" & CR & _
            "cbm4win itself is heavily based on cbm4linux," & Chr$(13) & _
            "written by Michael Klein (http://www.lb.shuttle.de/puffin/)" & CR & _
-           "This is version 0.4.0.1 of the GUI," & Chr$(13) & _
+           "This is version 0.41 of the GUI," & Chr$(13) & _
            "distributed under the zlib/libpng OpenSource license." _
            , vbInformation, "About"
 End Sub
