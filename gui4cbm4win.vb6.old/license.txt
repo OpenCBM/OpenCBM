@@ -1,7 +1,8 @@
-Gui4cbm4win 0.4.1 -- GUI for cbm4win, version 0.4.1, 2006-06-10
+Gui4cbm4win 0.4.1 -- GUI for cbm4win, version 0.4.1, 2006-06-31
 
 Copyright (C) 2004-2005 Leif Bloomquist
 Copyright (C) 2006      Wolfgang Moser
+Copyright (C) 2006      Spiro Trikaliotis
 
 This software Is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages

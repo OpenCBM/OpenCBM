@@ -23,7 +23,7 @@ RevisionVer=1
 AutoIncrementVer=0
 ServerSupportFiles=0
 VersionComments="http://sf.net/project/showfiles.php?group_id=122047"
-VersionCompanyName="cbm4win.sf.net"
+VersionCompanyName="opencbm.sf.net"
 VersionFileDescription="Gui4Cbm4Win, controlling cbm4win"
 VersionLegalCopyright="Copyright 2005 Leif Bloomquist, Copyright 2006 Wolfgang Moser (http://d81.de), Spiro Trikaliotis"
 VersionLegalTrademarks="OpenCBM, Gui4cbm4win, cbm4linux, cbm4win"
