@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.15 2006-10-15 16:43:50 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.16 2006-11-09 19:25:15 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -62,12 +62,12 @@
 #define OUT_PORT (Pdx->ParPortPortAddress + PARALLEL_CONTROL_OFFSET)
 
 /*! set an output line on the parallel port */
-#define CBMIEC_SET(_set)              Pdx->IecOutBits|=(_set); WRITE_PORT_UCHAR(OUT_PORT,(UCHAR)(Pdx->IecOutEor ^ Pdx->IecOutBits))
+#define CBMIEC_SET(_set)              do { DBG_ASSERT((_set) != 0); Pdx->IecOutBits|=(_set); WRITE_PORT_UCHAR(OUT_PORT,(UCHAR)(Pdx->IecOutEor ^ Pdx->IecOutBits)); } while (0)
 /*! release an output line on the parallel port */
-#define CBMIEC_RELEASE(_rel)          Pdx->IecOutBits&=~(_rel); WRITE_PORT_UCHAR(OUT_PORT,(UCHAR)(Pdx->IecOutEor ^ Pdx->IecOutBits))
+#define CBMIEC_RELEASE(_rel)          do { DBG_ASSERT((_rel) != 0); Pdx->IecOutBits&=~(_rel); WRITE_PORT_UCHAR(OUT_PORT,(UCHAR)(Pdx->IecOutEor ^ Pdx->IecOutBits)); } while (0)
 /*! set and release an output line on the parallel port (simultaneously) */
-#define CBMIEC_SET_RELEASE(_set,_rel) Pdx->IecOutBits|=(_set); Pdx->IecOutBits&=~(_rel); \
-                                      WRITE_PORT_UCHAR(OUT_PORT,(UCHAR)(Pdx->IecOutEor ^ Pdx->IecOutBits))
+#define CBMIEC_SET_RELEASE(_set,_rel) do { DBG_ASSERT((_set) != 0); DBG_ASSERT((_rel) != 0); Pdx->IecOutBits|=(_set); Pdx->IecOutBits&=~(_rel); \
+                                      WRITE_PORT_UCHAR(OUT_PORT,(UCHAR)(Pdx->IecOutEor ^ Pdx->IecOutBits)); } while (0)
 
 /*! get the value of the parallel port */
 #define CBMIEC_GET(_line)             (((READ_PORT_UCHAR(IN_PORT) ^ Pdx->IecInEor) & _line)==0?1:0)
