@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: fs.c,v 1.11 2006-09-06 17:59:11 strik Exp $";
+    "@(#) $Id: fs.c,v 1.12 2006-12-11 18:43:47 cbm4linux Exp $";
 #endif
 
 #include "d64copy_int.h"
@@ -237,21 +237,20 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
             if(new_tr > tr)
             {
                 /* grow image */
-                char block[BLOCKSIZE];
-                memset(block, '\0', BLOCKSIZE);
                 while(tr < new_tr)
                 {
-                    int s;
-                    s = d64copy_sector_count(settings->two_sided, ++tr);
-                    if(fwrite(block, BLOCKSIZE, s, the_file) != (size_t)s)
-                    {
-                        message_cb(0, "could not write %s", name);
-                        fclose(the_file);
-                        if(!is_image)
-                            arch_unlink(name);
-                        return 1;
-                    }
-                    block_count += s;
+                    block_count += d64copy_sector_count(settings->two_sided, ++tr);
+                }
+
+                message_cb(1, "growing image file to %d blocks", block_count);
+
+                if (arch_ftruncate(arch_fileno(the_file), block_count * BLOCKSIZE) != 0)
+                {
+                    message_cb(0, "%s: could not extend image file", name);
+                    fclose(the_file);
+                    if(!is_image)
+                        arch_unlink(name);
+                    return 1;
                 }
             }
         }
