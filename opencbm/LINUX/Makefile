@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2006-07-20 11:31:36 strik Exp $
+# $Id: Makefile,v 1.10 2007-01-22 21:45:49 wmsr Exp $
 
 include LINUX/config.make
 
@@ -12,7 +12,7 @@ SUBDIRS  = sys/linux include arch/$(ARCH) lib compat \
            demo/flash demo/morse demo/rpm1541 docs \
 	   sample/libtrans
 
-SUBDIRS_OPTIONAL = mnib36
+SUBDIRS_OPTIONAL = mnib36 nibtools
 
 .PHONY: all clean mrproper dist install uninstall dev install-files
 
