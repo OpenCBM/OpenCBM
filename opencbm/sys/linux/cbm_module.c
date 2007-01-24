@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.18 2007-01-22 19:12:40 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.19 2007-01-24 19:34:42 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -440,7 +440,7 @@ static int cbm_read(struct inode *inode, struct file *f, char *buf, int count)
                         received++;
                         put_user((char)b, buf++);
 
-                        if(count % 256) {
+                        if(received % 256) {
                             udelay(50);
                         } else {
                             schedule();
@@ -692,15 +692,15 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                                 }
                                 else
                                 {
-                    if (set & IEC_DATA)  set_mask = DATA_OUT;
-                    if (set & IEC_CLOCK) set_mask = CLK_OUT;
-                    if (set & IEC_ATN)   set_mask = ATN_OUT;
-                    if (set & IEC_RESET) set_mask = RESET;
+                    if (set & IEC_DATA)  set_mask |= DATA_OUT;
+                    if (set & IEC_CLOCK) set_mask |= CLK_OUT;
+                    if (set & IEC_ATN)   set_mask |= ATN_OUT;
+                    if (set & IEC_RESET) set_mask |= RESET;
 
-                    if (release & IEC_DATA)  release_mask = DATA_OUT;
-                    if (release & IEC_CLOCK) release_mask = CLK_OUT;
-                    if (release & IEC_ATN)   release_mask = ATN_OUT;
-                    if (release & IEC_RESET) release_mask = RESET;
+                    if (release & IEC_DATA)  release_mask |= DATA_OUT;
+                    if (release & IEC_CLOCK) release_mask |= CLK_OUT;
+                    if (release & IEC_ATN)   release_mask |= ATN_OUT;
+                    if (release & IEC_RESET) release_mask |= RESET;
 
                                         SET_RELEASE(set_mask, release_mask);
                                 }
