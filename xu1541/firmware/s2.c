@@ -4,11 +4,14 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s2.c,v 1.1 2007-02-04 12:36:34 harbaum Exp $
+ * This Revision: $Id: s2.c,v 1.2 2007-02-04 15:12:04 harbaum Exp $
  *
  * $Log: s2.c,v $
- * Revision 1.1  2007-02-04 12:36:34  harbaum
- * Initial revision
+ * Revision 1.2  2007-02-04 15:12:04  harbaum
+ * Fixed broken optimization in s1/s2 write byte
+ *
+ * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
+ * Initial version
  *
  *
  */
@@ -22,9 +25,9 @@
 #include "s2.h"
 
 static void s2_write_byte(unsigned char c) {
-  char i;
+  unsigned char i;
 
-  for(i=4; ; i--) {
+  for(i=0; i<4; i++) {
     if(c & 1) { SET(DATA) } else { RELEASE(DATA); }
     c >>= 1;
     RELEASE(ATN);

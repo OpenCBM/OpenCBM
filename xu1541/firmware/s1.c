@@ -4,11 +4,14 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s1.c,v 1.1 2007-02-04 12:36:34 harbaum Exp $
+ * This Revision: $Id: s1.c,v 1.2 2007-02-04 15:12:04 harbaum Exp $
  *
  * $Log: s1.c,v $
- * Revision 1.1  2007-02-04 12:36:34  harbaum
- * Initial revision
+ * Revision 1.2  2007-02-04 15:12:04  harbaum
+ * Fixed broken optimization in s1/s2 write byte
+ *
+ * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
+ * Initial version
  *
  *
  */
@@ -22,14 +25,13 @@
 #include "s1.h"
 
 static void s1_write_byte(unsigned char c) {
-  unsigned char b, i;
+  unsigned char i;
 
-  for(i=7; ; i--) {
-    b=(c >> i) & 1;
-    if(b) { SET(DATA); } else { RELEASE(DATA); }
+  for(i=0; i<8; i++, c<<=1) {
+    if(c & 0x80) { SET(DATA); } else { RELEASE(DATA); }
     RELEASE(CLK);
     while(!GET(CLK));
-    if(b) { RELEASE(DATA); } else { SET(DATA); }
+    if(c & 0x80) { RELEASE(DATA); } else { SET(DATA); }
     while(GET(CLK));
     RELEASE(DATA);
     SET(CLK);
