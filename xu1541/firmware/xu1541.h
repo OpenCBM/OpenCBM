@@ -6,16 +6,7 @@
 #define XU1541_H
 
 #include "xu1541_types.h"
-
-/* adjust settings in usbconfig.h and usbtiny.h accordingly */
-/* usbtiny is always 2.xx, avrusb version is 1.xx */
-#ifdef USBTINY
-#define XU1541_VERSION_MAJOR 2
-#else
-#define XU1541_VERSION_MAJOR 1
-#endif
-
-#define XU1541_VERSION_MINOR 0
+#include "version.h"
 
 /* use port c for cbm io */
 #define CBM_PORT  PORTC

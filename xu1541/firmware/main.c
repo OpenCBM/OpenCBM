@@ -4,11 +4,14 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.1 2007-02-04 12:36:33 harbaum Exp $
+ * This Revision: $Id: main.c,v 1.2 2007-02-05 17:01:55 harbaum Exp $
  *
  * $Log: main.c,v $
- * Revision 1.1  2007-02-04 12:36:33  harbaum
- * Initial revision
+ * Revision 1.2  2007-02-05 17:01:55  harbaum
+ * Simplified version numbering
+ *
+ * Revision 1.1.1.1  2007/02/04 12:36:33  harbaum
+ * Initial version
  *
  *
  */
@@ -411,7 +414,8 @@ int	main(void) {
   stdout = &mystdout;
 #endif
 
-  DEBUGF("xu1541 - (c) 2007 by Till Harbaum\n");
+  DEBUGF("xu1541 %d.%02d - (c) 2007 by Till Harbaum\n", 
+	 XU1541_VERSION_MAJOR, XU1541_VERSION_MINOR);
 
   cbm_init();
 

@@ -7,6 +7,8 @@
 // Public License as published by the Free Software Foundation.
 // ======================================================================
 
+#include "version.h"
+
 // The D+ and D- USB signals should be connected to two pins of the same
 // I/O port. The following macros define the port letter and the input
 // bit numbers:
@@ -36,7 +38,7 @@
 #define	USBTINY_DEVICE_ID		0xc632
 
 // The version of the device as a 16-bit number: 256*major + minor.
-#define	USBTINY_DEVICE_VERSION		0x200
+#define	USBTINY_DEVICE_VERSION		(256 * XU1541_VERSION_MAJOR + XU1541_VERSION_MINOR)
 
 // The following optional macros may be used as an identification of
 // your device. Undefine them when you run out of flash space.

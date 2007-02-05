@@ -5,11 +5,13 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: Proprietary, free under certain conditions. See Documentation.
- * This Revision: $Id: usbconfig.h,v 1.1 2007-02-04 12:36:34 harbaum Exp $
+ * This Revision: $Id: usbconfig.h,v 1.2 2007-02-05 17:01:55 harbaum Exp $
  */
 
 #ifndef __usbconfig_h_included__
 #define	__usbconfig_h_included__
+
+#include "version.h"
 
 /*
 General Description:
@@ -85,7 +87,7 @@ must be adapted to your hardware.
  * share the same product and vendor IDs. Not even if the devices are never
  * on the same bus together!
  */
-#define	USB_CFG_DEVICE_VERSION	0x00, 0x01
+#define	USB_CFG_DEVICE_VERSION	XU1541_VERSION_MINOR, XU1541_VERSION_MAJOR
 /* Version number of the device: Minor number first, then major number.
  */
 #define	USB_CFG_VENDOR_NAME		'T', 'i', 'l', 'l', ' ', 'H', 'a', 'r', 'b', 'a', 'u', 'm'
