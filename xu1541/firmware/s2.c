@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s2.c,v 1.2 2007-02-04 15:12:04 harbaum Exp $
+ * This Revision: $Id: s2.c,v 1.3 2007-02-06 22:34:44 harbaum Exp $
  *
  * $Log: s2.c,v $
- * Revision 1.2  2007-02-04 15:12:04  harbaum
+ * Revision 1.3  2007-02-06 22:34:44  harbaum
+ * Release DATA after byte was written
+ *
+ * Revision 1.2  2007/02/04 15:12:04  harbaum
  * Fixed broken optimization in s1/s2 write byte
  *
  * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
@@ -38,6 +41,8 @@ static void s2_write_byte(unsigned char c) {
     SET(ATN);
     while(!GET(CLK));
   }
+
+  RELEASE(DATA);
 }
 
 unsigned char s2_write(unsigned char *data, unsigned char len) {
