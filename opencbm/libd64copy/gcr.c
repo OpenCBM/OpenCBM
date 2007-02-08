@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: gcr.c,v 1.5 2006-05-20 08:35:47 wmsr Exp $";
+    "@(#) $Id: gcr.c,v 1.5.2.1 2007-02-08 19:19:40 harbaum Exp $";
 #endif
 
 #include "gcr.h"
@@ -101,7 +101,11 @@ int gcr_encode(unsigned const char *block, unsigned char *encoded)
     chkref[0]  = *block;
         /* add the last byte to the checksum */
     chkref[1] ^= *block;
-       gcr_4_to_5_encode(chkref, encoded, 4, 5);
+
+    /* clear trailing unused bytes, not necessary but somehow nicer */
+    chkref[2] = chkref[3] = 0;
+
+    gcr_4_to_5_encode(chkref, encoded, 4, 5);
 
     return 0;
 }

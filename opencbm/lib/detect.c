@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/detect.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: detect.c,v 1.2 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: detect.c,v 1.2.2.1 2007-02-08 19:19:40 harbaum Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -76,9 +76,9 @@ cbm_identify(CBM_FILE HandleDevice, __u_char DeviceAddress,
     FUNC_ENTER();
 
     if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0 
-        && cbmarch_talk(HandleDevice, DeviceAddress, 15) == 0)
+        && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
     {
-        if (cbmarch_raw_read(HandleDevice, buf, 3) == 3)
+        if (cbm_raw_read(HandleDevice, buf, 3) == 3)
         {
             magic = buf[0] | (buf[1] << 8);
 
@@ -136,7 +136,7 @@ cbm_identify(CBM_FILE HandleDevice, __u_char DeviceAddress,
             }
             rv = 0;
         }
-        cbmarch_untalk(HandleDevice);
+        cbm_untalk(HandleDevice);
     }
 
     if(CbmDeviceType)

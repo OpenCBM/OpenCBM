@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.10 2007-01-22 21:45:49 wmsr Exp $
+# $Id: Makefile,v 1.10.2.1 2007-02-08 19:19:39 harbaum Exp $
 
 include LINUX/config.make
 
@@ -6,7 +6,8 @@ CBMDEV   = /dev/cbm
 CBMPERM  = 666
 DEVMAJOR = 10
 DEVMINOR = 177
-SUBDIRS  = sys/linux include arch/$(ARCH) lib compat \
+# SUBDIRS  = sys/linux include arch/$(ARCH) lib compat
+SUBDIRS  = include arch/$(ARCH) lib compat \
 	   libtrans \
            cbmctrl cbmformat cbmforng d64copy cbmcopy \
            demo/flash demo/morse demo/rpm1541 docs \

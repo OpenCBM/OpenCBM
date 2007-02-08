@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.12 2006-07-20 11:45:28 strik Exp $";
+    "@(#) $Id: main.c,v 1.12.2.1 2007-02-08 19:19:39 harbaum Exp $";
 #endif
 
 #include "opencbm.h"
@@ -208,7 +208,7 @@ static void ARCH_SIGNALDECL reset(int dummy)
 
     fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
 #ifdef LIBD64COPY_DEBUG
-    printDebugLibD64Counters(my_message_cb);
+    //    printDebugLibD64Counters(my_message_cb);
 #endif
     d64copy_cleanup();
     cbm_reset(fd_cbm_local);

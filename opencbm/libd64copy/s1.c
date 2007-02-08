@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.11 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: s1.c,v 1.11.2.1 2007-02-08 19:19:40 harbaum Exp $";
 #endif
 
 #include "opencbm.h"
@@ -18,6 +18,10 @@ static char *rcsid =
 #include <stdlib.h>
 
 #include "arch.h"
+
+#ifdef ENABLE_XU1541
+#include "../lib/xu1541.h"
+#endif
 
 static const unsigned char s1_drive_prog[] = {
 #include "s1.inc"
@@ -82,6 +86,23 @@ static int s1_write_byte(CBM_FILE fd, unsigned char c)
     return 0;
 }
 
+/* write_n redirects USB writes to the external reader if required */
+static void write_n(const unsigned char *data, int size) 
+{
+    int i;
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	xu1541_special_write(XU1541_S1, data, size);
+	return;
+    }
+#endif
+
+    for(i=0;i<size;i++)
+	s1_write_byte(fd_cbm, *data++);
+}
+
 static int s1_read_byte(CBM_FILE fd, unsigned char *c)
 {
     int b=0, i;
@@ -121,49 +142,57 @@ static int s1_read_byte(CBM_FILE fd, unsigned char *c)
     return 0;
 }
 
+/* read_n redirects USB reads to the external reader if required */
+static void read_n(unsigned char *data, int size) 
+{
+    int i;
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	xu1541_special_read(XU1541_S1, data, size);
+	return;
+    }
+#endif
+
+    for(i=0;i<size;i++)
+	s1_read_byte(fd_cbm, data++);
+}
+
 static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
 {
-    int  i;
     unsigned char status;
 
                                                                         SETSTATEDEBUG((void)0);
-    s1_write_byte(fd_cbm, tr);
+    write_n(&tr, 1);
                                                                         SETSTATEDEBUG((void)0);
-    s1_write_byte(fd_cbm, se);
+    write_n(&se, 1);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT    
     arch_usleep(20000);
 #endif    
                                                                         SETSTATEDEBUG((void)0);
-    s1_read_byte(fd_cbm, &status);
+    read_n(&status, 1);
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=0);
-    for(i=0;i<256;i++)
-    {
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount++);
-        s1_read_byte(fd_cbm, &block[i]);
-    }
+    // removed from loop: SETSTATEDEBUG(debugLibD64ByteCount++);
+    read_n(block, 256);
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=-1);
     cbm_iec_release(fd_cbm, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
-
     return status;
 }
 
 static int write_block(unsigned char tr, unsigned char se, const unsigned char *blk, int size, int read_status)
 {
-    int  i;
     unsigned char status;
-
                                                                         SETSTATEDEBUG((void)0);
-    s1_write_byte(fd_cbm, tr);
+    write_n(&tr, 1);
                                                                         SETSTATEDEBUG((void)0);
-    s1_write_byte(fd_cbm, se);
+    write_n(&se, 1);
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=0);
-    for(i=0;i<size;i++)
-    {
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount++);
-        s1_write_byte(fd_cbm, blk[i]);
-    }
+
+    // removed from loop: SETSTATEDEBUG(debugLibD64ByteCount++);
+    write_n(blk, size);
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=-1);
 #ifndef USE_CBM_IEC_WAIT    
     if(size == BLOCKSIZE) {
@@ -172,7 +201,7 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
     }
 #endif    
                                                                         SETSTATEDEBUG((void)0);
-    s1_read_byte(fd_cbm, &status);
+    read_n(&status, 1);
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_release(fd_cbm, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
@@ -212,31 +241,34 @@ static void close_disk(void)
 
 static int send_track_map(unsigned char tr, const char *trackmap, unsigned char count)
 {
-    int i;
+    int i, size;
+    unsigned char *data;
                                                                         SETSTATEDEBUG((void)0);
-    s1_write_byte(fd_cbm, tr);
+    size = d64copy_sector_count(two_sided, tr);
+    data = malloc(size+2);
+
+    data[0] = tr;
+    data[1] = count;
+
+    /* build track map */
+    for(i = 0; i < size; i++)
+	data[2+i] = !NEED_SECTOR(trackmap[i]);
                                                                         SETSTATEDEBUG((void)0);
-    s1_write_byte(fd_cbm, count);
-                                                                        SETSTATEDEBUG((void)0);
-    for(i = 0; i < d64copy_sector_count(two_sided, tr); i++)
-    {
-                                                                        SETSTATEDEBUG((void)0);
-        s1_write_byte(fd_cbm, (unsigned char) !NEED_SECTOR(trackmap[i]));
-    }
+    write_n(data, size+2);
+    free(data);
                                                                         SETSTATEDEBUG((void)0);
     return 0;
 }
 
 static int read_gcr_block(unsigned char *se, unsigned char *gcrbuf)
 {
-    int i;
     unsigned char s;
 
                                                                         SETSTATEDEBUG((void)0);
-    s1_read_byte(fd_cbm, &s);
+    read_n(&s, 1);
                                                                         SETSTATEDEBUG((void)0);
     *se = s;
-    s1_read_byte(fd_cbm,  &s);
+    read_n(&s, 1);
                                                                         SETSTATEDEBUG((void)0);
 
     if(s) {
@@ -244,10 +276,7 @@ static int read_gcr_block(unsigned char *se, unsigned char *gcrbuf)
     }
 
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=0);
-    for(i = 0; i < GCRBUFSIZE; i++) {
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount++);
-        s1_read_byte(fd_cbm, &gcrbuf[i]);
-    }
+    read_n(gcrbuf, GCRBUFSIZE);
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=-1);
     return 0;
 }

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.17 2006-04-10 10:29:58 strik Exp $ \n
+** \version $Id: cbm.c,v 1.17.2.1 2007-02-08 19:19:39 harbaum Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -34,6 +34,9 @@
 #include "opencbm.h"
 #include "archlib.h"
 
+#ifdef ENABLE_XU1541
+#include "xu1541.h"
+#endif
 
 // #define DBG_DUMP_RAW_READ
 // #define DBG_DUMP_RAW_WRITE
@@ -61,6 +64,14 @@ const char * CBMAPIDECL
 cbm_get_driver_name(int PortNumber)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        static const char usb[]="libusb/xu1541";
+	FUNC_LEAVE_STRING(usb); 
+    }
+#endif
 
     FUNC_LEAVE_STRING(cbmarch_get_driver_name(PortNumber));
 }
@@ -90,6 +101,11 @@ cbm_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_init() == 0)
+        FUNC_LEAVE_INT(0); 
+#endif
+
     FUNC_LEAVE_INT(cbmarch_driver_open(HandleDevice, PortNumber));
 }
 
@@ -111,6 +127,14 @@ void CBMAPIDECL
 cbm_driver_close(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle != 0) 
+    {
+        xu1541_close();
+	FUNC_LEAVE();
+    }
+#endif
 
     cbmarch_driver_close(HandleDevice);
 
@@ -146,6 +170,10 @@ cbm_lock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) return;
+#endif
+
     cbmarch_lock(HandleDevice);
 
     FUNC_LEAVE();
@@ -172,6 +200,10 @@ void CBMAPIDECL
 cbm_unlock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) return;
+#endif
 
     cbmarch_unlock(HandleDevice);
 
@@ -214,6 +246,13 @@ cbm_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
     DBG_MEMDUMP("cbm_raw_write", Buffer, Count);
 #endif
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        FUNC_LEAVE_INT(xu1541_write(Buffer, Count));
+    }
+#endif
+
     FUNC_LEAVE_INT(cbmarch_raw_write(HandleDevice,Buffer, Count));
 }
 
@@ -244,11 +283,18 @@ cbm_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 int CBMAPIDECL 
 cbm_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
-    int bytesRead;
+    int bytesRead = 0;
 
     FUNC_ENTER();
 
-    bytesRead = cbmarch_raw_read(HandleDevice, Buffer, Count);
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        bytesRead = xu1541_read(Buffer, Count);
+    } 
+    else
+#endif
+        bytesRead = cbmarch_raw_read(HandleDevice, Buffer, Count);
 
 #ifdef DBG_DUMP_RAW_READ
     DBG_MEMDUMP("cbm_raw_read", Buffer, bytesRead);
@@ -285,6 +331,13 @@ cbm_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddr
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_LISTEN, DeviceAddress, SecondaryAddress));
+    }
+#endif
+
     FUNC_LEAVE_INT(cbmarch_listen(HandleDevice, DeviceAddress, SecondaryAddress));
 }
 
@@ -315,6 +368,13 @@ int CBMAPIDECL
 cbm_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_TALK, DeviceAddress, SecondaryAddress));
+    }
+#endif
 
     FUNC_LEAVE_INT(cbmarch_talk(HandleDevice, DeviceAddress, SecondaryAddress));
 }
@@ -355,7 +415,14 @@ cbm_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
 
     FUNC_ENTER();
 
-    if (cbmarch_open(HandleDevice, DeviceAddress, SecondaryAddress) == 0)
+#ifdef ENABLE_XU1541
+    if(xu1541_handle)
+	returnValue = xu1541_ioctl(XU1541_OPEN, DeviceAddress, SecondaryAddress);
+    else
+#endif
+        returnValue = cbmarch_open(HandleDevice, DeviceAddress, SecondaryAddress);
+
+    if (returnValue == 0)
     {
         returnValue = 0;
 
@@ -410,6 +477,13 @@ cbm_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddre
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	FUNC_LEAVE_INT(xu1541_ioctl(XU1541_CLOSE, DeviceAddress, SecondaryAddress));
+    }
+#endif
+ 
     FUNC_LEAVE_INT(cbmarch_close(HandleDevice, DeviceAddress, SecondaryAddress));
 }
 
@@ -438,6 +512,13 @@ cbm_unlisten(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_UNLISTEN, 0, 0));
+    }
+#endif
+
     FUNC_LEAVE_INT(cbmarch_unlisten(HandleDevice));
 }
 
@@ -465,6 +546,13 @@ int CBMAPIDECL
 cbm_untalk(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_UNTALK, 0, 0));
+    }
+#endif
 
     FUNC_LEAVE_INT(cbmarch_untalk(HandleDevice));
 }
@@ -495,6 +583,13 @@ cbm_get_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_GET_EOI, 0, 0));
+    }
+#endif
+
     FUNC_LEAVE_INT(cbmarch_get_eoi(HandleDevice));
 }
 
@@ -517,6 +612,13 @@ int CBMAPIDECL
 cbm_clear_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_CLEAR_EOI, 0, 0));
+    }
+#endif
 
     FUNC_LEAVE_INT(cbmarch_clear_eoi(HandleDevice));
 }
@@ -546,6 +648,13 @@ int CBMAPIDECL
 cbm_reset(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_RESET, 0, 0));
+    }
+#endif
 
     FUNC_LEAVE_INT(cbmarch_reset(HandleDevice));
 }
@@ -580,6 +689,13 @@ cbm_pp_read(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	FUNC_LEAVE_UCHAR(xu1541_ioctl(XU1541_PP_READ, 0, 0));
+    }
+#endif
+
     FUNC_LEAVE_UCHAR(cbmarch_pp_read(HandleDevice));
 }
 
@@ -610,6 +726,14 @@ void CBMAPIDECL
 cbm_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	xu1541_ioctl(XU1541_PP_WRITE, Byte, 0);
+	FUNC_LEAVE();
+    }
+#endif
 
     cbmarch_pp_write(HandleDevice, Byte);
 
@@ -642,6 +766,13 @@ cbm_iec_poll(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	FUNC_LEAVE_INT(xu1541_ioctl(XU1541_IEC_POLL, 0, 0));
+    }
+#endif
+
     FUNC_LEAVE_INT(cbmarch_iec_poll(HandleDevice));
 }
 
@@ -668,7 +799,15 @@ void CBMAPIDECL
 cbm_iec_set(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
- 
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	xu1541_ioctl(XU1541_IEC_SET, Line, 0);
+	FUNC_LEAVE();
+    }
+#endif
+
     cbmarch_iec_set(HandleDevice, Line);
 
     FUNC_LEAVE();
@@ -696,7 +835,15 @@ void CBMAPIDECL
 cbm_iec_release(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
- 
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	xu1541_ioctl(XU1541_IEC_RELEASE, Line, 0);
+	FUNC_LEAVE();
+    }
+#endif
+
     cbmarch_iec_release(HandleDevice, Line);
 
     FUNC_LEAVE();
@@ -733,7 +880,15 @@ void CBMAPIDECL
 cbm_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     FUNC_ENTER();
- 
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	xu1541_ioctl(XU1541_IEC_SET, Set, Release);
+	FUNC_LEAVE();
+    }
+#endif
+
     cbmarch_iec_setrelease(HandleDevice, Set, Release);
 
     FUNC_LEAVE();
@@ -770,6 +925,13 @@ cbm_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	FUNC_LEAVE_INT(xu1541_ioctl(XU1541_IEC_WAIT, Line, State));
+    }
+#endif
+
     FUNC_LEAVE_INT(cbmarch_iec_wait(HandleDevice, Line, State));
 }
 
@@ -798,6 +960,14 @@ int CBMAPIDECL
 cbm_iec_get(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+        FUNC_LEAVE_INT((xu1541_ioctl(XU1541_IEC_POLL,0,0)&Line) != 0 ? 1 : 0);
+    }
+#endif
+
     FUNC_LEAVE_INT((cbmarch_iec_poll(HandleDevice)&Line) != 0 ? 1 : 0);
 }
 
@@ -869,7 +1039,7 @@ cbm_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
         // Now, ask the drive for its error status:
 
-        if (cbmarch_talk(HandleDevice, DeviceAddress, 15) == 0)
+        if (cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
         {
             int bytesRead = cbm_raw_read(HandleDevice, bufferToWrite, BufferLength);
 
@@ -880,7 +1050,7 @@ cbm_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
             bufferToWrite[bytesRead] = '\0';
 
-            cbmarch_untalk(HandleDevice);
+            cbm_untalk(HandleDevice);
         }
 
         retValue = atoi(bufferToWrite);
@@ -921,13 +1091,13 @@ cbm_exec_command(CBM_FILE HandleDevice, __u_char DeviceAddress,
     int rv;
 
     FUNC_ENTER();
-    rv = cbmarch_listen(HandleDevice, DeviceAddress, 15);
+    rv = cbm_listen(HandleDevice, DeviceAddress, 15);
     if(rv == 0) {
         if(Size == 0) {
             Size = (size_t) strlen(Command);
         }
-        rv = (size_t) cbmarch_raw_write(HandleDevice, Command, Size) != Size;
-        cbmarch_unlisten(HandleDevice);
+        rv = (size_t) cbm_raw_write(HandleDevice, Command, Size) != Size;
+        cbm_unlisten(HandleDevice);
     }
 
     FUNC_LEAVE_INT(rv);
@@ -953,6 +1123,14 @@ cbm_parallel_burst_read(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	fprintf(stderr, "cbm_parallel_burst_read(): Not supported by xu1541\n");
+	exit(-1);
+    }
+#endif
+
     FUNC_LEAVE_UCHAR(cbmarch_parallel_burst_read(HandleDevice));
 }
 
@@ -975,6 +1153,14 @@ void CBMAPIDECL
 cbm_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	fprintf(stderr, "cbm_parallel_burst_write(): Not supported by xu1541\n");
+	exit(-1);
+    }
+#endif
 
     cbmarch_parallel_burst_write(HandleDevice, Value);
 
@@ -1007,6 +1193,14 @@ cbm_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned 
 {
     FUNC_ENTER();
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	fprintf(stderr, "cbm_parallel_burst_read_track(): Not supported by xu1541\n");
+	exit(-1);
+    }
+#endif
+
     FUNC_LEAVE_INT(cbmarch_parallel_burst_read_track(HandleDevice, Buffer, Length));
 }
 
@@ -1035,6 +1229,14 @@ int CBMAPIDECL
 cbm_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
+
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	fprintf(stderr, "cbm_parallel_burst_write_track(): Not supported by xu1541\n");
+	exit(-1);
+    }
+#endif
 
     FUNC_LEAVE_INT(cbmarch_parallel_burst_write_track(HandleDevice, Buffer, Length));
 }

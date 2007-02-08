@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.4 2006-06-02 22:51:55 wmsr Exp $ \n
+** \version $Id: upload.c,v 1.4.2.1 2007-02-08 19:19:40 harbaum Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -86,7 +86,7 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
     for(i = 0; i < Size; i += 32)
     {
-        cbmarch_listen(HandleDevice, DeviceAddress, 15);
+        cbm_listen(HandleDevice, DeviceAddress, 15);
 
         // Calculate how much bytes are left
 
@@ -109,11 +109,11 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
         // Write the M-W command to the drive...
 
-        cbmarch_raw_write(HandleDevice, command, sizeof(command));
+        cbm_raw_write(HandleDevice, command, sizeof(command));
 
         // ... as well as the (up to 32) data bytes
 
-        cbmarch_raw_write(HandleDevice, bufferToProgram, c);
+        cbm_raw_write(HandleDevice, bufferToProgram, c);
 
         // Now, advance the pointer into drive memory
         // as well to the program in PC's memory in case we
@@ -129,7 +129,7 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
         // The UNLISTEN is the signal for the drive 
         // to start execution of the command
 
-        cbmarch_unlisten(HandleDevice);
+        cbm_unlisten(HandleDevice);
     }
 
     FUNC_LEAVE_INT(rv);
@@ -202,11 +202,11 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
         // Write the M-R command to the drive...
         cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command));
 
-        cbmarch_talk(HandleDevice, DeviceAddress, 15);
+        cbm_talk(HandleDevice, DeviceAddress, 15);
 
         // now read the (up to 256) data bytes
         // and advance the return value of send bytes, too.
-        rv += cbmarch_raw_read(HandleDevice, StoreBuffer, c);
+        rv += cbm_raw_read(HandleDevice, StoreBuffer, c);
 
         // Now, advance the pointer into drive memory
         // as well to the program in PC's memory in case we
@@ -215,7 +215,7 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
         StoreBuffer     += c;
 
         // The UNTALK is the signal for end of transmission
-        cbmarch_untalk(HandleDevice);
+        cbm_untalk(HandleDevice);
     }
 
     FUNC_LEAVE_INT(rv);
