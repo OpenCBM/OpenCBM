@@ -8,12 +8,10 @@
  *
  */
 
-// #define SRT_INIT_PARPORT 1 // @@@@SRT
-
 /*! ************************************************************** 
 ** \file sys/libcommon/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.10 2007-02-10 18:12:19 strik Exp $ \n
+** \version $Id: init.c,v 1.11 2007-02-10 20:48:22 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
@@ -172,12 +170,10 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx, IN 
     // If requested by the registry, lock the parallel port
     //
 
-#ifdef SRT_INIT_PARPORT // @@@@SRT
-    if (Pdx && Pdx->ParallelPortLock && Pdx->ParallelPortIsLocked == FALSE)
+    if (InitializeCable && Pdx && Pdx->ParallelPortLock && Pdx->ParallelPortIsLocked == FALSE)
     {
         cbm_lock_parport(Pdx);
     }
-#endif // #ifdef SRT_INIT_PARPORT // @@@@SRT
 
     FUNC_LEAVE();
 }

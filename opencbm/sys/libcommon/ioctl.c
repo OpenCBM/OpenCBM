@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.17 2007-02-10 18:12:20 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.18 2007-02-10 20:48:22 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -270,13 +270,11 @@ cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
         case CBMCTRL_UPDATE:
             DBG_IRP(CBMCTRL_UPDATE);
             ntStatus = STATUS_SUCCESS;
-            fastStart = TRUE;
             break;
 
         case CBMCTRL_TEST_IRQ:
             DBG_IRP(CBMCTRL_TEST_IRQ);
             ntStatus = STATUS_SUCCESS;
-            fastStart = TRUE;
             break;
 
 #if DBG

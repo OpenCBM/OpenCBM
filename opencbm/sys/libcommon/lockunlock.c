@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/lockunlock.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: lockunlock.c,v 1.4 2007-02-10 18:12:20 strik Exp $ \n
+** \version $Id: lockunlock.c,v 1.5 2007-02-10 20:48:22 strik Exp $ \n
 ** \n
 ** \brief Functions for locking und unlocking the driver onto the parallel port
 **
@@ -76,6 +76,12 @@ cbm_lock_parport(IN PDEVICE_EXTENSION Pdx)
     {
         Pdx->ParallelPortIsLocked = TRUE;
 
+        // initialize cable type and try to detect the cable if necessary
+
+        cbm_init_registry(NULL, Pdx, TRUE);
+
+        // initialize the IEC Bus
+
         cbmiec_init(Pdx);
     }
 
@@ -84,13 +90,7 @@ cbm_lock_parport(IN PDEVICE_EXTENSION Pdx)
     // before we failed
 
 
-    if (NT_SUCCESS(ntStatus))
-    {
-        // initialize cable type and try to detect the cable if necessary
-
-        cbm_init_registry(NULL, Pdx, TRUE);
-    }
-    else
+    if (!NT_SUCCESS(ntStatus))
     {
         // The functions themselves test if the resource
         // is allocated, thus, we do not need to protect
