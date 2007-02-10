@@ -8,10 +8,12 @@
  *
  */
 
+// #define SRT_INIT_PARPORT 1 // @@@@SRT
+
 /*! ************************************************************** 
 ** \file sys/libcommon/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.9 2006-11-09 19:26:03 strik Exp $ \n
+** \version $Id: init.c,v 1.10 2007-02-10 18:12:19 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
@@ -42,6 +44,10 @@ static UNICODE_STRING ServiceKeyRegistryPath;
    Pointer to the device extension of the device to be
    updated.
 
+ \param InitializeCAble
+   If the cable should be detected and initialized, this
+   is set to TRUE; if not, it is FALSE.
+
  The RegistryPath parameter can be NULL, but this is only
  allowed on a second or subsequent call.
 
@@ -53,7 +59,7 @@ static UNICODE_STRING ServiceKeyRegistryPath;
 */
 
 VOID
-cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx)
+cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx, IN BOOLEAN InitializeCable)
 {
     NTSTATUS ntStatus;
 
@@ -123,9 +129,10 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx)
 
                 cbm_registry_read_ulong(hKey, L"CableType", &iecCable);
 
-#ifdef SRT_INIT_PARPORT // @@@@SRT
-                cbmiec_set_cabletype(Pdx, iecCable);
-#endif // #ifdef SRT_INIT_PARPORT // @@@@SRT
+                if (InitializeCable)
+                {
+                    cbmiec_set_cabletype(Pdx, iecCable);
+                }
 
                 //
                 // update if we are requested to permanently lock the parallel port
@@ -202,7 +209,7 @@ DriverCommonInit(IN PDRIVER_OBJECT Driverobject, IN PUNICODE_STRING RegistryPath
 
     // Initialize the settings from the registry
 
-    cbm_init_registry(RegistryPath, NULL);
+    cbm_init_registry(RegistryPath, NULL, FALSE);
 
     // set the function pointers to our driver
 

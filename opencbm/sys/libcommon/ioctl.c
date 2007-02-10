@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.16 2006-07-20 14:07:37 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.17 2007-02-10 18:12:20 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -511,7 +511,7 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 
         case CBMCTRL_UPDATE:
             DBG_IRP(CBMCTRL_UPDATE);
-            cbm_init_registry(NULL, Pdx);
+            cbm_init_registry(NULL, Pdx, TRUE);
             ntStatus = STATUS_SUCCESS;
             break;
 

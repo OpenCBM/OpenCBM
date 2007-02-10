@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.9 2006-03-10 19:25:17 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.10 2007-02-10 18:12:19 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **
@@ -158,7 +158,7 @@ cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer, IN OUT PULO
 #endif // #if DBG
 
 extern VOID
-cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx);
+cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx, IN BOOLEAN InitializeCable);
 
 extern NTSTATUS
 cbm_startio(IN PDEVICE_OBJECT Fdo, IN PIRP Irp);
