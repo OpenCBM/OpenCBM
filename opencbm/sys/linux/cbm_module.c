@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.19 2007-01-24 19:34:42 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.20 2007-02-10 18:10:57 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -530,7 +530,6 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
                 local_irq_save(flags);
                 SET(DATA_OUT);
                 RELEASE(ATN_OUT);
-// @@@                udelay(30);
                 RELEASE(CLK_OUT);
                 while (!GET(CLK_IN)) // @@@
                       ;              // @@@
