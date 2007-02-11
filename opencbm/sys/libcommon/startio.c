@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/startio.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startio.c,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: startio.c,v 1.4 2007-02-11 16:53:42 strik Exp $ \n
 ** \n
 ** \brief StartIo function for processing the IRP queue
 **
@@ -75,6 +75,7 @@ cbm_startio(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
             break;
 
         case IRP_MJ_DEVICE_CONTROL:
+        case IRP_MJ_INTERNAL_DEVICE_CONTROL:
             ntStatus = cbm_execute_devicecontrol(pdx, Irp);
             break;
 

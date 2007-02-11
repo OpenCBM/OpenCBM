@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis
+ *  Copyright 2004, 2007 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.11 2007-02-10 20:48:22 strik Exp $ \n
+** \version $Id: init.c,v 1.12 2007-02-11 16:53:41 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **
@@ -42,10 +42,6 @@ static UNICODE_STRING ServiceKeyRegistryPath;
    Pointer to the device extension of the device to be
    updated.
 
- \param InitializeCAble
-   If the cable should be detected and initialized, this
-   is set to TRUE; if not, it is FALSE.
-
  The RegistryPath parameter can be NULL, but this is only
  allowed on a second or subsequent call.
 
@@ -57,7 +53,7 @@ static UNICODE_STRING ServiceKeyRegistryPath;
 */
 
 VOID
-cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx, IN BOOLEAN InitializeCable)
+cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx)
 {
     NTSTATUS ntStatus;
 
@@ -127,10 +123,7 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx, IN 
 
                 cbm_registry_read_ulong(hKey, L"CableType", &iecCable);
 
-                if (InitializeCable)
-                {
-                    cbmiec_set_cabletype(Pdx, iecCable);
-                }
+                cbmiec_set_cabletype(Pdx, iecCable);
 
                 //
                 // update if we are requested to permanently lock the parallel port
@@ -166,13 +159,138 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx, IN 
         cbmiec_global_init(NULL);
     }
 
-    //
-    // If requested by the registry, lock the parallel port
-    //
+    FUNC_LEAVE();
+}
 
-    if (InitializeCable && Pdx && Pdx->ParallelPortLock && Pdx->ParallelPortIsLocked == FALSE)
+/*! \brief Initialize the cable
+
+ This function initializes the cable. For this, it makes
+ sure the initialization is started asynchronously.
+
+ \param Pdx
+   Pointer to the DEVICE_EXTENSION (unused).
+*/
+
+VOID
+cbm_initialize_cable_deferred(IN PDEVICE_EXTENSION Pdx)
+{
+    FUNC_ENTER();
+
+    Pdx->CableInitTimer = 5; // wait 5 seconds before initializing the cable
+
+    DBG_IRQL( <= DISPATCH_LEVEL);
+    IoStartTimer(Pdx->Fdo);
+
+    FUNC_LEAVE();
+}
+
+
+/*! \brief Free the IRP on IRP completion
+
+ This function is the boilerplate for freeing the IRP
+ which has been allocated by IoAllocateIrp() before.
+ It is installed as completion routine for the IRP.
+
+ \param Fdo
+   Pointer to the DEVICE_OBJECT for which this IRP has
+   been completed.
+
+ \param Irp
+   Pointer to the Irp which has completed.
+
+ \param Context
+   Pointer to the DEVICE_EXTENSION (unused).
+*/
+
+static NTSTATUS
+CompleteIOCTL(PDEVICE_OBJECT Fdo, PIRP Irp, PVOID Context)
+{
+    NTSTATUS ntStatus;
+
+    FUNC_ENTER();
+
+    UNREFERENCED_PARAMETER(Context);
+
+//    DBG_IRQL( <= DISPATCH_LEVEL);
+//    IoStopTimer(Fdo);
+
+    DBG_IRQL( <= DISPATCH_LEVEL);
+    IoFreeIrp(Irp);
+
+    FUNC_LEAVE_NTSTATUS_CONST(STATUS_MORE_PROCESSING_REQUIRED);
+}
+
+/*! \brief Initialize Cable
+
+ This function is called as a timer routine. It's purpose is
+ to initialize the cable type on driver start.
+
+ \param Fdo
+   Pointer to the DEVICE_OBJECT.
+
+ \param Context
+   Pointer to the DEVICE_EXTENSION.
+
+ \remark
+ We do not want to initialize the cable immediately on driver startup,
+ as the initialization can take considerable time, and we would prevent
+ the system from booting further. Thus, we delay this for some seconds
+ after the driver load, to be done in our ow thread. This function
+ generates an IRP for CBMCTRL_UPDATE to initialize the cable.
+*/
+
+static VOID
+InitializeCableTimerRoutine(PDEVICE_OBJECT Fdo, PVOID Context)
+{
+    PDEVICE_EXTENSION pdx = Context;
+
+    FUNC_ENTER();
+
+    // InitializeCableTimerRoutine is called at DISPATCH_LEVEL
+    DBG_IRQL( == DISPATCH_LEVEL);
+
+    if (pdx->CableInitTimer > 0 && --pdx->CableInitTimer == 0)
     {
-        cbm_lock_parport(Pdx);
+        NTSTATUS ntStatus;
+
+        do {
+            PIO_STACK_LOCATION irpSp;
+            PIRP irp;
+
+            // send a CBMCTRL_UPDATE as ioctl to myself
+
+            DBG_IRQL( <= DISPATCH_LEVEL );
+            irp = IoAllocateIrp(Fdo->StackSize, FALSE);
+            if (irp == NULL)
+            {
+                ntStatus = STATUS_INSUFFICIENT_RESOURCES;
+                break;
+            }
+
+            DBG_IRQL( <= DISPATCH_LEVEL );
+            irpSp = IoGetNextIrpStackLocation(irp);
+
+            irpSp->MajorFunction = IRP_MJ_INTERNAL_DEVICE_CONTROL;
+            irpSp->Parameters.DeviceIoControl.IoControlCode = CBMCTRL_UPDATE;
+            irpSp->Parameters.DeviceIoControl.InputBufferLength = 0;
+            irpSp->Parameters.DeviceIoControl.OutputBufferLength = 0;
+            irpSp->FileObject = NULL;
+
+            DBG_IRQL( <= DISPATCH_LEVEL );
+            IoSetCompletionRoutine(irp, CompleteIOCTL, pdx, TRUE, TRUE, TRUE);
+
+            DBG_IRQL( <= DISPATCH_LEVEL );
+            ntStatus = IoCallDriver(Fdo, irp);
+
+            // If we did not succeed in calling the driver, free the IRP again
+
+            if (!NT_SUCCESS(ntStatus))
+            {
+                IoFreeIrp(irp);
+                break;
+            }
+
+        } while (0);
     }
 
     FUNC_LEAVE();
@@ -205,7 +323,7 @@ DriverCommonInit(IN PDRIVER_OBJECT Driverobject, IN PUNICODE_STRING RegistryPath
 
     // Initialize the settings from the registry
 
-    cbm_init_registry(RegistryPath, NULL, FALSE);
+    cbm_init_registry(RegistryPath, NULL);
 
     // set the function pointers to our driver
 
@@ -216,6 +334,7 @@ DriverCommonInit(IN PDRIVER_OBJECT Driverobject, IN PUNICODE_STRING RegistryPath
     Driverobject->MajorFunction[IRP_MJ_READ] = cbm_readwrite;
     Driverobject->MajorFunction[IRP_MJ_WRITE] = cbm_readwrite;
     Driverobject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = cbm_devicecontrol;
+    Driverobject->MajorFunction[IRP_MJ_INTERNAL_DEVICE_CONTROL] = cbm_devicecontrol;
 
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
@@ -338,6 +457,11 @@ AddDeviceCommonInit(IN PDEVICE_OBJECT Fdo, IN PUNICODE_STRING DeviceName,
 */
     pdx->IsSMP = (CbmGetNumberProcessors() > 1) ? TRUE : FALSE;
 
+    // Initialize timer so that it can be used later on for device initialization
+
+    DBG_IRQL( == PASSIVE_LEVEL);
+    IoInitializeTimer(pdx->Fdo, InitializeCableTimerRoutine, pdx);
+
     // Initialize the parallel port information
 
     ntStatus = ParPortInit(&parallelPortName, pdx);
@@ -353,6 +477,8 @@ AddDeviceCommonInit(IN PDEVICE_OBJECT Fdo, IN PUNICODE_STRING DeviceName,
     if (NT_SUCCESS(ntStatus))
     {
         ntStatus = cbm_start_thread(pdx);
+
+        cbm_initialize_cable_deferred(pdx);
     }
 
     // Now, log success to the event logger if we succeeded.

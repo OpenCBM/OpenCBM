@@ -5,14 +5,14 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2004, 2006 Spiro Trikaliotis
+ *  Copyright 2001-2007 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.15 2006-09-24 11:16:11 strik Exp $ \n
+** \version $Id: init.c,v 1.16 2007-02-11 16:53:42 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -136,7 +136,7 @@ cbmiec_cleanup(IN PDEVICE_EXTENSION Pdx)
  \param CableType
    The type of the cable.
 */
-NTSTATUS
+VOID
 cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType)
 {
     NTSTATUS ntStatus;
@@ -146,9 +146,7 @@ cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType)
     Pdx->IecCableUserSet = CableType;
     cbmiec_setcablestate(Pdx, CABLESTATE_UNKNOWN);
 
-    ntStatus = cbmiec_checkcable(Pdx);
-
-    FUNC_LEAVE_NTSTATUS(ntStatus);
+    FUNC_LEAVE();
 }
 
 /* */

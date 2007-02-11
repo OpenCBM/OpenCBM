@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis
+ *  Copyright 2004-2007 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/wdm/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.11 2007-02-10 18:12:20 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.12 2007-02-11 16:53:42 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **
@@ -178,7 +178,7 @@ AddDevice(IN PDRIVER_OBJECT DriverObject, IN PDEVICE_OBJECT PdoUNUSED, IN PCWSTR
         {
             PDEVICE_EXTENSION pdx = fdo->DeviceExtension;
 
-            cbm_init_registry(NULL, pdx, FALSE);
+            cbm_init_registry(NULL, pdx);
         }
     }
 

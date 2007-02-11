@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2006 Spiro Trikaliotis
+ *  Copyright 2006-2007 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/lockunlock.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: lockunlock.c,v 1.5 2007-02-10 20:48:22 strik Exp $ \n
+** \version $Id: lockunlock.c,v 1.6 2007-02-11 16:53:42 strik Exp $ \n
 ** \n
 ** \brief Functions for locking und unlocking the driver onto the parallel port
 **
@@ -78,7 +78,7 @@ cbm_lock_parport(IN PDEVICE_EXTENSION Pdx)
 
         // initialize cable type and try to detect the cable if necessary
 
-        cbm_init_registry(NULL, Pdx, TRUE);
+        cbm_init_registry(NULL, Pdx);
 
         // initialize the IEC Bus
 

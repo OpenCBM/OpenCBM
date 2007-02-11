@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005 Spiro Trikaliotis
+ *  Copyright 2005-2007 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.10 2007-02-10 18:12:19 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.11 2007-02-11 16:53:41 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **
@@ -123,6 +123,9 @@ struct _ARCH_DEVICE_EXTENSION {
     LONG IecBlockIrqUsageCount;
 #endif
 
+    /*! Countdown for the initialization of the parallel port on startup */
+    LONG CableInitTimer; 
+
 } ARCH_DEVICE_EXTENSION;
 
 extern VOID
@@ -158,7 +161,10 @@ cbm_dbg_readbuffer(IN PDEVICE_EXTENSION Pdx, OUT PCHAR ReturnBuffer, IN OUT PULO
 #endif // #if DBG
 
 extern VOID
-cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx, IN BOOLEAN InitializeCable);
+cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx);
+
+extern VOID
+cbm_initialize_cable_deferred(IN PDEVICE_EXTENSION Pdx);
 
 extern NTSTATUS
 cbm_startio(IN PDEVICE_OBJECT Fdo, IN PIRP Irp);

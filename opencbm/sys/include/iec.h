@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2006 Spiro Trikaliotis
+ *  Copyright 2004-2007 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.15 2006-10-14 16:50:57 strik Exp $ \n
+** \version $Id: iec.h,v 1.16 2007-02-11 16:53:41 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -106,7 +106,7 @@ cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx, IN const PUCHAR Buffer, IN ULONG Buff
 extern NTSTATUS 
 cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx, OUT PUCHAR Buffer, IN ULONG BufferLength, OUT ULONG* Read);
 
-extern NTSTATUS
+extern VOID
 cbmiec_set_cabletype(IN PDEVICE_EXTENSION Pdx, IN IEC_CABLETYPE CableType);
 
 extern NTSTATUS
@@ -126,5 +126,8 @@ cbmiec_parallel_burst_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR* Buffer, IN
 
 extern NTSTATUS
 cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLength);
+
+extern NTSTATUS
+cbmiec_checkcable(PDEVICE_EXTENSION Pdx);
 
 #endif /* #ifndef CBMIEC_H */

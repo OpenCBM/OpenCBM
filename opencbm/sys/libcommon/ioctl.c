@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2006 Spiro Trikaliotis
+ *  Copyright 2004-2007 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.18 2007-02-10 20:48:22 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.19 2007-02-11 16:53:41 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -509,7 +509,21 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 
         case CBMCTRL_UPDATE:
             DBG_IRP(CBMCTRL_UPDATE);
-            cbm_init_registry(NULL, Pdx, TRUE);
+
+            DBG_IRQL( <= DISPATCH_LEVEL);
+            IoStopTimer(Pdx->Fdo);
+
+            cbm_init_registry(NULL, Pdx);
+
+            //
+            // If requested by the registry, lock the parallel port
+            //
+
+            if (Pdx->ParallelPortLock && Pdx->ParallelPortIsLocked == FALSE)
+            {
+                cbm_lock_parport(Pdx);
+            }
+
             ntStatus = STATUS_SUCCESS;
             break;
 

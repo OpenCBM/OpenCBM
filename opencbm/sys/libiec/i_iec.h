@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis
+ *  Copyright 2004, 2007 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.16 2006-11-09 19:25:15 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.17 2007-02-11 16:53:42 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -226,9 +226,6 @@ cbmiec_block_irq(PDEVICE_EXTENSION Pdx);
 
 extern VOID
 cbmiec_release_irq(PDEVICE_EXTENSION Pdx);
-
-extern NTSTATUS
-cbmiec_checkcable(PDEVICE_EXTENSION Pdx);
 
 extern LONG
 cbmiec_i_pp_read_debounced(IN PDEVICE_EXTENSION Pdx);
