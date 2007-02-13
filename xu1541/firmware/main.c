@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.2 2007-02-05 17:01:55 harbaum Exp $
+ * This Revision: $Id: main.c,v 1.3 2007-02-13 19:20:14 harbaum Exp $
  *
  * $Log: main.c,v $
- * Revision 1.2  2007-02-05 17:01:55  harbaum
+ * Revision 1.3  2007-02-13 19:20:14  harbaum
+ * activity LED
+ *
+ * Revision 1.2  2007/02/05 17:01:55  harbaum
  * Simplified version numbering
  *
  * Revision 1.1.1.1  2007/02/04 12:36:33  harbaum
@@ -166,6 +169,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
       break;
       
     case XU1541_RESET:
+      LED_OFF();
       DEBUGF("reset()\n");
       do_reset();
       return 0;
@@ -335,6 +339,7 @@ byte_t usb_in ( byte_t* data, byte_t len )
   char rv = 0;
 
   DEBUGF("rd %d\n", len);
+  LED_ON();  
 
   switch(io_mode) {
     case MODE_ORIGINAL:
@@ -354,6 +359,7 @@ byte_t usb_in ( byte_t* data, byte_t len )
       break;
   }
 
+  LED_OFF();  
   return (rv>0)?rv:0;
 }
 
@@ -368,6 +374,7 @@ void usb_out ( byte_t* data, byte_t len )
 #endif
 {
   char rv = 0;  
+  LED_ON();  
 
   switch(io_mode) {
     case MODE_ORIGINAL:
@@ -387,6 +394,7 @@ void usb_out ( byte_t* data, byte_t len )
       break;
   }
 
+  LED_OFF();  
 #ifndef USBTINY
   return (rv>0)?rv:0;
 #endif
@@ -407,6 +415,13 @@ int	main(void) {
   UCSRA |= _BV(U2X);
   UCSRB |= _BV(TXEN);
   UBRRL = F_CPU / (57600 * 16L) - 1;
+#else
+  /* no debugging at all, drive led on tx, led is on port d.1 */
+  DDRD |= _BV(1);     /* pin is output */
+  LED_ON();           /* drive led during startup */
+
+  /* rxd (d.0) is iec_srq. we don't use it (yet) so just make it an input */
+  DDRD &= ~_BV(0);     /* pin is input */  
 #endif
 #endif
 
@@ -434,6 +449,9 @@ int	main(void) {
   usbInit();
 
   sei();
+
+  LED_OFF();
+
   for(;;) {	/* main event loop */
     wdt_reset();
     usbPoll();

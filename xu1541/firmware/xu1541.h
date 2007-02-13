@@ -39,6 +39,14 @@
 #define SET_RELEASE(s,r) { SET(s); RELEASE(r); }
 #define GET(line)        ((CBM_PIN&(line))==0?1:0)
 
+#ifndef DEBUG
+#define LED_ON()     { PORTD &= ~_BV(1); }
+#define LED_OFF()    { PORTD |=  _BV(1); }
+#else
+#define LED_ON()
+#define LED_OFF()
+#endif
+
 extern unsigned char eoi;
 
 /* exported functions */

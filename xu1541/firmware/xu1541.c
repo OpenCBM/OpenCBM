@@ -4,11 +4,14 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.1 2007-02-04 12:36:34 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.2 2007-02-13 19:20:14 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.1  2007-02-04 12:36:34  harbaum
- * Initial revision
+ * Revision 1.2  2007-02-13 19:20:14  harbaum
+ * activity LED
+ *
+ * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
+ * Initial version
  *
  *
  */
@@ -260,7 +263,7 @@ char cbm_raw_write(const unsigned char *buf, char cnt, char atn, char talk) {
 char xu1541_read(unsigned char *data, unsigned char len) {
   unsigned char i, ok, bit, b;
   unsigned char received = 0;
-  
+
   do {
     i = 0;
     
