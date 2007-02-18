@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.3 2007-02-13 19:20:14 harbaum Exp $
+ * This Revision: $Id: main.c,v 1.4 2007-02-18 19:47:32 harbaum Exp $
  *
  * $Log: main.c,v $
- * Revision 1.3  2007-02-13 19:20:14  harbaum
+ * Revision 1.4  2007-02-18 19:47:32  harbaum
+ * Bootloader and p2 protocol
+ *
+ * Revision 1.3  2007/02/13 19:20:14  harbaum
  * activity LED
  *
  * Revision 1.2  2007/02/05 17:01:55  harbaum
@@ -54,12 +57,14 @@ typedef byte_t uchar;
 #define MODE_S1        1
 #define MODE_S2        2
 #define MODE_PP        3
+#define MODE_P2        4
 unsigned char io_mode;
 
 #include "xu1541.h"
 #include "s1.h"
 #include "s2.h"
 #include "pp.h"
+#include "p2.h"
 
 #ifdef DEBUG
 #define DEBUGF(format, args...) printf_P(PSTR(format), ##args)
@@ -211,7 +216,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
       xu1541_pp_write(data[2]);
       return 0;
       break;
-      
+
       /* ----- special protocol drivers access ----- */    
       
       /* ----- S1 ----- */
@@ -316,6 +321,40 @@ extern	byte_t	usb_setup ( byte_t data[8] )
       }
       break;
       
+      /* ----- P2 ----- */
+    case XU1541_P2:
+      switch(data[2]) {
+	case XU1541_INFO:
+	  replyBuf[0] = P2_VERSION_MAJOR;
+	  replyBuf[1] = P2_VERSION_MINOR;
+	  return 2;
+	  break;
+
+	case XU1541_READ:
+	  io_mode = MODE_P2;
+	  len = *(unsigned short*)(data+4);
+	  /* more data to be expected? */
+	  return(len?0xff:0x00);
+	  break;
+	  
+	case XU1541_WRITE:
+	  io_mode = MODE_P2;
+	  len = *(unsigned short*)(data+4);
+#ifdef USBTINY
+	  /* usbtiny always returns 0 on write */
+	  return 0;
+#else
+	  return(len?0xff:0x00);
+#endif
+	  break;
+
+	break;
+	default:
+	  DEBUGF("ERROR: p2 command %d not implemented\n", data[1]);
+	  break;
+      }
+      break;
+      
     default:
       DEBUGF("ERROR: command %d not implemented\n", data[0]);
       // must not happen ...
@@ -357,6 +396,10 @@ byte_t usb_in ( byte_t* data, byte_t len )
     case MODE_PP:
       rv = pp_read(data, len);
       break;
+
+    case MODE_P2:
+      rv = p2_read(data, len);
+      break;
   }
 
   LED_OFF();  
@@ -391,6 +434,10 @@ void usb_out ( byte_t* data, byte_t len )
 
     case MODE_PP:
       rv = pp_write(data, len);
+      break;
+
+    case MODE_P2:
+      rv = p2_write(data, len);
       break;
   }
 

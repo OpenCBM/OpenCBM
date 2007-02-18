@@ -8,7 +8,7 @@
 # ======================================================================
 USBTINY         = ./usbtiny
 TARGET_ARCH     = -DF_CPU=12000000 -DAVR -DUSBTINY -mmcu=atmega8
-OBJECTS         = main.o xu1541.o s1.o s2.o pp.o
+OBJECTS         = main.o xu1541.o s1.o s2.o pp.o p2.o
 CABLE           = stk200
 #CABLE           = usbasp
 AVRDUDE         = avrdude

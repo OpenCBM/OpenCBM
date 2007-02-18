@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.2 2007-02-13 19:20:14 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.3 2007-02-18 19:47:32 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.2  2007-02-13 19:20:14  harbaum
+ * Revision 1.3  2007-02-18 19:47:32  harbaum
+ * Bootloader and p2 protocol
+ *
+ * Revision 1.2  2007/02/13 19:20:14  harbaum
  * activity LED
  *
  * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
@@ -40,6 +43,30 @@
 #define IEC_CLOCK  0x02 /*!< Specify the CLOCK line */
 #define IEC_ATN    0x04 /*!< Specify the ATN line */
 #define IEC_RESET  0x08 /*!< Specify the RESET line */
+
+/* fast conversion between logical and physical mapping */
+static const unsigned char iec2hw_table[] PROGMEM = {
+  0,
+  DATA,
+         CLK,
+  DATA | CLK,
+               ATN,
+  DATA |       ATN,
+         CLK | ATN,
+  DATA | CLK | ATN,
+                     RESET,
+  DATA |             RESET,
+         CLK |       RESET,
+  DATA | CLK |       RESET,
+               ATN | RESET,
+  DATA |       ATN | RESET,
+         CLK | ATN | RESET,
+  DATA | CLK | ATN | RESET
+};
+
+static unsigned char iec2hw(char iec) {
+  return pgm_read_byte(iec2hw_table + iec);
+}
 
 /* global variable to keep track of eoi state */
 unsigned char eoi;
@@ -396,11 +423,7 @@ char xu1541_set(char lines) {
     return -1;
   }
   
-  if(lines & IEC_DATA)  SET(DATA);
-  if(lines & IEC_CLOCK) SET(CLK);
-  if(lines & IEC_ATN)   SET(ATN);
-  if(lines & IEC_RESET) SET(RESET);
-  
+  SET(iec2hw(lines));
   return 0;
 }
 
@@ -411,18 +434,11 @@ char xu1541_release(char lines) {
     return -1;
   }
 
-  if(lines & IEC_DATA)  RELEASE(DATA);
-  if(lines & IEC_CLOCK) RELEASE(CLK);
-  if(lines & IEC_ATN)   RELEASE(ATN);
-  if(lines & IEC_RESET) RELEASE(RESET);
-
+  RELEASE(iec2hw(lines));
   return 0;
 }
 
 char xu1541_setrelease(char set, char release) {
-  char set_mask = 0;
-  char release_mask = 0;
-
   if ( (set & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET))
 	  || (release & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET))) {
     // there was some bit set that is not recognized, return
@@ -430,17 +446,7 @@ char xu1541_setrelease(char set, char release) {
     return -1;
   }
 
-  if (set & IEC_DATA)  set_mask = DATA;
-  if (set & IEC_CLOCK) set_mask = CLK;
-  if (set & IEC_ATN)   set_mask = ATN;
-  if (set & IEC_RESET) set_mask = RESET;
-
-  if (release & IEC_DATA)  release_mask = DATA;
-  if (release & IEC_CLOCK) release_mask = CLK;
-  if (release & IEC_ATN)   release_mask = ATN;
-  if (release & IEC_RESET) release_mask = RESET;
-
-  SET_RELEASE(set_mask, release_mask);
+  SET_RELEASE(iec2hw(set), iec2hw(release));
 
   return 0;
 }
