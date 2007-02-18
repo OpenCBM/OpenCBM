@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.10 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: pp.c,v 1.10.2.1 2007-02-18 19:49:22 harbaum Exp $";
 #endif
 
 #include "opencbm.h"
@@ -18,6 +18,10 @@ static char *rcsid =
 #include <stdlib.h>
 
 #include "arch.h"
+
+#ifdef ENABLE_XU1541
+#include "../lib/xu1541.h"
+#endif
 
 static const unsigned char ppr1541[] = {
 #include "ppr-1541.inc"
@@ -51,6 +55,13 @@ static struct drive_prog
 
 static int write_byte(CBM_FILE fd, unsigned char c)
 {
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+    {
+	xu1541_special_write(XU1541_P2, &c, 1); 
+	return 0;
+    }
+#endif
                                                                         SETSTATEDEBUG((void)0);
     cbm_pp_write(fd, c);
                                                                         SETSTATEDEBUG((void)0);
@@ -79,6 +90,13 @@ static unsigned char read_byte(CBM_FILE fd)
 {
     unsigned char c;
 
+#ifdef ENABLE_XU1541
+    if(xu1541_handle) 
+      {
+	xu1541_special_read(XU1541_P2, &c, 1); 
+	return c;
+    }
+#endif
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_release(fd, IEC_CLOCK);
                                                                         SETSTATEDEBUG((void)0);
