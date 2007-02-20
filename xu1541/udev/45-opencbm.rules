@@ -1,0 +1,6 @@
+SUBSYSTEM!="usb_device", ACTION!="add", GOTO="opencbm_rules_end"
+
+# xu1541
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="c632", GROUP="plugdev", MODE="0664"
+
+LABEL="opencbm_rules_end"
