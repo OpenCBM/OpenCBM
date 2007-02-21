@@ -6,7 +6,7 @@
 # USBTINY	- the location of this directory
 # TARGET_ARCH	- gcc -mmcu= option with AVR device type
 # OBJECTS	- the objects in addition to the USBtiny objects
-# FLASH		- command to upload main.hex to flash
+# FLASH		- command to upload firmware-usbtiny.hex to flash
 # STACK		- maximum stack size
 # SCHEM		- Postscript version of the schematic to be generated
 #
@@ -23,27 +23,27 @@ LDFLAGS	= -g
 MODULES = crc.o int.o usb.o $(OBJECTS)
 UTIL	= $(USBTINY)/..
 
-main.hex:
+firmware-usbtiny.hex:
 
-all:		main.hex $(SCHEM)
+all:		firmware-usbtiny.hex $(SCHEM)
 
 clean:
-	rm -f main.bin *.o tags *.sch~ *~
+	rm -f firmware-usbtiny.bin *.o tags *.sch~ *~
 
 clobber:	clean
-	rm -f main.hex $(SCHEM)
+	rm -f firmware-usbtiny.hex $(SCHEM)
 
-main.bin:	$(MODULES)
+firmware-usbtiny.bin:	$(MODULES)
 	$(LINK.o) -o $@ $(MODULES)
 
-main.hex:	main.bin $(UTIL)/check.py
-	@$(UTIL)/check.py main.bin $(STACK) $(FLASHSIZE) $(RAMSIZE)
-	avr-objcopy -j .text -j .data -O ihex main.bin main.hex
+firmware-usbtiny.hex:	firmware-usbtiny.bin $(UTIL)/check.py
+	@$(UTIL)/check.py firmware-usbtiny.bin $(STACK) $(FLASHSIZE) $(RAMSIZE)
+	avr-objcopy -j .text -j .data -O ihex firmware-usbtiny.bin firmware-usbtiny.hex
 
-disasm:		main.bin
-	avr-objdump -S main.bin
+disasm:		firmware-usbtiny.bin
+	avr-objdump -S firmware-usbtiny.bin
 
-program:		main.hex
+program:		firmware-usbtiny.hex
 	$(FLASH)
 
 crc.o:		$(USBTINY)/crc.S $(USBTINY)/def.h usbtiny.h
@@ -53,4 +53,4 @@ int.o:		$(USBTINY)/int.S $(USBTINY)/def.h usbtiny.h
 usb.o:		$(USBTINY)/usb.c $(USBTINY)/def.h $(USBTINY)/usb.h usbtiny.h
 	$(COMPILE.c) $(USBTINY)/usb.c
 
-main.o:		$(USBTINY)/usb.h
+firmware-usbtiny.o:		$(USBTINY)/usb.h

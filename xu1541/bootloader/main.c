@@ -83,7 +83,6 @@ extern  byte_t  usb_setup ( byte_t data[8] ) {
   if (data[1] == USBBOOT_FUNC_LEAVE_BOOT) {
     leaveBootloader();
   } else if (data[1] == USBBOOT_FUNC_WRITE_PAGE) {
-    
     state = STATE_WRITE_PAGE;
     
     page_address = (data[3] << 8) | data[2]; /* page address */
@@ -103,7 +102,6 @@ extern  byte_t  usb_setup ( byte_t data[8] ) {
 #endif
    
   } else if (data[1] == USBBOOT_FUNC_GET_PAGESIZE) {
-    
     replyBuf[0] = SPM_PAGESIZE >> 8;
     replyBuf[1] = SPM_PAGESIZE & 0xff;
     return 2;
@@ -175,6 +173,12 @@ int main(void)
 
     /* clear usb ports */
     USB_CFG_IOPORT   &= (uchar)~((1<<USB_CFG_DMINUS_BIT)|(1<<USB_CFG_DPLUS_BIT));
+
+    /* make usb data lines outputs */
+    USBDDR    |= ((1<<USB_CFG_DMINUS_BIT)|(1<<USB_CFG_DPLUS_BIT));
+
+    /* USB Reset by device only required on Watchdog Reset */
+    _delay_ms(10);
 
     /* make usb data lines inputs */
     USBDDR &= ~((1<<USB_CFG_DMINUS_BIT)|(1<<USB_CFG_DPLUS_BIT));

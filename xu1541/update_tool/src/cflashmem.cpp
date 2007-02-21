@@ -24,6 +24,10 @@ CPage * CFlashmem::getFirstpage() {
   return m_pFirstpage;
 }
 
+CPage * CFlashmem::getLastpage() {
+  return m_pLastpage;
+}
+
 CPage* CFlashmem::getPageToAddress(unsigned int nAddress) {
   unsigned int nBaseaddress = nAddress - (nAddress % m_nPagesize);
   

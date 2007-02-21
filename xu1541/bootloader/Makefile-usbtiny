@@ -11,10 +11,11 @@ LDFLAGS += -Wl,--section-start=.text=$(BOOTLOADER_ADDRESS)
 USBTINY         = ./usbtiny
 TARGET_ARCH     = -DF_CPU=12000000 -DAVR -DUSBTINY -mmcu=atmega8
 OBJECTS         = main.o
-#CABLE           = stk200
-CABLE           = usbasp
-AVRDUDE         = sudo /usr/local/avr/bin/avrdude
-FLASH           = $(AVRDUDE) -c $(CABLE) -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc8:m -U flash:w:main.hex
+CABLE           = stk200
+#CABLE           = usbasp
+AVRDUDE         = avrdude
+#AVRDUDE         = sudo /usr/local/avr/bin/avrdude
+FLASH           = $(AVRDUDE) -c $(CABLE) -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc8:m -U flash:w:bootldr-usbtiny.hex
 STACK           = 32
 FLASHSIZE       = 8192
 RAMSIZE         = 1024

@@ -11,28 +11,35 @@
 
 #include "cbootloader.h"
 
-static int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid, char *buf, int buflen)
+static int  getDescriptorString(usb_dev_handle *dev, int index, int langid, char *buf, int buflen)
 {
-char    buffer[256];
-int     rval, i;
+  char    buffer[256];
+  int     len, i;
 
-    if((rval = usb_control_msg(dev, USB_ENDPOINT_IN, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) + index, langid, buffer, sizeof(buffer), 1000)) < 0)
-        return rval;
-    if(buffer[1] != USB_DT_STRING)
-        return 0;
-    if((unsigned char)buffer[0] < rval)
-        rval = (unsigned char)buffer[0];
-    rval /= 2;
-    /* lossy conversion to ISO Latin1 */
-    for(i=1;i<rval;i++){
-        if(i > buflen)  /* destination buffer overflow */
-            break;
-        buf[i-1] = buffer[2 * i];
-        if(buffer[2 * i + 1] != 0)  /* outside of ISO Latin1 range */
-            buf[i-1] = '?';
-    }
-    buf[i-1] = 0;
-    return i-1;
+  if((len = usb_control_msg(dev, USB_ENDPOINT_IN, 
+			    USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) + index, 
+			    langid, buffer, sizeof(buffer), 1000)) < 0)
+    return len;
+  
+  if(buffer[1] != USB_DT_STRING)
+    return 0;
+  
+  /* limit string len to embedded len */
+  if((unsigned char)buffer[0] < len) len = (unsigned char)buffer[0];  
+  len = len/2-1;  
+
+  /* limit to buffer size */
+  if(len > buflen) len = buflen;
+
+  /* lossy conversion to ISO Latin1 */
+  for(i=0;i<len;i++){
+    buf[i] = buffer[2 + 2*i];
+    if(buffer[3 + 2*i])
+      buf[i] = '_';
+  }
+  buf[i] = 0;
+
+  return i;
 }
 
 /* vendor and product id (donated by ftdi) */
@@ -62,7 +69,7 @@ usb_dev_handle      *handle = 0;
                     fprintf(stderr, "Warning: cannot open USB device: %s\n", usb_strerror());
                     continue;
                 }
-                len = usbGetStringAscii(handle, dev->descriptor.iProduct, 0x0409, string, sizeof(string));
+                len = getDescriptorString(handle, dev->descriptor.iProduct, 0x0409, string, sizeof(string));
                 if(len < 0){
                     fprintf(stderr, "warning: cannot query product name for device: %s\n", usb_strerror());
 		    if(handle) usb_close(handle);
@@ -70,8 +77,9 @@ usb_dev_handle      *handle = 0;
                 }
 
 		if(strcmp(string, "xu1541boot") != 0) {
-                    fprintf(stderr, "Error: Found xu1541 device not in bootloader mode,"
-			    " please install jumper switch and replug device!\n");
+                    fprintf(stderr, "Error: Found %s device (version %u.%02u) not in boot loader\n"
+			    "       mode, please install jumper switch and replug device!\n", 
+			    string, dev->descriptor.bcdDevice >> 8, dev->descriptor.bcdDevice & 0xff);
 
 		    if(handle) usb_close(handle);
 		    handle = NULL;		  
@@ -85,7 +93,7 @@ usb_dev_handle      *handle = 0;
     }
 
     if(!handle)
-        fprintf(stderr, "Could not find any xu1541 device in bootloader mode\n");
+        fprintf(stderr, "Could not find any xu1541 device in boot loader mode\n");
 
     return handle;
 }

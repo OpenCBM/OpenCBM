@@ -8,7 +8,7 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile-avrusb,v 1.1 2007-02-18 19:47:31 harbaum Exp $
+# This Revision: $Id: Makefile-avrusb,v 1.2 2007-02-21 17:47:18 harbaum Exp $
 
 BOOTLOADER_ADDRESS = 1800
 LDFLAGS += -Wl,--section-start=.text=$(BOOTLOADER_ADDRESS)
@@ -49,7 +49,7 @@ flash:	all
 	$(UISP) --erase --upload --verify if=bootldr-avrusb.hex
 
 program: bootldr-avrusb.hex
-	sudo /usr/local/avr/bin/avrdude -c usbasp -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc8:m -U flash:w:bootldr-avrusb.hex
+	avrdude -c stk200 -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc8:m -U flash:w:bootldr-avrusb.hex
 
 # Fuse high byte:
 # 0xc9 = 1 1 0 0   1 0 0 0 <-- BOOTRST (boot reset vector at boot code)

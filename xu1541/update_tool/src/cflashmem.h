@@ -22,6 +22,7 @@ class CFlashmem {
   void display();
   void readFromIHEX(char* filename);
   CPage * getFirstpage();
+  CPage * getLastpage();
 
  protected:
   unsigned int m_nPagesize;
