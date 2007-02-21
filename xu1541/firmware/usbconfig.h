@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: Proprietary, free under certain conditions. See Documentation.
- * This Revision: $Id: usbconfig.h,v 1.2 2007-02-05 17:01:55 harbaum Exp $
+ * This Revision: $Id: usbconfig.h,v 1.3 2007-02-21 21:51:05 harbaum Exp $
  */
 
 #ifndef __usbconfig_h_included__
@@ -51,7 +51,7 @@ must be adapted to your hardware.
 /* Define this to 1 if the device has its own power supply. Set it to 0 if the
  * device is powered from the USB bus.
  */
-#define	USB_CFG_MAX_BUS_POWER			25
+#define	USB_CFG_MAX_BUS_POWER			30
 /* Set this variable to the maximum USB bus power consumption of your device.
  * The value is in milliamperes. [It will be divided by two since USB
  * communicates power requirements in units of 2 mA.]

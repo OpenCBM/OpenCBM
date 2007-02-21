@@ -25,7 +25,7 @@
 
 // The power requirement of the USB device in mA, or 0 when the device
 // is not bus powered:
-#define	USBTINY_MAX_POWER		25
+#define	USBTINY_MAX_POWER		30
 
 // The USB vendor and device IDs. These values should be unique for
 // every distinct device. You can get your own vendor ID from the USB
