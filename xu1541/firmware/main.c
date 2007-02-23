@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.4 2007-02-18 19:47:32 harbaum Exp $
+ * This Revision: $Id: main.c,v 1.5 2007-02-23 21:33:44 harbaum Exp $
  *
  * $Log: main.c,v $
- * Revision 1.4  2007-02-18 19:47:32  harbaum
+ * Revision 1.5  2007-02-23 21:33:44  harbaum
+ * USB echo test added
+ *
+ * Revision 1.4  2007/02/18 19:47:32  harbaum
  * Bootloader and p2 protocol
  *
  * Revision 1.3  2007/02/13 19:20:14  harbaum
@@ -100,11 +103,21 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 
   switch(data[1]) {
 
+    /* ----- USB testing ----- */
+    case XU1541_ECHO:
+      DEBUGF("echo\n");
+      replyBuf[0] = data[2];
+      replyBuf[1] = data[3];
+      replyBuf[2] = data[4];
+      replyBuf[3] = data[5];
+      return 4;
+      break;
+
     /* ----- Basic I/O ----- */
     case XU1541_INFO:
       replyBuf[0] = XU1541_VERSION_MAJOR;
       replyBuf[1] = XU1541_VERSION_MINOR;
-      *(unsigned short*)(replyBuf+1) = XU1541_CAPABILIIES;
+      *(unsigned short*)(replyBuf+2) = XU1541_CAPABILIIES;
       return 4;
       break;
 
