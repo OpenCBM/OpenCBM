@@ -18,10 +18,7 @@
 #define XU1541_CAP_PROTO_PP          0x0040   // supports parallel protocol
 #define XU1541_CAP_PROTO_P2          0x0080   // supports parallel2 protocol
 
-#define XU1541_CAPABILIIES  (XU1541_CAP_CBM | XU1541_CAP_LL | \
-                             XU1541_CAP_PP  | XU1541_CAP_PROTO_S1 | \
-                             XU1541_CAP_PROTO_S2 | XU1541_CAP_PROTO_PP | \
-                             XU1541_CAP_PROTO_P2)
+#define XU1541_CAPABILIIES  (XU1541_CAP_CBM | XU1541_CAP_LL | XU1541_CAP_PP  | XU1541_CAP_PROTO_S1 | XU1541_CAP_PROTO_S2 | XU1541_CAP_PROTO_PP | XU1541_CAP_PROTO_P2)
 
 #define XU1541_READ                  1
 #define XU1541_WRITE                 2

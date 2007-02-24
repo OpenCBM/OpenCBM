@@ -30,6 +30,8 @@
 #define PAR_PORT1_PIN    PINB
 #define PAR_PORT1_PORT   PORTB
 
+#define XU1541_DELAY { _udelay_us(10); }
+
 /* makros are used to actually access the port pins */
 #define POLL()           (CBM_PIN)
 /* set line means: make it an output and drive it low */
