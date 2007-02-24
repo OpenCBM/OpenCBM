@@ -3,8 +3,7 @@
 
   Thomas Fischl <tfischl@gmx.de>
 
-  Creation Date..: 2006-03-18
-  Last change....: 2006-06-25
+  modified for xu1541 by Till Harbaum
 */
 
 #include <stdio.h>
@@ -18,7 +17,11 @@
 int main(int argc, char **argv) {
 
   if (argc < 2) {
-    fprintf(stderr, "usage: xu1541_update firmware.hex\n");
+    printf("usage: xu1541_update firmware.hex\n");
+#ifdef WIN
+    printf("Press return to quit\n");
+    getchar();
+#endif
     exit(1);
   }
 
@@ -27,7 +30,11 @@ int main(int argc, char **argv) {
   
   printf("Found xu1541 in boot loader mode, updating:\n");
   if(pagesize != 64) {
-    fprintf(stderr, "Unexpected page size: %d\n", pagesize);
+    printf("Unexpected page size: %d\n", pagesize);
+#ifdef WIN
+    printf("Press return to quit\n");
+    getchar();
+#endif
     exit(1);
   }
 
@@ -37,17 +44,25 @@ int main(int argc, char **argv) {
 
   /* make sure image is relocated correctly */
   if(flashmem->getFirstpage()->getPageaddress()) {
-    fprintf(stderr, "Error: Image starts at address $%x != 0\n", 
+    printf("Error: Image starts at address $%x != 0\n", 
 	    flashmem->getFirstpage()->getPageaddress());
+#ifdef WIN
+    printf("Press return to quit\n");
+    getchar();
+#endif
     exit(1);
   }
     
   /* make sure image fits into chip (8k - 2k boot loader) */
   if(flashmem->getLastpage()->getPageaddress() + pagesize - 1 > (8192-2048-1)) {
-    fprintf(stderr, "Error: Image too long, ends at $%x > $%x\n", 
+    printf("Error: Image too long, ends at $%x > $%x\n", 
 	    flashmem->getLastpage()->getPageaddress() + pagesize - 1,
 	    (8192-2048-1));
 
+#ifdef WIN
+    printf("Press return to quit\n");
+    getchar();
+#endif
     exit(1);
   }
 
@@ -55,12 +70,16 @@ int main(int argc, char **argv) {
   while (pPage != NULL) {
     printf("."); fflush(stdout);
     
-
     bootloader->writePage(pPage);
     pPage = pPage->getNext();
   } 
 
   printf(" done\nPlease remove jumper switch and replug USB cable to return to normal operation!\n");
+
+#ifdef WIN
+    printf("Press return to quit\n");
+    getchar();
+#endif
 
   return 0;
 }

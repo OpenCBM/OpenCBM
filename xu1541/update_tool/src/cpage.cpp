@@ -56,8 +56,8 @@ void CPage::setNext(CPage* pPage) {
   m_pNextpage = pPage;
 }
 
-CPage* CPage::insert(unsigned int nAddress, unsigned char bValue) {
-  assert(m_nPageaddress == (nAddress - (nAddress % m_nPagesize)));
+void CPage::insert(unsigned int nAddress, unsigned char bValue) {
+  assert((unsigned int)m_nPageaddress == (nAddress - (nAddress % m_nPagesize)));
   m_pData[nAddress % m_nPagesize] = bValue;
 }
 

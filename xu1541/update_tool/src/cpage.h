@@ -25,7 +25,7 @@ class CPage {
   unsigned char* getData();
   CPage* getPrev();
   CPage* getNext();
-  CPage* insert(unsigned int nAddress, unsigned char bValue);
+  void insert(unsigned int nAddress, unsigned char bValue);
   void display();
   void setPrev(CPage* pPage);
   void setNext(CPage* pPage);

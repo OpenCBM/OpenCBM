@@ -59,32 +59,32 @@ usb_dev_handle      *handle = 0;
     usb_find_busses();
     usb_find_devices();
 
-    for(bus=usb_busses; bus; bus=bus->next){
+    for(bus=usb_get_busses(); bus; bus=bus->next){
         for(dev=bus->devices; dev; dev=dev->next){
             if(dev->descriptor.idVendor == XU1541_VID && dev->descriptor.idProduct == XU1541_PID){
                 char    string[256];
                 int     len;
                 handle = usb_open(dev); /* we need to open the device in order to query strings */
                 if(!handle){
-                    fprintf(stderr, "Warning: cannot open USB device: %s\n", usb_strerror());
+                    printf("Warning: cannot open USB device: %s\n", usb_strerror());
                     continue;
                 }
                 len = getDescriptorString(handle, dev->descriptor.iProduct, 0x0409, string, sizeof(string));
                 if(len < 0){
-                    fprintf(stderr, "warning: cannot query product name for device: %s\n", usb_strerror());
+                    printf("warning: cannot query product name for device: %s\n", usb_strerror());
 		    if(handle) usb_close(handle);
 		    handle = NULL;
                 }
 
 		if(strcmp(string, "xu1541boot") != 0) {
-                    fprintf(stderr, "Error: Found %s device (version %u.%02u) not in boot loader\n"
-			    "       mode, please install jumper switch and replug device!\n", 
-			    string, dev->descriptor.bcdDevice >> 8, dev->descriptor.bcdDevice & 0xff);
-
+		    printf("Error: Found %s device (version %u.%02u) not in boot loader\n"
+			   "       mode, please install jumper switch and replug device!\n", 
+			   string, dev->descriptor.bcdDevice >> 8, dev->descriptor.bcdDevice & 0xff);
+		    
 		    if(handle) usb_close(handle);
 		    handle = NULL;		  
 		}
-
+		
 		break;
             }
         }
@@ -93,7 +93,7 @@ usb_dev_handle      *handle = 0;
     }
 
     if(!handle)
-        fprintf(stderr, "Could not find any xu1541 device in boot loader mode\n");
+        printf("Could not find any xu1541 device in boot loader mode\n");
 
     return handle;
 }
@@ -102,8 +102,13 @@ usb_dev_handle      *handle = 0;
 
 CBootloader::CBootloader() {
   usb_init();
-  if((usbhandle = findDevice()) == NULL)
+  if((usbhandle = findDevice()) == NULL) {
+#ifdef WIN
+    printf("Press return to quit\n");
+    getchar();
+#endif
     exit(1);
+  }
 }
 
 CBootloader::~CBootloader() {
@@ -121,7 +126,11 @@ unsigned int CBootloader::getPagesize() {
 			   5000);
 
   if (nBytes != 2) {
-    fprintf(stderr, "Error: wrong response size in getPageSize: %d !\n", nBytes);
+    printf("Error: wrong response size in getPageSize: %d !\n", nBytes);
+#ifdef WIN
+    printf("Press return to quit\n");
+    getchar();
+#endif
     exit(1);
   }
 
@@ -139,7 +148,11 @@ void CBootloader::startApplication() {
 			   5000);
 
   if (nBytes != 0) {
-    fprintf(stderr, "Error: wrong response size in startApplication: %d !\n", nBytes);
+    printf("Error: wrong response size in startApplication: %d !\n", nBytes);
+#ifdef WIN
+    printf("Press return to quit\n");
+    getchar();
+#endif
     exit(1);
   }
 }
@@ -155,8 +168,12 @@ void CBootloader::writePage(CPage* page) {
 			   (char*) page->getData(), page->getPagesize(), 
 			   5000);
 
-  if (nBytes != page->getPagesize()) {
-    fprintf(stderr, "Error: wrong byte count in writePage: %d !\n", nBytes);
+  if (nBytes != (signed)page->getPagesize()) {
+    printf("Error: wrong byte count in writePage: %d !\n", nBytes);
+#ifdef WIN
+    printf("Press return to quit\n");
+    getchar();
+#endif
     exit(1);
   }
 }

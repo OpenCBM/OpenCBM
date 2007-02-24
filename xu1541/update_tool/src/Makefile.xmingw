@@ -1,0 +1,20 @@
+#
+# Makefile.xmingw
+#
+
+XMINGW_ROOT = /usr/local/cross-tools/bin
+
+GPP = $(XMINGW_ROOT)/i386-mingw32msvc-g++
+
+APP = xu1541_update
+
+all: ../$(APP).exe
+
+clean:
+	rm -f ../$(APP).exe *.o
+
+%.o:%.cpp
+	$(GPP) -Wall -DWIN -c $< 
+
+ ../$(APP).exe: main.cpp cflashmem.o cpage.o cbootloader.o
+	$(GPP) -Wall -DWIN main.cpp cflashmem.o cpage.o cbootloader.o -o $@ -lusb
