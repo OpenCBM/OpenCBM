@@ -35,10 +35,10 @@ extern int xu1541_init(void);
 extern void xu1541_close(void);
 extern int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr);
 extern int xu1541_write(const __u_char *data, size_t len);
-extern int xu1541_read(void *data, size_t len);
+extern int xu1541_read(__u_char *data, size_t len);
 
 /* calls for speeder supported modes */
-extern int xu1541_special_write(int mode, const void *data, size_t size);
-extern int xu1541_special_read(int mode, void *data, size_t size);
+extern int xu1541_special_write(int mode, const __u_char *data, size_t size);
+extern int xu1541_special_read(int mode, __u_char *data, size_t size);
 
 #endif // XU1541_H
