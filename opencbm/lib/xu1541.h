@@ -7,11 +7,13 @@
 #include "opencbm.h"
 
 #if 0
-#define FUNC_ENTER()  printf("CBMLIB: Entering %s\n", __func__)
-#define DEBUGF(format, args...) printf("CBMLIB: " format "\n", ##args)
+ #define FUNC_ENTER()  printf("CBMLIB: Entering %s\n", __func__)
+ #define DEBUGF(format, args...) printf("CBMLIB: " format "\n", ##args)
 #else
-#define FUNC_ENTER()
-#define DEBUGF(format, args...)
+ #ifndef FUNC_ENTER
+  #define FUNC_ENTER()
+ #endif
+ #define DEBUGF(_x)
 #endif
 
 /* time out one second after device itself times out */
@@ -31,8 +33,8 @@ extern usb_dev_handle *xu1541_handle;
 /* calls required for standard io */
 extern int xu1541_init(void);
 extern void xu1541_close(void);
-extern int xu1541_ioctl(__u_char cmd, __u_char addr, __u_char secaddr);
-extern int xu1541_write(const void *data, size_t len);
+extern int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr);
+extern int xu1541_write(const __u_char *data, size_t len);
 extern int xu1541_read(void *data, size_t len);
 
 /* calls for speeder supported modes */

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.17.2.1 2007-02-08 19:19:39 harbaum Exp $ \n
+** \version $Id: cbm.c,v 1.17.2.2 2007-03-01 19:52:08 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -692,7 +692,7 @@ cbm_pp_read(CBM_FILE HandleDevice)
 #ifdef ENABLE_XU1541
     if(xu1541_handle) 
     {
-	FUNC_LEAVE_UCHAR(xu1541_ioctl(XU1541_PP_READ, 0, 0));
+	FUNC_LEAVE_UCHAR((UCHAR)xu1541_ioctl(XU1541_PP_READ, 0, 0));
     }
 #endif
 

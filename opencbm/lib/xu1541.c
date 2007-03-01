@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.1.2.2 2007-02-20 13:36:35 harbaum Exp $ \n
+** \version $Id: xu1541.c,v 1.1.2.3 2007-03-01 19:52:08 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -65,7 +65,7 @@ int xu1541_init(void) {
   struct usb_bus      *bus;
   struct usb_device   *dev;
 
-  DEBUGF("Scanning usb ...");
+  DEBUGF(("Scanning usb ..."));
 
   usb_init();
   
@@ -83,8 +83,8 @@ int xu1541_init(void) {
 	char    string[256];
 	int     len;
 	
-        DEBUGF("Found xu1541 device on bus %s device %s.",
-               bus->dirname, dev->filename);
+        DEBUGF(("Found xu1541 device on bus %s device %s.",
+               bus->dirname, dev->filename));
 
         /* open device */
         if(!(xu1541_handle = usb_open(dev)))
@@ -117,7 +117,7 @@ int xu1541_init(void) {
   }
   
   if(!xu1541_handle) {
-    DEBUGF("No xu1541 device found");
+    DEBUGF(("No xu1541 device found"));
     return -1;
   } else {
 #ifndef WIN
@@ -134,7 +134,7 @@ int xu1541_init(void) {
 
 void xu1541_close(void)
 {
-    DEBUGF("Closing USB link");
+    DEBUGF(("Closing USB link"));
 
 #ifndef WIN
     if(usb_release_interface(xu1541_handle, 0))
@@ -144,12 +144,12 @@ void xu1541_close(void)
     usb_close(xu1541_handle);
 }
 
-int xu1541_ioctl(__u_char cmd, __u_char addr, __u_char secaddr)
+int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
   int nBytes;
   char ret[4] =  { 0x11, 0x22, 0x33, 0x44 };
 
-  DEBUGF("ioctl %d for device %d, sub %d", cmd, addr, secaddr);
+  DEBUGF(("ioctl %d for device %d, sub %d", cmd, addr, secaddr));
 
   /* USB_TIMEOUT msec timeout required for reset */
   if((nBytes = usb_control_msg(xu1541_handle, 
@@ -160,17 +160,17 @@ int xu1541_ioctl(__u_char cmd, __u_char addr, __u_char secaddr)
       return -1;
   }
 
-  DEBUGF("returned %d bytes", nBytes);
+  DEBUGF(("returned %d bytes", nBytes));
 
   /* return ok(0) if command does not have a return value */
   if(nBytes == 0) 
     return 0;
 
-  DEBUGF("return val = %x", ret[0]);
+  DEBUGF(("return val = %x", ret[0]));
   return ret[0];
 }
 
-int xu1541_write(const void *data, size_t len) 
+int xu1541_write(const __u_char *data, size_t len) 
 {
     int bytesWritten = 0;
 
@@ -194,17 +194,17 @@ int xu1541_write(const void *data, size_t len)
 	data += wr;
 	bytesWritten += wr;
 
-	DEBUGF("wrote chunk %d bytes, total %d, left %d", 
-	       wr, bytesWritten, len);
+	DEBUGF(("wrote chunk %d bytes, total %d, left %d", 
+	       wr, bytesWritten, len));
     }
     return bytesWritten;
 }
 
-int xu1541_read(void *data, size_t len) 
+int xu1541_read(__u_char *data, size_t len) 
 {
     int bytesRead = 0;
     
-    DEBUGF("request to read %d bytes to %p", len, data);
+    DEBUGF(("request to read %d bytes to %p", len, data));
     
     while(len > 0) 
     {
@@ -226,8 +226,8 @@ int xu1541_read(void *data, size_t len)
 	data += rd;
 	bytesRead += rd;
 
-	DEBUGF("received chunk %d bytes, total %d ,left %d", 
-	       rd, bytesRead, len);
+	DEBUGF(("received chunk %d bytes, total %d ,left %d", 
+	       rd, bytesRead, len));
 	
 	/* force end of read */
 	if(rd < bytes2read) len = 0;
@@ -235,7 +235,7 @@ int xu1541_read(void *data, size_t len)
     return bytesRead;
 }
 
-int xu1541_special_write(int mode, const void *data, size_t size) 
+int xu1541_special_write(int mode, const __u_char *data, size_t size) 
 {
     int bytesWritten = 0;
 
@@ -259,7 +259,7 @@ int xu1541_special_write(int mode, const void *data, size_t size)
     return bytesWritten;
 }
 
-int xu1541_special_read(int mode, void *data, size_t size) 
+int xu1541_special_read(int mode, __u_char *data, size_t size) 
 {
     int bytesRead = 0;
 
