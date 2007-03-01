@@ -5,7 +5,7 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile-avrusb,v 1.3 2007-02-21 17:47:19 harbaum Exp $
+# This Revision: $Id: Makefile-avrusb,v 1.4 2007-03-01 12:59:08 harbaum Exp $
 
 SERIAL = `echo /dev/tty.[Uu][Ss]*`
 UISP = uisp -dprog=stk200
@@ -17,7 +17,7 @@ UISP = uisp -dprog=stk200
 DEFINES += -DF_CPU=12000000
 COMPILE = avr-gcc -Wall -O2 -Iusbdrv -I. -mmcu=atmega8 $(DEFINES)
 
-OBJECTS = usbdrv/usbdrv.o usbdrv/usbdrvasm.o usbdrv/oddebug.o main.o xu1541.o s1.o s2.o pp.o p2.o
+OBJECTS = usbdrv/usbdrv.o usbdrv/usbdrvasm.o usbdrv/oddebug.o main.o xu1541.o s1.o s2.o pp.o p2.o event_log.o
 
 
 # symbolic targets:

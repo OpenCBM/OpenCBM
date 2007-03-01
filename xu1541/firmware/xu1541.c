@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.3 2007-02-18 19:47:32 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.4 2007-03-01 12:59:08 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.3  2007-02-18 19:47:32  harbaum
+ * Revision 1.4  2007-03-01 12:59:08  harbaum
+ * Added event log
+ *
+ * Revision 1.3  2007/02/18 19:47:32  harbaum
  * Bootloader and p2 protocol
  *
  * Revision 1.2  2007/02/13 19:20:14  harbaum
@@ -31,6 +34,7 @@
 #include <util/delay.h>
 
 #include "xu1541.h"
+#include "event_log.h"
 
 #ifdef DEBUG
 #define DEBUGF(format, args...) printf_P(PSTR(format), ##args)
@@ -129,6 +133,7 @@ static void wait_for_free_bus(void) {
     ++i;
     
     if (i == 1000) {
+      EVENT(EVENT_TIMEOUT_FREE_BUS);
       DEBUGF("Quiting because of timeout\n");
       break;
     }
@@ -174,6 +179,12 @@ static char send_byte(unsigned char b) {
     _delay_us(10);
   }
 
+#ifdef ENABLE_EVENT_LOG
+  if(!ack) {
+    EVENT(EVENT_BYTE_NAK);
+  }
+#endif
+
   return ack;
 }
 
@@ -218,6 +229,7 @@ char cbm_raw_write(const unsigned char *buf, char cnt, char atn, char talk) {
   if(!GET(DATA)) {
     DEBUGF("cbm_write: no devices found\n");
     RELEASE(CLK | ATN);
+    EVENT(EVENT_WRITE_NO_DEV);
     return -1;
   }
 
@@ -233,6 +245,7 @@ char cbm_raw_write(const unsigned char *buf, char cnt, char atn, char talk) {
       /* release clock and wait for listener to release data */
       if(!wait_for_listener()) {
 	DEBUGF("w4l timeout\n");
+	EVENT(EVENT_TIMEOUT_LISTENER);
 	RELEASE(CLK | ATN);
 	return -1;
       }
@@ -263,10 +276,12 @@ char cbm_raw_write(const unsigned char *buf, char cnt, char atn, char talk) {
 	sent++;
 	_delay_us(100);
       } else {
+	EVENT(EVENT_WRITE_FAILED);
 	DEBUGF("cbm_write: I/O error\n");
 	rv = -1;
       }
     } else {
+      EVENT(EVENT_WRITE_DEV_NOT_PRESENT);
       DEBUGF("cbm_write: device not present\n");
       rv = -1;
     }
@@ -297,12 +312,13 @@ char xu1541_read(unsigned char *data, unsigned char len) {
     /* wait for clock to be released */
     while(GET(CLK)) {
       if( i >= 50 ) {
-	   /* 1 sec timeout */
-	   DEBUGF("timeout\n");
-	   return -1;
+	/* 1 sec timeout */
+	EVENT(EVENT_READ_TIMEOUT);
+	DEBUGF("timeout\n");
+	return -1;
       } else {
-	   i++;
-	   _delay_us(20);
+	i++;
+	_delay_us(20);
       }
     }
     
@@ -332,16 +348,16 @@ char xu1541_read(unsigned char *data, unsigned char len) {
 	 
       /* wait for clock to be asserted */
       for(i = 0; (i < 200) && !(ok=(GET(CLK)==0)); i++) {
-	   _delay_us(10);
+	_delay_us(10);
       }
       if(ok) {
-	   b >>= 1;
-	   if(GET(DATA)==0) {
-		b |= 0x80;
-	   }
-	   for(i = 0; i < 100 && !(ok=GET(CLK)); i++) {
-		_delay_us(20);
-	   }
+	b >>= 1;
+	if(GET(DATA)==0) {
+	  b |= 0x80;
+	}
+	for(i = 0; i < 100 && !(ok=GET(CLK)); i++) {
+	  _delay_us(20);
+	}
       }
     }
     
@@ -349,7 +365,7 @@ char xu1541_read(unsigned char *data, unsigned char len) {
     if(ok) {
       SET(DATA);
     }
-
+    
     if(ok) {
       data[received++] = b;
       _delay_us(50);
@@ -357,6 +373,7 @@ char xu1541_read(unsigned char *data, unsigned char len) {
   } while(received < len && ok && !eoi);
   
   if(!ok) {
+    EVENT(EVENT_READ_ERROR);
     DEBUGF("cbm_read: I/O error\n");
     return -1;
   }
@@ -393,6 +410,7 @@ char xu1541_wait(char line, char state) {
   while((POLL() & hw_mask) == hw_state) {
     if(i >= 1000) {
       if(j++ > XU1541_W4L_TIMEOUT * 100) {
+	EVENT(EVENT_TIMEOUT_IEC_WAIT);
 	DEBUGF("iec_wait timeout\n");
 	return -1;
       }

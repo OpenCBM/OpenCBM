@@ -5,8 +5,11 @@
 #ifndef XU1541_TYPES_H
 #define XU1541_TYPES_H
 
+/* special commands used for testing and debugging */
 #define XU1541_ECHO                  0xff
+#define XU1541_GET_EVENT             0xfe
 
+/* normal commands */
 #define XU1541_INFO                  0
 
 #define XU1541_CAP_CBM               0x0001   // supports CBM commands

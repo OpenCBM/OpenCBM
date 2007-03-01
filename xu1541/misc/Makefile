@@ -2,13 +2,17 @@
 # Makefile
 #
 
-APP = usb_echo_test
+ECHO_TEST = usb_echo_test
+EVENT_LOG = read_event_log
 
-all: $(APP)
+all: $(ECHO_TEST) $(EVENT_LOG)
 
 clean:
-	rm -f $(APP)
+	rm -f $(ECHO_TEST) $(EVENT_LOG)
 
-$(APP): $(APP).c
-	$(CC) -Wall -o $@ $(APP).c -lusb
+$(ECHO_TEST): $(ECHO_TEST).c
+	$(CC) -Wall -o $@ $< -lusb
+
+$(EVENT_LOG): $(EVENT_LOG).c
+	$(CC) -Wall -o $@ $< -lusb
 

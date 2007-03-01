@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.5 2007-02-23 21:33:44 harbaum Exp $
+ * This Revision: $Id: main.c,v 1.6 2007-03-01 12:59:08 harbaum Exp $
  *
  * $Log: main.c,v $
- * Revision 1.5  2007-02-23 21:33:44  harbaum
+ * Revision 1.6  2007-03-01 12:59:08  harbaum
+ * Added event log
+ *
+ * Revision 1.5  2007/02/23 21:33:44  harbaum
  * USB echo test added
  *
  * Revision 1.4  2007/02/18 19:47:32  harbaum
@@ -68,6 +71,7 @@ unsigned char io_mode;
 #include "s2.h"
 #include "pp.h"
 #include "p2.h"
+#include "event_log.h"
 
 #ifdef DEBUG
 #define DEBUGF(format, args...) printf_P(PSTR(format), ##args)
@@ -112,6 +116,16 @@ extern	byte_t	usb_setup ( byte_t data[8] )
       replyBuf[3] = data[5];
       return 4;
       break;
+
+    /* ----- Debugging ----- */
+#ifdef ENABLE_EVENT_LOG
+    case XU1541_GET_EVENT:
+      DEBUGF("get event\n");
+      replyBuf[0] = EVENT_LOG_LEN;
+      replyBuf[1] = event_log_get(data[2]);
+      return 2;
+      break;
+#endif
 
     /* ----- Basic I/O ----- */
     case XU1541_INFO:
@@ -465,6 +479,29 @@ void usb_out ( byte_t* data, byte_t len )
 
 int	main(void) {
   wdt_enable(WDTO_1S);
+
+#ifdef ENABLE_EVENT_LOG
+  event_log_init();
+  EVENT(EVENT_START);
+
+  /* save reset reasons */
+  if(MCUCSR & (_BV(EXTRF)|_BV(PORF))) {
+    EVENT(EVENT_RESET_EXT);
+    MCUCSR &= ~_BV(EXTRF);
+    MCUCSR &= ~_BV(PORF);
+  }
+
+  if(MCUCSR & _BV(WDRF)) {
+    EVENT(EVENT_RESET_WATCHDOG);
+    MCUCSR &= ~_BV(WDRF);
+  }
+
+  if(MCUCSR & _BV(BORF)) {
+    EVENT(EVENT_RESET_BROWNOUT);
+    MCUCSR &= ~_BV(BORF);
+  }
+#endif  
+
 
 #if DEBUG_LEVEL > 0
   /* let debug routines init the uart if they want to */

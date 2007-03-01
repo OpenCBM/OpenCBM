@@ -6,14 +6,17 @@ XMINGW_ROOT = /usr/local/cross-tools/bin
 
 CC = $(XMINGW_ROOT)/i386-mingw32msvc-gcc
 
-APP = usb_echo_test
+ECHO_TEST = usb_echo_test
+EVENT_LOG = read_event_log
 
-all: $(APP).exe
+all: $(ECHO_TEST).exe $(EVENT_LOG).exe
 
 clean:
-	rm -f $(APP).exe
+	rm -f $(ECHO_TEST) $(EVENT_LOG)
 
-$(APP).exe: $(APP).c
-	$(CC) -Wall -DWIN -o $@ $(APP).c -lusb
+$(ECHO_TEST).exe: $(ECHO_TEST).c
+	$(CC) -Wall -DWIN -o $@ $< -lusb
 
- 
+$(EVENT_LOG).exe: $(EVENT_LOG).c
+	$(CC) -Wall -DWIN -o $@ $< -lusb
+
