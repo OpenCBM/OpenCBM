@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.1.2.4 2007-03-01 20:23:56 harbaum Exp $ \n
+** \version $Id: xu1541.c,v 1.1.2.5 2007-03-03 11:41:58 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -182,7 +182,7 @@ int xu1541_write(const __u_char *data, size_t len)
 	if((wr = usb_control_msg(xu1541_handle, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_OUT, 
 				 XU1541_WRITE,
-				 bytes2write, 0, (void*)data, 
+				 bytes2write, 0, (char*)data, 
 				 bytes2write, USB_TIMEOUT)) < 0) 
 	{
 	    fprintf(stderr, "USB error xu1541_write(): %s\n", usb_strerror());
@@ -214,7 +214,7 @@ int xu1541_read(__u_char *data, size_t len)
 	if((rd = usb_control_msg(xu1541_handle, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				 XU1541_READ,
-				 bytes2read, 0, (void*)data, 
+				 bytes2read, 0, (char*)data, 
 				 bytes2read, USB_TIMEOUT)) < 0) 
 	{
 	    fprintf(stderr, "USB error in xu1541_read(): %s\n", usb_strerror());
@@ -244,7 +244,7 @@ int xu1541_special_write(int mode, const __u_char *data, size_t size)
 
 	if((wr = usb_control_msg(xu1541_handle, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_OUT, mode,
-				 XU1541_WRITE, bytes2write, (void*)data, 
+				 XU1541_WRITE, bytes2write, (char*)data, 
 				 bytes2write, USB_TIMEOUT)) < 0) {
 	    fprintf(stderr, "USB error in xu1541_special_write(): %s\n", usb_strerror());
       exit(-1);
@@ -268,7 +268,7 @@ int xu1541_special_read(int mode, __u_char *data, size_t size)
 	
 	if((rd = usb_control_msg(xu1541_handle, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_IN, mode,
-				 XU1541_READ, bytes2read, (void*)data, 
+				 XU1541_READ, bytes2read, (char*)data, 
 				 bytes2read, USB_TIMEOUT)) < 0) {
 	    fprintf(stderr, "USB error in xu1541_special_read(): %s\n", usb_strerror());
       exit(-1);
