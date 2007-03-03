@@ -5,7 +5,7 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile-avrusb,v 1.4 2007-03-01 12:59:08 harbaum Exp $
+# This Revision: $Id: Makefile-avrusb,v 1.5 2007-03-03 12:18:09 harbaum Exp $
 
 SERIAL = `echo /dev/tty.[Uu][Ss]*`
 UISP = uisp -dprog=stk200
@@ -73,11 +73,8 @@ firmware-avrusb.hex:	firmware-avrusb.bin
 program: firmware-avrusb.hex
 	avrdude -c stk200 -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc9:m -U flash:w:firmware-avrusb.hex
 
-program-nodep:
+program-usb: firmware-avrusb.hex
 	avrdude -c usbasp -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc9:m -U flash:w:firmware-avrusb.hex
-
-disasm:	firmware-avrusb.bin
-	avr-objdump -d firmware-avrusb.bin
 
 cpp:
 	$(COMPILE) -E main.c

@@ -30,15 +30,16 @@
 #define PAR_PORT1_PIN    PINB
 #define PAR_PORT1_PORT   PORTB
 
-#define XU1541_DELAY { _udelay_us(10); }
+#include <util/delay.h>
+#define XU1541_DELAY { _delay_us(1); }
 
 /* makros are used to actually access the port pins */
 #define POLL()           (CBM_PIN)
 /* set line means: make it an output and drive it low */
-#define SET(line)        { CBM_PORT &= ~(line); CBM_DDR |= (line); }
+#define SET(line)        { XU1541_DELAY; CBM_PORT &= ~(line); CBM_DDR |= (line); }
 /* release means: make it an input and enable the pull-ups */
-#define RELEASE(line)    { CBM_DDR &= ~(line); CBM_PORT |= (line); }
-#define SET_RELEASE(s,r) { SET(s); RELEASE(r); }
+#define RELEASE(line)    {  XU1541_DELAY; CBM_DDR &= ~(line); CBM_PORT |= (line); }
+#define SET_RELEASE(s,r) {  XU1541_DELAY; SET(s); RELEASE(r); }
 #define GET(line)        ((CBM_PIN&(line))==0?1:0)
 
 #ifndef DEBUG
