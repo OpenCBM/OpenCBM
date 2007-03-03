@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.4 2007-03-01 12:59:08 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.5 2007-03-03 14:54:14 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.4  2007-03-01 12:59:08  harbaum
+ * Revision 1.5  2007-03-03 14:54:14  harbaum
+ * More 1571 adjustments
+ *
+ * Revision 1.4  2007/03/01 12:59:08  harbaum
  * Added event log
  *
  * Revision 1.3  2007/02/18 19:47:32  harbaum
@@ -309,10 +312,10 @@ char xu1541_read(unsigned char *data, unsigned char len) {
   do {
     i = 0;
     
-    /* wait for clock to be released */
+    /* wait for clock to be released, may be required while write errors */
     while(GET(CLK)) {
-      if( i >= 50 ) {
-	/* 1 sec timeout */
+      if( i >= 200 ) {
+	/* 4 sec timeout */
 	EVENT(EVENT_READ_TIMEOUT);
 	DEBUGF("timeout\n");
 	return -1;

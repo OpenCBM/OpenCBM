@@ -33,14 +33,37 @@
 #include <util/delay.h>
 #define XU1541_DELAY { _delay_us(1); }
 
-/* makros are used to actually access the port pins */
-#define POLL()           (CBM_PIN)
+/* inlined functions are used to actually access the port pins */
+static inline unsigned char POLL(void) {
+  _delay_us(1);
+  return CBM_PIN;
+}
+
 /* set line means: make it an output and drive it low */
-#define SET(line)        { XU1541_DELAY; CBM_PORT &= ~(line); CBM_DDR |= (line); }
+static inline void SET(unsigned char line) {
+  _delay_us(1);
+  CBM_PORT &= ~line; 
+  CBM_DDR |= line;
+}
+
 /* release means: make it an input and enable the pull-ups */
-#define RELEASE(line)    {  XU1541_DELAY; CBM_DDR &= ~(line); CBM_PORT |= (line); }
-#define SET_RELEASE(s,r) {  XU1541_DELAY; SET(s); RELEASE(r); }
-#define GET(line)        ((CBM_PIN&(line))==0?1:0)
+static inline void RELEASE(unsigned char line) {
+  _delay_us(1);
+  CBM_DDR &= ~line; 
+  CBM_PORT |= line;
+}
+
+static inline void SET_RELEASE(unsigned char s, unsigned char r) {
+  _delay_us(1);
+  CBM_PORT &= ~s; 
+  CBM_DDR = (CBM_DDR | s) & ~r;
+  CBM_PORT |= r;
+}
+
+static inline unsigned char GET(unsigned char line) {
+  _delay_us(1);
+  return ((CBM_PIN & line) == 0 )?1:0;
+}
 
 #ifndef DEBUG
 #define LED_ON()     { PORTD &= ~_BV(1); }

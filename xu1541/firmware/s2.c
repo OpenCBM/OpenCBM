@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s2.c,v 1.3 2007-02-06 22:34:44 harbaum Exp $
+ * This Revision: $Id: s2.c,v 1.4 2007-03-03 14:54:14 harbaum Exp $
  *
  * $Log: s2.c,v $
- * Revision 1.3  2007-02-06 22:34:44  harbaum
+ * Revision 1.4  2007-03-03 14:54:14  harbaum
+ * More 1571 adjustments
+ *
+ * Revision 1.3  2007/02/06 22:34:44  harbaum
  * Release DATA after byte was written
  *
  * Revision 1.2  2007/02/04 15:12:04  harbaum
@@ -31,12 +34,12 @@ static void s2_write_byte(unsigned char c) {
   unsigned char i;
 
   for(i=0; i<4; i++) {
-    if(c & 1) { SET(DATA) } else { RELEASE(DATA); }
+    if(c & 1) { SET(DATA); } else { RELEASE(DATA); }
     c >>= 1;
     RELEASE(ATN);
     while(GET(CLK));
 
-    if(c & 1) { SET(DATA) } else { RELEASE(DATA); }
+    if(c & 1) { SET(DATA); } else { RELEASE(DATA); }
     c >>= 1;
     SET(ATN);
     while(!GET(CLK));
