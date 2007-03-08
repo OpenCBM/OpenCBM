@@ -59,6 +59,6 @@
 #define XU1541_P2                    (XU1541_S1 + 3)
 
 /* max time to wait for device */
-#define XU1541_W4L_TIMEOUT        5  // 5 seconds
+#define XU1541_W4L_TIMEOUT        20  // seconds, max. 60 possible here
 
 #endif // XU1541_TYPES_H

@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s1.c,v 1.2 2007-02-04 15:12:04 harbaum Exp $
+ * This Revision: $Id: s1.c,v 1.3 2007-03-08 11:16:23 harbaum Exp $
  *
  * $Log: s1.c,v $
- * Revision 1.2  2007-02-04 15:12:04  harbaum
+ * Revision 1.3  2007-03-08 11:16:23  harbaum
+ * timeout and watchdog adjustments
+ *
+ * Revision 1.2  2007/02/04 15:12:04  harbaum
  * Fixed broken optimization in s1/s2 write byte
  *
  * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
@@ -20,9 +23,11 @@
 /* changes in the protocol must be reflected here. */
 
 #include <avr/io.h>
+#include <avr/wdt.h>
 
 #include "xu1541.h"
 #include "s1.h"
+
 
 static void s1_write_byte(unsigned char c) {
   unsigned char i;
@@ -30,12 +35,16 @@ static void s1_write_byte(unsigned char c) {
   for(i=0; i<8; i++, c<<=1) {
     if(c & 0x80) { SET(DATA); } else { RELEASE(DATA); }
     RELEASE(CLK);
-    while(!GET(CLK));
+
+    while(!GET(CLK))
+      wdt_reset();
+
     if(c & 0x80) { RELEASE(DATA); } else { SET(DATA); }
     while(GET(CLK));
     RELEASE(DATA);
     SET(CLK);
-    while(!GET(DATA));
+    while(!GET(DATA))
+      wdt_reset();
   }
 }
 
@@ -54,14 +63,21 @@ static unsigned char s1_read_byte(void) {
 
   c = 0;
   for(i=7; i>=0; i--) {
-    while(GET(DATA));
+    while(GET(DATA))
+      wdt_reset();
+
     RELEASE(CLK);
     b = GET(CLK);
     c = (c >> 1) | (b ? 0x80 : 0);
     SET(DATA);
-    while(b == GET(CLK));
+    while(b == GET(CLK))
+      wdt_reset();
+
     RELEASE(DATA);
-    while(!GET(DATA));
+
+    while(!GET(DATA))
+      wdt_reset();
+
     SET(CLK);
   }
   return c;

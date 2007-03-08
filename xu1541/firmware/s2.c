@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s2.c,v 1.4 2007-03-03 14:54:14 harbaum Exp $
+ * This Revision: $Id: s2.c,v 1.5 2007-03-08 11:16:23 harbaum Exp $
  *
  * $Log: s2.c,v $
- * Revision 1.4  2007-03-03 14:54:14  harbaum
+ * Revision 1.5  2007-03-08 11:16:23  harbaum
+ * timeout and watchdog adjustments
+ *
+ * Revision 1.4  2007/03/03 14:54:14  harbaum
  * More 1571 adjustments
  *
  * Revision 1.3  2007/02/06 22:34:44  harbaum
@@ -18,14 +21,13 @@
  *
  * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
  * Initial version
- *
- *
  */
 
 /* This file contains the "serial2" helper functions for opencbm */
 /* changes in the protocol must be reflected here. */
 
 #include <avr/io.h>
+#include <avr/wdt.h>
 
 #include "xu1541.h"
 #include "s2.h"
@@ -37,12 +39,15 @@ static void s2_write_byte(unsigned char c) {
     if(c & 1) { SET(DATA); } else { RELEASE(DATA); }
     c >>= 1;
     RELEASE(ATN);
-    while(GET(CLK));
+    while(GET(CLK))
+      wdt_reset();
 
     if(c & 1) { SET(DATA); } else { RELEASE(DATA); }
     c >>= 1;
     SET(ATN);
-    while(!GET(CLK));
+
+    while(!GET(CLK))
+      wdt_reset();
   }
 
   RELEASE(DATA);
@@ -62,10 +67,14 @@ static unsigned char s2_read_byte(void) {
   char i;
 
   for(i=4; i>0; i--) {
-    while(GET(CLK));
+    while(GET(CLK))
+      wdt_reset();
+
     c = (c>>1) | (GET(DATA) ? 0x80 : 0);
     RELEASE(ATN);
-    while(!GET(CLK));
+    while(!GET(CLK))
+      wdt_reset();
+
     c = (c>>1) | (GET(DATA) ? 0x80 : 0);
     SET(ATN);
   }

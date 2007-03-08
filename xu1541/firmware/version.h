@@ -2,7 +2,7 @@
 #define VERSION_H
 
 #define XU1541_VERSION_MAJOR_BASE   1
-#define XU1541_VERSION_MINOR        4
+#define XU1541_VERSION_MINOR        5
 
 #ifdef USBTINY
 /* usbtiny version has even major number */ 

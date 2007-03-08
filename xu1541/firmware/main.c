@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.6 2007-03-01 12:59:08 harbaum Exp $
+ * This Revision: $Id: main.c,v 1.7 2007-03-08 11:16:23 harbaum Exp $
  *
  * $Log: main.c,v $
- * Revision 1.6  2007-03-01 12:59:08  harbaum
+ * Revision 1.7  2007-03-08 11:16:23  harbaum
+ * timeout and watchdog adjustments
+ *
+ * Revision 1.6  2007/03/01 12:59:08  harbaum
  * Added event log
  *
  * Revision 1.5  2007/02/23 21:33:44  harbaum
@@ -104,6 +107,8 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 #endif
   char talk, rv;
   unsigned short len;
+
+  DEBUGF("cmd %d (ioctl %d)\n", data[1], data[1] - XU1541_IOCTL);
 
   switch(data[1]) {
 

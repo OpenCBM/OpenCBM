@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.5 2007-03-03 14:54:14 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.6 2007-03-08 11:16:23 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.5  2007-03-03 14:54:14  harbaum
+ * Revision 1.6  2007-03-08 11:16:23  harbaum
+ * timeout and watchdog adjustments
+ *
+ * Revision 1.5  2007/03/03 14:54:14  harbaum
  * More 1571 adjustments
  *
  * Revision 1.4  2007/03/01 12:59:08  harbaum
@@ -308,20 +311,22 @@ char cbm_raw_write(const unsigned char *buf, char cnt, char atn, char talk) {
 char xu1541_read(unsigned char *data, unsigned char len) {
   unsigned char i, ok, bit, b;
   unsigned char received = 0;
+  unsigned short to;
 
   do {
-    i = 0;
+    to = 0;
     
     /* wait for clock to be released, may be required while write errors */
     while(GET(CLK)) {
-      if( i >= 200 ) {
-	/* 4 sec timeout */
+      if( to >= 5000 ) {
+	/* 0.1 (5000 * 20us) sec timeout */
 	EVENT(EVENT_READ_TIMEOUT);
-	DEBUGF("timeout\n");
+	DEBUGF("read timeout\n");
 	return -1;
       } else {
-	i++;
+	to++;
 	_delay_us(20);
+	wdt_reset();
       }
     }
     
@@ -422,6 +427,7 @@ char xu1541_wait(char line, char state) {
     } else {
       i++;
       _delay_us(10);
+      wdt_reset();
     }
   }
   return 0;
