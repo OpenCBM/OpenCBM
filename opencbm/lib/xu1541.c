@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.1.2.5 2007-03-03 11:41:58 strik Exp $ \n
+** \version $Id: xu1541.c,v 1.1.2.6 2007-03-08 11:16:49 harbaum Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -147,7 +147,7 @@ void xu1541_close(void)
 int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
   int nBytes;
-  char ret[4] =  { 0x11, 0x22, 0x33, 0x44 };
+  char ret[4];
 
   DEBUGF(("ioctl %d for device %d, sub %d", cmd, addr, secaddr));
 

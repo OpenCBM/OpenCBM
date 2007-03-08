@@ -16,9 +16,9 @@
  #define DEBUGF(_x)
 #endif
 
-/* time out one second after device itself times out */
+/* time out 10% after device itself times out */
 /* so make sure we should normally never time out on usb */
-#define USB_TIMEOUT ((XU1541_W4L_TIMEOUT+1) * 1000)
+#define USB_TIMEOUT (XU1541_W4L_TIMEOUT * 1100)
 
 #include "../../xu1541/firmware/xu1541_types.h"
 
