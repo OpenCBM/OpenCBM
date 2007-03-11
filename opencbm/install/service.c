@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file service.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: service.c,v 1.8 2006-09-14 19:15:17 strik Exp $ \n
+** \version $Id: service.c,v 1.8.2.1 2007-03-11 13:46:01 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the service control manager for the OPENCBM driver
 **
@@ -345,7 +345,10 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
 
         if (AutomaticStart)
         {
+/* @@@@@@@
             cbm_i_driver_start();
+/* @@@@@@@
+*/
         }
     }
     else
@@ -431,7 +434,10 @@ CbmRemove(IN LPCTSTR DriverName)
 
     // Make sure the driver is stopped before being unloaded
 
+/* @@@@@@@
     cbm_i_driver_stop();
+/* @@@@@@@
+*/
 
     scManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 

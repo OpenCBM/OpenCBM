@@ -3,35 +3,49 @@
 
 #include "opencbm.h"
 
-extern const char * cbmarch_get_driver_name(int PortNumber);
-extern int  cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber);
-extern void cbmarch_driver_close(CBM_FILE HandleDevice);
-extern void cbmarch_lock(CBM_FILE HandleDevice);
-extern void cbmarch_unlock(CBM_FILE HandleDevice);
-extern int  cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count);
-extern int  cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count);
-extern int  cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
-extern int  cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
-extern int  cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
-extern int  cbmarch_unlisten(CBM_FILE HandleDevice);
-extern int  cbmarch_untalk(CBM_FILE HandleDevice);
-extern int  cbmarch_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
-extern int  cbmarch_unlisten(CBM_FILE HandleDevice);
-extern int  cbmarch_untalk(CBM_FILE HandleDevice);
-extern int  cbmarch_get_eoi(CBM_FILE HandleDevice);
-extern int  cbmarch_clear_eoi(CBM_FILE HandleDevice);
-extern int  cbmarch_reset(CBM_FILE HandleDevice);
-extern __u_char cbmarch_pp_read(CBM_FILE HandleDevice);
-extern void cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte);
-extern int  cbmarch_iec_poll(CBM_FILE HandleDevice);
-extern void cbmarch_iec_set(CBM_FILE HandleDevice, int Line);
-extern void cbmarch_iec_release(CBM_FILE HandleDevice, int Line);
-extern void cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release);
-extern int  cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State);
+#undef EXTERN
 
-extern __u_char cbmarch_parallel_burst_read(CBM_FILE HandleDevice);
-extern void cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value);
-extern int  cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
-extern int  cbmarch_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+#if defined WIN32
+
+# if defined OPENCBM_PLUGIN
+#  define EXTERN __declspec(dllexport) /*!< we are exporting the functions */
+# else
+#  define EXTERN __declspec(dllimport) /*!< we are importing the functions */
+# endif
+
+#else
+# define EXTERN extern
+#endif
+
+EXTERN const char * CBMAPIDECL cbmarch_get_driver_name(int PortNumber);
+EXTERN int          CBMAPIDECL cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber);
+EXTERN void         CBMAPIDECL cbmarch_driver_close(CBM_FILE HandleDevice);
+EXTERN void         CBMAPIDECL cbmarch_lock(CBM_FILE HandleDevice);
+EXTERN void         CBMAPIDECL cbmarch_unlock(CBM_FILE HandleDevice);
+EXTERN int          CBMAPIDECL cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count);
+EXTERN int          CBMAPIDECL cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count);
+EXTERN int          CBMAPIDECL cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+EXTERN int          CBMAPIDECL cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+EXTERN int          CBMAPIDECL cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+EXTERN int          CBMAPIDECL cbmarch_unlisten(CBM_FILE HandleDevice);
+EXTERN int          CBMAPIDECL cbmarch_untalk(CBM_FILE HandleDevice);
+EXTERN int          CBMAPIDECL cbmarch_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+EXTERN int          CBMAPIDECL cbmarch_unlisten(CBM_FILE HandleDevice);
+EXTERN int          CBMAPIDECL cbmarch_untalk(CBM_FILE HandleDevice);
+EXTERN int          CBMAPIDECL cbmarch_get_eoi(CBM_FILE HandleDevice);
+EXTERN int          CBMAPIDECL cbmarch_clear_eoi(CBM_FILE HandleDevice);
+EXTERN int          CBMAPIDECL cbmarch_reset(CBM_FILE HandleDevice);
+EXTERN __u_char     CBMAPIDECL cbmarch_pp_read(CBM_FILE HandleDevice);
+EXTERN void         CBMAPIDECL cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte);
+EXTERN int          CBMAPIDECL cbmarch_iec_poll(CBM_FILE HandleDevice);
+EXTERN void         CBMAPIDECL cbmarch_iec_set(CBM_FILE HandleDevice, int Line);
+EXTERN void         CBMAPIDECL cbmarch_iec_release(CBM_FILE HandleDevice, int Line);
+EXTERN void         CBMAPIDECL cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release);
+EXTERN int          CBMAPIDECL cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State);
+
+EXTERN __u_char     CBMAPIDECL cbmarch_parallel_burst_read(CBM_FILE HandleDevice);
+EXTERN void         CBMAPIDECL cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value);
+EXTERN int          CBMAPIDECL cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+EXTERN int          CBMAPIDECL cbmarch_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
 #endif // #ifndef ARCHLIB_H

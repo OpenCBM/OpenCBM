@@ -96,10 +96,6 @@ SOURCE=.\archlib.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\archmnib.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\cbm.c
 # End Source File
 # Begin Source File
@@ -149,6 +145,10 @@ SOURCE=..\..\include\debug.h
 # Begin Source File
 
 SOURCE=.\i_opencbm.h
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\include\opencbm-plugin.h"
 # End Source File
 # Begin Source File
 

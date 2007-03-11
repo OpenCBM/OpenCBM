@@ -4,7 +4,7 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005 Spiro Trikaliotis
+ *  Copyright 2005,2007 Spiro Trikaliotis
  *
  *  Parts are Copyright
  *      Jouko Valta <jopi(at)stekt(dot)oulu(dot)fi>
@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/i_opencbm_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm_vice.c,v 1.2 2006-02-24 12:21:41 strik Exp $ \n
+** \version $Id: i_opencbm_vice.c,v 1.2.2.1 2007-03-11 13:46:03 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -192,7 +192,7 @@ cbm_i_get_debugging_flags(VOID)
    PortNumber is not allowed to exceed 10. 
 */
 
-const char *
+const char * CBMAPIDECL
 cbmarch_get_driver_name(int PortNumber)
 {
     //! \todo do not hard-code the driver name
@@ -223,7 +223,7 @@ cbmarch_get_driver_name(int PortNumber)
  cbm_driver_open() should be balanced with cbm_driver_close().
 */
 
-int
+int CBMAPIDECL
 cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 {
     const unsigned char sys[] = "SYS8192\r";
@@ -274,7 +274,7 @@ cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber)
  call cbm_driver_close().
 */
 
-void
+void CBMAPIDECL
 cbmarch_driver_close(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();

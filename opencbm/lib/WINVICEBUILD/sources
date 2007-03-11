@@ -19,7 +19,6 @@ SOURCES=../cbm.c \
 	../petscii.c \
 	../gcr_4b5b.c \
 	../upload.c \
-	i_opencbm_vice.c \
 	archlib_vice.c \
 	archmnib_vice.c \
 	vice_comm.c \

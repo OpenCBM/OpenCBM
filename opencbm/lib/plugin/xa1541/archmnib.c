@@ -5,14 +5,14 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 2005      Tim Schürmann
- *  Copyright 2005      Spiro Trikaliotis
+ *  Copyright 2005,2007 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archmnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: archmnib.c,v 1.6 2006-03-26 14:35:09 strik Exp $ \n
+** \version $Id: archmnib.c,v 1.1.2.1 2007-03-11 13:46:04 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **
@@ -27,7 +27,7 @@
 #define DBG_USERMODE
 
 /*! The name of the executable */
-#define DBG_PROGNAME "OPENCBM.DLL"
+#define DBG_PROGNAME "OPENCBM-XA1541.DLL"
 
 #include "debug.h"
 
@@ -37,8 +37,10 @@
 #include <stdlib.h>
 
 //! mark: We are building the DLL */
-#define DLL
+
 #include "i_opencbm.h"
+
+#define OPENCBM_PLUGIN
 #include "archlib.h"
 
 
@@ -57,7 +59,7 @@
  call this function.
 */
 
-__u_char
+__u_char CBMAPIDECL
 cbmarch_parallel_burst_read(CBM_FILE HandleDevice)
 {
     CBMT_PARBURST_PREAD_OUT result;
@@ -84,7 +86,7 @@ cbmarch_parallel_burst_read(CBM_FILE HandleDevice)
  call this function.
 */
 
-void
+void CBMAPIDECL
 cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     CBMT_PARBURST_PWRITE_IN parameter;
@@ -119,7 +121,7 @@ cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
  call this function.
 */
 
-int
+int CBMAPIDECL
 cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     int retval = 0;
@@ -159,7 +161,7 @@ cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsig
  call this function.
 */
 
-int
+int CBMAPIDECL
 cbmarch_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     int retval = 0;

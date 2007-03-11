@@ -1,8 +1,8 @@
-# $Id: Makefile,v 1.5 2006-05-13 16:51:50 strik Exp $
+# $Id: Makefile,v 1.5.2.1 2007-03-11 13:46:00 strik Exp $
 
 include ../LINUX/config.make
 
-.PHONY: all clean mrproper install uninstall install-files
+.PHONY: all clean mrproper install uninstall install-files doc install-files-doc install--doc
 
 SGML = opencbm.sgml
 
@@ -36,6 +36,12 @@ HTML = html/opencbm.html
 	cd html; sgml2html -s 2 ../$<; cd ..
 
 all: $(TXT) $(DVI) $(INFO) $(HTML) ${PDF}
+
+doc: all
+
+install-doc: install
+
+install-files-doc: install-files
 
 clean:
 	rm -f $(TEX)

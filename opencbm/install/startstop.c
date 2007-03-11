@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.18 2006-09-13 15:58:33 strik Exp $ \n
+** \version $Id: startstop.c,v 1.18.2.1 2007-03-11 13:46:01 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -153,6 +153,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 
     // Try to find out the version and path of the DLL
 
+/* @@@@@@@
     {
         HMODULE handleDll;
 
@@ -313,6 +314,8 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
             RegCloseKey(regKey);
         }
     }
+/* @@@@@@@
+*/
 
     // Print out the configuration we just obtained
 
@@ -461,9 +464,15 @@ CbmCheckCorrectInstallation(BOOL HaveAdminRights)
     for (tries = 1; tries >= 0; --tries)
     {
         if (driverAlreadyStarted)
+/* @@@@@@@
             cbm_i_driver_stop();
+/* @@@@@@@
+*/;
 
+/* @@@@@@@
         error = HaveAdminRights ? (cbm_i_driver_start() ? FALSE : TRUE) : FALSE;
+/* @@@@@@@
+*/error = FALSE;
 
         driverAlreadyStarted = TRUE;
 
@@ -475,7 +484,10 @@ CbmCheckCorrectInstallation(BOOL HaveAdminRights)
         }
         else
         {
+/* @@@@@@@
             error = cbm_i_i_driver_install((PULONG) &outBuffer, sizeof(outBuffer));
+/* @@@@@@@
+*/ error = FALSE;
             outBuffer.DllVersion = 0;
 
             if (error)
@@ -495,7 +507,10 @@ CbmCheckCorrectInstallation(BOOL HaveAdminRights)
                     // stop the driver to be able to restart the parallel port
                     //
 
+/* @@@@@@@
                     cbm_i_driver_stop();
+/* @@@@@@@
+*/
                     driverAlreadyStarted = FALSE;
 
                     //
@@ -528,10 +543,13 @@ CbmCheckCorrectInstallation(BOOL HaveAdminRights)
     // If the driver is not set to be started automatically, stop it now
     //
 
+/* @@@@@@@
     if (!IsDriverStartedAutomatically())
     {
         cbm_i_driver_stop();
     }
+/* @@@@@@@
+*/
 
     if (CheckVersions(&outBuffer))
     {

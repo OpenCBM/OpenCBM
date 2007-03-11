@@ -11,13 +11,11 @@
 /*! ************************************************************** 
 ** \file lib/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.1.2.6 2007-03-08 11:16:49 harbaum Exp $ \n
+** \version $Id: xu1541.c,v 1.1.2.1 2007-03-11 13:46:07 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
 ****************************************************************/
-
-#ifdef ENABLE_XU1541 
 
 #include <stdio.h>
 #include <string.h>
@@ -120,7 +118,7 @@ int xu1541_init(void) {
     DEBUGF(("No xu1541 device found"));
     return -1;
   } else {
-#ifndef WIN
+#ifndef WIN32
     /* Get exclusive access to interface 0. Does not work under windows. */
     if (usb_claim_interface(xu1541_handle, 0) != 0) {
       fprintf(stderr, "USB error: %s\n", usb_strerror());
@@ -136,7 +134,7 @@ void xu1541_close(void)
 {
     DEBUGF(("Closing USB link"));
 
-#ifndef WIN
+#ifndef WIN32
     if(usb_release_interface(xu1541_handle, 0))
       fprintf(stderr, "USB error: %s\n", usb_strerror());
 #endif
@@ -285,5 +283,3 @@ int xu1541_special_read(int mode, __u_char *data, size_t size)
     
     return bytesRead;
 }
-
-#endif // ENABLE_XU1541 

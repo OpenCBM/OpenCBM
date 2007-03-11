@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.10.2.1 2007-02-08 19:19:39 harbaum Exp $
+# $Id: Makefile,v 1.10.2.2 2007-03-11 13:46:00 strik Exp $
 
 include LINUX/config.make
 
@@ -6,16 +6,17 @@ CBMDEV   = /dev/cbm
 CBMPERM  = 666
 DEVMAJOR = 10
 DEVMINOR = 177
-# SUBDIRS  = sys/linux include arch/$(ARCH) lib compat
 SUBDIRS  = include arch/$(ARCH) lib compat \
+	   lib/plugin/xu1541 \
 	   libtrans \
            cbmctrl cbmformat cbmforng d64copy cbmcopy \
-           demo/flash demo/morse demo/rpm1541 docs \
+           demo/flash demo/morse demo/rpm1541 \
 	   sample/libtrans
+SUBDIRS_DOC = docs
 
 SUBDIRS_OPTIONAL = mnib36 nibtools
 
-.PHONY: all clean mrproper dist install uninstall dev install-files
+.PHONY: all clean mrproper dist doc install install-doc uninstall dev install-files install-files-doc all-doc
 
 all: 
 	@for subdir in $(SUBDIRS); do \
@@ -24,6 +25,13 @@ all:
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
 	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
+
+doc:
+	@for subdir in $(SUBDIRS_DOC); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
+	done
+
+all-doc: all doc
 
 clean:
 	@for subdir in $(SUBDIRS); do \
@@ -62,8 +70,18 @@ install: install-files
 	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
 
+install-files-doc: install-files all-doc
+	@for subdir in $(SUBDIRS_DOC); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
+	done
+
+install-doc: install-files-doc install
+	@for subdir in $(SUBDIRS_DOC); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
+	done
+
 uninstall: 
-	@for subdir in $(SUBDIRS); do \
+	@for subdir in $(SUBDIRS) $(SUBDIRS_DOC); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \

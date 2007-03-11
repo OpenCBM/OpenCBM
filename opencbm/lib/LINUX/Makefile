@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6.2.1 2007-02-08 19:19:40 harbaum Exp $
+# $Id: Makefile,v 1.6.2.2 2007-03-11 13:46:02 strik Exp $
 
 include ../LINUX/config.make
 
@@ -10,13 +10,11 @@ LIBCBMCOPY = ../libcbmcopy
 LIBD64COPY = ../libd64copy
 LIBARCH    = ../arch/linux/
 
-LIB_CFLAGS += -DENABLE_XU1541
-
 SHLIB   = libopencbm.so
 SHLIBV  = $(SHLIB).$(MAJ)
 SHLIBV3 = $(SHLIBV).$(MIN).$(REL)
 LIB     = libopencbm.a
-SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c LINUX/archlib.c LINUX/archmnib.c xu1541.c \
+SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c LINUX/archlib.c LINUX/archmnib.c \
 	  $(foreach t,cbmcopy pp s1 s2, $(LIBCBMCOPY)/$(t).c) \
 	  $(foreach t,d64copy fs gcr pp s1 s2 std, $(LIBD64COPY)/$(t).c)
 
@@ -53,7 +51,7 @@ $(SHLIBV): $(SHLIBV3)
 	ln -sf $< $@
 
 $(SHLIBV3): $(SHOBJS)
-	$(CC) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a -lusb
+	$(CC) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a -lusb -ldl
 
 $(LIB): $(OBJS)
 	$(AR) r $@ $(OBJS)
@@ -108,5 +106,4 @@ detectxp1541.o detectxp1541.lo: detectxp1541.c ../include/opencbm.h
 petscii.o petscii.lo: petscii.c ../include/opencbm.h
 gcr_4b5b.o gcr_4b5b.lo: gcr_4b5b.c ../include/opencbm.h
 upload.o upload.lo: upload.c ../include/opencbm.h
-xu1541.o xu1541.lo: xu1541.c  xu1541.h ../include/opencbm.h
 cbm.o cbm.lo: cbm.c ../include/opencbm.h ../include/LINUX/cbm_module.h

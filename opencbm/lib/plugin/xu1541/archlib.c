@@ -4,20 +4,21 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005-2007 Spiro Trikaliotis
+ *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright 2001-2005,2007 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
-** \file lib/WINVICEBUILD/archlib_vice.c \n
-** \author Spiro Trikaliotis \n
-** \version $Id: archlib_vice.c,v 1.8.2.1 2007-03-11 13:46:03 strik Exp $ \n
+** \file lib/WINBUILD/archlib.c \n
+** \author Michael Klein, Spiro Trikaliotis \n
+** \version $Id: archlib.c,v 1.1.2.1 2007-03-11 13:46:06 strik Exp $ \n
 ** \n
-** \brief Shared library / DLL for accessing the driver
-**        This variant is for accessing VICE instead of a real device
+** \brief Shared library / DLL for accessing the driver, windows specific code
 **
 ****************************************************************/
 
+#ifdef WIN32
 #include <windows.h>
 #include <windowsx.h>
 
@@ -25,195 +26,96 @@
 #define DBG_USERMODE
 
 /*! Mark: We are building the DLL */
-#define DBG_DLL
+// #define DBG_DLL
 
 /*! The name of the executable */
-#define DBG_PROGNAME "OPENCBM.DLL"
+#define DBG_PROGNAME "OPENCBM-XU1541.DLL"
 
 /*! This file is "like" debug.c, that is, define some variables */
-#define DBG_IS_DEBUG_C
+// #define DBG_IS_DEBUG_C
 
 #include "debug.h"
-
-#include <winioctl.h>
-#include "cbmioctl.h"
+#endif
 
 #include <stdlib.h>
 
 //! mark: We are building the DLL */
-#define DLL
-#include "i_opencbm.h"
+#define OPENCBM_PLUGIN
+//#include "i_opencbm.h"
 #include "archlib.h"
 
-#include "arch.h"
-#include "vice_comm.h"
-
-/**/
-static void
-DbgOut(const char * const Format, ...)
-{
-    va_list arg_ptr;
-    int n;
-    
-
-    // Get a pointer to the current position in the given DebugBuffer
-
-    char buffer[2048];
-
-    va_start(arg_ptr, Format);
-
-    // If there is some space left in the DebugBuffer, append the contents
-
-    // Output at most the number of bytes which are left in the DebugBuffer
-
-    n = _vsnprintf(buffer, sizeof(buffer) - 1, Format, arg_ptr);
-
-    // Was the buffer too small? If yes, the number of bytes
-    // inserted is the size of the remaining buffer, so, set
-    // this value
-
-    if (n<0) 
-        n = sizeof(buffer);
-
-    if (n < sizeof(buffer))
-        buffer[n++] = '\n';
-
-    buffer[n] = 0;
-
-    va_end(arg_ptr);
-
-    OutputDebugString(buffer);
-}
-
-static void
-DbgLineStatus(const unsigned char Value)
-{
-/**
-    DbgOut("ATN OUT = %u, CLOCK OUT = %u, DATA OUT = %u, CLOCK IN = %u, DATA IN = %u",
-        (Value & 0x08 ? 1 : 0),
-        (Value & 0x10 ? 1 : 0),
-        (Value & 0x20 ? 1 : 0),
-        (Value & 0x40 ? 1 : 0),
-        (Value & 0x80 ? 1 : 0));
-/**/
-}
-
-static void
-send_and_wait(const unsigned int addr, const unsigned char *buffer, int size)
-{
-    FUNC_ENTER();
-
-    vicewritememory(addr, size, buffer);
-    vicewriteregister(reg_pc, addr);
-    vicewriteregister_when_at(0x2000);
-    vicetrap(0x2000);
-    viceresume();
-
-    vicewaittrap();
-
-    FUNC_LEAVE();
-}
+#include "xu1541.h"
 
 
-/*! \brief DLL initialization und unloading
+/*-------------------------------------------------------------------*/
+/*--------- OPENCBM ARCH FUNCTIONS ----------------------------------*/
 
- This function is called whenever the DLL is loaded or unloaded.
- It ensures that the driver is loaded to be able to call its
- functions.
+/*! \brief Get the name of the driver for a specific parallel port
 
- \param Module
-   Handle of the module; this is not used.
+ Get the name of the driver for a specific parallel port.
 
- \param Reason
-   DLL_PROCESS_ATTACH if the DLL is loaded,
-   DLL_PROCESS_DETACH if it is unloaded.
-
- \param Reserved
-   Not used.
+ \param PortNumber
+   The port number for the driver to open. 0 means "default" driver, while
+   values != 0 enumerate each driver.
 
  \return 
-   Returns TRUE on success, else FALSE.
+   Returns a pointer to a null-terminated string containing the
+   driver name, or NULL if an error occurred.
 
- If this function returns FALSE, windows reports that loading the DLL
- was not successful. If the DLL is linked statically, the executable
- refuses to load with STATUS_DLL_INIT_FAILED (0xC0000142)
+ \bug
+   PortNumber is not allowed to exceed 10. 
 */
 
-BOOL
-opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
+const char * CBMAPIDECL
+cbmarch_get_driver_name(int PortNumber)
 {
-    static BOOL bIsOpen = FALSE;
-    BOOLEAN Status = TRUE;
-
-    FUNC_ENTER();
-
-#if DBG
-
-    if (Reason == DLL_PROCESS_ATTACH)
-    {
-        // Read the debugging flags from the registry
-
-        cbm_i_get_debugging_flags();
-    }
-
-#endif
-
-    /* make sure the definitions in opencbm.h and cbmioctl.h
-     * match each other! 
-     * Since we are the only instance which includes both files,
-     * we are the only one which can ensure this.
-     */
-
-    DBG_ASSERT(IEC_LINE_CLOCK == IEC_CLOCK);
-    DBG_ASSERT(IEC_LINE_RESET == IEC_RESET);
-    DBG_ASSERT(IEC_LINE_DATA == IEC_DATA);
-    DBG_ASSERT(IEC_LINE_ATN == IEC_ATN);
-
-    switch (Reason) 
-    {
-        case DLL_PROCESS_ATTACH:
-
-            Status = TRUE;
-            break;
-
-        case DLL_PROCESS_DETACH:
-
-            vicerelease();
-            Status = TRUE;
-            break;
-
-        default:
-            break;
-
-    }
-
-    FUNC_LEAVE_BOOL(Status);
+    return "libusb/xu1541"; 
 }
 
-/*! \brief Complete driver installation, "external version"
+/*! \brief Opens the driver
 
- This function performs anything that is needed to successfully
- complete the driver installation.
+ This function Opens the driver.
 
- \param Buffer
-   Pointer to a buffer which will return the install information
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the driver.
 
- \param BufferLen
-   The length of the buffer Buffer points to (in bytes).
+ \param PortNumber
+   The port number of the driver to open. 0 means "default" driver, while
+   values != 0 enumerate each driver.
 
- \return
-   FALSE on success, TRUE on error
+ \return 
+   ==0: This function completed successfully
+   !=0: otherwise
 
- This function is for use of the installation routines only!
+ PortNumber is not allowed to exceed 10. 
 
- This version of this function is for exporting out of the DLL.
+ cbm_driver_open() should be balanced with cbm_driver_close().
 */
 
-BOOL CBMAPIDECL
-cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
+int CBMAPIDECL
+cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 {
-    FUNC_ENTER();
-    FUNC_LEAVE_INT(FALSE);
+    return xu1541_init();
+}
+
+/*! \brief Closes the driver
+
+ Closes the driver, which has be opened with cbm_driver_open() before.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ cbm_driver_close() should be called to balance a previous call to
+ cbm_driver_open(). 
+ 
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call cbm_driver_close().
+*/
+
+void CBMAPIDECL
+cbmarch_driver_close(CBM_FILE HandleDevice)
+{
+    xu1541_close();
 }
 
 
@@ -244,9 +146,6 @@ cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
 void CBMAPIDECL
 cbmarch_lock(CBM_FILE HandleDevice)
 {
-    FUNC_ENTER();
-
-    FUNC_LEAVE();
 }
 
 /*! \brief Unlock the parallel port for the driver
@@ -269,9 +168,6 @@ cbmarch_lock(CBM_FILE HandleDevice)
 void CBMAPIDECL
 cbmarch_unlock(CBM_FILE HandleDevice)
 {
-    FUNC_ENTER();
-
-    FUNC_LEAVE();
 }
 
 /*! \brief Write data to the IEC serial bus
@@ -298,39 +194,10 @@ cbmarch_unlock(CBM_FILE HandleDevice)
  call this function.
 */
 
-static unsigned char data_rawwrite[] = { 
-    0xA2, 0x00,       // 2100 LDX #$00
-    0xBD, 0x00, 0x40, // 2102 LDA $4000,X
-    0x20, 0xA8, 0xFF, // 2105 JSR $FFA8
-    0xE8,             // 2108 INX
-    0x88,             // 2109 DEY
-    0xD0, 0xF6,       // 210A BNE $2102
-    0x4C, 0x00, 0x20  // 210C JMP $2000
-};
-static const addr_rawwrite = 0x2100;
-
 int CBMAPIDECL
 cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
-    unsigned char byteswritten = 0;
-
-    FUNC_ENTER();
-
-    DBG_ASSERT(((signed int)Count) >= 0);
-    DBG_ASSERT(Count < 256);
-
-    vicepause();
-    vicewritememory(0x4000, Count, Buffer);
-    vicewriteregister(reg_y, Count);
-    viceresume();
-    vicewaittrap();
-
-    vicepause();
-    send_and_wait(addr_rawwrite, data_rawwrite, sizeof(data_rawwrite));
-
-    byteswritten = (unsigned char) vicereadregister(reg_y);
-
-    FUNC_LEAVE_INT(Count - byteswritten);
+    return xu1541_write(Buffer, Count);
 }
 
 /*! \brief Read data from the IEC serial bus
@@ -356,49 +223,10 @@ cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
  call this function.
 */
 
-static unsigned char data_rawread[] = { 
-    0xA9, 0x00,       // 2180 LDA #$00
-    0x85, 0x90,       // 2182 STA $90
-    0xA2, 0x00,       // 2184 LDX #$00
-    0x20, 0xA5, 0xFF, // 2186 JSR $FFA5
-    0x9D, 0x00, 0x40, // 2189 STA $4000,X
-
-    0xea, 0xea, 0xea, // 218C NOP; NOP; NOP; 
-    // 0x20, 0xd2, 0xff, // 218C JSR $FFD2
-
-    0xE8,             // 218F INX
-    0x20, 0xB7, 0xFF, // 2190 JSR $FFB7
-    0xC9, 0x40,       // 2193 CMP #$40
-    0xF0, 0x08,       // 2195 BEQ $219F
-    0x29, 0x40,       // 2197 AND #$40
-    0xd0, 0x05,       // 2199 BNE $21A0
-    0x88,             // 219B DEY
-    0xD0, 0xE8,       // 219C BNE $2186
-    0x24,             // 219E BIT (8 bit argument)
-    0x88,             // 219F DEY
-    0x4C, 0x00, 0x20  // 21A0 JMP $2000
-};
-static const addr_rawread = 0x2180;
-
 int CBMAPIDECL
 cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
-    unsigned char bytesread = 0;
-
-    FUNC_ENTER();
-
-    DBG_ASSERT(((signed int)Count) >= 0);
-    DBG_ASSERT(Count < 256);
-
-    vicepause();
-    vicewriteregister(reg_y, Count);
-    vicepreparereadmemory(0x4000, Count);
-    send_and_wait(addr_rawread, data_rawread, sizeof(data_rawread));
-
-    vicereadmemory(0x4000, Count, Buffer);
-    bytesread = (unsigned char) vicereadregister(reg_y);
-
-    FUNC_LEAVE_INT(Count - bytesread);
+    return xu1541_read(Buffer, Count);
 }
 
 
@@ -426,34 +254,10 @@ cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
  call this function.
 */
 
-static unsigned char data_listen[] = { 
-    0xA0, 0x00,       // 2200 LDY #$00
-    0x84, 0x90,       // 2202 STY $90
-    0x20, 0xb1, 0xff, // 2204 JSR $FFB1 ; LISTEN
-    0x8a,             // 2207 TXA
-    0x20, 0x93, 0xff, // 2208 JSR $FF93 ; SECONDARY address after listen
-    0xa5, 0x90,       // 220B LDA $90
-    0x29, 0x80,       // 220D AND #$80
-    0x4c, 0x00, 0x20  // 220F JMP $2000
-};
-
-static unsigned int addr_listen = 0x2200;
 int CBMAPIDECL
 cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
-    unsigned char status;
-
-    FUNC_ENTER();
-
-    vicepause();
-    vicewriteregister(reg_a, DeviceAddress);
-    vicewriteregister(reg_x, SecondaryAddress | 0x60);
-
-    send_and_wait(addr_listen, data_listen, sizeof(data_listen));
-
-    status = (unsigned char) vicereadregister(reg_a);
-
-    FUNC_LEAVE_INT(status ? 1 : 0);
+    return xu1541_ioctl(XU1541_LISTEN, DeviceAddress, SecondaryAddress);
 }
 
 /*! \brief Send a TALK on the IEC serial bus
@@ -479,50 +283,10 @@ cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Secondary
  call this function.
 */
 
-static unsigned char data_talk[] = { 
-    0xA0, 0x00,       // 2280 LDY #$00
-    0x84, 0x90,       // 2282 STY $90
-    0x20, 0xb4, 0xff, // 2284 JSR $FFB4 ; TALK
-    0x8a,             // 2287 TXA
-    0x20, 0x96, 0xff, // 2288 JSR $FF96 ; TKSA, SECONDARY address after talk
-    0xa5, 0x90,       // 228B LDA $90
-    0x29, 0x80,       // 228D AND #$80
-    0x4c, 0x00, 0x20  // 228F JMP $2000
-};
-
-static unsigned int addr_talk = 0x2280;
-
 int CBMAPIDECL
 cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
-    unsigned char status = 0;
-
-    FUNC_ENTER();
-
-    do
-    {
-        if (cbmarch_listen(HandleDevice, DeviceAddress, SecondaryAddress))
-        {
-            status = 1;
-            break;
-        }
-
-        if (cbmarch_unlisten(HandleDevice))
-        {
-            status = 1;
-            break;
-        }
-
-        vicepause();
-        vicewriteregister(reg_a, DeviceAddress);
-        vicewriteregister(reg_x, SecondaryAddress | 0x60);
-        send_and_wait(addr_talk, data_talk, sizeof(data_talk));
-
-        status = (unsigned char) vicereadregister(reg_a);
-
-    } while (0);
-
-    FUNC_LEAVE_INT(status ? 1 : 0);
+    return xu1541_ioctl(XU1541_TALK, DeviceAddress, SecondaryAddress);
 }
 
 /*! \brief Open a file on the IEC serial bus
@@ -549,8 +313,7 @@ cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAd
 int CBMAPIDECL
 cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
-    FUNC_ENTER();
-    FUNC_LEAVE_INT(cbmarch_listen(HandleDevice, DeviceAddress, (__u_char)(SecondaryAddress | 0xf0)));
+    return xu1541_ioctl(XU1541_OPEN, DeviceAddress, SecondaryAddress);
 }
 
 /*! \brief Close a file on the IEC serial bus
@@ -577,9 +340,7 @@ cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAd
 int CBMAPIDECL
 cbmarch_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
-    FUNC_ENTER();
-    cbmarch_listen(HandleDevice, DeviceAddress, (__u_char)((SecondaryAddress & 0x0f) | 0xe0));
-    FUNC_LEAVE_INT(cbmarch_unlisten(HandleDevice));
+    return xu1541_ioctl(XU1541_CLOSE, DeviceAddress, SecondaryAddress);
 }
 
 /*! \brief Send an UNLISTEN on the IEC serial bus
@@ -602,22 +363,10 @@ cbmarch_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryA
  call this function.
 */
 
-static unsigned char data_unlisten[] = { 
-    0x20, 0xae, 0xff, // 2300 JSR $FFAE ; UNLISTEN
-    0x4c, 0x00, 0x20  // 2303 JMP $2000
-};
-
-static unsigned int addr_unlisten = 0x2300;
-
 int CBMAPIDECL
 cbmarch_unlisten(CBM_FILE HandleDevice)
 {
-    FUNC_ENTER();
-
-    vicepause();
-    send_and_wait(addr_unlisten, data_unlisten, sizeof(data_unlisten));
-
-    FUNC_LEAVE_INT(0);
+    return xu1541_ioctl(XU1541_UNLISTEN, 0, 0);
 }
 
 /*! \brief Send an UNTALK on the IEC serial bus
@@ -640,22 +389,10 @@ cbmarch_unlisten(CBM_FILE HandleDevice)
  call this function.
 */
 
-static unsigned char data_untalk[] = { 
-    0x20, 0xab, 0xff, // 2380 JSR $FFAB ; UNTALK
-    0x4c, 0x00, 0x20  // 2383 JMP $2000
-};
-
-static unsigned int addr_untalk = 0x2380;
-
 int CBMAPIDECL
 cbmarch_untalk(CBM_FILE HandleDevice)
 {
-    FUNC_ENTER();
-
-    vicepause();
-    send_and_wait(addr_untalk, data_untalk, sizeof(data_untalk));
-
-    FUNC_LEAVE_INT(0);
+    return xu1541_ioctl(XU1541_UNTALK, 0, 0);
 }
 
 
@@ -679,26 +416,10 @@ cbmarch_untalk(CBM_FILE HandleDevice)
  call this function.
 */
 
-static unsigned char data_geteoi[] = { 
-    0x20, 0xb7, 0xff, // 2400 JSR $FFB7 ; get status
-    0x4c, 0x00, 0x20  // 2403 JMP $2000
-};
-
-static unsigned int addr_geteoi = 0x2400;
-
 int CBMAPIDECL
 cbmarch_get_eoi(CBM_FILE HandleDevice)
 {
-    unsigned char status = 0;
-
-    FUNC_ENTER();
-
-    vicepause();
-    send_and_wait(addr_geteoi, data_geteoi, sizeof(data_geteoi));
-
-    status = (unsigned char) vicereadregister(reg_a);
-
-    FUNC_LEAVE_INT(status & 0x40 ? 1 : 0);
+    return xu1541_ioctl(XU1541_GET_EOI, 0, 0);
 }
 
 /*! \brief Reset the EOI flag
@@ -716,24 +437,10 @@ cbmarch_get_eoi(CBM_FILE HandleDevice)
  call this function.
 */
 
-static unsigned char data_cleareoi[] = { 
-    0xa5, 0x90,       // 2480 LDA $90
-    0x29, 0xBF,       // 2482 AND #$BF
-    0x85, 0x90,       // 2484 STA $90
-    0x4c, 0x00, 0x20  // 2486 JMP $2000
-};
-
-static unsigned int addr_cleareoi = 0x2480;
-
 int CBMAPIDECL
 cbmarch_clear_eoi(CBM_FILE HandleDevice)
 {
-    FUNC_ENTER();
-
-    vicepause();
-    send_and_wait(addr_cleareoi, data_cleareoi, sizeof(data_cleareoi));
-
-    FUNC_LEAVE_INT(0);
+    return xu1541_ioctl(XU1541_CLEAR_EOI, 0, 0);
 }
 
 /*! \brief RESET all devices
@@ -760,9 +467,7 @@ cbmarch_clear_eoi(CBM_FILE HandleDevice)
 int CBMAPIDECL
 cbmarch_reset(CBM_FILE HandleDevice)
 {
-    FUNC_ENTER();
-    vicereset();
-    FUNC_LEAVE_INT(0);
+    return xu1541_ioctl(XU1541_RESET, 0, 0);
 }
 
 
@@ -790,28 +495,10 @@ cbmarch_reset(CBM_FILE HandleDevice)
    This function can't signal an error, thus, be careful!
 */
 
-static unsigned char data_pp_read[] = { 
-    0xA9, 0x00,       // 2500 LDA #$00
-    0x8D, 0x03, 0xDD, // 2502 STA $DD03
-    0xAD, 0x01, 0xDD, // 2505 LDA $DD01
-    0x4C, 0x00, 0x20  // 2508 JMP $2000
-};
-
-static unsigned int addr_pp_read = 0x2500;
-
 __u_char CBMAPIDECL
 cbmarch_pp_read(CBM_FILE HandleDevice)
 {
-    __u_char read;
-
-    FUNC_ENTER();
-
-    vicepause();
-    send_and_wait(addr_pp_read, data_pp_read, sizeof(data_pp_read));
-
-    read = (__u_char) vicereadregister(reg_a);
-
-    FUNC_LEAVE_UCHAR(read);
+    return (__u_char) xu1541_ioctl(XU1541_PP_READ, 0, 0);
 }
 
 /*! \brief Write a byte to a XP1541/XP1571 cable
@@ -837,25 +524,10 @@ cbmarch_pp_read(CBM_FILE HandleDevice)
    This function can't signal an error, thus, be careful!
 */
 
-static unsigned char data_pp_write[] = { 
-    0xA0, 0xFF,       // 2580 LDY #$FF
-    0x8C, 0x03, 0xDD, // 2582 STY $DD03
-    0x8D, 0x01, 0xDD, // 2585 STA $DD01
-    0x4C, 0x00, 0x20  // 2588 JMP $2000
-};
-
-static unsigned int addr_pp_write = 0x2580;
-
 void CBMAPIDECL
 cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 {
-    FUNC_ENTER();
-
-    vicepause();
-    vicewriteregister(reg_a, Byte);
-    send_and_wait(addr_pp_write, data_pp_write, sizeof(data_pp_write));
-
-    FUNC_LEAVE();
+    xu1541_ioctl(XU1541_PP_WRITE, Byte, 0);
 }
 
 /*! \brief Read status of all bus lines.
@@ -879,40 +551,10 @@ cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte)
    This function can't signal an error, thus, be careful!
 */
 
-static unsigned char data_iec_poll[] = { 
-    0xAD, 0x00, 0xDD, // 2600 LDA $DD00
-    0x4C, 0x00, 0x20  // 2603 JMP $2000
-};
-
-static unsigned int addr_iec_poll = 0x2600;
-
-#define VICE_ATN_OUT  0x08
-#define VICE_CLK_IN   0x40
-#define VICE_CLK_OUT  0x10
-#define VICE_DATA_IN  0x80
-#define VICE_DATA_OUT 0x20
-
 int CBMAPIDECL
 cbmarch_iec_poll(CBM_FILE HandleDevice)
 {
-    int line = 0;
-    int result = 0;
-
-    FUNC_ENTER();
-
-    vicepause();
-    send_and_wait(addr_iec_poll, data_iec_poll, sizeof(data_iec_poll));
-
-    line = vicereadregister(reg_a);
-
-//    DbgOut("iec_poll = $%02x", line);
-    DbgLineStatus((unsigned char)(line ^ 0xc0));
-
-    if (!(line & VICE_CLK_IN))  result |= IEC_CLOCK;
-    if (!(line & VICE_DATA_IN)) result |= IEC_DATA;
-    if ( (line & VICE_ATN_OUT)) result |= IEC_ATN;
-
-    FUNC_LEAVE_INT(result);
+    return xu1541_ioctl(XU1541_IEC_POLL, 0, 0);
 }
 
 
@@ -937,11 +579,7 @@ cbmarch_iec_poll(CBM_FILE HandleDevice)
 void CBMAPIDECL
 cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
 {
-    FUNC_ENTER();
-
-    cbmarch_iec_setrelease(HandleDevice, Line, 0);
-
-    FUNC_LEAVE();
+    xu1541_ioctl(XU1541_IEC_SET, Line, 0);
 }
 
 /*! \brief Deactivate a line on the IEC serial bus
@@ -965,11 +603,7 @@ cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
 void CBMAPIDECL
 cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
 {
-    FUNC_ENTER();
-
-    cbmarch_iec_setrelease(HandleDevice, 0, Line);
-
-    FUNC_LEAVE();
+    xu1541_ioctl(XU1541_IEC_RELEASE, Line, 0);
 }
 
 /*! \brief Activate and deactive a line on the IEC serial bus
@@ -999,51 +633,10 @@ cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
    effect is undefined.
 */
 
-static unsigned char data_iec_setrelease[] = { 
-    0x8E, 0x87, 0x26, // 2680 STX $2687
-    0x2D, 0x00, 0xDD, // 2683 AND $DD00
-    0x09, 0x00,       // 2686 ORA #$00
-    0x8D, 0x00, 0xDD, // 2688 STA $DD00
-    0x4C, 0x00, 0x20, // 268B JMP $2000
-};
-
-static unsigned int addr_iec_setrelease = 0x2680;
-
 void CBMAPIDECL
 cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
-    __u_char set = 0;
-    __u_char release = 0;
-
-    FUNC_ENTER();
-
-    DBG_ASSERT((Set & Release) == 0);
-
-//    DbgOut("");
-//    DbgOut("setrelease: Mask = %u, Line = %u", Set, Release);
-    cbmarch_iec_poll(HandleDevice);
-
-    if (Set & IEC_DATA)  set |= VICE_DATA_OUT;
-    if (Set & IEC_CLOCK) set |= VICE_CLK_OUT;
-    if (Set & IEC_ATN)   set |= VICE_ATN_OUT;
-
-    if (Release & IEC_DATA)  release |= VICE_DATA_OUT;
-    if (Release & IEC_CLOCK) release |= VICE_CLK_OUT;
-    if (Release & IEC_ATN)   release |= VICE_ATN_OUT;
-
-    if (set || release)
-    {
-//        DbgOut("iec_setrelease = set = $%02x, release = $%02x", set, release);
-
-        vicepause();
-        vicewriteregister(reg_a, release ^ 0xff);
-        vicewriteregister(reg_x, set);
-        send_and_wait(addr_iec_setrelease, data_iec_setrelease, sizeof(data_iec_setrelease));
-    }
-
-    cbmarch_iec_poll(HandleDevice);
-
-    FUNC_LEAVE();
+    xu1541_ioctl(XU1541_IEC_SET, Set, Release);
 }
 
 /*! \brief Wait for a line to have a specific state
@@ -1055,7 +648,7 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
    A CBM_FILE which contains the file handle of the driver.
 
  \param Line
-   The line to be waited for. This must be exactly one of
+   The line to be deactivated. This must be exactly one of
    IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET.
 
  \param State
@@ -1075,18 +668,5 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 int CBMAPIDECL
 cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
-    FUNC_ENTER();
-
-    if (State)
-    {
-        while(!cbm_iec_get(HandleDevice, Line))
-            arch_usleep(10);
-    }
-    else
-    {
-        while(cbm_iec_get(HandleDevice, Line))
-            arch_usleep(10);
-    }
-
-    FUNC_LEAVE_INT(cbmarch_iec_poll(HandleDevice));
+    return xu1541_ioctl(XU1541_IEC_WAIT, Line, State);
 }

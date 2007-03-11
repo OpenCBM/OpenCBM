@@ -5,7 +5,6 @@ TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib \
            $(SDK_LIB_PATH)/winmm.lib    \
-           ./libusb.lib                 \
            ../../bin/*/arch.lib         
 
 DLLBASE=0x10000000
@@ -14,7 +13,7 @@ DLLENTRY=opencbm_init
 
 INCLUDES=../../include;../../include/WINDOWS;../
 
-C_DEFINES = $(C_DEFINES) /DENABLE_XU1541=1 /DWIN
+C_DEFINES = $(C_DEFINES)
 
 SOURCES=../cbm.c \
 	../detect.c \
@@ -22,8 +21,6 @@ SOURCES=../cbm.c \
 	../petscii.c \
 	../gcr_4b5b.c \
 	../upload.c \
-	../xu1541.c \
 	i_opencbm.c \
 	archlib.c \
-	archmnib.c \
 	opencbm.rc

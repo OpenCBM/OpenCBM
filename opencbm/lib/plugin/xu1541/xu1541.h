@@ -20,7 +20,7 @@
 /* so make sure we should normally never time out on usb */
 #define USB_TIMEOUT (XU1541_W4L_TIMEOUT * 1100)
 
-#include "../../xu1541/firmware/xu1541_types.h"
+#include "../../../../xu1541/firmware/xu1541_types.h"
 
 /* vendor and product id (donated by ftdi) */
 #define XU1541_VID  0x0403

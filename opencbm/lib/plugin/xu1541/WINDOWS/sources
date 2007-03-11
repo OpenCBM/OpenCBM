@@ -1,0 +1,20 @@
+TARGETNAME=opencbm-xu1541
+TARGETPATH=../../../../bin
+TARGETTYPE=DYNLINK
+TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
+           $(SDK_LIB_PATH)/user32.lib   \
+           $(SDK_LIB_PATH)/advapi32.lib \
+           $(SDK_LIB_PATH)/winmm.lib    \
+           ./libusb.lib                 \
+           ../../../../bin/*/arch.lib         
+
+DLLBASE=0x10000000
+
+DLLENTRY=opencbm_xu1541_init
+
+INCLUDES=../../../../include;../../../../include/WINDOWS;../../..
+
+SOURCES=../archlib.c \
+	../xu1541.c \
+        dllmain.c \
+	opencbm-xu1541.rc

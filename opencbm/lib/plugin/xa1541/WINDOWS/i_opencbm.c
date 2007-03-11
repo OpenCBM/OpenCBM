@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.14.2.1 2007-03-11 13:46:02 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.1.2.1 2007-03-11 13:46:05 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -32,7 +32,7 @@
 
 /*! The name of the executable */
 #ifndef DBG_PROGNAME
-    #define DBG_PROGNAME "OPENCBM.DLL"
+    #define DBG_PROGNAME "OPENCBM-XA1541.DLL"
 #endif // #ifndef DBG_PROGNAME
 
 #include "debug.h"
@@ -46,6 +46,9 @@
 #include "i_opencbm.h"
 
 #include "version.h"
+
+#define OPENCBM_PLUGIN 1
+
 #include "archlib.h"
 
 
@@ -429,8 +432,6 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
 /*-------------------------------------------------------------------*/
 /*--------- OPENCBM ARCH FUNCTIONS ----------------------------------*/
 
-#if 0
-
 /*! \brief Get the name of the driver for a specific parallel port
 
  Get the name of the driver for a specific parallel port.
@@ -558,7 +559,6 @@ cbmarch_driver_close(CBM_FILE HandleDevice)
 
     FUNC_LEAVE();
 }
-#endif
 
 /*! \brief Perform an ioctl on the driver
 
@@ -658,7 +658,6 @@ cbm_ioctl(IN CBM_FILE HandleDevice, IN DWORD ControlCode,
  This function is for use of the installation routines only!
 */
 
-#if 0
 BOOL
 cbm_i_driver_start(VOID)
 {
@@ -900,4 +899,3 @@ IsDriverStartedAutomatically(VOID)
 
     FUNC_LEAVE_BOOL(automaticStart);
 }
-#endif
