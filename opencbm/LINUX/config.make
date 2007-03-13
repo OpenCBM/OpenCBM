@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.7 2006-04-29 07:47:51 strik Exp $
+# $Id: config.make,v 1.7.2.1 2007-03-13 09:59:37 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -18,6 +18,10 @@ INFODIR     = $(PREFIX)/info
 INCDIR      = $(PREFIX)/include
 MODDIR      = `for d in /lib/modules/\`uname -r\`/{extra,misc,kernel/drivers/char}; do test -d $$d && echo $$d; done | head -n 1`
 
+#
+# Where to find the xu1541 firmware
+#
+XU1541DIR   = ~/xu1541/firmware/
 
 #
 # compiler/linker flags. Should be ok.

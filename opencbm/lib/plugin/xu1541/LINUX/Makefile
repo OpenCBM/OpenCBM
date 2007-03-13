@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1.2.1 2007-03-11 13:46:07 strik Exp $
+# $Id: Makefile,v 1.1.2.2 2007-03-13 09:59:37 strik Exp $
 
 include ../../../LINUX/config.make
 
@@ -13,7 +13,7 @@ SRCS    = archlib.c xu1541.c
 OBJS    = $(SRCS:.c=.o)
 SHOBJS  = $(SRCS:.c=.lo)
 
-CFLAGS += -I../../
+CFLAGS += -I../../../include/LINUX/ -I../../../include/ -I../../ -I $(XU1541DIR)
 
 all: $(SHLIB) $(LIB) $(SHLIBV) $(SHLIBV3)
 
