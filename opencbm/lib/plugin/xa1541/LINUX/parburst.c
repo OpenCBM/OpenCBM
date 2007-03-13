@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: archmnib.c,v 1.5 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: parburst.c,v 1.1.2.1 2007-03-13 10:01:35 strik Exp $";
 #endif
 
 #include <fcntl.h>

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.1.2.1 2007-03-11 13:46:04 strik Exp $ \n
+** \version $Id: iec.c,v 1.1.2.1 2007-03-13 10:01:35 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
