@@ -12,7 +12,7 @@ DLLBASE=0x10000000
 
 DLLENTRY=opencbm_xu1541_init
 
-INCLUDES=../../../../include;../../../../include/WINDOWS;../../..
+INCLUDES=../../../../include;../../../../include/WINDOWS;../../..;$(XU1541DIR)
 
 SOURCES=../archlib.c \
 	../xu1541.c \

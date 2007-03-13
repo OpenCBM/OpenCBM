@@ -14,6 +14,6 @@ DLLENTRY=opencbm_xa1541_init
 INCLUDES=../../../../include;../../../../include/WINDOWS;../../..
 
 SOURCES=archlib.c \
-	archmnib.c \
+	parburst.c \
 	i_opencbm.c \
 	opencbm-xa1541.rc
