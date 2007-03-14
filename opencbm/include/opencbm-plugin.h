@@ -31,6 +31,19 @@ typedef void         (CBMAPIDECL *cbm_plugin_parallel_burst_write_t)(CBM_FILE Ha
 typedef int          (CBMAPIDECL *cbm_plugin_parallel_burst_read_track_t)(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 typedef int          (CBMAPIDECL *cbm_plugin_parallel_burst_write_track_t)(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
+
+typedef void         (CBMAPIDECL *cbm_plugin_s1_read_n_t) (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+typedef void         (CBMAPIDECL *cbm_plugin_s1_write_n_t)(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+
+typedef void         (CBMAPIDECL *cbm_plugin_s2_read_n_t) (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+typedef void         (CBMAPIDECL *cbm_plugin_s2_write_n_t)(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+
+typedef void         (CBMAPIDECL *cbm_plugin_pp_dc_read_n_t) (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+typedef void         (CBMAPIDECL *cbm_plugin_pp_dc_write_n_t)(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+
+typedef void         (CBMAPIDECL *cbm_plugin_pp_cc_read_n_t) (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+typedef void         (CBMAPIDECL *cbm_plugin_pp_cc_write_n_t)(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+
 struct opencbm_plugin_s {
     cbm_plugin_get_driver_name_t            cbm_plugin_get_driver_name;
     cbm_plugin_driver_open_t                cbm_plugin_driver_open;

@@ -48,4 +48,14 @@ EXTERN void         CBMAPIDECL cbmarch_parallel_burst_write(CBM_FILE HandleDevic
 EXTERN int          CBMAPIDECL cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 EXTERN int          CBMAPIDECL cbmarch_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
+
+EXTERN void         CBMAPIDECL cbmarch_s1_read_n    (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+EXTERN void         CBMAPIDECL cbmarch_s1_write_n   (CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+EXTERN void         CBMAPIDECL cbmarch_s2_read_n    (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+EXTERN void         CBMAPIDECL cbmarch_s2_write_n   (CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+EXTERN void         CBMAPIDECL cbmarch_pp_dc_read_n (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+EXTERN void         CBMAPIDECL cbmarch_pp_dc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+EXTERN void         CBMAPIDECL cbmarch_pp_cc_read_n (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+EXTERN void         CBMAPIDECL cbmarch_pp_cc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+
 #endif // #ifndef ARCHLIB_H

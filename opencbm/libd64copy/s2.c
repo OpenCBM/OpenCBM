@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s2.c,v 1.11.2.1 2007-02-08 19:19:40 harbaum Exp $";
+    "@(#) $Id: s2.c,v 1.11.2.2 2007-03-14 17:12:36 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -19,9 +19,11 @@ static char *rcsid =
 
 #include "arch.h"
 
-#ifdef ENABLE_XU1541
-#include "../lib/xu1541.h"
-#endif
+#include "opencbm-plugin.h"
+
+static cbm_plugin_s2_read_n_t cbm_plugin_s2_read_n = NULL;
+
+static cbm_plugin_s2_write_n_t cbm_plugin_s2_write_n = NULL;
 
 static const unsigned char s2_drive_prog[] = {
 #include "s2.inc"
@@ -96,13 +98,11 @@ static void read_n(unsigned char *data, int size)
 {
     int i;
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
+    if (cbm_plugin_s2_read_n)
     {
-	xu1541_special_read(XU1541_S2, data, size);
-	return;
+        cbm_plugin_s2_read_n(fd_cbm, data, size);
+        return;
     }
-#endif
 
     for(i=0;i<size;i++)
 	s2_read_byte(fd_cbm, data++);
@@ -129,13 +129,11 @@ static void write_n(const unsigned char *data, int size)
 {
     int i;
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
+    if (cbm_plugin_s2_write_n)
     {
-      xu1541_special_write(XU1541_S2, data, size);
-      return;
+        cbm_plugin_s2_write_n(fd_cbm, data, size);
+        return;
     }
-#endif
 
     for(i=0;i<size;i++)
 	s2_write_byte(fd_cbm, *data++);
@@ -191,6 +189,10 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
     fd_cbm = fd;
     two_sided = settings->two_sided;
 
+    cbm_plugin_s2_read_n = cbm_get_plugin_function_address("cbmarch_s2_read_n");
+
+    cbm_plugin_s2_write_n = cbm_get_plugin_function_address("cbmarch_s2_write_n");
+
                                                                         SETSTATEDEBUG((void)0);
     cbm_upload(fd_cbm, d, 0x700, s2_drive_prog, sizeof(s2_drive_prog));
                                                                         SETSTATEDEBUG((void)0);
@@ -221,6 +223,10 @@ static void close_disk(void)
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_set(fd_cbm, IEC_CLOCK);
                                                                         SETSTATEDEBUG((void)0);
+
+    cbm_plugin_s2_read_n = NULL;
+
+    cbm_plugin_s2_write_n = NULL;
 }
 
 static int send_track_map(unsigned char tr, const char *trackmap, unsigned char count)

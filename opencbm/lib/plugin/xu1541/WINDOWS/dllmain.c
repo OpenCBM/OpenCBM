@@ -9,9 +9,9 @@
 */
 
 /*! ************************************************************** 
-** \file lib/WINBUILD/archlib.c \n
+** \file lib/plugin/xu1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: dllmain.c,v 1.1.2.1 2007-03-11 13:46:08 strik Exp $ \n
+** \version $Id: dllmain.c,v 1.1.2.2 2007-03-14 17:12:32 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -39,18 +39,5 @@
 BOOL
 opencbm_xu1541_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
-    FUNC_ENTER();
-
-#if 0 // DBG
-
-    if (Reason == DLL_PROCESS_ATTACH)
-    {
-        // Read the debugging flags from the registry
-
-        cbm_i_get_debugging_flags();
-    }
-
-#endif
-
-    FUNC_LEAVE_BOOL(TRUE);
+    return TRUE;
 }

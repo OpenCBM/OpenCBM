@@ -10,9 +10,9 @@
 */
 
 /*! ************************************************************** 
-** \file lib/WINBUILD/archlib.c \n
+** \file lib/plugin/xa1541/WINDOWS/iec.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: iec.c,v 1.1.2.1 2007-03-13 10:01:35 strik Exp $ \n
+** \version $Id: iec.c,v 1.1.2.2 2007-03-14 17:12:31 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **

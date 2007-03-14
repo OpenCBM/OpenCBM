@@ -100,12 +100,24 @@ SOURCE=.\dllmain.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\s1_s2_pp.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\xu1541.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=..\..\..\archlib.h
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\..\..\include\opencbm-plugin.h"
+# End Source File
 # Begin Source File
 
 SOURCE=.\usb.h

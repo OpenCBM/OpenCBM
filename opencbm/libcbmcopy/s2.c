@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s2.c,v 1.11.2.1 2007-02-08 19:19:40 harbaum Exp $";
+    "@(#) $Id: s2.c,v 1.11.2.2 2007-03-14 17:12:35 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -19,9 +19,12 @@ static char *rcsid =
 
 #include "arch.h"
 
-#ifdef ENABLE_XU1541
-#include "../lib/xu1541.h"
-#endif
+#include "opencbm-plugin.h"
+
+static cbm_plugin_s2_read_n_t cbm_plugin_s2_read_n = NULL;
+
+static cbm_plugin_s2_write_n_t cbm_plugin_s2_write_n = NULL;
+
 
 static const unsigned char s2r15x1[] = {
 #include "s2r.inc"
@@ -55,13 +58,11 @@ static int write_byte(CBM_FILE fd, unsigned char c)
 {
     int i;
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
+    if(cbm_plugin_s2_write_n)
     {
-	xu1541_special_write(XU1541_S2, &c, 1); 
-	return 0;
+        cbm_plugin_s2_write_n(fd, &c, 1);
+        return 0;
     }
-#endif
 
     for(i=4; i>0; i--) {
                                                                         SETSTATEDEBUG(debugCBMcopyBitCount=i*2);
@@ -98,13 +99,11 @@ static unsigned char read_byte(CBM_FILE fd)
     int i;
     unsigned char c;
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
+    if(cbm_plugin_s2_read_n)
     {
-	xu1541_special_read(XU1541_S2, &c, 1); 
-	return c;
+        cbm_plugin_s2_read_n(fd, &c, 1);
+        return c;
     }
-#endif
 
     c = 0;
     for(i=4; i>0; i--) {
@@ -167,6 +166,10 @@ static int upload_turbo(CBM_FILE fd, unsigned char drive,
     const struct drive_prog *p;
     int dt;
 
+    cbm_plugin_s2_read_n = cbm_get_plugin_function_address("cbmarch_s2_read_n");
+
+    cbm_plugin_s2_write_n = cbm_get_plugin_function_address("cbmarch_s2_write_n");
+
     dt = (drive_type == cbm_dt_cbm1581);
     p = &drive_progs[dt * 2 + (write != 0)];
 
@@ -203,6 +206,10 @@ static void exit_turbo(CBM_FILE fd, int write)
                                                                         SETSTATEDEBUG((void)0);
 //    cbm_iec_wait(fd, IEC_DATA, 0);
                                                                         SETSTATEDEBUG((void)0);
+
+    cbm_plugin_s2_read_n = NULL;
+
+    cbm_plugin_s2_write_n = NULL;
 }
 
 DECLARE_TRANSFER_FUNCS(s2_transfer);

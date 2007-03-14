@@ -112,7 +112,15 @@ SOURCE=.\parburst.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=..\..\..\archlib.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\i_opencbm.h
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\..\..\include\opencbm-plugin.h"
 # End Source File
 # End Group
 # Begin Group "Resource Files"

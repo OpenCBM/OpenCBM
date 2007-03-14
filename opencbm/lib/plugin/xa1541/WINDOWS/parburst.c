@@ -10,9 +10,9 @@
 */
 
 /*! ************************************************************** 
-** \file lib/WINBUILD/archmnib.c \n
+** \file lib/plugin/xa1541/WINDOWS/parburst.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: parburst.c,v 1.1.2.1 2007-03-13 10:01:38 strik Exp $ \n
+** \version $Id: parburst.c,v 1.1.2.2 2007-03-14 17:12:31 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **

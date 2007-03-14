@@ -16,5 +16,6 @@ INCLUDES=../../../../include;../../../../include/WINDOWS;../../..;$(XU1541DIR)
 
 SOURCES=../archlib.c \
 	../xu1541.c \
+	../s1_s2_pp.c \
         dllmain.c \
 	opencbm-xu1541.rc

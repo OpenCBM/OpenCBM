@@ -10,9 +10,9 @@
 */
 
 /*! ************************************************************** 
-** \file lib/WINBUILD/archlib.c \n
+** \file lib/plugin/xu1541/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.1.2.1 2007-03-11 13:46:06 strik Exp $ \n
+** \version $Id: archlib.c,v 1.1.2.2 2007-03-14 17:12:31 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
