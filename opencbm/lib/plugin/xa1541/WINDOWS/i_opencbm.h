@@ -9,9 +9,9 @@
  */
 
 /*! ************************************************************** 
-** \file lib/WINBUILD/i_opencbm.h \n
+** \file lib/plugin/xa1541/WINDOWS/i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.1.2.1 2007-03-11 13:46:05 strik Exp $ \n
+** \version $Id: i_opencbm.h,v 1.1.2.2 2007-03-14 11:32:10 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **

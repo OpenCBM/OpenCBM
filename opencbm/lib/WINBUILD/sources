@@ -11,7 +11,7 @@ DLLBASE=0x10000000
 
 DLLENTRY=opencbm_init
 
-INCLUDES=../../include;../../include/WINDOWS;../
+INCLUDES=../../include;../../include/WINDOWS;../../lib/plugin/xa1541/WINDOWS/;../
 
 C_DEFINES = $(C_DEFINES)
 
@@ -23,4 +23,5 @@ SOURCES=../cbm.c \
 	../upload.c \
 	i_opencbm.c \
 	archlib.c \
+	getpluginaddress.c \
 	opencbm.rc

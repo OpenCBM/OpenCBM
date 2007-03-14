@@ -92,19 +92,19 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\archlib.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\archlib.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\archmnib.c
+SOURCE=.\i_opencbm.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\i_opencbm.c
+SOURCE=.\iec.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\parburst.c
 # End Source File
 # End Group
 # Begin Group "Header Files"

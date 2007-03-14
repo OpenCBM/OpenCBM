@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.17.2.4 2007-03-11 13:46:01 strik Exp $ \n
+** \version $Id: cbm.c,v 1.17.2.5 2007-03-14 11:32:09 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -39,47 +39,7 @@
 #endif
 #include "opencbm-plugin.h"
 
-#ifdef WIN32
-
-  typedef HINSTANCE SHARED_OBJECT_HANDLE;
-
-  SHARED_OBJECT_HANDLE plugin_load(const char * name)
-  {
-      return LoadLibrary(name);
-  }
-
-  void * plugin_get_address(SHARED_OBJECT_HANDLE handle, const char * name)
-  {
-      return GetProcAddress(handle, name);
-  }
-
-  void plugin_unload(SHARED_OBJECT_HANDLE handle)
-  {
-      FreeLibrary(handle);
-  }
-
-#else
-
-  #include <dlfcn.h>
-
-  typedef void * SHARED_OBJECT_HANDLE;
-
-  SHARED_OBJECT_HANDLE plugin_load(const char * name)
-  {
-      return dlopen(name, RTLD_NOW);
-  }
-
-  void * plugin_get_address(SHARED_OBJECT_HANDLE handle, const char * name)
-  {
-      return dlsym(handle, name);
-  }
-
-  void plugin_unload(SHARED_OBJECT_HANDLE handle)
-  {
-      dlclose(handle);
-  }
-
-#endif
+#include "getpluginaddress.h"
 
 struct plugin_information_s {
     SHARED_OBJECT_HANDLE Library;
