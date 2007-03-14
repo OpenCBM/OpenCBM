@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.17.2.5 2007-03-14 11:32:09 strik Exp $ \n
+** \version $Id: cbm.c,v 1.17.2.6 2007-03-14 12:37:12 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -34,9 +34,6 @@
 #include "opencbm.h"
 #include "archlib.h"
 
-#ifdef ENABLE_XU1541
-#include "xu1541.h"
-#endif
 #include "opencbm-plugin.h"
 
 #include "getpluginaddress.h"
@@ -153,14 +150,6 @@ cbm_get_driver_name(int PortNumber)
 
     initialize_plugin();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        static const char usb[]="libusb/xu1541";
-        FUNC_LEAVE_STRING(usb); 
-    }
-#endif
-
     FUNC_LEAVE_STRING(Plugin_information.Plugin.cbm_plugin_get_driver_name(PortNumber));
 }
 
@@ -191,11 +180,6 @@ cbm_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 
     initialize_plugin();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_init() == 0)
-        FUNC_LEAVE_INT(0); 
-#endif
-
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_driver_open(HandleDevice, PortNumber));
 }
 
@@ -217,14 +201,6 @@ void CBMAPIDECL
 cbm_driver_close(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle != 0) 
-    {
-        xu1541_close();
-	FUNC_LEAVE();
-    }
-#endif
 
     Plugin_information.Plugin.cbm_plugin_driver_close(HandleDevice);
 
@@ -262,10 +238,6 @@ cbm_lock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) return;
-#endif
-
     Plugin_information.Plugin.cbm_plugin_lock(HandleDevice);
 
     FUNC_LEAVE();
@@ -292,10 +264,6 @@ void CBMAPIDECL
 cbm_unlock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) return;
-#endif
 
     Plugin_information.Plugin.cbm_plugin_unlock(HandleDevice);
 
@@ -338,13 +306,6 @@ cbm_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
     DBG_MEMDUMP("cbm_raw_write", Buffer, Count);
 #endif
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        FUNC_LEAVE_INT(xu1541_write(Buffer, Count));
-    }
-#endif
-
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_raw_write(HandleDevice,Buffer, Count));
 }
 
@@ -379,14 +340,7 @@ cbm_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        bytesRead = xu1541_read(Buffer, Count);
-    } 
-    else
-#endif
-        bytesRead = Plugin_information.Plugin.cbm_plugin_raw_read(HandleDevice, Buffer, Count);
+    bytesRead = Plugin_information.Plugin.cbm_plugin_raw_read(HandleDevice, Buffer, Count);
 
 #ifdef DBG_DUMP_RAW_READ
     DBG_MEMDUMP("cbm_raw_read", Buffer, bytesRead);
@@ -423,13 +377,6 @@ cbm_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddr
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_LISTEN, DeviceAddress, SecondaryAddress));
-    }
-#endif
-
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_listen(HandleDevice, DeviceAddress, SecondaryAddress));
 }
 
@@ -460,13 +407,6 @@ int CBMAPIDECL
 cbm_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_TALK, DeviceAddress, SecondaryAddress));
-    }
-#endif
 
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_talk(HandleDevice, DeviceAddress, SecondaryAddress));
 }
@@ -507,12 +447,7 @@ cbm_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
 
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle)
-	returnValue = xu1541_ioctl(XU1541_OPEN, DeviceAddress, SecondaryAddress);
-    else
-#endif
-        returnValue = Plugin_information.Plugin.cbm_plugin_open(HandleDevice, DeviceAddress, SecondaryAddress);
+    returnValue = Plugin_information.Plugin.cbm_plugin_open(HandleDevice, DeviceAddress, SecondaryAddress);
 
     if (returnValue == 0)
     {
@@ -569,13 +504,6 @@ cbm_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddre
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	FUNC_LEAVE_INT(xu1541_ioctl(XU1541_CLOSE, DeviceAddress, SecondaryAddress));
-    }
-#endif
- 
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_close(HandleDevice, DeviceAddress, SecondaryAddress));
 }
 
@@ -604,13 +532,6 @@ cbm_unlisten(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_UNLISTEN, 0, 0));
-    }
-#endif
-
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_unlisten(HandleDevice));
 }
 
@@ -638,13 +559,6 @@ int CBMAPIDECL
 cbm_untalk(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_UNTALK, 0, 0));
-    }
-#endif
 
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_untalk(HandleDevice));
 }
@@ -675,13 +589,6 @@ cbm_get_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_GET_EOI, 0, 0));
-    }
-#endif
-
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_get_eoi(HandleDevice));
 }
 
@@ -704,13 +611,6 @@ int CBMAPIDECL
 cbm_clear_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_CLEAR_EOI, 0, 0));
-    }
-#endif
 
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_clear_eoi(HandleDevice));
 }
@@ -740,13 +640,6 @@ int CBMAPIDECL
 cbm_reset(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        FUNC_LEAVE_INT(xu1541_ioctl(XU1541_RESET, 0, 0));
-    }
-#endif
 
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_reset(HandleDevice));
 }
@@ -781,13 +674,6 @@ cbm_pp_read(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	FUNC_LEAVE_UCHAR((__u_char)xu1541_ioctl(XU1541_PP_READ, 0, 0));
-    }
-#endif
-
     FUNC_LEAVE_UCHAR(Plugin_information.Plugin.cbm_plugin_pp_read(HandleDevice));
 }
 
@@ -818,14 +704,6 @@ void CBMAPIDECL
 cbm_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	xu1541_ioctl(XU1541_PP_WRITE, Byte, 0);
-	FUNC_LEAVE();
-    }
-#endif
 
     Plugin_information.Plugin.cbm_plugin_pp_write(HandleDevice, Byte);
 
@@ -858,13 +736,6 @@ cbm_iec_poll(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	FUNC_LEAVE_INT(xu1541_ioctl(XU1541_IEC_POLL, 0, 0));
-    }
-#endif
-
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_iec_poll(HandleDevice));
 }
 
@@ -891,14 +762,6 @@ void CBMAPIDECL
 cbm_iec_set(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	xu1541_ioctl(XU1541_IEC_SET, Line, 0);
-	FUNC_LEAVE();
-    }
-#endif
 
     Plugin_information.Plugin.cbm_plugin_iec_set(HandleDevice, Line);
 
@@ -927,14 +790,6 @@ void CBMAPIDECL
 cbm_iec_release(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	xu1541_ioctl(XU1541_IEC_RELEASE, Line, 0);
-	FUNC_LEAVE();
-    }
-#endif
 
     Plugin_information.Plugin.cbm_plugin_iec_release(HandleDevice, Line);
 
@@ -973,14 +828,6 @@ cbm_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	xu1541_ioctl(XU1541_IEC_SET, Set, Release);
-	FUNC_LEAVE();
-    }
-#endif
-
     Plugin_information.Plugin.cbm_plugin_iec_setrelease(HandleDevice, Set, Release);
 
     FUNC_LEAVE();
@@ -1017,13 +864,6 @@ cbm_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	FUNC_LEAVE_INT(xu1541_ioctl(XU1541_IEC_WAIT, Line, State));
-    }
-#endif
-
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_iec_wait(HandleDevice, Line, State));
 }
 
@@ -1052,13 +892,6 @@ int CBMAPIDECL
 cbm_iec_get(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-        FUNC_LEAVE_INT((xu1541_ioctl(XU1541_IEC_POLL,0,0)&Line) != 0 ? 1 : 0);
-    }
-#endif
 
     FUNC_LEAVE_INT((Plugin_information.Plugin.cbm_plugin_iec_poll(HandleDevice)&Line) != 0 ? 1 : 0);
 }
@@ -1215,14 +1048,6 @@ cbm_parallel_burst_read(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	fprintf(stderr, "cbm_parallel_burst_read(): Not supported by xu1541\n");
-	exit(-1);
-    }
-#endif
-
     FUNC_LEAVE_UCHAR(Plugin_information.Plugin.cbm_plugin_parallel_burst_read(HandleDevice));
 }
 
@@ -1245,14 +1070,6 @@ void CBMAPIDECL
 cbm_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     FUNC_ENTER();
-
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	fprintf(stderr, "cbm_parallel_burst_write(): Not supported by xu1541\n");
-	exit(-1);
-    }
-#endif
 
     Plugin_information.Plugin.cbm_plugin_parallel_burst_write(HandleDevice, Value);
 
@@ -1285,14 +1102,6 @@ cbm_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned 
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	fprintf(stderr, "cbm_parallel_burst_read_track(): Not supported by xu1541\n");
-	exit(-1);
-    }
-#endif
-
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track(HandleDevice, Buffer, Length));
 }
 
@@ -1322,13 +1131,34 @@ cbm_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned
 {
     FUNC_ENTER();
 
-#ifdef ENABLE_XU1541
-    if(xu1541_handle) 
-    {
-	fprintf(stderr, "cbm_parallel_burst_write_track(): Not supported by xu1541\n");
-	exit(-1);
-    }
-#endif
-
     FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_parallel_burst_write_track(HandleDevice, Buffer, Length));
+}
+
+
+/*! \brief Get the function pointer for a function in a plugin
+
+ This function gets the function pointer for a function which 
+ resides in the plugin.
+
+ \param Functionname
+   The name of the function of which to get the address
+
+ \return
+   Pointer to the function if successfull; 0 if not.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+void * CBMAPIDECL
+cbm_get_plugin_function_address(const char * Functionname)
+{
+    void * pointer = NULL;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Library)
+        pointer = plugin_get_address(Plugin_information.Library, Functionname);
+
+    FUNC_LEAVE_PTR(pointer, void*);
 }

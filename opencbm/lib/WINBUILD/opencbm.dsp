@@ -112,6 +112,10 @@ SOURCE=..\gcr_4b5b.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\getpluginaddress.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\i_opencbm.c
 # End Source File
 # Begin Source File
@@ -141,6 +145,10 @@ SOURCE=..\..\include\WINDOWS\cbmioctl.h
 # Begin Source File
 
 SOURCE=..\..\include\debug.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\getpluginaddress.h
 # End Source File
 # Begin Source File
 
