@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.17.2.7 2007-03-15 11:15:55 strik Exp $ \n
+** \version $Id: cbm.c,v 1.17.2.8 2007-03-15 16:38:02 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -50,7 +50,7 @@ struct plugin_information_s Plugin_information = { 0 };
 static int
 initialize_plugin_pointer(plugin_information_t *Plugin_information)
 {
-    int ret = 1;
+    int error = 1;
 
     do {
         memset(&Plugin_information->Plugin, 0, sizeof(Plugin_information->Plugin));
@@ -94,20 +94,91 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information)
         Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track  = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read_track");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write_track");
 
-        ret = 0;
+        /* Make sure that all required functions are available: */
+
+        error = (NULL == Plugin_information->Plugin.cbm_plugin_get_driver_name
+              || NULL == Plugin_information->Plugin.cbm_plugin_driver_open
+              || NULL == Plugin_information->Plugin.cbm_plugin_driver_close
+              || NULL == Plugin_information->Plugin.cbm_plugin_raw_write
+              || NULL == Plugin_information->Plugin.cbm_plugin_raw_read
+              || NULL == Plugin_information->Plugin.cbm_plugin_open
+              || NULL == Plugin_information->Plugin.cbm_plugin_close
+              || NULL == Plugin_information->Plugin.cbm_plugin_listen
+              || NULL == Plugin_information->Plugin.cbm_plugin_talk
+              || NULL == Plugin_information->Plugin.cbm_plugin_unlisten
+              || NULL == Plugin_information->Plugin.cbm_plugin_untalk
+              || NULL == Plugin_information->Plugin.cbm_plugin_get_eoi
+              || NULL == Plugin_information->Plugin.cbm_plugin_clear_eoi
+              || NULL == Plugin_information->Plugin.cbm_plugin_reset
+              || NULL == Plugin_information->Plugin.cbm_plugin_iec_poll
+              || NULL == Plugin_information->Plugin.cbm_plugin_iec_setrelease
+              || NULL == Plugin_information->Plugin.cbm_plugin_iec_wait
+
+              ) ? 1 : 0;
+
+        if (error)
+            break;
+
+        /* the following functions are optional:
+         *  - Plugin_information->Plugin.cbm_plugin_lock
+         *  - Plugin_information->Plugin.cbm_plugin_unlock
+         *  - Plugin_information->Plugin.cbm_plugin_iec_set
+         *  - Plugin_information->Plugin.cbm_plugin_iec_release
+         *  - Plugin_information->Plugin.cbm_plugin_parallel_burst_read
+         *  - Plugin_information->Plugin.cbm_plugin_parallel_burst_write
+         *  - Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track
+         *  - Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track)
+         *  - Plugin_information->Plugin.cbm_plugin_pp_read
+         *  - Plugin_information->Plugin.cbm_plugin_pp_write
+         */
+
+
+        /* make sure that the parburst function are either ALL, or NONE implemented: */
+
+        error = 1;
+
+        if (Plugin_information->Plugin.cbm_plugin_parallel_burst_read 
+         && Plugin_information->Plugin.cbm_plugin_parallel_burst_write
+         && Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track
+         && Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track
+           )
+
+           error = 0;
+
+        if (NULL == Plugin_information->Plugin.cbm_plugin_parallel_burst_read 
+         && NULL == Plugin_information->Plugin.cbm_plugin_parallel_burst_write
+         && NULL == Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track
+         && NULL == Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track
+           )
+
+            error = 0;
+
+        if (error)
+            break;
+
+
+        error = 1;
+
+        /* the same for the pp_read() and pp_write() functions */
+
+        if (Plugin_information->Plugin.cbm_plugin_pp_read
+         && Plugin_information->Plugin.cbm_plugin_pp_write
+           )
+
+            error = 0;
+
+        if (NULL == Plugin_information->Plugin.cbm_plugin_pp_read
+         && NULL == Plugin_information->Plugin.cbm_plugin_pp_write
+           )
+
+            error = 0;
+
+        if (error)
+            break;
 
     } while (0);
 
-    return ret;
-}
-
-static void
-initialize_plugin(void)
-{
-    if (Plugin_information.Library == NULL)
-    {
-        initialize_plugin_pointer(&Plugin_information);
-    }
+    return error;
 }
 
 static void
@@ -119,6 +190,22 @@ uninitialize_plugin(void)
 
         Plugin_information.Library = NULL;
     }
+}
+
+static int
+initialize_plugin(void)
+{
+    int error = 1;
+
+    if (Plugin_information.Library == NULL)
+    {
+        if (0 == initialize_plugin_pointer(&Plugin_information))
+        {
+            error = 0;
+        }
+    }
+
+    return error;
 }
 
 // #define DBG_DUMP_RAW_READ
@@ -146,11 +233,33 @@ uninitialize_plugin(void)
 const char * CBMAPIDECL
 cbm_get_driver_name(int PortNumber)
 {
+    const char *ret;
+
+    static char buffer[256];
+
+    int error;
+
     FUNC_ENTER();
 
-    initialize_plugin();
+    error = initialize_plugin();
 
-    FUNC_LEAVE_STRING(Plugin_information.Plugin.cbm_plugin_get_driver_name(PortNumber));
+    if (Plugin_information.Plugin.cbm_plugin_get_driver_name)
+        ret = Plugin_information.Plugin.cbm_plugin_get_driver_name(PortNumber);
+    else
+        ret = "NO PLUGIN DRIVER!";
+
+    if (error)
+    {
+        strncpy(buffer, ret, sizeof(buffer));
+
+        buffer[sizeof(buffer)-1] = 0;
+
+        ret = buffer;
+
+        uninitialize_plugin();
+    }
+
+    FUNC_LEAVE_STRING(ret);
 }
 
 /*! \brief Opens the driver
@@ -176,11 +285,18 @@ cbm_get_driver_name(int PortNumber)
 int CBMAPIDECL 
 cbm_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 {
+    int error;
+
     FUNC_ENTER();
 
-    initialize_plugin();
+    error = initialize_plugin();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_driver_open(HandleDevice, PortNumber));
+    if (error)
+        uninitialize_plugin();
+    else
+        error = Plugin_information.Plugin.cbm_plugin_driver_open(HandleDevice, PortNumber);
+
+    FUNC_LEAVE_INT(error);
 }
 
 /*! \brief Closes the driver
@@ -238,7 +354,8 @@ cbm_lock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    Plugin_information.Plugin.cbm_plugin_lock(HandleDevice);
+    if (Plugin_information.Plugin.cbm_plugin_lock)
+        Plugin_information.Plugin.cbm_plugin_lock(HandleDevice);
 
     FUNC_LEAVE();
 }
@@ -265,7 +382,8 @@ cbm_unlock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    Plugin_information.Plugin.cbm_plugin_unlock(HandleDevice);
+    if (Plugin_information.Plugin.cbm_plugin_unlock)
+        Plugin_information.Plugin.cbm_plugin_unlock(HandleDevice);
 
     FUNC_LEAVE();
 }
@@ -665,6 +783,8 @@ cbm_reset(CBM_FILE HandleDevice)
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
 
+ Note that a plugin is not required to implement this function.
+
  \bug
    This function can't signal an error, thus, be careful!
 */
@@ -672,9 +792,14 @@ cbm_reset(CBM_FILE HandleDevice)
 __u_char CBMAPIDECL 
 cbm_pp_read(CBM_FILE HandleDevice)
 {
+    __u_char ret = -1;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_UCHAR(Plugin_information.Plugin.cbm_plugin_pp_read(HandleDevice));
+    if (Plugin_information.Plugin.cbm_plugin_pp_read)
+        ret = Plugin_information.Plugin.cbm_plugin_pp_read(HandleDevice);
+
+    FUNC_LEAVE_UCHAR(ret);
 }
 
 /*! \brief Write a byte to a XP1541/XP1571 cable
@@ -696,6 +821,8 @@ cbm_pp_read(CBM_FILE HandleDevice)
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
 
+ Note that a plugin is not required to implement this function.
+
  \bug
    This function can't signal an error, thus, be careful!
 */
@@ -705,7 +832,8 @@ cbm_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 {
     FUNC_ENTER();
 
-    Plugin_information.Plugin.cbm_plugin_pp_write(HandleDevice, Byte);
+    if (Plugin_information.Plugin.cbm_plugin_pp_write)
+        Plugin_information.Plugin.cbm_plugin_pp_write(HandleDevice, Byte);
 
     FUNC_LEAVE();
 }
@@ -763,7 +891,10 @@ cbm_iec_set(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
 
-    Plugin_information.Plugin.cbm_plugin_iec_set(HandleDevice, Line);
+    if (Plugin_information.Plugin.cbm_plugin_iec_set)
+        Plugin_information.Plugin.cbm_plugin_iec_set(HandleDevice, Line);
+    else
+        Plugin_information.Plugin.cbm_plugin_iec_setrelease(HandleDevice, Line, 0);
 
     FUNC_LEAVE();
 }
@@ -791,7 +922,10 @@ cbm_iec_release(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
 
-    Plugin_information.Plugin.cbm_plugin_iec_release(HandleDevice, Line);
+    if (Plugin_information.Plugin.cbm_plugin_iec_release)
+        Plugin_information.Plugin.cbm_plugin_iec_release(HandleDevice, Line);
+    else
+        Plugin_information.Plugin.cbm_plugin_iec_setrelease(HandleDevice, 0, Line);
 
     FUNC_LEAVE();
 }
@@ -1041,14 +1175,21 @@ cbm_exec_command(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
+
+ Note that a plugin is not required to implement this function.
 */
 
 __u_char CBMAPIDECL
 cbm_parallel_burst_read(CBM_FILE HandleDevice)
 {
+    __u_char ret = 0;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_UCHAR(Plugin_information.Plugin.cbm_plugin_parallel_burst_read(HandleDevice));
+    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_read)
+        ret = Plugin_information.Plugin.cbm_plugin_parallel_burst_read(HandleDevice);
+
+    FUNC_LEAVE_UCHAR(ret);
 }
 
 /*! \brief PARBURST: Write to the parallel port
@@ -1064,6 +1205,8 @@ cbm_parallel_burst_read(CBM_FILE HandleDevice)
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
+
+ Note that a plugin is not required to implement this function.
 */
 
 void CBMAPIDECL
@@ -1071,7 +1214,8 @@ cbm_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     FUNC_ENTER();
 
-    Plugin_information.Plugin.cbm_plugin_parallel_burst_write(HandleDevice, Value);
+    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_write)
+        Plugin_information.Plugin.cbm_plugin_parallel_burst_write(HandleDevice, Value);
 
     FUNC_LEAVE();
 }
@@ -1095,14 +1239,22 @@ cbm_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
+
+ Note that a plugin is not required to implement this function.
+ If this function is not implemented, it will return -1.
 */
 
 int CBMAPIDECL
 cbm_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
+    int ret = -1;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track(HandleDevice, Buffer, Length));
+    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track)
+        ret = Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track(HandleDevice, Buffer, Length);
+
+    FUNC_LEAVE_INT(ret);
 }
 
 /*! \brief PARBURST: Write a complete track
@@ -1124,14 +1276,22 @@ cbm_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned 
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
+
+ Note that a plugin is not required to implement this function.
+ If this function is not implemented, it will return -1.
 */
 
 int CBMAPIDECL
 cbm_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
+    int ret = -1;
+
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_parallel_burst_write_track(HandleDevice, Buffer, Length));
+    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_write_track)
+        ret = Plugin_information.Plugin.cbm_plugin_parallel_burst_write_track(HandleDevice, Buffer, Length);
+
+    FUNC_LEAVE_INT(ret);
 }
 
 
