@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1.2.3 2007-03-15 06:59:56 strik Exp $
+# $Id: Makefile,v 1.1.2.4 2007-03-15 11:06:26 strik Exp $
 
 include ../../../LINUX/config.make
 
@@ -8,7 +8,7 @@ SHLIB   = libopencbm-xu1541.so
 SHLIBV  = $(SHLIB).$(MAJ)
 SHLIBV3 = $(SHLIBV).$(MIN).$(REL)
 LIB     = libopencbm-xu1541.a
-SRCS    = archlib.c xu1541.c
+SRCS    = archlib.c xu1541.c s1_s2_pp.c
 
 OBJS    = $(SRCS:.c=.o)
 SHOBJS  = $(SRCS:.c=.lo)
