@@ -6,14 +6,8 @@
 
 #include "opencbm.h"
 
-#if 0
- #define FUNC_ENTER()  printf("CBMLIB: Entering %s\n", __func__)
- #define DEBUGF(format, args...) printf("CBMLIB: " format "\n", ##args)
-#else
- #ifndef FUNC_ENTER
+#ifndef FUNC_ENTER
   #define FUNC_ENTER()
- #endif
- #define DEBUGF(_x)
 #endif
 
 /* time out 10% after device itself times out */
@@ -25,10 +19,6 @@
 /* vendor and product id (donated by ftdi) */
 #define XU1541_VID  0x0403
 #define XU1541_PID  0xc632
-
-#define XU1541_CONTROL_CHUNK  128
-
-extern usb_dev_handle *xu1541_handle;
 
 /* calls required for standard io */
 extern int xu1541_init(void);

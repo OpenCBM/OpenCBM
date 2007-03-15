@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.1.2.2 2007-03-14 17:12:31 strik Exp $ \n
+** \version $Id: archlib.c,v 1.1.2.3 2007-03-15 17:38:56 harbaum Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -579,7 +579,7 @@ cbmarch_iec_poll(CBM_FILE HandleDevice)
 void CBMAPIDECL
 cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
 {
-    xu1541_ioctl(XU1541_IEC_SET, Line, 0);
+    xu1541_ioctl(XU1541_IEC_SETRELEASE, Line, 0);
 }
 
 /*! \brief Deactivate a line on the IEC serial bus
@@ -603,7 +603,7 @@ cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
 void CBMAPIDECL
 cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
 {
-    xu1541_ioctl(XU1541_IEC_RELEASE, Line, 0);
+    xu1541_ioctl(XU1541_IEC_SETRELEASE, 0, Line);
 }
 
 /*! \brief Activate and deactive a line on the IEC serial bus
@@ -636,7 +636,7 @@ cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
 void CBMAPIDECL
 cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
-    xu1541_ioctl(XU1541_IEC_SET, Set, Release);
+    xu1541_ioctl(XU1541_IEC_SETRELEASE, Set, Release);
 }
 
 /*! \brief Wait for a line to have a specific state
