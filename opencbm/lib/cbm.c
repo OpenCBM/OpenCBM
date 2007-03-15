@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.17.2.6 2007-03-14 12:37:12 strik Exp $ \n
+** \version $Id: cbm.c,v 1.17.2.7 2007-03-15 11:15:55 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -58,7 +58,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information)
 #ifdef WIN32
         Plugin_information->Library = plugin_load("opencbm-xu1541.dll");
 #else
-        Plugin_information->Library = plugin_load("/usr/local/lib/libopencbm-xu1541.so");
+        Plugin_information->Library = plugin_load("/usr/local/lib/opencbm/plugin/libopencbm-xu1541.so");
 #endif
 
         DBG_PRINT((DBG_PREFIX "LoadLibrary returned %p", Plugin_information->Library));
