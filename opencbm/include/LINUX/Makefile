@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-03-02 18:17:19 strik Exp $
+# $Id: Makefile,v 1.1.8.1 2007-03-15 11:19:27 strik Exp $
 
 include ../LINUX/config.make
 
@@ -18,4 +18,4 @@ install-files:
 install: install-files
 
 uninstall:
-	cd $(INCDIR) && rm -d $(INSTHDRS)
+	-cd $(INCDIR) && rm -d $(INSTHDRS)

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1.2.4 2007-03-15 11:06:26 strik Exp $
+# $Id: Makefile,v 1.1.2.5 2007-03-15 11:19:27 strik Exp $
 
 include ../../../LINUX/config.make
 
@@ -34,7 +34,7 @@ install: install-files
 	ldconfig -n $(PLUGINDIR)
 
 uninstall:
-	cd $(PLUGINDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
+	-cd $(PLUGINDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
 	-rmdir -p $(PLUGINDIR)
 
 .c.o:
