@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.1.2.4 2007-03-15 17:38:56 harbaum Exp $ \n
+** \version $Id: xu1541.c,v 1.1.2.5 2007-03-15 17:59:14 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -24,6 +24,7 @@
 
 #include "opencbm.h"
 #include "xu1541.h"
+#include "arch.h"
 
 static int debug_level = -10000;
 static usb_dev_handle *xu1541_handle = NULL;
@@ -253,7 +254,7 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 	      }
 	      else 
 	      {
-		  usleep(timeout_delay);
+		  arch_usleep(timeout_delay);
 		  timeout_delay <<= 1;
 	      }
 	  } 
@@ -347,7 +348,7 @@ int xu1541_write(const __u_char *data, size_t len)
 		} 
 		else
 		{
-		  usleep(timeout_delay);
+		  arch_usleep(timeout_delay);
 		  timeout_delay <<= 1;
 		}
 	    } 
@@ -422,7 +423,7 @@ int xu1541_read(__u_char *data, size_t len)
 	        // requests
 	        if(rv[0] != XU1541_IO_READ_DONE) 
 		{
-		    usleep(timeout_delay);
+		    arch_usleep(timeout_delay);
 		    timeout_delay <<= 1;
 		} 
 		else
