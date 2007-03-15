@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.10.2.3 2007-03-13 10:01:34 strik Exp $
+# $Id: Makefile,v 1.10.2.4 2007-03-15 06:59:55 strik Exp $
 
 include LINUX/config.make
 
@@ -35,10 +35,10 @@ all-doc: all doc
 
 opencbm:
 	@for subdir in $(SUBDIRS); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile all || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile all; ) || true; \
 	done
 
 doc:
@@ -118,7 +118,7 @@ plugin-xa1541:
 plugin: plugin-xu1541 plugin-xa1541
 
 uninstall: 
-	@for subdir in $(SUBDIRS_NON_OPTIONAL); do \
+	@for subdir in $(SUBDIRS_ALL_NON_OPTIONAL); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \

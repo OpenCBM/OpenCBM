@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.7.2.1 2007-03-13 09:59:37 strik Exp $
+# $Id: config.make,v 1.7.2.2 2007-03-15 06:59:55 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -17,6 +17,7 @@ MANDIR      = $(PREFIX)/man/man1
 INFODIR     = $(PREFIX)/info
 INCDIR      = $(PREFIX)/include
 MODDIR      = `for d in /lib/modules/\`uname -r\`/{extra,misc,kernel/drivers/char}; do test -d $$d && echo $$d; done | head -n 1`
+PLUGINDIR   = $(PREFIX)/lib/opencbm/plugin/
 
 #
 # Where to find the xu1541 firmware

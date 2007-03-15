@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1.2.2 2007-03-13 09:59:37 strik Exp $
+# $Id: Makefile,v 1.1.2.3 2007-03-15 06:59:56 strik Exp $
 
 include ../../../LINUX/config.make
 
@@ -25,15 +25,17 @@ mrproper: clean
 	rm -f $(LIBCBMCOPY)/*.inc $(LIBD64COPY)/*.inc
 
 install-files:
-	install -m 755 $(SHLIBV3) $(LIBDIR)
-	install -m 644 $(LIB) $(LIBDIR)
-	cd $(LIBDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
+	install -d $(PLUGINDIR)
+	install -m 755 $(SHLIBV3) $(PLUGINDIR)
+	install -m 644 $(LIB) $(PLUGINDIR)
+	cd $(PLUGINDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
 
 install: install-files
-	ldconfig -n $(LIBDIR)
+	ldconfig -n $(PLUGINDIR)
 
 uninstall:
-	cd $(LIBDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
+	cd $(PLUGINDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
+	-rmdir -p $(PLUGINDIR)
 
 .c.o:
 	$(CC) $(LIB_CFLAGS) -c -o $@ $<
