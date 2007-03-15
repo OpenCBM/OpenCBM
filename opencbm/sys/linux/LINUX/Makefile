@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4.2.1 2007-03-13 09:57:45 strik Exp $
+# $Id: Makefile,v 1.4.2.2 2007-03-15 07:53:48 strik Exp $
 
 ifneq ($(KERNELRELEASE),)
 EXTRA_CFLAGS := $(CBM4LINUX_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
@@ -32,7 +32,7 @@ install: install-files
 
 uninstall:
 	if [ ! -z "`lsmod|grep '^cbm '`" ]; then rmmod cbm; fi
-	rm -f $(MODDIR)/cbm.o
+	rm -f $(MODDIR)/cbm.o $(MODDIR)/cbm.ko
 
 cbm.o: cbm_module.c
 	-ln -s LINUX/Makefile Makefile
