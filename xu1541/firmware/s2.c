@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s2.c,v 1.5 2007-03-08 11:16:23 harbaum Exp $
+ * This Revision: $Id: s2.c,v 1.6 2007-03-15 17:40:51 harbaum Exp $
  *
  * $Log: s2.c,v $
- * Revision 1.5  2007-03-08 11:16:23  harbaum
+ * Revision 1.6  2007-03-15 17:40:51  harbaum
+ * Plenty of changes incl. first async support
+ *
+ * Revision 1.5  2007/03/08 11:16:23  harbaum
  * timeout and watchdog adjustments
  *
  * Revision 1.4  2007/03/03 14:54:14  harbaum
@@ -32,29 +35,29 @@
 #include "xu1541.h"
 #include "s2.h"
 
-static void s2_write_byte(unsigned char c) {
-  unsigned char i;
+static void s2_write_byte(uchar c) {
+  uchar i;
 
   for(i=0; i<4; i++) {
-    if(c & 1) { SET(DATA); } else { RELEASE(DATA); }
+    if(c & 1) { iec_set(DATA); } else { iec_release(DATA); }
     c >>= 1;
-    RELEASE(ATN);
-    while(GET(CLK))
+    iec_release(ATN);
+    while(iec_get(CLK))
       wdt_reset();
 
-    if(c & 1) { SET(DATA); } else { RELEASE(DATA); }
+    if(c & 1) { iec_set(DATA); } else { iec_release(DATA); }
     c >>= 1;
-    SET(ATN);
+    iec_set(ATN);
 
-    while(!GET(CLK))
+    while(!iec_get(CLK))
       wdt_reset();
   }
 
-  RELEASE(DATA);
+  iec_release(DATA);
 }
 
-unsigned char s2_write(unsigned char *data, unsigned char len) {
-  unsigned char i;
+uchar s2_write(uchar *data, uchar len) {
+  uchar i;
 
   for(i=0;i<len;i++)
     s2_write_byte(*data++);
@@ -62,27 +65,27 @@ unsigned char s2_write(unsigned char *data, unsigned char len) {
   return len;
 }
 
-static unsigned char s2_read_byte(void) {
-  unsigned char c = 0;
+static uchar s2_read_byte(void) {
+  uchar c = 0;
   char i;
 
   for(i=4; i>0; i--) {
-    while(GET(CLK))
+    while(iec_get(CLK))
       wdt_reset();
 
-    c = (c>>1) | (GET(DATA) ? 0x80 : 0);
-    RELEASE(ATN);
-    while(!GET(CLK))
+    c = (c>>1) | (iec_get(DATA) ? 0x80 : 0);
+    iec_release(ATN);
+    while(!iec_get(CLK))
       wdt_reset();
 
-    c = (c>>1) | (GET(DATA) ? 0x80 : 0);
-    SET(ATN);
+    c = (c>>1) | (iec_get(DATA) ? 0x80 : 0);
+    iec_set(ATN);
   }
   return c;
 }
 
-unsigned char s2_read(unsigned char *data, unsigned char len) {
-  unsigned char i;
+uchar s2_read(uchar *data, uchar len) {
+  uchar i;
 
   for(i=0;i<len;i++)
     *data++ = s2_read_byte();

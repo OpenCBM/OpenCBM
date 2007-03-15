@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: Proprietary, free under certain conditions. See Documentation.
- * This Revision: $Id: usbdrv.c,v 1.1 2007-02-04 12:36:36 harbaum Exp $
+ * This Revision: $Id: usbdrv.c,v 1.2 2007-03-15 17:40:51 harbaum Exp $
  */
 
 #include "iarcompat.h"
@@ -71,6 +71,10 @@ optimizing hints:
 - use narrow scope for variables which should be in X/Y/Z register
 - assign char sized expressions to variables to force 8 bit arithmetics
 */
+
+unsigned char usb_idle(void) {
+  return ((usbMsgLen == 0xff) && (usbTxLen < 0));
+}
 
 /* ------------------------------------------------------------------------- */
 

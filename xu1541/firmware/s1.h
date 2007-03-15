@@ -8,7 +8,7 @@
 #define S1_VERSION_MAJOR 1
 #define S1_VERSION_MINOR 0
 
-extern unsigned char s1_read(unsigned char *data, unsigned char len);
-extern unsigned char s1_write(unsigned char *data, unsigned char len);
+extern uchar s1_read(uchar *data, uchar len);
+extern uchar s1_write(uchar *data, uchar len);
 
 #endif // S1_H

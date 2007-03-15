@@ -77,6 +77,11 @@ static	byte_t	usb_tx_total;		// total transmit size
 static	byte_t*	usb_tx_data;		// pointer to data to transmit
 static	byte_t	new_address;		// new device address
 
+byte_t usb_idle(void) {
+  return((usb_tx_state == TX_STATE_IDLE) && 
+	 (usb_tx_total == 0) && (usb_tx_len == 0));
+}
+
 #if	defined USBTINY_VENDOR_NAME
 struct
 {

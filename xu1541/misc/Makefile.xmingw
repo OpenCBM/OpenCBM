@@ -12,7 +12,7 @@ EVENT_LOG = read_event_log
 all: $(ECHO_TEST).exe $(EVENT_LOG).exe
 
 clean:
-	rm -f $(ECHO_TEST) $(EVENT_LOG)
+	rm -f $(ECHO_TEST).exe $(EVENT_LOG).exe
 
 $(ECHO_TEST).exe: $(ECHO_TEST).c
 	$(CC) -Wall -DWIN -o $@ $< -lusb

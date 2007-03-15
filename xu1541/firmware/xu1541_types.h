@@ -8,6 +8,7 @@
 /* special commands used for testing and debugging */
 #define XU1541_ECHO                  0xff
 #define XU1541_GET_EVENT             0xfe
+#define XU1541_IRQ_PAUSE             0xfd
 
 /* normal commands */
 #define XU1541_INFO                  0
@@ -38,19 +39,21 @@
 #define XU1541_GET_EOI               (XU1541_IOCTL + 7)
 #define XU1541_CLEAR_EOI             (XU1541_IOCTL + 8)
 
-#define XU1541_PP_READ               (XU1541_IOCTL + 10)
-#define XU1541_PP_WRITE              (XU1541_IOCTL + 11)
-#define XU1541_IEC_POLL              (XU1541_IOCTL + 12)
-#define XU1541_IEC_SET               (XU1541_IOCTL + 13)
-#define XU1541_IEC_RELEASE           (XU1541_IOCTL + 14)
-#define XU1541_IEC_WAIT              (XU1541_IOCTL + 15)
-#define XU1541_IEC_SETRELEASE        (XU1541_IOCTL + 16)
+/* support commands for async read/write */
+#define XU1541_REQUEST_READ          (XU1541_IOCTL + 9)
+#define XU1541_GET_RESULT            (XU1541_IOCTL + 10)
+
+#define XU1541_PP_READ               (XU1541_IOCTL + 11)
+#define XU1541_PP_WRITE              (XU1541_IOCTL + 12)
+#define XU1541_IEC_POLL              (XU1541_IOCTL + 13)
+#define XU1541_IEC_WAIT              (XU1541_IOCTL + 14)
+#define XU1541_IEC_SETRELEASE        (XU1541_IOCTL + 15)
 
 /* constants needed by parallel burst (nibbler) */
-#define XU1541_PARBURST_READ         (XU1541_IOCTL + 17)
-#define XU1541_PARBURST_WRITE        (XU1541_IOCTL + 18)
-#define XU1541_PARBURST_READ_TRACK   (XU1541_IOCTL + 19)
-#define XU1541_PARBURST_WRITE_TRACK  (XU1541_IOCTL + 20)
+#define XU1541_PARBURST_READ         (XU1541_IOCTL + 16)
+#define XU1541_PARBURST_WRITE        (XU1541_IOCTL + 17)
+#define XU1541_PARBURST_READ_TRACK   (XU1541_IOCTL + 18)
+#define XU1541_PARBURST_WRITE_TRACK  (XU1541_IOCTL + 19)
 
 /* special protocol codes begin at 32 */
 #define XU1541_S1                    (32)
@@ -58,7 +61,18 @@
 #define XU1541_PP                    (XU1541_S1 + 2)
 #define XU1541_P2                    (XU1541_S1 + 3)
 
+/* io state codes */
+#define XU1541_IO_IDLE           0
+#define XU1541_IO_READ           1
+#define XU1541_IO_READ_DONE      2
+#define XU1541_IO_WRITE_PREPARED 3
+#define XU1541_IO_WRITE          4
+#define XU1541_IO_IRQ_PAUSE      5
+#define XU1541_IO_RESULT         6
+#define XU1541_IO_ASYNC          7
+
 /* max time to wait for device */
 #define XU1541_W4L_TIMEOUT        20  // seconds, max. 60 possible here
+#define XU1541_IO_BUFFER_SIZE    128
 
 #endif // XU1541_TYPES_H

@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s1.c,v 1.3 2007-03-08 11:16:23 harbaum Exp $
+ * This Revision: $Id: s1.c,v 1.4 2007-03-15 17:40:51 harbaum Exp $
  *
  * $Log: s1.c,v $
- * Revision 1.3  2007-03-08 11:16:23  harbaum
+ * Revision 1.4  2007-03-15 17:40:51  harbaum
+ * Plenty of changes incl. first async support
+ *
+ * Revision 1.3  2007/03/08 11:16:23  harbaum
  * timeout and watchdog adjustments
  *
  * Revision 1.2  2007/02/04 15:12:04  harbaum
@@ -29,27 +32,27 @@
 #include "s1.h"
 
 
-static void s1_write_byte(unsigned char c) {
-  unsigned char i;
+static void s1_write_byte(uchar c) {
+  uchar i;
 
   for(i=0; i<8; i++, c<<=1) {
-    if(c & 0x80) { SET(DATA); } else { RELEASE(DATA); }
-    RELEASE(CLK);
+    if(c & 0x80) { iec_set(DATA); } else { iec_release(DATA); }
+    iec_release(CLK);
 
-    while(!GET(CLK))
+    while(!iec_get(CLK))
       wdt_reset();
 
-    if(c & 0x80) { RELEASE(DATA); } else { SET(DATA); }
-    while(GET(CLK));
-    RELEASE(DATA);
-    SET(CLK);
-    while(!GET(DATA))
+    if(c & 0x80) { iec_release(DATA); } else { iec_set(DATA); }
+    while(iec_get(CLK));
+    iec_release(DATA);
+    iec_set(CLK);
+    while(!iec_get(DATA))
       wdt_reset();
   }
 }
 
-unsigned char s1_write(unsigned char *data, unsigned char len) {
-  unsigned char i;
+uchar s1_write(uchar *data, uchar len) {
+  uchar i;
 
   for(i=0;i<len;i++)
     s1_write_byte(*data++);
@@ -57,34 +60,34 @@ unsigned char s1_write(unsigned char *data, unsigned char len) {
   return len;
 }
 
-static unsigned char s1_read_byte(void) {
+static uchar s1_read_byte(void) {
   char i;
-  unsigned char b, c;
+  uchar b, c;
 
   c = 0;
   for(i=7; i>=0; i--) {
-    while(GET(DATA))
+    while(iec_get(DATA))
       wdt_reset();
 
-    RELEASE(CLK);
-    b = GET(CLK);
+    iec_release(CLK);
+    b = iec_get(CLK);
     c = (c >> 1) | (b ? 0x80 : 0);
-    SET(DATA);
-    while(b == GET(CLK))
+    iec_set(DATA);
+    while(b == iec_get(CLK))
       wdt_reset();
 
-    RELEASE(DATA);
+    iec_release(DATA);
 
-    while(!GET(DATA))
+    while(!iec_get(DATA))
       wdt_reset();
 
-    SET(CLK);
+    iec_set(CLK);
   }
   return c;
 }
 
-unsigned char s1_read(unsigned char *data, unsigned char len) {
-  unsigned char i;
+uchar s1_read(uchar *data, uchar len) {
+  uchar i;
 
   for(i=0;i<len;i++)
     *data++ = s1_read_byte();

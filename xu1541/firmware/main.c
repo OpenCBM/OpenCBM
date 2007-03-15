@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.7 2007-03-08 11:16:23 harbaum Exp $
+ * This Revision: $Id: main.c,v 1.8 2007-03-15 17:40:51 harbaum Exp $
  *
  * $Log: main.c,v $
- * Revision 1.7  2007-03-08 11:16:23  harbaum
+ * Revision 1.8  2007-03-15 17:40:51  harbaum
+ * Plenty of changes incl. first async support
+ *
+ * Revision 1.7  2007/03/08 11:16:23  harbaum
  * timeout and watchdog adjustments
  *
  * Revision 1.6  2007/03/01 12:59:08  harbaum
@@ -42,15 +45,17 @@
 
 #include <util/delay.h>
 
+#include "xu1541.h"
+
 #ifndef USBTINY
 // use avrusb library
 #include "usbdrv.h"
 #include "oddebug.h"
+typedef uchar byte_t;
 #else
 // use usbtiny library 
 #include "usb.h"
 #include "usbtiny.h"
-typedef byte_t uchar;
 
 #define USBDDR DDRC
 #define USB_CFG_IOPORT PORTC
@@ -67,7 +72,7 @@ typedef byte_t uchar;
 #define MODE_S2        2
 #define MODE_PP        3
 #define MODE_P2        4
-unsigned char io_mode;
+static uchar io_mode;
 
 #include "xu1541.h"
 #include "s1.h"
@@ -94,6 +99,8 @@ static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL,
 #define DEBUGF(format, args...)
 #endif
 
+extern byte_t usb_tx_state;
+
 /* ------------------------------------------------------------------------- */
 
 #ifndef USBTINY
@@ -105,292 +112,275 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 {
   byte_t *replyBuf = data;
 #endif
-  char talk, rv;
-  unsigned short len;
-
-  DEBUGF("cmd %d (ioctl %d)\n", data[1], data[1] - XU1541_IOCTL);
-
+  char talk;
+  uchar len = data[2];
+  
+  DEBUGF("cmd %d (%d)\n", data[1], data[1] - XU1541_IOCTL);
+  
   switch(data[1]) {
-
+    
     /* ----- USB testing ----- */
-    case XU1541_ECHO:
-      DEBUGF("echo\n");
-      replyBuf[0] = data[2];
-      replyBuf[1] = data[3];
-      replyBuf[2] = data[4];
-      replyBuf[3] = data[5];
-      return 4;
-      break;
+  case XU1541_IRQ_PAUSE:
+    xu1541_req_irq_pause(len);
+    break;
 
+  case XU1541_ECHO:
+    DEBUGF("echo\n");
+    memcpy(replyBuf, data+2, 4);
+    return 4;
+    break;
+    
     /* ----- Debugging ----- */
 #ifdef ENABLE_EVENT_LOG
-    case XU1541_GET_EVENT:
-      DEBUGF("get event\n");
-      replyBuf[0] = EVENT_LOG_LEN;
-      replyBuf[1] = event_log_get(data[2]);
+  case XU1541_GET_EVENT:
+    DEBUGF("get ev\n");
+    replyBuf[0] = EVENT_LOG_LEN;
+    replyBuf[1] = event_log_get(len);
+    return 2;
+    break;
+#endif
+    
+    /* ----- Basic I/O ----- */
+  case XU1541_INFO:
+    replyBuf[0] = XU1541_VERSION_MAJOR;
+    replyBuf[1] = XU1541_VERSION_MINOR;
+    *(ushort*)(replyBuf+2) = XU1541_CAPABILIIES;
+    return 4;
+    break;
+    
+  case XU1541_REQUEST_READ:
+    xu1541_request_read(len);
+    return 0;
+    break;
+
+  case XU1541_GET_RESULT:
+    xu1541_get_result(replyBuf);
+    return 2;
+    break;
+    
+  case XU1541_READ:
+    io_mode = MODE_ORIGINAL;
+    DEBUGF("rd %d\n", data[2]);
+    /* more data to be expected? */
+    return(data[2]?0xff:0x00);
+    break;
+    
+  case XU1541_WRITE:
+    io_mode = MODE_ORIGINAL;
+    xu1541_prepare_write(data[2]);
+#ifdef USBTINY
+    /* usbtiny always returns 0 on write */
+    return 0;
+#else
+    return(data[2]?0xff:0x00);
+#endif
+    break;
+
+  case XU1541_TALK:
+  case XU1541_LISTEN:
+    DEBUGF("tlk/lst(%d,%d)\n", data[2], data[3]);
+    talk = (data[1] == XU1541_TALK);
+    data[2] |= talk ? 0x40 : 0x20;
+    data[3] |= 0x60;
+    xu1541_request_async(data+2, 2, 1, talk);
+    return 0;
+    break;
+    
+  case XU1541_UNTALK:
+  case XU1541_UNLISTEN:
+    DEBUGF("untlk/unlst()\n");
+    data[2] = (data[1] == XU1541_UNTALK) ? 0x5f : 0x3f;
+    xu1541_request_async(data+2, 1, 1, 0);
+    return 0;
+    break;
+    
+  case XU1541_OPEN:
+  case XU1541_CLOSE:
+    DEBUGF("open/close(%d,%d)\n", data[2], data[3]);
+    data[2] |= 0x20;
+    data[3] |= (data[1] == XU1541_OPEN) ? 0xf0 : 0xe0;
+    xu1541_request_async(data+2, 2, 1, 0);
+    return 0;
+    break;
+    
+  case XU1541_GET_EOI:
+    replyBuf[0] = eoi ? 1 : 0;
+    return 1;
+    break;
+    
+  case XU1541_CLEAR_EOI:
+    eoi = 0;
+    return 0;
+    break;
+    
+  case XU1541_RESET:
+    LED_OFF();
+    DEBUGF("rst\n");
+    do_reset();
+    return 0;
+    break;
+
+    /* ----- Low-level port access ----- */
+    
+  case XU1541_IEC_WAIT:
+    xu1541_wait(data[2], data[3]);
+    /* intentional fall through */
+    
+  case XU1541_IEC_POLL:
+    replyBuf[0] = xu1541_poll();
+    DEBUGF("poll=%x\n", replyBuf[0]);
+    return 1;
+    break;
+      
+  case XU1541_IEC_SETRELEASE:
+    xu1541_setrelease(data[2], data[3]);
+    return 0;
+    break;
+    
+  case XU1541_PP_READ:
+    replyBuf[0] = xu1541_pp_read();
+    return 1;
+    break;
+    
+  case XU1541_PP_WRITE:
+    xu1541_pp_write(len);
+    return 0;
+    break;
+    
+    /* ----- special protocol drivers access ----- */    
+    
+    /* ----- S1 ----- */
+  case XU1541_S1:
+    switch(data[2]) {
+    case XU1541_INFO:
+      replyBuf[0] = S1_VERSION_MAJOR;
+      replyBuf[1] = S1_VERSION_MINOR;
       return 2;
       break;
-#endif
-
-    /* ----- Basic I/O ----- */
-    case XU1541_INFO:
-      replyBuf[0] = XU1541_VERSION_MAJOR;
-      replyBuf[1] = XU1541_VERSION_MINOR;
-      *(unsigned short*)(replyBuf+2) = XU1541_CAPABILIIES;
-      return 4;
-      break;
-
+      
     case XU1541_READ:
-      io_mode = MODE_ORIGINAL;
-      len = *(unsigned short*)(data+2);
-      DEBUGF("req to rd %d bytes\n", len);
+      io_mode = MODE_S1;
       /* more data to be expected? */
-      return(len?0xff:0x00);
+      return(data[4]?0xff:0x00);
       break;
-
+      
     case XU1541_WRITE:
-      io_mode = MODE_ORIGINAL;
-      len = *(unsigned short*)(data+2);
+      io_mode = MODE_S1;
 #ifdef USBTINY
       /* usbtiny always returns 0 on write */
       return 0;
 #else
-      return(len?0xff:0x00);
+      return(data[4]?0xff:0x00);
 #endif
       break;
-
-    case XU1541_TALK:
-    case XU1541_LISTEN:
-      data[2] &= 0x1f;     /* device */
-      data[3] &= 0x0f;     /* secondary address */
-
-      DEBUGF("talk/listen(%d,%d)\n", data[2], data[3]);
-      talk = (data[1] == XU1541_TALK);
-      data[2] |= talk ? 0x40 : 0x20;
-      data[3] |= 0x60;
-      rv = cbm_raw_write(data+2, 2, 1, talk);
-      replyBuf[0] = rv > 0 ? 0 : rv;
-      return 1;
-      break;
-
-    case XU1541_UNTALK:
-    case XU1541_UNLISTEN:
-      DEBUGF("untalk/unlisten()\n");
-      data[2] = (data[1] == XU1541_UNTALK) ? 0x5f : 0x3f;
-      rv = cbm_raw_write(data+2, 1, 1, 0);
-      replyBuf[0] = rv > 0 ? 0 : rv;
-      return 1;
-      break;
-
-    case XU1541_OPEN:
-    case XU1541_CLOSE:
-      data[2] &= 0x1f;     /* device */
-      data[3] &= 0x0f;     /* secondary address */
-
-      DEBUGF("open/close(%d,%d)\n", data[2], data[3]);
-      data[2] |= 0x20;
-      data[3] |= (data[1] == XU1541_OPEN) ? 0xf0 : 0xe0;
-      rv = cbm_raw_write(data+2, 2, 1, 0);
-      replyBuf[0] = rv > 0 ? 0 : rv;
-      return 1;
-      break;
-  
-    case XU1541_GET_EOI:
-      replyBuf[0] = eoi ? 1 : 0;
-      return 1;
-      break;
       
-    case XU1541_CLEAR_EOI:
-      eoi = 0;
-      return 0;
       break;
-      
-    case XU1541_RESET:
-      LED_OFF();
-      DEBUGF("reset()\n");
-      do_reset();
-      return 0;
-      break;
-
-	 /* ----- Low-level port access ----- */
-
-    case XU1541_IEC_WAIT:
-      xu1541_wait(data[2], data[3]);
-      /* intentional fall through */
-      
-    case XU1541_IEC_POLL:
-      replyBuf[0] = xu1541_poll();
-      DEBUGF("poll() = %x\n", replyBuf[0]);
-      return 1;
-      break;
-      
-    case XU1541_IEC_SET:
-      replyBuf[0] = xu1541_set(data[2]);
-      return 1;
-      break;
-      
-    case XU1541_IEC_RELEASE:
-      replyBuf[0] = xu1541_release(data[2]);
-      return 1;
-      break;
-      
-    case XU1541_IEC_SETRELEASE:
-      replyBuf[0] = xu1541_setrelease(data[2], data[3]);
-      return 1;
-      break;
-      
-    case XU1541_PP_READ:
-      replyBuf[0] = xu1541_pp_read();
-      return 1;
-      break;
-      
-    case XU1541_PP_WRITE:
-      xu1541_pp_write(data[2]);
-      return 0;
-      break;
-
-      /* ----- special protocol drivers access ----- */    
-      
-      /* ----- S1 ----- */
-    case XU1541_S1:
-      switch(data[2]) {
-	case XU1541_INFO:
-	  replyBuf[0] = S1_VERSION_MAJOR;
-	  replyBuf[1] = S1_VERSION_MINOR;
-	  return 2;
-	  break;
-
-	case XU1541_READ:
-	  io_mode = MODE_S1;
-	  len = *(unsigned short*)(data+4);
-	  /* more data to be expected? */
-	  return(len?0xff:0x00);
-	  break;
-	  
-	case XU1541_WRITE:
-	  io_mode = MODE_S1;
-	  len = *(unsigned short*)(data+4);
-#ifdef USBTINY
-      /* usbtiny always returns 0 on write */
-	  return 0;
-#else
-	  return(len?0xff:0x00);
-#endif
-	  break;
-
-	break;
-	default:
-	  DEBUGF("ERROR: s1 command %d not implemented\n", data[1]);
-	  break;
-      }
-      break;
-
-      /* ----- S2 ----- */
-    case XU1541_S2:
-      switch(data[2]) {
-	case XU1541_INFO:
-	  replyBuf[0] = S2_VERSION_MAJOR;
-	  replyBuf[1] = S2_VERSION_MINOR;
-	  return 2;
-	  break;
-
-	case XU1541_READ:
-	  io_mode = MODE_S2;
-	  len = *(unsigned short*)(data+4);
-	  /* more data to be expected? */
-	  return(len?0xff:0x00);
-	  break;
-	  
-	case XU1541_WRITE:
-	  io_mode = MODE_S2;
-	  len = *(unsigned short*)(data+4);
-#ifdef USBTINY
-      /* usbtiny always returns 0 on write */
-	  return 0;
-#else
-	  return(len?0xff:0x00);
-#endif
-	  break;
-
-	break;
-	default:
-	  DEBUGF("ERROR: s2 command %d not implemented\n", data[1]);
-	  break;
-      }
-      break;
-      
-      /* ----- PP ----- */
-    case XU1541_PP:
-      switch(data[2]) {
-	case XU1541_INFO:
-	  replyBuf[0] = PP_VERSION_MAJOR;
-	  replyBuf[1] = PP_VERSION_MINOR;
-	  return 2;
-	  break;
-
-	case XU1541_READ:
-	  io_mode = MODE_PP;
-	  len = *(unsigned short*)(data+4);
-	  /* more data to be expected? */
-	  return(len?0xff:0x00);
-	  break;
-	  
-	case XU1541_WRITE:
-	  io_mode = MODE_PP;
-	  len = *(unsigned short*)(data+4);
-#ifdef USBTINY
-	  /* usbtiny always returns 0 on write */
-	  return 0;
-#else
-	  return(len?0xff:0x00);
-#endif
-	  break;
-
-	break;
-	default:
-	  DEBUGF("ERROR: pp command %d not implemented\n", data[1]);
-	  break;
-      }
-      break;
-      
-      /* ----- P2 ----- */
-    case XU1541_P2:
-      switch(data[2]) {
-	case XU1541_INFO:
-	  replyBuf[0] = P2_VERSION_MAJOR;
-	  replyBuf[1] = P2_VERSION_MINOR;
-	  return 2;
-	  break;
-
-	case XU1541_READ:
-	  io_mode = MODE_P2;
-	  len = *(unsigned short*)(data+4);
-	  /* more data to be expected? */
-	  return(len?0xff:0x00);
-	  break;
-	  
-	case XU1541_WRITE:
-	  io_mode = MODE_P2;
-	  len = *(unsigned short*)(data+4);
-#ifdef USBTINY
-	  /* usbtiny always returns 0 on write */
-	  return 0;
-#else
-	  return(len?0xff:0x00);
-#endif
-	  break;
-
-	break;
-	default:
-	  DEBUGF("ERROR: p2 command %d not implemented\n", data[1]);
-	  break;
-      }
-      break;
-      
     default:
-      DEBUGF("ERROR: command %d not implemented\n", data[0]);
-      // must not happen ...
+      DEBUGF("ERR: s1 cmd %d not impl.\n", data[1]);
       break;
+    }
+    break;
+    
+    /* ----- S2 ----- */
+  case XU1541_S2:
+    switch(data[2]) {
+    case XU1541_INFO:
+      replyBuf[0] = S2_VERSION_MAJOR;
+      replyBuf[1] = S2_VERSION_MINOR;
+      return 2;
+      break;
+      
+    case XU1541_READ:
+      io_mode = MODE_S2;
+      /* more data to be expected? */
+      return(data[4]?0xff:0x00);
+      break;
+      
+    case XU1541_WRITE:
+      io_mode = MODE_S2;
+#ifdef USBTINY
+      /* usbtiny always returns 0 on write */
+      return 0;
+#else
+      return(data[4]?0xff:0x00);
+#endif
+      break;
+      
+      break;
+    default:
+      DEBUGF("ERR: s2 cmd %d not impl.\n", data[1]);
+      break;
+    }
+    break;
+    
+    /* ----- PP ----- */
+  case XU1541_PP:
+    switch(data[2]) {
+    case XU1541_INFO:
+      replyBuf[0] = PP_VERSION_MAJOR;
+      replyBuf[1] = PP_VERSION_MINOR;
+      return 2;
+      break;
+      
+    case XU1541_READ:
+      io_mode = MODE_PP;
+      /* more data to be expected? */
+      return(data[4]?0xff:0x00);
+      break;
+      
+    case XU1541_WRITE:
+      io_mode = MODE_PP;
+#ifdef USBTINY
+      /* usbtiny always returns 0 on write */
+      return 0;
+#else
+      return(data[4]?0xff:0x00);
+#endif
+      break;
+	  
+      break;
+    default:
+      DEBUGF("ERR: pp cmd %d not impl.\n", data[1]);
+      break;
+    }
+    break;
+    
+    /* ----- P2 ----- */
+  case XU1541_P2:
+    switch(data[2]) {
+    case XU1541_INFO:
+      replyBuf[0] = P2_VERSION_MAJOR;
+      replyBuf[1] = P2_VERSION_MINOR;
+      return 2;
+      break;
+      
+    case XU1541_READ:
+      io_mode = MODE_P2;
+      /* more data to be expected? */
+      return(data[4]?0xff:0x00);
+      break;
+      
+    case XU1541_WRITE:
+      io_mode = MODE_P2;
+#ifdef USBTINY
+      /* usbtiny always returns 0 on write */
+      return 0;
+#else
+      return(data[4]?0xff:0x00);
+#endif
+      break;
+      
+      break;
+    default:
+      DEBUGF("ERR: p2 cmd %d not impl.\n", data[1]);
+      break;
+      }
+    break;
+      
+  default:
+    DEBUGF("ERR: cmd %d not impl.\n", data[0]);
+    // must not happen ...
+    break;
   }
   
   return 0;  // reply len
@@ -531,8 +521,7 @@ int	main(void) {
   stdout = &mystdout;
 #endif
 
-  DEBUGF("xu1541 %d.%02d - (c) 2007 by Till Harbaum\n", 
-	 XU1541_VERSION_MAJOR, XU1541_VERSION_MINOR);
+  DEBUGF("xu1541 %d.%02d\n", XU1541_VERSION_MAJOR, XU1541_VERSION_MINOR);
 
   cbm_init();
 
@@ -555,8 +544,13 @@ int	main(void) {
   LED_OFF();
 
   for(;;) {	/* main event loop */
+    extern byte_t usb_idle(void);
     wdt_reset();
     usbPoll();
+
+    /* do async iec processing */
+    if(usb_idle())
+      xu1541_handle();
   }
 
   return 0;

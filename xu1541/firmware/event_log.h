@@ -5,7 +5,9 @@
 #ifndef EVENT_LOG_H
 #define EVENT_LOG_H
 
+#ifndef DEBUG
 #define ENABLE_EVENT_LOG
+#endif
 
 #ifdef ENABLE_EVENT_LOG
 

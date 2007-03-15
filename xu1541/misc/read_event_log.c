@@ -16,6 +16,12 @@
 
 usb_dev_handle      *handle = NULL;
 
+#ifdef WIN
+#define QUIT_KEY  { printf("Press return to quit\n"); getchar(); }
+#else
+#define QUIT_KEY
+#endif
+
 void dump_event_log(void) {
 
   int nBytes, i, log_len;
@@ -169,24 +175,35 @@ int main(int argc, char *argv[]) {
   if(!handle) {
     fprintf(stderr, "Error: Could not find XU1541 device\n");
 
-#ifdef WIN
-    printf("Press return to quit\n");
-    getchar();
-#endif
-
+    QUIT_KEY;
     exit(-1);
+  }
+
+  if (usb_set_configuration(handle, 1) != 0) {
+    fprintf(stderr, "USB error: %s\n", usb_strerror());
+
+    QUIT_KEY;
+    return -1;
+  }
+
+  /* Get exclusive access to interface 0. */
+  if (usb_claim_interface(handle, 0) != 0) {
+    fprintf(stderr, "USB error: %s\n", usb_strerror());
+
+    QUIT_KEY;
+    return -1;
   }
 
   display_device_info();
 
   dump_event_log();
 
+  if(usb_release_interface(handle, 0))
+    fprintf(stderr, "USB error: %s\n", usb_strerror());
+  
   usb_close(handle);
-
-#ifdef WIN
-  printf("Press return to quit\n");
-  getchar();
-#endif
+  
+  QUIT_KEY;
 
   return 0;
 }

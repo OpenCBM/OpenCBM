@@ -8,7 +8,7 @@
 #define P2_VERSION_MAJOR 1
 #define P2_VERSION_MINOR 0
 
-extern unsigned char p2_read(unsigned char *data, unsigned char len);
-extern unsigned char p2_write(unsigned char *data, unsigned char len);
+extern uchar p2_read(uchar *data, uchar len);
+extern uchar p2_write(uchar *data, uchar len);
 
 #endif // P2_H

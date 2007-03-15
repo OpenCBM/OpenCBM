@@ -5,6 +5,9 @@
 #ifndef XU1541_H
 #define XU1541_H
 
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+
 #include "xu1541_types.h"
 #include "version.h"
 
@@ -30,40 +33,7 @@
 #define PAR_PORT1_PIN    PINB
 #define PAR_PORT1_PORT   PORTB
 
-#include <util/delay.h>
-#define XU1541_DELAY { _delay_us(1); }
-
-/* inlined functions are used to actually access the port pins */
-static inline unsigned char POLL(void) {
-  _delay_us(1);
-  return CBM_PIN;
-}
-
-/* set line means: make it an output and drive it low */
-static inline void SET(unsigned char line) {
-  _delay_us(1);
-  CBM_PORT &= ~line; 
-  CBM_DDR |= line;
-}
-
-/* release means: make it an input and enable the pull-ups */
-static inline void RELEASE(unsigned char line) {
-  _delay_us(1);
-  CBM_DDR &= ~line; 
-  CBM_PORT |= line;
-}
-
-static inline void SET_RELEASE(unsigned char s, unsigned char r) {
-  _delay_us(1);
-  CBM_PORT &= ~s; 
-  CBM_DDR = (CBM_DDR | s) & ~r;
-  CBM_PORT |= r;
-}
-
-static inline unsigned char GET(unsigned char line) {
-  _delay_us(1);
-  return ((CBM_PIN & line) == 0 )?1:0;
-}
+#define IEC_DELAY  (0.2)   // 200ns
 
 #ifndef DEBUG
 #define LED_ON()     { PORTD &= ~_BV(1); }
@@ -73,24 +43,38 @@ static inline unsigned char GET(unsigned char line) {
 #define LED_OFF()
 #endif
 
-extern unsigned char eoi;
+extern uchar eoi;
 
 /* exported functions */
-extern void cbm_init(void);
-extern void do_reset(void);
-extern char cbm_raw_write(const unsigned char *buf, char cnt, char atn, char talk);
-extern char xu1541_read(unsigned char *data, unsigned char len);
-extern char xu1541_write(unsigned char *data, unsigned char len);
+
+/* basic port access routines */
+extern uchar iec_poll(void);
+extern void  iec_set(uchar line);
+extern void  iec_release(uchar line);
+extern void  iec_set_release(uchar s, uchar r);
+extern uchar iec_get(uchar line);
+
+extern void  cbm_init(void);
+extern void  do_reset(void);
+extern uchar cbm_raw_write(const uchar *buf, uchar cnt, uchar atn, uchar talk);
+extern void  xu1541_request_async(const uchar *buf, uchar cnt, uchar atn, uchar talk);
+extern void  xu1541_request_read(uchar len);
+extern uchar xu1541_read(uchar *data, uchar len);
+extern void  xu1541_prepare_write(uchar len);
+extern uchar xu1541_write(uchar *data, uchar len);
+extern void  xu1541_handle(void);
+extern void  xu1541_get_result(uchar *data);
 
 /* low level io on single lines */
-extern char xu1541_wait(char line, char state);
-extern char xu1541_poll(void);
-extern char xu1541_set(char lines);
-extern char xu1541_release(char lines);
-extern char xu1541_setrelease(char set, char release);
+extern uchar xu1541_wait(uchar line, uchar state);
+extern uchar xu1541_poll(void);
+extern void  xu1541_setrelease(uchar set, uchar release);
 
 /* low level io on parallel lines */
-extern unsigned char xu1541_pp_read(void);
-extern void xu1541_pp_write(unsigned char);
+extern uchar xu1541_pp_read(void);
+extern void  xu1541_pp_write(uchar);
+
+/* debugging */
+extern void  xu1541_req_irq_pause(uchar len);
 
 #endif // XU1541_H

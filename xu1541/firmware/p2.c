@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: p2.c,v 1.1 2007-02-18 19:47:32 harbaum Exp $
+ * This Revision: $Id: p2.c,v 1.2 2007-03-15 17:40:51 harbaum Exp $
  *
  * $Log: p2.c,v $
- * Revision 1.1  2007-02-18 19:47:32  harbaum
+ * Revision 1.2  2007-03-15 17:40:51  harbaum
+ * Plenty of changes incl. first async support
+ *
+ * Revision 1.1  2007/02/18 19:47:32  harbaum
  * Bootloader and p2 protocol
  *
  *
@@ -23,19 +26,19 @@
 #include "xu1541.h"
 #include "p2.h"
 
-static void p2_write_byte(unsigned char c) {
+static void p2_write_byte(uchar c) {
 
   xu1541_pp_write(c);
 
-  RELEASE(CLK);
-  while(GET(DATA));
+  iec_release(CLK);
+  while(iec_get(DATA));
 
-  SET(CLK);
-  while(!GET(DATA));
+  iec_set(CLK);
+  while(!iec_get(DATA));
 }
 
-unsigned char p2_write(unsigned char *data, unsigned char len) {
-  unsigned char i;
+uchar p2_write(uchar *data, uchar len) {
+  uchar i;
   
   for(i=0;i<len;i++)
     p2_write_byte(*data++);
@@ -43,22 +46,22 @@ unsigned char p2_write(unsigned char *data, unsigned char len) {
   return len;
 }
 
-static unsigned char p2_read_byte(void) {
-  unsigned char c;
+static uchar p2_read_byte(void) {
+  uchar c;
 
-  RELEASE(CLK);
-  while(GET(DATA));
+  iec_release(CLK);
+  while(iec_get(DATA));
 
   c = xu1541_pp_read();
   
-  SET(CLK);
-  while(!GET(DATA));
+  iec_set(CLK);
+  while(!iec_get(DATA));
   
   return c;
 }
 
-unsigned char p2_read(unsigned char *data, unsigned char len) {
-  unsigned char i;
+uchar p2_read(uchar *data, uchar len) {
+  uchar i;
 
   for(i=0;i<len;i++)
     *data++ = p2_read_byte();
