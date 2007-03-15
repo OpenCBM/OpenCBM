@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.1.2.2 2007-03-14 17:12:32 strik Exp $ \n
+** \version $Id: xu1541.c,v 1.1.2.3 2007-03-15 15:08:19 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -22,6 +22,8 @@
 
 #include "opencbm.h"
 #include "xu1541.h"
+
+#include "arch.h"
 
 usb_dev_handle *xu1541_handle = NULL;
 
@@ -56,8 +58,6 @@ static int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
   return i-1;
 }
 
-#include <errno.h>
-
 /* try to find a xu1541 cable */
 int xu1541_init(void) {
   struct usb_bus      *bus;
@@ -72,7 +72,7 @@ int xu1541_init(void) {
 
   /* usb_find_devices sets errno if some devices reply 100% correct. */
   /* make lib ignore this as this has nothing to do with our device */
-  errno = 0;
+  arch_set_errno(0);
 
   for(bus = usb_get_busses(); bus; bus = bus->next) {
     for(dev = bus->devices; dev; dev = dev->next) {
