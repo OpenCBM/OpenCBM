@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.9 2007-03-17 10:26:13 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.10 2007-03-17 10:41:30 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.9  2007-03-17 10:26:13  harbaum
+ * Revision 1.10  2007-03-17 10:41:30  harbaum
+ * Argh ... still that bug
+ *
+ * Revision 1.9  2007/03/17 10:26:13  harbaum
  * Oops, too much optimization
  *
  * Revision 1.8  2007/03/17 07:11:04  harbaum
@@ -456,6 +459,19 @@ void xu1541_handle(void) {
       iec_release(DATA);
 
       /* xyz */
+      /* use special "timer with wait for clock" */
+#if 0
+      /* use 8 bit timer 2, prescaler 32 */
+      TCCR2 = _BV(CS21) | _BV(CS20);  /* prescaler 32 -> 375khz/2.667us */
+
+      /* 400us timeout == 300 ticks @ 375khz */
+      TCNT2 = 0;
+      TIFR |= _BV(TOV2);
+
+      /* wait until counter reaches expected value or counter overflows */
+      while((TCNT2 < a) && !(TIFR & _BV(TOV2)));
+#endif
+
     
       /* wait for CLK to be asserted, timeout after 400us */
       for(i = 0; (i < 40) && !(ok=iec_get(CLK)); i++) {
