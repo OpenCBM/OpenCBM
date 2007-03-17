@@ -7,7 +7,9 @@ TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/winmm.lib    \
            ../../../../bin/*/arch.lib         
 
-DLLBASE=0x10000000
+USE_MSVCRT = 1
+
+DLLBASE=0x71000000
 
 DLLENTRY=opencbm_xa1541_init
 
