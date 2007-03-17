@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.8 2007-03-17 07:11:04 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.9 2007-03-17 10:26:13 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.8  2007-03-17 07:11:04  harbaum
+ * Revision 1.9  2007-03-17 10:26:13  harbaum
+ * Oops, too much optimization
+ *
+ * Revision 1.8  2007/03/17 07:11:04  harbaum
  * Relaxed disabled irqs
  *
  * Revision 1.6  2007/03/08 11:16:23  harbaum
@@ -421,12 +424,11 @@ void xu1541_handle(void) {
 
     io_offset = 0;
 
-    /* disable IRQs to make sure IEC transfer goes uninterrupted */
     LED_ON();
 
     do {
       to = 0;
-    
+
       /* wait for clock to be released, may be required while write errors */
       while(iec_get(CLK)) {
 	if( to >= 20000 ) {
@@ -439,7 +441,6 @@ void xu1541_handle(void) {
 
 	  /* re-enable interrupts and return */
 	  //	  sei();
-
 	  LED_OFF();
 	  return;
 	} else {
@@ -448,8 +449,13 @@ void xu1541_handle(void) {
 	}
       }
 
+      /* disable IRQs to make sure IEC transfer goes uninterrupted */
+      cli();
+
       /* release DATA line */
       iec_release(DATA);
+
+      /* xyz */
     
       /* wait for CLK to be asserted, timeout after 400us */
       for(i = 0; (i < 40) && !(ok=iec_get(CLK)); i++) {
@@ -468,9 +474,6 @@ void xu1541_handle(void) {
       for(i = 0; i < 100 && !(ok=iec_get(CLK)); i++) {
 	DELAY_US(20);
       }
-
-      /* the byte transfer must not be interrupted */
-      cli();
 
       /* read all bits of byte */
       for(bit = b = 0; (bit < 8) && ok; bit++) {
@@ -492,12 +495,12 @@ void xu1541_handle(void) {
 	}
       }
       
+      sei();
+
       /* acknowledge byte */
       if(ok)
 	iec_set(DATA);
       
-      sei();
-
       if(ok) {
 	io_buffer[received++] = b;
 	DELAY_US(50);
