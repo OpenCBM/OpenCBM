@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.1.2.5 2007-03-15 17:59:14 strik Exp $ \n
+** \version $Id: xu1541.c,v 1.1.2.6 2007-03-17 10:48:05 harbaum Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -88,7 +88,7 @@ static int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
 int xu1541_init(void) {
   struct usb_bus      *bus;
   struct usb_device   *dev;
-  unsigned char ret[2];
+  unsigned char ret[4];
   int len;
 
   xu1541_dbg(0, "Scanning usb ...");
@@ -251,6 +251,7 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 		  ret[0] = rv[1];
 		  /* a returned byte means that the USB link is fine */
 		  link_ok = 1;
+		  errno = 0;
 	      }
 	      else 
 	      {
@@ -345,6 +346,7 @@ int xu1541_write(const __u_char *data, size_t len)
 		        len = 0;
 
 		    link_ok = 1;
+		    errno = 0;
 		} 
 		else
 		{
@@ -427,7 +429,10 @@ int xu1541_read(__u_char *data, size_t len)
 		    timeout_delay <<= 1;
 		} 
 		else
+		{
 	            link_ok = 1;
+		    errno = 0;
+		}
 	    } 
 	    else 
 	    {
