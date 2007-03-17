@@ -4,11 +4,11 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.10 2007-03-17 10:41:30 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.11 2007-03-17 19:31:34 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.10  2007-03-17 10:41:30  harbaum
- * Argh ... still that bug
+ * Revision 1.11  2007-03-17 19:31:34  harbaum
+ * Some timeouts via hw timer
  *
  * Revision 1.9  2007/03/17 10:26:13  harbaum
  * Oops, too much optimization
@@ -45,6 +45,7 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
+#include <util/delay.h>
 
 #include "xu1541.h"
 #include "event_log.h"
@@ -95,26 +96,26 @@ static const uchar iec2hw_table[] PROGMEM = {
 static void delay_wait(uchar a) {
   wdt_reset();
 
-  TCNT2 = 0;
-  TIFR |= _BV(TOV2);
+  TCNT0 = 0;
+  TIFR |= _BV(TOV0);
 
   /* wait until counter reaches expected value or counter overflows */
-  while((TCNT2 < a) && !(TIFR & _BV(TOV2)));
+  while((TCNT0 < a) && !(TIFR & _BV(TOV0)));
 }
 
 /* counter runs at 12/8 mhz */
 /* a max 256 -> max 170us */
 static void delay_us(uchar a) {
-  /* use 8 bit timer 2 as system timer, prescaler/8 */
-  TCCR2 = _BV(CS21);
+  /* use 8 bit timer 0 as system timer, prescaler/8 */
+  TCCR0 = _BV(CS01);
   delay_wait(a);
 }
 
 /* counter runs at 12/1024 mhz */
 /* a max 256 -> max 21.8ms */
 static void delay_ms(uchar a) {
-  /* use 8 bit timer 2 as system timer, prescaler/1024 */
-  TCCR2 = _BV(CS22) | _BV(CS21) | _BV(CS20);
+  /* use 8 bit timer 0 as system timer, prescaler/1024 */
+  TCCR0 = _BV(CS02) | _BV(CS00);
   delay_wait(a);
 }
 
@@ -432,10 +433,11 @@ void xu1541_handle(void) {
     do {
       to = 0;
 
-      /* wait for clock to be released, may be required while write errors */
+      /* wait for clock to be released. typically times out during: */
+      /* directory read */
       while(iec_get(CLK)) {
-	if( to >= 20000 ) {
-	  /* 0.4 (20000 * 20us) sec timeout */
+	if( to >= 50000 ) {
+	  /* 1.0 (50000 * 20us) sec timeout */
 	  EVENT(EVENT_READ_TIMEOUT);
 	  DEBUGF("rd to\n");
 
@@ -453,32 +455,22 @@ void xu1541_handle(void) {
       }
 
       /* disable IRQs to make sure IEC transfer goes uninterrupted */
-      cli();
 
       /* release DATA line */
       iec_release(DATA);
 
-      /* xyz */
       /* use special "timer with wait for clock" */
-#if 0
       /* use 8 bit timer 2, prescaler 32 */
-      TCCR2 = _BV(CS21) | _BV(CS20);  /* prescaler 32 -> 375khz/2.667us */
-
-      /* 400us timeout == 300 ticks @ 375khz */
+      TCCR2 = _BV(CS21) | _BV(CS20);  /* prescaler 32 -> 375khz/2.66667us */
       TCNT2 = 0;
       TIFR |= _BV(TOV2);
 
       /* wait until counter reaches expected value or counter overflows */
-      while((TCNT2 < a) && !(TIFR & _BV(TOV2)));
-#endif
+      /* 400us timeout == 150 ticks @ 375khz */
+      while((TCNT2 < 150) && !(TIFR & _BV(TOV2)) && !iec_get(CLK));
 
-    
-      /* wait for CLK to be asserted, timeout after 400us */
-      for(i = 0; (i < 40) && !(ok=iec_get(CLK)); i++) {
-	DELAY_US(10);
-      }
 
-      if(!ok) {
+      if(!iec_get(CLK)) {
 	/* device signals eoi */
 	eoi = 1;
 	iec_set(DATA);
@@ -486,17 +478,30 @@ void xu1541_handle(void) {
 	iec_release(DATA);
       }
       
+      cli();
+
+      /* prescaler 256 -> 46,8khz/21.3us -> 2ms timeout = 94 ticks */
+      TCCR2 = _BV(CS22) | _BV(CS21);  /* prescaler 256 */
+      TCNT2 = 0;
+      TIFR |= _BV(TOV2);
+
+#if 0
       /* wait 2ms for clock to be released */
       for(i = 0; i < 100 && !(ok=iec_get(CLK)); i++) {
 	DELAY_US(20);
       }
-
+#else
+      /* wait until counter reaches expected value or counter overflows */
+      /* 2ms timeout == 94 ticks @ 46.8khz */
+      while((TCNT2 < 94) && !(TIFR & _BV(TOV2)) && !(ok=iec_get(CLK)));      
+#endif
+      
       /* read all bits of byte */
       for(bit = b = 0; (bit < 8) && ok; bit++) {
 	
 	/* wait 2ms for clock to be asserted */
-	for(i = 0; (i < 200) && !(ok=(iec_get(CLK)==0)); i++) {
-	  DELAY_US(10);
+	for(i = 0; (i < 100) && !(ok=(!iec_get(CLK))); i++) {
+	  DELAY_US(20);
 	}
 
 	if(ok) {
@@ -504,7 +509,7 @@ void xu1541_handle(void) {
 	  if(!iec_get(DATA)) 
 	    b |= 0x80;
 	  
-	  /* 2ms timeout */
+	  /* wait 2ms for clock to be released */
 	  for(i = 0; i < 100 && !(ok=iec_get(CLK)); i++) {
 	    DELAY_US(20);
 	  }

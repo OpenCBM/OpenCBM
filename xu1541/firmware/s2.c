@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s2.c,v 1.6 2007-03-15 17:40:51 harbaum Exp $
+ * This Revision: $Id: s2.c,v 1.7 2007-03-17 19:31:34 harbaum Exp $
  *
  * $Log: s2.c,v $
- * Revision 1.6  2007-03-15 17:40:51  harbaum
+ * Revision 1.7  2007-03-17 19:31:34  harbaum
+ * Some timeouts via hw timer
+ *
+ * Revision 1.6  2007/03/15 17:40:51  harbaum
  * Plenty of changes incl. first async support
  *
  * Revision 1.5  2007/03/08 11:16:23  harbaum
@@ -38,19 +41,19 @@
 static void s2_write_byte(uchar c) {
   uchar i;
 
+  wdt_reset();
+
   for(i=0; i<4; i++) {
     if(c & 1) { iec_set(DATA); } else { iec_release(DATA); }
     c >>= 1;
     iec_release(ATN);
-    while(iec_get(CLK))
-      wdt_reset();
+    while(iec_get(CLK));
 
     if(c & 1) { iec_set(DATA); } else { iec_release(DATA); }
     c >>= 1;
     iec_set(ATN);
 
-    while(!iec_get(CLK))
-      wdt_reset();
+    while(!iec_get(CLK));
   }
 
   iec_release(DATA);
@@ -69,14 +72,14 @@ static uchar s2_read_byte(void) {
   uchar c = 0;
   char i;
 
+  wdt_reset();
+
   for(i=4; i>0; i--) {
-    while(iec_get(CLK))
-      wdt_reset();
+    while(iec_get(CLK));
 
     c = (c>>1) | (iec_get(DATA) ? 0x80 : 0);
     iec_release(ATN);
-    while(!iec_get(CLK))
-      wdt_reset();
+    while(!iec_get(CLK));
 
     c = (c>>1) | (iec_get(DATA) ? 0x80 : 0);
     iec_set(ATN);
