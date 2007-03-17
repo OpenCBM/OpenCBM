@@ -4,11 +4,11 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.7 2007-03-15 17:40:51 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.8 2007-03-17 07:11:04 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.7  2007-03-15 17:40:51  harbaum
- * Plenty of changes incl. first async support
+ * Revision 1.8  2007-03-17 07:11:04  harbaum
+ * Relaxed disabled irqs
  *
  * Revision 1.6  2007/03/08 11:16:23  harbaum
  * timeout and watchdog adjustments
@@ -39,8 +39,6 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
-
-#include <util/delay.h>
 
 #include "xu1541.h"
 #include "event_log.h"
@@ -80,38 +78,72 @@ static const uchar iec2hw_table[] PROGMEM = {
   DATA | CLK | ATN | RESET
 };
 
+/* the timers don't allow for accurate 1us and 1ms clock speeds */
+/* thus use macros to adjust the offsets */
+#define DELAY_US(a) delay_us(1.5*(a))
+#define DELAY_MS(a) delay_ms(8.533*(a))
+
+/* don't use busy waiting delay routines from util/delay.h. use timer */
+/* based aproach instead since this is more accurate when being */
+/* interrupted by an USB irq */
+static void delay_wait(uchar a) {
+  wdt_reset();
+
+  TCNT2 = 0;
+  TIFR |= _BV(TOV2);
+
+  /* wait until counter reaches expected value or counter overflows */
+  while((TCNT2 < a) && !(TIFR & _BV(TOV2)));
+}
+
+/* counter runs at 12/8 mhz */
+/* a max 256 -> max 170us */
+static void delay_us(uchar a) {
+  /* use 8 bit timer 2 as system timer, prescaler/8 */
+  TCCR2 = _BV(CS21);
+  delay_wait(a);
+}
+
+/* counter runs at 12/1024 mhz */
+/* a max 256 -> max 21.8ms */
+static void delay_ms(uchar a) {
+  /* use 8 bit timer 2 as system timer, prescaler/1024 */
+  TCCR2 = _BV(CS22) | _BV(CS21) | _BV(CS20);
+  delay_wait(a);
+}
+
 static uchar iec2hw(char iec) {
   return pgm_read_byte(iec2hw_table + iec);
 }
 
 uchar iec_poll(void) {
-  _delay_us(IEC_DELAY);
+  DELAY_US(IEC_DELAY);
   return CBM_PIN;
 }
 
 /* set line means: make it an output and drive it low */
 void iec_set(uchar line) {
-  _delay_us(IEC_DELAY);
+  DELAY_US(IEC_DELAY);
   CBM_PORT &= ~line; 
   CBM_DDR |= line;
 }
 
 /* release means: make it an input and enable the pull-ups */
 void iec_release(uchar line) {
-  _delay_us(IEC_DELAY);
+  DELAY_US(IEC_DELAY);
   CBM_DDR &= ~line; 
   CBM_PORT |= line;
 }
 
 void iec_set_release(uchar s, uchar r) {
-  _delay_us(IEC_DELAY);
+  DELAY_US(IEC_DELAY);
   CBM_PORT &= ~s; 
   CBM_DDR = (CBM_DDR | s) & ~r;
   CBM_PORT |= r;
 }
 
 uchar iec_get(uchar line) {
-  _delay_us(IEC_DELAY);
+  DELAY_US(IEC_DELAY);
   return ((CBM_PIN & line) == 0 )?1:0;
 }
 
@@ -125,28 +157,22 @@ void cbm_init(void) {
   io_request = XU1541_IO_IDLE;
 
   iec_release(ATN | CLK | DATA | RESET);
-  _delay_us(100);
+  DELAY_US(100);
 
   //  do_reset();
-}
-
-/* wrapper around _delay_ms() since it doesn't work > 16ms */
-static void delay_ms(uchar n) {
-  while(n--) 
-    _delay_ms(1);
 }
 
 static char check_if_bus_free(void) {
   iec_release(ATN | CLK | DATA | RESET);
 
   // wait for the drive to have time to react
-  _delay_us(100);
+  DELAY_US(100);
 
   // assert ATN
   iec_set(ATN);
 
   // now, wait for the drive to have time to react
-  _delay_us(100);
+  DELAY_US(100);
 
   // if DATA is still unset, we have a problem.
   if (!iec_get(DATA)) {
@@ -156,7 +182,7 @@ static char check_if_bus_free(void) {
 
   // ok, at least one drive reacted. Now, test releasing ATN:    
   iec_release(ATN);
-  _delay_us(100);
+  DELAY_US(100);
 
   if (!iec_get(DATA)) {
     iec_release(ATN | CLK | DATA | RESET);
@@ -183,7 +209,7 @@ static void wait_for_free_bus(void) {
       DEBUGF("wait4free bus to\n");
       break;
     }
-    _delay_ms(1);
+    DELAY_MS(1);
   }
 }
 
@@ -191,7 +217,7 @@ void do_reset( void ) {
   DEBUGF("reset\n");
   iec_release(DATA | ATN | CLK);
   iec_set(RESET);
-  delay_ms(100);
+  DELAY_MS(20);
   iec_release(RESET);
   
   wait_for_free_bus();
@@ -206,13 +232,13 @@ static char send_byte(uchar b) {
   for( i = 0; i < 8; i++ ) {
 
     /* each _bit_ takes a total of 90us to send ... */
-    _delay_us(70);
+    DELAY_US(70);
 
     if( !(b & 1) ) 
       iec_set(DATA);
 
     iec_release(CLK);
-    _delay_us(20);
+    DELAY_US(20);
 
     iec_set_release(CLK, DATA);
 
@@ -221,7 +247,7 @@ static char send_byte(uchar b) {
 
   /* wait up to 2ms for ack */
   for( i = 0; (i < 200) && !(ack=iec_get(DATA)); i++ ) {
-    _delay_us(10);
+    DELAY_US(10);
   }
 
 #ifdef ENABLE_EVENT_LOG
@@ -243,30 +269,28 @@ static char wait_for_listener(void) {
   /* wait for client to do the same with the DATA line */
   for(a=0;iec_get(DATA)&&(a < XU1541_W4L_TIMEOUT * 100);a++) {
     for(b=0;iec_get(DATA)&&(b < 1000);b++) {
-      wdt_reset();
-      _delay_us(10);
+      DELAY_US(10);
     }
   }
 
   return !iec_get(DATA);
 }
 
-/* return number of successful written bytes or -1 on error */
+/* return number of successful written bytes or 0 on error */
 uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
   char i;
   uchar rv = len;
   
   eoi = 0;
 
-  DEBUGF("write: %d b, atn=%d\n", len, atn);
+  DEBUGF("wr %d, atn %d\n", len, atn);
 
   iec_release(DATA);
   iec_set(CLK | (atn ? ATN : 0));
 
   /* all devices will pull DATA down, 1ms timeout */
   for(i=0; (i<100) && !iec_get(DATA); i++) {
-    wdt_reset();
-    _delay_us(10);
+    DELAY_US(10);
   }
 
   /* noone pulls DATA? */
@@ -280,7 +304,7 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
   while(len && rv) {
 
     /* wait 50 us */
-    _delay_us(50);      
+    DELAY_US(50);      
 
     /* data line must be pulled by device */
     if(iec_get(DATA)) {
@@ -293,31 +317,35 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
 	return 0;
       }
 
+      /* this is timing critical and if we are not sending an eoi */
+      /* the iec_set(CLK) must be reached in less than ~150us. The USB */
+      /* at 1.5MBit/s transfers 160 bits (20 bytes) in ~100us, this */
+      /* should not interfere */
+
       if((len == 1) && !atn) {
 	/* signal eoi by waiting so long (>200us) that listener */
 	/* pulls data */
 
 	/* wait for data line to be pulled, wait max 1ms */
 	for(i=0; (i<100) && !iec_get(DATA); i++) {
-	  wdt_reset();
-	  _delay_us(10);
+	  DELAY_US(10);
 	}
 	
 	/* wait for data line to be released, wait max 1ms */
 	for(i=0; (i<100) && iec_get(DATA); i++) {
-	  wdt_reset();
-	  _delay_us(10);
+	  DELAY_US(10);
 	}
       }
 
-      /* wait 10 us */
-      _delay_us(10);
+      /* wait 10 us, why 10?? This delay is the most likely to be hit */
+      /* by an USB irq */
+      DELAY_US(10);
 
       iec_set(CLK);
 
       if(send_byte(*buf++)) {
 	len--;
-	_delay_us(100);
+	DELAY_US(100);
       } else {
 	EVENT(EVENT_WRITE_FAILED);
 	DEBUGF("write: io err\n");
@@ -337,7 +365,7 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
   } else {
     iec_release(ATN);
   }
-  _delay_us(100);
+  DELAY_US(100);
   
   DEBUGF("rv=%d\n", rv);
 
@@ -357,8 +385,7 @@ void xu1541_handle(void) {
     DEBUGF("h-ps %d0\n", io_buffer[0]);
     cli();
     while(io_buffer[0]--) {
-      _delay_ms(10);
-      wdt_reset();
+      DELAY_MS(10);
     }
     sei();
 
@@ -368,11 +395,9 @@ void xu1541_handle(void) {
   if(io_request == XU1541_IO_ASYNC) {
     DEBUGF("h-as\n");
     LED_ON();
-    cli();
     /* write async cmd byte(s) used for (un)talk/(un)listen, open and close */
     io_result = !cbm_raw_write(io_buffer+2, io_buffer_fill, 
 			       io_buffer[0], io_buffer[1]);
-    sei();
     LED_OFF();
 
     io_request = XU1541_IO_RESULT;
@@ -381,9 +406,7 @@ void xu1541_handle(void) {
   if(io_request == XU1541_IO_WRITE) {
     DEBUGF("h-wr %d\n", io_buffer_fill);
     LED_ON();
-    cli();
     io_result = cbm_raw_write(io_buffer, io_buffer_fill, 0, 0);
-    sei();
     LED_OFF();
 
     io_request = XU1541_IO_RESULT;
@@ -400,7 +423,6 @@ void xu1541_handle(void) {
 
     /* disable IRQs to make sure IEC transfer goes uninterrupted */
     LED_ON();
-    cli();
 
     do {
       to = 0;
@@ -416,49 +438,57 @@ void xu1541_handle(void) {
 	  io_buffer_fill = 0;
 
 	  /* re-enable interrupts and return */
-	  sei();
+	  //	  sei();
+
 	  LED_OFF();
 	  return;
 	} else {
 	  to++;
-	  _delay_us(20);
-	  wdt_reset();
+	  DELAY_US(20);
 	}
       }
 
       /* release DATA line */
       iec_release(DATA);
     
-      /* wait for CLK to be asserted */
-      for(i = 0; (i < 40) && !(ok=iec_get(CLK)); i++) 
-	_delay_us(10);
-      
+      /* wait for CLK to be asserted, timeout after 400us */
+      for(i = 0; (i < 40) && !(ok=iec_get(CLK)); i++) {
+	DELAY_US(10);
+      }
+
       if(!ok) {
 	/* device signals eoi */
 	eoi = 1;
 	iec_set(DATA);
-	_delay_us(70);
+	DELAY_US(70);
 	iec_release(DATA);
       }
       
-      /* wait for clock to be released */
-      for(i = 0; i < 100 && !(ok=iec_get(CLK)); i++) 
-	_delay_us(20);
-      
+      /* wait 2ms for clock to be released */
+      for(i = 0; i < 100 && !(ok=iec_get(CLK)); i++) {
+	DELAY_US(20);
+      }
+
+      /* the byte transfer must not be interrupted */
+      cli();
+
       /* read all bits of byte */
       for(bit = b = 0; (bit < 8) && ok; bit++) {
 	
-	/* wait for clock to be asserted */
-	for(i = 0; (i < 200) && !(ok=(iec_get(CLK)==0)); i++) 
-	  _delay_us(10);
-	
+	/* wait 2ms for clock to be asserted */
+	for(i = 0; (i < 200) && !(ok=(iec_get(CLK)==0)); i++) {
+	  DELAY_US(10);
+	}
+
 	if(ok) {
 	  b >>= 1;
 	  if(!iec_get(DATA)) 
 	    b |= 0x80;
 	  
-	  for(i = 0; i < 100 && !(ok=iec_get(CLK)); i++) 
-	    _delay_us(20);
+	  /* 2ms timeout */
+	  for(i = 0; i < 100 && !(ok=iec_get(CLK)); i++) {
+	    DELAY_US(20);
+	  }
 	}
       }
       
@@ -466,10 +496,13 @@ void xu1541_handle(void) {
       if(ok)
 	iec_set(DATA);
       
+      sei();
+
       if(ok) {
 	io_buffer[received++] = b;
-	_delay_us(50);
+	DELAY_US(50);
       }
+      
     } while(received < io_buffer_fill && ok && !eoi);
 
     if(!ok) {
@@ -482,7 +515,7 @@ void xu1541_handle(void) {
     io_request = XU1541_IO_READ_DONE;
     io_buffer_fill = received;
 
-    sei();
+    //    sei();
     LED_OFF();
   }
 }
@@ -591,8 +624,7 @@ uchar xu1541_wait(uchar line, uchar state) {
       i = 0;
     } else {
       i++;
-      _delay_us(10);
-      wdt_reset();
+      DELAY_US(10);
     }
   }
   return 0;
