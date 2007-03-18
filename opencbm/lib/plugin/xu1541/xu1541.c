@@ -9,9 +9,9 @@
 */
 
 /*! ************************************************************** 
-** \file lib/xu1541.c \n
+** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.1.2.6 2007-03-17 10:48:05 harbaum Exp $ \n
+** \version $Id: xu1541.c,v 1.1.2.7 2007-03-18 17:23:51 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **

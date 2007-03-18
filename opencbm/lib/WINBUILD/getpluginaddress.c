@@ -10,9 +10,9 @@
 */
 
 /*! ************************************************************** 
-** \file lib/cbm.c \n
+** \file lib/WINBUILD/getpluginaddress.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: getpluginaddress.c,v 1.1.2.1 2007-03-14 11:32:10 strik Exp $ \n
+** \version $Id: getpluginaddress.c,v 1.1.2.2 2007-03-18 17:23:51 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
