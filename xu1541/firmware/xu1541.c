@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.11 2007-03-17 19:31:34 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.12 2007-03-18 20:40:34 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.11  2007-03-17 19:31:34  harbaum
+ * Revision 1.12  2007-03-18 20:40:34  harbaum
+ * More hardware timer usage
+ *
+ * Revision 1.11  2007/03/17 19:31:34  harbaum
  * Some timeouts via hw timer
  *
  * Revision 1.9  2007/03/17 10:26:13  harbaum
@@ -87,8 +90,8 @@ static const uchar iec2hw_table[] PROGMEM = {
 
 /* the timers don't allow for accurate 1us and 1ms clock speeds */
 /* thus use macros to adjust the offsets */
-#define DELAY_US(a) delay_us(1.5*(a))
-#define DELAY_MS(a) delay_ms(8.533*(a))
+#define DELAY_US(a) delay_us(256 - (1.5*(a)))
+#define DELAY_MS(a) delay_ms(256 - (8.533*(a)))
 
 /* don't use busy waiting delay routines from util/delay.h. use timer */
 /* based aproach instead since this is more accurate when being */
@@ -96,11 +99,11 @@ static const uchar iec2hw_table[] PROGMEM = {
 static void delay_wait(uchar a) {
   wdt_reset();
 
-  TCNT0 = 0;
+  TCNT0 = a;
   TIFR |= _BV(TOV0);
 
-  /* wait until counter reaches expected value or counter overflows */
-  while((TCNT0 < a) && !(TIFR & _BV(TOV0)));
+  /* wait until counter overflows */
+  while(!(TIFR & _BV(TOV0)));
 }
 
 /* counter runs at 12/8 mhz */
@@ -124,33 +127,33 @@ static uchar iec2hw(char iec) {
 }
 
 uchar iec_poll(void) {
-  DELAY_US(IEC_DELAY);
+  _delay_us(IEC_DELAY);
   return CBM_PIN;
 }
 
 /* set line means: make it an output and drive it low */
 void iec_set(uchar line) {
-  DELAY_US(IEC_DELAY);
+  _delay_us(IEC_DELAY);
   CBM_PORT &= ~line; 
   CBM_DDR |= line;
 }
 
 /* release means: make it an input and enable the pull-ups */
 void iec_release(uchar line) {
-  DELAY_US(IEC_DELAY);
+  _delay_us(IEC_DELAY);
   CBM_DDR &= ~line; 
   CBM_PORT |= line;
 }
 
 void iec_set_release(uchar s, uchar r) {
-  DELAY_US(IEC_DELAY);
+  _delay_us(IEC_DELAY);
   CBM_PORT &= ~s; 
   CBM_DDR = (CBM_DDR | s) & ~r;
   CBM_PORT |= r;
 }
 
 uchar iec_get(uchar line) {
-  DELAY_US(IEC_DELAY);
+  _delay_us(IEC_DELAY);
   return ((CBM_PIN & line) == 0 )?1:0;
 }
 
@@ -165,6 +168,20 @@ void cbm_init(void) {
 
   iec_release(ATN | CLK | DATA | RESET);
   DELAY_US(100);
+
+#if 0 // timer test
+#define TEST_DELAY  100
+ {
+   uchar x;
+
+   TCCR2 = _BV(CS21) | _BV(CS20);  /* prescaler 32 -> 375khz/2.66667us */
+   TCNT2 = 0;
+   DELAY_US(TEST_DELAY);
+   x = TCNT2;
+
+   DEBUGF("counted %u (%u)\n", x, (uchar)(TEST_DELAY/2.666667));
+ }
+#endif
 
   //  do_reset();
 }
@@ -230,6 +247,25 @@ void do_reset( void ) {
   wait_for_free_bus();
 }
 
+/* timeout in milliseconds, max 5.4 */ 
+#define IEC_TIMEOUT_MS(a)  ((uchar)((a) * F_CPU / 256000))
+
+static uchar iec_wait_timeout_2ms(uchar mask, uchar state) {
+
+  /* use 8 bit timer 2 for precise timeout */
+  TCCR2 = _BV(CS22) | _BV(CS21);  /* prescaler 256 */
+  TCNT2 = 256 - IEC_TIMEOUT_MS(2);
+  TIFR |= _BV(TOV2);
+
+  /* wait until counter reaches expected value or counter overflows */
+  /* e.g. 2ms timeout == 94 ticks @ 46.8khz, or of course until expected */
+  /* event arrives. this is in negative notation since iec_poll returns */
+  /* 0 for "active" bits */
+  while(!(TIFR & _BV(TOV2)) && (((iec_poll() & mask) == state)));    
+  
+  return ((iec_poll() & mask) != state);
+}
+
 /*
  *  send byte
  */
@@ -252,10 +288,8 @@ static char send_byte(uchar b) {
     b >>= 1;
   }
 
-  /* wait up to 2ms for ack */
-  for( i = 0; (i < 200) && !(ack=iec_get(DATA)); i++ ) {
-    DELAY_US(10);
-  }
+  /* wait 2ms for data to be driven */
+  ack = iec_wait_timeout_2ms(DATA, DATA);
 
 #ifdef ENABLE_EVENT_LOG
   if(!ack) {
@@ -266,7 +300,7 @@ static char send_byte(uchar b) {
   return ack;
 }
 
-/* wait for listener to release DATA line, 5 second timeout */
+/* wait for listener to release DATA line, N second timeout */
 static char wait_for_listener(void) {
   unsigned short a,b;
 
@@ -285,7 +319,6 @@ static char wait_for_listener(void) {
 
 /* return number of successful written bytes or 0 on error */
 uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
-  char i;
   uchar rv = len;
   
   eoi = 0;
@@ -295,13 +328,8 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
   iec_release(DATA);
   iec_set(CLK | (atn ? ATN : 0));
 
-  /* all devices will pull DATA down, 1ms timeout */
-  for(i=0; (i<100) && !iec_get(DATA); i++) {
-    DELAY_US(10);
-  }
-
-  /* noone pulls DATA? */
-  if(!iec_get(DATA)) {
+  /* wait for any device to pull data */
+  if(!iec_wait_timeout_2ms(DATA, DATA)) {
     DEBUGF("write: no devs\n");
     iec_release(CLK | ATN);
     EVENT(EVENT_WRITE_NO_DEV);
@@ -333,15 +361,11 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
 	/* signal eoi by waiting so long (>200us) that listener */
 	/* pulls data */
 
-	/* wait for data line to be pulled, wait max 1ms */
-	for(i=0; (i<100) && !iec_get(DATA); i++) {
-	  DELAY_US(10);
-	}
-	
-	/* wait for data line to be released, wait max 1ms */
-	for(i=0; (i<100) && iec_get(DATA); i++) {
-	  DELAY_US(10);
-	}
+	/* wait 2ms for data to be pulled */
+	iec_wait_timeout_2ms(DATA, DATA);
+
+	/* wait 2ms for data to be release */
+	iec_wait_timeout_2ms(DATA, 0);
       }
 
       /* wait 10 us, why 10?? This delay is the most likely to be hit */
@@ -420,7 +444,7 @@ void xu1541_handle(void) {
   }
 
   if(io_request == XU1541_IO_READ) {
-    uchar i, ok, bit, b;
+    uchar ok, bit, b;
     uchar received = 0;
     unsigned short to;
 
@@ -444,8 +468,6 @@ void xu1541_handle(void) {
 	  io_request = XU1541_IO_READ_DONE;
 	  io_buffer_fill = 0;
 
-	  /* re-enable interrupts and return */
-	  //	  sei();
 	  LED_OFF();
 	  return;
 	} else {
@@ -480,39 +502,20 @@ void xu1541_handle(void) {
       
       cli();
 
-      /* prescaler 256 -> 46,8khz/21.3us -> 2ms timeout = 94 ticks */
-      TCCR2 = _BV(CS22) | _BV(CS21);  /* prescaler 256 */
-      TCNT2 = 0;
-      TIFR |= _BV(TOV2);
-
-#if 0
-      /* wait 2ms for clock to be released */
-      for(i = 0; i < 100 && !(ok=iec_get(CLK)); i++) {
-	DELAY_US(20);
-      }
-#else
-      /* wait until counter reaches expected value or counter overflows */
-      /* 2ms timeout == 94 ticks @ 46.8khz */
-      while((TCNT2 < 94) && !(TIFR & _BV(TOV2)) && !(ok=iec_get(CLK)));      
-#endif
+      /* wait 2ms for clock to be asserted */
+      ok = iec_wait_timeout_2ms(CLK, CLK);
       
       /* read all bits of byte */
       for(bit = b = 0; (bit < 8) && ok; bit++) {
 	
-	/* wait 2ms for clock to be asserted */
-	for(i = 0; (i < 100) && !(ok=(!iec_get(CLK))); i++) {
-	  DELAY_US(20);
-	}
-
-	if(ok) {
+	/* wait 2ms for clock to be released */
+	if((ok = iec_wait_timeout_2ms(CLK, 0))) {
 	  b >>= 1;
 	  if(!iec_get(DATA)) 
 	    b |= 0x80;
 	  
-	  /* wait 2ms for clock to be released */
-	  for(i = 0; i < 100 && !(ok=iec_get(CLK)); i++) {
-	    DELAY_US(20);
-	  }
+	  /* wait 2ms for clock to be asserted */
+	  ok = iec_wait_timeout_2ms(CLK, CLK);
 	}
       }
       
@@ -539,7 +542,6 @@ void xu1541_handle(void) {
     io_request = XU1541_IO_READ_DONE;
     io_buffer_fill = received;
 
-    //    sei();
     LED_OFF();
   }
 }
