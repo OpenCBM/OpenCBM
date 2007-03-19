@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6.2.5 2007-03-15 06:59:55 strik Exp $
+# $Id: Makefile,v 1.6.2.6 2007-03-19 18:12:53 strik Exp $
 
 include ../LINUX/config.make
 
@@ -17,6 +17,7 @@ SHLIBV  = $(SHLIB).$(MAJ)
 SHLIBV3 = $(SHLIBV).$(MIN).$(REL)
 LIB     = libopencbm.a
 SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c \
+	  configuration.c LINUX/configuration_make.c \
 	  LINUX/getpluginaddress.c \
 	  $(foreach t,cbmcopy pp s1 s2, $(LIBCBMCOPY)/$(t).c) \
 	  $(foreach t,d64copy fs gcr pp s1 s2 std, $(LIBD64COPY)/$(t).c)

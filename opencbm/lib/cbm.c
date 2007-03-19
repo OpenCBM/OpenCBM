@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.17.2.8 2007-03-15 16:38:02 strik Exp $ \n
+** \version $Id: cbm.c,v 1.17.2.9 2007-03-19 18:12:53 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -38,6 +38,8 @@
 
 #include "getpluginaddress.h"
 
+#include "configuration.h"
+
 struct plugin_information_s {
     SHARED_OBJECT_HANDLE Library;
     opencbm_plugin_t     Plugin;
@@ -47,19 +49,43 @@ typedef struct plugin_information_s plugin_information_t;
 static
 struct plugin_information_s Plugin_information = { 0 };
 
+
+#ifdef WIN32
+    #define DEFAULT_PLUGIN_NAME "opencbm-xu1541.dll"
+#else
+    #define DEFAULT_PLUGIN_NAME "/usr/local/lib/opencbm/plugin/libopencbm-xu1541.so"
+#endif
+
+
 static int
 initialize_plugin_pointer(plugin_information_t *Plugin_information)
 {
     int error = 1;
 
     do {
+        unsigned char plugin_name[1024] = DEFAULT_PLUGIN_NAME;
+
+        opencbm_configuration_handle handle_configuration = opencbm_configuration_open();
+
+        if (handle_configuration)
+        {
+            int error;
+
+            error = opencbm_configuration_get_data(handle_configuration, "plugins", "default", plugin_name, sizeof(plugin_name));
+
+            if (!error)
+                error = opencbm_configuration_get_data(handle_configuration, plugin_name, "location", plugin_name, sizeof(plugin_name));
+
+            if (error)
+                strcpy(plugin_name, DEFAULT_PLUGIN_NAME);
+
+            opencbm_configuration_close(handle_configuration);
+        }
+        DBG_PRINT((DBG_PREFIX "Using plugin %s", plugin_name));
+
         memset(&Plugin_information->Plugin, 0, sizeof(Plugin_information->Plugin));
 
-#ifdef WIN32
-        Plugin_information->Library = plugin_load("opencbm-xu1541.dll");
-#else
-        Plugin_information->Library = plugin_load("/usr/local/lib/opencbm/plugin/libopencbm-xu1541.so");
-#endif
+        Plugin_information->Library = plugin_load(plugin_name);
 
         DBG_PRINT((DBG_PREFIX "LoadLibrary returned %p", Plugin_information->Library));
 

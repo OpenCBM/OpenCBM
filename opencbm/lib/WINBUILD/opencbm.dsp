@@ -100,6 +100,14 @@ SOURCE=..\cbm.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\configuration.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\configuration_name.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\detect.c
 # End Source File
 # Begin Source File
@@ -141,6 +149,10 @@ SOURCE=..\archlib.h
 # Begin Source File
 
 SOURCE=..\..\include\WINDOWS\cbmioctl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\configuration.h
 # End Source File
 # Begin Source File
 
