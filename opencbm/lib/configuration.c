@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/configuration.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration.c,v 1.1.2.1 2007-03-19 18:12:53 strik Exp $ \n
+** \version $Id: configuration.c,v 1.1.2.2 2007-03-19 18:48:47 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file
@@ -34,8 +34,6 @@
 struct opencbm_configuration_s {
     FILE * File;
 };
-
-typedef struct opencbm_configuration_s opencbm_configuration_t;
 
 /*! \brief \internal Read a line of the configuration file
 
