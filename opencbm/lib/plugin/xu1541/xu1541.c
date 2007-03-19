@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.1.2.7 2007-03-18 17:23:51 strik Exp $ \n
+** \version $Id: xu1541.c,v 1.1.2.8 2007-03-19 19:01:25 harbaum Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -180,11 +180,11 @@ int xu1541_init(void) {
 
   xu1541_dbg(0, "firmware version %u.%02u", ret[0], ret[1]);
 
-  if(ret[1] < 6) {
+  if(ret[1] < 8) {
     fprintf(stderr, "Device reports firmware version %u.%02u\n", 
 	    ret[0], ret[1]);
     fprintf(stderr, "but this version of opencbm requires at least "
-	    "version x.06\n");
+	    "version x.08\n");
     return -1;
   }
 
@@ -205,7 +205,6 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
   int nBytes;
   char ret[4];
-  int timeout_delay = TIMEOUT_DELAY;
 
   xu1541_dbg(1, "ioctl %d for device %d, sub %d", cmd, addr, secaddr);
 
@@ -223,7 +222,7 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 				   USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				   cmd, (secaddr << 8) + addr, 0, 
 				   NULL, 0, 
-				   USB_TIMEOUT)) < 0) 
+				   1000)) < 0) 
       {
 	  fprintf(stderr, "USB error in xu1541_ioctl(async): %s\n", 
 		  usb_strerror());
@@ -241,7 +240,7 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 			     USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 			     XU1541_GET_RESULT, 0, 0, 
 			     (char*)rv, sizeof(rv), 
-			     USB_TIMEOUT) == sizeof(rv)) 
+			     1000) == sizeof(rv)) 
 	  {
 	      /* we got a valid result */
 	      if(rv[0] == XU1541_IO_RESULT) 
@@ -252,17 +251,23 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 		  /* a returned byte means that the USB link is fine */
 		  link_ok = 1;
 		  errno = 0;
-	      }
+	      } 
 	      else 
 	      {
-		  arch_usleep(timeout_delay);
-		  timeout_delay <<= 1;
+		  xu1541_dbg(3, "unexpected result (%d/%d)", rv[0], rv[1]);
+
+		  /* not the expected result */
+		  arch_usleep(TIMEOUT_DELAY);
 	      }
 	  } 
 	  else 
 	  {
+	      xu1541_dbg(3, "usb timeout");
+
 	      /* count the error states (just out of couriosity) */
 	      err++;
+
+	      arch_usleep(TIMEOUT_DELAY);
 	  }
       } 
       while(!link_ok);
@@ -304,7 +309,6 @@ int xu1541_write(const __u_char *data, size_t len)
     {
         int link_ok = 0, err = 0;
         int wr, bytes2write;
-	int timeout_delay = TIMEOUT_DELAY;
 	bytes2write = (len > XU1541_IO_BUFFER_SIZE)?XU1541_IO_BUFFER_SIZE:len;
 	
 	/* the write itself moved the data into the buffer, the actual */
@@ -337,7 +341,7 @@ int xu1541_write(const __u_char *data, size_t len)
 			       USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 			       XU1541_GET_RESULT, 0, 0, 
 			       (char*)rv, sizeof(rv), 
-			       USB_TIMEOUT) == sizeof(rv)) 
+			       1000) == sizeof(rv)) 
 	    {
 	        /* the USB link is available again if we got a valid result */
 	        if(rv[0] == XU1541_IO_RESULT) {
@@ -350,12 +354,13 @@ int xu1541_write(const __u_char *data, size_t len)
 		} 
 		else
 		{
-		  arch_usleep(timeout_delay);
-		  timeout_delay <<= 1;
+		    xu1541_dbg(3, "unexpected result (%d/%d)", rv[0], rv[1]);
+		    arch_usleep(TIMEOUT_DELAY);
 		}
 	    } 
 	    else 
 	    {
+	        xu1541_dbg(3, "usb timeout");
 	        /* count the error states (just out of couriosity) */
 	        err++;
 	    }
@@ -376,7 +381,6 @@ int xu1541_read(__u_char *data, size_t len)
 	int rd, bytes2read;
 	int link_ok = 0, err = 0;
 	unsigned char rv[2];
-	int timeout_delay = TIMEOUT_DELAY;
 	  
 	/* limit transfer size */
 	bytes2read = (len > XU1541_IO_BUFFER_SIZE)?XU1541_IO_BUFFER_SIZE:len;
@@ -387,7 +391,7 @@ int xu1541_read(__u_char *data, size_t len)
 			USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 			XU1541_REQUEST_READ, bytes2read, 0, 
 			NULL, 0,
-			USB_TIMEOUT);
+			1000);
 	
 	if(rd < 0) {
 	    fprintf(stderr, "USB error in xu1541_request_read(): %s\n", 
@@ -415,7 +419,7 @@ int xu1541_read(__u_char *data, size_t len)
 				     USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				     XU1541_GET_RESULT, 0, 0, 
 				     (char*)rv, sizeof(rv), 
-				     USB_TIMEOUT)) == sizeof(rv)) 
+				     1000)) == sizeof(rv)) 
 	    {
 	        xu1541_dbg(2, "got result %d/%d", rv[0], rv[1]);
 	      
@@ -425,17 +429,21 @@ int xu1541_read(__u_char *data, size_t len)
 	        // requests
 	        if(rv[0] != XU1541_IO_READ_DONE) 
 		{
-		    arch_usleep(timeout_delay);
-		    timeout_delay <<= 1;
+		    xu1541_dbg(3, "unexpected result");
+		    arch_usleep(TIMEOUT_DELAY);
 		} 
 		else
 		{
+		    xu1541_dbg(3, "link ok");
+
 	            link_ok = 1;
 		    errno = 0;
 		}
 	    } 
 	    else 
 	    {
+		xu1541_dbg(3, "usb timeout");
+
 		/* count the error states (just out of couriosity) */
 		err++;
 	    }
@@ -445,9 +453,8 @@ int xu1541_read(__u_char *data, size_t len)
 	/* finally read data itself */
 	if((rd = usb_control_msg(xu1541_handle, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_IN, 
-				 XU1541_READ,
-				 bytes2read, 0, (char*)data, 
-				 bytes2read, USB_TIMEOUT)) < 0) 
+				 XU1541_READ, bytes2read, 0, 
+				 (char*)data, bytes2read, 1000)) < 0) 
 	{
 	    fprintf(stderr, "USB error in xu1541_read(): %s\n", 
 		    usb_strerror());
@@ -485,8 +492,7 @@ int xu1541_special_write(int mode, const __u_char *data, size_t size)
 	if((wr = usb_control_msg(xu1541_handle, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_OUT, 
 				 mode, XU1541_WRITE, bytes2write, 
-				 (char*)data, bytes2write, 
-				 USB_TIMEOUT)) < 0) 
+				 (char*)data, bytes2write, 1000)) < 0) 
 	{
 	    fprintf(stderr, "USB error in xu1541_special_write(): %s\n", 
 		    usb_strerror());
