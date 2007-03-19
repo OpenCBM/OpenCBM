@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.12 2007-03-18 20:40:34 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.13 2007-03-19 18:58:36 harbaum Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.12  2007-03-18 20:40:34  harbaum
+ * Revision 1.13  2007-03-19 18:58:36  harbaum
+ * Change in async state handling
+ *
+ * Revision 1.12  2007/03/18 20:40:34  harbaum
  * More hardware timer usage
  *
  * Revision 1.11  2007/03/17 19:31:34  harbaum
@@ -183,7 +186,7 @@ void cbm_init(void) {
  }
 #endif
 
-  //  do_reset();
+ do_reset();
 }
 
 static char check_if_bus_free(void) {
@@ -228,7 +231,7 @@ static void wait_for_free_bus(void) {
     
     ++i;
     
-    if (i == 1000) {
+    if (i == 2000) {
       EVENT(EVENT_TIMEOUT_FREE_BUS);
       DEBUGF("wait4free bus to\n");
       break;
@@ -614,9 +617,13 @@ void xu1541_get_result(unsigned char *data) {
   data[0] = io_request;
   data[1] = io_result;
 
+  DEBUGF("r %d/%d\n", data[0], data[1]);
+
+#if 0
   /* reset flag if result has been delivered */
   if(io_request == XU1541_IO_RESULT) 
      io_request = XU1541_IO_IDLE;
+#endif
 }
 
 void xu1541_request_async(const uchar *buf, uchar cnt, 
