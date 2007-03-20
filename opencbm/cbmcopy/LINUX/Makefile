@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-03-02 18:17:17 strik Exp $
+# $Id: Makefile,v 1.1.8.1 2007-03-20 06:42:23 strik Exp $
 
 include ../LINUX/config.make
 
@@ -31,5 +31,6 @@ install-files: $(PROG)
 install: install-files
 
 uninstall:
-	rm -f $(BINDIR)/$(PROG) $(BINDIR)/$(LINKS)
-	rm -f $(MANDIR)/$(MAN1) $(MANDIR)/$(LINKS)
+	rm -f $(BINDIR)/$(PROG) $(MANDIR)/$(MAN1)
+	for l in $(LINKS); do rm -f $(BINDIR)/$$l $(MANDIR)/$$l.1; done
+	-rmdir -p $(BINDIR) $(MANDIR)
