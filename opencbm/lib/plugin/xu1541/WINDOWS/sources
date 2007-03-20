@@ -5,7 +5,7 @@ TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib \
            $(SDK_LIB_PATH)/winmm.lib    \
-           ./libusb.lib                 \
+           */libusb.lib                 \
            ../../../../bin/*/arch.lib         
 
 USE_MSVCRT = 1
