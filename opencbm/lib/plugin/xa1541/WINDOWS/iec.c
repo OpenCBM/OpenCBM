@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/iec.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: iec.c,v 1.1.2.2 2007-03-14 17:12:31 strik Exp $ \n
+** \version $Id: iec.c,v 1.1.2.3 2007-03-20 18:43:19 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -125,8 +125,8 @@ fastschedule_stop(void)
  refuses to load with STATUS_DLL_INIT_FAILED (0xC0000142)
 */
 
-BOOL
-opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
+BOOL WINAPI
+DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
     static BOOL bIsOpen = FALSE;
     BOOLEAN Status = TRUE;

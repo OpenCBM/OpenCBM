@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: dllmain.c,v 1.1.2.2 2007-03-14 17:12:32 strik Exp $ \n
+** \version $Id: dllmain.c,v 1.1.2.3 2007-03-20 18:43:20 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -36,8 +36,8 @@
 #include "debug.h"
 
 
-BOOL
-opencbm_xu1541_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
+BOOL WINAPI
+DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
     return TRUE;
 }

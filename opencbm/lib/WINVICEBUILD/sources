@@ -11,8 +11,6 @@ USE_MSVCRT = 1
 
 DLLBASE=0x70000000
 
-DLLENTRY=opencbm_init
-
 INCLUDES=../../include;../../include/WINDOWS;../;../WINBUILD/
 
 SOURCES=../cbm.c \

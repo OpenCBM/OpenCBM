@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archlib_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: archlib_vice.c,v 1.8.2.1 2007-03-11 13:46:03 strik Exp $ \n
+** \version $Id: archlib_vice.c,v 1.8.2.2 2007-03-20 18:43:19 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        This variant is for accessing VICE instead of a real device
@@ -139,8 +139,8 @@ send_and_wait(const unsigned int addr, const unsigned char *buffer, int size)
  refuses to load with STATUS_DLL_INIT_FAILED (0xC0000142)
 */
 
-BOOL
-opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
+BOOL WINAPI
+DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
     static BOOL bIsOpen = FALSE;
     BOOLEAN Status = TRUE;

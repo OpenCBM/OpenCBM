@@ -12,8 +12,6 @@ USE_MSVCRT = 1
 
 DLLBASE=0x71000000
 
-DLLENTRY=opencbm_xu1541_init
-
 INCLUDES=../../../../include;../../../../include/WINDOWS;../../..;$(XU1541DIR)
 
 SOURCES=../archlib.c \

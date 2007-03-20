@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.16.2.1 2007-03-11 13:46:02 strik Exp $ \n
+** \version $Id: archlib.c,v 1.16.2.2 2007-03-20 18:43:19 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -65,8 +65,8 @@
  refuses to load with STATUS_DLL_INIT_FAILED (0xC0000142)
 */
 
-BOOL
-opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
+BOOL WINAPI
+DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
     static BOOL bIsOpen = FALSE;
 

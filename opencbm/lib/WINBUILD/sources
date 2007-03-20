@@ -11,8 +11,6 @@ USE_MSVCRT = 1
 
 DLLBASE=0x70000000
 
-DLLENTRY=opencbm_init
-
 INCLUDES=../../include;../../include/WINDOWS;../../lib/plugin/xa1541/WINDOWS/;../
 
 C_DEFINES = $(C_DEFINES)
