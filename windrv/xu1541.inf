@@ -1,7 +1,7 @@
 [Version]
 Signature = "$Chicago$"
 provider  = %manufacturer%
-DriverVer = 02/25/2007,0.1.12.0
+DriverVer = 03/20/2007,0.1.12.1
 CatalogFile = xu1541.cat
 CatalogFile.NT = xu1541.cat
 CatalogFile.NTAMD64 = xu1541_x64.cat
@@ -108,7 +108,7 @@ HKR,,SurpriseRemovalOK, 0x00010001, 1
 ;--------------------------------------------------------------------------
 
 [libusb_add_service]
-DisplayName    = "LibUsb-Win32 - Kernel Driver 02/25/2007, 0.1.12.0"
+DisplayName    = "LibUsb-Win32 - Kernel Driver 03/20/2007, 0.1.12.1"
 ServiceType    = 1
 StartType      = 3
 ErrorControl   = 0
