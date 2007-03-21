@@ -13,7 +13,7 @@ DLLBASE=0x71000000
 
 INCLUDES=../../../../include;../../../../include/WINDOWS;../../..
 
-SOURCES=archlib.c \
+SOURCES=iec.c \
 	parburst.c \
 	i_opencbm.c \
 	opencbm-xa1541.rc
