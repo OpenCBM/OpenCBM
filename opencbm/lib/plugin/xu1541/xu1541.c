@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.1.2.8 2007-03-19 19:01:25 harbaum Exp $ \n
+** \version $Id: xu1541.c,v 1.1.2.9 2007-03-21 17:58:29 harbaum Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -45,11 +45,11 @@ static void xu1541_dbg(int level, char *msg, ...)
 
     if(level <= debug_level) 
     {
-        printf("[XU1541] ");
+        fprintf(stderr, "[XU1541] ");
         va_start(argp, msg);
-	vprintf(msg, argp);
+	vfprintf(stderr, msg, argp);
 	va_end(argp);
-	printf("\n");
+	fprintf(stderr, "\n");
     }
 }
 
