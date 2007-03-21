@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration_name.c,v 1.1.2.1 2007-03-19 18:12:54 strik Exp $ \n
+** \version $Id: configuration_name.c,v 1.1.2.2 2007-03-21 16:00:54 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file
@@ -27,7 +27,7 @@
 
 #include <windows.h>
 
-#define DEFAULT_FILENAME "System32/opencbm.conf"
+#define DEFAULT_FILENAME "/System32/opencbm.conf"
 
 
 #define MAX_PATH_ 1024
