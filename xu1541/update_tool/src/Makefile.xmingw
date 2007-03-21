@@ -4,17 +4,17 @@
 
 XMINGW_ROOT = /usr/local/cross-tools/bin
 
-GPP = $(XMINGW_ROOT)/i386-mingw32msvc-g++
+CC = $(XMINGW_ROOT)/i386-mingw32msvc-gcc
+CFLAGS+=-DWIN -Wall
+LFLAGS+=-lusb
 
 APP = xu1541_update
+OBJS = xu1541_update.o ihex.o flash.o
 
 all: ../$(APP).exe
 
 clean:
 	rm -f ../$(APP).exe *.o
 
-%.o:%.cpp
-	$(GPP) -Wall -DWIN -c $< 
-
- ../$(APP).exe: main.cpp cflashmem.o cpage.o cbootloader.o
-	$(GPP) -Wall -DWIN main.cpp cflashmem.o cpage.o cbootloader.o -o $@ -lusb
+../$(APP).exe: $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LFLAGS)

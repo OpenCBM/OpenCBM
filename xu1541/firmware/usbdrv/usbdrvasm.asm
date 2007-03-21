@@ -4,8 +4,8 @@
  * Creation Date: 2006-03-01
  * Tabsize: 4
  * Copyright: (c) 2006 by OBJECTIVE DEVELOPMENT Software GmbH
- * License: Proprietary, free under certain conditions. See Documentation.
- * This Revision: $Id: usbdrvasm.asm,v 1.1 2007-02-04 12:36:38 harbaum Exp $
+ * License: GNU GPL v2 (see License.txt) or proprietary (CommercialLicense.txt)
+ * This Revision: $Id: usbdrvasm.asm,v 1.2 2007-03-21 18:02:12 harbaum Exp $
  */
 
 /*

@@ -3,9 +3,9 @@
  * Author: Christian Starkjohann
  * Creation Date: 2004-12-29
  * Tabsize: 4
- * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
- * License: Proprietary, free under certain conditions. See Documentation.
- * This Revision: $Id: usbdrvasm.S,v 1.1 2007-02-18 19:47:32 harbaum Exp $
+ * Copyright: (c) 2007 by OBJECTIVE DEVELOPMENT Software GmbH
+ * License: GNU GPL v2 (see License.txt) or proprietary (CommercialLicense.txt)
+ * This Revision: $Id: usbdrvasm.S,v 1.2 2007-03-21 18:02:09 harbaum Exp $
  */
 
 /*
@@ -15,6 +15,14 @@ for a description of the entire driver.
 Since almost all of this code is timing critical, don't change unless you
 really know what you are doing! Many parts require not only a maximum number
 of CPU cycles, but even an exact number of cycles!
+
+
+Timing constraints according to spec (in bit times):
+timing subject                                      min max    CPUcycles
+---------------------------------------------------------------------------
+EOP of OUT/SETUP to sync pattern of DATA0 (both rx) 2   16     16-128
+EOP of IN to sync pattern of DATA0 (rx, then tx)    2   7.5    16-60
+DATAx (rx) to ACK/NAK/STALL (tx)                    2   7.5    16-60
 */
 
 #include "iarcompat.h"
@@ -49,18 +57,14 @@ of CPU cycles, but even an exact number of cycles!
 #   define lo8(x)   LOW(x)
 #   define hi8(x)   ((x)>>8)    /* not HIGH to allow XLINK to make a proper range check */
 
-    extern  usbRxBuf, usbDeviceAddr, usbNewDeviceAddr, usbInputBuf
-    extern  usbCurrentTok, usbRxLen, usbRxToken, usbAppBuf, usbTxLen
-    extern  usbTxBuf, usbMsgLen, usbNakBuf, usbAckBuf, usbTxLen1, usbTxBuf1
+    extern  usbRxBuf, usbDeviceAddr, usbNewDeviceAddr, usbInputBufOffset
+    extern  usbCurrentTok, usbRxLen, usbRxToken, usbTxLen
+    extern  usbTxBuf, usbMsgLen, usbTxLen1, usbTxBuf1, usbTxLen3, usbTxBuf3
     public  usbCrc16
     public  usbCrc16Append
 
-#   ifndef IVT_BASE_ADDRESS
-#       define IVT_BASE_ADDRESS 0
-#   endif
-
-    ASEG
-    ORG     INT0_vect + IVT_BASE_ADDRESS
+    COMMON  INTVEC
+    ORG     INT0_vect
     rjmp    SIG_INTERRUPT0
     RSEG    CODE
 
@@ -77,409 +81,398 @@ of CPU cycles, but even an exact number of cycles!
 #endif /* __IAR_SYSTEMS_ASM__ */
 
 
-SIG_INTERRUPT0:
 ;Software-receiver engine. Strict timing! Don't change unless you can preserve timing!
 ;interrupt response time: 4 cycles + insn running = 7 max if interrupts always enabled
-;max allowable interrupt latency: 32 cycles -> max 25 cycles interrupt disable
-;max stack usage: [ret(2), x1, SREG, x2, cnt, shift, YH, YL, x3, x4] = 11 bytes
-usbInterrupt:
-;order of registers pushed:
-;x1, SREG, x2, cnt, shift, [YH, YL, x3]
-    push    x1              ;2  push only what is necessary to sync with edge ASAP
-    in      x1, SREG        ;1
-    push    x1              ;2
+;max allowable interrupt latency: 34 cycles -> max 25 cycles interrupt disable
+;max stack usage: [ret(2), YL, SREG, YH, shift, x1, x2, x3, cnt, x4] = 11 bytes
+;Numbers in brackets are maximum cycles since SOF.
+SIG_INTERRUPT0:
+;order of registers pushed: YL, SREG [sofError], YH, shift, x1, x2, x3, cnt
+    push    YL              ;2 [35] push only what is necessary to sync with edge ASAP
+    in      YL, SREG        ;1 [37]
+    push    YL              ;2 [39]
+;----------------------------------------------------------------------------
+; Synchronize with sync pattern:
+;----------------------------------------------------------------------------
 ;sync byte (D-) pattern LSb to MSb: 01010100 [1 = idle = J, 0 = K]
 ;sync up with J to K edge during sync pattern -- use fastest possible loops
 ;first part has no timeout because it waits for IDLE or SE1 (== disconnected)
-#if !USB_CFG_SAMPLE_EXACT
-    ldi     x1, 5           ;1 setup a timeout for waitForK
-#endif
 waitForJ:
-    sbis    USBIN, USBMINUS ;1 wait for D- == 1
+    sbis    USBIN, USBMINUS ;1 [40] wait for D- == 1
     rjmp    waitForJ        ;2
-#if USB_CFG_SAMPLE_EXACT
-;The following code represents the unrolled loop in the else branch. It
-;results in a sampling window of 1/4 bit which meets the spec.
-    sbis    USBIN, USBMINUS
-    rjmp    foundK
-    sbis    USBIN, USBMINUS
-    rjmp    foundK
-    sbis    USBIN, USBMINUS
-    rjmp    foundK
-    nop
-    nop2
-foundK:
-#else
 waitForK:
-    dec     x1              ;1
-    sbic    USBIN, USBMINUS ;1 wait for D- == 0
-    brne    waitForK        ;2
-#endif
-;{2, 6} after falling D- edge, average delay: 4 cycles [we want 4 for center sampling]
-;we have 1 bit time for setup purposes, then sample again:
-    push    x2              ;2
-    push    cnt             ;2
-    push    shift           ;2
-shortcutEntry:
-    ldi     cnt, 1          ;1 pre-init bit counter (-1 because no dec follows, -1 because 1 bit already sampled)
-    ldi     x2, 1<<USB_CFG_DPLUS_BIT    ;1 -> 8   edge sync ended with D- == 0
-;now wait until SYNC byte is over. Wait for either 2 bits low (success) or 2 bits high (failure)
-waitNoChange:
-    in      x1, USBIN       ;1 <-- sample, timing: edge + {2, 6} cycles
-    eor     x2, x1          ;1
-    sbrc    x2, 0           ;1 | 2
-    ldi     cnt, 2          ;1 | 0 cnt = numBits - 1 (because dec follows)
-    mov     x2, x1          ;1
-    dec     cnt             ;1
-    brne    waitNoChange    ;2 | 1
-    sbrc    x1, USBMINUS    ;2
-    rjmp    sofError        ;0 two consecutive "1" bits -> framing error
-;start reading data, but don't check for bitstuffing because these are the
-;first bits. Use the cycles for initialization instead. Note that we read and
-;store the binary complement of the data stream because eor results in 1 for
-;a change and 0 for no change.
-    in      x1, USBIN       ;1 <-- sample bit 0, timing: edge + {3, 7} cycles
-    eor     x2, x1          ;1
-    ror     x2              ;1
-    ldi     shift, 0x7f     ;1 The last bit of the sync pattern was a "no change"
-    ror     shift           ;1
-    push    YH              ;2 -> 7
-    in      x2, USBIN       ;1 <-- sample bit 1, timing: edge + {2, 6} cycles
-    eor     x1, x2          ;1
-    ror     x1              ;1
-    ror     shift           ;1
-    push    YL              ;2
-    lds     YL, usbInputBuf ;2 -> 8
-    in      x1, USBIN       ;1 <-- sample bit 2, timing: edge + {2, 6} cycles
-    eor     x2, x1          ;1
-    ror     x2              ;1
-    ror     shift           ;1
-    ldi     cnt, USB_BUFSIZE;1
-    ldi     YH, hi8(usbRxBuf);1 assume that usbRxBuf does not cross a page
-    push    x3              ;2 -> 8
-    in      x2, USBIN       ;1 <-- sample bit 3, timing: edge + {2, 6} cycles
-    eor     x1, x2          ;1
-    ror     x1              ;1
-    ror     shift           ;1
-    ser     x3              ;1
-    nop                     ;1
-    rjmp    rxbit4          ;2 -> 8
+;The following code results in a sampling window of 1/4 bit which meets the spec.
+    sbis    USBIN, USBMINUS
+    rjmp    foundK
+    sbis    USBIN, USBMINUS
+    rjmp    foundK
+    sbis    USBIN, USBMINUS
+    rjmp    foundK
+    sbis    USBIN, USBMINUS
+    rjmp    foundK
+    sbis    USBIN, USBMINUS
+    rjmp    foundK
+    rjmp    sofError
+foundK:
+;{3, 5} after falling D- edge, average delay: 4 cycles [we want 4 for center sampling]
+;we have 1 bit time for setup purposes, then sample again. Numbers in brackets
+;are cycles from center of first sync (double K) bit after the instruction
+    push    YH                  ;2 [2]
+    lds     YL, usbInputBufOffset;2 [4]
+    clr     YH                  ;1 [5]
+    subi    YL, lo8(-(usbRxBuf));1 [6]
+    sbci    YH, hi8(-(usbRxBuf));1 [7]
 
-shortcutToStart:            ;{,43} into next frame: max 5.5 sync bits missed
-#if !USB_CFG_SAMPLE_EXACT
-    ldi     x1, 5           ;2 setup timeout
-#endif
-waitForJ1:
-    sbis    USBIN, USBMINUS ;1 wait for D- == 1
-    rjmp    waitForJ1       ;2
-#if USB_CFG_SAMPLE_EXACT
-;The following code represents the unrolled loop in the else branch. It
-;results in a sampling window of 1/4 bit which meets the spec.
-    sbis    USBIN, USBMINUS
-    rjmp    foundK1
-    sbis    USBIN, USBMINUS
-    rjmp    foundK1
-    sbis    USBIN, USBMINUS
-    rjmp    foundK1
-    nop
-    nop2
-foundK1:
-#else
-waitForK1:
-    dec     x1              ;1
-    sbic    USBIN, USBMINUS ;1 wait for D- == 0
-    brne    waitForK1       ;2
-#endif
-    pop     YH              ;2 correct stack alignment
-    nop2                    ;2 delay for the same time as the pushes in the original code
-    rjmp    shortcutEntry   ;2
+    sbis    USBIN, USBMINUS ;1 [8] we want two bits K [sample 1 cycle too early]
+    rjmp    haveTwoBitsK    ;2 [10]
+    pop     YH              ; undo the push from before
+    rjmp    waitForK        ; this was not the end of sync, retry
+haveTwoBitsK:
+;----------------------------------------------------------------------------
+; push more registers and initialize values while we sample the first bits:
+;----------------------------------------------------------------------------
+    push    shift           ;2 [16]
+    push    x1              ;2 [12]
+    push    x2              ;2 [14]
 
-; ################# receiver loop #################
+    in      x1, USBIN       ;1 [17] <-- sample bit 0
+    ldi     shift, 0xff     ;1 [18]
+    bst     x1, USBMINUS    ;1 [19]
+    bld     shift, 0        ;1 [20]
+    push    x3              ;2 [22]
+    push    cnt             ;2 [24]
+    
+    in      x2, USBIN       ;1 [25] <-- sample bit 1
+    ser     x3              ;1 [26] [inserted init instruction]
+    eor     x1, x2          ;1 [27]
+    bst     x1, USBMINUS    ;1 [28]
+    bld     shift, 1        ;1 [29]
+    ldi     cnt, USB_BUFSIZE;1 [30] [inserted init instruction]
+    rjmp    rxbit2          ;2 [32]
+
+;----------------------------------------------------------------------------
+; Receiver loop (numbers in brackets are cycles within byte after instr)
+;----------------------------------------------------------------------------
+
+unstuff0:               ;1 (branch taken)
+    andi    x3, ~0x01   ;1 [15]
+    mov     x1, x2      ;1 [16] x2 contains last sampled (stuffed) bit
+    in      x2, USBIN   ;1 [17] <-- sample bit 1 again
+    ori     shift, 0x01 ;1 [18]
+    rjmp    didUnstuff0 ;2 [20]
+
+unstuff1:               ;1 (branch taken)
+    mov     x2, x1      ;1 [21] x1 contains last sampled (stuffed) bit
+    andi    x3, ~0x02   ;1 [22]
+    ori     shift, 0x02 ;1 [23]
+    nop                 ;1 [24]
+    in      x1, USBIN   ;1 [25] <-- sample bit 2 again
+    rjmp    didUnstuff1 ;2 [27]
+
+unstuff2:               ;1 (branch taken)
+    andi    x3, ~0x04   ;1 [29]
+    ori     shift, 0x04 ;1 [30]
+    mov     x1, x2      ;1 [31] x2 contains last sampled (stuffed) bit
+    nop                 ;1 [32]
+    in      x2, USBIN   ;1 [33] <-- sample bit 3
+    rjmp    didUnstuff2 ;2 [35]
+
+unstuff3:               ;1 (branch taken)
+    in      x2, USBIN   ;1 [34] <-- sample stuffed bit 3 [one cycle too late]
+    andi    x3, ~0x08   ;1 [35]
+    ori     shift, 0x08 ;1 [36]
+    rjmp    didUnstuff3 ;2 [38]
+
+unstuff4:               ;1 (branch taken)
+    andi    x3, ~0x10   ;1 [40]
+    in      x1, USBIN   ;1 [41] <-- sample stuffed bit 4
+    ori     shift, 0x10 ;1 [42]
+    rjmp    didUnstuff4 ;2 [44]
+
+unstuff5:               ;1 (branch taken)
+    andi    x3, ~0x20   ;1 [48]
+    in      x2, USBIN   ;1 [49] <-- sample stuffed bit 5
+    ori     shift, 0x20 ;1 [50]
+    rjmp    didUnstuff5 ;2 [52]
+
+unstuff6:               ;1 (branch taken)
+    andi    x3, ~0x40   ;1 [56]
+    in      x1, USBIN   ;1 [57] <-- sample stuffed bit 6
+    ori     shift, 0x40 ;1 [58]
+    rjmp    didUnstuff6 ;2 [60]
+
 ; extra jobs done during bit interval:
-; bit 6:    se0 check
-; bit 7:    or, store, clear
-; bit 0:    recover from delay  [SE0 is unreliable here due to bit dribbling in hubs]
+; bit 0:    store, clear [SE0 is unreliable here due to bit dribbling in hubs]
 ; bit 1:    se0 check
-; bit 2:    se0 check
-; bit 3:    overflow check
-; bit 4:    se0 check
-; bit 5:    rjmp
-
-; stuffed* helpers have the functionality of a subroutine, but we can't afford
-; the overhead of a call. We therefore need a separate routine for each caller
-; which jumps back appropriately.
-
-stuffed5:               ;1 for branch taken
-    in      x2, USBIN   ;1 <-- sample @ +1
-    andi    x2, USBMASK ;1
-    breq    se0a        ;1
-    andi    x3, 0xc0    ;1 (0xff03 >> 2) & 0xff
-    ori     shift, 0xfc ;1
-    rjmp    rxbit6      ;2
-
-stuffed6:               ;1 for branch taken
-    in      x1, USBIN   ;1 <-- sample @ +1
-    andi    x1, USBMASK ;1
-    breq    se0a        ;1
-    andi    x3, 0x81    ;1 (0xff03 >> 1) & 0xff
-    ori     shift, 0xfc ;1
-    rjmp    rxbit7      ;2
-
-; This is somewhat special because it has to compensate for the delay in bit 7
-stuffed7:               ;1 for branch taken
-    andi    x1, USBMASK ;1 already sampled by caller
-    breq    se0a        ;1
-    mov     x2, x1      ;1 ensure correct NRZI sequence [we can save andi x3 here]
-    ori     shift, 0xfc ;1
-    in      x1, USBIN   ;1 <-- sample bit 0
-    rjmp    unstuffed7  ;2
-
-stuffed0:               ;1 for branch taken
-    in      x1, USBIN   ;1 <-- sample @ +1
-    andi    x1, USBMASK ;1
-    breq    se0a        ;1
-    andi    x3, 0xfe    ;1 (0xff03 >> 7) & 0xff
-    ori     shift, 0xfc ;1
-    rjmp    rxbit1      ;2
-
-;-----------------------------
+; bit 2:    overflow check
+; bit 3:    recovery from delay [bit 0 tasks took too long]
+; bit 4:    none
+; bit 5:    none
+; bit 6:    none
+; bit 7:    jump, eor
 rxLoop:
-    brlo    stuffed5    ;1
-rxbit6:
-    in      x1, USBIN   ;1 <-- sample bit 6
-    andi    x1, USBMASK ;1
-    breq    se0a        ;1
-    eor     x2, x1      ;1
-    ror     x2          ;1
-    ror     shift       ;1
-    cpi     shift, 4    ;1
-    brlo    stuffed6    ;1
-rxbit7:
-    in      x2, USBIN   ;1 <-- sample bit 7
-    eor     x1, x2      ;1
-    ror     x1          ;1
-    ror     shift       ;1
-    eor     x3, shift   ;1 x3 is 0 at bit locations we changed, 1 at others
-    st      y+, x3      ;2 the eor above reconstructed modified bits and inverted rx data
-    ser     x3          ;1
-rxbit0:
-    in      x1, USBIN   ;1 <-- sample bit 0
-    cpi     shift, 4    ;1
-    brlo    stuffed7    ;1
-unstuffed7:
-    eor     x2, x1      ;1
-    ror     x2          ;1
-    ror     shift       ;1
-    cpi     shift, 4    ;1
-    brlo    stuffed0    ;1
-rxbit1:
-    in      x2, USBIN   ;1 <-- sample bit 1
-    andi    x2, USBMASK ;1
-se0a:                   ; enlarge jump range to SE0
-    breq    se0         ;1 check for SE0 more often close to start of byte
-    eor     x1, x2      ;1
-    ror     x1          ;1
-    ror     shift       ;1
-    cpi     shift, 4    ;1
-    brlo    stuffed1    ;1
+    eor     x3, shift   ;1 [0] reconstruct: x3 is 0 at bit locations we changed, 1 at others
+    in      x1, USBIN   ;1 [1] <-- sample bit 0
+    st      y+, x3      ;2 [3] store data
+    ser     x3          ;1 [4]
+    nop                 ;1 [5]
+    eor     x2, x1      ;1 [6]
+    bst     x2, USBMINUS;1 [7]
+    bld     shift, 0    ;1 [8]
+    in      x2, USBIN   ;1 [9] <-- sample bit 1 (or possibly bit 0 stuffed)
+    andi    x2, USBMASK ;1 [10]
+    breq    se0         ;1 [11] SE0 check for bit 1
+    andi    shift, 0xf9 ;1 [12]
+didUnstuff0:
+    breq    unstuff0    ;1 [13]
+    eor     x1, x2      ;1 [14]
+    bst     x1, USBMINUS;1 [15]
+    bld     shift, 1    ;1 [16]
 rxbit2:
-    in      x1, USBIN   ;1 <-- sample bit 2
-    andi    x1, USBMASK ;1
-    breq    se0         ;1
-    eor     x2, x1      ;1
-    ror     x2          ;1
-    ror     shift       ;1
-    cpi     shift, 4    ;1
-    brlo    stuffed2    ;1
-rxbit3:
-    in      x2, USBIN   ;1 <-- sample bit 3
-    eor     x1, x2      ;1
-    ror     x1          ;1
-    ror     shift       ;1
-    dec     cnt         ;1  check for buffer overflow
-    breq    overflow    ;1
-    cpi     shift, 4    ;1
-    brlo    stuffed3    ;1
-rxbit4:
-    in      x1, USBIN   ;1 <-- sample bit 4
-    andi    x1, USBMASK ;1
-    breq    se0         ;1
-    eor     x2, x1      ;1
-    ror     x2          ;1
-    ror     shift       ;1
-    cpi     shift, 4    ;1
-    brlo    stuffed4    ;1
-rxbit5:
-    in      x2, USBIN   ;1 <-- sample bit 5
-    eor     x1, x2      ;1
-    ror     x1          ;1
-    ror     shift       ;1
-    cpi     shift, 4    ;1
-    rjmp    rxLoop      ;2
-;-----------------------------
+    in      x1, USBIN   ;1 [17] <-- sample bit 2 (or possibly bit 1 stuffed)
+    andi    shift, 0xf3 ;1 [18]
+    breq    unstuff1    ;1 [19] do remaining work for bit 1
+didUnstuff1:
+    subi    cnt, 1      ;1 [20]
+    brcs    overflow    ;1 [21] loop control
+    eor     x2, x1      ;1 [22]
+    bst     x2, USBMINUS;1 [23]
+    bld     shift, 2    ;1 [24]
+    in      x2, USBIN   ;1 [25] <-- sample bit 3 (or possibly bit 2 stuffed)
+    andi    shift, 0xe7 ;1 [26]
+    breq    unstuff2    ;1 [27]
+didUnstuff2:
+    eor     x1, x2      ;1 [28]
+    bst     x1, USBMINUS;1 [29]
+    bld     shift, 3    ;1 [30]
+didUnstuff3:
+    andi    shift, 0xcf ;1 [31]
+    breq    unstuff3    ;1 [32]
+    in      x1, USBIN   ;1 [33] <-- sample bit 4
+    eor     x2, x1      ;1 [34]
+    bst     x2, USBMINUS;1 [35]
+    bld     shift, 4    ;1 [36]
+didUnstuff4:
+    andi    shift, 0x9f ;1 [37]
+    breq    unstuff4    ;1 [38]
+    nop2                ;2 [40]
+    in      x2, USBIN   ;1 [41] <-- sample bit 5
+    eor     x1, x2      ;1 [42]
+    bst     x1, USBMINUS;1 [43]
+    bld     shift, 5    ;1 [44]
+didUnstuff5:
+    andi    shift, 0x3f ;1 [45]
+    breq    unstuff5    ;1 [46]
+    nop2                ;2 [48]
+    in      x1, USBIN   ;1 [49] <-- sample bit 6
+    eor     x2, x1      ;1 [50]
+    bst     x2, USBMINUS;1 [51]
+    bld     shift, 6    ;1 [52]
+didUnstuff6:
+    cpi     shift, 0x02 ;1 [53]
+    brlo    unstuff6    ;1 [54]
+    nop2                ;2 [56]
+    in      x2, USBIN   ;1 [57] <-- sample bit 7
+    eor     x1, x2      ;1 [58]
+    bst     x1, USBMINUS;1 [59]
+    bld     shift, 7    ;1 [60]
+didUnstuff7:
+    cpi     shift, 0x04 ;1 [61]
+    brsh    rxLoop      ;2 [63] loop control
+unstuff7:
+    andi    x3, ~0x80   ;1 [63]
+    ori     shift, 0x80 ;1 [64]
+    in      x2, USBIN   ;1 [65] <-- sample stuffed bit 7
+    nop                 ;1 [66]
+    rjmp    didUnstuff7 ;2 [68]
 
-stuffed1:               ;1 for branch taken
-    in      x2, USBIN   ;1 <-- sample @ +1
-    andi    x2, USBMASK ;1
-    breq    se0         ;1
-    andi    x3, 0xfc    ;1 (0xff03 >> 6) & 0xff
-    ori     shift, 0xfc ;1
-    rjmp    rxbit2      ;2
 
-stuffed2:               ;1 for branch taken
-    in      x1, USBIN   ;1 <-- sample @ +1
-    andi    x1, USBMASK ;1
-    breq    se0         ;1
-    andi    x3, 0xf8    ;1 (0xff03 >> 5) & 0xff
-    ori     shift, 0xfc ;1
-    rjmp    rxbit3      ;2
-
-stuffed3:               ;1 for branch taken
-    in      x2, USBIN   ;1 <-- sample @ +1
-    andi    x2, USBMASK ;1
-    breq    se0         ;1
-    andi    x3, 0xf0    ;1 (0xff03 >> 4) & 0xff
-    ori     shift, 0xfc ;1
-    rjmp    rxbit4      ;2
-
-stuffed4:               ;1 for branch taken
-    in      x1, USBIN   ;1 <-- sample @ +1
-    andi    x1, USBMASK ;1
-    breq    se0         ;1
-    andi    x3, 0xe0    ;1 (0xff03 >> 3) & 0xff
-    ori     shift, 0xfc ;1
-    rjmp    rxbit5      ;2
-
-;################ end receiver loop ###############
-
-overflow:                   ; ignore package if buffer overflow
-    rjmp    rxDoReturn      ; enlarge jump range
-
+;----------------------------------------------------------------------------
+; Processing of received packet (numbers in brackets are cycles after end of SE0)
+;----------------------------------------------------------------------------
 ;This is the only non-error exit point for the software receiver loop
-;{4, 20} cycles after start of SE0, typically {10, 18} after SE0 start = {-6, 2} from end of SE0
-;next sync starts {16,} cycles after SE0 -> worst case start: +4 from next sync start
 ;we don't check any CRCs here because there is no time left.
-se0:                            ;{-6, 2} from end of SE0 / {,4} into next frame
-    mov     cnt, YL             ;1 assume buffer in lower 256 bytes of memory
-    lds     YL, usbInputBuf     ;2 reposition to buffer start
-    sub     cnt, YL             ;1 length of message
-    ldi     x1, 1<<USB_INTR_PENDING_BIT ;1
-    cpi     cnt, 3              ;1
-    out     USB_INTR_PENDING, x1;1 clear pending intr and check flag later. SE0 must be over. {,10} into next frame
-    brlo    rxDoReturn          ;1 ensure valid packet size, ignore others
-    ld      x1, y               ;2 PID
-    ldd     x2, y+1             ;2 ADDR + 1 bit endpoint number
-    mov     x3, x2              ;1 store for endpoint number
-    andi    x2, 0x7f            ;1 mask endpoint number bit
-    lds     shift, usbDeviceAddr;2
-    cpi     x1, USBPID_SETUP    ;1
-    breq    isSetupOrOut        ;2 -> 19 = {13, 21} from SE0 end
-    cpi     x1, USBPID_OUT      ;1
-    breq    isSetupOrOut        ;2 -> 22 = {16, 24} from SE0 end / {,24} into next frame
-    cpi     x1, USBPID_IN       ;1
-    breq    handleIn            ;1
-#define USB_DATA_MASK   ~(USBPID_DATA0 ^ USBPID_DATA1)
-    andi    x1, USB_DATA_MASK   ;1
-    cpi     x1, USBPID_DATA0 & USB_DATA_MASK ;1
-    brne    rxDoReturn          ;1 not a data PID -- ignore
-isData:
-    lds     x2, usbCurrentTok   ;2
-    tst     x2                  ;1
-    breq    rxDoReturn          ;1 for other device or spontaneous data -- ignore
-    lds     x1, usbRxLen        ;2
-    cpi     x1, 0               ;1
-    brne    sendNakAndReti      ;1 no buffer space available / {30, 38} from SE0 end
+#define token   x1
+se0:                            ;  [0]
+    subi    cnt, USB_BUFSIZE    ;1 [1]
+    neg     cnt                 ;1 [2]
+    cpi     cnt, 3              ;1 [3]
+    ldi     x2, 1<<USB_INTR_PENDING_BIT ;1 [4]
+    out     USB_INTR_PENDING, x2;1 [5] clear pending intr and check flag later. SE0 should be over.
+    brlo    doReturn            ;1 [6] this is probably an ACK, NAK or similar packet
+    sub     YL, cnt             ;1 [7]
+    sbci    YH, 0               ;1 [8]
+    ld      token, y            ;2 [10]
+    cpi     token, USBPID_DATA0 ;1 [11]
+    breq    handleData          ;1 [12]
+    cpi     token, USBPID_DATA1 ;1 [13]
+    breq    handleData          ;1 [14]
+    ldd     x2, y+1             ;2 [16] ADDR and 1 bit endpoint number
+    mov     x3, x2              ;1 [17] store for endpoint number
+    andi    x2, 0x7f            ;1 [18] x2 is now ADDR
+    lds     shift, usbDeviceAddr;2 [20]
+    cp      x2, shift           ;1 [21]
+overflow:                       ; This is a hack: brcs overflow will never have Z flag set
+    brne    ignorePacket        ;1 [22] packet for different address
+    cpi     token, USBPID_IN    ;1 [23]
+    breq    handleIn            ;1 [24]
+    cpi     token, USBPID_SETUP ;1 [25]
+    breq    handleSetupOrOut    ;1 [26]
+    cpi     token, USBPID_OUT   ;1 [27]
+    breq    handleSetupOrOut    ;1 [28]
+;   rjmp    ignorePacket        ;fallthrough, should not happen anyway.
+
+ignorePacket:
+    clr     shift
+    sts     usbCurrentTok, shift
+doReturn:
+    pop     cnt
+    pop     x3
+    pop     x2
+    pop     x1
+    pop     shift
+    pop     YH
+sofError:
+    pop     YL
+    out     SREG, YL
+    pop     YL
+    reti
+
+#if USB_CFG_HAVE_INTRIN_ENDPOINT && USB_CFG_HAVE_INTRIN_ENDPOINT3
+handleIn3:                      ;1 [38] (branch taken)
+    lds     cnt, usbTxLen3      ;2 [40]
+    sbrc    cnt, 4              ;2 [42]
+    rjmp    sendCntAndReti      ;0 43 + 17 = 60 until SOP
+    sts     usbTxLen3, x1       ;2 [44] x1 == USBPID_NAK from above
+    ldi     YL, lo8(usbTxBuf3)  ;1 [45]
+    ldi     YH, hi8(usbTxBuf3)  ;1 [46]
+    rjmp    usbSendAndReti      ;2 [48] + 13 = 61 until SOP (violates the spec by 1 cycle)
+#endif
+
+;Setup and Out are followed by a data packet two bit times (16 cycles) after
+;the end of SE0. The sync code allows up to 40 cycles delay from the start of
+;the sync pattern until the first bit is sampled. That's a total of 56 cycles.
+handleSetupOrOut:               ;1 [29] (branch taken)
+#if USB_CFG_IMPLEMENT_FN_WRITEOUT   /* if we have data for second OUT endpoint, set usbCurrentTok to -1 */
+    sbrc    x3, 7               ;1 [30] skip if endpoint 0
+    ldi     token, -1           ;1 [31] indicate that this is endpoint 1 OUT
+#endif
+    sts     usbCurrentTok, token;2 [33]
+    pop     cnt                 ;2 [35]
+    pop     x3                  ;2 [37]
+    pop     x2                  ;2 [39]
+    pop     x1                  ;2 [41]
+    pop     shift               ;2 [43]
+    pop     YH                  ;2 [45]
+    in      YL, USB_INTR_PENDING;1 [46]
+    sbrc    YL, USB_INTR_PENDING_BIT;1 [47] check whether data is already arriving
+    rjmp    waitForJ            ;2 [49] save the pops and pushes -- a new interrupt is aready pending
+    rjmp    sofError            ;2 not an error, but it does the pops and reti we want
+
+
+handleData:                     ;1 [15] (branch taken)
+    lds     token, usbCurrentTok;2 [17]
+    tst     token               ;1 [18]
+    breq    doReturn            ;1 [19]
+    lds     x2, usbRxLen        ;2 [21]
+    tst     x2                  ;1 [22]
+    brne    sendNakAndReti      ;1 [23]
 ; 2006-03-11: The following two lines fix a problem where the device was not
 ; recognized if usbPoll() was called less frequently than once every 4 ms.
-    cpi     cnt, 4              ;1 zero sized data packets are status phase only -- ignore and ack
-    brmi    sendAckAndReti      ;1 keep rx buffer clean -- we must not NAK next SETUP
-    sts     usbRxLen, cnt       ;2 store received data, swap buffers
-    sts     usbRxToken, x2      ;2
-    lds     x1, usbAppBuf       ;2
-    sts     usbAppBuf, YL       ;2
-    sts     usbInputBuf, x1     ;2 buffers now swapped
-    rjmp    sendAckAndReti      ;2 -> {43, 51} from SE0 end
+    cpi     cnt, 4              ;1 [24] zero sized data packets are status phase only -- ignore and ack
+    brmi    sendAckAndReti      ;1 [25] keep rx buffer clean -- we must not NAK next SETUP
+    sts     usbRxLen, cnt       ;2 [27] store received data, swap buffers
+    sts     usbRxToken, token   ;2 [29]
+    lds     x2, usbInputBufOffset;2 [31] swap buffers
+    ldi     cnt, USB_BUFSIZE    ;1 [32]
+    sub     cnt, x2             ;1 [33]
+    sts     usbInputBufOffset, cnt;2 [35] buffers now swapped
+    rjmp    sendAckAndReti      ;2 [37] + 19 = 56 until SOP
 
-handleIn:                       ; {18, 26} from SE0 end
-    cp      x2, shift           ;1 shift contains our device addr
-    brne    rxDoReturn          ;1 other device
+handleIn:                       ;1 [25] (branch taken)
+;We don't send any data as long as the C code has not processed the current
+;input data and potentially updated the output data. That's more efficient
+;in terms of code size than clearing the tx buffers when a packet is received.
+    lds     x1, usbRxLen        ;2 [27]
+    cpi     x1, 1               ;1 [28] negative values are flow control, 0 means "buffer free"
+    brge    sendNakAndReti      ;1 [29] unprocessed input packet?
+    ldi     x1, USBPID_NAK      ;1 [30] prepare value for usbTxLen
 #if USB_CFG_HAVE_INTRIN_ENDPOINT
-    sbrc    x3, 7               ;2 x3 contains addr + endpoint
+    sbrc    x3, 7               ;2 [33] x3 contains addr + endpoint
     rjmp    handleIn1           ;0
 #endif
-    lds     cnt, usbTxLen       ;2
-    cpi     cnt, -1             ;1
-    breq    sendNakAndReti      ;1 -> {27, 35} from SE0 end
-    ldi     x1, -1              ;1
-    sts     usbTxLen, x1        ;2 buffer is now free
-    ldi     YL, lo8(usbTxBuf)   ;1
-    ldi     YH, hi8(usbTxBuf)   ;1
-    rjmp    usbSendAndReti      ;2 -> {34, 43} from SE0 end
+    lds     cnt, usbTxLen       ;2 [34]
+    sbrc    cnt, 4              ;2 [36] all handshake tokens have bit 4 set
+    rjmp    sendCntAndReti      ;0 37 + 17 = 54 until SOP
+    sts     usbTxLen, x1        ;2 [38] x1 == USBPID_NAK from above
+    ldi     YL, lo8(usbTxBuf)   ;1 [39]
+    ldi     YH, hi8(usbTxBuf)   ;1 [40]
+    rjmp    usbSendAndReti      ;2 [42] + 14 = 56 until SOP
 
-; Comment about when to set usbTxLen to -1:
-; We should set it back to -1 when we receive the ACK from the host. This would
+; Comment about when to set usbTxLen to USBPID_NAK:
+; We should set it back when we receive the ACK from the host. This would
 ; be simple to implement: One static variable which stores whether the last
 ; tx was for endpoint 0 or 1 and a compare in the receiver to distinguish the
-; ACK. However, we set it back to -1 immediately when we send the package,
+; ACK. However, we set it back immediately when we send the package,
 ; assuming that no error occurs and the host sends an ACK. We save one byte
 ; RAM this way and avoid potential problems with endless retries. The rest of
 ; the driver assumes error-free transfers anyway.
 
-otherOutOrSetup:
-    clr     x1
-    sts     usbCurrentTok, x1
-rxDoReturn:
-    pop     x3                  ;2
-    pop     YL                  ;2
-    pop     YH                  ;2
-    rjmp    sofError            ;2
-
-isSetupOrOut:                   ; we must be fast here -- a data package may follow / {,24} into next frame
-    cp      x2, shift           ;1 shift contains our device addr
-    brne    otherOutOrSetup     ;1 other device -- ignore
-    sts     usbCurrentTok, x1   ;2
-#if 0   /* we implement only one rx endpoint */
-    sts     usbRxEndp, x3       ;2 only stored if we may have to distinguish endpoints
+#if USB_CFG_HAVE_INTRIN_ENDPOINT    /* placed here due to relative jump range */
+handleIn1:                      ;1 [33] (branch taken)
+#if USB_CFG_HAVE_INTRIN_ENDPOINT3
+; 2006-06-10 as suggested by O.Tamura: support second INTR IN / BULK IN endpoint
+    ldd     x2, y+2             ;2 [35]
+    sbrc    x2, 0               ;2 [37]
+    rjmp    handleIn3           ;0
 #endif
-;A transmission can still have data in the output buffer while we receive a
-;SETUP package with an IN phase. To avoid that the old data is sent as a reply,
-;we abort transmission. ### This mechanism assumes that NO OUT OR SETUP package
-;is ever sent to endpoint 1. We would abort transmission for endpoint 0
-;in this case.
-    ldi     x1, -1              ;1
-    sts     usbMsgLen, x1       ;2
-    sts     usbTxLen, x1        ;2 abort transmission
-    pop     x3                  ;2
-    pop     YL                  ;2
-    in      x1, USB_INTR_PENDING;1
-    sbrc    x1, USB_INTR_PENDING_BIT;1 check whether data is already arriving {,41} into next frame
-    rjmp    shortcutToStart     ;2 save the pops and pushes -- a new interrupt is aready pending
-;If the jump above was not taken, we can be at {,2} into the next frame here
-    pop     YH                  ;2
-txDoReturn:
-sofError:                       ; error in start of frame -- ignore frame
-    ldi     x1, 1<<USB_INTR_PENDING_BIT;1 many int0 events occurred during our processing -- clear pending flag
-    out     USB_INTR_PENDING, x1;1
-    pop     shift               ;2
-    pop     cnt                 ;2
-    pop     x2                  ;2
-    pop     x1                  ;2
-    out     SREG, x1            ;1
-    pop     x1                  ;2
-    reti                        ;4 -> {,21} into next frame -> up to 3 sync bits missed
+    lds     cnt, usbTxLen1      ;2 [39]
+    sbrc    cnt, 4              ;2 [41] all handshake tokens have bit 4 set
+    rjmp    sendCntAndReti      ;0 42 + 17 = 59 until SOP
+    sts     usbTxLen1, x1       ;2 [43] x1 == USBPID_NAK from above
+    ldi     YL, lo8(usbTxBuf1)  ;1 [44]
+    ldi     YH, hi8(usbTxBuf1)  ;1 [45]
+    rjmp    usbSendAndReti      ;2 [47] + 13 = 60 until SOP
+#endif
 
 
-sendNakAndReti:                 ; 21 cycles until SOP
-    ldi     YL, lo8(usbNakBuf)  ;1
-    ldi     YH, hi8(usbNakBuf)  ;1
-    rjmp    usbSendToken        ;2
+;----------------------------------------------------------------------------
+; Transmitting data
+;----------------------------------------------------------------------------
 
-sendAckAndReti:                 ; 19 cycles until SOP
-    ldi     YL, lo8(usbAckBuf)  ;1
-    ldi     YH, hi8(usbAckBuf)  ;1
-usbSendToken:
-    ldi     cnt, 2              ;1
-;;;;rjmp    usbSendAndReti      fallthrough
+bitstuff0:                  ;1 (for branch taken)
+    eor     x1, x4          ;1
+    ldi     x2, 0           ;1
+    out     USBOUT, x1      ;1 <-- out
+    rjmp    didStuff0       ;2 branch back 2 cycles earlier
+bitstuff1:                  ;1 (for branch taken)
+    eor     x1, x4          ;1
+    rjmp    didStuff1       ;2 we know that C is clear, jump back to do OUT and ror 0 into x2
+bitstuff2:                  ;1 (for branch taken)
+    eor     x1, x4          ;1
+    rjmp    didStuff2       ;2 jump back 4 cycles earlier and do out and ror 0 into x2
+bitstuff3:                  ;1 (for branch taken)
+    eor     x1, x4          ;1
+    rjmp    didStuff3       ;2 jump back earlier and ror 0 into x2
+bitstuff4:                  ;1 (for branch taken)
+    eor     x1, x4          ;1
+    ldi     x2, 0           ;1
+    out     USBOUT, x1      ;1 <-- out
+    rjmp    didStuff4       ;2 jump back 2 cycles earlier
+
+sendNakAndReti:                 ;0 [-19] 19 cycles until SOP
+    ldi     x3, USBPID_NAK      ;1 [-18]
+    rjmp    usbSendX3           ;2 [-16]
+sendAckAndReti:                 ;0 [-19] 19 cycles until SOP
+    ldi     x3, USBPID_ACK      ;1 [-18]
+    rjmp    usbSendX3           ;2 [-16]
+sendCntAndReti:                 ;0 [-17] 17 cycles until SOP
+    mov     x3, cnt             ;1 [-16]
+usbSendX3:                      ;0 [-16]
+    ldi     YL, 20              ;1 [-15] 'x3' is R20
+    ldi     YH, 0               ;1 [-14]
+    ldi     cnt, 2              ;1 [-13]
+;   rjmp    usbSendAndReti      fallthrough
 
 ; USB spec says:
 ; idle = J
@@ -491,171 +484,128 @@ usbSendToken:
 ;pointer to data in 'Y'
 ;number of bytes in 'cnt' -- including sync byte
 ;uses: x1...x4, shift, cnt, Y
-usbSendAndReti:             ; SOP starts 16 cycles after call
-    push    x4              ;2
-    in      x1, USBOUT      ;1
-    cbr     x1, USBMASK     ;1 mask out data bits
-    ori     x1, USBIDLE     ;1 idle
-    out     USBOUT, x1      ;1 prepare idle state
-    ldi     x4, USBMASK     ;1 exor mask
-    in      x2, USBDDR      ;1
-    ori     x2, USBMASK     ;1 set both pins to output
-    out     USBDDR, x2      ;1 <-- acquire bus now
+;Numbers in brackets are time since first bit of sync pattern is sent
+usbSendAndReti:             ;0 [-13] timing: 13 cycles until SOP
+    in      x2, USBDDR      ;1 [-12]
+    ori     x2, USBMASK     ;1 [-11]
+    sbi     USBOUT, USBMINUS;2 [-9] prepare idle state; D+ and D- must have been 0 (no pullups)
+    in      x1, USBOUT      ;1 [-8] port mirror for tx loop
+    out     USBDDR, x2      ;1 [-7] <- acquire bus
 ; need not init x2 (bitstuff history) because sync starts with 0
-    ldi     shift, 0x80     ;1 sync byte is first byte sent
-    rjmp    txLoop          ;2 -> 13 + 3 = 16 cycles until SOP
-
-#if USB_CFG_HAVE_INTRIN_ENDPOINT    /* placed here due to relative jump range */
-handleIn1:
-    lds     cnt, usbTxLen1
-    cpi     cnt, -1
-    breq    sendNakAndReti
-    ldi     x1, -1
-    sts     usbTxLen1, x1
-    ldi     YL, lo8(usbTxBuf1)
-    ldi     YH, hi8(usbTxBuf1)
-    rjmp    usbSendAndReti
-#endif
-
-bitstuff0:                  ;1 (for branch taken)
-    eor     x1, x4          ;1
-    ldi     x2, 0           ;1
-    out     USBOUT, x1      ;1 <-- out
-    rjmp    didStuff0       ;2 branch back 2 cycles earlier
-bitstuff1:                  ;1 (for branch taken)
-    eor     x1, x4          ;1
-    ldi     x2, 0           ;1
-    sec                     ;1 set carry so that brsh will not jump
-    out     USBOUT, x1      ;1 <-- out
-    rjmp    didStuff1       ;2 jump back 1 cycle earler
-bitstuff2:                  ;1 (for branch taken)
-    eor     x1, x4          ;1
-    ldi     x2, 0           ;1
-    rjmp    didStuff2       ;2 jump back 3 cycles earlier and do out
-bitstuff3:                  ;1 (for branch taken)
-    eor     x1, x4          ;1
-    ldi     x2, 0           ;1
-    rjmp    didStuff3       ;2 jump back earlier
-
-txLoop:
-    sbrs    shift, 0        ;1
-    eor     x1, x4          ;1
-    out     USBOUT, x1      ;1 <-- out
-    ror     shift           ;1
-    ror     x2              ;1
+    push    x4              ;2 [-5]
+    ldi     x4, USBMASK     ;1 [-4] exor mask
+    ldi     shift, 0x80     ;1 [-3] sync byte is first byte sent
+txLoop:                     ;       [62]
+    sbrs    shift, 0        ;1 [-2] [62]
+    eor     x1, x4          ;1 [-1] [63]
+    out     USBOUT, x1      ;1 [0] <-- out bit 0
+    ror     shift           ;1 [1]
+    ror     x2              ;1 [2]
 didStuff0:
-    cpi     x2, 0xfc        ;1
-    brsh    bitstuff0       ;1
-    sbrs    shift, 0        ;1
-    eor     x1, x4          ;1
-    ror     shift           ;1
-    out     USBOUT, x1      ;1 <-- out
-    ror     x2              ;1
-    cpi     x2, 0xfc        ;1
+    cpi     x2, 0xfc        ;1 [3]
+    brsh    bitstuff0       ;1 [4]
+    sbrs    shift, 0        ;1 [5]
+    eor     x1, x4          ;1 [6]
+    ror     shift           ;1 [7]
 didStuff1:
-    brsh    bitstuff1       ;1
-    sbrs    shift, 0        ;1
-    eor     x1, x4          ;1
-    ror     shift           ;1
-    ror     x2              ;1
+    out     USBOUT, x1      ;1 [8] <-- out bit 1
+    ror     x2              ;1 [9]
+    cpi     x2, 0xfc        ;1 [10]
+    brsh    bitstuff1       ;1 [11]
+    sbrs    shift, 0        ;1 [12]
+    eor     x1, x4          ;1 [13]
+    ror     shift           ;1 [14]
 didStuff2:
-    out     USBOUT, x1      ;1 <-- out
-    cpi     x2, 0xfc        ;1
-    brsh    bitstuff2       ;1
-    sbrs    shift, 0        ;1
-    eor     x1, x4          ;1
-    ror     shift           ;1
-    ror     x2              ;1
+    ror     x2              ;1 [15]
+    out     USBOUT, x1      ;1 [16] <-- out bit 2
+    cpi     x2, 0xfc        ;1 [17]
+    brsh    bitstuff2       ;1 [18]
+    sbrs    shift, 0        ;1 [19]
+    eor     x1, x4          ;1 [20]
+    ror     shift           ;1 [21]
 didStuff3:
-    cpi     x2, 0xfc        ;1
-    out     USBOUT, x1      ;1 <-- out
-    brsh    bitstuff3       ;1
-    nop2                    ;2
-    ld      x3, y+          ;2
-    sbrs    shift, 0        ;1
-    eor     x1, x4          ;1
-    out     USBOUT, x1      ;1 <-- out
-    ror     shift           ;1
-    ror     x2              ;1
+    ror     x2              ;1 [22]
+    cpi     x2, 0xfc        ;1 [23]
+    out     USBOUT, x1      ;1 [24] <-- out bit 3
+    brsh    bitstuff3       ;1 [25]
+    nop2                    ;2 [27]
+    ld      x3, y+          ;2 [29]
+    sbrs    shift, 0        ;1 [30]
+    eor     x1, x4          ;1 [31]
+    out     USBOUT, x1      ;1 [32] <-- out bit 4
+    ror     shift           ;1 [33]
+    ror     x2              ;1 [34]
 didStuff4:
-    cpi     x2, 0xfc        ;1
-    brsh    bitstuff4       ;1
-    sbrs    shift, 0        ;1
-    eor     x1, x4          ;1
-    ror     shift           ;1
-    out     USBOUT, x1      ;1 <-- out
-    ror     x2              ;1
-    cpi     x2, 0xfc        ;1
+    cpi     x2, 0xfc        ;1 [35]
+    brsh    bitstuff4       ;1 [36]
+    sbrs    shift, 0        ;1 [37]
+    eor     x1, x4          ;1 [38]
+    ror     shift           ;1 [39]
 didStuff5:
-    brsh    bitstuff5       ;1
-    sbrs    shift, 0        ;1
-    eor     x1, x4          ;1
-    ror     shift           ;1
-    ror     x2              ;1
+    out     USBOUT, x1      ;1 [40] <-- out bit 5
+    ror     x2              ;1 [41]
+    cpi     x2, 0xfc        ;1 [42]
+    brsh    bitstuff5       ;1 [43]
+    sbrs    shift, 0        ;1 [44]
+    eor     x1, x4          ;1 [45]
+    ror     shift           ;1 [46]
 didStuff6:
-    out     USBOUT, x1      ;1 <-- out
-    cpi     x2, 0xfc        ;1
-    brsh    bitstuff6       ;1
-    sbrs    shift, 0        ;1
-    eor     x1, x4          ;1
-    ror     shift           ;1
-    ror     x2              ;1
+    ror     x2              ;1 [47]
+    out     USBOUT, x1      ;1 [48] <-- out bit 6
+    cpi     x2, 0xfc        ;1 [49]
+    brsh    bitstuff6       ;1 [50]
+    sbrs    shift, 0        ;1 [51]
+    eor     x1, x4          ;1 [52]
+    ror     shift           ;1 [53]
 didStuff7:
-    cpi     x2, 0xfc        ;1
-    out     USBOUT, x1      ;1 <-- out
-    brsh    bitstuff7       ;1
-    mov     shift, x3       ;1
-    dec     cnt             ;1
-    brne    txLoop          ;2 | 1
-    cbr     x1, USBMASK     ;1 prepare SE0 [spec says EOP may be 15 to 18 cycles]
-    pop     x4              ;2
-    out     USBOUT, x1      ;1 <-- out SE0 -- from now 2 bits = 16 cycles until bus idle
-    ldi     cnt, 2          ;| takes cnt * 3 cycles
-se0Delay:                   ;|
-    dec     cnt             ;|
-    brne    se0Delay        ;| -> 2 * 3 = 6 cycles
+    ror     x2              ;1 [54]
+    cpi     x2, 0xfc        ;1 [55]
+    out     USBOUT, x1      ;1 [56] <-- out bit 7
+    brsh    bitstuff7       ;1 [57]
+    mov     shift, x3       ;1 [58]
+    dec     cnt             ;1 [59]
+    brne    txLoop          ;1/2 [60/61]
+;make SE0:
+    cbr     x1, USBMASK     ;1 [61] prepare SE0 [spec says EOP may be 15 to 18 cycles]
+    pop     x4              ;2 [63]
+;brackets are cycles from start of SE0 now
+    out     USBOUT, x1      ;1 [0] <-- out SE0 -- from now 2 bits = 16 cycles until bus idle
+    nop2                    ;2 [2]
 ;2006-03-06: moved transfer of new address to usbDeviceAddr from C-Code to asm:
-    lds     x2, usbNewDeviceAddr    ;2
-    subi    YL, lo8(usbNakBuf + 2)  ;1
-    sbci    YH, hi8(usbNakBuf + 2)  ;1
-    breq    skipAddrAssign          ;2
-    sts     usbDeviceAddr, x2       ;0  if not skipped: SE0 is one cycle longer
+;set address only after data packet was sent, not after handshake
+    lds     x2, usbNewDeviceAddr;2 [4]
+    subi    YL, 20 + 2      ;1 [5]
+    sbci    YH, 0           ;1 [6]
+    breq    skipAddrAssign  ;2 [8]
+    sts     usbDeviceAddr, x2;0  if not skipped: SE0 is one cycle longer
 skipAddrAssign:
 ;end of usbDeviceAddress transfer
-    ori     x1, USBIDLE     ;1
-    in      x2, USBDDR      ;1
-    cbr     x2, USBMASK     ;1 set both pins to input
-    out     USBOUT, x1      ;1 <-- out J (idle) -- end of SE0 (EOP signal)
-    cbr     x1, USBMASK     ;1 configure no pullup on both pins
-    pop     x3              ;2
-    pop     YL              ;2
-    out     USBDDR, x2      ;1 <-- release bus now
-    out     USBOUT, x1      ;1 set pullup state
-    pop     YH              ;2
-    rjmp    txDoReturn      ;2 [we want to jump to rxDoReturn, but this saves cycles]
+    ldi     x2, 1<<USB_INTR_PENDING_BIT;1 [9] int0 occurred during TX -- clear pending flag
+    out     USB_INTR_PENDING, x2;1 [10]
+    ori     x1, USBIDLE     ;1 [11]
+    in      x2, USBDDR      ;1 [12]
+    cbr     x2, USBMASK     ;1 [13] set both pins to input
+    mov     x3, x1          ;1 [14]
+    cbr     x3, USBMASK     ;1 [15] configure no pullup on both pins
+    out     USBOUT, x1      ;1 [16] <-- out J (idle) -- end of SE0 (EOP signal)
+    out     USBDDR, x2      ;1 [17] <-- release bus now
+    out     USBOUT, x3      ;1 [18] <-- ensure no pull-up resistors are active
+    rjmp    doReturn
 
-
-bitstuff4:                  ;1 (for branch taken)
-    eor     x1, x4          ;1
-    ldi     x2, 0           ;1
-    out     USBOUT, x1      ;1 <-- out
-    rjmp    didStuff4       ;2 jump back 2 cycles earlier
 bitstuff5:                  ;1 (for branch taken)
     eor     x1, x4          ;1
-    ldi     x2, 0           ;1
-    sec                     ;1 set carry so that brsh is not taken
-    out     USBOUT, x1      ;1 <-- out
-    rjmp    didStuff5       ;2 jump back 1 cycle earlier
+    rjmp    didStuff5       ;2 same trick as above...
 bitstuff6:                  ;1 (for branch taken)
     eor     x1, x4          ;1
-    ldi     x2, 0           ;1
-    rjmp    didStuff6       ;2 jump back 3 cycles earlier and do out there
+    rjmp    didStuff6       ;2 same trick as above...
 bitstuff7:                  ;1 (for branch taken)
     eor     x1, x4          ;1
-    ldi     x2, 0           ;1
-    rjmp    didStuff7       ;2 jump back 4 cycles earlier
+    rjmp    didStuff7       ;2 same trick as above...
 
-; ######################## utility functions ########################
+
+;----------------------------------------------------------------------------
+; Utility functions
+;----------------------------------------------------------------------------
 
 #ifdef __IAR_SYSTEMS_ASM__
 /* Register assignments for usbCrc16 on IAR cc */
@@ -663,6 +613,8 @@ bitstuff7:                  ;1 (for branch taken)
  * First parameter passed in r16/r17, second in r18/r19 and so on.
  * Callee must preserve r4-r15, r24-r29 (r28/r29 is frame pointer)
  * Result is passed in r16/r17
+ * In case of the "tiny" memory model, pointers are only 8 bit with no
+ * padding. We therefore pass argument 1 as "16 bit unsigned".
  */
 RTMODEL "__rt_version", "3"
 /* The line above will generate an error if cc calling conventions change.

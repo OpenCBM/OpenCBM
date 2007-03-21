@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: Proprietary, free under certain conditions. See Documentation.
- * This Revision: $Id: usbconfig.h,v 1.3 2007-02-21 21:51:05 harbaum Exp $
+ * This Revision: $Id: usbconfig.h,v 1.4 2007-03-21 18:02:10 harbaum Exp $
  */
 
 #ifndef __usbconfig_h_included__
@@ -21,7 +21,7 @@ must be adapted to your hardware.
 
 /* ---------------------------- Hardware Config ---------------------------- */
 
-#define	USB_CFG_IOPORT			PORTC
+#define	USB_CFG_IOPORTNAME		C
 /* This is the port where the USB bus is connected. When you configure it to
  * "PORTB", the registers PORTB, PINB (=PORTB+2) and DDRB (=PORTB+1) will be
  * used.

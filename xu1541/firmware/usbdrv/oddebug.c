@@ -4,19 +4,15 @@
  * Creation Date: 2005-01-16
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
- * License: Proprietary, free under certain conditions. See Documentation.
- * This Revision: $Id: oddebug.c,v 1.1 2007-02-04 12:36:36 harbaum Exp $
+ * License: GNU GPL v2 (see License.txt) or proprietary (CommercialLicense.txt)
+ * This Revision: $Id: oddebug.c,v 1.2 2007-03-21 18:02:12 harbaum Exp $
  */
 
-#include "iarcompat.h"
-#ifndef __IAR_SYSTEMS_ICC__
-#   include <avr/io.h>
-#endif
 #include "oddebug.h"
 
 #if DEBUG_LEVEL > 0
 
-#warning "Debugging is turned on! Never compile production devices with debugging!"
+#warning "Never compile production devices with debugging enabled"
 
 static void uartPutc(char c)
 {

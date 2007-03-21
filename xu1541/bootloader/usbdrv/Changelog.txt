@@ -81,3 +81,54 @@ Scroll down to the bottom to see the most recent changes.
     with a zero length.
 
 * Release 2006-03-14
+
+  - Improved IAR C support: tiny memory model, more devices
+  - Added template usbconfig.h file under the name usbconfig-prototype.h
+
+* Release 2006-03-26
+
+  - Added provision for one more interrupt-in endpoint (endpoint 3).
+  - Added provision for one interrupt-out endpoint (endpoint 1).
+  - Added flowcontrol macros for USB.
+  - Added provision for custom configuration descriptor.
+  - Allow ANY two port bits for D+ and D-.
+  - Merged (optional) receive endpoint number into global usbRxToken variable.
+  - Use USB_CFG_IOPORTNAME instead of USB_CFG_IOPORT. We now construct the
+    variable name from the single port letter instead of computing the address
+    of related ports from the output-port address.
+
+* Release 2006-06-26
+
+  - Updated documentation in usbdrv.h and usbconfig-prototype.h to reflect the
+    new features.
+  - Removed "#warning" directives because IAR does not understand them. Use
+    unused static variables instead to generate a warning.
+  - Do not include <avr/io.h> when compiling with IAR.
+  - Introduced USB_CFG_DESCR_PROPS_* in usbconfig.h to configure how each
+    USB descriptor should be handled. It is now possible to provide descriptor
+    data in Flash, RAM or dynamically at runtime.
+  - STALL is now a status in usbTxLen* instead of a message. We can now conform
+    to the spec and leave the stall status pending until it is cleared.
+  - Made usbTxPacketCnt1 and usbTxPacketCnt3 public. This allows the
+    application code to reset data toggling on interrupt pipes.
+
+* Release 2006-07-18
+
+  - Added an #if !defined __ASSEMBLER__ to the warning in usbdrv.h. This fixes
+    an assembler error.
+  - usbDeviceDisconnect() takes pull-up resistor to high impedance now.
+
+* Release 2007-02-01
+
+  - Merged in some code size improvements from usbtiny (thanks to Dick
+    Streefland for these optimizations!)
+  - Special alignment requirement for usbRxBuf not required any more. Thanks
+    again to Dick Streefland for this hint!
+  - Reverted to "#warning" instead of unused static variables -- new versions
+    of IAR CC should handle this directive.
+  - Changed Open Source license to GNU GPL v2 in order to make linking against
+    other free libraries easier. We no longer require publication of the
+    circuit diagrams, but we STRONGLY encourage it. If you improve the driver
+    itself, PLEASE grant us a royalty free license to your changes for our
+    commercial license.
+

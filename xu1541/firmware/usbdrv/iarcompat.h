@@ -4,8 +4,8 @@
  * Creation Date: 2006-03-01
  * Tabsize: 4
  * Copyright: (c) 2006 by OBJECTIVE DEVELOPMENT Software GmbH
- * License: Proprietary, free under certain conditions. See Documentation.
- * This Revision: $Id: iarcompat.h,v 1.1 2007-02-04 12:36:36 harbaum Exp $
+ * License: GNU GPL v2 (see License.txt) or proprietary (CommercialLicense.txt)
+ * This Revision: $Id: iarcompat.h,v 1.2 2007-03-21 18:02:12 harbaum Exp $
  */
 
 /*
@@ -58,6 +58,13 @@ Thanks to Oleg Semyonov for his help with the IAR tools port!
 #define sei()       __enable_interrupt()
 #define wdt_reset() __watchdog_reset()
 
+/* Depending on the device you use, you may get problems with the way usbdrv.h
+ * handles the differences between devices. Since IAR does not use #defines
+ * for MCU registers, we can't check for the existence of a particular
+ * register with an #ifdef. If the autodetection mechanism fails, include
+ * definitions for the required USB_INTR_* macros in your usbconfig.h. See
+ * usbconfig-prototype.h and usbdrv.h for details.
+ */
 
 #endif  /* defined __IAR_SYSTEMS_ICC__ || defined __IAR_SYSTEMS_ASM__ */
 #endif  /* __iarcompat_h_INCLUDED__ */

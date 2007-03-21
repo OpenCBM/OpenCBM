@@ -4,8 +4,8 @@
  * Creation Date: 2005-01-16
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
- * License: Proprietary, free under certain conditions. See Documentation.
- * This Revision: $Id: oddebug.h,v 1.1 2007-02-18 19:47:31 harbaum Exp $
+ * License: GNU GPL v2 (see License.txt) or proprietary (CommercialLicense.txt)
+ * This Revision: $Id: oddebug.h,v 1.2 2007-03-21 18:02:09 harbaum Exp $
  */
 
 #ifndef __oddebug_h_included__
@@ -26,6 +26,12 @@ the output and a memory block to dump in hex ('data' and 'len').
 
 #ifndef F_CPU
 #   define  F_CPU   12000000    /* 12 MHz */
+#endif
+
+/* make sure we have the UART defines: */
+#include "iarcompat.h"
+#ifndef __IAR_SYSTEMS_ICC__
+#   include <avr/io.h>
 #endif
 
 #ifndef uchar
