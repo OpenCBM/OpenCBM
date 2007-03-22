@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file install/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.10.2.1 2007-03-11 13:46:01 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.10.2.2 2007-03-22 11:37:35 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the driver
 **
@@ -28,38 +28,7 @@
 // Include the functionality of the DLL into the install
 // Application
 
-#if 1 // ---- @SRT 
-
 #include "../lib/WINBUILD/i_opencbm.c"
-
-#else
-
-#include "windows.h"
-#include "windowsx.h"
-
-/*! Mark: We are in user-space (for debug.h) */
-#define DBG_USERMODE
-
-/*! The name of the executable */
-#ifndef DBG_PROGNAME
-    #define DBG_PROGNAME "OPENCBM.DLL"
-#endif // #ifndef DBG_PROGNAME
-
-#include "debug.h"
-
-#include <winioctl.h>
-#include "cbmioctl.h"
-
-#include <stdlib.h>
-#include <stddef.h>
-
-#include "i_opencbm.h"
-
-#include "version.h"
-#include "archlib.h"
-
-#endif
-
 
 /*! \brief Tell the driver to update its settings
 
@@ -77,7 +46,7 @@ VOID
 CbmInstallUpdate(VOID)
 {
     CBM_FILE HandleDevice;
-/* @@@@@@@
+
     FUNC_ENTER();
 
     if (cbmarch_driver_open(&HandleDevice, 0) == 0)
@@ -85,8 +54,7 @@ CbmInstallUpdate(VOID)
         cbm_ioctl(HandleDevice, CBMCTRL(UPDATE), NULL, 0, NULL, 0);
         cbmarch_driver_close(HandleDevice);
     }
-/* @@@@@@@
-*/
+
     FUNC_LEAVE();
 }
 
@@ -110,7 +78,6 @@ CbmTestIrq(VOID)
 
     FUNC_ENTER();
 
-/* @@@@@@@
     if (cbmarch_driver_open(&HandleDevice, 0) == 0)
     {
         DBG_PRINT((DBG_PREFIX "Issuing CBMCTRL_TEST_IRQ"));
@@ -120,9 +87,6 @@ CbmTestIrq(VOID)
     }
 
     FUNC_LEAVE_BOOL(error);
-/* @@@@@@@
-*/
-    FUNC_LEAVE_BOOL(FALSE);
 }
 
 #if DBG
@@ -149,7 +113,6 @@ CbmOutputDebuggingBuffer(VOID)
 
     buffer = malloc(OUTPUT_BUFFER_LEN);
 
-/* @@@@@@@
     if (buffer && cbmarch_driver_open(&HandleDevice, 0) == 0)
     {
         PCHAR p = buffer;
@@ -173,8 +136,6 @@ CbmOutputDebuggingBuffer(VOID)
 
         } while (endLine);
     }
-/* @@@@@@@
-*/
 
     if (buffer)
     {
