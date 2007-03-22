@@ -390,7 +390,7 @@ ihex_file_t *ihex_parse_file(char *filename) {
     ifile->lines++;
     
     /* force line termination */
-    line[sizeof(line)] = 0;
+    line[sizeof(line)-1] = 0;
 
     /* if line is completely white, just skip it */
     if(!ihex_line_is_white(line)) {
