@@ -16,6 +16,16 @@ static int ihex_iswhite(unsigned char c) {
   return( (c == ' ')||(c == '\n')||(c == '\r')||(c == '\t'));
 }
 
+static int ihex_line_is_white(char *line) {
+  int is_white = 1;
+
+  while(*line)
+    if(!(ihex_iswhite(*line++)))
+      is_white = 0;
+
+  return is_white;
+}
+
 static int hex2bin(unsigned char c) {
   if((c >= '0') && (c <= '9')) return(c - '0');
   if((c >= 'a') && (c <= 'f')) return(c - 'a' + 10);
@@ -382,38 +392,42 @@ ihex_file_t *ihex_parse_file(char *filename) {
     /* force line termination */
     line[sizeof(line)] = 0;
 
-    /* parse line */
-    if(!(iline = ihex_parse_line(line, ifile->lines))) {
-      fprintf(stderr, "ERROR: Hex parsing failed\n");
-      ihex_free_file(ifile);
-      fclose(file);
-      return(NULL);
-    }
+    /* if line is completely white, just skip it */
+    if(!ihex_line_is_white(line)) {
 
-    /* data must not occur after and marker */
-    if(ifile->ended) {
-      fprintf(stderr, "ERROR: Data after end marker\n");
-      ihex_free_file(ifile);
-      fclose(file);
-      return(NULL);
-    }
-
-    /* remember that the end marker has been found */
-    if(iline->type == RECORD_END) 
-      ifile->ended = 1;
-
-    /* insert data chunks into structure */
-    if(iline->type == RECORD_DATA) {
-      /* integrate line into file structure */
-      if(ihex_insert(ifile, iline) != 0) {
-	fprintf(stderr, "ERROR: Insertion failed\n");
+      /* parse line */
+      if(!(iline = ihex_parse_line(line, ifile->lines))) {
+	fprintf(stderr, "ERROR: Hex parsing failed\n");
 	ihex_free_file(ifile);
 	fclose(file);
 	return(NULL);
       }
-    }
 
-    ihex_free_line(iline);
+      /* data must not occur after and marker */
+      if(ifile->ended) {
+	fprintf(stderr, "ERROR: Data after end marker\n");
+	ihex_free_file(ifile);
+	fclose(file);
+	return(NULL);
+      }
+
+      /* remember that the end marker has been found */
+      if(iline->type == RECORD_END) 
+	ifile->ended = 1;
+      
+      /* insert data chunks into structure */
+      if(iline->type == RECORD_DATA) {
+	/* integrate line into file structure */
+	if(ihex_insert(ifile, iline) != 0) {
+	  fprintf(stderr, "ERROR: Insertion failed\n");
+	  ihex_free_file(ifile);
+	  fclose(file);
+	  return(NULL);
+	}
+      }
+
+      ihex_free_line(iline);
+    }
   }
 
   if(!ifile->ended) {
