@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.17 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: pp.c,v 1.18 2007-03-22 12:50:29 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -18,6 +18,12 @@ static char *rcsid =
 #include <stdlib.h>
 
 #include "arch.h"
+
+#include "opencbm-plugin.h"
+
+static cbm_plugin_pp_dc_read_n_t cbm_plugin_pp_dc_read_n = NULL;
+
+static cbm_plugin_pp_dc_write_n_t cbm_plugin_pp_dc_write_n = NULL;
 
 enum pp_direction_e
 {
@@ -75,6 +81,21 @@ static int pp_write(CBM_FILE fd, char c1, char c2)
     return 0;
 }
 
+/* write_n redirects USB writes to the external reader if required */
+static void write_n(const unsigned char *data, int size) 
+{
+    int i;
+
+    if (cbm_plugin_pp_dc_write_n)
+    {
+        cbm_plugin_pp_dc_write_n(fd_cbm, data, size);
+        return;
+    }
+
+    for(i=0;i<size/2;i++,data+=2)
+	pp_write(fd_cbm, data[0], data[1]);
+}
+
 static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 {
                                                                         SETSTATEDEBUG((void)0);
@@ -105,51 +126,60 @@ static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
     return 0;
 }
 
+/* read_n redirects USB reads to the external reader if required */
+static void read_n(unsigned char *data, int size) 
+{
+    int i;
+
+    if (cbm_plugin_pp_dc_read_n)
+    {
+        cbm_plugin_pp_dc_read_n(fd_cbm, data, size);
+        return;
+    }
+
+    for(i=0;i<size/2;i++,data+=2)
+	pp_read(fd_cbm, data, data+1);
+}
+
 static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
 {
-    int  i;
-    unsigned char status;
-
+    unsigned char status[2];
                                                                         SETSTATEDEBUG((void)0);
-    pp_write(fd_cbm, tr, se);
+
+    status[0] = tr; status[1] = se;
+    write_n(status, 2);
+
 #ifndef USE_CBM_IEC_WAIT    
     arch_usleep(20000);
 #endif
                                                                         SETSTATEDEBUG((void)0);
-    pp_read(fd_cbm, &status, &status);
+    read_n(status, 2);
 
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=0);
-    for(i=0;i<BLOCKSIZE;i+=2)
-    {
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount++);
-        pp_read(fd_cbm, &block[i], &block[i+1]);
-    }
+    read_n(block, BLOCKSIZE);
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=-1);
 
                                                                         SETSTATEDEBUG((void)0);
-    return status;
+    return status[1];
 }
 
 static int write_block(unsigned char tr, unsigned char se, const unsigned char *blk, int size, int read_status)
 {
     int i = 0;
-    unsigned char status;
+    unsigned char status[2];
 
                                                                         SETSTATEDEBUG((void)0);
-    pp_write(fd_cbm, tr, se);
+    status[0] = tr; status[1] = se;
+    write_n(status, 2);
 
                                                                         SETSTATEDEBUG((void)0);
+    /* send first byte twice if length is odd */
     if(size % 2) {
-        pp_write(fd_cbm, *blk, *blk);
+        write_n(blk, 2);
         i = 1;
     }
-
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=0);
-    for(;i<size;i+=2)
-    {
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount++);
-        pp_write(fd_cbm, blk[i], blk[i+1]);
-    }
+    write_n(blk+i, size-i);
 
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=-1);
 #ifndef USE_CBM_IEC_WAIT    
@@ -159,10 +189,10 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
 #endif
 
                                                                         SETSTATEDEBUG((void)0);
-    pp_read(fd_cbm, &status, &status);
+    read_n(status, 2);
 
                                                                         SETSTATEDEBUG((void)0);
-    return status;
+    return status[1];
 }
 
 static int open_disk(CBM_FILE fd, d64copy_settings *settings,
@@ -175,6 +205,10 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
 
     fd_cbm    = fd;
     two_sided = settings->two_sided;
+
+    cbm_plugin_pp_dc_read_n = cbm_get_plugin_function_address("cbmarch_pp_dc_read_n");
+
+    cbm_plugin_pp_dc_write_n = cbm_get_plugin_function_address("cbmarch_pp_dc_write_n");
 
     if(settings->drive_type != cbm_dt_cbm1541)
     {
@@ -217,45 +251,47 @@ static void close_disk(void)
                                                                         SETSTATEDEBUG((void)0);
     cbm_pp_read(fd_cbm);
                                                                         SETSTATEDEBUG((void)0);
+
+    cbm_plugin_pp_dc_read_n = NULL;
+
+    cbm_plugin_pp_dc_write_n = NULL;
 }
 
 static int send_track_map(unsigned char tr, const char *trackmap, unsigned char count)
 {
-    int i;
-    unsigned char c;
-                                                                        SETSTATEDEBUG((void)0);
-    pp_write(fd_cbm, tr, count);
-                                                                        SETSTATEDEBUG((void)0);
-    for(i = 0; i < d64copy_sector_count(two_sided, tr); i++)
-    {
-        c = !NEED_SECTOR(trackmap[i]);
-                                                                        SETSTATEDEBUG((void)0);
-        pp_write(fd_cbm, c, c);
-    }
+    int i, size;
+    unsigned char *data;
+
+    size = d64copy_sector_count(two_sided, tr);
+    data = malloc(2+2*size);
+
+    data[0] = tr;
+    data[1] = count;
+
+    /* build track map */
+    for(i = 0; i < size; i++)
+	data[2+2*i] = data[2+2*i+1] = !NEED_SECTOR(trackmap[i]);
+    
+    write_n(data, 2*size+2);
+    free(data);
                                                                         SETSTATEDEBUG((void)0);
     return 0;
 }
 
 static int read_gcr_block(unsigned char *se, unsigned char *gcrbuf)
 {
-    int i;
-    unsigned char s;
-
+    unsigned char s[2];
                                                                         SETSTATEDEBUG((void)0);
-    pp_read(fd_cbm, &s, &s);
-    *se = s;
+    read_n(s, 2);
+    *se = s[1];
                                                                         SETSTATEDEBUG((void)0);
-    pp_read(fd_cbm, &s, &s);
+    read_n(s, 2);
 
-    if(s) {
-        return s;
+    if(s[1]) {
+        return s[1];
     }
-
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=0);
-    for(i = 0; i < GCRBUFSIZE; i += 2) {
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount++);
-        pp_read(fd_cbm, &gcrbuf[i], &gcrbuf[i+1]);
-    }
+    read_n(gcrbuf, GCRBUFSIZE);
                                                                         SETSTATEDEBUG(debugLibD64ByteCount=-1);
 
                                                                         SETSTATEDEBUG((void)0);

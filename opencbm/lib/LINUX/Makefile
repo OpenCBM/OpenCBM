@@ -1,8 +1,10 @@
-# $Id: Makefile,v 1.6 2006-05-13 17:05:11 wmsr Exp $
+# $Id: Makefile,v 1.7 2007-03-22 12:50:17 strik Exp $
 
 include ../LINUX/config.make
 
 CA65_FLAGS += --asm-include-dir ../libd64copy/
+
+CFLAGS += -I ./
 
 .PHONY: all clean mrproper install uninstall install-files
 
@@ -14,7 +16,9 @@ SHLIB   = libopencbm.so
 SHLIBV  = $(SHLIB).$(MAJ)
 SHLIBV3 = $(SHLIBV).$(MIN).$(REL)
 LIB     = libopencbm.a
-SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c LINUX/archlib.c LINUX/archmnib.c \
+SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c \
+	  configuration.c LINUX/configuration_name.c \
+	  LINUX/getpluginaddress.c \
 	  $(foreach t,cbmcopy pp s1 s2, $(LIBCBMCOPY)/$(t).c) \
 	  $(foreach t,d64copy fs gcr pp s1 s2 std, $(LIBD64COPY)/$(t).c)
 
@@ -51,7 +55,7 @@ $(SHLIBV): $(SHLIBV3)
 	ln -sf $< $@
 
 $(SHLIBV3): $(SHOBJS)
-	$(CC) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a
+	$(CC) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a -lusb -ldl
 
 $(LIB): $(OBJS)
 	$(AR) r $@ $(OBJS)

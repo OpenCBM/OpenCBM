@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2006-09-25 10:38:32 strik Exp $
+# $Id: Makefile,v 1.5 2007-03-22 12:50:29 strik Exp $
 
 ifneq ($(KERNELRELEASE),)
 EXTRA_CFLAGS := $(CBM4LINUX_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
@@ -20,6 +20,7 @@ clean:
 	rm -f cbm.mod.c *.o *.ko .cbm* Modules.symvers
 	rm -fr .tmp_versions
 	rm -f Makefile
+	rm -f Module.symvers
 
 mrproper: clean
 
@@ -30,7 +31,8 @@ install: install-files
 	-depmod -a
 
 uninstall:
-	rm -f $(MODDIR)/cbm.o
+	if [ ! -z "`lsmod|grep '^cbm '`" ]; then rmmod cbm; fi
+	rm -f $(MODDIR)/cbm.o $(MODDIR)/cbm.ko
 
 cbm.o: cbm_module.c
 	-ln -s LINUX/Makefile Makefile

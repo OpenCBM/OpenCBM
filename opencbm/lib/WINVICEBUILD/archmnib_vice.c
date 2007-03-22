@@ -5,14 +5,14 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 2005      Tim Schürmann
- *  Copyright 2005      Spiro Trikaliotis
+ *  Copyright 2005,2007 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archmnib_vice.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: archmnib_vice.c,v 1.4 2006-03-20 11:45:53 strik Exp $ \n
+** \version $Id: archmnib_vice.c,v 1.5 2007-03-22 12:50:18 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code for VICE emulation
 **
@@ -57,7 +57,7 @@
  call this function.
 */
 
-__u_char
+__u_char CBMAPIDECL
 cbmarch_parallel_burst_read(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
@@ -80,7 +80,7 @@ cbmarch_parallel_burst_read(CBM_FILE HandleDevice)
  call this function.
 */
 
-void
+void CBMAPIDECL
 cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     FUNC_ENTER();
@@ -109,7 +109,7 @@ cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
  call this function.
 */
 
-int
+int CBMAPIDECL
 cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
@@ -138,7 +138,7 @@ cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsig
  call this function.
 */
 
-int
+int CBMAPIDECL
 cbmarch_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();

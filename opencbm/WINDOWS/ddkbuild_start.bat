@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.16 2007-01-22 21:45:49 wmsr Exp $
+rem $Id: ddkbuild_start.bat,v 1.17 2007-03-22 12:50:08 strik Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -47,6 +47,9 @@ if not defined CMDARGUMENTS set CMDARGUMENTS=
 rem Some files which might be useful
 if not defined DDKBUILD_COMMAND_HOLLIS set DDKBUILD_COMMAND_HOLLIS=ddkbuild_hollis.bat
 if not defined DDKBUILD_COMMAND_OSR    set DDKBUILD_COMMAND_OSR=ddkbuild_osr.bat
+
+
+if not defined XU1541DIR set XU1541DIR=.
 
 rem --------------------------------------------------------------------------
 

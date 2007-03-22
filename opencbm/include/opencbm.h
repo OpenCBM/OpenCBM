@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.19 2006-06-02 22:51:55 wmsr Exp $ \n
+** \version $Id: opencbm.h,v 1.20 2007-03-22 12:50:09 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \authors With additions from Wolfgang Moser \n
@@ -181,6 +181,9 @@ EXTERN int CBMAPIDECL  cbm_parallel_burst_read_track(CBM_FILE f, __u_char *buffe
 EXTERN int CBMAPIDECL cbm_parallel_burst_write_track(CBM_FILE f, __u_char *buffer, unsigned int length);
 
 /* parallel burst functions end */
+
+/* get function address of the plugin */
+EXTERN void * CBMAPIDECL cbm_get_plugin_function_address(const char * Functionname);
 
 #ifdef __cplusplus
 }

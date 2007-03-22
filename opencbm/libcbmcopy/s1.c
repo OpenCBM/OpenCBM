@@ -9,13 +9,19 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.9 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: s1.c,v 1.10 2007-03-22 12:50:28 strik Exp $";
 #endif
 
 #include "opencbm.h"
 #include "cbmcopy_int.h"
 
 #include <stdlib.h>
+
+#include "opencbm-plugin.h"
+
+static cbm_plugin_s1_read_n_t cbm_plugin_s1_read_n = NULL;
+
+static cbm_plugin_s1_write_n_t cbm_plugin_s1_write_n = NULL;
 
 static const unsigned char s1r15x1[] = {
 #include "s1r.inc"
@@ -48,6 +54,13 @@ static struct drive_prog
 static int write_byte(CBM_FILE fd, unsigned char c)
 {
     int b, i;
+
+    if(cbm_plugin_s1_write_n)
+    {
+        cbm_plugin_s1_write_n(fd, &c, 1);
+        return 0;
+    }
+
     for(i=7; i>=0; i--) {
         b=(c >> i) & 1;
                                                                         SETSTATEDEBUG(debugCBMcopyBitCount=i);
@@ -87,6 +100,13 @@ static unsigned char read_byte(CBM_FILE fd)
 {
     int b=0, i;
     unsigned char c;
+
+    if(cbm_plugin_s1_read_n)
+    {
+        cbm_plugin_s1_read_n(fd, &c, 1);
+        return c;
+    }
+
     c = 0;
     for(i=7; i>=0; i--) {
                                                                         SETSTATEDEBUG(debugCBMcopyBitCount=i);
@@ -167,6 +187,9 @@ static int upload_turbo(CBM_FILE fd, unsigned char drive,
     const struct drive_prog *p;
     int dt;
 
+    cbm_plugin_s1_read_n = cbm_get_plugin_function_address("cbmarch_s1_read_n");
+    cbm_plugin_s1_write_n = cbm_get_plugin_function_address("cbmarch_s1_write_n");
+
     dt = (drive_type == cbm_dt_cbm1581);
     p = &drive_progs[dt * 2 + (write != 0)];
 
@@ -201,6 +224,10 @@ static void exit_turbo(CBM_FILE fd, int write)
                                                                         SETSTATEDEBUG((void)0);
 //    cbm_iec_wait(fd, IEC_DATA, 0);
                                                                         SETSTATEDEBUG((void)0);
+
+    cbm_plugin_s1_read_n = NULL;
+
+    cbm_plugin_s1_write_n = NULL;
 }
 
 DECLARE_TRANSFER_FUNCS(s1_transfer);

@@ -4,14 +4,14 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005-2006 Spiro Trikaliotis
+ *  Copyright 2005-2007 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archlib_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: archlib_vice.c,v 1.8 2006-04-10 10:29:58 strik Exp $ \n
+** \version $Id: archlib_vice.c,v 1.9 2007-03-22 12:50:18 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        This variant is for accessing VICE instead of a real device
@@ -139,8 +139,8 @@ send_and_wait(const unsigned int addr, const unsigned char *buffer, int size)
  refuses to load with STATUS_DLL_INIT_FAILED (0xC0000142)
 */
 
-BOOL
-opencbm_init(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
+BOOL WINAPI
+DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
     static BOOL bIsOpen = FALSE;
     BOOLEAN Status = TRUE;
@@ -241,7 +241,7 @@ cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
  because the program terminates).
 */
 
-void
+void CBMAPIDECL
 cbmarch_lock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
@@ -266,7 +266,7 @@ cbmarch_lock(CBM_FILE HandleDevice)
  Look at cbm_lock() for an explanation of this function.
 */
 
-void
+void CBMAPIDECL
 cbmarch_unlock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
@@ -309,7 +309,7 @@ static unsigned char data_rawwrite[] = {
 };
 static const addr_rawwrite = 0x2100;
 
-int
+int CBMAPIDECL
 cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
     unsigned char byteswritten = 0;
@@ -380,7 +380,7 @@ static unsigned char data_rawread[] = {
 };
 static const addr_rawread = 0x2180;
 
-int
+int CBMAPIDECL
 cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
     unsigned char bytesread = 0;
@@ -438,7 +438,7 @@ static unsigned char data_listen[] = {
 };
 
 static unsigned int addr_listen = 0x2200;
-int
+int CBMAPIDECL
 cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     unsigned char status;
@@ -492,7 +492,7 @@ static unsigned char data_talk[] = {
 
 static unsigned int addr_talk = 0x2280;
 
-int
+int CBMAPIDECL
 cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     unsigned char status = 0;
@@ -546,7 +546,7 @@ cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAd
  call this function.
 */
 
-int
+int CBMAPIDECL
 cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     FUNC_ENTER();
@@ -574,7 +574,7 @@ cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAd
  call this function.
 */
 
-int
+int CBMAPIDECL
 cbmarch_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     FUNC_ENTER();
@@ -609,7 +609,7 @@ static unsigned char data_unlisten[] = {
 
 static unsigned int addr_unlisten = 0x2300;
 
-int
+int CBMAPIDECL
 cbmarch_unlisten(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
@@ -647,7 +647,7 @@ static unsigned char data_untalk[] = {
 
 static unsigned int addr_untalk = 0x2380;
 
-int
+int CBMAPIDECL
 cbmarch_untalk(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
@@ -686,7 +686,7 @@ static unsigned char data_geteoi[] = {
 
 static unsigned int addr_geteoi = 0x2400;
 
-int
+int CBMAPIDECL
 cbmarch_get_eoi(CBM_FILE HandleDevice)
 {
     unsigned char status = 0;
@@ -725,7 +725,7 @@ static unsigned char data_cleareoi[] = {
 
 static unsigned int addr_cleareoi = 0x2480;
 
-int
+int CBMAPIDECL
 cbmarch_clear_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
@@ -757,7 +757,7 @@ cbmarch_clear_eoi(CBM_FILE HandleDevice)
  call this function.
 */
 
-int
+int CBMAPIDECL
 cbmarch_reset(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
@@ -799,7 +799,7 @@ static unsigned char data_pp_read[] = {
 
 static unsigned int addr_pp_read = 0x2500;
 
-__u_char
+__u_char CBMAPIDECL
 cbmarch_pp_read(CBM_FILE HandleDevice)
 {
     __u_char read;
@@ -846,7 +846,7 @@ static unsigned char data_pp_write[] = {
 
 static unsigned int addr_pp_write = 0x2580;
 
-void
+void CBMAPIDECL
 cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 {
     FUNC_ENTER();
@@ -892,7 +892,7 @@ static unsigned int addr_iec_poll = 0x2600;
 #define VICE_DATA_IN  0x80
 #define VICE_DATA_OUT 0x20
 
-int
+int CBMAPIDECL
 cbmarch_iec_poll(CBM_FILE HandleDevice)
 {
     int line = 0;
@@ -934,7 +934,7 @@ cbmarch_iec_poll(CBM_FILE HandleDevice)
    This function can't signal an error, thus, be careful!
 */
 
-void
+void CBMAPIDECL
 cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
@@ -962,7 +962,7 @@ cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
    This function can't signal an error, thus, be careful!
 */
 
-void
+void CBMAPIDECL
 cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
@@ -1009,7 +1009,7 @@ static unsigned char data_iec_setrelease[] = {
 
 static unsigned int addr_iec_setrelease = 0x2680;
 
-void
+void CBMAPIDECL
 cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     __u_char set = 0;
@@ -1072,7 +1072,7 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
    This function can't signal an error, thus, be careful!
 */
 
-int
+int CBMAPIDECL
 cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
     FUNC_ENTER();

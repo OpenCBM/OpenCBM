@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.18 2006-09-13 15:58:33 strik Exp $ \n
+** \version $Id: startstop.c,v 1.19 2007-03-22 12:50:09 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -476,6 +476,7 @@ CbmCheckCorrectInstallation(BOOL HaveAdminRights)
         else
         {
             error = cbm_i_i_driver_install((PULONG) &outBuffer, sizeof(outBuffer));
+
             outBuffer.DllVersion = 0;
 
             if (error)

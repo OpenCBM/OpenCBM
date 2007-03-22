@@ -7,11 +7,13 @@ TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/winmm.lib    \
            ../../bin/*/arch.lib         
 
-DLLBASE=0x10000000
+USE_MSVCRT = 1
 
-DLLENTRY=opencbm_init
+DLLBASE=0x70000000
 
-INCLUDES=../../include;../../include/WINDOWS;../
+INCLUDES=../../include;../../include/WINDOWS;../../lib/plugin/xa1541/WINDOWS/;../
+
+C_DEFINES = $(C_DEFINES)
 
 SOURCES=../cbm.c \
 	../detect.c \
@@ -19,7 +21,9 @@ SOURCES=../cbm.c \
 	../petscii.c \
 	../gcr_4b5b.c \
 	../upload.c \
+	../configuration.c \
+	configuration_name.c \
 	i_opencbm.c \
 	archlib.c \
-	archmnib.c \
+	getpluginaddress.c \
 	opencbm.rc

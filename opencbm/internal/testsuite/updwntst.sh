@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $Id: updwntst.sh,v 1.1 2006-04-15 13:35:44 wmsr Exp $
+# $Id: updwntst.sh,v 1.2 2007-03-22 12:50:10 strik Exp $
 
 function error_info {
 	echo "updwntst.sh <drivenumber>" 1>&2
@@ -22,7 +22,7 @@ echo $$ > shelltst.pid
 
 echo Doing up-/download test 1 at 0x300...0x5ff
 rm -f dload300.bin
-dd if=/dev/random bs=256 count=3 of=upload300.bin 2> /dev/null
+dd if=/dev/urandom bs=256 count=3 of=upload300.bin 2> /dev/null
 cbmctrl upload   $DRIVENO 0x0300 upload300.bin
 cbmctrl download $DRIVENO 0x0300 0x0300 dload300.bin
 cmp upload300.bin dload300.bin
@@ -32,7 +32,7 @@ rm -f upload300.bin
 # check that transmitted data for validness
 
 echo "Doing ROM upload test (faked) at 0x8000...0xffff"
-dd if=/dev/random bs=512 count=64 2> /dev/null | cbmctrl upload $DRIVENO 0x8000 -
+dd if=/dev/urandom bs=512 count=64 2> /dev/null | cbmctrl upload $DRIVENO 0x8000 -
 echo "Doing ROM download test from 0x8000...0xffff"
 cbmctrl download $DRIVENO 0x8000 0x8000 - > /dev/null
 
@@ -41,7 +41,7 @@ cbmctrl download $DRIVENO 0x8000 0x8000 - > /dev/null
 
 echo Doing up-/download test 2 at 0x300...0x5ff
 rm -f dload300.bin
-dd if=/dev/random bs=256 count=3 of=u2load300.bin 2> /dev/null
+dd if=/dev/urandom bs=256 count=3 of=u2load300.bin 2> /dev/null
 cbmctrl upload   $DRIVENO 0x0300        u2load300.bin
 cbmctrl download $DRIVENO 0x0300 0x0300  dload300.bin
 cmp u2load300.bin dload300.bin

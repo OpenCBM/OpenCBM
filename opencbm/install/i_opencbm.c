@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file install/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.10 2006-05-05 08:18:58 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.11 2007-03-22 12:50:09 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the driver
 **
@@ -29,7 +29,6 @@
 // Application
 
 #include "../lib/WINBUILD/i_opencbm.c"
-
 
 /*! \brief Tell the driver to update its settings
 
