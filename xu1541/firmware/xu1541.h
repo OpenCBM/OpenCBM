@@ -33,7 +33,7 @@ typedef unsigned short ushort;
 #define PAR_PORT1_PIN    PINB
 #define PAR_PORT1_PORT   PORTB
 
-#define IEC_DELAY  (0.2)   // 200ns
+#define IEC_DELAY  (0.5)   // 500ns
 
 #ifndef DEBUG
 #define LED_ON()     { PORTD &= ~_BV(1); }
