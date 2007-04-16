@@ -166,7 +166,6 @@ Friend Class MainForm
 
         Dim temp As String
         Dim Results As ReturnStringType
-        Dim FullPath As String
 
         Try
 
@@ -184,33 +183,36 @@ Friend Class MainForm
 
             'Read in the complete output file -------------
 
-            FullPath = Path.Combine(OUTPUT_PATH, TEMPFILE1)
-            Dim reader As StreamReader = File.OpenText(FullPath)
+            Dim reader As StringReader = New StringReader(Results.Output)
+            Dim last As String = vbNullString
 
             'Check for empty file
-            If Not reader.EndOfStream Then
+            'First line is dir. name and ID
+            temp = reader.ReadLine()
+            CBMDiskName.Text = UCase(ExtractQuotes(temp))
+            CBMDiskID.Text = UCase(VB.Right(temp, 5))
 
-                'First line is dir. name and ID
+            temp = reader.ReadLine()
+            While Not (temp Is Nothing)
+                ' Whenever another line is available, store the current one into the panel
+                CBMDirectory.Items.Add(temp.ToUpper()) 'Not only does uppercase look better, but Scratch, Rename need uppercase
+
+                last = temp
                 temp = reader.ReadLine()
-                CBMDiskName.Text = UCase(ExtractQuotes(temp))
-                CBMDiskID.Text = UCase(VB.Right(temp, 5))
+            End While
 
-                While Not reader.EndOfStream
-                    temp = reader.ReadLine()
-
-                    ' Whenever another line is available, store the current one into the panel
-                    CBMDirectory.Items.Add(temp.ToUpper()) 'Not only does uppercase look better, but Scratch, Rename need uppercase
-                End While
-
-                'The drive status is taken from the last line on stdout
-                LastStatus.Text = temp.ToUpper()
-
-                reader.Close()
-
-                'And delete both temp files, so we're not cluttering things up
-                File.Delete(Path.Combine(OUTPUT_PATH, TEMPFILE1))
-                File.Delete(Path.Combine(OUTPUT_PATH, TEMPFILE2))
+            'The drive status is taken from the last line on stdout
+            If Not (last Is Nothing) Then
+                If Not last.Length = 0 Then
+                    LastStatus.Text = last.ToUpper()
+                End If
             End If
+
+            reader.Close()
+
+            'And delete both temp files, so we're not cluttering things up
+            File.Delete(Path.Combine(OUTPUT_PATH, TEMPFILE1))
+            File.Delete(Path.Combine(OUTPUT_PATH, TEMPFILE2))
 
         Catch exception As Exception
 
@@ -404,22 +406,6 @@ Friend Class MainForm
         End If
     End Sub
 
-    Private Sub Dir1_Change(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles Dir1.SelectedIndexChanged
-        PCWorkingDir.Text = Dir1.DirList(Dir1.DirListIndex) & "\"
-        ChDir(PCWorkingDir.Text)
-        PCRefresh_Click(PCRefresh, New System.EventArgs())
-    End Sub
-
-    Private Sub Drive1_SelectedIndexChanged(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles Drive1.SelectedIndexChanged
-
-        On Error Resume Next
-
-        ChDrive(Drive1.Drive)
-        ChDir(CurDir())
-        Dir1.Path = CurDir()
-        Dir1_Change(Dir1, New System.EventArgs())
-    End Sub
-
     Private Sub WriteD64toFloppy(ByRef d64file As String)
 
         Dim Result As Object
@@ -459,31 +445,12 @@ Friend Class MainForm
         DriveNumber = CShort(OptionsForm.DriveNum.Text)
 
         PCWorkingDir.Text = AddSlash(CurDir())
-        Dir1.Path = CurDir()
         PCRefresh_Click(PCRefresh, New System.EventArgs())
-
-        Drive.SelectedItem = OptionsForm.DriveNum.SelectedItem
 
     End Sub
 
     'A slightly smarter version of Chdir, that handles drives as well.
     Private Sub GotoDir(ByRef FullPath As String)
-
-        Try
-            Dim Parts As String()
-
-            Parts = FullPath.Split(Path.VolumeSeparatorChar)
-
-            ChDrive(Parts(0))
-            Drive1.Drive = Parts(0)
-
-            ChDir(Parts(1))
-
-        Catch exception As Exception
-
-            MsgBox(exception.ToString())
-
-        End Try
 
     End Sub
 
@@ -502,8 +469,7 @@ Friend Class MainForm
         Static InProgress As Boolean
         Dim CmdLine As String
         Dim ErrorString As String = vbNullString
-        Dim OutFile As String
-        Dim ErrFile As String
+        Dim FirstLog As Boolean = True
 
         Try
             If (InProgress) Then
@@ -538,8 +504,8 @@ Friend Class MainForm
             'All these quotes [chr$(34)] are needed to handle spaces.  So you get:
             'cmd /c ""path\command" args "files""
 
-            OutFile = Path.Combine(OUTPUT_PATH, TEMPFILE1)
-            ErrFile = Path.Combine(OUTPUT_PATH, TEMPFILE2)
+            'OutFile = Path.Combine(OUTPUT_PATH, TEMPFILE1)
+            'ErrFile = Path.Combine(OUTPUT_PATH, TEMPFILE2)
 
             CmdLine = String.Format("{0} {1}", Action, Args)
 
@@ -559,43 +525,40 @@ Friend Class MainForm
             If (p.Start()) Then
 
                 Dim stdOut As StreamReader = p.StandardOutput
+                Dim stdOutString As String
+                Dim stdOutLength As Long = 0
                 Dim stdErr As StreamReader = p.StandardError
 
-                If Not p.WaitForExit(300000) Then
-                    DoCommand.Errors = "Process did not complete within 5 minutes."
+                While Not p.HasExited
+
+                    stdOutString = stdOut.ReadLine
+
+                    If Not FirstLog Then
+                        WriteLog(Nothing, stdOutString)
+                    Else
+                        WriteLog(CmdLine, stdOutString)
+                        FirstLog = False
+                    End If
+
+                    'End If
+                    Application.DoEvents()
+
+                End While
+
+                stdOutString = stdOut.ReadToEnd
+
+                If Not FirstLog Then
+                    WriteLog(Nothing, stdOutString)
                 Else
-                    Dim stdOutString As String = stdOut.ReadToEnd()
-                    Dim stdErrString As String = stdErr.ReadToEnd()
-
-                    Log.AppendText(String.Format("{0:yyyy/MM/dd HH:mm:ss} {1}", DateTime.Now, CmdLine) & vbNewLine)
-                    Log.AppendText(stdOutString & vbNewLine)
-
-                    If (stdErrString.Trim().Length > 0) Then
-                        Log.AppendText(vbNewLine)
-                        Log.AppendText("Error Stream:" & vbNewLine)
-                        Log.AppendText(stdErrString & vbNewLine)
-                    End If
-
-                    File.WriteAllText(OutFile, stdOutString)
-                    File.WriteAllText(ErrFile, stdErrString)
-
-                    'Read in the output file
-                    DoCommand.Output = stdOutString ' = reader.ReadToEnd()
-
-                    'Read in the error file
-                    DoCommand.Errors = stdErrString '= reader.ReadToEnd()
-
-                    'And delete both, so we're not cluttering things up
-                    If (DeleteOutFile) Then
-                        File.Delete(OutFile)
-                        File.Delete(ErrFile)
-                    End If
-
-                    Log.AppendText("========================================" & vbNewLine)
-                    Log.Select(Log.Text.Length - 1, 0)
-                    Log.ScrollToCaret()
-
+                    WriteLog(CmdLine, stdOutString)
+                    FirstLog = False
                 End If
+
+                Log.AppendText("========================================" & vbNewLine)
+
+                DoCommand.Output += stdOutString
+                DoCommand.Errors = stdErr.ReadToEnd()
+
             End If
         Catch exception As Exception
 
@@ -613,11 +576,26 @@ Friend Class MainForm
         End Try
     End Function
 
+    Private Sub WriteLog(ByVal CmdLine As String, ByVal outString As String)
+        If Not (CmdLine Is Nothing) Then
+            If CmdLine.Length > 0 Then
+                Log.AppendText(String.Format("{0:yyyy/MM/dd HH:mm:ss} {1}", DateTime.Now, CmdLine) & vbNewLine)
+            End If
+        End If
+
+        Log.AppendText(outString & vbNewLine)
+        Log.Select(Log.Text.Length - 1, 0)
+        Log.ScrollToCaret()
+        Log.Refresh()
+
+
+    End Sub
+
     Private Sub MakeDir_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles MakeDir.Click
         Prompt.Ask("Enter Directory Name")
         If (Prompt.LastResult = CANCELSTRING) Then Exit Sub
 
-        MkDir(AddSlash(Dir1.Path) & Prompt.LastResult)
+        MkDir(AddSlash(PCWorkingDir.Text) & Prompt.LastResult)
         PCRefresh_Click(PCRefresh, New System.EventArgs())
     End Sub
 
@@ -676,7 +654,7 @@ Friend Class MainForm
 
             'Refresh the KB/Blocks display
             For Each item In PCDirectory.SelectedItems
-                Dim filename As String = Path.Combine(Dir1.Path, PCDirectory.Items(T))
+                Dim filename As String = Path.Combine(PCWorkingDir.Text, PCDirectory.Items(T))
 
                 ' Check if file exists first
                 If Not File.Exists(filename) Then
@@ -701,7 +679,6 @@ Friend Class MainForm
         PCWorkingDir.Text = AddSlash(CurDir())
         PCDirectory.Path = CurDir()
         PCDirectory.Refresh()
-        Dir1.Refresh()
     End Sub
 
     Private Sub PCRename_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles PCRename.Click
@@ -734,7 +711,7 @@ Friend Class MainForm
             ' ChDir PCWorkingDir.Text
             GotoDir(PCWorkingDir.Text)
             PCRefresh_Click(PCRefresh, New System.EventArgs())
-            Dir1.Path = PCWorkingDir.Text
+            PCWorkingDir.Text = PCWorkingDir.Text
         End If
     End Sub
 
@@ -846,5 +823,13 @@ Friend Class MainForm
 
     Private Sub Drive_SelectedIndexChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Drive.SelectedIndexChanged
         DriveNumber = CShort(Drive.SelectedItem)
+    End Sub
+
+    Private Sub cmdBrowse_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdBrowse.Click
+        folderBrowser.SelectedPath = PCWorkingDir.Text
+        If folderBrowser.ShowDialog() = Windows.Forms.DialogResult.OK Then
+            PCWorkingDir.Text = folderBrowser.SelectedPath
+            PCDirectory.Path = folderBrowser.SelectedPath
+        End If
     End Sub
 End Class

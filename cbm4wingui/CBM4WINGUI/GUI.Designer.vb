@@ -83,11 +83,10 @@
         Me._Label_3 = New System.Windows.Forms.Label
         Me._Label_4 = New System.Windows.Forms.Label
         Me.Frame2 = New System.Windows.Forms.GroupBox
+        Me.cmdBrowse = New System.Windows.Forms.Button
         Me.BlockText = New System.Windows.Forms.TextBox
         Me.KBText = New System.Windows.Forms.TextBox
-        Me.Drive1 = New Microsoft.VisualBasic.Compatibility.VB6.DriveListBox
         Me.MakeDir = New System.Windows.Forms.Button
-        Me.Dir1 = New Microsoft.VisualBasic.Compatibility.VB6.DirListBox
         Me.PCDirectory = New Microsoft.VisualBasic.Compatibility.VB6.FileListBox
         Me.PCRefresh = New System.Windows.Forms.Button
         Me.RunFile = New System.Windows.Forms.Button
@@ -100,6 +99,7 @@
         Me._Label_2 = New System.Windows.Forms.Label
         Me.LogGroup = New System.Windows.Forms.GroupBox
         Me.Log = New System.Windows.Forms.RichTextBox
+        Me.folderBrowser = New System.Windows.Forms.FolderBrowserDialog
         CType(Me.Label, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SplitContainer1.Panel1.SuspendLayout()
         Me.SplitContainer1.Panel2.SuspendLayout()
@@ -114,62 +114,66 @@
         Me.CopyFromFloppy.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.CopyFromFloppy.BackColor = System.Drawing.SystemColors.Control
         Me.CopyFromFloppy.Cursor = System.Windows.Forms.Cursors.Default
+        Me.CopyFromFloppy.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.CopyFromFloppy.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CopyFromFloppy.ForeColor = System.Drawing.SystemColors.ControlText
         Me.CopyFromFloppy.Location = New System.Drawing.Point(319, 172)
         Me.CopyFromFloppy.Name = "CopyFromFloppy"
         Me.CopyFromFloppy.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CopyFromFloppy.Size = New System.Drawing.Size(52, 33)
+        Me.CopyFromFloppy.Size = New System.Drawing.Size(73, 33)
         Me.CopyFromFloppy.TabIndex = 2
         Me.CopyFromFloppy.Text = "<--"
         Me.ToolTip1.SetToolTip(Me.CopyFromFloppy, "If no files are selected, this button will create a D64 image of the entire disk." & _
                 "")
-        Me.CopyFromFloppy.UseVisualStyleBackColor = False
+        Me.CopyFromFloppy.UseVisualStyleBackColor = True
         '
         'Options
         '
         Me.Options.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Options.BackColor = System.Drawing.SystemColors.Control
         Me.Options.Cursor = System.Windows.Forms.Cursors.Default
+        Me.Options.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.Options.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Options.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Options.Location = New System.Drawing.Point(319, 426)
+        Me.Options.Location = New System.Drawing.Point(319, 425)
         Me.Options.Name = "Options"
         Me.Options.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.Options.Size = New System.Drawing.Size(52, 33)
+        Me.Options.Size = New System.Drawing.Size(73, 33)
         Me.Options.TabIndex = 24
         Me.Options.Text = "Options"
-        Me.Options.UseVisualStyleBackColor = False
+        Me.Options.UseVisualStyleBackColor = True
         '
         'About
         '
         Me.About.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.About.BackColor = System.Drawing.SystemColors.Control
         Me.About.Cursor = System.Windows.Forms.Cursors.Default
+        Me.About.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.About.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.About.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.About.Location = New System.Drawing.Point(319, 461)
+        Me.About.Location = New System.Drawing.Point(319, 460)
         Me.About.Name = "About"
         Me.About.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.About.Size = New System.Drawing.Size(52, 33)
+        Me.About.Size = New System.Drawing.Size(73, 33)
         Me.About.TabIndex = 23
         Me.About.Text = "About"
-        Me.About.UseVisualStyleBackColor = False
+        Me.About.UseVisualStyleBackColor = True
         '
         'CopyToFloppy
         '
         Me.CopyToFloppy.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.CopyToFloppy.BackColor = System.Drawing.SystemColors.Control
         Me.CopyToFloppy.Cursor = System.Windows.Forms.Cursors.Default
+        Me.CopyToFloppy.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.CopyToFloppy.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CopyToFloppy.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.CopyToFloppy.Location = New System.Drawing.Point(319, 132)
+        Me.CopyToFloppy.Location = New System.Drawing.Point(319, 133)
         Me.CopyToFloppy.Name = "CopyToFloppy"
         Me.CopyToFloppy.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CopyToFloppy.Size = New System.Drawing.Size(52, 33)
+        Me.CopyToFloppy.Size = New System.Drawing.Size(73, 33)
         Me.CopyToFloppy.TabIndex = 0
         Me.CopyToFloppy.Text = "-->"
-        Me.CopyToFloppy.UseVisualStyleBackColor = False
+        Me.CopyToFloppy.UseVisualStyleBackColor = True
         '
         'SplitContainer1
         '
@@ -180,18 +184,18 @@
         '
         'SplitContainer1.Panel1
         '
+        Me.SplitContainer1.Panel1.Controls.Add(Me.CBMDrive)
         Me.SplitContainer1.Panel1.Controls.Add(Me.CopyToFloppy)
         Me.SplitContainer1.Panel1.Controls.Add(Me.Options)
         Me.SplitContainer1.Panel1.Controls.Add(Me.CopyFromFloppy)
         Me.SplitContainer1.Panel1.Controls.Add(Me.About)
-        Me.SplitContainer1.Panel1.Controls.Add(Me.CBMDrive)
         Me.SplitContainer1.Panel1.Controls.Add(Me.Frame2)
         '
         'SplitContainer1.Panel2
         '
         Me.SplitContainer1.Panel2.Controls.Add(Me.LogGroup)
-        Me.SplitContainer1.Size = New System.Drawing.Size(992, 497)
-        Me.SplitContainer1.SplitterDistance = 675
+        Me.SplitContainer1.Size = New System.Drawing.Size(1083, 497)
+        Me.SplitContainer1.SplitterDistance = 741
         Me.SplitContainer1.TabIndex = 27
         '
         'CBMDrive
@@ -218,10 +222,10 @@
         Me.CBMDrive.Controls.Add(Me._Label_4)
         Me.CBMDrive.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMDrive.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.CBMDrive.Location = New System.Drawing.Point(375, 0)
+        Me.CBMDrive.Location = New System.Drawing.Point(398, 4)
         Me.CBMDrive.Name = "CBMDrive"
         Me.CBMDrive.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMDrive.Size = New System.Drawing.Size(297, 491)
+        Me.CBMDrive.Size = New System.Drawing.Size(340, 491)
         Me.CBMDrive.TabIndex = 25
         Me.CBMDrive.TabStop = False
         Me.CBMDrive.Text = "Commodore Drive"
@@ -230,52 +234,55 @@
         '
         Me.Drive.FormattingEnabled = True
         Me.Drive.Items.AddRange(New Object() {"8", "9", "10", "11"})
-        Me.Drive.Location = New System.Drawing.Point(226, 14)
+        Me.Drive.Location = New System.Drawing.Point(262, 16)
         Me.Drive.Name = "Drive"
-        Me.Drive.Size = New System.Drawing.Size(62, 22)
+        Me.Drive.Size = New System.Drawing.Size(73, 24)
         Me.Drive.TabIndex = 37
         '
         'CBMValidate
         '
         Me.CBMValidate.BackColor = System.Drawing.SystemColors.Control
         Me.CBMValidate.Cursor = System.Windows.Forms.Cursors.Default
+        Me.CBMValidate.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.CBMValidate.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMValidate.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.CBMValidate.Location = New System.Drawing.Point(226, 156)
+        Me.CBMValidate.Location = New System.Drawing.Point(262, 152)
         Me.CBMValidate.Name = "CBMValidate"
         Me.CBMValidate.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMValidate.Size = New System.Drawing.Size(65, 25)
+        Me.CBMValidate.Size = New System.Drawing.Size(73, 25)
         Me.CBMValidate.TabIndex = 36
         Me.CBMValidate.Text = "Validate"
-        Me.CBMValidate.UseVisualStyleBackColor = False
+        Me.CBMValidate.UseVisualStyleBackColor = True
         '
         'CBMInitialize
         '
         Me.CBMInitialize.BackColor = System.Drawing.SystemColors.Control
         Me.CBMInitialize.Cursor = System.Windows.Forms.Cursors.Default
+        Me.CBMInitialize.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.CBMInitialize.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMInitialize.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.CBMInitialize.Location = New System.Drawing.Point(226, 124)
+        Me.CBMInitialize.Location = New System.Drawing.Point(262, 120)
         Me.CBMInitialize.Name = "CBMInitialize"
         Me.CBMInitialize.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMInitialize.Size = New System.Drawing.Size(65, 25)
+        Me.CBMInitialize.Size = New System.Drawing.Size(73, 25)
         Me.CBMInitialize.TabIndex = 25
         Me.CBMInitialize.Text = "Initialize"
-        Me.CBMInitialize.UseVisualStyleBackColor = False
+        Me.CBMInitialize.UseVisualStyleBackColor = True
         '
         'CBMFormat
         '
         Me.CBMFormat.BackColor = System.Drawing.SystemColors.Control
         Me.CBMFormat.Cursor = System.Windows.Forms.Cursors.Default
+        Me.CBMFormat.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.CBMFormat.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMFormat.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.CBMFormat.Location = New System.Drawing.Point(226, 92)
+        Me.CBMFormat.Location = New System.Drawing.Point(262, 88)
         Me.CBMFormat.Name = "CBMFormat"
         Me.CBMFormat.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMFormat.Size = New System.Drawing.Size(65, 25)
+        Me.CBMFormat.Size = New System.Drawing.Size(73, 25)
         Me.CBMFormat.TabIndex = 10
         Me.CBMFormat.Text = "Format"
-        Me.CBMFormat.UseVisualStyleBackColor = False
+        Me.CBMFormat.UseVisualStyleBackColor = True
         '
         'CBMDirectory
         '
@@ -283,14 +290,14 @@
                     Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.CBMDirectory.BackColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
         Me.CBMDirectory.Cursor = System.Windows.Forms.Cursors.Default
-        Me.CBMDirectory.Font = New System.Drawing.Font("Courier New", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.CBMDirectory.Font = New System.Drawing.Font("Courier New", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMDirectory.ForeColor = System.Drawing.Color.FromArgb(CType(CType(131, Byte), Integer), CType(CType(131, Byte), Integer), CType(CType(255, Byte), Integer))
-        Me.CBMDirectory.ItemHeight = 14
+        Me.CBMDirectory.ItemHeight = 16
         Me.CBMDirectory.Location = New System.Drawing.Point(8, 40)
         Me.CBMDirectory.Name = "CBMDirectory"
         Me.CBMDirectory.RightToLeft = System.Windows.Forms.RightToLeft.No
         Me.CBMDirectory.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
-        Me.CBMDirectory.Size = New System.Drawing.Size(217, 410)
+        Me.CBMDirectory.Size = New System.Drawing.Size(251, 404)
         Me.CBMDirectory.TabIndex = 9
         '
         'CBMReset
@@ -298,72 +305,77 @@
         Me.CBMReset.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.CBMReset.BackColor = System.Drawing.SystemColors.Control
         Me.CBMReset.Cursor = System.Windows.Forms.Cursors.Default
+        Me.CBMReset.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.CBMReset.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMReset.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.CBMReset.Location = New System.Drawing.Point(226, 407)
+        Me.CBMReset.Location = New System.Drawing.Point(262, 403)
         Me.CBMReset.Name = "CBMReset"
         Me.CBMReset.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMReset.Size = New System.Drawing.Size(65, 25)
+        Me.CBMReset.Size = New System.Drawing.Size(73, 25)
         Me.CBMReset.TabIndex = 8
         Me.CBMReset.Text = "Reset"
-        Me.CBMReset.UseVisualStyleBackColor = False
+        Me.CBMReset.UseVisualStyleBackColor = True
         '
         'CBMDriveStatus
         '
         Me.CBMDriveStatus.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.CBMDriveStatus.BackColor = System.Drawing.SystemColors.Control
         Me.CBMDriveStatus.Cursor = System.Windows.Forms.Cursors.Default
+        Me.CBMDriveStatus.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.CBMDriveStatus.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMDriveStatus.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.CBMDriveStatus.Location = New System.Drawing.Point(226, 439)
+        Me.CBMDriveStatus.Location = New System.Drawing.Point(262, 435)
         Me.CBMDriveStatus.Name = "CBMDriveStatus"
         Me.CBMDriveStatus.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMDriveStatus.Size = New System.Drawing.Size(65, 25)
+        Me.CBMDriveStatus.Size = New System.Drawing.Size(73, 25)
         Me.CBMDriveStatus.TabIndex = 7
         Me.CBMDriveStatus.Text = "Status"
-        Me.CBMDriveStatus.UseVisualStyleBackColor = False
+        Me.CBMDriveStatus.UseVisualStyleBackColor = True
         '
         'CBMRefresh
         '
         Me.CBMRefresh.BackColor = System.Drawing.SystemColors.Control
         Me.CBMRefresh.Cursor = System.Windows.Forms.Cursors.Default
+        Me.CBMRefresh.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.CBMRefresh.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMRefresh.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.CBMRefresh.Location = New System.Drawing.Point(226, 60)
+        Me.CBMRefresh.Location = New System.Drawing.Point(262, 56)
         Me.CBMRefresh.Name = "CBMRefresh"
         Me.CBMRefresh.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMRefresh.Size = New System.Drawing.Size(65, 25)
+        Me.CBMRefresh.Size = New System.Drawing.Size(73, 25)
         Me.CBMRefresh.TabIndex = 6
         Me.CBMRefresh.Text = "Directory"
-        Me.CBMRefresh.UseVisualStyleBackColor = False
+        Me.CBMRefresh.UseVisualStyleBackColor = True
         '
         'CBMRename
         '
         Me.CBMRename.BackColor = System.Drawing.SystemColors.Control
         Me.CBMRename.Cursor = System.Windows.Forms.Cursors.Default
+        Me.CBMRename.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.CBMRename.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMRename.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.CBMRename.Location = New System.Drawing.Point(226, 220)
+        Me.CBMRename.Location = New System.Drawing.Point(262, 216)
         Me.CBMRename.Name = "CBMRename"
         Me.CBMRename.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMRename.Size = New System.Drawing.Size(65, 25)
+        Me.CBMRename.Size = New System.Drawing.Size(73, 25)
         Me.CBMRename.TabIndex = 5
         Me.CBMRename.Text = "Rename"
-        Me.CBMRename.UseVisualStyleBackColor = False
+        Me.CBMRename.UseVisualStyleBackColor = True
         '
         'CBMScratch
         '
         Me.CBMScratch.BackColor = System.Drawing.SystemColors.Control
         Me.CBMScratch.Cursor = System.Windows.Forms.Cursors.Default
+        Me.CBMScratch.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.CBMScratch.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMScratch.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.CBMScratch.Location = New System.Drawing.Point(226, 252)
+        Me.CBMScratch.Location = New System.Drawing.Point(262, 248)
         Me.CBMScratch.Name = "CBMScratch"
         Me.CBMScratch.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMScratch.Size = New System.Drawing.Size(65, 25)
+        Me.CBMScratch.Size = New System.Drawing.Size(73, 25)
         Me.CBMScratch.TabIndex = 4
         Me.CBMScratch.Text = "Scratch"
-        Me.CBMScratch.UseVisualStyleBackColor = False
+        Me.CBMScratch.UseVisualStyleBackColor = True
         '
         '_Label_0
         '
@@ -390,7 +402,7 @@
         Me.LastStatus.Location = New System.Drawing.Point(8, 467)
         Me.LastStatus.Name = "LastStatus"
         Me.LastStatus.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.LastStatus.Size = New System.Drawing.Size(283, 19)
+        Me.LastStatus.Size = New System.Drawing.Size(327, 19)
         Me.LastStatus.TabIndex = 33
         '
         '_Label_5
@@ -400,10 +412,10 @@
         Me._Label_5.Cursor = System.Windows.Forms.Cursors.Default
         Me._Label_5.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me._Label_5.ForeColor = System.Drawing.SystemColors.ControlText
-        Me._Label_5.Location = New System.Drawing.Point(226, 391)
+        Me._Label_5.Location = New System.Drawing.Point(262, 386)
         Me._Label_5.Name = "_Label_5"
         Me._Label_5.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me._Label_5.Size = New System.Drawing.Size(64, 17)
+        Me._Label_5.Size = New System.Drawing.Size(73, 17)
         Me._Label_5.TabIndex = 28
         Me._Label_5.Text = "Drive:"
         '
@@ -417,7 +429,7 @@
         Me.CBMDiskName.Location = New System.Drawing.Point(8, 16)
         Me.CBMDiskName.Name = "CBMDiskName"
         Me.CBMDiskName.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMDiskName.Size = New System.Drawing.Size(154, 19)
+        Me.CBMDiskName.Size = New System.Drawing.Size(176, 19)
         Me.CBMDiskName.TabIndex = 14
         '
         'CBMDiskID
@@ -427,10 +439,10 @@
         Me.CBMDiskID.Cursor = System.Windows.Forms.Cursors.Default
         Me.CBMDiskID.Font = New System.Drawing.Font("Courier New", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.CBMDiskID.ForeColor = System.Drawing.Color.FromArgb(CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(192, Byte), Integer))
-        Me.CBMDiskID.Location = New System.Drawing.Point(168, 16)
+        Me.CBMDiskID.Location = New System.Drawing.Point(190, 16)
         Me.CBMDiskID.Name = "CBMDiskID"
         Me.CBMDiskID.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.CBMDiskID.Size = New System.Drawing.Size(57, 19)
+        Me.CBMDiskID.Size = New System.Drawing.Size(69, 19)
         Me.CBMDiskID.TabIndex = 13
         Me.CBMDiskID.TextAlign = System.Drawing.ContentAlignment.TopCenter
         '
@@ -440,10 +452,10 @@
         Me._Label_3.Cursor = System.Windows.Forms.Cursors.Default
         Me._Label_3.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me._Label_3.ForeColor = System.Drawing.SystemColors.ControlText
-        Me._Label_3.Location = New System.Drawing.Point(223, 40)
+        Me._Label_3.Location = New System.Drawing.Point(262, 40)
         Me._Label_3.Name = "_Label_3"
         Me._Label_3.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me._Label_3.Size = New System.Drawing.Size(68, 17)
+        Me._Label_3.Size = New System.Drawing.Size(73, 17)
         Me._Label_3.TabIndex = 12
         Me._Label_3.Text = "Disk:"
         '
@@ -453,7 +465,7 @@
         Me._Label_4.Cursor = System.Windows.Forms.Cursors.Default
         Me._Label_4.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me._Label_4.ForeColor = System.Drawing.SystemColors.ControlText
-        Me._Label_4.Location = New System.Drawing.Point(226, 204)
+        Me._Label_4.Location = New System.Drawing.Point(262, 200)
         Me._Label_4.Name = "_Label_4"
         Me._Label_4.RightToLeft = System.Windows.Forms.RightToLeft.No
         Me._Label_4.Size = New System.Drawing.Size(73, 17)
@@ -466,11 +478,10 @@
                     Or System.Windows.Forms.AnchorStyles.Left) _
                     Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.Frame2.BackColor = System.Drawing.SystemColors.Control
+        Me.Frame2.Controls.Add(Me.cmdBrowse)
         Me.Frame2.Controls.Add(Me.BlockText)
         Me.Frame2.Controls.Add(Me.KBText)
-        Me.Frame2.Controls.Add(Me.Drive1)
         Me.Frame2.Controls.Add(Me.MakeDir)
-        Me.Frame2.Controls.Add(Me.Dir1)
         Me.Frame2.Controls.Add(Me.PCDirectory)
         Me.Frame2.Controls.Add(Me.PCRefresh)
         Me.Frame2.Controls.Add(Me.RunFile)
@@ -491,6 +502,18 @@
         Me.Frame2.TabStop = False
         Me.Frame2.Text = "Local Drive"
         '
+        'cmdBrowse
+        '
+        Me.cmdBrowse.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.cmdBrowse.FlatStyle = System.Windows.Forms.FlatStyle.System
+        Me.cmdBrowse.Font = New System.Drawing.Font("Arial", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.cmdBrowse.Location = New System.Drawing.Point(231, 470)
+        Me.cmdBrowse.Name = "cmdBrowse"
+        Me.cmdBrowse.Size = New System.Drawing.Size(73, 23)
+        Me.cmdBrowse.TabIndex = 36
+        Me.cmdBrowse.Text = "Browse"
+        Me.cmdBrowse.UseVisualStyleBackColor = True
+        '
         'BlockText
         '
         Me.BlockText.AcceptsReturn = True
@@ -504,7 +527,7 @@
         Me.BlockText.MaxLength = 0
         Me.BlockText.Name = "BlockText"
         Me.BlockText.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.BlockText.Size = New System.Drawing.Size(73, 20)
+        Me.BlockText.Size = New System.Drawing.Size(73, 23)
         Me.BlockText.TabIndex = 32
         Me.BlockText.Text = "0 Blocks"
         '
@@ -521,29 +544,16 @@
         Me.KBText.MaxLength = 0
         Me.KBText.Name = "KBText"
         Me.KBText.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.KBText.Size = New System.Drawing.Size(73, 20)
+        Me.KBText.Size = New System.Drawing.Size(73, 23)
         Me.KBText.TabIndex = 31
         Me.KBText.Text = "0 KB"
-        '
-        'Drive1
-        '
-        Me.Drive1.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-                    Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Drive1.BackColor = System.Drawing.SystemColors.Window
-        Me.Drive1.Cursor = System.Windows.Forms.Cursors.Default
-        Me.Drive1.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Drive1.ForeColor = System.Drawing.SystemColors.WindowText
-        Me.Drive1.FormattingEnabled = True
-        Me.Drive1.Location = New System.Drawing.Point(8, 13)
-        Me.Drive1.Name = "Drive1"
-        Me.Drive1.Size = New System.Drawing.Size(213, 21)
-        Me.Drive1.TabIndex = 26
         '
         'MakeDir
         '
         Me.MakeDir.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.MakeDir.BackColor = System.Drawing.SystemColors.Control
         Me.MakeDir.Cursor = System.Windows.Forms.Cursors.Default
+        Me.MakeDir.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.MakeDir.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.MakeDir.ForeColor = System.Drawing.SystemColors.ControlText
         Me.MakeDir.Location = New System.Drawing.Point(228, 88)
@@ -552,22 +562,7 @@
         Me.MakeDir.Size = New System.Drawing.Size(73, 25)
         Me.MakeDir.TabIndex = 29
         Me.MakeDir.Text = "Make Dir"
-        Me.MakeDir.UseVisualStyleBackColor = False
-        '
-        'Dir1
-        '
-        Me.Dir1.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-                    Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Dir1.BackColor = System.Drawing.SystemColors.Window
-        Me.Dir1.Cursor = System.Windows.Forms.Cursors.Default
-        Me.Dir1.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Dir1.ForeColor = System.Drawing.SystemColors.WindowText
-        Me.Dir1.FormattingEnabled = True
-        Me.Dir1.IntegralHeight = False
-        Me.Dir1.Location = New System.Drawing.Point(8, 40)
-        Me.Dir1.Name = "Dir1"
-        Me.Dir1.Size = New System.Drawing.Size(213, 111)
-        Me.Dir1.TabIndex = 27
+        Me.MakeDir.UseVisualStyleBackColor = True
         '
         'PCDirectory
         '
@@ -579,11 +574,11 @@
         Me.PCDirectory.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.PCDirectory.ForeColor = System.Drawing.SystemColors.WindowText
         Me.PCDirectory.FormattingEnabled = True
-        Me.PCDirectory.Location = New System.Drawing.Point(8, 152)
+        Me.PCDirectory.Location = New System.Drawing.Point(8, 24)
         Me.PCDirectory.Name = "PCDirectory"
         Me.PCDirectory.Pattern = "*.*"
         Me.PCDirectory.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
-        Me.PCDirectory.Size = New System.Drawing.Size(213, 298)
+        Me.PCDirectory.Size = New System.Drawing.Size(213, 420)
         Me.PCDirectory.TabIndex = 20
         '
         'PCRefresh
@@ -591,6 +586,7 @@
         Me.PCRefresh.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PCRefresh.BackColor = System.Drawing.SystemColors.Control
         Me.PCRefresh.Cursor = System.Windows.Forms.Cursors.Default
+        Me.PCRefresh.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.PCRefresh.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.PCRefresh.ForeColor = System.Drawing.SystemColors.ControlText
         Me.PCRefresh.Location = New System.Drawing.Point(228, 56)
@@ -599,28 +595,30 @@
         Me.PCRefresh.Size = New System.Drawing.Size(73, 25)
         Me.PCRefresh.TabIndex = 19
         Me.PCRefresh.Text = "Refresh"
-        Me.PCRefresh.UseVisualStyleBackColor = False
+        Me.PCRefresh.UseVisualStyleBackColor = True
         '
         'RunFile
         '
         Me.RunFile.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.RunFile.BackColor = System.Drawing.SystemColors.Control
         Me.RunFile.Cursor = System.Windows.Forms.Cursors.Default
+        Me.RunFile.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.RunFile.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.RunFile.ForeColor = System.Drawing.SystemColors.ControlText
         Me.RunFile.Location = New System.Drawing.Point(228, 240)
         Me.RunFile.Name = "RunFile"
         Me.RunFile.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.RunFile.Size = New System.Drawing.Size(73, 25)
+        Me.RunFile.Size = New System.Drawing.Size(73, 49)
         Me.RunFile.TabIndex = 18
         Me.RunFile.Text = "Run / View"
-        Me.RunFile.UseVisualStyleBackColor = False
+        Me.RunFile.UseVisualStyleBackColor = True
         '
         'PCRename
         '
         Me.PCRename.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PCRename.BackColor = System.Drawing.SystemColors.Control
         Me.PCRename.Cursor = System.Windows.Forms.Cursors.Default
+        Me.PCRename.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.PCRename.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.PCRename.ForeColor = System.Drawing.SystemColors.ControlText
         Me.PCRename.Location = New System.Drawing.Point(228, 176)
@@ -629,7 +627,7 @@
         Me.PCRename.Size = New System.Drawing.Size(73, 25)
         Me.PCRename.TabIndex = 17
         Me.PCRename.Text = "Rename"
-        Me.PCRename.UseVisualStyleBackColor = False
+        Me.PCRename.UseVisualStyleBackColor = True
         '
         'PCWorkingDir
         '
@@ -644,7 +642,7 @@
         Me.PCWorkingDir.MaxLength = 0
         Me.PCWorkingDir.Name = "PCWorkingDir"
         Me.PCWorkingDir.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.PCWorkingDir.Size = New System.Drawing.Size(293, 20)
+        Me.PCWorkingDir.Size = New System.Drawing.Size(213, 23)
         Me.PCWorkingDir.TabIndex = 16
         Me.PCWorkingDir.Text = "c:\"
         '
@@ -653,6 +651,7 @@
         Me.PCDelete.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PCDelete.BackColor = System.Drawing.SystemColors.Control
         Me.PCDelete.Cursor = System.Windows.Forms.Cursors.Default
+        Me.PCDelete.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.PCDelete.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.PCDelete.ForeColor = System.Drawing.SystemColors.ControlText
         Me.PCDelete.Location = New System.Drawing.Point(228, 208)
@@ -661,7 +660,7 @@
         Me.PCDelete.Size = New System.Drawing.Size(73, 25)
         Me.PCDelete.TabIndex = 15
         Me.PCDelete.Text = "Delete"
-        Me.PCDelete.UseVisualStyleBackColor = False
+        Me.PCDelete.UseVisualStyleBackColor = True
         '
         '_Label_7
         '
@@ -727,7 +726,7 @@
         Me.LogGroup.ForeColor = System.Drawing.SystemColors.ControlText
         Me.LogGroup.Location = New System.Drawing.Point(0, 0)
         Me.LogGroup.Name = "LogGroup"
-        Me.LogGroup.Size = New System.Drawing.Size(313, 497)
+        Me.LogGroup.Size = New System.Drawing.Size(338, 497)
         Me.LogGroup.TabIndex = 1
         Me.LogGroup.TabStop = False
         Me.LogGroup.Text = "Log"
@@ -735,22 +734,28 @@
         'Log
         '
         Me.Log.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.Log.Font = New System.Drawing.Font("Courier New", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Log.Location = New System.Drawing.Point(3, 16)
+        Me.Log.Font = New System.Drawing.Font("Courier New", 7.8!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Log.Location = New System.Drawing.Point(3, 19)
         Me.Log.Name = "Log"
         Me.Log.ReadOnly = True
-        Me.Log.Size = New System.Drawing.Size(307, 478)
+        Me.Log.Size = New System.Drawing.Size(332, 475)
         Me.Log.TabIndex = 1
         Me.Log.Text = ""
+        Me.Log.WordWrap = False
+        '
+        'folderBrowser
+        '
+        Me.folderBrowser.RootFolder = System.Environment.SpecialFolder.MyComputer
         '
         'MainForm
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 14.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(7.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.Control
-        Me.ClientSize = New System.Drawing.Size(992, 497)
+        Me.ClientSize = New System.Drawing.Size(1083, 497)
         Me.Controls.Add(Me.SplitContainer1)
         Me.Cursor = System.Windows.Forms.Cursors.Default
+        Me.DoubleBuffered = True
         Me.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Location = New System.Drawing.Point(4, 23)
@@ -789,9 +794,7 @@
     Public WithEvents Frame2 As System.Windows.Forms.GroupBox
     Public WithEvents BlockText As System.Windows.Forms.TextBox
     Public WithEvents KBText As System.Windows.Forms.TextBox
-    Public WithEvents Drive1 As Microsoft.VisualBasic.Compatibility.VB6.DriveListBox
     Public WithEvents MakeDir As System.Windows.Forms.Button
-    Public WithEvents Dir1 As Microsoft.VisualBasic.Compatibility.VB6.DirListBox
     Public WithEvents PCDirectory As Microsoft.VisualBasic.Compatibility.VB6.FileListBox
     Public WithEvents PCRefresh As System.Windows.Forms.Button
     Public WithEvents RunFile As System.Windows.Forms.Button
@@ -805,5 +808,7 @@
     Friend WithEvents Drive As System.Windows.Forms.ComboBox
     Friend WithEvents LogGroup As System.Windows.Forms.GroupBox
     Friend WithEvents Log As System.Windows.Forms.RichTextBox
+    Friend WithEvents cmdBrowse As System.Windows.Forms.Button
+    Friend WithEvents folderBrowser As System.Windows.Forms.FolderBrowserDialog
 #End Region
 End Class

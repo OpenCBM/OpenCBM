@@ -58,35 +58,6 @@ Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = CBM4WINGUI.vsmdi
 	EndGlobalSection
-	GlobalSection(SourceCodeControl) = preSolution
-		SccNumberOfProjects = 8
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = CBM4WINGUI.vbproj
-		SccLocalPath1 = .
-		SccProjectUniqueName2 = GUI4CBM4WINSetup\\GUI4CBM4WINSetup.vdproj
-		SccLocalPath2 = .
-		SccProjectFilePathRelativizedFromConnection2 = GUI4CBM4WINSetup\\
-		SccProjectUniqueName3 = ..\\PaytonByrd_GenericHelpers\\PaytonByrd_GenericHelpers.csproj
-		SccProjectName3 = \u0022$/CBM4WINGUI.root/CBM4WINGUI_1\u0022,\u0020LACAAAAA
-		SccLocalPath3 = ..
-		SccProjectFilePathRelativizedFromConnection3 = PaytonByrd_GenericHelpers\\
-		SccProjectUniqueName4 = ..\\PaytonByrd_GenericHelpersTests\\PaytonByrd_GenericHelpersTests.csproj
-		SccProjectName4 = \u0022$/CBM4WINGUI.root/CBM4WINGUI_1\u0022,\u0020LACAAAAA
-		SccLocalPath4 = ..
-		SccProjectFilePathRelativizedFromConnection4 = PaytonByrd_GenericHelpersTests\\
-		SccProjectUniqueName5 = ..\\OpenCBMInstallHelper\\OpenCBMInstallHelper.csproj
-		SccProjectName5 = \u0022$/CBM4WINGUI.root/CBM4WINGUI_1\u0022,\u0020LACAAAAA
-		SccLocalPath5 = ..
-		SccProjectFilePathRelativizedFromConnection5 = OpenCBMInstallHelper\\
-		SccProjectUniqueName6 = ..\\PaytonByrd_ProcessConfiguration\\PaytonByrd_ProcessConfiguration.csproj
-		SccProjectName6 = \u0022$/CBM4WINGUI.root/CBM4WINGUI_1\u0022,\u0020LACAAAAA
-		SccLocalPath6 = ..
-		SccProjectFilePathRelativizedFromConnection6 = PaytonByrd_ProcessConfiguration\\
-		SccProjectUniqueName7 = ..\\PaytonByrd_ProcessConfigurationTests\\PaytonByrd_ProcessConfigurationTests.csproj
-		SccProjectName7 = \u0022$/CBM4WINGUI.root/CBM4WINGUI_1\u0022,\u0020LACAAAAA
-		SccLocalPath7 = ..
-		SccProjectFilePathRelativizedFromConnection7 = PaytonByrd_ProcessConfigurationTests\\
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

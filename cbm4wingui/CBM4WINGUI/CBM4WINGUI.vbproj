@@ -9,7 +9,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <AssemblyName>GUI4CBM4WIN</AssemblyName>
     <OutputType>WinExe</OutputType>
-    <StartupObject>GUI4CBM4WIN.MainForm</StartupObject>
+    <StartupObject>GUI4CBM4WIN.My.MyApplication</StartupObject>
     <AssemblyMajorVersion>0</AssemblyMajorVersion>
     <AssemblyMinorVersion>4</AssemblyMinorVersion>
     <AssemblyRevisionNumber>1</AssemblyRevisionNumber>
@@ -20,10 +20,14 @@
     <RootNamespace>GUI4CBM4WIN</RootNamespace>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>.\bin\</OutputPath>
@@ -99,6 +103,10 @@
     <Compile Include="Installer1.vb">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
     <Compile Include="Options.Designer.vb">
       <SubType>Code</SubType>
       <DependentUpon>Options.vb</DependentUpon>
@@ -136,6 +144,10 @@
     </EmbeddedResource>
     <Content Include="CBM4WINGUI.ico" />
     <Content Include="license.txt" />
+    <Content Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </Content>
     <None Include="lib\cbmcopy.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -184,9 +196,6 @@
     <None Include="lib\opencbmvice.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="My Project\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>
