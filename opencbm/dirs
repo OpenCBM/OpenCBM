@@ -16,5 +16,6 @@ DIRS= \
 	sys
 
 OPTIONAL_DIRS= \
+	addon \
 	nibtools \
 	mnib36

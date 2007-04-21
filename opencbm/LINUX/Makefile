@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.11 2007-03-22 12:50:07 strik Exp $
+# $Id: Makefile,v 1.12 2007-04-21 07:56:35 wmsr Exp $
 
 include LINUX/config.make
 
@@ -19,7 +19,7 @@ SUBDIRS_PLUGIN_XU1541 = lib/plugin/xu1541
 
 SUBDIRS_PLUGIN_XA1541 = lib/plugin/xa1541 sys/linux/
 
-SUBDIRS_OPTIONAL = mnib36 nibtools
+SUBDIRS_OPTIONAL = addon nibtools mnib36
 
 
 SUBDIRS_PLUGIN          = $(SUBDIRS_PLUGIN_XU1541) $(SUBDIRS_PLUGIN_XA1541)
