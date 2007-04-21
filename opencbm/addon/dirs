@@ -1,0 +1,4 @@
+DIRS= \
+	frm_analyzer \
+	weaktest
+

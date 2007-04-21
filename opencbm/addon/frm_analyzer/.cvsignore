@@ -1,0 +1,12 @@
+frm_analyzer.lst
+frm_analyzer.inc
+*Debug
+*Release
+objchk*
+objfre*
+obj*
+build*.log
+build*.err
+build*.wrn
+*.plg
+frm_analyzer
