@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2007-04-21 18:16:09 cnvogelg Exp $
+# $Id: Makefile,v 1.9 2007-04-21 19:17:10 cnvogelg Exp $
 
 include ../LINUX/config.make
 
@@ -12,10 +12,7 @@ LIBCBMCOPY = ../libcbmcopy
 LIBD64COPY = ../libd64copy
 LIBARCH    = ../arch/linux/
 
-SHLIB   = libopencbm.$(SHLIB_EXT)
-SHLIBV  = $(SHLIB).$(MAJ)
-SHLIBV3 = $(SHLIBV).$(MIN).$(REL)
-LIB     = libopencbm.a
+LIBNAME = libopencbm
 SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c \
 	  configuration.c LINUX/configuration_name.c \
 	  LINUX/getpluginaddress.c \
@@ -57,11 +54,7 @@ $(SHLIBV): $(SHLIBV3)
 	ln -sf $< $@
 
 $(SHLIBV3): $(SHOBJS)
-ifeq "$(OS)" "Darwin"
-	$(CC) $(LDFLAGS) -dynamiclib -o $@ $(SHOBJS) $(LIBARCH)/libarch.a -ldl -lc
-else
-	$(CC) $(LDFLAGS) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a -ldl
-endif
+	$(CC) $(LDFLAGS) $(SHLIB_SWITCH) -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a -ldl
 
 $(LIB): $(OBJS)
 	$(AR) r $@ $(OBJS)

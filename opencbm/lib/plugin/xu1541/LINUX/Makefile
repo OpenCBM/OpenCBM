@@ -1,13 +1,10 @@
-# $Id: Makefile,v 1.3 2007-04-21 18:16:10 cnvogelg Exp $
+# $Id: Makefile,v 1.4 2007-04-21 19:17:10 cnvogelg Exp $
 
 include ../../../LINUX/config.make
 
 .PHONY: all clean mrproper install uninstall install-files
 
-SHLIB   = libopencbm-xu1541.$(SHLIB_EXT)
-SHLIBV  = $(SHLIB).$(MAJ)
-SHLIBV3 = $(SHLIBV).$(MIN).$(REL)
-LIB     = libopencbm-xu1541.a
+LIBNAME = libopencbm-xu1541
 SRCS    = archlib.c xu1541.c s1_s2_pp.c
 
 OBJS    = $(SRCS:.c=.o)
@@ -50,11 +47,7 @@ $(SHLIBV): $(SHLIBV3)
 	ln -sf $< $@
 
 $(SHLIBV3): $(SHOBJS)
-ifeq "$(OS)" "Darwin"
-	$(CC) $(LDFLAGS) -dynamiclib -o $@ $(SHOBJS) -lusb -ldl
-else
-	$(CC) $(LDFLAGS) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) -lusb -ldl
-endif
+	$(CC) $(LDFLAGS) $(SHLIB_SWITCH) -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) -lusb -ldl
 
 $(LIB): $(OBJS)
 	$(AR) r $@ $(OBJS)

@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.9 2007-04-21 18:16:09 cnvogelg Exp $
+# $Id: config.make,v 1.10 2007-04-21 19:17:09 cnvogelg Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -43,12 +43,21 @@ CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DOPENCBM_VERSION=$(VER
 LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
 SHLIB_EXT    = so
+SHLIB_SWITCH = -shared
 LINK_FLAGS   = -L../lib -L../arch/$(ARCH) -lopencbm -larch
 SONAME       = -Wl,-soname -Wl,
 CC           = gcc
 AR           = ar
 LDCONFIG     = /sbin/ldconfig
 OD_FLAGS     = -w8 -txC -v -An
+
+#
+# library definitions
+#
+SHLIB   = $(LIBNAME).$(SHLIB_EXT)
+SHLIBV  = $(SHLIB).$(MAJ)
+SHLIBV3 = $(SHLIBV).$(MIN).$(REL)
+LIB     = $(LIBNAME).a
 
 #
 # location of the kernel source directory
@@ -77,10 +86,16 @@ KERNEL_FLAGS =
 #
 ifeq "$(OS)" "Darwin"
 
+LIBUSBDIR = $(HOME)/libusb
+
 OD_FLAGS  = -txC -v -An
 CFLAGS   += -DOPENCBM_MAC
 SHLIB_EXT = dylib
-LIBUSBDIR = $(HOME)/libusb
+SHLIB_SWITCH = -dynamiclib -compatibility_version $(MAJ).$(MIN) -current_version $(MAJ).$(MIN).$(REL)
+SONAME = -install_name $(PREFIX)/lib/
+
+SHLIBV  = $(LIBNAME).$(MAJ).$(SHLIB_EXT)
+SHLIBV3 = $(LIBNAME).$(MAJ).$(MIN).$(REL).$(SHLIB_EXT)
 
 endif
 
