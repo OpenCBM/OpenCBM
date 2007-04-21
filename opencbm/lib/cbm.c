@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.18 2007-03-22 12:50:10 strik Exp $ \n
+** \version $Id: cbm.c,v 1.19 2007-04-21 18:16:09 cnvogelg Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -53,7 +53,11 @@ struct plugin_information_s Plugin_information = { 0 };
 #ifdef WIN32
     #define DEFAULT_PLUGIN_NAME "opencbm-xu1541.dll"
 #else
-    #define DEFAULT_PLUGIN_NAME "/usr/local/lib/opencbm/plugin/libopencbm-xu1541.so"
+#ifdef OPENCBM_MAC
+    #define DEFAULT_PLUGIN_NAME PREFIX "/lib/opencbm/plugin/libopencbm-xu1541.dylib"
+#else
+    #define DEFAULT_PLUGIN_NAME PREFIX "/lib/opencbm/plugin/libopencbm-xu1541.so"
+#endif
 #endif
 
 

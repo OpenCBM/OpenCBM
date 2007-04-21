@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/LINUX/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration_name.c,v 1.2 2007-03-22 13:12:21 strik Exp $ \n
+** \version $Id: configuration_name.c,v 1.3 2007-04-21 18:16:09 cnvogelg Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file
@@ -24,7 +24,7 @@
 #include <string.h>
 
 
-#define DEFAULT_FILENAME "/etc/opencbm.conf"
+#define DEFAULT_FILENAME PREFIX "/etc/opencbm.conf"
 
 #define MAX_PATH_ 1024
 

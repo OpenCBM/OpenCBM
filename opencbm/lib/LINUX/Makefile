@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.7 2007-03-22 12:50:17 strik Exp $
+# $Id: Makefile,v 1.8 2007-04-21 18:16:09 cnvogelg Exp $
 
 include ../LINUX/config.make
 
@@ -12,7 +12,7 @@ LIBCBMCOPY = ../libcbmcopy
 LIBD64COPY = ../libd64copy
 LIBARCH    = ../arch/linux/
 
-SHLIB   = libopencbm.so
+SHLIB   = libopencbm.$(SHLIB_EXT)
 SHLIBV  = $(SHLIB).$(MAJ)
 SHLIBV3 = $(SHLIBV).$(MIN).$(REL)
 LIB     = libopencbm.a
@@ -25,7 +25,7 @@ SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c \
 OBJS    = $(SRCS:.c=.o)
 SHOBJS  = $(SRCS:.c=.lo)
 
-all: $(SHLIB) $(LIB) $(SHLIBV) $(SHLIBV3)
+all: $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
 
 clean:
 	rm -f $(OBJS) $(SHOBJS) $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
@@ -40,7 +40,9 @@ install-files:
 	cd $(LIBDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
 
 install: install-files
+ifeq "$(OS)" "Linux"
 	ldconfig -n $(LIBDIR)
+endif
 
 uninstall:
 	cd $(LIBDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
@@ -55,7 +57,11 @@ $(SHLIBV): $(SHLIBV3)
 	ln -sf $< $@
 
 $(SHLIBV3): $(SHOBJS)
-	$(CC) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a -lusb -ldl
+ifeq "$(OS)" "Darwin"
+	$(CC) $(LDFLAGS) -dynamiclib -o $@ $(SHOBJS) $(LIBARCH)/libarch.a -ldl -lc
+else
+	$(CC) $(LDFLAGS) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a -ldl
+endif
 
 $(LIB): $(OBJS)
 	$(AR) r $@ $(OBJS)

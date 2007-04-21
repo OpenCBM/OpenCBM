@@ -27,7 +27,11 @@
 
 # include <unistd.h>
 # include <errno.h>
+
+/* error.h is only available on Linux */
+#ifndef OPENCBM_MAC
 # include <error.h>
+#endif
 
 # define ULONG_PTR unsigned long
 
@@ -51,7 +55,11 @@
  extern void arch_error(int AUnused, unsigned int ErrorCode, const char *format, ...);
  extern char *arch_strerror(unsigned int ErrorCode);
 #else
+#ifdef OPENCBM_MAC
+ extern void arch_error(int AUnused, unsigned int ErrorCode, const char *format, ...);
+#else
 # define arch_error error
+#endif
 # define arch_strerror strerror
 #endif
 

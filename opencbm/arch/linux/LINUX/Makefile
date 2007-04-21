@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2006-07-20 11:45:28 strik Exp $
+# $Id: Makefile,v 1.4 2007-04-21 18:16:09 cnvogelg Exp $
 
 include ../../LINUX/config.make
 
@@ -9,6 +9,10 @@ CFLAGS += -I../../include
 LIB     = libarch.a
 SRCS    = ctrlbreak.c \
 	  file.c
+
+ifeq "$(OS)" "Darwin"
+SRCS += error.c
+endif
 
 OBJS    = $(SRCS:.c=.lo)
 

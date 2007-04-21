@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.8 2007-03-22 12:50:07 strik Exp $
+# $Id: config.make,v 1.9 2007-04-21 18:16:09 cnvogelg Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -22,21 +22,33 @@ PLUGINDIR   = $(PREFIX)/lib/opencbm/plugin/
 #
 # Where to find the xu1541 firmware
 #
-XU1541DIR   = ~/xu1541/firmware/
+XU1541DIR   = $(HOME)/xu1541/firmware/
+
+#
+# Where to find libusb (libusb.sf.net)
+#
+LIBUSBDIR   = /usr
+
+#
+# define os name
+#
+OS = $(shell uname -s)
 
 #
 # compiler/linker flags. Should be ok.
 #
 ARCH	     = linux
 
-CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DOPENCBM_VERSION=$(VERSION)
+CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DOPENCBM_VERSION=$(VERSION) -DPREFIX=\"$(PREFIX)\"
 LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
+SHLIB_EXT    = so
 LINK_FLAGS   = -L../lib -L../arch/$(ARCH) -lopencbm -larch
 SONAME       = -Wl,-soname -Wl,
 CC           = gcc
 AR           = ar
 LDCONFIG     = /sbin/ldconfig
+OD_FLAGS     = -w8 -txC -v -An
 
 #
 # location of the kernel source directory
@@ -60,6 +72,17 @@ KERNEL_SOURCE = `for d in {/lib/modules/\`uname -r\`/build,/usr/src/linux}; do t
 #KERNEL_FLAGS = -DDIRECT_PORT_ACCESS
 KERNEL_FLAGS =
 
+#
+# Mac specific modifications
+#
+ifeq "$(OS)" "Darwin"
+
+OD_FLAGS  = -txC -v -An
+CFLAGS   += -DOPENCBM_MAC
+SHLIB_EXT = dylib
+LIBUSBDIR = $(HOME)/libusb
+
+endif
 
 #
 # common compile flags
@@ -70,7 +93,7 @@ KERNEL_FLAGS =
 	$(CC) $(SHLIB_CFLAGS) -c -o $@ $<
 
 .o65.inc:
-	test -s $< && od -w8 -txC -v -An $< | \
+	test -s $< && od $(OD_FLAGS) $< | \
 	sed 's/\([0-9a-f]\{2\}\) */0x\1,/g; $$s/,$$//' > $@
 
 

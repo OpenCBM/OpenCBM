@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.20 2007-03-22 12:50:09 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.21 2007-04-21 18:16:09 cnvogelg Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \authors With additions from Wolfgang Moser \n
@@ -79,6 +79,11 @@ extern void vdd_usleep(CBM_FILE f, unsigned int howlong);
 # define WINAPI /*!< WINAPI is a dummy on Linux */
 # define CBM_FILE int /*!< The "file descriptor" for an opened driver */
 # define CBM_FILE_INVALID ((CBM_FILE)-1)
+
+/* On Macs we need to define the __u_char */
+#ifdef __APPLE__
+typedef unsigned char __u_char;
+#endif
 
 #endif
 
