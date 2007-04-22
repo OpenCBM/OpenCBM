@@ -498,19 +498,7 @@ Friend Class MainForm
             Waiting.Label.Text = WaitMessage
             VB6.ShowForm(Waiting, VB6.FormShowConstants.Modeless, Me)
 
-            'cmd /c is needed in order to have a shell write to a file (long, complicated explanation)
-            '1> redirects stdout to a file, and 2> redirects stderr to a file (Win2K/XP only)
-
-            'All these quotes [chr$(34)] are needed to handle spaces.  So you get:
-            'cmd /c ""path\command" args "files""
-
-            'OutFile = Path.Combine(OUTPUT_PATH, TEMPFILE1)
-            'ErrFile = Path.Combine(OUTPUT_PATH, TEMPFILE2)
-
             CmdLine = String.Format("{0} {1}", Action, Args)
-
-            'System.Diagnostics.Debug.WriteLine(CmdLine)
-            'ShellWait(CmdLine, AppWinStyle.Hide)
 
             Dim p As Process = New Process()
 
@@ -521,9 +509,9 @@ Friend Class MainForm
             p.StartInfo.RedirectStandardOutput = True
             p.StartInfo.UseShellExecute = False
 
-
             If (p.Start()) Then
 
+                Dim stdOutBuffer As New System.Text.StringBuilder
                 Dim stdOut As StreamReader = p.StandardOutput
                 Dim stdOutString As String
                 Dim stdOutLength As Long = 0
@@ -532,6 +520,7 @@ Friend Class MainForm
                 While Not p.HasExited
 
                     stdOutString = stdOut.ReadLine
+                    stdOutBuffer.Append(stdOutString + vbNewLine)
 
                     If Not FirstLog Then
                         WriteLog(Nothing, stdOutString)
@@ -546,6 +535,7 @@ Friend Class MainForm
                 End While
 
                 stdOutString = stdOut.ReadToEnd
+                stdOutBuffer.Append(stdOutString)
 
                 If Not FirstLog Then
                     WriteLog(Nothing, stdOutString)
@@ -556,7 +546,7 @@ Friend Class MainForm
 
                 Log.AppendText("========================================" & vbNewLine)
 
-                DoCommand.Output += stdOutString
+                DoCommand.Output = stdOutBuffer.ToString()
                 DoCommand.Errors = stdErr.ReadToEnd()
 
             End If
@@ -742,7 +732,12 @@ Friend Class MainForm
 
             Quote1 = InStr(FullString, Chr(34))
             Quote2 = InStr(Quote1 + 1, FullString, Chr(34))
-            ExtractQuotes = Mid(FullString, Quote1 + 1, Quote2 - Quote1 - 1)
+            If Quote1 < Quote2 And Quote1 > -1 And Quote2 > -1 Then
+                ExtractQuotes = Mid(FullString, Quote1 + 1, Quote2 - Quote1 - 1)
+            Else
+                Me.WriteLog(Nothing, String.Format("FullString: [{0}]", FullString))
+
+            End If
 
         Catch exception As Exception
 

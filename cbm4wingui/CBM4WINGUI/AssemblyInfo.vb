@@ -41,7 +41,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyTrademark("OpenCBM, Gui4cbm4win, cbm4linux, cbm4win")>
 <Assembly: AssemblyCulture("")>
 
-<Assembly: AssemblyVersion("0.6.1.0")> 
-<Assembly: AssemblyFileVersionAttribute("0.6.1.0")> 
+<Assembly: AssemblyVersion("0.6.3.0")> 
+<Assembly: AssemblyFileVersionAttribute("0.6.3.0")> 
 
 <Assembly: ComVisibleAttribute(False)> 

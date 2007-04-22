@@ -76,23 +76,14 @@ Friend Class OptionsForm
     End Sub
 
     Private Sub CBMDetect_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles CBMDetect.Click
-        Dim What As String = vbNullString
         Dim StdOut As String = Path.Combine(OUTPUT_PATH, TEMPFILE1)
         Dim StdErr As String = Path.Combine(OUTPUT_PATH, TEMPFILE2)
-        MainForm.PubDoCommand("cbmctrl", "detect", "Detecting Drives...", False)
+        Dim Result As String = _
+            MainForm.PubDoCommand("cbmctrl", "detect", "Detecting Drives...", False)
 
         'Read in the complete output file -------------
-        If (File.Exists(StdOut)) Then
-            Dim stream As StreamReader = File.OpenText(StdOut)
-            What = stream.ReadToEnd()
-            stream.Close()
-
-            File.Delete(StdOut)
-            If File.Exists(StdErr) Then File.Delete(StdErr)
-        End If
-
-        If (What = "") Then What = "No drives found, please check cbm4win installation and directory paths!"
-        MsgBox(What, MsgBoxStyle.OkOnly, "Drive Detection")
+        If (Result = "") Then Result = "No drives found, please check cbm4win installation and directory paths!"
+        MsgBox(Result, MsgBoxStyle.OkOnly, "Drive Detection")
     End Sub
 
     Private Sub ResetBus_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles ResetBus.Click
@@ -115,6 +106,12 @@ Friend Class OptionsForm
                 Case 4
                     TransferString = "auto"
             End Select
+        End If
+    End Sub
+
+    Private Sub cmdBrowse_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdBrowse.Click
+        If _BrowseFolders.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
+            StartingPath.Text = _BrowseFolders.SelectedPath
         End If
     End Sub
 End Class

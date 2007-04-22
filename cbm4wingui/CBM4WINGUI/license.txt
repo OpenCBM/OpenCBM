@@ -1,4 +1,4 @@
-Gui4cbm4win 0.6.2 -- GUI for cbm4win, version 0.6.2, 2007-04-16
+Gui4cbm4win 0.6.3 -- GUI for cbm4win, version 0.6.3, 2007-04-16
 
 Copyright (C) 2004-2005 Leif Bloomquist
 Copyright (C) 2006      Wolfgang Moser
