@@ -27,10 +27,10 @@
 #
 internal   opencbm-internal
 #
-opencbm    cbm4win &internal
+opencbm    cbm4win &internal &addon
 #
-cbm4win	   cbm4win &internal
-cbm4linux  cbm4win &internal
+cbm4win	   cbm4win &internal &addon
+cbm4linux  cbm4win &internal &addon
 #
 opencbm-src cbm4win
 #
