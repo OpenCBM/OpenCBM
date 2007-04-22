@@ -1,3 +1,5 @@
+weaktest.lst
+weaktest.inc
 *Debug
 *Release
 objchk*

@@ -1,7 +1,6 @@
-# $Id: Makefile,v 1.2 2007-04-22 16:03:25 strik Exp $
+# $Id: Makefile,v 1.3 2007-04-22 18:46:50 wmsr Exp $
 
 include ../../LINUX/config.make
-
 CFLAGS     := $(subst ../,../../,$(CFLAGS))
 LINK_FLAGS := $(subst ../,../../,$(LINK_FLAGS))
 
