@@ -5,10 +5,10 @@
 
 #define ARCH_EMPTY
 
-#ifdef WIN32
-# include "version.h"
+#include "version.h"
+#define OPENCBM_VERSION OPENCBM_VERSION_STRING
 
-# define OPENCBM_VERSION OPENCBM_VERSION_STRING
+#ifdef WIN32
 # define ARCH_CBM_LINUX_WIN( _linux, _win) _win
 
 # include <stdio.h>

@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.10 2007-04-21 19:17:09 cnvogelg Exp $
+# $Id: config.make,v 1.11 2007-04-22 15:23:21 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -39,7 +39,7 @@ OS = $(shell uname -s)
 #
 ARCH	     = linux
 
-CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DOPENCBM_VERSION=$(VERSION) -DPREFIX=\"$(PREFIX)\"
+CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\"
 LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
 SHLIB_EXT    = so
@@ -111,15 +111,6 @@ endif
 	test -s $< && od $(OD_FLAGS) $< | \
 	sed 's/\([0-9a-f]\{2\}\) */0x\1,/g; $$s/,$$//' > $@
 
-
-#
-# package version (major.minor.release). Don't touch.
-#
-MAJ = 0
-MIN = 4
-REL = 0
-
-VERSION = '"$(MAJ).$(MIN).$(REL)"'
 
 #
 # cross assembler definitions.
