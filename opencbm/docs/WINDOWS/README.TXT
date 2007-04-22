@@ -24,13 +24,13 @@ There is a web page available for cbm4win. Get updates from there:
    - Windows 98
    - Windows Me (Millenium Edition)
 
-   In fact, CBM4WIN will refuse to load on one of these operating systems.
+   In fact, OpenCBM will refuse to load on one of these operating systems.
    Anyway, support for Windows 98 (Second Edition) and Me is planned.
 
 
 2. Needed equipment
 
-   CBM4WIN needs an XA1541 active cable or an XM1541 multitasking cable to
+   OpenCBM needs an XA1541 active cable or an XM1541 multitasking cable to
    work.  In fact, only the XA1541 cable has been tested.
 
    Furthermore, it needs a CBM serial bus drive, for example, a CBM 1540, CBM
@@ -75,7 +75,7 @@ There is a web page available for cbm4win. Get updates from there:
    Feel free to contact me if you have questions, suggestions, or you just want
    to confirm that something does work or does not. Specifically, if you are
    using cables not specified above, or drives not specified above, I would
-   like to hear if CBM4WIN works with this combo.
+   like to hear if OpenCBM works with this combo.
 
    More specifically, I have setup a project page on sourceforge:
 

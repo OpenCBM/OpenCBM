@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.11 2007-02-11 16:53:41 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.12 2007-04-22 10:32:38 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **
@@ -27,7 +27,7 @@
 #include <parallel.h>
 
 /*! Name of the executable to be debugged */
-#define DBG_PROGNAME "CBM4WIN.SYS"
+#define DBG_PROGNAME "OPENCBM.SYS"
 
 #include "cbmioctl.h"
 #include "memtags.h"

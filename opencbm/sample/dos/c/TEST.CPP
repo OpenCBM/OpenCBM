@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/test.cpp \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: TEST.CPP,v 1.5 2006-03-12 16:35:35 strik Exp $ \n
+** \version $Id: TEST.CPP,v 1.6 2007-04-22 10:32:36 strik Exp $ \n
 ** \n
 ** \brief Some tests for the DOS API
 **
@@ -267,11 +267,11 @@ int main(int argc, char **argv)
     printf("cbm_identify returned: %u - '%s'.\n\n", (unsigned int) devicetype,
                          devicetype_str);
 
-    n = cbm_exec_command(f, drive, "S0:CBM4WIN.VDD", 0);
+    n = cbm_exec_command(f, drive, "S0:OPENCBM.VDD", 0);
     printf("cbm_exec_command(scratch) %s!\n", n==0 ? "success" : "FAILED");
 
-    writefile(f, drive, "CBM4WIN.VDD,S,W");
-    readfile(f, drive, "CBM4WIN.VDD,S,R");
+    writefile(f, drive, "OPENCBM.VDD,S,W");
+    readfile(f, drive, "OPENCBM.VDD,S,R");
 
     morse(f, drive);
 

@@ -1,8 +1,8 @@
-rem $Id: postbuild_local.bat.sample,v 1.6 2006-04-27 20:44:22 wmsr Exp $
+rem $Id: postbuild_local.bat.sample,v 1.7 2007-04-22 10:32:17 strik Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR POSTBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
-rem CURRENT CBM4WIN DIRECTORY.
+rem CURRENT OPENCBM DIRECTORY.
 rem
 rem EXAMPLE:
 rem

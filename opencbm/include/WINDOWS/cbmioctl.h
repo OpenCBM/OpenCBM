@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.17 2006-09-24 11:16:11 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.18 2007-04-22 10:32:34 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -242,10 +242,10 @@ typedef CBMT_SINGLEBYTE CBMT_PARBURST_PWRITE_IN;
 /*! BASE number of the custom IOCTL */
 #define CBMCTRL_BASE    0x0000A424
 /*! INDEX number of the custom IOCTLs */
-#define CBM4WIN_IOCTL_INDEX  0x823
+#define OPENCBM_IOCTL_INDEX  0x823
 
 /*! Define a IOCTL */
-#define _CBMIO(_a,_b) CTL_CODE(CBMCTRL_BASE, (CBM4WIN_IOCTL_INDEX+(_b)), \
+#define _CBMIO(_a,_b) CTL_CODE(CBMCTRL_BASE, (OPENCBM_IOCTL_INDEX+(_b)), \
                    METHOD_BUFFERED, FILE_ANY_ACCESS)
 
                                                   // INPUT:               OUTPUT:

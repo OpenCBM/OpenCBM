@@ -109,12 +109,12 @@ opencbmvdd.dll,,,2
 Spiro        = "Spiro Trikaliotis"
 DiskName     = "OpenCBM driver diskette"
 ClassName    = "CBM drivers"
-DriverName   = "CBM4WIN parallel port driver"
-ServiceName  = "CBM4WIN Service"
+DriverName   = "OpenCBM parallel port driver"
+ServiceName  = "OpenCBM Service"
 
 [Strings.0407]
 Spiro        = "Spiro Trikaliotis"
 DiskName     = "OpenCBM Treiber Diskette"
 ClassName    = "CBM Treiber"
-DriverName   = "CBM4WIN Parallel-Port-Treiber"
-ServiceName  = "CBM4WIN Service"
+DriverName   = "OpenCBM Parallel-Port-Treiber"
+ServiceName  = "OpenCBM Service"

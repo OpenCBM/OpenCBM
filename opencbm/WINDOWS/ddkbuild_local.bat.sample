@@ -1,8 +1,8 @@
-rem $Id: ddkbuild_local.bat.sample,v 1.7 2007-03-22 12:50:08 strik Exp $
+rem $Id: ddkbuild_local.bat.sample,v 1.8 2007-04-22 10:32:15 strik Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR DDKBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
-rem CURRENT CBM4WIN DIRECTORY.
+rem CURRENT OPENCBM DIRECTORY.
 rem
 rem EXAMPLE:
 rem

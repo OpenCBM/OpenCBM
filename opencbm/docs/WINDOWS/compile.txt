@@ -1,4 +1,4 @@
-                            HOW TO COMPILE CBM4WIN
+                            HOW TO COMPILE OpenCBM
 
 1. INTRODUCTION
 
@@ -58,7 +58,7 @@ might want to use DDKBUILD, which helps you use the DDK build tools from the MS
 VC++ IDE.
 
 
-3. BUILDING CBM4WIN
+3. BUILDING OpenCBM
 
 The steps to build the files highly depend on your scenario, that is, if you use
 the DDK, DDK + DDKBUILD + MS VC, or MS VC only. Because of this, I show you how

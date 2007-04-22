@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.2 2007-03-22 13:12:22 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.3 2007-04-22 10:32:36 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -830,8 +830,8 @@ cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
     if (BufferLen >= sizeof(outBuffer->DllVersion) + offsetof(CBMT_I_INSTALL_OUT, DllVersion))
     {
         outBuffer->DllVersion =
-            CBMT_I_INSTALL_OUT_MAKE_VERSION(CBM4WIN_VERSION_MAJOR, CBM4WIN_VERSION_MINOR,
-                                            CBM4WIN_VERSION_SUBMINOR, CBM4WIN_VERSION_DEVEL);
+            CBMT_I_INSTALL_OUT_MAKE_VERSION(OPENCBM_VERSION_MAJOR, OPENCBM_VERSION_MINOR,
+                                            OPENCBM_VERSION_SUBMINOR, OPENCBM_VERSION_DEVEL);
     }
 
     // if there is even room for the dll version extension, set the dll version extension
@@ -839,7 +839,7 @@ cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
     if (BufferLen >= sizeof(outBuffer->DllVersionEx) + offsetof(CBMT_I_INSTALL_OUT, DllVersionEx))
     {
         outBuffer->DllVersionEx =
-            CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(CBM4WIN_VERSION_PATCHLEVEL);
+            CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(OPENCBM_VERSION_PATCHLEVEL);
     }
 
     FUNC_LEAVE_INT(

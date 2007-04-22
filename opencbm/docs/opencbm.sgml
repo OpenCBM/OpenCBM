@@ -1,7 +1,7 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.5 2006-04-29 07:47:52 strik Exp $ -->
+<!-- $Id: opencbm.sgml,v 1.6 2007-04-22 10:32:32 strik Exp $ -->
 <title>opencbm 0.4.0 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
@@ -540,7 +540,7 @@ Congratulation, you have successfully set up your opencbm installation!
 <sect1>Installing opencbm on Windows (cbm4win)<label id="cbm4win-install">
 
 <p>
-<it/WARNING! If you have already installed a previous version of CBM4WIN on your
+<it/WARNING! If you have already installed a previous version of OpenCBM on your
 machine, you have to uninstall it before installing a new version. For this, go
 to the directory where the old version is located, and enter instcbm
 --remove./

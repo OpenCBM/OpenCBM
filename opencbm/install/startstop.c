@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.19 2007-03-22 12:50:09 strik Exp $ \n
+** \version $Id: startstop.c,v 1.20 2007-04-22 10:32:35 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -319,13 +319,13 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
     printf("\n\nThe following configuration is used:\n\n");
 
     instcbmVersion =
-        CBMT_I_INSTALL_OUT_MAKE_VERSION(CBM4WIN_VERSION_MAJOR,
-                                        CBM4WIN_VERSION_MINOR,
-                                        CBM4WIN_VERSION_SUBMINOR,
-                                        CBM4WIN_VERSION_DEVEL);
+        CBMT_I_INSTALL_OUT_MAKE_VERSION(OPENCBM_VERSION_MAJOR,
+                                        OPENCBM_VERSION_MINOR,
+                                        OPENCBM_VERSION_SUBMINOR,
+                                        OPENCBM_VERSION_DEVEL);
 
     instcbmVersionEx =
-        CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(CBM4WIN_VERSION_PATCHLEVEL);
+        CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(OPENCBM_VERSION_PATCHLEVEL);
 
     OutputVersionString("INSTCBM version: ", instcbmVersion, instcbmVersionEx);
 

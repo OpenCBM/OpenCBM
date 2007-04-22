@@ -1,6 +1,6 @@
-INSTALLATION VON CBM4WIN
+INSTALLATION VON OpenCBM
 
-WARNUNG! Wenn du schon eine ältere Version von CBM4WIN auf deinem Rechner
+WARNUNG! Wenn du schon eine ältere Version von OpenCBM auf deinem Rechner
 installiert hast, musst du diese unbedingt erst deinstallieren, bevor du eine
 neue Version installierst. Dafür gehe in das Verzeichnis, wo die alte Version
 installiert ist, und gebe instcbm --remove ein.
@@ -151,7 +151,7 @@ folgenden Befehle sondern nur die, die du wirklich ausführen möchtest.
   benutze das cbmformat-Programm.
 
 
-Falls du den cbm4win-Treiber komplett von deinem Rechner entfernen möchtest,
+Falls du den OpenCBM-Treiber komplett von deinem Rechner entfernen möchtest,
 verwende dazu den "instcbm --remove"-Befehl.
 
 Du kannst einen Blick auf die möglichen cbmctrl-Befehle werfen, indem du cbmctrl

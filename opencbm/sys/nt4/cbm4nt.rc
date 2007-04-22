@@ -4,7 +4,7 @@
 
 #define VER_FILETYPE                VFT_DRV
 #define VER_FILESUBTYPE             VFT2_DRV_SYSTEM
-#define VER_FILEDESCRIPTION_STR     "CBM4WIN Parallel Port Driver, NT4 version"
+#define VER_FILEDESCRIPTION_STR     "OpenCBM Parallel Port Driver, NT4 version"
 #define VER_INTERNALNAME_STR        "cbm4nt.sys"
 
 #include "version.common.h"
