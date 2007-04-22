@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.5 2007-03-22 12:50:17 strik Exp $ \n
+** \version $Id: upload.c,v 1.6 2007-04-22 09:41:19 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -183,6 +183,8 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
     for(i = 0; i < Size; i += 0x100)
     {
+        char dummy;
+
         // Calculate how much bytes are left
         c = Size - i;
 
@@ -213,6 +215,9 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
         // might need to use it again for another M-W command
         DriveMemAddress += c;
         StoreBuffer     += c;
+
+        // skip the trailing CR
+        cbm_raw_read(HandleDevice, &dummy, 1);
 
         // The UNTALK is the signal for end of transmission
         cbm_untalk(HandleDevice);
