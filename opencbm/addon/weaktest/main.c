@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.1 2007-04-21 09:05:48 wmsr Exp $";
+    "@(#) $Id: main.c,v 1.2 2007-04-22 16:03:25 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -34,7 +34,9 @@ const unsigned char weakstart[] = {
 
 /* setable via command line */
 static d64copy_severity_e verbosity = sev_warning;
+#if 0 // @TODO unused variable
 static int no_progress = 0;
+#endif
 
 /* other globals */
 static CBM_FILE fd_cbm;

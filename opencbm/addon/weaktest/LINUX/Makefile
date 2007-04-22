@@ -1,6 +1,9 @@
-# $Id: Makefile,v 1.1 2007-04-21 09:05:48 wmsr Exp $
+# $Id: Makefile,v 1.2 2007-04-22 16:03:25 strik Exp $
 
 include ../../LINUX/config.make
+
+CFLAGS     := $(subst ../,../../,$(CFLAGS))
+LINK_FLAGS := $(subst ../,../../,$(LINK_FLAGS))
 
 .PHONY: all mrproper clean install uninstall install-files
 

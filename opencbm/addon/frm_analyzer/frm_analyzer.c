@@ -13,7 +13,7 @@
  
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: frm_analyzer.c,v 1.1 2007-04-21 09:05:47 wmsr Exp $";
+    "@(#) $Id: frm_analyzer.c,v 1.2 2007-04-22 16:03:24 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -62,7 +62,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 //    unsigned char drive, tracks = 35, bump = 1, orig = 0, show_progress = 0;
     unsigned char drive, tracks = 35, bump = 1, orig = 0x4b, show_progress = 0;
     char cmd[40], c, name[20], *arg;
-    int error = 0;
+    int erroroccured = 0;
 
     struct option longopts[] =
     {
@@ -174,14 +174,14 @@ orig=arch_atoc(optarg);
             printf("\n");
         }
 #endif
-        error = cbm_device_status(fd, drive, cmd, sizeof(cmd));
+        erroroccured = cbm_device_status(fd, drive, cmd, sizeof(cmd));
 
-        if(error && status)
+        if(erroroccured && status)
         {
             printf("%s\n", cmd);
         }
 
-        if(!error && (tracks > 35))
+        if(!erroroccured && (tracks > 35))
         {
             cbm_open(fd, drive, 2, "#", 1);
             cbm_exec_command(fd, drive, "U1:2 0 18 0", 11);
@@ -197,16 +197,18 @@ orig=arch_atoc(optarg);
             cbm_close(fd, drive, 2);
         }
 
-        if(!error && status)
+        if(!erroroccured && status)
         {
             cbm_device_status(fd, drive, cmd, sizeof(cmd));
             printf("%s\n", cmd);
         }
 #if 1   // verbose output
         {
+#if 0 // @TODO unused variables
             float RPMval;
             int sectors, virtGAPsze, remainder, trackTailGAP, flags, retry, lastTr;
             const char *vrfy;
+#endif
             unsigned char data[0x100];
             if (cbm_download(fd, drive, 0x0500, data, sizeof(data)) == sizeof(data))
             {
