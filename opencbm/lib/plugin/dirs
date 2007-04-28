@@ -1,2 +1,5 @@
-DIRS=	xa1541 \
+DIRS= \
+	xa1541
+
+OPTIONAL_DIRS= \
 	xu1541
