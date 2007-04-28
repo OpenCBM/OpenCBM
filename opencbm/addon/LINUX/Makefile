@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2007-04-22 18:46:50 wmsr Exp $
+# $Id: Makefile,v 1.4 2007-04-28 17:01:00 cnvogelg Exp $
 
 include ../LINUX/config.make
 include ./dirs
@@ -17,7 +17,7 @@ all:
 	done
 
 mrproper:
-	@for subdir in $(SUBDIRS_ALL_NON_OPTIONAL); do \
+	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
@@ -25,7 +25,7 @@ mrproper:
 	done
 
 clean:
-	@for subdir in $(SUBDIRS_ALL_NON_OPTIONAL); do \
+	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
@@ -50,7 +50,7 @@ install: install-files
 	done
 
 uninstall: 
-	@for subdir in $(SUBDIRS_ALL_NON_OPTIONAL); do \
+	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
