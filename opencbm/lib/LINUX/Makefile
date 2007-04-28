@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2007-04-21 19:17:10 cnvogelg Exp $
+# $Id: Makefile,v 1.10 2007-04-28 17:18:33 cnvogelg Exp $
 
 include ../LINUX/config.make
 
@@ -12,52 +12,30 @@ LIBCBMCOPY = ../libcbmcopy
 LIBD64COPY = ../libd64copy
 LIBARCH    = ../arch/linux/
 
+# specify lib
 LIBNAME = libopencbm
 SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c \
 	  configuration.c LINUX/configuration_name.c \
 	  LINUX/getpluginaddress.c \
 	  $(foreach t,cbmcopy pp s1 s2, $(LIBCBMCOPY)/$(t).c) \
 	  $(foreach t,d64copy fs gcr pp s1 s2 std, $(LIBD64COPY)/$(t).c)
+LIBS = $(LIBARCH)/libarch.a -ldl
 
-OBJS    = $(SRCS:.c=.o)
-SHOBJS  = $(SRCS:.c=.lo)
+all: build-lib
 
-all: $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
-
-clean:
-	rm -f $(OBJS) $(SHOBJS) $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
+clean: clean-lib
 	rm -f $(LIBD64COPY)/*.o65 $(LIBCBMCOPY)/*.o65
 
 mrproper: clean
 	rm -f $(LIBCBMCOPY)/*.inc $(LIBD64COPY)/*.inc
 
-install-files:
-	install -m 755 $(SHLIBV3) $(LIBDIR)
-	install -m 644 $(LIB) $(LIBDIR)
-	cd $(LIBDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
+install-files: install-lib
 
-install: install-files
-ifeq "$(OS)" "Linux"
-	ldconfig -n $(LIBDIR)
-endif
+install: install-files update-libcache
 
-uninstall:
-	cd $(LIBDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
+uninstall: uninstall-lib
 
-.c.o:
-	$(CC) $(LIB_CFLAGS) -c -o $@ $<
-
-$(SHLIB): $(SHLIBV)
-	ln -sf $< $@
-
-$(SHLIBV): $(SHLIBV3)
-	ln -sf $< $@
-
-$(SHLIBV3): $(SHOBJS)
-	$(CC) $(LDFLAGS) $(SHLIB_SWITCH) -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a -ldl
-
-$(LIB): $(OBJS)
-	$(AR) r $@ $(OBJS)
+include ../LINUX/librules.make
 
 ### dependencies:
 

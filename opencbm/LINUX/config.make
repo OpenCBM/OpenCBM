@@ -1,5 +1,11 @@
-# $Id: config.make,v 1.11 2007-04-22 15:23:21 strik Exp $
+# $Id: config.make,v 1.12 2007-04-28 17:18:33 cnvogelg Exp $
 #
+
+# package version (major.minor.release). Don't touch. 	 
+MAJ = 0
+MIN = 4
+REL = 0
+
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
 #
@@ -52,14 +58,6 @@ LDCONFIG     = /sbin/ldconfig
 OD_FLAGS     = -w8 -txC -v -An
 
 #
-# library definitions
-#
-SHLIB   = $(LIBNAME).$(SHLIB_EXT)
-SHLIBV  = $(SHLIB).$(MAJ)
-SHLIBV3 = $(SHLIBV).$(MIN).$(REL)
-LIB     = $(LIBNAME).a
-
-#
 # location of the kernel source directory
 # (removed, use the later implementation instead. I left them in in case the
 #  later implementation does not work on a particular machine.)
@@ -93,9 +91,6 @@ CFLAGS   += -DOPENCBM_MAC
 SHLIB_EXT = dylib
 SHLIB_SWITCH = -dynamiclib -compatibility_version $(MAJ).$(MIN) -current_version $(MAJ).$(MIN).$(REL)
 SONAME = -install_name $(PREFIX)/lib/
-
-SHLIBV  = $(LIBNAME).$(MAJ).$(SHLIB_EXT)
-SHLIBV3 = $(LIBNAME).$(MAJ).$(MIN).$(REL).$(SHLIB_EXT)
 
 endif
 
