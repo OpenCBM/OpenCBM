@@ -40,6 +40,11 @@ void usb_echo(void) {
   int i, nBytes, errors=0;
   unsigned short val[2], ret[2];
 
+#ifdef BIG_ENDIAN
+  char tmp;
+  char *retc = (char *)ret;
+#endif
+
   printf("=== Running standard echo test ===\n");
 
   for(i=0;i<ECHO_NUM;i++) {
@@ -49,6 +54,15 @@ void usb_echo(void) {
     nBytes = usb_control_msg(handle, 
 	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
 	   XU1541_ECHO, val[0], val[1], (char*)ret, sizeof(ret), 1000);
+
+#ifdef BIG_ENDIAN
+    tmp = retc[0];
+    retc[0] = retc[1];
+    retc[1] = tmp;
+    tmp = retc[2];
+    retc[2] = retc[3];
+    retc[3] = tmp;
+#endif
 
     if(nBytes < 0) {
       fprintf(stderr, "USB request failed: %s!\n", usb_strerror());
@@ -74,6 +88,11 @@ void usb_no_irq(void) {
 
   int i, nBytes, errors=0, tos=0, recovered=0, failed=0;
   unsigned short val[2], ret[2];
+
+#ifdef BIG_ENDIAN
+  char tmp;
+  char *retc = (char *)ret;
+#endif
 
   printf("=== Running irq disabled echo test ===\n");
 
@@ -101,13 +120,22 @@ void usb_no_irq(void) {
 	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
 	   XU1541_ECHO, val[0], val[1], (char*)ret, sizeof(ret), 1000);
 
+#ifdef BIG_ENDIAN
+    tmp = retc[0];
+    retc[0] = retc[1];
+    retc[1] = tmp;
+    tmp = retc[2];
+    retc[2] = retc[3];
+    retc[3] = tmp;
+#endif
+
     if(nBytes < 0) {
       fprintf(stderr, "Expected error: %s!\n", usb_strerror());
       failed = 1;
       tos++;
     } else if(nBytes != sizeof(ret)) {
       fprintf(stderr, "Expected error: Wrong number of %d bytes returned, "
-	      "expected %d\n", nBytes, sizeof(ret));
+	      "expected %d\n", nBytes, (int)sizeof(ret));
       failed = 1;
       tos++;
     } else if((val[0] != ret[0]) ||(val[1] != ret[1])) {
