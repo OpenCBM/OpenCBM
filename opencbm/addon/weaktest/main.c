@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.2 2007-04-22 16:03:25 strik Exp $";
+    "@(#) $Id: main.c,v 1.3 2007-04-29 08:59:01 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -30,7 +30,8 @@ extern transfer_funcs d64copy_pp_transfer,
 
 const unsigned char weakstart[] = {
     	0x55, 0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01, 0x00, 0xff, 0x7f, 0xbf, 0xdf, 0xef, 0xf7 };
-//      0x55, 0xd4, 0xa5, 0x29, 0x4a, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00 };
+const unsigned char syncmark[] = {
+    	0x99, 0x99, 0x99, 0x99, 0x99, 0x99, 0x99, 0x9a, 0xff, 0x59, 0x99, 0x99, 0x99, 0x99, 0x99, 0x99 };
 
 /* setable via command line */
 static d64copy_severity_e verbosity = sev_warning;
@@ -204,6 +205,31 @@ static void printGcrBuffer(unsigned char* data, int omitzeroes)
     printf("\n");
 }
 
+static void xorBufferWithTestpattern(unsigned char buffer[])
+{
+	  int i, j;
+    for(i=0; i<sizeof(weakstart); i++)
+    {
+        buffer[i] ^= weakstart[i];	// copy over the weak bit area start sequence
+    }
+    for(i=16; i<(GCRBUFSIZE-64); i++)
+    {
+        buffer[i] ^= 0;	// follow with weak bits only
+    }
+    for(; i<(GCRBUFSIZE-22); i++)
+    {
+        buffer[i] ^= 0x55; // start writing the test vector tail marker
+    }
+    for(j=0; j<sizeof(syncmark); i++, j++)
+    {
+        buffer[i] ^= syncmark[j]; // copy the bitsync marker
+    }
+    for(; i<GCRBUFSIZE; i++)
+    {
+        buffer[i] ^= 0x55; // then proceed with GAPs
+    }
+}
+
 static int testLastDirectorySectorWithWeakBits(
     unsigned char cbm_drive, d64copy_settings setup, const transfer_funcs *target,
     unsigned char track, unsigned char se)
@@ -220,18 +246,12 @@ static int testLastDirectorySectorWithWeakBits(
     if(target->open_disk(fd_cbm, &setup, (void*)(ULONG_PTR)cbm_drive, 1,
                       turbo_routine_starter, my_message_cb) == 0)
     {
-        for(i=0; i<sizeof(weakstart); i++)
+        for(i=0; i<GCRBUFSIZE; i++)
         {
-            gcr[i] = weakstart[i];	// copy over the weak bit area start sequence
+            gcr[i] = 0;
         }
-        for(i=16; i<(GCRBUFSIZE-64); i++)
-        {
-            gcr[i] = 0;	// follow with weak bits only
-        }
-        for(; i<GCRBUFSIZE; i++)
-        {
-            gcr[i] = 0x55; // then proceed with GAPs
-        }
+        xorBufferWithTestpattern(gcr);
+
         // print the buffer
         printf("Input test vector");
         printGcrBuffer(gcr, 0);
@@ -275,19 +295,7 @@ static int testLastDirectorySectorWithWeakBits(
             printf("\nRead back weak bit area");
             printGcrBuffer(gcr, 0);
 
-            // print the XOR'ed Input/Output result
-            for(i=0; i<sizeof(weakstart); i++)
-            {
-                gcr[i] ^= weakstart[i];
-            }
-            for(i=16; i<(GCRBUFSIZE-64); i++)
-            {
-                gcr[i] ^= 0;
-            }
-            for(; i<GCRBUFSIZE; i++)
-            {
-                gcr[i] ^= 0x55;
-            }
+            xorBufferWithTestpattern(gcr);
             printf("\nRead back weak bit area XOR'ed with input vector");
             printGcrBuffer(gcr, 1);
 
