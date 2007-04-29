@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.16 2007-02-11 16:53:42 strik Exp $ \n
+** \version $Id: init.c,v 1.17 2007-04-29 17:56:56 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -155,7 +155,7 @@ cbm_check_irq_availability(IN PDEVICE_EXTENSION Pdx)
 {
     FUNC_ENTER();
 
-    DBG_PRINT((DBG_PREFIX "*"));
+    DBG_CABLE((DBG_PREFIX "*"));
 
     //
     // If we got an interrupt, test if it works
@@ -163,7 +163,7 @@ cbm_check_irq_availability(IN PDEVICE_EXTENSION Pdx)
 
     if (Pdx->ParallelPortAllocatedInterrupt)
     {
-        DBG_PRINT((DBG_PREFIX "* Allocated interrupt"));
+        DBG_IRQ((DBG_PREFIX "* Allocated interrupt"));
 
         if (!NT_SUCCESS(cbmiec_test_irq(Pdx, NULL, 0)))
         {
@@ -173,7 +173,7 @@ cbm_check_irq_availability(IN PDEVICE_EXTENSION Pdx)
 
             LogErrorOnly(Pdx->Fdo, CBM_IRQ_DOES_NOT_WORK);
 
-//            DBG_PRINT((DBG_PREFIX "* Interrupt does not work, release it again"));
+//            DBG_IRQ((DBG_PREFIX "* Interrupt does not work, release it again"));
 
 //            ParPortFreeInterrupt(Pdx);
         }

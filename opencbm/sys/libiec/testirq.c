@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/testirq.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: testirq.c,v 1.5 2006-10-14 16:26:05 strik Exp $ \n
+** \version $Id: testirq.c,v 1.6 2007-04-29 17:56:56 strik Exp $ \n
 ** \n
 ** \brief Test for IRQ capabilities
 **
@@ -82,54 +82,54 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
         // Now, do the test
         //
 
-        DBG_PRINT((DBG_PREFIX "Release all lines"));
+        DBG_CABLE((DBG_PREFIX "Release all lines"));
         CBMIEC_RELEASE(PP_ATN_OUT | PP_CLK_OUT | PP_DATA_OUT | PP_RESET_OUT);
 
-        DBG_PRINT((DBG_PREFIX "Pdx->IrqCount = 100"));
+        DBG_CABLE((DBG_PREFIX "Pdx->IrqCount = 100"));
         ret = InterlockedExchange(&Pdx->IrqCount, 100);
         DBG_ASSERT(ret==0);
 
-        DBG_PRINT((DBG_PREFIX "Allow Interrupts"));
+        DBG_CABLE((DBG_PREFIX "Allow Interrupts"));
         CBMIEC_SET(PP_LP_IRQ);
 
         if (Pdx->ParPortEcpPortAddress)
         {
             ecr  = READ_PORT_UCHAR(ecrPort);
 
-            DBG_PRINT((DBG_PREFIX ""));
-            DBG_PRINT((DBG_PREFIX "" __DATE__ " " __TIME__));
-            DBG_PRINT((DBG_PREFIX "Setting ECP to configuration mode"));
+            DBG_CABLE((DBG_PREFIX ""));
+            DBG_CABLE((DBG_PREFIX "" __DATE__ " " __TIME__));
+            DBG_CABLE((DBG_PREFIX "Setting ECP to configuration mode"));
 
             WRITE_PORT_UCHAR(Pdx->ParPortEcpPortAddress, ecr | 0xe0);
             ecp0 = READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + 0);
             ecp1 = READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + 1);
 
-            DBG_PRINT((DBG_PREFIX "Addresses: %p = (%02x, %02x, %02x)",
+            DBG_CABLE((DBG_PREFIX "Addresses: %p = (%02x, %02x, %02x)",
                 Pdx->ParPortEcpPortAddress,
                 ecp0,
                 ecp1,
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + 2)));
 
-            DBG_PRINT((DBG_PREFIX "Interrupt bit = %s",
+            DBG_CABLE((DBG_PREFIX "Interrupt bit = %s",
                 (READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + 0) & 0x40)
                 ? "TRUE"
                 : "FALSE"));
 
-            DBG_PRINT((DBG_PREFIX "Interrupt bit = %s",
+            DBG_CABLE((DBG_PREFIX "Interrupt bit = %s",
                 (READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + 0) & 0x40)
                 ? "TRUE"
                 : "FALSE"));
 
-            DBG_PRINT((DBG_PREFIX "Resetting ECP to old mode"));
+            DBG_CABLE((DBG_PREFIX "Resetting ECP to old mode"));
 
             WRITE_PORT_UCHAR(Pdx->ParPortEcpPortAddress, ecr);
 
-            DBG_PRINT((DBG_PREFIX "Interrupt bit ECR = %s",
+            DBG_CABLE((DBG_PREFIX "Interrupt bit ECR = %s",
                 (READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET) & 0x04)
                 ? "TRUE"
                 : "FALSE"));
 
-            DBG_PRINT((DBG_PREFIX "Interrupt bit ECR = %s",
+            DBG_CABLE((DBG_PREFIX "Interrupt bit ECR = %s",
                 (READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET) & 0x04)
                 ? "TRUE"
                 : "FALSE"));
@@ -137,34 +137,34 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
             WRITE_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET, 
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET) & ~0x04);
 
-            DBG_PRINT((DBG_PREFIX "Interrupt bit ECR = %s",
+            DBG_CABLE((DBG_PREFIX "Interrupt bit ECR = %s",
                 (READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET) & 0x04)
                 ? "TRUE"
                 : "FALSE"));
 
-            DBG_PRINT((DBG_PREFIX ""));
-            DBG_PRINT((DBG_PREFIX ""));
+            DBG_CABLE((DBG_PREFIX ""));
+            DBG_CABLE((DBG_PREFIX ""));
 
-            DBG_PRINT((DBG_PREFIX "Before: ECR (%p) = %02x",
+            DBG_CABLE((DBG_PREFIX "Before: ECR (%p) = %02x",
                 Pdx->ParPortEcpPortAddress + ECR_OFFSET, 
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET)));
 
             WRITE_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET,
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET) | 0x10);
 
-            DBG_PRINT((DBG_PREFIX "After:  ECR (%p) = %02x",
+            DBG_CABLE((DBG_PREFIX "After:  ECR (%p) = %02x",
                 Pdx->ParPortEcpPortAddress + ECR_OFFSET, 
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET)));
         }
 
-        DBG_PRINT((DBG_PREFIX "Set all lines"));
+        DBG_CABLE((DBG_PREFIX "Set all lines"));
         CBMIEC_SET(PP_ATN_OUT | PP_CLK_OUT | PP_DATA_OUT);
 
-        DBG_PRINT((DBG_PREFIX "Wait 1s"));
+        DBG_CABLE((DBG_PREFIX "Wait 1s"));
         cbmiec_udelay(1000000);
 
         ret = InterlockedExchange(&Pdx->IrqCount, 100);
-        DBG_PRINT((DBG_PREFIX "Pdx->IrqCount = 100, old Value = %u", ret));
+        DBG_CABLE((DBG_PREFIX "Pdx->IrqCount = 100, old Value = %u", ret));
 
         if (ret != 100)
         {
@@ -178,31 +178,31 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
             /* ntStatus = STATUS_UNSUCCESSFUL; */
         }
 
-        DBG_PRINT((DBG_PREFIX "Release all lines"));
+        DBG_CABLE((DBG_PREFIX "Release all lines"));
         CBMIEC_RELEASE(PP_ATN_OUT | PP_CLK_OUT | PP_DATA_OUT);
 
-        DBG_PRINT((DBG_PREFIX "Wait 1s"));
+        DBG_CABLE((DBG_PREFIX "Wait 1s"));
         cbmiec_udelay(1000000);
 
-        DBG_PRINT((DBG_PREFIX "Disallow Interrupts"));
+        DBG_CABLE((DBG_PREFIX "Disallow Interrupts"));
         CBMIEC_RELEASE(PP_LP_IRQ);
 
         if (Pdx->ParPortEcpPortAddress)
         {
-            DBG_PRINT((DBG_PREFIX "Before: ECR (%p) = %02x",
+            DBG_CABLE((DBG_PREFIX "Before: ECR (%p) = %02x",
                 Pdx->ParPortEcpPortAddress + ECR_OFFSET, 
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET)));
 
             WRITE_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET,
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET) & ~0x10);
 
-            DBG_PRINT((DBG_PREFIX "After:  ECR (%p) = %02x", 
+            DBG_CABLE((DBG_PREFIX "After:  ECR (%p) = %02x", 
                 Pdx->ParPortEcpPortAddress + ECR_OFFSET, 
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET)));
         }
 
         ret = InterlockedExchange(&Pdx->IrqCount, 0);
-        DBG_PRINT((DBG_PREFIX "Pdx->IrqCount = 0, old Value = %u", ret));
+        DBG_CABLE((DBG_PREFIX "Pdx->IrqCount = 0, old Value = %u", ret));
 
         /*
          * Check if an interrupt occurred

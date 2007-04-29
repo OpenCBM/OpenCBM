@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/checkcable.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: checkcable.c,v 1.5 2006-10-15 16:43:50 strik Exp $ \n
+** \version $Id: checkcable.c,v 1.6 2007-04-29 17:56:56 strik Exp $ \n
 ** \n
 ** \brief Check and test the cable type
 **
@@ -111,7 +111,7 @@ cbmiec_set_cablevalues(IN PDEVICE_EXTENSION Pdx)
         break;
 
     case IEC_CABLETYPE_XE:
-        DBG_PRINT((DBG_PREFIX "************ XE1541 ***************"));
+        DBG_CABLE((DBG_PREFIX "************ XE1541 ***************"));
         Pdx->IecAtnOut   = PP_XE_ATN_OUT;
         Pdx->IecClkOut   = PP_XE_CLK_OUT;
         Pdx->IecDataOut  = PP_XE_DATA_OUT;
@@ -127,9 +127,9 @@ cbmiec_set_cablevalues(IN PDEVICE_EXTENSION Pdx)
         break;
 
     default:
-        DBG_PRINT((DBG_PREFIX "***************************************"));
-        DBG_PRINT((DBG_PREFIX "******************* DEFAULT? **********"));
-        DBG_PRINT((DBG_PREFIX "***************************************"));
+        DBG_CABLE((DBG_PREFIX "***************************************"));
+        DBG_CABLE((DBG_PREFIX "******************* DEFAULT? **********"));
+        DBG_CABLE((DBG_PREFIX "***************************************"));
         break;
     };
 
@@ -138,11 +138,11 @@ cbmiec_set_cablevalues(IN PDEVICE_EXTENSION Pdx)
     Pdx->IecOutBits = (READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor) 
                       & (PP_DATA_OUT|PP_CLK_OUT|PP_ATN_OUT|PP_RESET_OUT);
 
-    DBG_PRINT((DBG_PREFIX "IecAtnOut = %02x IecAtnIn = %02x", Pdx->IecAtnOut, Pdx->IecAtnIn));
-    DBG_PRINT((DBG_PREFIX "IecClkOut = %02x IecClkIn = %02x", Pdx->IecClkOut, Pdx->IecClkIn));
-    DBG_PRINT((DBG_PREFIX "IecDataOut = %02x IecDataIn = %02x", Pdx->IecDataOut, Pdx->IecDataIn));
-    DBG_PRINT((DBG_PREFIX "IecResetOut = %02x IecResetIn = %02x", Pdx->IecResetOut, Pdx->IecResetIn));
-    DBG_PRINT((DBG_PREFIX "EOR     Out = %02x EOR     In = %02x - outbits = %02x", Pdx->IecOutEor, 
+    DBG_CABLE((DBG_PREFIX "IecAtnOut = %02x IecAtnIn = %02x", Pdx->IecAtnOut, Pdx->IecAtnIn));
+    DBG_CABLE((DBG_PREFIX "IecClkOut = %02x IecClkIn = %02x", Pdx->IecClkOut, Pdx->IecClkIn));
+    DBG_CABLE((DBG_PREFIX "IecDataOut = %02x IecDataIn = %02x", Pdx->IecDataOut, Pdx->IecDataIn));
+    DBG_CABLE((DBG_PREFIX "IecResetOut = %02x IecResetIn = %02x", Pdx->IecResetOut, Pdx->IecResetIn));
+    DBG_CABLE((DBG_PREFIX "EOR     Out = %02x EOR     In = %02x - outbits = %02x", Pdx->IecOutEor, 
         Pdx->IecInEor, Pdx->IecOutBits));
 
     FUNC_LEAVE();
@@ -175,19 +175,19 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
 
     ch = READ_PORT_UCHAR(IN_PORT);
 
-    DBG_PRINT((DBG_PREFIX "############ Status: out: $%02x, in: $%02x ($%02x ^ $%02x)",
+    DBG_CABLE((DBG_PREFIX "############ Status: out: $%02x, in: $%02x ($%02x ^ $%02x)",
         READ_PORT_UCHAR(OUT_PORT), ch, ch ^ Pdx->IecOutEor, Pdx->IecOutEor));
 
 #define READ(_x) ((((READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor)) & (_x)) ? 1 : 0)
 
 #define SHOW(_x, _y) 
-    // DBG_PRINT((DBG_PREFIX "CBMIEC_GET(" #_x ") = $%02x, READ(" #_y ") = $%02x", CBMIEC_GET(_x), READ(_y) ));
+    // DBG_CABLE((DBG_PREFIX "CBMIEC_GET(" #_x ") = $%02x, READ(" #_y ") = $%02x", CBMIEC_GET(_x), READ(_y) ));
 
 #define SHOW1() \
-    DBG_PRINT((DBG_PREFIX "############ ATN OUT = %u, CLOCK OUT = %u, DATA OUT = %u, RESET OUT = %u", \
+    DBG_CABLE((DBG_PREFIX "############ ATN OUT = %u, CLOCK OUT = %u, DATA OUT = %u, RESET OUT = %u", \
         READ(PP_ATN_OUT), READ(PP_CLK_OUT), READ(PP_DATA_OUT), READ(PP_RESET_OUT) )); \
 \
-    DBG_PRINT((DBG_PREFIX "############ ATN IN  = %u, CLOCK IN  = %u, DATA IN  = %u, RESET IN  = %u", \
+    DBG_CABLE((DBG_PREFIX "############ ATN IN  = %u, CLOCK IN  = %u, DATA IN  = %u, RESET IN  = %u", \
         CBMIEC_GET(PP_ATN_IN), CBMIEC_GET(PP_CLK_IN), CBMIEC_GET(PP_DATA_IN), CBMIEC_GET(PP_RESET_IN) ));
 
     do {
@@ -199,32 +199,32 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
 
         if (READ(PP_RESET_OUT) && CBMIEC_GET(PP_RESET_IN) == 0)
         {
-            DBG_PRINT((DBG_PREFIX "RESET does not follow"));
+            DBG_CABLE((DBG_PREFIX "RESET does not follow"));
             break;
         }
 
         if (READ(PP_ATN_OUT) && CBMIEC_GET(PP_ATN_IN) == 0)
         {
-            DBG_PRINT((DBG_PREFIX "ATN does not follow"));
+            DBG_CABLE((DBG_PREFIX "ATN does not follow"));
             break;
         }
 
         if (READ(PP_DATA_OUT) && CBMIEC_GET(PP_DATA_IN) == 0)
         {
-            DBG_PRINT((DBG_PREFIX "DATA does not follow"));
+            DBG_CABLE((DBG_PREFIX "DATA does not follow"));
             break;
         }
 
         if (READ(PP_CLK_OUT) && CBMIEC_GET(PP_CLK_IN) == 0)
         {
-            DBG_PRINT((DBG_PREFIX "CLOCK does not follow"));
+            DBG_CABLE((DBG_PREFIX "CLOCK does not follow"));
             break;
         }
 
 
         if (Pdx->DoNotReleaseBus)
         {
-            DBG_PRINT((DBG_PREFIX "Pdx->DoNotReleaseBus set, skipping extra tests."));
+            DBG_CABLE((DBG_PREFIX "Pdx->DoNotReleaseBus set, skipping extra tests."));
 
             ntStatus = STATUS_SUCCESS;
             break;
@@ -235,35 +235,35 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
         CBMIEC_RELEASE(PP_ATN_OUT | PP_RESET_OUT | PP_CLK_OUT | PP_DATA_OUT);
         cbmiec_schedule_timeout(1000); /* wait 1 ms */
 
-DBG_PRINT((DBG_PREFIX " --- Release all lines" ));
+DBG_CABLE((DBG_PREFIX " --- Release all lines" ));
 SHOW1();
         cbmiec_wait_for_drives_ready(Pdx);
-DBG_PRINT((DBG_PREFIX " --- Release all lines - 1" ));
+DBG_CABLE((DBG_PREFIX " --- Release all lines - 1" ));
 SHOW1();
 
         /* Now, check if all lines are unset */
 
         if (CBMIEC_GET(PP_RESET_IN))
         {
-            DBG_PRINT((DBG_PREFIX "RESET is set, but it should not"));
+            DBG_CABLE((DBG_PREFIX "RESET is set, but it should not"));
             break;
         }
 
         if (CBMIEC_GET(PP_ATN_IN))
         {
-            DBG_PRINT((DBG_PREFIX "ATN is set, but it should not"));
+            DBG_CABLE((DBG_PREFIX "ATN is set, but it should not"));
             break;
         }
 
         if (CBMIEC_GET(PP_DATA_IN))
         {
-            DBG_PRINT((DBG_PREFIX "DATA is set, but it should not"));
+            DBG_CABLE((DBG_PREFIX "DATA is set, but it should not"));
             break;
         }
 
         if (CBMIEC_GET(PP_CLK_IN))
         {
-            DBG_PRINT((DBG_PREFIX "CLOCK is set, but it should not"));
+            DBG_CABLE((DBG_PREFIX "CLOCK is set, but it should not"));
             break;
         }
 
@@ -271,19 +271,19 @@ SHOW1();
 
         CBMIEC_SET(PP_ATN_OUT);
 
-DBG_PRINT((DBG_PREFIX " --- ATN set" ));
+DBG_CABLE((DBG_PREFIX " --- ATN set" ));
 SHOW1();
 
         if (CBMIEC_GET(PP_RESET_IN))
         {
-            DBG_PRINT((DBG_PREFIX "RESET is reacting to ATN - most probably, it is an XE1541 cable!"));
+            DBG_CABLE((DBG_PREFIX "RESET is reacting to ATN - most probably, it is an XE1541 cable!"));
             Pdx->IecCable = IEC_CABLETYPE_XE;
         }
         else
         {
             if (CBMIEC_GET(PP_DATA_IN) == 0)
             {
-                DBG_PRINT((DBG_PREFIX "DATA does not react to ATN."));
+                DBG_CABLE((DBG_PREFIX "DATA does not react to ATN."));
             }
         }
 
@@ -328,7 +328,7 @@ cbmiec_checkcable(PDEVICE_EXTENSION Pdx)
 
     FUNC_ENTER();
 
-DBG_PRINT((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSet, Pdx->IecCable));
+DBG_CABLE((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSet, Pdx->IecCable));
     do {
         CABLESTATE newCableState = CABLESTATE_UNKNOWN;
 
@@ -336,9 +336,9 @@ DBG_PRINT((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSe
          * If the cabletype is still tested, do not retest again
          */
 
-        DBG_PRINT((DBG_PREFIX "*****************" ));
-        DBG_PRINT((DBG_PREFIX "cbmiec_checkcable" ));
-        DBG_PRINT((DBG_PREFIX "*****************" ));
+        DBG_CABLE((DBG_PREFIX "*****************" ));
+        DBG_CABLE((DBG_PREFIX "cbmiec_checkcable" ));
+        DBG_CABLE((DBG_PREFIX "*****************" ));
 
         switch (Pdx->IecCableUserSet)
         {
@@ -467,9 +467,9 @@ DBG_PRINT((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSe
      * will be printed even if "start" was not printed!
      */
 
-    DBG_PRINT((DBG_PREFIX "*********************" ));
-    DBG_PRINT((DBG_PREFIX "end cbmiec_checkcable" ));
-    DBG_PRINT((DBG_PREFIX "*********************" ));
+    DBG_CABLE((DBG_PREFIX "*********************" ));
+    DBG_CABLE((DBG_PREFIX "end cbmiec_checkcable" ));
+    DBG_CABLE((DBG_PREFIX "*********************" ));
 
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }

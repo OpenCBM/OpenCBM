@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.12 2006-06-21 10:11:55 strik Exp $ \n
+** \version $Id: debug.h,v 1.13 2007-04-29 17:56:56 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -95,6 +95,9 @@
        /*! debugging flag: show DPC processing */
        #define DBGF_DPC     0x00080000
 
+       /*! debugging flag: show CABLE detection */
+       #define DBGF_CABLE   0x00040000
+
 
        /*! debugging flag: output debugging info debug into Memory Buffer */
        #define DBGF_DBGMEMBUF 0x00020000
@@ -159,6 +162,7 @@ int __cdecl main(int argc, char *argv[])
        #define ISDBG_IRPPATH()        (DbgFlags & DBGF_IRPPATH)
        #define ISDBG_IRP()            (DbgFlags & DBGF_IRP)
        #define ISDBG_DPC()            (DbgFlags & DBGF_DPC)
+       #define ISDBG_CABLE()          (DbgFlags & DBGF_CABLE)
        #define ISDBG_DBGMEMBUF()      (DbgFlags & DBGF_DBGMEMBUF)
        #define ISDBG_DBGPRINT()       (DbgFlags & DBGF_DBGPRINT)
 #endif // #ifdef DBG_KERNELMODE
@@ -334,6 +338,8 @@ int __cdecl main(int argc, char *argv[])
               #define DBG_IRP(     _xxx ) { if (ISDBG_IRP()) { DBGO(( DBG_PREFIX "Got IRP: " #_xxx )); } }
               /*! Output if DBGF_DPC is defined */
               #define DBG_DPC(     _xxx ) { if (ISDBG_DPC()) { DBGO( _xxx ); } }
+              /*! Output if DBGF_CABLE is defined */
+              #define DBG_CABLE(   _xxx ) { if (ISDBG_CABLE()) { DBGO( _xxx ); } }
        #endif
 
 #else  // #if DBG
@@ -448,6 +454,9 @@ int __cdecl main(int argc, char *argv[])
 
               //! On release builds, a dummy
               #define DBG_DPC(     _xxx )
+
+              //! On release builds, a dummy
+              #define DBG_CABLE(   _xxx )
 
        #endif
 
