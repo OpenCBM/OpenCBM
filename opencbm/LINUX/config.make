@@ -1,13 +1,15 @@
-# $Id: config.make,v 1.13 2007-04-29 10:28:27 strik Exp $
+# $Id: config.make,v 1.14 2007-04-29 10:46:21 strik Exp $
 #
 
 # get package version (major.minor.release).
 
-OPENCBM_MAJOR   :=$(shell grep "\#define OPENCBM_VERSION_MAJOR"      include/version.h|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
-OPENCBM_MINOR   :=$(shell grep "\#define OPENCBM_VERSION_MINOR"      include/version.h|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
-OPENCBM_RELEASE :=$(shell grep "\#define OPENCBM_VERSION_SUBMINOR"   include/version.h|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
-OPENCBM_PATCHLVL:=$(shell grep "\#define OPENCBM_VERSION_PATCHLEVEL" include/version.h|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
-OPENCBM_DEVEL   :=$(shell grep "\#define OPENCBM_VERSION_DEVEL"      include/version.h|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
+VERSIONH:=$(RELATIVEPATH)include/version.h
+
+OPENCBM_MAJOR   :=$(shell grep "\#define OPENCBM_VERSION_MAJOR"      ${VERSIONH}|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
+OPENCBM_MINOR   :=$(shell grep "\#define OPENCBM_VERSION_MINOR"      ${VERSIONH}|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
+OPENCBM_RELEASE :=$(shell grep "\#define OPENCBM_VERSION_SUBMINOR"   ${VERSIONH}|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
+OPENCBM_PATCHLVL:=$(shell grep "\#define OPENCBM_VERSION_PATCHLEVEL" ${VERSIONH}|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
+OPENCBM_DEVEL   :=$(shell grep "\#define OPENCBM_VERSION_DEVEL"      ${VERSIONH}|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
 
 MAJ:=${OPENCBM_MAJOR}
 MIN:=${OPENCBM_MINOR}

@@ -1,6 +1,7 @@
-# $Id: Makefile,v 1.4 2007-04-28 17:01:00 cnvogelg Exp $
+# $Id: Makefile,v 1.5 2007-04-29 10:46:21 strik Exp $
 
-include ../LINUX/config.make
+RELATIVEPATH=../
+include ${RELATIVEPATH}LINUX/config.make
 include ./dirs
 
 .PHONY: all mrproper clean install uninstall install-files

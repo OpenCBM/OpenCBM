@@ -1,6 +1,7 @@
-# $Id: Makefile,v 1.1 2006-05-21 13:39:44 strik Exp $
+# $Id: Makefile,v 1.2 2007-04-29 10:46:23 strik Exp $
 
-include ../../LINUX/config.make
+RELATIVEPATH=../../
+include ${RELATIVEPATH}LINUX/config.make
 CFLAGS     := $(subst ../,../../,$(CFLAGS))
 LINK_FLAGS := $(subst ../,../../,$(LINK_FLAGS))
 

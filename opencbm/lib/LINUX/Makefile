@@ -1,6 +1,7 @@
-# $Id: Makefile,v 1.10 2007-04-28 17:18:33 cnvogelg Exp $
+# $Id: Makefile,v 1.11 2007-04-29 10:46:23 strik Exp $
 
-include ../LINUX/config.make
+RELATIVEPATH=../
+include ${RELATIVEPATH}LINUX/config.make
 
 CA65_FLAGS += --asm-include-dir ../libd64copy/
 

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2007-03-22 12:50:29 strik Exp $
+# $Id: Makefile,v 1.6 2007-04-29 10:46:23 strik Exp $
 
 ifneq ($(KERNELRELEASE),)
 EXTRA_CFLAGS := $(CBM4LINUX_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
@@ -11,7 +11,8 @@ modules:
 
 else
 
-include ../../LINUX/config.make
+RELATIVEPATH=../../
+include ${RELATIVEPATH}LINUX/config.make
 
 all: cbm.o
 
