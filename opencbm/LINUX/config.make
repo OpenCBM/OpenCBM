@@ -1,10 +1,22 @@
-# $Id: config.make,v 1.12 2007-04-28 17:18:33 cnvogelg Exp $
+# $Id: config.make,v 1.13 2007-04-29 10:28:27 strik Exp $
 #
 
-# package version (major.minor.release). Don't touch. 	 
-MAJ = 0
-MIN = 4
-REL = 0
+# get package version (major.minor.release).
+
+OPENCBM_MAJOR   :=$(shell grep "\#define OPENCBM_VERSION_MAJOR"      include/version.h|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
+OPENCBM_MINOR   :=$(shell grep "\#define OPENCBM_VERSION_MINOR"      include/version.h|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
+OPENCBM_RELEASE :=$(shell grep "\#define OPENCBM_VERSION_SUBMINOR"   include/version.h|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
+OPENCBM_PATCHLVL:=$(shell grep "\#define OPENCBM_VERSION_PATCHLEVEL" include/version.h|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
+OPENCBM_DEVEL   :=$(shell grep "\#define OPENCBM_VERSION_DEVEL"      include/version.h|sed -e "s/\#define OPENCBM_VERSION_[^ ]*[ ]*//")
+
+MAJ:=${OPENCBM_MAJOR}
+MIN:=${OPENCBM_MINOR}
+
+ifeq ($(OPENCBM_DEVEL), 0)
+	REL:=${OPENCBM_RELEASE}
+else
+	REL:=${OPENCBM_RELEASE}.${OPENCBM_DEVEL}
+endif
 
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
