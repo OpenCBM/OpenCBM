@@ -3,7 +3,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang Moser
+' Copyright (C) 2006      Wolfgang 0.6.4
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -30,6 +30,7 @@
 
 Option Strict Off
 Option Explicit On
+Imports System.Configuration
 Imports System.Runtime.InteropServices
 Imports System.Text
 
@@ -57,8 +58,8 @@ Module Constants_Renamed
     Public Const STILL_ACTIVE As Short = &H103S
     Public Const PROCESS_QUERY_INFORMATION As Short = &H400S
 
-    Public Const TEMPFILE1 As String = "OutFile.log"
-    Public Const TEMPFILE2 As String = "ErrFile.log"
+    'Public Const TEMPFILE1 As String = "OutFile.log"
+    'Public Const TEMPFILE2 As String = "ErrFile.log"
     Public ReadOnly OUTPUT_PATH As String = GetShortPath()
 
     Public Class Interop
@@ -72,4 +73,13 @@ Module Constants_Renamed
         Interop.GetShortPathName(System.IO.Path.GetTempPath(), TempPath, 1024)
         Return TempPath.ToString()
     End Function
+
+    Private g_objConfig As Configuration = _
+        ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None)
+
+    Public ReadOnly Property Config() As Configuration
+        Get
+            Return g_objConfig
+        End Get
+    End Property
 End Module

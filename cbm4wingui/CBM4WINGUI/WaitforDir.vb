@@ -3,7 +3,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang Moser
+' Copyright (C) 2006      Wolfgang 0.6.4
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -50,7 +50,7 @@ Friend Class Waiting
 		Me.AlwaysOnTop = True
 	End Sub
 	
-	'There's no "elegant" way to abort a running cbm4win process, short of killing the PID, so this is left for future...
+    'There's no "elegant" way to abort a running OpenCBM process, short of killing the PID, so this is left for future...
 	
 	Private Sub Cancel_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles Cancel.Click
 		Me.Hide()

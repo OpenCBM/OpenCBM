@@ -44,18 +44,9 @@ Friend Class OptionsForm
         Me.Hide()
     End Sub
 
-    'UPGRADE_WARNING: Event CheckNoWarpMode.CheckStateChanged may fire when form is initialized. Click for more: 'ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?keyword="88B12AE1-6DE0-48A0-86F1-60C0686C026A"'
-    Private Sub CheckNoWarpMode_CheckStateChanged(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles CheckNoWarpMode.CheckStateChanged
-        If CheckNoWarpMode.CheckState = System.Windows.Forms.CheckState.Checked Then
-            NoWarpString = "--no-warp"
-        Else
-            NoWarpString = ""
-        End If
-    End Sub
-
-    Private Sub Morse_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles Morse.Click
+    Private Sub Morse_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs)
         ChDir(ExeDir)
-        MainForm.PubDoCommand("morse", "" & DriveNum.Text, "Morse Code Demo")
+        frmMain.PubDoCommand("morse", "" & DriveNum.Text, "Morse Code Demo")
     End Sub
 
     Public WriteOnly Property AlwaysOnTop() As Boolean
@@ -75,19 +66,15 @@ Friend Class OptionsForm
         Me.AlwaysOnTop = True
     End Sub
 
-    Private Sub CBMDetect_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles CBMDetect.Click
-        Dim StdOut As String = Path.Combine(OUTPUT_PATH, TEMPFILE1)
-        Dim StdErr As String = Path.Combine(OUTPUT_PATH, TEMPFILE2)
-        Dim Result As String = _
-            MainForm.PubDoCommand("cbmctrl", "detect", "Detecting Drives...", False)
+    Private Sub CBMDetect_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs)
 
         'Read in the complete output file -------------
         If (Result = "") Then Result = "No drives found, please check cbm4win installation and directory paths!"
         MsgBox(Result, MsgBoxStyle.OkOnly, "Drive Detection")
     End Sub
 
-    Private Sub ResetBus_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles ResetBus.Click
-        MainForm.PubDoCommand("cbmctrl", "reset", "Resetting drives, please wait.")
+    Private Sub ResetBus_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs)
+        frmMain.PubDoCommand("cbmctrl", "reset", "Resetting drives, please wait.")
     End Sub
 
     'UPGRADE_WARNING: Event Transfer.CheckedChanged may fire when form is initialized. Click for more: 'ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?keyword="88B12AE1-6DE0-48A0-86F1-60C0686C026A"'
@@ -109,9 +96,13 @@ Friend Class OptionsForm
         End If
     End Sub
 
-    Private Sub cmdBrowse_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdBrowse.Click
+    Private Sub cmdBrowse_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
         If _BrowseFolders.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
             StartingPath.Text = _BrowseFolders.SelectedPath
         End If
+    End Sub
+
+    Private Sub CheckNoWarpMode_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs)
+
     End Sub
 End Class

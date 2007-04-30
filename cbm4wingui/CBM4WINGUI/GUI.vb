@@ -3,7 +3,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang Moser
+' Copyright (C) 2006      Wolfgang 0.6.4
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -40,7 +40,7 @@
 '                Fixed hardcoded reference to c:\ drive in two places
 '                Improved handling of default values when INI file has errors.
 '
-'   Additions by Wolfgang Moser, based on Gui4Cbm4Win 0.0.9
+'   Additions by Wolfgang 0.6.4, based on Gui4Cbm4Win 0.0.9
 '         0.40 - Renamed all "Warp"-Options into "No-Warp" ones
 '                Added "auto" transfer option
 '                Renamed the stdout and stderr log files to g4c4w*.log
@@ -87,17 +87,17 @@ Option Explicit On
 Imports VB = Microsoft.VisualBasic
 Imports System.IO
 
-Friend Class MainForm
+Friend Class frmMain
     Inherits System.Windows.Forms.Form
 
 
 
     Private Sub About_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles About.Click
         MsgBox( _
-            "GUI4CBM4WIN by Leif Bloomquist (no support anymore) & adoption to OpenCBM 0.4.0 by Wolfgang Moser (http://d81.de/)            " & vbNewLine _
-            & "This is a simple GUI front-end for cbm4win by Spiro Trikaliotis (www.trikaliotis.net/cbm4win/)" & vbNewLine _
-            & "cbm4win itself is heavily based on cbm4linux written by Michael Klein (http://www.lb.shuttle.de/puffin/)" & vbNewLine _
-            & "This is version " & Application.ProductVersion & " of the GUI, " _
+            "GUI4CBM4WIN by Leif Bloomquist (no support anymore) & adoption to OpenCBM 0.4.0 by Wolfgang (http://d81.de/)            " & vbNewLine _
+            & vbNewLine & "This is a simple GUI front-end for OpenCBM by Spiro Trikaliotis (www.trikaliotis.net/cbm4win/)" & vbNewLine _
+            & vbNewLine & "OpenCBM itself is heavily based on cbm4linux written by Michael Klein (http://www.lb.shuttle.de/puffin/)" & vbNewLine _
+            & vbNewLine & "This is version " & Application.ProductVersion & " of the GUI, " _
             & "which is currently maintained by Payton Byrd (payton@paytonbyrd.com) and is " & vbNewLine _
             & "distributed under the zlib/libpng OpenSource license.", MsgBoxStyle.Information, "About")
     End Sub
@@ -210,10 +210,6 @@ Friend Class MainForm
 
             reader.Close()
 
-            'And delete both temp files, so we're not cluttering things up
-            File.Delete(Path.Combine(OUTPUT_PATH, TEMPFILE1))
-            File.Delete(Path.Combine(OUTPUT_PATH, TEMPFILE2))
-
         Catch exception As Exception
 
             If Not (Err.Number = 53) Then
@@ -299,9 +295,8 @@ Friend Class MainForm
     Private Sub CopyFromFloppy_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) _
       Handles CopyFromFloppy.Click
 
-        Dim T As Short
         Dim FilesSelected As Short
-        Dim Result As Object
+        Dim Result As DialogResult
         Dim FileName As String
         Dim FileNameOut As String
         Dim FileNameTemp As String
@@ -309,14 +304,13 @@ Friend Class MainForm
 
         FilesSelected = 0
 
-        ChDir(PCWorkingDir.Text)
-
-        For T = 0 To CBMDirectory.Items.Count - 1
-            If (CBMDirectory.GetSelected(T)) Then
-                FileName = ExtractQuotes(VB6.GetItemString(CBMDirectory, T)).ToLower()
+        If Directory.Exists(CurrentDirectory) Then
+            For Each strToCopy As String In CBMDirectory.SelectedItems
+                FileName = ExtractQuotes(strToCopy).ToLower()
 
                 'Check for SEQ file
-                FileNameTemp = VB6.GetItemString(CBMDirectory, T).Trim() 'Remove spaces first
+                FileNameTemp = FileName.Trim() 'Remove spaces first
+
                 If FileNameTemp.ToUpper().EndsWith("SEQ") Then
                     FileNameOut = FileName & ".seq"
                     FileName = FileName & ",s"
@@ -325,13 +319,22 @@ Friend Class MainForm
                     'FileName stays the same
                 End If
 
-                args = String.Format("--transfer={0} -r {1} ""{2}"" --output=""{3}""", _
-                    TransferString, DriveNumber, FileName, FileNameOut)
+                FileNameOut = Path.Combine(CurrentDirectory, FileNameOut)
 
-                DoCommand("cbmcopy", args, "Copying '" & ExtractQuotes(VB6.GetItemString(CBMDirectory, T)) & "' from floppy disk.")
+                Dim strTransfer As String = TransferString
+
+                If strTransfer = "original" Then strTransfer = "auto"
+
+                args = String.Format("--quiet --no-progress --transfer={0} -r {1} ""{2}"" --output=""{3}""", _
+                    strTransfer, DriveNumber, FileName, FileNameOut)
+
+                DoCommand("cbmcopy", args, "Copying '" & ExtractQuotes(strToCopy) & "' from floppy disk.")
+
                 FilesSelected = FilesSelected + 1
-            End If
-        Next T
+
+                PCDirectory.Refresh()
+            Next
+        End If
 
         'No Files were selected, make a D64 instead.
         If (FilesSelected = 0) Then
@@ -343,8 +346,12 @@ Friend Class MainForm
 
                 Prompt.Ask("Please Enter Filename:")
                 If Not (Prompt.LastResult = CANCELSTRING) Then
+                    Dim strTargetFilename As String = Prompt.LastResult
+                    If Not strTargetFilename.ToLower().EndsWith(".d64") Then
+                        strTargetFilename += ".d64"
+                    End If
                     args = String.Format("--transfer={0} {1} {2} ""{3}""", _
-                        TransferString, NoWarpString, DriveNumber, Prompt.LastResult)
+                        TransferString, g_strNoWarp, DriveNumber, Path.Combine(CurrentDirectory, strTargetFilename))
 
                     DoCommand("d64copy", args, "Creating D64 image, please wait.")
 
@@ -390,10 +397,17 @@ Friend Class MainForm
                     Else
                         SeqType = ""
                     End If
-                    args = String.Format("--transfer={0} -w {1} ""{2}"" --output=""{3}""{4}", _
-                        TransferString, DriveNumber, FileName, FileNameOut, SeqType)
 
+                    If FileNameOut.Length > 16 Then
+                        FileNameOut = FileNameOut.Substring(0, 16)
+                    End If
 
+                    Dim strTransfer As String = TransferString
+
+                    If strTransfer = "original" Then strTransfer = "auto"
+
+                    args = String.Format("--quiet --no-progress --transfer={0} -w {1} ""{2}"" --output=""{3}""{4}", _
+                        strTransfer, DriveNumber, Path.Combine(CurrentDirectory, FileName), FileNameOut, SeqType)
 
                     DoCommand("cbmcopy", args, _
                         "Copying '" & PCDirectory.Items(T) & "' to floppy disk as '" & UCase(FileNameOut) & "'")
@@ -417,7 +431,7 @@ Friend Class MainForm
 
         If Not (Result = MsgBoxResult.No) Then
             args = String.Format("--transfer={0} {1} ""{2}"" {3}", _
-                TransferString, NoWarpString, d64file, DriveNumber)
+                TransferString, g_strNoWarp, Path.Combine(CurrentDirectory, d64file), DriveNumber)
 
             DoCommand("d64copy", args, "Creating disk from D64 image, please wait.")
 
@@ -434,24 +448,37 @@ Friend Class MainForm
         Text = String.Format("GUI4CBM4WIN {0}", Application.ProductVersion)
 
         If (VB.Command() = "-leifdevelopment") Then
-            OptionsForm.PreviewCheck.CheckState = System.Windows.Forms.CheckState.Checked
+            'OptionsForm.PreviewCheck.CheckState = System.Windows.Forms.CheckState.Checked
         End If
 
         CheckExes()
         ExeDir = AddSlash(CurDir())
 
         LoadINI()
-        GotoDir(OptionsForm.StartingPath.Text)
-        DriveNumber = CShort(OptionsForm.DriveNum.Text)
+        'DriveNumber = CShort(OptionsForm.DriveNum.Text)
 
-        PCWorkingDir.Text = AddSlash(CurDir())
+        CurrentDirectory = frmConfiguration.InitialDirectory
+        GotoDir(CurrentDirectory)
         PCRefresh_Click(PCRefresh, New System.EventArgs())
 
+        Drive.Items.Clear()
+        Drive.Items.Add(frmConfiguration.DefaultDeviceNumber)
+        Drive.SelectedIndex = 0
+    End Sub
+
+    Public Sub SetCbmDrive()
+        Drive.Items.Clear()
+        For Each objRow As CbmDevices.CbmDevicesRow In frmConfiguration.m_objCbmDevices._CbmDevices.Rows
+            Dim intIndex As Integer = Drive.Items.Add(objRow.Device)
+            If (objRow._Default) Then
+                Drive.SelectedIndex = intIndex
+            End If
+        Next
     End Sub
 
     'A slightly smarter version of Chdir, that handles drives as well.
     Private Sub GotoDir(ByRef FullPath As String)
-
+        CurrentDirectory = FullPath
     End Sub
 
 
@@ -473,15 +500,15 @@ Friend Class MainForm
 
         Try
             If (InProgress) Then
-                MsgBox("cbm4win command already in progress, cannot continue.", MsgBoxStyle.Critical)
-                DoCommand.Errors = "cbm4win command already in progress."
+                MsgBox("OpenCBM command already in progress, cannot continue.", MsgBoxStyle.Critical)
+                DoCommand.Errors = "OpenCBM command already in progress."
                 DoCommand.Output = vbNullString
                 Exit Function
             End If
 
             'Check command - mostly for debugging.
             Dim Result As Object
-            If (OptionsForm.PreviewCheck.CheckState) Then
+            If (frmConfiguration.PreviewCommands) Then
                 Result = MsgBox("Requested command:" & vbNewLine & vbNewLine & _
                     Action & " " & Args & vbNewLine & vbNewLine & _
                     "OK to continue?", MsgBoxStyle.YesNo)
@@ -518,7 +545,7 @@ Friend Class MainForm
                 Dim stdErr As StreamReader = p.StandardError
 
                 While Not p.HasExited
-
+                    Application.DoEvents()
                     stdOutString = stdOut.ReadLine
                     stdOutBuffer.Append(stdOutString + vbNewLine)
 
@@ -585,89 +612,107 @@ Friend Class MainForm
         Prompt.Ask("Enter Directory Name")
         If (Prompt.LastResult = CANCELSTRING) Then Exit Sub
 
-        MkDir(AddSlash(PCWorkingDir.Text) & Prompt.LastResult)
+        MkDir(AddSlash(CurrentDirectory) & Prompt.LastResult)
         PCRefresh_Click(PCRefresh, New System.EventArgs())
     End Sub
 
     Private Sub Options_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles Options.Click
-        OptionsForm.StartingPath.Text = AddSlash(PCWorkingDir.Text)
+        'OptionsForm.StartingPath.Text = AddSlash(CurrentDirectory)
 
-        OptionsForm.ShowDialog()
+        'OptionsForm.ShowDialog()
 
-        DriveNumber = CShort(OptionsForm.DriveNum.Text)
-        PCWorkingDir.Text = OptionsForm.StartingPath.Text
-        GotoDir(PCWorkingDir.Text)
+        'DriveNumber = CShort(OptionsForm.DriveNum.Text)
+        'CurrentDirectory = OptionsForm.StartingPath.Text
+        'GotoDir(CurrentDirectory)
+
+
+
+        If frmConfiguration.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
+            Me.CurrentDirectory = frmConfiguration.InitialDirectory
+            GotoDir(CurrentDirectory)
+        End If
+
     End Sub
 
     Private Sub PCDelete_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles PCDelete.Click
-        Dim T As Short
         Dim Result As Object
 
         Result = MsgBox("Delete the selected file(s)?", MsgBoxStyle.YesNo Or MsgBoxStyle.Question, "Delete Files")
         If (Result = MsgBoxResult.No) Then Exit Sub
 
-        For T = 0 To PCDirectory.Items.Count - 1
-            If (PCDirectory.GetSelected(T)) Then
-                File.Delete(PCDirectory.Items(T))
-            End If
-        Next T
+        Dim objList As New ArrayList
+
+        For Each strToDelete As String In PCDirectory.SelectedItems
+            objList.Add(Path.Combine(CurrentDirectory, strToDelete))
+        Next
+
+        For Each strToDelete As String In objList
+            File.Delete(strToDelete)
+        Next
 
         PCDirectory.Refresh()
     End Sub
 
-    Private busy As Boolean
+    Private m_blnBusy As Boolean
 
     Private Sub PCDirectory_SelectedIndexChanged(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles PCDirectory.SelectedIndexChanged
 
 
-        If Not busy Then
+        If Not m_blnBusy Then
 
-            Dim T As Short
-            Dim Bytes As Integer
-            Dim D64Selected As Short
+            Dim lngBytes As Long
+            Dim shtD64Selected As Short
 
-            busy = True
+            m_blnBusy = True
 
-            D64Selected = -1
-            Bytes = 0
+            shtD64Selected = -1
+            lngBytes = 0
 
             'If a D64 is selected, deselect all the others
-            Dim item As String
+            'Dim item As String
 
-            For Each item In PCDirectory.SelectedItems
-                If item.ToUpper().EndsWith(".D64") Then
-                    PCDirectory.ClearSelected()
-                    PCDirectory.SelectedItem = item
-                    Exit For
-                End If
-            Next
+            'For Each item In PCDirectory.SelectedItems
+            '    If item.ToUpper().EndsWith(".D64") Then
+            '        PCDirectory.ClearSelected()
+            '        PCDirectory.SelectedItem = item
+            '        Exit For
+            '    End If
+            'Next
 
             'Refresh the KB/Blocks display
-            For Each item In PCDirectory.SelectedItems
-                Dim filename As String = Path.Combine(PCWorkingDir.Text, PCDirectory.Items(T))
+            For Each item As String In PCDirectory.SelectedItems
+                Dim filename As String = Path.Combine(CurrentDirectory, item)
 
                 ' Check if file exists first
                 If Not File.Exists(filename) Then
                     ' File does not exist anymore
                     PCDirectory.ClearSelected()
-                    Bytes = 0
+                    lngBytes = 0
                     PCDirectory.Refresh()
                     Exit For
                 Else
-                    Bytes += FileLen(filename)
+
+                    lngBytes += FileLen(filename)
+
                 End If
             Next
 
-            KBText.Text = VB6.Format(Bytes / 1024, "0.0") & " KB"
-            BlockText.Text = CShort(Bytes / 254) & " Blocks" '254 Bytes per C= Block
+            KBText.Text = String.Format("{0:0.0} KB", lngBytes / 1024)
 
-            busy = False
+            Dim lngBlocks As Long
+            lngBlocks = lngBytes / 254
+
+            If lngBytes Mod 254 > 0 Then
+                lngBlocks += 1
+            End If
+
+            BlockText.Text = String.Format("{0:0} Blocks", lngBlocks)
+
         End If
+        m_blnBusy = False
     End Sub
 
     Private Sub PCRefresh_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles PCRefresh.Click
-        PCWorkingDir.Text = AddSlash(CurDir())
-        PCDirectory.Path = CurDir()
         PCDirectory.Refresh()
     End Sub
 
@@ -698,10 +743,10 @@ Friend Class MainForm
 
         'Enable Enter Key
         If (KeyCode = 13) Then
-            ' ChDir PCWorkingDir.Text
-            GotoDir(PCWorkingDir.Text)
+            ' ChDir CurrentDirectory
+            GotoDir(CurrentDirectory)
             PCRefresh_Click(PCRefresh, New System.EventArgs())
-            PCWorkingDir.Text = PCWorkingDir.Text
+            CurrentDirectory = CurrentDirectory
         End If
     End Sub
 
@@ -790,7 +835,7 @@ Friend Class MainForm
         If Not (FilesOK) Then
 
             MsgBox("Can't find cbmctrl.exe " & vbNewLine & vbNewLine & _
-                "gui4cbm4win must be run from within the same directory as the cbm4win executable files." & vbNewLine & vbNewLine & _
+                "gui4cbm4win must be run from within the same directory as the OpenCBM executable files." & vbNewLine & vbNewLine & _
                 "Current Directory: " & CurDir(), _
                 MsgBoxStyle.Critical, "Error")
 
@@ -801,7 +846,7 @@ Friend Class MainForm
 
     'Refresh the directory - only if automatic refresh hasn't been turned off
     Private Sub RefreshCBMDir()
-        If (OptionsForm.AutoRefreshDir.CheckState) Then
+        If (frmConfiguration.RefreshAfter) Then
             CBMRefresh_Click(CBMRefresh, New System.EventArgs())
         Else
             ClearCBMDir()
@@ -821,10 +866,35 @@ Friend Class MainForm
     End Sub
 
     Private Sub cmdBrowse_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdBrowse.Click
-        folderBrowser.SelectedPath = PCWorkingDir.Text
+        folderBrowser.SelectedPath = CurrentDirectory
         If folderBrowser.ShowDialog() = Windows.Forms.DialogResult.OK Then
-            PCWorkingDir.Text = folderBrowser.SelectedPath
-            PCDirectory.Path = folderBrowser.SelectedPath
+            CurrentDirectory = folderBrowser.SelectedPath
         End If
     End Sub
+
+    Private Property CurrentDirectoryPath() As String
+        Get
+            Return PCDirectory.Path
+        End Get
+        Set(ByVal value As String)
+            If (Directory.Exists(value)) Then
+                PCDirectory.Path = value
+                PCWorkingDir.Text = value
+            End If
+        End Set
+    End Property
+
+    Private Property CurrentDirectory() As String
+        Get
+            Return PCWorkingDir.Text
+        End Get
+        Set(ByVal value As String)
+            If (Directory.Exists(value)) Then
+                PCWorkingDir.Text = value
+                PCDirectory.Path = value
+            Else
+                CurrentDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            End If
+        End Set
+    End Property
 End Class

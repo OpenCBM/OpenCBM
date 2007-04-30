@@ -58,13 +58,16 @@
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
+    <Reference Include="System.configuration" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
+    <Reference Include="System.Design" />
     <Reference Include="System.Drawing">
       <Name>System.Drawing</Name>
     </Reference>
+    <Reference Include="System.Web.Services" />
     <Reference Include="System.Windows.Forms">
       <Name>System.Windows.Forms</Name>
     </Reference>
@@ -84,6 +87,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.vb" />
+    <Compile Include="CbmDevices.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CbmDevices.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="frmConfiguration.Designer.vb">
+      <DependentUpon>frmConfiguration.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmConfiguration.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Constants.vb">
       <SubType>Code</SubType>
     </Compile>
@@ -107,13 +121,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Application.myapp</DependentUpon>
     </Compile>
-    <Compile Include="Options.Designer.vb">
-      <SubType>Code</SubType>
-      <DependentUpon>Options.vb</DependentUpon>
-    </Compile>
-    <Compile Include="Options.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Prompt.Designer.vb">
       <SubType>Code</SubType>
       <DependentUpon>Prompt.vb</DependentUpon>
@@ -128,19 +135,21 @@
     <Compile Include="WaitforDir.vb">
       <SubType>Form</SubType>
     </Compile>
+    <EmbeddedResource Include="frmConfiguration.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>frmConfiguration.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI.resX">
       <DependentUpon>GUI.vb</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Options.resX">
-      <DependentUpon>Options.vb</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Prompt.resX">
       <DependentUpon>Prompt.vb</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="WaitforDir.resX">
       <DependentUpon>WaitforDir.vb</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Content Include="CBM4WINGUI.ico" />
     <Content Include="license.txt" />
@@ -186,6 +195,18 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
+    <None Include="CbmDevices.xsc">
+      <DependentUpon>CbmDevices.xsd</DependentUpon>
+    </None>
+    <None Include="CbmDevices.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>CbmDevices.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="CbmDevices.xss">
+      <DependentUpon>CbmDevices.xsd</DependentUpon>
+    </None>
     <None Include="lib\opencbm-0.4.0.tar.gz" />
     <None Include="lib\opencbm.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -196,6 +217,12 @@
     <None Include="lib\opencbmvice.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MozBar\MozBar.csproj">
+      <Project>{180E4B12-A45B-4091-8A6F-91031C28DA3D}</Project>
+      <Name>MozBar</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>

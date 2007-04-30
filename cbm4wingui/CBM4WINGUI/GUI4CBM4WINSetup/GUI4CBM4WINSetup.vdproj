@@ -129,8 +129,20 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_FDEF95737CBF7928AF129A101CDEFCBD"
+        "OwnerKey" = "8:_224D3CABDEE147698706075DA158A5DE"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_224D3CABDEE147698706075DA158A5DE"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_FDEF95737CBF7928AF129A101CDEFCBD"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -619,6 +631,37 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_FDEF95737CBF7928AF129A101CDEFCBD"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:MozBar, Version=1.5.1.0, Culture=neutral, PublicKeyToken=c2cf310c62ad0838, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_FDEF95737CBF7928AF129A101CDEFCBD"
+                    {
+                    "Name" = "8:MozBar.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:MozBar.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_6056D2CADB9E4E19BECF01ECA7FA4F06"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
         }
         "FileType"
         {
@@ -708,13 +751,13 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:GUI4CBM4WIN"
         "ProductCode" = "8:{DCDBD777-A539-4E06-8408-158C03026701}"
-        "PackageCode" = "8:{7B1E21D5-510D-4044-8DBE-AB502D767014}"
+        "PackageCode" = "8:{3197154E-BB2F-4BA1-A24F-E3F8504EC986}"
         "UpgradeCode" = "8:{58E9A8E4-F201-4C7A-A84B-A19DA4761DDD}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.6.3"
+        "ProductVersion" = "8:0.6.4"
         "Manufacturer" = "8:OpenCBM"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
