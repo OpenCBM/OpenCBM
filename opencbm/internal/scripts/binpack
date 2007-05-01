@@ -1,13 +1,17 @@
 #! /bin/bash
 
-if [ "$1" == "" ]; then
-	echo Usage: $0 VERSION
-	echo
-	echo Example: $0 0.1.0.86
-	exit 1
-fi
+VERSIONH=include/version.h
 
-VERSION=$1
+# get the old versions
+VER_MAJOR="`grep \"#define OPENCBM_VERSION_MAJOR\" $VERSIONH|sed -e \"s/#define OPENCBM_VERSION_MAJOR[ ]*//\"`"
+VER_MINOR="`grep \"#define OPENCBM_VERSION_MINOR\" $VERSIONH|sed -e \"s/#define OPENCBM_VERSION_MINOR[ ]*//\"`"
+VER_SUBMINOR="`grep \"#define OPENCBM_VERSION_SUBMINOR\" $VERSIONH|sed -e \"s/#define OPENCBM_VERSION_SUBMINOR[ ]*//\"`"
+VER_BUGFIX="`grep \"#define OPENCBM_VERSION_BUGFIX\" $VERSIONH|sed -e \"s/#define OPENCBM_VERSION_BUGFIX[ ]*//\"`"
+VER_DEVEL="`grep \"#define OPENCBM_VERSION_DEVEL\" $VERSIONH|sed -e \"s/#define OPENCBM_VERSION_DEVEL[ ]*//\"`"
+
+VERSION=$VER_MAJOR.$VER_MINOR.$VER_SUBMINOR.$VER_DEVEL
+
+echo $VERSION
 
 (
 cd bin/
