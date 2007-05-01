@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/configuration.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration.c,v 1.2 2007-03-22 13:12:21 strik Exp $ \n
+** \version $Id: configuration.c,v 1.3 2007-05-01 17:51:38 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file
@@ -55,11 +55,11 @@ struct opencbm_configuration_s {
    be split up into portions of MAX_LINE_LENGTH.
 */
 static
-unsigned char *
+char *
 configuration_read_line(opencbm_configuration_handle Handle)
 {
-    static unsigned char buffer[MAX_LINE_LENGTH];
-    unsigned char *ret = NULL;
+    static char buffer[MAX_LINE_LENGTH];
+    char *ret = NULL;
 
     do {
         /* If we already reached the end of file, abort here */
@@ -80,7 +80,7 @@ configuration_read_line(opencbm_configuration_handle Handle)
 
         if (buffer[0] != '#')
         {
-            unsigned char *p;
+            char *p;
 
             ret = buffer;
 
@@ -136,7 +136,7 @@ opencbm_configuration_open(void)
     opencbm_configuration_handle handle;
 
     do {
-        unsigned char filenamebuffer[MAX_PATH_];
+        char filenamebuffer[MAX_PATH_];
 
         handle = malloc(sizeof(*handle));
 
@@ -210,15 +210,15 @@ opencbm_configuration_close(opencbm_configuration_handle Handle)
 */
 int
 opencbm_configuration_get_data(opencbm_configuration_handle Handle,
-                               const unsigned char Section[], const unsigned char Entry[],
-                               unsigned char ReturnBuffer[], unsigned int ReturnBufferLength)
+                               const char Section[], const char Entry[],
+                               char ReturnBuffer[], unsigned int ReturnBufferLength)
 {
     int error = 1;
 
     do
     {
         unsigned int found = 0;
-        unsigned char *p;
+        char *p;
 
         unsigned int section_length;
         unsigned int entry_length;

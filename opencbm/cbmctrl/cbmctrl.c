@@ -5,13 +5,13 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Modifications for cbm4win and general rework Copyright 2001-2006 Spiro Trikaliotis
+ *  Modifications for cbm4win and general rework Copyright 2001-2007 Spiro Trikaliotis
  *  Additions Copyright 2006 Wolfgang Moser (http://d81.de)
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.40 2006-07-23 14:23:35 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.41 2007-05-01 17:51:37 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -23,6 +23,7 @@ static char *rcsid =
 #include <assert.h>
 
 #include "arch.h"
+#include "libmisc.h"
 
 typedef
 enum {
@@ -39,6 +40,7 @@ typedef struct {
     int error;   //!< there was an error in processing the options (=1), or not (=0)
     int help;    //!< option: the user requested help for the specified command
     int version; //!< option: print version information
+    char *adapter; //!< option: an explicit adapter was specified
     PETSCII_RAW petsciiraw; //!< option: The user requested PETSCII or RAW, or nothing 
 } OPTIONS;
 
@@ -1629,19 +1631,21 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
     int option_index;
     int c;
 
-    static const char short_options[] = "+fhVpr";
+    static const char short_options[] = "+fhVpr@:";
     static struct option long_options[] =
     {
-        {"forget",  no_argument, NULL, 'f'},
-        {"help",    no_argument, NULL, 'h'},
-        {"version", no_argument, NULL, 'V'},
-        {"petscii", no_argument, NULL, 'p'},
-        {"raw",     no_argument, NULL, 'r'},
-        {NULL,      no_argument, NULL, 0  }
+        { "adapter" , required_argument, NULL, '@' },
+        { "forget"  , no_argument,       NULL, 'f' },
+        { "help"    , no_argument,       NULL, 'h' },
+        { "version" , no_argument,       NULL, 'V' },
+        { "petscii" , no_argument,       NULL, 'p' },
+        { "raw"     , no_argument,       NULL, 'r' },
+        { NULL      , no_argument,       NULL, 0   }
     };
 
     // clear all options
     memset(options, 0, sizeof(*options));
+    options->adapter = 0;
 
     // remember argc and argv, so they can be used later
     options->argc = argc;
@@ -1684,6 +1688,13 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
             set_option(&options->help, 1, 0, "--help");
             break;
 
+        case '@':
+            if (options->adapter != NULL)
+                options->error = 1;
+            else
+                options->adapter = cbmlibmisc_strdup(optarg);
+            break;
+
         case 'V':
             set_option(&options->version, 1, 0, "--version");
             break;
@@ -1708,6 +1719,7 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
 static void
 free_options(OPTIONS * const options)
 {
+    cbmlibmisc_strfree(options->adapter);
 }
 
 static int
@@ -1740,7 +1752,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     OPTIONS options;
 
     int rv = 0;
-    
+
     do {
         CBM_FILE fd;
 
@@ -1767,13 +1779,13 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             options.petsciiraw = pprog->petsciiraw;
 
         if (pprog->need_driver)
-            rv = cbm_driver_open(&fd, 0);
+            rv = cbm_driver_open_ex(&fd, options.adapter);
 
         if (rv != 0)
         {
             if (arch_get_errno())
             {
-                arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
+                arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name_ex(options.adapter));
             }
             break;
         }

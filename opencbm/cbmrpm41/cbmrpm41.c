@@ -10,10 +10,11 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.17 2006-08-30 12:59:46 wmsr Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.18 2007-05-01 17:51:38 strik Exp $";
 #endif
 
 #include "cbmrpm41.h"
+#include "libmisc.h"
 
 static unsigned char cbmrpm41[] = {
 #include "cbmrpm41.inc"
@@ -553,12 +554,14 @@ main(int argc, char *argv[])
     int status = 0;
     __u_char cmd[40], job = 1, begintrack = 1, endtrack = 35, retries = 5;
     char c, *arg;
+    char *adapter = NULL;
     int sector = 0, berror = 0;
 
     struct option longopts[] =
     {
         { "help"       , no_argument      , NULL, 'h' },
         { "version"    , no_argument      , NULL, 'V' },
+        { "adapter"    , required_argument, NULL, '@' },
         { "job"        , no_argument      , NULL, 'j' },
         { "retries"    , required_argument, NULL, 'r' },
         { "extended"   , no_argument      , NULL, 'x' },
@@ -575,7 +578,7 @@ main(int argc, char *argv[])
     };
 
     // const char shortopts[] ="hVj:sr:xb:e:c:qvn";
-    const char shortopts[] ="hVj:sxr:b:e:c:";
+    const char shortopts[] ="hVj:sxr:b:e:c:@:";
 
 
     while((c=(unsigned char)getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
@@ -603,6 +606,15 @@ main(int argc, char *argv[])
             case 'e': endtrack = arch_atoc(optarg);
                       break;
             case 'c': sector = atoi(optarg);
+                      break;
+            case '@': if (adapter == NULL)
+                          adapter = cbmlibmisc_strdup(optarg);
+                      else
+                      {
+                          fprintf(stderr, "--adapter/-@ given more than once.");
+                          help();
+                          return 0;
+                      }
                       break;
             default : hint(argv[0]);
                       return 1;
@@ -654,7 +666,7 @@ main(int argc, char *argv[])
            "Press <Enter>, when ready or press <CTRL>-C to abort.\r", drive, drive);
     getchar();
 
-    if(cbm_driver_open(&fd, 0) == 0) do
+    if(cbm_driver_open_ex(&fd, adapter) == 0) do
     {
         arch_set_ctrlbreak_handler(handle_CTRL_C);
 
@@ -721,16 +733,19 @@ main(int argc, char *argv[])
             printf("%s\n", cmd);
         }
         cbm_driver_close(fd);
+        cbmlibmisc_strfree(adapter);
         return 0;
     } while(0);
     else
     {
-        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
+        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name_ex(adapter));
+        cbmlibmisc_strfree(adapter);
         return 1;
     }
     // if the do{}while(0) loop is exited with a break, we get here
-    arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
+    arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name_ex(adapter));
     cbm_reset(fd);
+    cbmlibmisc_strfree(adapter);
     cbm_driver_close(fd);
     return 1;
 }

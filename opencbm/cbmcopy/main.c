@@ -5,11 +5,12 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 2001-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright 2004-2007 Spiro Trikaliotis
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.18 2006-07-20 11:45:28 strik Exp $";
+    "@(#) $Id: main.c,v 1.19 2007-05-01 17:51:37 strik Exp $";
 #endif
 
 #include <ctype.h>
@@ -20,6 +21,7 @@ static char *rcsid =
 #include <string.h>
 
 #include "arch.h"
+#include "libmisc.h"
 
 #include "opencbm.h"
 #include "cbmcopy.h"
@@ -185,6 +187,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
     char output_type = '\0';
     char *tail;
     char *ext;
+    char *adapter = NULL;
 
     unsigned char drive;
     const char *tm = NULL;
@@ -209,6 +212,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
     {
         { "help"            , no_argument      , NULL, 'h' },
         { "verbose"         , no_argument      , NULL, 'v' },
+        { "adapter"         , required_argument, NULL, '@' },
         { "quiet"           , no_argument      , NULL, 'q' },
         { "version"         , no_argument      , NULL, 'V' },
         { "no-progress"     , no_argument      , NULL, 'n' },
@@ -223,7 +227,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
         { NULL              , 0                , NULL, 0   }
     };
 
-    const char shortopts[] ="hVqvrwnt:d:f:o:Ra:";
+    const char shortopts[] ="hVqvrwnt:d:f:o:Ra:@:";
 
     if(NULL == (tail = strrchr(argv[0], '/')))
     {
@@ -299,6 +303,15 @@ int ARCH_MAINDECL main(int argc, char **argv)
                 break;
             case 'a': /* override-address */
                 char_star_opt_once(&address_str, "--address", argv);
+                break;
+            case '@': /* choose adapter */
+                if (adapter == NULL)
+                    adapter = cbmlibmisc_strdup(optarg);
+                else {
+                    my_message_cb(sev_fatal, "--adapter/-@ given more than once.");
+                    hint(argv[0]);
+                    exit(1);
+                }
                 break;
             default : /* unknown */
                 hint(argv[0]);
@@ -417,7 +430,8 @@ int ARCH_MAINDECL main(int argc, char **argv)
         return 1;
     }
 
-    rv = cbm_driver_open( &fd, 0 );
+    rv = cbm_driver_open_ex( &fd, adapter );
+    cbmlibmisc_strfree(adapter);
 
     if(0 == rv)
     {

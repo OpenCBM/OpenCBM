@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.19 2007-04-21 18:16:09 cnvogelg Exp $ \n
+** \version $Id: cbm.c,v 1.20 2007-05-01 17:51:38 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -28,6 +28,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+
+#include "libmisc.h"
 
 //! mark: We are building the DLL */
 #define DLL
@@ -50,42 +52,58 @@ static
 struct plugin_information_s Plugin_information = { 0 };
 
 
-#ifdef WIN32
-    #define DEFAULT_PLUGIN_NAME "opencbm-xu1541.dll"
-#else
-#ifdef OPENCBM_MAC
-    #define DEFAULT_PLUGIN_NAME PREFIX "/lib/opencbm/plugin/libopencbm-xu1541.dylib"
-#else
-    #define DEFAULT_PLUGIN_NAME PREFIX "/lib/opencbm/plugin/libopencbm-xu1541.so"
-#endif
-#endif
-
-
 static int
-initialize_plugin_pointer(plugin_information_t *Plugin_information)
+initialize_plugin_pointer(plugin_information_t *Plugin_information, const char * const Adapter)
 {
     int error = 1;
 
     do {
-        unsigned char plugin_name[1024] = DEFAULT_PLUGIN_NAME;
+        char plugin_name[1024] = "";
 
         opencbm_configuration_handle handle_configuration = opencbm_configuration_open();
 
         if (handle_configuration)
         {
-            int error;
+            int error = 0;
 
-            error = opencbm_configuration_get_data(handle_configuration, "plugins", "default", plugin_name, sizeof(plugin_name));
+            if (Adapter == NULL)
+            {
+                //
+                // get the name of the default plugin
+                //
 
+                error = opencbm_configuration_get_data(handle_configuration, 
+                           "plugins", "default", plugin_name, sizeof(plugin_name));
+            }
+            else
+            {
+                //
+                // Use the given plugin name
+                //
+                if (strlen(Adapter) < sizeof(plugin_name))
+                    strcpy(plugin_name, Adapter);
+            }
+
+            //
+            // get the location of the plugin
+            //
             if (!error)
-                error = opencbm_configuration_get_data(handle_configuration, plugin_name, "location", plugin_name, sizeof(plugin_name));
+            {
+                error = opencbm_configuration_get_data(handle_configuration,
+                           plugin_name, "location", plugin_name, sizeof(plugin_name));
+            }
 
+            //
+            // if an error occurred, make sure that no plugin will be loaded!
+            //
             if (error)
-                strcpy(plugin_name, DEFAULT_PLUGIN_NAME);
+            {
+                *plugin_name = 0;
+            }
 
             opencbm_configuration_close(handle_configuration);
         }
-        DBG_PRINT((DBG_PREFIX "Using plugin %s", plugin_name));
+        DBG_PRINT((DBG_PREFIX "Using plugin at '%s'", plugin_name));
 
         memset(&Plugin_information->Plugin, 0, sizeof(Plugin_information->Plugin));
 
@@ -223,13 +241,13 @@ uninitialize_plugin(void)
 }
 
 static int
-initialize_plugin(void)
+initialize_plugin(const char * const Adapter)
 {
     int error = 1;
 
     if (Plugin_information.Library == NULL)
     {
-        if (0 == initialize_plugin_pointer(&Plugin_information))
+        if (0 == initialize_plugin_pointer(&Plugin_information, Adapter))
         {
             error = 0;
         }
@@ -241,8 +259,118 @@ initialize_plugin(void)
 // #define DBG_DUMP_RAW_READ
 // #define DBG_DUMP_RAW_WRITE
 
+/*! \brief Split adapter in adapter and port
+
+ This function extracts the adapter name and the port number
+ out of the given adapter specification.
+
+ \param Adapter
+   The name of the adapter to be used.
+   The format is specified in the remarks section below.
+
+ \param PortNumber
+   Pointer to an unsigned int which will get the specified port number.
+   It is left untouched if no port number was specified.
+
+ \return
+   NULL: an error occurred.
+   Else: A pointer to the "stripped" adapter specification.
+         This data has to be freed with cbmlibmisc_strfree() afterwards!
+
+ \remark
+   The Adapter consists of two parts: The name, a colon, and a port.
+   The given pointer can be NULL, in which case the default adapter will be used.
+   If specified, the name must be the same name as the section in the INI file.
+   You can add a colon and a number, opening a specific bus on this device.
+   You can also omit the adapter name, thus, only giving a colon and a number,
+   in which case the specified bus will be used on the default adapter
+*/
+
+static char *
+cbm_split_adapter_in_name_and_port(char * Adapter, unsigned int * PortNumber)
+{
+    char * adapter_stripped = NULL;
+
+    if (Adapter) 
+    {
+        char *p = strchr(Adapter, ':');
+
+        if (p)
+        {
+            // there was some colon (:), thus, extract portNumber and name
+
+            adapter_stripped = cbmlibmisc_strndup(Adapter, p - Adapter);
+
+            if (adapter_stripped != NULL)
+                *PortNumber = atoi(p + 1);
+        }
+    }
+
+    if (adapter_stripped == NULL)
+        adapter_stripped = cbmlibmisc_strdup(Adapter);
+
+    return adapter_stripped;
+}
+
 /*-------------------------------------------------------------------*/
 /*--------- DRIVER HANDLING -----------------------------------------*/
+
+/*! \brief Get the name of the driver for a specific parallel port, extended version
+
+ Get the name of the driver for a specific parallel port.
+
+ \param Adapter
+   The name of the adapter to be used.
+   The format is given in the documentation for cbm_split_adapter_in_name_and_port().
+
+ \return 
+   Returns a pointer to a null-terminated string containing the
+   driver name, or NULL if an error occurred.
+*/
+
+const char * CBMAPIDECL
+cbm_get_driver_name_ex(char * Adapter)
+{
+    const char *ret;
+
+    static char buffer[256];
+    char *adapter_stripped = NULL;
+    unsigned int portNumber = 0;
+
+    int error;
+
+    FUNC_ENTER();
+
+    if (Adapter != NULL)
+    {
+        adapter_stripped = cbm_split_adapter_in_name_and_port(Adapter, &portNumber);
+
+        DBG_PRINT((DBG_PREFIX "Using adapter '%s', that is, adapter '%s' with port '%u'",
+            Adapter, adapter_stripped, portNumber));
+    }
+
+    error = initialize_plugin(adapter_stripped);
+
+    if (Plugin_information.Plugin.cbm_plugin_get_driver_name)
+        ret = Plugin_information.Plugin.cbm_plugin_get_driver_name(portNumber);
+    else
+        ret = "NO PLUGIN DRIVER!";
+
+    if (error)
+    {
+        strncpy(buffer, ret, sizeof(buffer));
+
+        buffer[sizeof(buffer)-1] = 0;
+
+        ret = buffer;
+
+        uninitialize_plugin();
+    }
+
+    cbmlibmisc_strfree(adapter_stripped);
+
+    FUNC_LEAVE_STRING(ret);
+}
 
 /*! \brief Get the name of the driver for a specific parallel port
 
@@ -258,38 +386,78 @@ initialize_plugin(void)
 
  \bug
    PortNumber is not allowed to exceed 10. 
+
+ \note
+   Do not use this function.
+   It is only there for compatibility reasons with older applications.
+   Use cbm_get_driver_name_ex() instead!
 */
 
 const char * CBMAPIDECL
 cbm_get_driver_name(int PortNumber)
 {
-    const char *ret;
-
-    static char buffer[256];
-
-    int error;
+    char number[] = ":0";
 
     FUNC_ENTER();
 
-    error = initialize_plugin();
-
-    if (Plugin_information.Plugin.cbm_plugin_get_driver_name)
-        ret = Plugin_information.Plugin.cbm_plugin_get_driver_name(PortNumber);
-    else
-        ret = "NO PLUGIN DRIVER!";
-
-    if (error)
-    {
-        strncpy(buffer, ret, sizeof(buffer));
-
-        buffer[sizeof(buffer)-1] = 0;
-
-        ret = buffer;
-
-        uninitialize_plugin();
+    if (PortNumber >= 0 && PortNumber < 10) {
+        number[1] = PortNumber + '0';
     }
 
-    FUNC_LEAVE_STRING(ret);
+    FUNC_LEAVE_STRING(cbm_get_driver_name_ex(number));
+}
+
+/*! \brief Opens the driver, extended version
+
+ This function Opens the driver.
+
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the driver.
+
+ \param Adapter
+   The name of the adapter to be used.
+   The format is given in the documentation for cbm_split_adapter_in_name_and_port().
+
+ \return
+   ==0: This function completed successfully
+   !=0: otherwise
+
+ \limitation
+ PortNumber is not allowed to exceed 10. 
+
+ \remark
+ cbm_driver_open_ex() should be balanced with cbm_driver_close().
+*/
+
+int CBMAPIDECL 
+cbm_driver_open_ex(CBM_FILE *HandleDevice, char * Adapter)
+{
+    int error;
+    unsigned int portNumber = 0;
+    char * adapter_stripped = Adapter;
+
+    FUNC_ENTER();
+
+    DBG_PRINT((DBG_PREFIX "cbm_driver_open_ex() called"));
+
+    if (Adapter != NULL)
+    {
+        adapter_stripped = cbm_split_adapter_in_name_and_port(Adapter, &portNumber);
+
+        DBG_PRINT((DBG_PREFIX "Using adapter '%s', that is, adapter '%s' with port '%u'",
+            Adapter, adapter_stripped, portNumber));
+    }
+
+    error = initialize_plugin(adapter_stripped);
+
+    cbmlibmisc_strfree(adapter_stripped);
+
+    if (error)
+        uninitialize_plugin();
+    else
+        error = Plugin_information.Plugin.cbm_plugin_driver_open(HandleDevice, portNumber);
+
+    FUNC_LEAVE_INT(error);
 }
 
 /*! \brief Opens the driver
@@ -309,24 +477,26 @@ cbm_get_driver_name(int PortNumber)
 
  PortNumber is not allowed to exceed 10. 
 
+ \note
+   Do not use this function.
+   It is only there for compatibility reasons with older applications.
+   Use cbm_driver_open_ex() instead!
+
  cbm_driver_open() should be balanced with cbm_driver_close().
 */
 
 int CBMAPIDECL 
 cbm_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 {
-    int error;
+    char number[] = ":0";
 
     FUNC_ENTER();
 
-    error = initialize_plugin();
+    if (PortNumber >= 0 && PortNumber < 10) {
+        number[1] = PortNumber + '0';
+    }
 
-    if (error)
-        uninitialize_plugin();
-    else
-        error = Plugin_information.Plugin.cbm_plugin_driver_open(HandleDevice, PortNumber);
-
-    FUNC_LEAVE_INT(error);
+    FUNC_LEAVE_INT(cbm_driver_open_ex(HandleDevice, number));
 }
 
 /*! \brief Closes the driver

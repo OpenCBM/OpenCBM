@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration_name.c,v 1.2 2007-03-22 13:12:22 strik Exp $ \n
+** \version $Id: configuration_name.c,v 1.3 2007-05-01 17:51:38 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file
@@ -49,8 +49,8 @@
  \return 
    Returns the input variable Buffer.
 */
-const unsigned char *
-configuration_get_default_filename(unsigned char Buffer[], unsigned int BufferLength)
+const char *
+configuration_get_default_filename(char Buffer[], unsigned int BufferLength)
 {
     if (Buffer)
     {

@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.14 2007-04-29 10:46:21 strik Exp $
+# $Id: config.make,v 1.15 2007-05-01 17:51:37 strik Exp $
 #
 
 # get package version (major.minor.release).
@@ -64,7 +64,7 @@ LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
 SHLIB_EXT    = so
 SHLIB_SWITCH = -shared
-LINK_FLAGS   = -L../lib -L../arch/$(ARCH) -lopencbm -larch
+LINK_FLAGS   = -L../lib -L../arch/$(ARCH) -L../libmisc -lopencbm -larch -lmisc
 SONAME       = -Wl,-soname -Wl,
 CC           = gcc
 AR           = ar

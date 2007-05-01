@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "all"=".\all.dsp" - Package Owner=<4>
+Project: "all"=.\all.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -27,7 +27,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "allamd64"=".\allamd64.dsp" - Package Owner=<4>
+Project: "allamd64"=.\allamd64.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -39,7 +39,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "alli386"=".\alli386.dsp" - Package Owner=<4>
+Project: "alli386"=.\alli386.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -51,7 +51,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "allia64"=".\allia64.dsp" - Package Owner=<4>
+Project: "allia64"=.\allia64.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -63,7 +63,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "allvs"=".\allvs.dsp" - Package Owner=<4>
+Project: "allvs"=.\allvs.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -123,7 +123,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "arch"="..\arch\windows\WINBUILD\arch.dsp" - Package Owner=<4>
+Project: "arch"=..\arch\windows\WINBUILD\arch.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -131,11 +131,14 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "cbmcopy"="..\cbmcopy\WINBUILD\cbmcopy.dsp" - Package Owner=<4>
+Project: "cbmcopy"=..\cbmcopy\WINBUILD\cbmcopy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -152,11 +155,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name arch
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "cbmctrl"="..\cbmctrl\WINBUILD\cbmctrl.dsp" - Package Owner=<4>
+Project: "cbmctrl"=..\cbmctrl\WINBUILD\cbmctrl.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -170,11 +176,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name arch
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "cbmformat"="..\cbmformat\WINBUILD\cbmformat.dsp" - Package Owner=<4>
+Project: "cbmformat"=..\cbmformat\WINBUILD\cbmformat.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -188,11 +197,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name arch
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "cbmforng"="..\cbmforng\WINBUILD\cbmforng.dsp" - Package Owner=<4>
+Project: "cbmforng"=..\cbmforng\WINBUILD\cbmforng.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -206,11 +218,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name opencbm
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "cbmrpm41"="..\cbmrpm41\WINBUILD\cbmrpm41.dsp" - Package Owner=<4>
+Project: "cbmrpm41"=..\cbmrpm41\WINBUILD\cbmrpm41.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -224,11 +239,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name opencbm
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "d64copy"="..\d64copy\WINBUILD\d64copy.dsp" - Package Owner=<4>
+Project: "d64copy"=..\d64copy\WINBUILD\d64copy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -245,11 +263,113 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name arch
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "demoflash"="..\demo\flash\WINBUILD\demoflash.dsp" - Package Owner=<4>
+Project: "demoflash"=..\demo\flash\WINBUILD\demoflash.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "demomorse"=..\demo\morse\WINBUILD\demomorse.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "demorpm1541"=..\demo\rpm1541\WINBUILD\demorpm1541.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "install"=..\install\WINBUILD\install.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "libcbmcopy"=..\libcbmcopy\WINBUILD\libcbmcopy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "libd64copy"=..\libd64copy\WINBUILD\libd64copy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -267,7 +387,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "demomorse"="..\demo\morse\WINBUILD\demomorse.dsp" - Package Owner=<4>
+Project: "libmisc"=..\libmisc\WINDOWS\libmisc.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -275,17 +395,11 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name opencbm
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name arch
-    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "demorpm1541"="..\demo\rpm1541\WINBUILD\demorpm1541.dsp" - Package Owner=<4>
+Project: "libtrans"=..\libtrans\WINBUILD\libtrans.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -293,32 +407,11 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name arch
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name opencbm
-    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "install"="..\install\WINBUILD\install.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name opencbm
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "libcbmcopy"="..\libcbmcopy\WINBUILD\libcbmcopy.dsp" - Package Owner=<4>
+Project: "opencbm"=..\lib\WINBUILD\opencbm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -333,25 +426,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libd64copy"="..\libd64copy\WINBUILD\libd64copy.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name opencbm
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name arch
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "libtrans"="..\libtrans\WINBUILD\libtrans.dsp" - Package Owner=<4>
+Project: "opencbmxa1541"=..\lib\plugin\xa1541\WINDOWS\opencbmxa1541.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -363,22 +438,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "opencbm"="..\lib\WINBUILD\opencbm.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name arch
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "opencbmxa1541"="..\lib\plugin\xa1541\WINDOWS\opencbmxa1541.dsp" - Package Owner=<4>
+Project: "opencbmxu1541"=..\lib\plugin\xu1541\WINDOWS\opencbmxu1541.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -390,19 +450,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "opencbmxu1541"="..\lib\plugin\xu1541\WINDOWS\opencbmxu1541.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "samplelibtrans"="..\sample\libtrans\WINDOWS\samplelibtrans.dsp" - Package Owner=<4>
+Project: "samplelibtrans"=..\sample\libtrans\WINDOWS\samplelibtrans.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -413,11 +461,14 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libtrans
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "syslibcommon"="..\sys\libcommon\syslibcommon.dsp" - Package Owner=<4>
+Project: "syslibcommon"=..\sys\libcommon\syslibcommon.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -429,7 +480,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "syslibiec"="..\sys\libiec\syslibiec.dsp" - Package Owner=<4>
+Project: "syslibiec"=..\sys\libiec\syslibiec.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -441,7 +492,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "sysnt4"="..\sys\nt4\sysnt4.dsp" - Package Owner=<4>
+Project: "sysnt4"=..\sys\nt4\sysnt4.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -453,7 +504,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "sysw98"="..\sys\wdm\win98\sysw98.dsp" - Package Owner=<4>
+Project: "sysw98"=..\sys\wdm\win98\sysw98.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -465,7 +516,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "syswdm"="..\sys\wdm\win2000\syswdm.dsp" - Package Owner=<4>
+Project: "syswdm"=..\sys\wdm\win2000\syswdm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -477,7 +528,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "vdd"="..\sys\vdd\dll\WINBUILD\vdd.dsp" - Package Owner=<4>
+Project: "vdd"=..\sys\vdd\dll\WINBUILD\vdd.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

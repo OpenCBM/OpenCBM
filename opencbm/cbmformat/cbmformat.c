@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmformat.c,v 1.11 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: cbmformat.c,v 1.12 2007-05-01 17:51:38 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -21,6 +21,7 @@ static char *rcsid =
 #include <string.h>
 
 #include "arch.h"
+#include "libmisc.h"
 
 static unsigned char dskfrmt[] = {
 #include "cbmformat.inc"
@@ -63,11 +64,13 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     unsigned char demagnetize = 0;
     char cmd[40], c, name[20], *arg;
     int err = 0;
+    char *adapter = NULL;
 
     struct option longopts[] =
     {
         { "help"       , no_argument      , NULL, 'h' },
         { "version"    , no_argument      , NULL, 'V' },
+        { "adapter"    , required_argument, NULL, '@' },
         { "no-bump"    , no_argument      , NULL, 'n' },
         { "extended"   , no_argument      , NULL, 'x' },
         { "original"   , no_argument      , NULL, 'o' },
@@ -81,7 +84,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         { NULL         , 0                , NULL, 0   }
     };
 
-    const char shortopts[] ="hVnxospvct:";
+    const char shortopts[] ="hVnxospvct:@:";
 
     while((c=(unsigned char)getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
@@ -106,6 +109,15 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             case 'c': demagnetize = 1;
                       break;
             case 't': tracks = arch_atoc(optarg);
+                      break;
+            case '@': if (adapter == NULL)
+                          adapter = cbmlibmisc_strdup(optarg);
+                      else
+                      {
+                          fprintf(stderr, "--adapter/-@ given more than once.");
+                          hint(argv[0]);
+                          return 1;
+                      }
                       break;
             default : hint(argv[0]);
                       return 1;
@@ -151,7 +163,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     }
     name[name_len] = 0;
 
-    if(cbm_driver_open(&fd, 0) == 0)
+    if(cbm_driver_open_ex(&fd, adapter) == 0)
     {
         cbm_upload(fd, drive, 0x0500, dskfrmt, sizeof(dskfrmt));
         sprintf(cmd, "M-E%c%c%c%c%c%c%c%c0:%s", 3, 5, tracks + 1, 
@@ -204,11 +216,13 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             printf("%s\n", cmd);
         }
         cbm_driver_close(fd);
+        cbmlibmisc_strfree(adapter);
         return 0;
     }
     else
     {
-        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
+        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name_ex(adapter));
+        cbmlibmisc_strfree(adapter);
         return 1;
     }
 }

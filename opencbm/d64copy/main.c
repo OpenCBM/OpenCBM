@@ -5,17 +5,19 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright 2004-2007 Spiro Trikaliotis
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.12 2006-07-20 11:45:28 strik Exp $";
+    "@(#) $Id: main.c,v 1.13 2007-05-01 17:51:38 strik Exp $";
 #endif
 
 #include "opencbm.h"
 #include "d64copy.h"
 
 #include "arch.h"
+#include "libmisc.h"
 
 #include <getopt.h>
 #include <stdarg.h>
@@ -223,6 +225,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     char *tm = NULL;
     char *src_arg;
     char *dst_arg;
+    char *adapter = NULL;
 
     int  c;
     int  rv = 1;
@@ -235,6 +238,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     {
         { "help"       , no_argument      , NULL, 'h' },
         { "version"    , no_argument      , NULL, 'V' },
+        { "adapter"    , required_argument, NULL, '@' },
         { "warp"       , no_argument      , NULL, 'w' },
         { "no-warp"    , no_argument      , &settings->warp, 0 },
         { "quiet"      , no_argument      , NULL, 'q' },
@@ -253,7 +257,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         { NULL         , 0                , NULL, 0   }
     };
 
-    const char shortopts[] ="hVwqbBt:i:s:e:d:r:2vnE:";
+    const char shortopts[] ="hVwqbBt:i:s:e:d:r:2vnE:@:";
 
     while((c=getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
@@ -324,6 +328,15 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                           return 1;
                       }
                       break;
+            case '@': if (adapter == NULL)
+                          adapter = cbmlibmisc_strdup(optarg);
+                      else
+                      {
+                          my_message_cb(sev_fatal, "--adapter/-@ given more than once.");
+                          hint(argv[0]);
+                          exit(1);
+                      }
+                      break;
             case 0:   break; // needed for --no-warp
             default : hint(argv[0]);
                       return 1;
@@ -368,7 +381,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         return 1;
     }
 
-    if(cbm_driver_open(&fd_cbm, 0) == 0)
+    if(cbm_driver_open_ex(&fd_cbm, adapter) == 0)
     {
         /*
          * If the user specified auto transfer mode, find out
@@ -404,9 +417,10 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     }
     else
     {
-        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
+        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name_ex(adapter));
     }
 
+    cbmlibmisc_strfree(adapter);
     free(settings);
     
     return rv;

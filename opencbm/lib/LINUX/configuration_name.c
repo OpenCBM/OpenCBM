@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/LINUX/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration_name.c,v 1.3 2007-04-21 18:16:09 cnvogelg Exp $ \n
+** \version $Id: configuration_name.c,v 1.4 2007-05-01 17:51:38 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file
@@ -23,8 +23,11 @@
 #include <assert.h>
 #include <string.h>
 
-
-#define DEFAULT_FILENAME PREFIX "/etc/opencbm.conf"
+#ifdef OPENCBM_MAC
+# define DEFAULT_FILENAME PREFIX "/etc/opencbm.conf"
+#else
+# define DEFAULT_FILENAME "/etc/opencbm.conf"
+#endif
 
 #define MAX_PATH_ 1024
 
@@ -43,8 +46,8 @@
  \return 
    Returns the input variable Buffer.
 */
-const unsigned char *
-configuration_get_default_filename(unsigned char Buffer[], unsigned int BufferLength)
+const char *
+configuration_get_default_filename(char Buffer[], unsigned int BufferLength)
 {
     if (Buffer)
     {

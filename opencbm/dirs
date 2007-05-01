@@ -9,6 +9,7 @@ DIRS= \
 	cbmctrl \
 	install \
 	lib \
+	libmisc \
 	libtrans \
 	demo \
 	sample \

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.21 2007-04-21 18:16:09 cnvogelg Exp $ \n
+** \version $Id: opencbm.h,v 1.22 2007-05-01 17:51:38 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \authors With additions from Wolfgang Moser \n
@@ -113,12 +113,14 @@ enum cbm_cable_type_e
 
 /*! \todo FIXME: port isn't used yet */
 EXTERN int CBMAPIDECL cbm_driver_open(CBM_FILE *f, int port);
+EXTERN int CBMAPIDECL cbm_driver_open_ex(CBM_FILE *f, char * adapter);
 EXTERN void CBMAPIDECL cbm_driver_close(CBM_FILE f);
 EXTERN void CBMAPIDECL cbm_lock(CBM_FILE f);
 EXTERN void CBMAPIDECL cbm_unlock(CBM_FILE f);
 
 /*! \todo FIXME: port isn't used yet */
 EXTERN const char * CBMAPIDECL cbm_get_driver_name(int port);
+EXTERN const char * CBMAPIDECL cbm_get_driver_name_ex(char * adapter);
 
 EXTERN int CBMAPIDECL cbm_listen(CBM_FILE f, __u_char dev, __u_char secadr);
 EXTERN int CBMAPIDECL cbm_talk(CBM_FILE f, __u_char dev, __u_char secadr);

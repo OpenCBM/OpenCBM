@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.14 2007-04-29 10:46:21 strik Exp $
+# $Id: Makefile,v 1.15 2007-05-01 17:51:37 strik Exp $
 
 RELATIVEPATH=./
 include ${RELATIVEPATH}LINUX/config.make
@@ -7,7 +7,7 @@ CBMDEV   = /dev/cbm
 CBMPERM  = 666
 DEVMAJOR = 10
 DEVMINOR = 177
-SUBDIRS  = include arch/$(ARCH) lib \
+SUBDIRS  = include arch/$(ARCH) libmisc lib \
 	   libtrans \
            cbmctrl cbmformat cbmforng d64copy cbmcopy \
            demo/flash demo/morse demo/rpm1541 \

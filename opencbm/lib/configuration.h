@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/configuration.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration.h,v 1.2 2007-03-22 13:12:21 strik Exp $ \n
+** \version $Id: configuration.h,v 1.3 2007-05-01 17:51:38 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file
@@ -24,8 +24,8 @@ typedef struct opencbm_configuration_s opencbm_configuration_t;
 typedef opencbm_configuration_t *opencbm_configuration_handle;
 
 
-extern const unsigned char *configuration_get_default_filename(unsigned char Buffer[], unsigned int BufferLength);
+extern const char *configuration_get_default_filename(char Buffer[], unsigned int BufferLength);
 
 extern opencbm_configuration_handle opencbm_configuration_open(void);
 extern void opencbm_configuration_close(opencbm_configuration_handle Handle);
-extern int  opencbm_configuration_get_data(opencbm_configuration_handle Handle, const unsigned char Section[], const unsigned char Entry[],unsigned char ReturnBuffer[], unsigned int ReturnBufferLength);
+extern int  opencbm_configuration_get_data(opencbm_configuration_handle Handle, const char Section[], const char Entry[], char ReturnBuffer[], unsigned int ReturnBufferLength);
