@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.20 2007-05-01 17:51:38 strik Exp $ \n
+** \version $Id: cbm.c,v 1.21 2007-05-03 19:02:19 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -306,8 +306,10 @@ cbm_split_adapter_in_name_and_port(char * Adapter, unsigned int * PortNumber)
         }
     }
 
-    if (adapter_stripped == NULL)
-        adapter_stripped = cbmlibmisc_strdup(Adapter);
+    if (adapter_stripped[0] == 0) {
+        cbmlibmisc_strfree(adapter_stripped);
+        adapter_stripped = NULL;
+    }
 
     return adapter_stripped;
 }
@@ -434,7 +436,7 @@ cbm_driver_open_ex(CBM_FILE *HandleDevice, char * Adapter)
 {
     int error;
     unsigned int portNumber = 0;
-    char * adapter_stripped = Adapter;
+    char * adapter_stripped = NULL;
 
     FUNC_ENTER();
 
