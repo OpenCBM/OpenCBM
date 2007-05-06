@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.21 2007-05-03 19:02:19 strik Exp $ \n
+** \version $Id: cbm.c,v 1.22 2007-05-06 11:01:02 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -304,9 +304,13 @@ cbm_split_adapter_in_name_and_port(char * Adapter, unsigned int * PortNumber)
             if (adapter_stripped != NULL)
                 *PortNumber = atoi(p + 1);
         }
+        else
+        {
+            adapter_stripped = cbmlibmisc_strdup(Adapter);
+        }
     }
 
-    if (adapter_stripped[0] == 0) {
+    if (adapter_stripped && adapter_stripped[0] == 0) {
         cbmlibmisc_strfree(adapter_stripped);
         adapter_stripped = NULL;
     }
