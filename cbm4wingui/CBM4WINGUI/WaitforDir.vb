@@ -3,7 +3,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang 0.6.4
+' Copyright (C) 2006      Wolfgang 0.6.5
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -35,32 +35,14 @@ Friend Class Waiting
 
 	
 	
-	Private IsOnTop As Boolean
+    Private Sub Waiting_Load(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles MyBase.Load
+    End Sub
 	
-	Public WriteOnly Property AlwaysOnTop() As Boolean
-		Set(ByVal Value As Boolean)
-			Dim lFlag As Integer
-			If Value Then lFlag = HWND_TOPMOST Else lFlag = HWND_NOTOPMOST
-			IsOnTop = Value
-			SetWindowPos(Me.Handle.ToInt32, lFlag, 0, 0, 0, 0, (SWP_NOSIZE Or SWP_NOMOVE))
-		End Set
-	End Property
-	
-	Private Sub Waiting_Load(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles MyBase.Load
-		Me.AlwaysOnTop = True
-	End Sub
-	
-    'There's no "elegant" way to abort a running OpenCBM process, short of killing the PID, so this is left for future...
-	
-	Private Sub Cancel_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles Cancel.Click
-		Me.Hide()
-	End Sub
-	
-	Private Sub LEDTimer_Tick(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles LEDTimer.Tick
-		If System.Drawing.ColorTranslator.ToOle(LED.BackColor) = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.Red) Then
-			LED.BackColor = System.Drawing.Color.Black
-		Else
-			LED.BackColor = System.Drawing.Color.Red
-		End If
-	End Sub
+    Private Sub LEDTimer_Tick(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles LEDTimer.Tick
+        If System.Drawing.ColorTranslator.ToOle(LED.BackColor) = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.Red) Then
+            LED.BackColor = System.Drawing.Color.Black
+        Else
+            LED.BackColor = System.Drawing.Color.Red
+        End If
+    End Sub
 End Class

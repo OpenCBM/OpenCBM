@@ -3,7 +3,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang 0.6.4
+' Copyright (C) 2006      Wolfgang 0.6.5
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -48,85 +48,57 @@
     Private components As System.ComponentModel.IContainer
     Public ToolTip1 As System.Windows.Forms.ToolTip
     Public WithEvents LEDTimer As System.Windows.Forms.Timer
-    Public WithEvents Cancel As System.Windows.Forms.Button
     Public WithEvents LED As System.Windows.Forms.Label
     Public WithEvents Label As System.Windows.Forms.Label
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> Private Sub InitializeComponent()
-        Dim resources As System.Resources.ResourceManager = New System.Resources.ResourceManager(GetType(Waiting))
-        Me.components = New System.ComponentModel.Container()
-        Me.ToolTip1 = New System.Windows.Forms.ToolTip(components)
-        Me.LEDTimer = New System.Windows.Forms.Timer(components)
-        Me.Cancel = New System.Windows.Forms.Button
+        Me.components = New System.ComponentModel.Container
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Waiting))
+        Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
+        Me.LEDTimer = New System.Windows.Forms.Timer(Me.components)
         Me.LED = New System.Windows.Forms.Label
         Me.Label = New System.Windows.Forms.Label
         Me.SuspendLayout()
-        Me.ToolTip1.Active = True
-        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
-        Me.Text = "Working..."
-        Me.ClientSize = New System.Drawing.Size(187, 93)
-        Me.Location = New System.Drawing.Point(3, 22)
-        Me.ControlBox = False
-        Me.MaximizeBox = False
-        Me.MinimizeBox = False
-        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        '
+        'LEDTimer
+        '
+        Me.LEDTimer.Enabled = True
+        Me.LEDTimer.Interval = 300
+        '
+        'LED
+        '
+        Me.LED.BackColor = System.Drawing.Color.Black
+        Me.LED.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        resources.ApplyResources(Me.LED, "LED")
+        Me.LED.Name = "LED"
+        '
+        'Label
+        '
+        Me.Label.BackColor = System.Drawing.Color.Transparent
+        Me.Label.Cursor = System.Windows.Forms.Cursors.Default
+        resources.ApplyResources(Me.Label, "Label")
+        Me.Label.ForeColor = System.Drawing.SystemColors.ControlText
+        Me.Label.Name = "Label"
+        '
+        'Waiting
+        '
+        resources.ApplyResources(Me, "$this")
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.Control
-        Me.Enabled = True
-        Me.KeyPreview = False
+        Me.ControlBox = False
+        Me.Controls.Add(Me.LED)
+        Me.Controls.Add(Me.Label)
         Me.Cursor = System.Windows.Forms.Cursors.Default
-        Me.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.ShowInTaskbar = True
-        Me.HelpButton = False
-        Me.WindowState = System.Windows.Forms.FormWindowState.Normal
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
+        Me.MaximizeBox = False
+        Me.MinimizeBox = False
         Me.Name = "Waiting"
-        Me.LEDTimer.Interval = 300
-        Me.LEDTimer.Enabled = True
-        Me.Cancel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
-        Me.Cancel.Text = "Cancel"
-        Me.Cancel.Size = New System.Drawing.Size(97, 25)
-        Me.Cancel.Location = New System.Drawing.Point(144, 48)
-        Me.Cancel.TabIndex = 1
-        Me.Cancel.Visible = False
-        Me.Cancel.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Cancel.BackColor = System.Drawing.SystemColors.Control
-        Me.Cancel.CausesValidation = True
-        Me.Cancel.Enabled = True
-        Me.Cancel.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Cancel.Cursor = System.Windows.Forms.Cursors.Default
-        Me.Cancel.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.Cancel.TabStop = True
-        Me.Cancel.Name = "Cancel"
-        Me.LED.BackColor = System.Drawing.Color.Black
-        Me.LED.Size = New System.Drawing.Size(41, 17)
-        Me.LED.Location = New System.Drawing.Point(72, 64)
-        Me.LED.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.LED.Visible = True
-        Me.LED.Name = "LED"
-        Me.Label.TextAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.Label.Text = "Please wait."
-        Me.Label.Size = New System.Drawing.Size(185, 49)
-        Me.Label.Location = New System.Drawing.Point(1, 16)
-        Me.Label.TabIndex = 0
-        Me.Label.Font = New System.Drawing.Font("Arial", 8.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label.BackColor = System.Drawing.Color.Transparent
-        Me.Label.Enabled = True
-        Me.Label.ForeColor = System.Drawing.SystemColors.ControlText
-        Me.Label.Cursor = System.Windows.Forms.Cursors.Default
-        Me.Label.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.Label.UseMnemonic = True
-        Me.Label.Visible = True
-        Me.Label.AutoSize = False
-        Me.Label.BorderStyle = System.Windows.Forms.BorderStyle.None
-        Me.Label.Name = "Label"
-        Me.Controls.Add(Cancel)
-        Me.Controls.Add(LED)
-        Me.Controls.Add(Label)
+        Me.ShowInTaskbar = False
+        Me.TopMost = True
         Me.ResumeLayout(False)
-        Me.PerformLayout()
+
     End Sub
 #End Region
 End Class

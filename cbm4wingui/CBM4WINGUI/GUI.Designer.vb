@@ -3,7 +3,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang 0.6.4
+' Copyright (C) 2006      Wolfgang 0.6.5
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -83,11 +83,11 @@
         Me._Label_3 = New System.Windows.Forms.Label
         Me._Label_4 = New System.Windows.Forms.Label
         Me.Frame2 = New System.Windows.Forms.GroupBox
+        Me.PCDirectory = New FilesBrowser.FilesListBox
         Me.cmdBrowse = New System.Windows.Forms.Button
         Me.BlockText = New System.Windows.Forms.TextBox
         Me.KBText = New System.Windows.Forms.TextBox
         Me.MakeDir = New System.Windows.Forms.Button
-        Me.PCDirectory = New Microsoft.VisualBasic.Compatibility.VB6.FileListBox
         Me.PCRefresh = New System.Windows.Forms.Button
         Me.RunFile = New System.Windows.Forms.Button
         Me.PCRename = New System.Windows.Forms.Button
@@ -156,9 +156,7 @@
         '
         Me.SplitContainer1.Panel1.Controls.Add(Me.CBMDrive)
         Me.SplitContainer1.Panel1.Controls.Add(Me.CopyToFloppy)
-        Me.SplitContainer1.Panel1.Controls.Add(Me.Options)
         Me.SplitContainer1.Panel1.Controls.Add(Me.CopyFromFloppy)
-        Me.SplitContainer1.Panel1.Controls.Add(Me.About)
         Me.SplitContainer1.Panel1.Controls.Add(Me.Frame2)
         '
         'SplitContainer1.Panel2
@@ -341,11 +339,13 @@
         '
         resources.ApplyResources(Me.Frame2, "Frame2")
         Me.Frame2.BackColor = System.Drawing.SystemColors.Control
+        Me.Frame2.Controls.Add(Me.PCDirectory)
         Me.Frame2.Controls.Add(Me.cmdBrowse)
+        Me.Frame2.Controls.Add(Me.Options)
         Me.Frame2.Controls.Add(Me.BlockText)
         Me.Frame2.Controls.Add(Me.KBText)
+        Me.Frame2.Controls.Add(Me.About)
         Me.Frame2.Controls.Add(Me.MakeDir)
-        Me.Frame2.Controls.Add(Me.PCDirectory)
         Me.Frame2.Controls.Add(Me.PCRefresh)
         Me.Frame2.Controls.Add(Me.RunFile)
         Me.Frame2.Controls.Add(Me.PCRename)
@@ -358,6 +358,15 @@
         Me.Frame2.ForeColor = System.Drawing.SystemColors.ControlText
         Me.Frame2.Name = "Frame2"
         Me.Frame2.TabStop = False
+        '
+        'PCDirectory
+        '
+        resources.ApplyResources(Me.PCDirectory, "PCDirectory")
+        Me.PCDirectory.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
+        Me.PCDirectory.FileIconSize = FilesBrowser.IconSize.Small
+        Me.PCDirectory.FormattingEnabled = True
+        Me.PCDirectory.Name = "PCDirectory"
+        Me.PCDirectory.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
         '
         'cmdBrowse
         '
@@ -391,17 +400,6 @@
         Me.MakeDir.ForeColor = System.Drawing.SystemColors.ControlText
         Me.MakeDir.Name = "MakeDir"
         Me.MakeDir.UseVisualStyleBackColor = True
-        '
-        'PCDirectory
-        '
-        resources.ApplyResources(Me.PCDirectory, "PCDirectory")
-        Me.PCDirectory.BackColor = System.Drawing.SystemColors.Window
-        Me.PCDirectory.Cursor = System.Windows.Forms.Cursors.Default
-        Me.PCDirectory.ForeColor = System.Drawing.SystemColors.WindowText
-        Me.PCDirectory.FormattingEnabled = True
-        Me.PCDirectory.Name = "PCDirectory"
-        Me.PCDirectory.Pattern = "*.*"
-        Me.PCDirectory.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
         '
         'PCRefresh
         '
@@ -494,6 +492,10 @@
         Me.Log.Name = "Log"
         Me.Log.ReadOnly = True
         '
+        'folderBrowser
+        '
+        resources.ApplyResources(Me.folderBrowser, "folderBrowser")
+        '
         'frmMain
         '
         resources.ApplyResources(Me, "$this")
@@ -536,7 +538,6 @@
     Public WithEvents BlockText As System.Windows.Forms.TextBox
     Public WithEvents KBText As System.Windows.Forms.TextBox
     Public WithEvents MakeDir As System.Windows.Forms.Button
-    Public WithEvents PCDirectory As Microsoft.VisualBasic.Compatibility.VB6.FileListBox
     Public WithEvents PCRefresh As System.Windows.Forms.Button
     Public WithEvents RunFile As System.Windows.Forms.Button
     Public WithEvents PCRename As System.Windows.Forms.Button
@@ -551,5 +552,6 @@
     Friend WithEvents Log As System.Windows.Forms.RichTextBox
     Friend WithEvents cmdBrowse As System.Windows.Forms.Button
     Friend WithEvents folderBrowser As System.Windows.Forms.FolderBrowserDialog
+    Friend WithEvents PCDirectory As FilesBrowser.FilesListBox
 #End Region
 End Class

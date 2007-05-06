@@ -3,7 +3,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang 0.6.4
+' Copyright (C) 2006      Wolfgang 0.6.5
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -45,34 +45,12 @@ Module Constants_Renamed
     Public Const SWP_NOSIZE As Short = &H1S
     Public Const SWP_NOMOVE As Short = &H2S
 
-    Public Const CANCELSTRING As String = "***CANCEL***"
+    Public CANCELSTRING As String = "***CANCEL***"
 
     Public Structure ReturnStringType
         Dim Output As String
         Dim Errors As String
     End Structure
-
-    'Misc. API Calls
-    Public Declare Function OpenProcess Lib "Kernel32" (ByVal dwDesiredAccess As Integer, ByVal bInheritHandle As Integer, ByVal dwProcessId As Integer) As Integer
-    Public Declare Function GetExitCodeProcess Lib "Kernel32" (ByVal hProcess As Integer, ByRef lpExitCode As Integer) As Integer
-    Public Const STILL_ACTIVE As Short = &H103S
-    Public Const PROCESS_QUERY_INFORMATION As Short = &H400S
-
-    'Public Const TEMPFILE1 As String = "OutFile.log"
-    'Public Const TEMPFILE2 As String = "ErrFile.log"
-    Public ReadOnly OUTPUT_PATH As String = GetShortPath()
-
-    Public Class Interop
-        <DllImport("kernel32.dll", SetLastError:=True, CharSet:=CharSet.Auto)> _
-        Public Shared Function GetShortPathName(ByVal longPath As String, <MarshalAs(UnmanagedType.LPTStr)> ByVal ShortPath As StringBuilder, <MarshalAs(UnmanagedType.U4)> ByVal bufferSize As Integer) As Integer
-        End Function
-    End Class
-
-    Private Function GetShortPath() As String
-        Dim TempPath As New System.Text.StringBuilder(1024)
-        Interop.GetShortPathName(System.IO.Path.GetTempPath(), TempPath, 1024)
-        Return TempPath.ToString()
-    End Function
 
     Private g_objConfig As Configuration = _
         ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None)

@@ -121,6 +121,16 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Application.myapp</DependentUpon>
     </Compile>
+    <Compile Include="en\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="Prompt.Designer.vb">
       <SubType>Code</SubType>
       <DependentUpon>Prompt.vb</DependentUpon>
@@ -142,6 +152,12 @@
     <EmbeddedResource Include="GUI.resX">
       <DependentUpon>GUI.vb</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="en\Resources.resx">
+      <SubType>Designer</SubType>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Prompt.resX">
       <DependentUpon>Prompt.vb</DependentUpon>
@@ -217,8 +233,17 @@
     <None Include="lib\opencbmvice.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="My Project\Settings.settings">
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FileListBoxControl\FileListBoxControl.csproj">
+      <Project>{F53E17FC-7576-44C4-B999-274B9F10B9CE}</Project>
+      <Name>FileListBoxControl</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MozBar\MozBar.csproj">
       <Project>{180E4B12-A45B-4091-8A6F-91031C28DA3D}</Project>
       <Name>MozBar</Name>

@@ -60,6 +60,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MozBar", "..\MozBar\MozBar.
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileListBoxControl", "..\FileListBoxControl\FileListBoxControl.csproj", "{F53E17FC-7576-44C4-B999-274B9F10B9CE}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +104,10 @@ Global
 		{180E4B12-A45B-4091-8A6F-91031C28DA3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{180E4B12-A45B-4091-8A6F-91031C28DA3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{180E4B12-A45B-4091-8A6F-91031C28DA3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F53E17FC-7576-44C4-B999-274B9F10B9CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F53E17FC-7576-44C4-B999-274B9F10B9CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F53E17FC-7576-44C4-B999-274B9F10B9CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F53E17FC-7576-44C4-B999-274B9F10B9CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

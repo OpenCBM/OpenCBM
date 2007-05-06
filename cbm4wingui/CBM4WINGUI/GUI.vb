@@ -3,7 +3,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang 0.6.4
+' Copyright (C) 2006      Wolfgang 0.6.5
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -40,7 +40,7 @@
 '                Fixed hardcoded reference to c:\ drive in two places
 '                Improved handling of default values when INI file has errors.
 '
-'   Additions by Wolfgang 0.6.4, based on Gui4Cbm4Win 0.0.9
+'   Additions by Wolfgang 0.6.5, based on Gui4Cbm4Win 0.0.9
 '         0.40 - Renamed all "Warp"-Options into "No-Warp" ones
 '                Added "auto" transfer option
 '                Renamed the stdout and stderr log files to g4c4w*.log
@@ -90,16 +90,18 @@ Imports System.IO
 Friend Class frmMain
     Inherits System.Windows.Forms.Form
 
+    Private m_objResourceManager As Resources.ResourceManager = _
+        New Resources.ResourceManager(Me.GetType().FullName, Me.GetType().Assembly)
 
+    Private ReadOnly Property ResourceManager() As Resources.ResourceManager
+        Get
+            Return m_objResourceManager
+        End Get
+    End Property
 
     Private Sub About_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles About.Click
-        MsgBox( _
-            "GUI4CBM4WIN by Leif Bloomquist (no support anymore) & adoption to OpenCBM 0.4.0 by Wolfgang (http://d81.de/)            " & vbNewLine _
-            & vbNewLine & "This is a simple GUI front-end for OpenCBM by Spiro Trikaliotis (www.trikaliotis.net/cbm4win/)" & vbNewLine _
-            & vbNewLine & "OpenCBM itself is heavily based on cbm4linux written by Michael Klein (http://www.lb.shuttle.de/puffin/)" & vbNewLine _
-            & vbNewLine & "This is version " & Application.ProductVersion & " of the GUI, " _
-            & "which is currently maintained by Payton Byrd (payton@paytonbyrd.com) and is " & vbNewLine _
-            & "distributed under the zlib/libpng OpenSource license.", MsgBoxStyle.Information, "About")
+        MsgBox(String.Format(ResourceManager.GetString("ABOUT"), Application.ProductVersion), _
+            MsgBoxStyle.Information, ResourceManager.GetString("ABOUT_TITLE"))
     End Sub
 
     'Called when user selects a file on the CBM directory
@@ -118,7 +120,7 @@ Friend Class frmMain
 
         Dim Status As ReturnStringType
 
-        Status = DoCommand("cbmctrl", "status " & DriveNumber, "Reading drive status, please wait.")
+        Status = DoCommand("cbmctrl", "status " & DriveNumber, ResourceManager.GetString("READ_DRIVE_STATUS"))
 
         LastStatus.Text = UCase(Status.Output)
     End Sub
@@ -131,19 +133,19 @@ Friend Class frmMain
         Dim Status As ReturnStringType
         Dim args As String
 
-        Result = MsgBox("This will erase ALL data on the floppy disk.  Are you sure?", _
+        Result = MsgBox(ResourceManager.GetString("FORMAT_MESSAGE"), _
             MsgBoxStyle.Exclamation Or MsgBoxStyle.YesNo, _
-            "Format Disk")
+            ResourceManager.GetString("FORMAT_TITLE"))
 
         If Not (Result = MsgBoxResult.No) Then
 
-            Prompt.Ask("Please Enter Diskname, ID")
+            Prompt.Ask(ResourceManager.GetString("FORMAT_DISK_NAME"))
 
             If (Prompt.LastResult = CANCELSTRING) Then Exit Sub
 
             args = String.Format(" -vso {0} ""{1}""", DriveNumber, Prompt.LastResult.ToUpper())
 
-            Status = DoCommand("cbmforng", args, "Formatting floppy disk, please wait.")
+            Status = DoCommand("cbmforng", args, ResourceManager.GetString("FORMATTING_DISK"))
 
             LastStatus.Text = UCase(Status.Output)
 
@@ -156,7 +158,7 @@ Friend Class frmMain
     Private Sub CBMInitialize_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles CBMInitialize.Click
 
 
-        DoCommand("cbmctrl", "command " & DriveNumber & " I0", "Initializing Drive")
+        DoCommand("cbmctrl", "command " & DriveNumber & " I0", ResourceManager.GetString("INITIALIZING_DRIVE"))
 
         CBMDriveStatus_Click(eventSender, eventArgs)
     End Sub
@@ -173,8 +175,7 @@ Friend Class frmMain
             CBMDirectory.Items.Clear()
 
             'Run the program
-            'UPGRADE_WARNING: Couldn't resolve default property of object Results. Click for more: 'ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?keyword="6A50421D-15FE-4896-8A1B-2EC21E9037B2"'
-            Results = DoCommand("cbmctrl", "dir " & DriveNumber, "Reading directory, please wait.", False)
+            Results = DoCommand("cbmctrl", "dir " & DriveNumber, ResourceManager.GetString("READING_DIRECTORY"), False)
 
             ' 'The drive status is always returned.
             ' LastStatus.Caption = UCase(Results.Errors)
@@ -213,7 +214,7 @@ Friend Class frmMain
         Catch exception As Exception
 
             If Not (Err.Number = 53) Then
-                MsgBox(exception.Message, MsgBoxStyle.Information, "Refresh")
+                MsgBox(exception.Message, MsgBoxStyle.Information, ResourceManager.GetString("REFRESH"))
             End If
 
             ClearCBMDir()
@@ -233,7 +234,8 @@ Friend Class frmMain
 
                 Prompt.Reply.Text = ExtractQuotes(VB6.GetItemString(CBMDirectory, T))
 
-                Prompt.Ask("Enter new name for '" & ExtractQuotes(VB6.GetItemString(CBMDirectory, T)) & "'", False)
+                Prompt.Ask(String.Format(ResourceManager.GetString("ENTER_NAME"), _
+                    ExtractQuotes(VB6.GetItemString(CBMDirectory, T))), False)
 
                 If Not (Prompt.LastResult = CANCELSTRING) Then
                     args = String.Format("command {0} ""R0:{1}={2}""", _
@@ -241,7 +243,7 @@ Friend Class frmMain
                         Prompt.LastResult.ToUpper(), _
                         ExtractQuotes(VB6.GetItemString(CBMDirectory, T)))
 
-                    DoCommand("cbmctrl", args, "Renaming")
+                    DoCommand("cbmctrl", args, ResourceManager.GetString("RENAMING"))
                 Else
                     Exit Sub
                 End If
@@ -253,7 +255,7 @@ Friend Class frmMain
 
     Private Sub CBMReset_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles CBMReset.Click
 
-        DoCommand("cbmctrl", "reset", "Resetting drives, please wait.")
+        DoCommand("cbmctrl", "reset", ResourceManager.GetString("RESETTING_DRIVES"))
     End Sub
 
     Private Sub CBMScratch_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles CBMScratch.Click
@@ -274,7 +276,7 @@ Friend Class frmMain
                     file)
 
                 DoCommand("cbmctrl", args, _
-                    "Scratching " & file)
+                    String.Format(ResourceManager.GetString("SCRATCHING_FILE"), file))
             End If
         Next T
 
@@ -289,7 +291,7 @@ Friend Class frmMain
         args = String.Format("command {0} ""V0:""", _
             DriveNumber)
 
-        DoCommand("cbmctrl", args, "Validating drive, please wait.")
+        DoCommand("cbmctrl", args, ResourceManager.GetString("VALIDATING"))
     End Sub
 
     Private Sub CopyFromFloppy_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) _
@@ -328,7 +330,7 @@ Friend Class frmMain
                 args = String.Format("--quiet --no-progress --transfer={0} -r {1} ""{2}"" --output=""{3}""", _
                     strTransfer, DriveNumber, FileName, FileNameOut)
 
-                DoCommand("cbmcopy", args, "Copying '" & ExtractQuotes(strToCopy) & "' from floppy disk.")
+                DoCommand("cbmcopy", args, String.Format(ResourceManager.GetString("COPYING_FROM_FLOPPY"), ExtractQuotes(strToCopy)))
 
                 FilesSelected = FilesSelected + 1
 
@@ -338,13 +340,13 @@ Friend Class frmMain
 
         'No Files were selected, make a D64 instead.
         If (FilesSelected = 0) Then
-            Result = MsgBox("No files selected.  Do you want to make a D64 image of this floppy disk?", _
+            Result = MsgBox(ResourceManager.GetString("COPYING_NO_FILES_SELECTED"), _
                 MsgBoxStyle.Question Or MsgBoxStyle.YesNo, _
-                "Create D64")
+                ResourceManager.GetString("COPYING_CREATE_D64"))
 
             If Not (Result = MsgBoxResult.No) Then
 
-                Prompt.Ask("Please Enter Filename:")
+                Prompt.Ask(ResourceManager.GetString("ENTER_FILENAME"))
                 If Not (Prompt.LastResult = CANCELSTRING) Then
                     Dim strTargetFilename As String = Prompt.LastResult
                     If Not strTargetFilename.ToLower().EndsWith(".d64") Then
@@ -353,7 +355,7 @@ Friend Class frmMain
                     args = String.Format("--transfer={0} {1} {2} ""{3}""", _
                         TransferString, g_strNoWarp, DriveNumber, Path.Combine(CurrentDirectory, strTargetFilename))
 
-                    DoCommand("d64copy", args, "Creating D64 image, please wait.")
+                    DoCommand("d64copy", args, ResourceManager.GetString("CREATING_D64"))
 
                     PCDirectory.Refresh()
                 End If
@@ -410,7 +412,7 @@ Friend Class frmMain
                         strTransfer, DriveNumber, Path.Combine(CurrentDirectory, FileName), FileNameOut, SeqType)
 
                     DoCommand("cbmcopy", args, _
-                        "Copying '" & PCDirectory.Items(T) & "' to floppy disk as '" & UCase(FileNameOut) & "'")
+                        String.Format(ResourceManager.GetString("COPYING_TO_FLOPPY"), PCDirectory.Items(T), UCase(FileNameOut)))
                 End If
             End If
         Next T
@@ -425,15 +427,15 @@ Friend Class frmMain
         Dim Result As Object
         Dim args As String
 
-        Result = MsgBox("This will overwrite ALL data on the floppy disk.  Are you sure?", _
+        Result = MsgBox(ResourceManager.GetString("CONFIRM_D64_WRITE"), _
             MsgBoxStyle.Exclamation Or MsgBoxStyle.YesNo, _
-            "Write D64 to Disk")
+            ResourceManager.GetString("CONFIRM_D64_WRITE_TITLE"))
 
         If Not (Result = MsgBoxResult.No) Then
             args = String.Format("--transfer={0} {1} ""{2}"" {3}", _
                 TransferString, g_strNoWarp, Path.Combine(CurrentDirectory, d64file), DriveNumber)
 
-            DoCommand("d64copy", args, "Creating disk from D64 image, please wait.")
+            DoCommand("d64copy", args, ResourceManager.GetString("CREATE_DISK_FROM_D64"))
 
             CBMRefresh_Click(CBMRefresh, New System.EventArgs())
 
@@ -445,7 +447,7 @@ Friend Class frmMain
 
         On Error Resume Next
 
-        Text = String.Format("GUI4CBM4WIN {0}", Application.ProductVersion)
+        Text = String.Format(ResourceManager.GetString("TITLE"), Application.ProductVersion)
 
         If (VB.Command() = "-leifdevelopment") Then
             'OptionsForm.PreviewCheck.CheckState = System.Windows.Forms.CheckState.Checked
@@ -455,6 +457,7 @@ Friend Class frmMain
         ExeDir = AddSlash(CurDir())
 
         LoadINI()
+        frmConfiguration.LoadConfig()
         'DriveNumber = CShort(OptionsForm.DriveNum.Text)
 
         CurrentDirectory = frmConfiguration.InitialDirectory
@@ -500,8 +503,8 @@ Friend Class frmMain
 
         Try
             If (InProgress) Then
-                MsgBox("OpenCBM command already in progress, cannot continue.", MsgBoxStyle.Critical)
-                DoCommand.Errors = "OpenCBM command already in progress."
+                MsgBox(ResourceManager.GetString("OPENCBM_IN_PROGRESS"), MsgBoxStyle.Critical)
+                DoCommand.Errors = ResourceManager.GetString("OPENCBM_IN_PROGRESS_ERROR")
                 DoCommand.Output = vbNullString
                 Exit Function
             End If
@@ -509,9 +512,8 @@ Friend Class frmMain
             'Check command - mostly for debugging.
             Dim Result As Object
             If (frmConfiguration.PreviewCommands) Then
-                Result = MsgBox("Requested command:" & vbNewLine & vbNewLine & _
-                    Action & " " & Args & vbNewLine & vbNewLine & _
-                    "OK to continue?", MsgBoxStyle.YesNo)
+                Result = MsgBox(String.Format(ResourceManager.GetString("PREVIEW_MSG"), Action, Args), MsgBoxStyle.YesNo)
+
                 If Result = MsgBoxResult.No Then
                     Exit Function
                 End If
@@ -609,7 +611,7 @@ Friend Class frmMain
     End Sub
 
     Private Sub MakeDir_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles MakeDir.Click
-        Prompt.Ask("Enter Directory Name")
+        Prompt.Ask(ResourceManager.GetString("ENTER_DIRECTORY_NAME"))
         If (Prompt.LastResult = CANCELSTRING) Then Exit Sub
 
         MkDir(AddSlash(CurrentDirectory) & Prompt.LastResult)
@@ -617,15 +619,6 @@ Friend Class frmMain
     End Sub
 
     Private Sub Options_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles Options.Click
-        'OptionsForm.StartingPath.Text = AddSlash(CurrentDirectory)
-
-        'OptionsForm.ShowDialog()
-
-        'DriveNumber = CShort(OptionsForm.DriveNum.Text)
-        'CurrentDirectory = OptionsForm.StartingPath.Text
-        'GotoDir(CurrentDirectory)
-
-
 
         If frmConfiguration.ShowDialog(Me) = Windows.Forms.DialogResult.OK Then
             Me.CurrentDirectory = frmConfiguration.InitialDirectory
@@ -637,7 +630,9 @@ Friend Class frmMain
     Private Sub PCDelete_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles PCDelete.Click
         Dim Result As Object
 
-        Result = MsgBox("Delete the selected file(s)?", MsgBoxStyle.YesNo Or MsgBoxStyle.Question, "Delete Files")
+        Result = MsgBox(ResourceManager.GetString("DELETE_SELECTED_FILES"), _
+            MsgBoxStyle.YesNo Or MsgBoxStyle.Question, _
+            ResourceManager.GetString("DELETE_SELECTED_FILES_TITLE"))
         If (Result = MsgBoxResult.No) Then Exit Sub
 
         Dim objList As New ArrayList
@@ -655,63 +650,6 @@ Friend Class frmMain
 
     Private m_blnBusy As Boolean
 
-    Private Sub PCDirectory_SelectedIndexChanged(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles PCDirectory.SelectedIndexChanged
-
-
-        If Not m_blnBusy Then
-
-            Dim lngBytes As Long
-            Dim shtD64Selected As Short
-
-            m_blnBusy = True
-
-            shtD64Selected = -1
-            lngBytes = 0
-
-            'If a D64 is selected, deselect all the others
-            'Dim item As String
-
-            'For Each item In PCDirectory.SelectedItems
-            '    If item.ToUpper().EndsWith(".D64") Then
-            '        PCDirectory.ClearSelected()
-            '        PCDirectory.SelectedItem = item
-            '        Exit For
-            '    End If
-            'Next
-
-            'Refresh the KB/Blocks display
-            For Each item As String In PCDirectory.SelectedItems
-                Dim filename As String = Path.Combine(CurrentDirectory, item)
-
-                ' Check if file exists first
-                If Not File.Exists(filename) Then
-                    ' File does not exist anymore
-                    PCDirectory.ClearSelected()
-                    lngBytes = 0
-                    PCDirectory.Refresh()
-                    Exit For
-                Else
-
-                    lngBytes += FileLen(filename)
-
-                End If
-            Next
-
-            KBText.Text = String.Format("{0:0.0} KB", lngBytes / 1024)
-
-            Dim lngBlocks As Long
-            lngBlocks = lngBytes / 254
-
-            If lngBytes Mod 254 > 0 Then
-                lngBlocks += 1
-            End If
-
-            BlockText.Text = String.Format("{0:0} Blocks", lngBlocks)
-
-        End If
-        m_blnBusy = False
-    End Sub
-
     Private Sub PCRefresh_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles PCRefresh.Click
         PCDirectory.Refresh()
     End Sub
@@ -720,52 +658,21 @@ Friend Class frmMain
         Dim T As Short
 
         For T = 0 To PCDirectory.Items.Count - 1
+            Dim strFileName As String = PCDirectory.Items(T)
             If (PCDirectory.GetSelected(T)) Then
-                Prompt.Reply.Text = PCDirectory.Items(T)
-                Prompt.Ask("Enter new name for '" & PCDirectory.Items(T) & "'", False)
+                Prompt.Reply.Text = strFileName
+                Prompt.Ask(String.Format(ResourceManager.GetString("ENTER_NAME"), strFileName), False)
 
-                If Not (Prompt.LastResult = CANCELSTRING) Then
-                    File.Move(PCDirectory.Items(T), Prompt.LastResult)
+                If Not (Prompt.LastResult = CANCELSTRING) And _
+                  File.Exists(Path.Combine(CurrentDirectory, strFileName)) Then
+                    File.Move(Path.Combine(CurrentDirectory, strFileName), _
+                        Path.Combine(CurrentDirectory, Prompt.LastResult))
                 End If
             End If
         Next T
 
         PCDirectory.Refresh()
     End Sub
-
-    Private Sub PCWorkingDir_KeyDown(ByVal eventSender As System.Object, ByVal eventArgs As System.Windows.Forms.KeyEventArgs)
-
-
-        Dim KeyCode As Short = eventArgs.KeyCode
-        Dim Shift As Short = eventArgs.KeyData \ &H10000
-
-        On Error Resume Next
-
-        'Enable Enter Key
-        If (KeyCode = 13) Then
-            ' ChDir CurrentDirectory
-            GotoDir(CurrentDirectory)
-            PCRefresh_Click(PCRefresh, New System.EventArgs())
-            CurrentDirectory = CurrentDirectory
-        End If
-    End Sub
-
-    'Thanks to vinnyd79 on Experts Exchange for this function!
-    Private Function ShellWait(ByRef PathName As Object, Optional ByRef WindowStyle As AppWinStyle = AppWinStyle.NormalFocus) As Double
-
-        Dim hProcess, RetVal As Integer
-
-        hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, False, Shell(PathName, WindowStyle))
-
-        Do
-            GetExitCodeProcess(hProcess, RetVal)
-
-            System.Windows.Forms.Application.DoEvents()
-            System.Threading.Thread.Sleep(10) ' was 100
-
-        Loop While RetVal = STILL_ACTIVE
-
-    End Function
 
     Private Function ExtractQuotes(ByRef FullString As String) As String
         Dim Quote1 As Short
@@ -805,7 +712,7 @@ Friend Class frmMain
 
         For T = 0 To PCDirectory.Items.Count - 1
             If (PCDirectory.GetSelected(T)) Then
-                ShellExecute(hWnd, "open", PCDirectory.Items(T), vbNullString, CurDir(), 1)
+                ShellExecute(hWnd, "open", PCDirectory.Items(T), vbNullString, CurrentDirectory, 1)
 
                 'Stop so only the first file is executed
                 Exit Sub
@@ -834,10 +741,8 @@ Friend Class frmMain
 
         If Not (FilesOK) Then
 
-            MsgBox("Can't find cbmctrl.exe " & vbNewLine & vbNewLine & _
-                "gui4cbm4win must be run from within the same directory as the OpenCBM executable files." & vbNewLine & vbNewLine & _
-                "Current Directory: " & CurDir(), _
-                MsgBoxStyle.Critical, "Error")
+            MsgBox(String.Format(ResourceManager.GetString("OPENCBM_NOT_FOUND"), CurDir()), _
+                MsgBoxStyle.Critical, ResourceManager.GetString("ERROR"))
 
             End
 
@@ -874,11 +779,11 @@ Friend Class frmMain
 
     Private Property CurrentDirectoryPath() As String
         Get
-            Return PCDirectory.Path
+            Return PCDirectory.SelectedPath
         End Get
         Set(ByVal value As String)
             If (Directory.Exists(value)) Then
-                PCDirectory.Path = value
+                PCDirectory.SelectedPath = value
                 PCWorkingDir.Text = value
             End If
         End Set
@@ -891,10 +796,70 @@ Friend Class frmMain
         Set(ByVal value As String)
             If (Directory.Exists(value)) Then
                 PCWorkingDir.Text = value
-                PCDirectory.Path = value
+
+                If PCDirectory.SelectedPath <> value Then
+                    PCDirectory.SelectedPath = value
+                End If
+
             Else
                 CurrentDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
             End If
         End Set
     End Property
+
+    Private Sub PCDirectory_FileSelected(ByVal sender As System.Object, _
+      ByVal fse As FilesBrowser.FileSelectEventArgs) Handles PCDirectory.FileSelected
+        If Not m_blnBusy Then
+
+            Dim lngBytes As Long
+            Dim shtD64Selected As Short
+
+            m_blnBusy = True
+
+            shtD64Selected = -1
+            lngBytes = 0
+
+            'Refresh the KB/Blocks display
+            For Each item As String In PCDirectory.SelectedItems
+                Dim filename As String = Path.Combine(CurrentDirectory, item)
+
+                ' Check if file exists first
+                If Not File.Exists(filename) Then
+                    ' File does not exist anymore
+                    PCDirectory.ClearSelected()
+                    lngBytes = 0
+                    PCDirectory.Refresh()
+                    Exit For
+                Else
+
+                    lngBytes += FileLen(filename)
+
+                End If
+            Next
+
+            KBText.Text = String.Format(ResourceManager.GetString("KB_FORMAT"), lngBytes / 1024)
+
+            Dim lngBlocks As Long
+            lngBlocks = lngBytes / 254
+
+            If lngBytes Mod 254 > 0 Then
+                lngBlocks += 1
+            End If
+
+            BlockText.Text = String.Format(ResourceManager.GetString("BLOCKS_FORMAT"), lngBlocks)
+
+        End If
+        m_blnBusy = False
+
+    End Sub
+
+    Private Sub PCWorkingDir_TextChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PCWorkingDir.TextChanged
+
+    End Sub
+
+    Private Sub PCDirectory_SelectedPathChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles PCDirectory.SelectedPathChanged
+        If CurrentDirectory <> PCDirectory.SelectedPath Then
+            CurrentDirectory = PCDirectory.SelectedPath
+        End If
+    End Sub
 End Class

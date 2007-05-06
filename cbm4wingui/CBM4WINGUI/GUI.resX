@@ -117,9 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="ToolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing">
     <value>17, 17</value>
-  </metadata>
+  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="CopyFromFloppy.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -127,18 +128,20 @@
   <data name="CopyFromFloppy.FlatStyle" type="System.Windows.Forms.FlatStyle, System.Windows.Forms">
     <value>System</value>
   </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="CopyFromFloppy.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="CopyFromFloppy.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="CopyFromFloppy.Location" type="System.Drawing.Point, System.Drawing">
-    <value>319, 172</value>
+    <value>279, 199</value>
   </data>
   <data name="CopyFromFloppy.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
   </data>
   <data name="CopyFromFloppy.Size" type="System.Drawing.Size, System.Drawing">
-    <value>73, 33</value>
+    <value>34, 25</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="CopyFromFloppy.TabIndex" type="System.Int32, mscorlib">
@@ -160,7 +163,7 @@
     <value>SplitContainer1.Panel1</value>
   </data>
   <data name="&gt;&gt;CopyFromFloppy.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>2</value>
   </data>
   <data name="Options.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Right</value>
@@ -171,8 +174,11 @@
   <data name="Options.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="Options.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="Options.Location" type="System.Drawing.Point, System.Drawing">
-    <value>319, 425</value>
+    <value>183, 414</value>
   </data>
   <data name="Options.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -193,7 +199,7 @@
     <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;Options.Parent" xml:space="preserve">
-    <value>SplitContainer1.Panel1</value>
+    <value>Frame2</value>
   </data>
   <data name="&gt;&gt;Options.ZOrder" xml:space="preserve">
     <value>2</value>
@@ -207,8 +213,11 @@
   <data name="About.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="About.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="About.Location" type="System.Drawing.Point, System.Drawing">
-    <value>319, 460</value>
+    <value>183, 453</value>
   </data>
   <data name="About.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -229,10 +238,10 @@
     <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;About.Parent" xml:space="preserve">
-    <value>SplitContainer1.Panel1</value>
+    <value>Frame2</value>
   </data>
   <data name="&gt;&gt;About.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>5</value>
   </data>
   <data name="CopyToFloppy.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -243,14 +252,17 @@
   <data name="CopyToFloppy.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="CopyToFloppy.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="CopyToFloppy.Location" type="System.Drawing.Point, System.Drawing">
-    <value>319, 133</value>
+    <value>279, 160</value>
   </data>
   <data name="CopyToFloppy.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
   </data>
   <data name="CopyToFloppy.Size" type="System.Drawing.Size, System.Drawing">
-    <value>73, 33</value>
+    <value>34, 25</value>
   </data>
   <data name="CopyToFloppy.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -270,9 +282,9 @@
   <data name="&gt;&gt;CopyToFloppy.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
-  <metadata name="Label.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <data name="Label.TrayLocation" type="System.Drawing.Point, System.Drawing">
     <value>105, 17</value>
-  </metadata>
+  </data>
   <data name="SplitContainer1.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>
   </data>
@@ -321,6 +333,9 @@
   <data name="CBMValidate.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="CBMValidate.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="CBMValidate.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 152</value>
   </data>
@@ -354,6 +369,9 @@
   <data name="CBMInitialize.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="CBMInitialize.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="CBMInitialize.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 120</value>
   </data>
@@ -386,6 +404,9 @@
   </data>
   <data name="CBMFormat.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
+  </data>
+  <data name="CBMFormat.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="CBMFormat.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 88</value>
@@ -456,6 +477,9 @@
   <data name="CBMReset.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="CBMReset.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="CBMReset.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 403</value>
   </data>
@@ -492,6 +516,9 @@
   <data name="CBMDriveStatus.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="CBMDriveStatus.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="CBMDriveStatus.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 435</value>
   </data>
@@ -524,6 +551,9 @@
   </data>
   <data name="CBMRefresh.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
+  </data>
+  <data name="CBMRefresh.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="CBMRefresh.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 56</value>
@@ -558,6 +588,9 @@
   <data name="CBMRename.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="CBMRename.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="CBMRename.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 216</value>
   </data>
@@ -590,6 +623,9 @@
   </data>
   <data name="CBMScratch.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
+  </data>
+  <data name="CBMScratch.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="CBMScratch.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 248</value>
@@ -624,6 +660,9 @@
   <data name="_Label_0.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8.25pt, style=Bold</value>
   </data>
+  <data name="_Label_0.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="_Label_0.Location" type="System.Drawing.Point, System.Drawing">
     <value>8, 451</value>
   </data>
@@ -657,6 +696,9 @@
   <data name="LastStatus.Font" type="System.Drawing.Font, System.Drawing">
     <value>Courier New, 8.25pt, style=Bold</value>
   </data>
+  <data name="LastStatus.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="LastStatus.Location" type="System.Drawing.Point, System.Drawing">
     <value>8, 467</value>
   </data>
@@ -686,6 +728,9 @@
   </data>
   <data name="_Label_5.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8.25pt, style=Bold</value>
+  </data>
+  <data name="_Label_5.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="_Label_5.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 386</value>
@@ -717,6 +762,9 @@
   <data name="CBMDiskName.Font" type="System.Drawing.Font, System.Drawing">
     <value>Courier New, 8.25pt, style=Bold</value>
   </data>
+  <data name="CBMDiskName.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="CBMDiskName.Location" type="System.Drawing.Point, System.Drawing">
     <value>8, 16</value>
   </data>
@@ -743,6 +791,9 @@
   </data>
   <data name="CBMDiskID.Font" type="System.Drawing.Font, System.Drawing">
     <value>Courier New, 8.25pt, style=Bold</value>
+  </data>
+  <data name="CBMDiskID.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="CBMDiskID.Location" type="System.Drawing.Point, System.Drawing">
     <value>190, 16</value>
@@ -774,6 +825,9 @@
   <data name="_Label_3.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8.25pt, style=Bold</value>
   </data>
+  <data name="_Label_3.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="_Label_3.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 40</value>
   </data>
@@ -803,6 +857,9 @@
   </data>
   <data name="_Label_4.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8.25pt, style=Bold</value>
+  </data>
+  <data name="_Label_4.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="_Label_4.Location" type="System.Drawing.Point, System.Drawing">
     <value>262, 200</value>
@@ -835,13 +892,13 @@
     <value>Arial, 8.25pt, style=Bold</value>
   </data>
   <data name="CBMDrive.Location" type="System.Drawing.Point, System.Drawing">
-    <value>398, 4</value>
+    <value>319, 4</value>
   </data>
   <data name="CBMDrive.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
   </data>
   <data name="CBMDrive.Size" type="System.Drawing.Size, System.Drawing">
-    <value>340, 491</value>
+    <value>344, 491</value>
   </data>
   <data name="CBMDrive.TabIndex" type="System.Int32, mscorlib">
     <value>25</value>
@@ -864,6 +921,33 @@
   <data name="Frame2.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
   </data>
+  <data name="PCDirectory.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="PCDirectory.ItemHeight" type="System.Int32, mscorlib">
+    <value>16</value>
+  </data>
+  <data name="PCDirectory.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 66</value>
+  </data>
+  <data name="PCDirectory.Size" type="System.Drawing.Size, System.Drawing">
+    <value>173, 420</value>
+  </data>
+  <data name="PCDirectory.TabIndex" type="System.Int32, mscorlib">
+    <value>37</value>
+  </data>
+  <data name="&gt;&gt;PCDirectory.Name" xml:space="preserve">
+    <value>PCDirectory</value>
+  </data>
+  <data name="&gt;&gt;PCDirectory.Type" xml:space="preserve">
+    <value>FilesBrowser.FilesListBox, FileListBoxControl, Version=1.0.2682.17213, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="&gt;&gt;PCDirectory.Parent" xml:space="preserve">
+    <value>Frame2</value>
+  </data>
+  <data name="&gt;&gt;PCDirectory.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
   <data name="cmdBrowse.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Right</value>
   </data>
@@ -873,8 +957,11 @@
   <data name="cmdBrowse.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8.25pt</value>
   </data>
+  <data name="cmdBrowse.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="cmdBrowse.Location" type="System.Drawing.Point, System.Drawing">
-    <value>231, 470</value>
+    <value>183, 37</value>
   </data>
   <data name="cmdBrowse.Size" type="System.Drawing.Size, System.Drawing">
     <value>73, 23</value>
@@ -895,7 +982,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;cmdBrowse.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>1</value>
   </data>
   <data name="BlockText.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Right</value>
@@ -907,7 +994,7 @@
     <value>Arial, 8pt</value>
   </data>
   <data name="BlockText.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 430</value>
+    <value>183, 356</value>
   </data>
   <data name="BlockText.MaxLength" type="System.Int32, mscorlib">
     <value>0</value>
@@ -934,7 +1021,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;BlockText.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>3</value>
   </data>
   <data name="KBText.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Right</value>
@@ -946,7 +1033,7 @@
     <value>Arial, 8pt</value>
   </data>
   <data name="KBText.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 406</value>
+    <value>183, 327</value>
   </data>
   <data name="KBText.MaxLength" type="System.Int32, mscorlib">
     <value>0</value>
@@ -973,7 +1060,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;KBText.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>4</value>
   </data>
   <data name="MakeDir.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -984,8 +1071,11 @@
   <data name="MakeDir.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="MakeDir.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="MakeDir.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 88</value>
+    <value>183, 117</value>
   </data>
   <data name="MakeDir.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -1009,34 +1099,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;MakeDir.ZOrder" xml:space="preserve">
-    <value>3</value>
-  </data>
-  <data name="PCDirectory.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Top, Bottom, Left, Right</value>
-  </data>
-  <data name="PCDirectory.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Arial, 8pt</value>
-  </data>
-  <data name="PCDirectory.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 24</value>
-  </data>
-  <data name="PCDirectory.Size" type="System.Drawing.Size, System.Drawing">
-    <value>213, 420</value>
-  </data>
-  <data name="PCDirectory.TabIndex" type="System.Int32, mscorlib">
-    <value>20</value>
-  </data>
-  <data name="&gt;&gt;PCDirectory.Name" xml:space="preserve">
-    <value>PCDirectory</value>
-  </data>
-  <data name="&gt;&gt;PCDirectory.Type" xml:space="preserve">
-    <value>Microsoft.VisualBasic.Compatibility.VB6.FileListBox, Microsoft.VisualBasic.Compatibility, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="&gt;&gt;PCDirectory.Parent" xml:space="preserve">
-    <value>Frame2</value>
-  </data>
-  <data name="&gt;&gt;PCDirectory.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>6</value>
   </data>
   <data name="PCRefresh.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -1047,8 +1110,11 @@
   <data name="PCRefresh.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="PCRefresh.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="PCRefresh.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 56</value>
+    <value>183, 86</value>
   </data>
   <data name="PCRefresh.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -1072,7 +1138,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;PCRefresh.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>7</value>
   </data>
   <data name="RunFile.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -1083,8 +1149,11 @@
   <data name="RunFile.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="RunFile.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="RunFile.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 240</value>
+    <value>183, 242</value>
   </data>
   <data name="RunFile.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -1108,7 +1177,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;RunFile.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>8</value>
   </data>
   <data name="PCRename.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -1119,8 +1188,11 @@
   <data name="PCRename.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="PCRename.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="PCRename.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 176</value>
+    <value>183, 180</value>
   </data>
   <data name="PCRename.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -1144,7 +1216,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;PCRename.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>9</value>
   </data>
   <data name="PCWorkingDir.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left, Right</value>
@@ -1153,7 +1225,7 @@
     <value>Arial, 8pt</value>
   </data>
   <data name="PCWorkingDir.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 470</value>
+    <value>4, 37</value>
   </data>
   <data name="PCWorkingDir.MaxLength" type="System.Int32, mscorlib">
     <value>0</value>
@@ -1162,7 +1234,7 @@
     <value>No</value>
   </data>
   <data name="PCWorkingDir.Size" type="System.Drawing.Size, System.Drawing">
-    <value>213, 23</value>
+    <value>173, 23</value>
   </data>
   <data name="PCWorkingDir.TabIndex" type="System.Int32, mscorlib">
     <value>16</value>
@@ -1180,7 +1252,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;PCWorkingDir.ZOrder" xml:space="preserve">
-    <value>8</value>
+    <value>10</value>
   </data>
   <data name="PCDelete.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -1191,8 +1263,11 @@
   <data name="PCDelete.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8pt</value>
   </data>
+  <data name="PCDelete.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="PCDelete.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 208</value>
+    <value>183, 211</value>
   </data>
   <data name="PCDelete.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -1216,7 +1291,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;PCDelete.ZOrder" xml:space="preserve">
-    <value>9</value>
+    <value>11</value>
   </data>
   <data name="_Label_7.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
@@ -1224,8 +1299,11 @@
   <data name="_Label_7.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8.25pt, style=Bold</value>
   </data>
+  <data name="_Label_7.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="_Label_7.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 454</value>
+    <value>1, 16</value>
   </data>
   <data name="_Label_7.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -1249,7 +1327,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;_Label_7.ZOrder" xml:space="preserve">
-    <value>10</value>
+    <value>12</value>
   </data>
   <data name="_Label_6.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Right</value>
@@ -1257,8 +1335,11 @@
   <data name="_Label_6.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8.25pt, style=Bold</value>
   </data>
+  <data name="_Label_6.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="_Label_6.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 390</value>
+    <value>183, 307</value>
   </data>
   <data name="_Label_6.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -1282,7 +1363,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;_Label_6.ZOrder" xml:space="preserve">
-    <value>11</value>
+    <value>13</value>
   </data>
   <data name="_Label_1.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -1290,8 +1371,11 @@
   <data name="_Label_1.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8.25pt, style=Bold</value>
   </data>
+  <data name="_Label_1.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="_Label_1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 40</value>
+    <value>183, 66</value>
   </data>
   <data name="_Label_1.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -1315,7 +1399,7 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;_Label_1.ZOrder" xml:space="preserve">
-    <value>12</value>
+    <value>14</value>
   </data>
   <data name="_Label_2.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Right</value>
@@ -1323,8 +1407,11 @@
   <data name="_Label_2.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8.25pt, style=Bold</value>
   </data>
+  <data name="_Label_2.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="_Label_2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>228, 160</value>
+    <value>183, 160</value>
   </data>
   <data name="_Label_2.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
@@ -1348,19 +1435,19 @@
     <value>Frame2</value>
   </data>
   <data name="&gt;&gt;_Label_2.ZOrder" xml:space="preserve">
-    <value>13</value>
+    <value>15</value>
   </data>
   <data name="Frame2.Font" type="System.Drawing.Font, System.Drawing">
     <value>Arial, 8.25pt, style=Bold</value>
   </data>
   <data name="Frame2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 0</value>
+    <value>3, 4</value>
   </data>
   <data name="Frame2.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
     <value>No</value>
   </data>
   <data name="Frame2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>310, 494</value>
+    <value>270, 490</value>
   </data>
   <data name="Frame2.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -1378,7 +1465,7 @@
     <value>SplitContainer1.Panel1</value>
   </data>
   <data name="&gt;&gt;Frame2.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>3</value>
   </data>
   <data name="&gt;&gt;SplitContainer1.Panel1.Name" xml:space="preserve">
     <value>SplitContainer1.Panel1</value>
@@ -1402,7 +1489,7 @@
     <value>3, 19</value>
   </data>
   <data name="Log.Size" type="System.Drawing.Size, System.Drawing">
-    <value>332, 475</value>
+    <value>407, 475</value>
   </data>
   <data name="Log.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1435,7 +1522,7 @@
     <value>0, 0</value>
   </data>
   <data name="LogGroup.Size" type="System.Drawing.Size, System.Drawing">
-    <value>338, 497</value>
+    <value>413, 497</value>
   </data>
   <data name="LogGroup.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1471,7 +1558,7 @@
     <value>1083, 497</value>
   </data>
   <data name="SplitContainer1.SplitterDistance" type="System.Int32, mscorlib">
-    <value>741</value>
+    <value>666</value>
   </data>
   <data name="SplitContainer1.TabIndex" type="System.Int32, mscorlib">
     <value>27</value>
@@ -1488,12 +1575,15 @@
   <data name="&gt;&gt;SplitContainer1.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
-  <metadata name="folderBrowser.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <data name="folderBrowser.TrayLocation" type="System.Drawing.Point, System.Drawing">
     <value>194, 17</value>
-  </metadata>
-  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  </data>
+  <data name="folderBrowser.Description" xml:space="preserve">
+    <value>Please select the folder containing CBM Files.</value>
+  </data>
+  <data name="$this.Localizable" type="System.Boolean, mscorlib">
     <value>True</value>
-  </metadata>
+  </data>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
     <value>7, 16</value>
   </data>
@@ -1552,5 +1642,129 @@
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
     <value>System.Windows.Forms.Form, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ABOUT" xml:space="preserve">
+    <value>GUI4CBM4WIN by Leif Bloomquist (no support anymore) &amp; 
+adoption to OpenCBM 0.4.0 by Wolfgang (http://d81.de/)
+
+This is a simple GUI front-end for OpenCBM by 
+Spiro Trikaliotis (www.trikaliotis.net/cbm4win/)
+
+OpenCBM itself is heavily based on cbm4linux written by 
+Michael Klein (http://www.lb.shuttle.de/puffin/)
+
+This is version {0} of the GUI, which is currently 
+maintained by Payton Byrd (payton@paytonbyrd.com) 
+and is distributed under the BSD OpenSource license.</value>
+  </data>
+  <data name="ABOUT_TITLE" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="BLOCKS_FORMAT" xml:space="preserve">
+    <value>{0:0} Blocks</value>
+  </data>
+  <data name="CONFIRM_D64_WRITE" xml:space="preserve">
+    <value>This will overwrite ALL data on the floppy disk.  Are you sure?</value>
+  </data>
+  <data name="CONFIRM_D64_WRITE_TITLE" xml:space="preserve">
+    <value>Write D64 to Disk")</value>
+  </data>
+  <data name="COPYING_CREATE_D64" xml:space="preserve">
+    <value>Create D64</value>
+  </data>
+  <data name="COPYING_FROM_FLOPPY" xml:space="preserve">
+    <value>Copying '{0}' from floppy disk.</value>
+  </data>
+  <data name="COPYING_NO_FILES_SELECTED" xml:space="preserve">
+    <value>No files selected.  Do you want to make a D64 image of this floppy disk?</value>
+  </data>
+  <data name="COPYING_TO_FLOPPY" xml:space="preserve">
+    <value>Copying '{0}' to floppy disk as '{1}'</value>
+  </data>
+  <data name="CREATE_DISK_FROM_D64" xml:space="preserve">
+    <value>Creating disk from D64 image, please wait.</value>
+  </data>
+  <data name="CREATING_D64" xml:space="preserve">
+    <value>Creating D64 image, please wait.</value>
+  </data>
+  <data name="DELETE_SELECTED_FILES" xml:space="preserve">
+    <value>Delete the selected file(s)?</value>
+  </data>
+  <data name="DELETE_SELECTED_FILES_TITLE" xml:space="preserve">
+    <value>Delete Files</value>
+  </data>
+  <data name="ENTER_DIRECTORY_NAME" xml:space="preserve">
+    <value>Enter Directory Name</value>
+  </data>
+  <data name="ENTER_FILENAME" xml:space="preserve">
+    <value>Please Enter Filename:</value>
+  </data>
+  <data name="ENTER_NAME" xml:space="preserve">
+    <value>Enter new name for '{0}'</value>
+  </data>
+  <data name="ERROR" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="FORMAT_DISK_NAME" xml:space="preserve">
+    <value>Please Enter Diskname,ID</value>
+  </data>
+  <data name="FORMAT_MESSAGE" xml:space="preserve">
+    <value>This will erase ALL data on the floppy disk.  Are you sure?</value>
+  </data>
+  <data name="FORMAT_TITLE" xml:space="preserve">
+    <value>Format Disk</value>
+  </data>
+  <data name="FORMATTING_DISK" xml:space="preserve">
+    <value>Formatting floppy disk, please wait.</value>
+  </data>
+  <data name="INITIALIZING_DRIVE" xml:space="preserve">
+    <value>Initializing Drive</value>
+  </data>
+  <data name="KB_FORMAT" xml:space="preserve">
+    <value>{0:0.0} KB</value>
+  </data>
+  <data name="OPENCBM_IN_PROGRESS" xml:space="preserve">
+    <value>OpenCBM command already in progress, cannot continue.</value>
+  </data>
+  <data name="OPENCBM_IN_PROGRESS_ERROR" xml:space="preserve">
+    <value>OpenCBM command already in progress.</value>
+  </data>
+  <data name="OPENCBM_NOT_FOUND" xml:space="preserve">
+    <value>Can't find cbmctrl.exe!
+
+GUI4CBM4WIN must be run from within the same directory as the OpenCBM executable files.
+
+Current Directory: {0}</value>
+  </data>
+  <data name="PREVIEW_MSG" xml:space="preserve">
+    <value>Requested Command:
+
+{0} {1}
+
+OK to continue?</value>
+  </data>
+  <data name="READ_DRIVE_STATUS" xml:space="preserve">
+    <value>Reading drive status, please wait.</value>
+  </data>
+  <data name="READING_DIRECTORY" xml:space="preserve">
+    <value>Reading directory, please wait.</value>
+  </data>
+  <data name="REFRESH" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="RENAMING" xml:space="preserve">
+    <value>Renaming</value>
+  </data>
+  <data name="RESETTING_DRIVES" xml:space="preserve">
+    <value>Resetting drives, please wait.</value>
+  </data>
+  <data name="SCRATCHING_FILE" xml:space="preserve">
+    <value>Scratching '{0}'</value>
+  </data>
+  <data name="TITLE" xml:space="preserve">
+    <value>GUI4CBM4WIN {0}</value>
+  </data>
+  <data name="VALIDATING" xml:space="preserve">
+    <value>Validating drive, please wait.</value>
   </data>
 </root>
