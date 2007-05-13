@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.9 2006-09-01 17:04:44 strik Exp $ \n
+** \version $Id: openclose.c,v 1.10 2007-05-13 17:00:37 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **
@@ -20,6 +20,11 @@
 #include <wdm.h>
 #include "cbm_driver.h"
 #include "iec.h"
+
+// \TODO: this include is there only for the workaround (cf. cbm_execute_createopen())
+// It has to go once the work-around has been removed.
+
+#include "../libiec/i_iec.h"
 
 /*! \brief Services IRPs containing the IRP_MJ_CREATE or IRP_MJ_CLOSE I/O function code.
 
@@ -132,6 +137,23 @@ cbm_execute_createopen(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
         // as we keep the parallel port locked all the time,
         // do not lock it now.
         ntStatus = STATUS_SUCCESS;
+
+        // \TODO: try workaround: As the machine might have been 
+        // suspended or hibernated without knowing it, test if
+        // all lines are exactly as expected. If not, lock und unlock
+        // the parallel port again
+        //
+        // \TODO When this work-around goes, make sure the include
+        // if i_iec.h is removed, too.
+
+        if (CBMIEC_GET(PP_RESET_IN) != 0)
+        {
+            DBG_PRINT((DBG_PREFIX "UNLOCK/LOCK pair!"));
+
+            cbm_unlock_parport(Pdx);
+            cbmiec_reset(Pdx);
+            ntStatus = cbm_lock_parport(Pdx);
+        }
     }
     else
     {
