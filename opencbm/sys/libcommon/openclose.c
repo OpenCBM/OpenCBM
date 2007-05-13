@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.10 2007-05-13 17:00:37 strik Exp $ \n
+** \version $Id: openclose.c,v 1.11 2007-05-13 17:05:34 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **
@@ -151,8 +151,8 @@ cbm_execute_createopen(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
             DBG_PRINT((DBG_PREFIX "UNLOCK/LOCK pair!"));
 
             cbm_unlock_parport(Pdx);
-            cbmiec_reset(Pdx);
             ntStatus = cbm_lock_parport(Pdx);
+            cbmiec_reset(Pdx);
         }
     }
     else
