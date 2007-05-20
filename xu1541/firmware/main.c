@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.8 2007-03-15 17:40:51 harbaum Exp $
+ * This Revision: $Id: main.c,v 1.9 2007-05-20 18:51:05 harbaum Exp $
  *
  * $Log: main.c,v $
- * Revision 1.8  2007-03-15 17:40:51  harbaum
+ * Revision 1.9  2007-05-20 18:51:05  harbaum
+ * New usbtiny version and first eeprom work
+ *
+ * Revision 1.8  2007/03/15 17:40:51  harbaum
  * Plenty of changes incl. first async support
  *
  * Revision 1.7  2007/03/08 11:16:23  harbaum
@@ -72,6 +75,7 @@ typedef uchar byte_t;
 #define MODE_S2        2
 #define MODE_PP        3
 #define MODE_P2        4
+#define MODE_EEPROM    5
 static uchar io_mode;
 
 #include "xu1541.h"
@@ -146,6 +150,21 @@ extern	byte_t	usb_setup ( byte_t data[8] )
     replyBuf[1] = XU1541_VERSION_MINOR;
     *(ushort*)(replyBuf+2) = XU1541_CAPABILIIES;
     return 4;
+    break;
+
+  case XU1541_EEPROM_READ:
+    io_mode = MODE_EEPROM;
+    return(data[2]?0xff:0x00);
+    break;
+
+  case XU1541_EEPROM_WRITE:
+    io_mode = MODE_EEPROM;
+#ifdef USBTINY
+    /* usbtiny always returns 0 on write */
+    return 0;
+#else
+    return(data[2]?0xff:0x00);
+#endif
     break;
     
   case XU1541_REQUEST_READ:
@@ -422,6 +441,11 @@ byte_t usb_in ( byte_t* data, byte_t len )
     case MODE_P2:
       rv = p2_read(data, len);
       break;
+
+    case MODE_EEPROM:
+      /* eeprom read */
+      rv = 0;
+      break;
   }
 
   LED_OFF();  
@@ -460,6 +484,11 @@ void usb_out ( byte_t* data, byte_t len )
 
     case MODE_P2:
       rv = p2_write(data, len);
+      break;
+
+    case MODE_EEPROM:
+      /* eeprom write */
+      rv = 0;
       break;
   }
 

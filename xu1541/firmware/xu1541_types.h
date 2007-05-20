@@ -55,6 +55,10 @@
 #define XU1541_PARBURST_READ_TRACK   (XU1541_IOCTL + 18)
 #define XU1541_PARBURST_WRITE_TRACK  (XU1541_IOCTL + 19)
 
+/* from version x.09 on, one can write eeprom data */
+#define XU1541_EEPROM_READ           (XU1541_IOCTL + 20)
+#define XU1541_EEPROM_WRITE          (XU1541_IOCTL + 21)
+
 /* special protocol codes begin at 32 */
 #define XU1541_S1                    (32)
 #define XU1541_S2                    (XU1541_S1 + 1)

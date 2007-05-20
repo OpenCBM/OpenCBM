@@ -78,8 +78,8 @@ static	byte_t*	usb_tx_data;		// pointer to data to transmit
 static	byte_t	new_address;		// new device address
 
 byte_t usb_idle(void) {
-  return((usb_tx_state == TX_STATE_IDLE) && 
-	 (usb_tx_total == 0) && (usb_tx_len == 0));
+  return((usb_tx_state == TX_STATE_IDLE) &&
+         (usb_tx_total == 0) && (usb_tx_len == 0));
 }
 
 #if	defined USBTINY_VENDOR_NAME
@@ -414,6 +414,10 @@ extern	void	usb_poll ( void )
 	}
 	if	( i == 0 )
 	{	// SE0 for more than 2.5uS is a reset
-		new_address = 0;
+	         cli();
+                 usb_tx_len=0;
+                 usb_rx_len=0;
+                 new_address = 0;
+                 sei();
 	}
 }

@@ -11,16 +11,17 @@
 import os, sys
 
 stacksize = 32
+flashsize = 2048
+ramsize   = 128
+
 if len(sys.argv) > 2:
 	stacksize = int(sys.argv[2])
-
-max_flash = 2048
 if len(sys.argv) > 3:
-	max_flash = int(sys.argv[3])
-
-max_sram = 128 - stacksize
+	flashsize = int(sys.argv[3])
 if len(sys.argv) > 4:
-	max_sram = int(sys.argv[4]) - stacksize
+	ramsize   = int(sys.argv[4])
+
+max_sram = ramsize - stacksize
 
 for line in os.popen('avr-objdump -ht ' + sys.argv[1]).readlines():
 	a = line.split()
@@ -36,7 +37,7 @@ for line in os.popen('avr-objdump -ht ' + sys.argv[1]).readlines():
 print 'text: %d, data: %d, bss: %d' % (text, data, bss)
 
 status = 0
-overflow = text + data - max_flash
+overflow = text + data - flashsize
 if overflow > 0:
 	print 'ERROR: Flash size limit exceeded by %d bytes.' % overflow
 	status = 1
