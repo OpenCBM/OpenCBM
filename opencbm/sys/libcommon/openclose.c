@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis
+ *  Copyright 2004, 2007 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.11 2007-05-13 17:05:34 strik Exp $ \n
+** \version $Id: openclose.c,v 1.12 2007-05-20 10:20:46 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **
@@ -20,11 +20,6 @@
 #include <wdm.h>
 #include "cbm_driver.h"
 #include "iec.h"
-
-// \TODO: this include is there only for the workaround (cf. cbm_execute_createopen())
-// It has to go once the work-around has been removed.
-
-#include "../libiec/i_iec.h"
 
 /*! \brief Services IRPs containing the IRP_MJ_CREATE or IRP_MJ_CLOSE I/O function code.
 
@@ -142,13 +137,10 @@ cbm_execute_createopen(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
         // suspended or hibernated without knowing it, test if
         // all lines are exactly as expected. If not, lock und unlock
         // the parallel port again
-        //
-        // \TODO When this work-around goes, make sure the include
-        // if i_iec.h is removed, too.
 
-        if (CBMIEC_GET(PP_RESET_IN) != 0)
+        if (cbmiec_is_cable_state_wrong(Pdx))
         {
-            DBG_PRINT((DBG_PREFIX "UNLOCK/LOCK pair!"));
+            DBG_PRINT((DBG_PREFIX "The cable state was wrong, try an UNLOCK/LOCK pair with a RESET to put cable in a known state"));
 
             cbm_unlock_parport(Pdx);
             ntStatus = cbm_lock_parport(Pdx);

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.17 2007-02-11 16:53:42 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.18 2007-05-20 10:20:46 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -68,6 +68,9 @@
 /*! set and release an output line on the parallel port (simultaneously) */
 #define CBMIEC_SET_RELEASE(_set,_rel) do { DBG_ASSERT((_set) != 0); DBG_ASSERT((_rel) != 0); Pdx->IecOutBits|=(_set); Pdx->IecOutBits&=~(_rel); \
                                       WRITE_PORT_UCHAR(OUT_PORT,(UCHAR)(Pdx->IecOutEor ^ Pdx->IecOutBits)); } while (0)
+
+/*! for the "hibernate workaround": Find out if the status of the control lines is like it should be */
+#define CBMIEC_ARE_OUTPUT_LINES_CORRECT() ( READ_PORT_UCHAR(OUT_PORT) == (UCHAR)(Pdx->IecOutEor ^ Pdx->IecOutBits) )
 
 /*! get the value of the parallel port */
 #define CBMIEC_GET(_line)             (((READ_PORT_UCHAR(IN_PORT) ^ Pdx->IecInEor) & _line)==0?1:0)

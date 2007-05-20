@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.16 2007-02-11 16:53:41 strik Exp $ \n
+** \version $Id: iec.h,v 1.17 2007-05-20 10:20:46 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -129,5 +129,8 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
 
 extern NTSTATUS
 cbmiec_checkcable(PDEVICE_EXTENSION Pdx);
+
+extern BOOLEAN
+cbmiec_is_cable_state_wrong(PDEVICE_EXTENSION Pdx);
 
 #endif /* #ifndef CBMIEC_H */

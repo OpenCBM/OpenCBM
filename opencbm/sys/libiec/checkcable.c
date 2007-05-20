@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2006 Spiro Trikaliotis
+ *  Copyright 2006-2007 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libiec/checkcable.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: checkcable.c,v 1.6 2007-04-29 17:56:56 strik Exp $ \n
+** \version $Id: checkcable.c,v 1.7 2007-05-20 10:20:46 strik Exp $ \n
 ** \n
 ** \brief Check and test the cable type
 **
@@ -485,4 +485,11 @@ cbmiec_setcablestate(PDEVICE_EXTENSION Pdx, CABLESTATE State)
     Pdx->IecCableState = State;
 
     FUNC_LEAVE();
+}
+
+
+BOOLEAN
+cbmiec_is_cable_state_wrong(PDEVICE_EXTENSION Pdx)
+{
+    return CBMIEC_ARE_OUTPUT_LINES_CORRECT() ? FALSE : TRUE;
 }
