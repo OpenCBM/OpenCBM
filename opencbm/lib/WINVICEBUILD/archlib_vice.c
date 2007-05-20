@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archlib_vice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: archlib_vice.c,v 1.9 2007-03-22 12:50:18 strik Exp $ \n
+** \version $Id: archlib_vice.c,v 1.10 2007-05-20 17:32:47 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        This variant is for accessing VICE instead of a real device
@@ -210,10 +210,10 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 */
 
 BOOL CBMAPIDECL
-cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
+cbm_install_complete(OUT PULONG Buffer, IN ULONG BufferLen)
 {
     FUNC_ENTER();
-    FUNC_LEAVE_INT(FALSE);
+    FUNC_LEAVE_BOOL(FALSE);
 }
 
 

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.h,v 1.8 2006-09-13 15:58:33 strik Exp $ \n
+** \version $Id: instcbm.h,v 1.9 2007-05-20 17:32:46 strik Exp $ \n
 ** \n
 ** \brief Header for installation routines
 **
@@ -30,7 +30,7 @@ extern BOOL CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL Aut
 extern BOOL CbmRemove(IN LPCTSTR DriverName);
 extern BOOL CbmCheckPresence(IN LPCTSTR DriverName);
 
-extern BOOL CbmCheckCorrectInstallation(BOOL HaveAdminRights);
+extern BOOL CbmCheckCorrectInstallation(BOOL HaveAdminRights, char *PluginNames[]);
 
 extern VOID CbmParportRestart(VOID);
 
@@ -43,6 +43,7 @@ extern BOOL CbmUpdateParameter(IN ULONG DefaultLpt,
 extern VOID CbmInstallUpdate(VOID);
 extern BOOL CbmTestIrq(VOID);
 
+extern char *get_plugin_filename(char *Plugin);
 
 #if DBG
 extern VOID CbmOutputDebuggingBuffer(VOID);

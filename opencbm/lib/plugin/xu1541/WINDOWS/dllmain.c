@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: dllmain.c,v 1.2 2007-03-22 13:12:23 strik Exp $ \n
+** \version $Id: dllmain.c,v 1.3 2007-05-20 17:32:47 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -35,9 +35,60 @@
 
 #include "debug.h"
 
+//! mark: We are building the DLL */
+#define OPENCBM_PLUGIN
+#include "archlib.h"
+
+
+/*! \brief Dummy DllMain
+
+ This function is a dummy DllMain(). Without it, the DLL
+ is not completely initialized, which breaks us.
+
+ \param Module
+   A handle to the DLL.
+
+ \param Reason
+   Specifies a flag indicating why the DLL entry-point function is being called. 
+
+ \param Reserved
+   Specifies further aspects of DLL initialization and cleanup
+
+ \return
+   FALSE if the DLL load should be aborted, else TRUE
+
+ \remark
+   For details, look up any documentation on DllMain().
+*/
 
 BOOL WINAPI
 DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
     return TRUE;
+}
+
+/*! \brief Complete driver installation, "external version"
+
+ This function performs anything that is needed to successfully
+ complete the driver installation.
+
+ \param Buffer
+   Pointer to a buffer which will return the install information
+
+ \param BufferLen
+   The length of the buffer Buffer points to (in bytes).
+
+ \return
+   FALSE on success, TRUE on error
+
+ This function is for use of the installation routines only!
+
+ This version of this function is for exporting out of the DLL.
+*/
+
+BOOL CBMAPIDECL
+cbm_install_complete(OUT PULONG Buffer, IN ULONG BufferLen)
+{
+    FUNC_ENTER();
+    FUNC_LEAVE_BOOL(FALSE);
 }

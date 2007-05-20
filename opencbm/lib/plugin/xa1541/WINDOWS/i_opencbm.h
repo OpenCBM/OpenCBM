@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.2 2007-03-22 13:12:22 strik Exp $ \n
+** \version $Id: i_opencbm.h,v 1.3 2007-05-20 17:32:47 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **
@@ -43,10 +43,6 @@ extern BOOL cbm_i_driver_stop(VOID);
 extern BOOL cbm_i_driver_start(VOID);
 
 extern BOOL cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen);
-
-EXTERN BOOL CBMAPIDECL cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen);
-/*! Function pointer for the cbm_i_driver_install() function */
-typedef BOOL (CBMAPIDECL *P_CBM_I_DRIVER_INSTALL)(OUT PULONG Buffer, IN ULONG BufferLen);
 
 extern LONG RegGetDWORD(IN HKEY RegKey, IN char *SubKey, OUT LPDWORD Value);
 extern BOOL IsDriverStartedAutomatically(VOID);

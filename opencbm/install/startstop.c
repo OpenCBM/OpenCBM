@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.20 2007-04-22 10:32:35 strik Exp $ \n
+** \version $Id: startstop.c,v 1.21 2007-05-20 17:32:46 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -26,7 +26,11 @@
 
 #include "i_opencbm.h"
 
+#include "archlib.h"
+
 #include "version.h"
+
+#include <stdlib.h>
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
@@ -36,7 +40,7 @@
 
 #include "debug.h"
 
-/*! \brief Output a path
+/*! \internal \brief Output a path
 
  \param Text
    Pointer to a string that will be printed before
@@ -46,7 +50,7 @@
    Pointer to a string which contains the path.
 
 */
-VOID
+static VOID
 OutputPathString(IN PCHAR Text, IN PCHAR Path)
 {
     FUNC_ENTER();
@@ -78,7 +82,7 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
 
     if (Version != 0)
     {
-        char patchlevelVersion[4] = "pl0";
+        char patchlevelVersion[] = "pl0";
 
         if (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) != 0)
         {
@@ -117,10 +121,366 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
     FUNC_LEAVE();
 }
 
+
+/*! \internal \brief Read parameters of the driver
+
+ This function determines the path of the driver as well as some 
+ basic configuration parameters of it
+
+ \param DriverPath
+   Pointer to a buffer that will hold the path of the driver on exit
+
+ \param DriverPathLen
+   The length of the buffer on which DriverPath points to.
+
+ \param StartMode
+   Pointer to a variable which will hold the start mode of the driver
+
+ \param LptPort
+   Pointer to a variable which will hold the LPT port number of the driver
+
+ \param LptLocking
+   Pointer to a variable which will determine if the driver being kept locked or not
+
+ \param CableType
+   Pointer to a variable which will hold the cable type for the driver
+
+ \return
+   TRUE if an error occurred, else FALSE.
+*/
+static BOOL
+ReadDriverData(char *DriverPath, ULONG DriverPathLen, DWORD *StartMode, DWORD *LptPort, DWORD *LptLocking, DWORD *CableType)
+{
+    BOOL error = TRUE;
+
+    HKEY regKey;
+
+    FUNC_ENTER();
+
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+                     CBM_REGKEY_SERVICE,
+                     0,
+                     KEY_QUERY_VALUE,
+                     &regKey)
+       )
+    {
+        DBG_WARN((DBG_PREFIX "RegOpenKeyEx() failed!"));
+        error = TRUE;
+    }
+    else
+    {
+        DWORD regLength;
+        DWORD regReturn;
+        DWORD regType;
+        char driverPathFromRegistry[MAX_PATH];
+
+        // now, get the number of the port to use
+
+        regLength = sizeof(driverPathFromRegistry);
+
+        regReturn = RegQueryValueEx(regKey, "ImagePath", NULL, &regType, 
+            (LPBYTE)driverPathFromRegistry, &regLength);
+
+        if (regReturn != ERROR_SUCCESS)
+        {
+            error = TRUE;
+
+            DBG_ERROR((DBG_PREFIX "No HKLM\\" CBM_REGKEY_SERVICE "\\ImagePath"
+                " value: %s", FormatErrorMessage(regReturn)));
+        }
+        else
+        {
+            char *pColon;
+
+            // Make sure there is a trailing zero
+
+            driverPathFromRegistry[sizeof(driverPathFromRegistry)-1] = 0;
+
+            // Find out if there is a colon ":" in the path
+
+            pColon = strchr(driverPathFromRegistry, ':');
+
+            if (pColon)
+            {
+                // There is a colon, that is, the path is absolute
+
+                if (strncmp(driverPathFromRegistry, "\\??\\", sizeof("\\??\\")-1) == 0)
+                {
+                    // There is the \??\ prefix, skip that
+
+                    strncpy(DriverPath, &driverPathFromRegistry[sizeof("\\??\\")-1],
+                        DriverPathLen);
+                }
+                else
+                {
+                    strncpy(DriverPath, driverPathFromRegistry, DriverPathLen);
+                }
+            }
+            else
+            {
+                DWORD lengthString;
+
+                // There is no colon, that is, the path is relative (to the windows directory)
+                // Thus, make sure the windows directory is appended in front of it
+
+                lengthString = GetWindowsDirectory(DriverPath, DriverPathLen);
+
+                if ((lengthString != 0) && (lengthString < DriverPathLen))
+                {
+                    strncat(&DriverPath[lengthString], "\\", DriverPathLen-lengthString);
+                    ++lengthString;
+
+                    strncat(&DriverPath[lengthString], driverPathFromRegistry,
+                        DriverPathLen-lengthString);
+                }
+            }
+        }
+
+        // find out the start mode of the driver
+
+        RegGetDWORD(regKey, "Start", StartMode);
+
+        // find out the default lpt port of the driver
+
+        RegGetDWORD(regKey, CBM_REGKEY_SERVICE_DEFAULTLPT, LptPort);
+
+        // find out the configured LPT port locking behaviour
+
+        RegGetDWORD(regKey, CBM_REGKEY_SERVICE_PERMLOCK, LptLocking);
+
+        // find out the configured cable type
+
+        RegGetDWORD(regKey, CBM_REGKEY_SERVICE_IECCABLE, CableType);
+
+        // We're done, close the registry handle.
+
+        RegCloseKey(regKey);
+    }
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+
+
+/*! \internal \brief Read the file version info out of a file
+
+ This function reads the file version information, as written
+ in the version resource, and returns it in the format needed
+ by instcbm.
+
+ \param Filename
+    The name of the file of which to determine the version
+
+ \param VersionNumber
+    Pointer to a variable which will hold the version information
+    of the file
+
+ \param PatchLevelNumber
+    Pointer to a variable which will hold the patchlevel
+    of the file.
+
+ \return
+    TRUE if an error occurred, else FALSE.
+*/
+static BOOL
+getVersionInfoOfFile(char * Filename, ULONG *VersionNumber, ULONG *PatchLevelNumber)
+{
+    ULONG error = TRUE;
+
+    DWORD versionInfoSize;
+    DWORD dummyhandle;
+
+    FUNC_ENTER();
+
+    DBG_ASSERT(PatchLevelNumber);
+
+    *PatchLevelNumber = 0;
+
+    versionInfoSize = GetFileVersionInfoSize(Filename, &dummyhandle);
+
+    if (versionInfoSize > 0)
+    {
+        void *versionInfo = malloc(versionInfoSize);
+
+        if (versionInfo && GetFileVersionInfo(Filename, 0, versionInfoSize, versionInfo))
+        {
+            VS_FIXEDFILEINFO *fileInfo;
+            DWORD fileInfoSize = 0;
+            TCHAR *versionInfoText = 0;
+
+            if (VerQueryValue(versionInfo, TEXT("\\"), &fileInfo, &fileInfoSize))
+            {
+                *VersionNumber   = ((fileInfo->dwFileVersionMS & 0x00FF0000) >> 8) | fileInfo->dwFileVersionMS & 0xFF;
+                *VersionNumber <<= 16;
+                *VersionNumber  |= ((fileInfo->dwFileVersionLS & 0x00FF0000) >> 8) | fileInfo->dwFileVersionLS & 0xFF;
+
+                error = FALSE;
+            }
+
+            // determine if there is some patch-level involved
+
+            if (VerQueryValue(versionInfo, TEXT("\\StringFileInfo\\000004B0\\FileVersion"), &versionInfoText, &fileInfoSize))
+            {
+                char *patch_level = strstr(versionInfoText, "pl");
+
+                if (patch_level)
+                {
+                    *PatchLevelNumber = atoi(patch_level + 2);
+                }
+                else
+                {
+                    // handling of old 0.1.0a version, which handled the patch-level in a different format:
+
+                    if (strcmp(versionInfoText, TEXT("0.1.0a")) == 0)
+                        *PatchLevelNumber = 1;
+                }
+            }
+        }
+
+        free(versionInfo);
+    }
+
+    FUNC_LEAVE_ULONG(error);
+}
+
+/*! special type which is used for the callback functions in ReadDllVersion */
+typedef BOOL (*DO_SOMETHING_WITH_DLL)(HMODULE HandleDll);
+
+/*! \internal \brief Determine version of a DLL
+
+ This function opens a DLL and reads out the version information as well
+ as the path of it. Additionally, a callback is called if it is specified.
+ This callback gets the HMODULE of the DLL, so, it can do additional initializing.
+
+ \param Filename
+    The name of the DLL of which to determine the version
+
+ \param Path
+    Pointer to a buffer which will hold the path of the DLL
+
+ \param PathLen
+    The length of the buffer pointed to with Path.
+
+ \param VersionNumber
+    Pointer to a variable which will hold the version information
+    of the dLL
+
+ \param VersionNumberEx
+    Pointer to a variable which will hold the patchlevel of the DLL
+
+ \param CallbackFunction
+    Pointer to a callback function which will be called with a handle
+    to the DLL. This parameter can be NULL.
+
+ \return
+    TRUE if an error occurred, else FALSE.
+*/
+static BOOL
+ReadDllVersion(char * Filename, char * Path, ULONG PathLen, ULONG * VersionNumber, ULONG * VersionNumberEx, DO_SOMETHING_WITH_DLL CallbackFunction)
+{
+    BOOL error = TRUE;
+
+    HMODULE handleDll;
+
+    FUNC_ENTER();
+
+    // Try to load the DLL. If this succeeds, get the version information
+    // from there
+
+    handleDll = LoadLibrary(Filename);
+
+    if (handleDll)
+    {
+        DWORD length;
+
+        length = GetModuleFileName(handleDll, Path, PathLen);
+
+        if (length >= PathLen)
+        {
+            Path[PathLen-1] = 0;
+        }
+
+        error = getVersionInfoOfFile(Path, VersionNumber, VersionNumberEx);
+
+        if (CallbackFunction)
+            error = error || CallbackFunction(handleDll);
+
+        FreeLibrary(handleDll);
+    }
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+/*! \internal \brief Complete the installation of a plugin DLL
+
+ This function is a callback for ReadDllVersion.
+ It calls a special function which completes the plugin
+ installation.
+
+ \param HandleDll
+    A handle to the plugin DLL which is currently processed
+
+ \return
+    TRUE if an error occurred, else FALSE.
+*/
+static BOOL
+CompleteDriverInstallation(HMODULE HandleDll)
+{
+    BOOL error = TRUE;
+
+    P_CBM_INSTALL_COMPLETE p_cbm_install_complete;
+    CBMT_I_INSTALL_OUT dllInstallOutBuffer;
+
+    FUNC_ENTER();
+
+    memset(&dllInstallOutBuffer, 0, sizeof(dllInstallOutBuffer));
+
+    p_cbm_install_complete = 
+        (P_CBM_INSTALL_COMPLETE) GetProcAddress(HandleDll, "cbm_install_complete");
+
+    if (p_cbm_install_complete) {
+        error = p_cbm_install_complete((PULONG) &dllInstallOutBuffer, sizeof(dllInstallOutBuffer));
+    }
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+/*! \internal \brief Check if versions differ
+*/
+
+static BOOL
+checkIfDifferentVersions(Version1, VersionEx1, Version2, VersionEx2)
+{
+    return ((Version1 != Version2) || (VersionEx1 != VersionEx2)) ? TRUE : FALSE;
+}
+
+char *
+get_plugin_filename(char *PluginName)
+{
+    char *filename;
+
+    FUNC_ENTER();
+
+    filename = malloc(sizeof("opencbm-.dll") + strlen(PluginName));
+
+    if (filename)
+        sprintf(filename, "opencbm-%s.dll", PluginName);
+
+    FUNC_LEAVE_STRING(filename);
+}
+
 /*! \brief Check version information
 
  This function checks (and outputs) the version
  information for cbm4win.
+
+ \param InstallOutBuffer
+    A buffer which will hold the version information for the
+    driver and the main DLL.
+
+ \param PluginNames
+    Array of pointers to strings which holds the names of all plugins to process.
+    This array has to be finished by a NULL pointer.
 
  \return
     If mixed versions are found, or other errors occurred,
@@ -128,7 +488,7 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
 
 */
 static BOOL
-CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
+CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer, char *PluginNames[])
 {
     ULONG instcbmVersion;
     ULONG instcbmVersionEx;
@@ -139,6 +499,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
     char dllPath[MAX_PATH] = "<unknown>";
     char driverPath[MAX_PATH] = "<unknown>";
     BOOL error;
+    BOOL differentVersion = FALSE;
 
     FUNC_ENTER();
 
@@ -153,166 +514,13 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 
     // Try to find out the version and path of the DLL
 
-    {
-        HMODULE handleDll;
-
-        // Try to load the DLL. If this succeeds, get the version information
-        // from there
-
-        handleDll = LoadLibrary("OPENCBM.DLL");
-
-        if (handleDll)
-        {
-            P_CBM_I_DRIVER_INSTALL p_cbm_i_driver_install;
-            CBMT_I_INSTALL_OUT dllInstallOutBuffer;
-            DWORD length;
-
-            memset(&dllInstallOutBuffer, 0, sizeof(dllInstallOutBuffer));
-
-            p_cbm_i_driver_install = 
-                (P_CBM_I_DRIVER_INSTALL) GetProcAddress(handleDll, "cbm_i_driver_install");
-
-            if (p_cbm_i_driver_install)
-            {
-                p_cbm_i_driver_install((PULONG) &dllInstallOutBuffer, sizeof(dllInstallOutBuffer));
-
-                if (   (InstallOutBuffer->DriverVersion == dllInstallOutBuffer.DriverVersion)
-                    && (InstallOutBuffer->DriverVersionEx == dllInstallOutBuffer.DriverVersionEx)
-                   )
-                {
-                    InstallOutBuffer->DllVersion   = dllInstallOutBuffer.DllVersion;
-                    InstallOutBuffer->DllVersionEx = dllInstallOutBuffer.DllVersionEx;
-                }
-                else
-                {
-                    error = TRUE;
-                }
-            }
-            else
-            {
-                error = TRUE;
-            }
-
-            length = GetModuleFileName(handleDll, dllPath, sizeof(dllPath));
-
-            if (length >= sizeof(dllPath))
-            {
-                dllPath[sizeof(dllPath)-1] = 0;
-            }
-
-            FreeLibrary(handleDll);
-        }
-        else
-        {
-            error = TRUE;
-        }
-    }
+    error = ReadDllVersion("OPENCBM.DLL", dllPath, sizeof(dllPath),
+        &InstallOutBuffer->DllVersion, &InstallOutBuffer->DllVersionEx,
+        0);
 
     // Try to find the path to the driver
 
-    {
-        HKEY regKey;
-
-        if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-                         CBM_REGKEY_SERVICE,
-                         0,
-                         KEY_QUERY_VALUE,
-                         &regKey)
-           )
-        {
-            DBG_WARN((DBG_PREFIX "RegOpenKeyEx() failed!"));
-            error = TRUE;
-        }
-        else
-        {
-            DWORD regLength;
-            DWORD regReturn;
-            DWORD regType;
-            char driverPathFromRegistry[MAX_PATH];
-
-            // now, get the number of the port to use
-
-            regLength = sizeof(driverPathFromRegistry);
-
-            regReturn = RegQueryValueEx(regKey, "ImagePath", NULL, &regType, 
-                (LPBYTE)driverPathFromRegistry, &regLength);
-
-            if (regReturn != ERROR_SUCCESS)
-            {
-                error = TRUE;
-
-                DBG_ERROR((DBG_PREFIX "No HKLM\\" CBM_REGKEY_SERVICE "\\ImagePath"
-                    " value: %s", FormatErrorMessage(regReturn)));
-            }
-            else
-            {
-                char *pColon;
-
-                // Make sure there is a trailing zero
-
-                driverPathFromRegistry[sizeof(driverPathFromRegistry)-1] = 0;
-
-                // Find out if there is a colon ":" in the path
-
-                pColon = strchr(driverPathFromRegistry, ':');
-
-                if (pColon)
-                {
-                    // There is a colon, that is, the path is absolute
-
-                    if (strncmp(driverPathFromRegistry, "\\??\\", sizeof("\\??\\")-1) == 0)
-                    {
-                        // There is the \??\ prefix, skip that
-
-                        strncpy(driverPath, &driverPathFromRegistry[sizeof("\\??\\")-1],
-                            sizeof(driverPath));
-                    }
-                    else
-                    {
-                        strncpy(driverPath, driverPathFromRegistry, sizeof(driverPath));
-                    }
-                }
-                else
-                {
-                    int lengthString;
-
-                    // There is no colon, that is, the path is relative (to the windows directory)
-                    // Thus, make sure the windows directory is appended in front of it
-
-                    lengthString = GetWindowsDirectory(driverPath, sizeof(driverPath));
-
-                    if ((lengthString != 0) && (lengthString < sizeof(driverPath)))
-                    {
-                        strncat(&driverPath[lengthString], "\\", sizeof(driverPath)-lengthString);
-                        ++lengthString;
-
-                        strncat(&driverPath[lengthString], driverPathFromRegistry,
-                            sizeof(driverPath)-lengthString);
-                    }
-                }
-            }
-
-            // find out the start mode of the driver
-
-            RegGetDWORD(regKey, "Start", &startMode);
-
-            // find out the default lpt port of the driver
-
-            RegGetDWORD(regKey, CBM_REGKEY_SERVICE_DEFAULTLPT, &lptPort);
-
-            // find out the configured LPT port locking behaviour
-
-            RegGetDWORD(regKey, CBM_REGKEY_SERVICE_PERMLOCK, &lptLocking);
-
-            // find out the configured cable type
-
-            RegGetDWORD(regKey, CBM_REGKEY_SERVICE_IECCABLE, &cableType);
-
-            // We're done, close the registry handle.
-
-            RegCloseKey(regKey);
-        }
-    }
+    error = ReadDriverData(driverPath, sizeof(driverPath), &startMode, &lptPort, &lptLocking, &cableType);
 
     // Print out the configuration we just obtained
 
@@ -332,17 +540,71 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
     OutputVersionString("Driver version:  ", InstallOutBuffer->DriverVersion,
         InstallOutBuffer->DriverVersionEx);
     OutputPathString   ("Driver path:     ", driverPath);
+    differentVersion |= checkIfDifferentVersions(instcbmVersion, instcbmVersionEx,
+        InstallOutBuffer->DriverVersion, InstallOutBuffer->DriverVersionEx);
+
     OutputVersionString("DLL version:     ", InstallOutBuffer->DllVersion,
         InstallOutBuffer->DllVersionEx);
     OutputPathString   ("DLL path:        ", dllPath);
+    differentVersion |= checkIfDifferentVersions(instcbmVersion, instcbmVersionEx,
+        InstallOutBuffer->DllVersion, InstallOutBuffer->DllVersionEx);
+
+#if 0 // \TODO: def _X86_
+    {
+        ULONG dllVersionVdd = 0;
+        ULONG dllVersionVddEx = 0;
+
+        dllPath[0] = 0;
+
+        ReadDllVersion("opencbmvdd.dll", dllPath, sizeof(dllPath),
+                &dllVersionVdd, &dllVersionVddEx, NULL);
+
+        OutputVersionString("VDD version:     ", dllVersionVdd, dllVersionVddEx);
+        OutputPathString   ("VDD path:        ", dllPath);
+        differentVersion |= checkIfDifferentVersions(instcbmVersion, instcbmVersionEx,
+            dllVersionVdd, dllVersionVddEx);
+    }
+#endif // #ifdef _X86_
+
+    if (PluginNames)
+    {
+        unsigned int i;
+
+        for (i = 0; PluginNames[i] != NULL; i++)
+        {
+            ULONG dllVersionPlugin = 0;
+            ULONG dllVersionPluginEx = 0;
+
+            char *filename = get_plugin_filename(PluginNames[i]);
+
+            dllPath[0] = 0;
+
+            if (!filename)
+            {
+                error = TRUE;
+                break;
+            }
+
+            error = ReadDllVersion(filename, dllPath, sizeof(dllPath),
+                &dllVersionPlugin, &dllVersionPluginEx,
+                CompleteDriverInstallation);
+
+            free(filename);
+
+            printf("\nPlugin '%s':\n", PluginNames[i]);
+            OutputVersionString("Plugin version:  ", dllVersionPlugin, dllVersionPluginEx);
+            OutputPathString   ("Plugin path:     ", dllPath);
+
+            /*! \TODO do we insist on plugins having the same version?
+            differentVersion |= checkIfDifferentVersions(instcbmVersion, instcbmVersionEx,
+                dllVersionPlugin, dllVersionPluginEx);
+            /**/
+        }
+    }
 
     printf("\n");
 
-    if (   (instcbmVersion   != InstallOutBuffer->DllVersion)
-        || (instcbmVersionEx != InstallOutBuffer->DllVersionEx)
-        || (instcbmVersion   != InstallOutBuffer->DriverVersion)
-        || (instcbmVersionEx != InstallOutBuffer->DriverVersionEx)
-       )
+    if (differentVersion)
     {
         error = TRUE;
         printf("There are mixed versions, THIS IS NOT RECOMMENDED!\n\n");
@@ -425,12 +687,17 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 
     FUNC_LEAVE_BOOL(error);
 }
+
 /*! \brief Check if the driver was correctly installed
 
  This function checks if the driver was correctly installed.
 
  \param HaveAdminRights
    TRUE if we are running with admin rights; FALSE if not.
+
+ \param PluginNames
+    Array of pointers to strings which holds the names of all plugins to process.
+    This array has to be finished by a NULL pointer.
 
  \return
    FALSE on success, TRUE on error,
@@ -447,7 +714,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
 */
 
 BOOL
-CbmCheckCorrectInstallation(BOOL HaveAdminRights)
+CbmCheckCorrectInstallation(BOOL HaveAdminRights, char *PluginNames[])
 {
     CBMT_I_INSTALL_OUT outBuffer;
     BOOL error;
@@ -534,7 +801,7 @@ CbmCheckCorrectInstallation(BOOL HaveAdminRights)
         cbm_i_driver_stop();
     }
 
-    if (CheckVersions(&outBuffer))
+    if (CheckVersions(&outBuffer, PluginNames))
     {
         error = TRUE;
     }

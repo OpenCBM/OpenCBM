@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.25 2006-09-14 19:15:17 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.26 2007-05-20 17:32:46 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -958,12 +958,16 @@ RemoveDriver(parameter_t *Parameter)
    Pointer to parameter_t struct which contains the
    description of the parameters given on the command-line.
 
+ \param PluginNames
+    Array of pointers to strings which holds the names of all plugins to process.
+    This array has to be finished by a NULL pointer.
+
  \return 
    Return value which will be given on return from main().
    That is, 0 on success, everything else indicates an error.
 */
 static int
-CheckDriver(parameter_t *Parameter)
+CheckDriver(parameter_t *Parameter, char *PluginNames[])
 {
     int error;
 
@@ -974,7 +978,7 @@ CheckDriver(parameter_t *Parameter)
     DBG_PRINT((DBG_PREFIX "Checking configuration for cbm4win"));
     printf("Checking configuration for cbm4win\n");
 
-    if (CbmCheckCorrectInstallation(NeededAccessRights()))
+    if (CbmCheckCorrectInstallation(NeededAccessRights(), PluginNames))
     {
         DBG_PRINT((DBG_PREFIX "There were errors in the current configuration."
             "Please fix them before trying to use the driver!"));
@@ -1037,12 +1041,16 @@ EnumParportDriver(parameter_t *Parameter)
    Pointer to parameter_t struct which contains the
    description of the parameters given on the command-line.
 
+ \param PluginNames
+    Array of pointers to strings which holds the names of all plugins to process.
+    This array has to be finished by a NULL pointer.
+
  \return 
    Return value which will be given on return from main()
    That is, 0 on success, everything else indicates an error.
 */
 static int
-CopyDriverFiles(parameter_t *Parameter)
+CopyDriverFiles(parameter_t *Parameter, char *PluginNames[])
 {
     char tmpPathString[MAX_PATH];
 
@@ -1112,6 +1120,32 @@ CopyDriverFiles(parameter_t *Parameter)
             if ((error = CopyFileToNewPath(driverLocalPath, driverSystemPath, "opencbm.dll", 7)) != 0)
                 break;
 
+            if (PluginNames)
+            {
+                unsigned int i;
+
+                for (i = 0; PluginNames[i] != NULL; i++)
+                {
+                    char *filename = get_plugin_filename(PluginNames[i]);
+
+                    if (!filename)
+                    {
+                        error = TRUE;
+                        break;
+                    }
+
+                    if ((error = CopyFileToNewPath(driverLocalPath, driverSystemPath, filename, 7)) != 0) {
+                        free(filename);
+                        break;
+                    }
+
+                    free(filename);
+                }
+
+                if (error)
+                    break;
+            }
+
 #ifdef _X86_
             if ((error = CopyFileToNewPath(driverLocalPath, driverSystemPath, "opencbmvdd.dll", 10)) != 0)
                 break;
@@ -1159,12 +1193,16 @@ CopyDriverFiles(parameter_t *Parameter)
    Pointer to parameter_t struct which contains the
    description of the parameters given on the command-line.
 
+ \param PluginNames
+    Array of pointers to strings which holds the names of all plugins to process.
+    This array has to be finished by a NULL pointer.
+
  \return 
    Return value which will be given on return from main()
    That is, 0 on success, everything else indicates an error.
 */
 static int
-InstallDriver(parameter_t *Parameter)
+InstallDriver(parameter_t *Parameter, char *PluginNames[])
 {
     int error = 0;
 
@@ -1179,7 +1217,7 @@ InstallDriver(parameter_t *Parameter)
             break;
         }
 
-        if ((error = CopyDriverFiles(Parameter)) != 0)
+        if ((error = CopyDriverFiles(Parameter, PluginNames)) != 0)
             break;
 
         if (!CbmUpdateParameter(Parameter->Lpt,
@@ -1198,7 +1236,7 @@ InstallDriver(parameter_t *Parameter)
 
         printf("\n");
 
-        if ((error = CheckDriver(Parameter)) != 0)
+        if ((error = CheckDriver(Parameter, PluginNames)) != 0)
             break;
         
     } while (0);
@@ -1219,7 +1257,7 @@ InstallDriver(parameter_t *Parameter)
    That is, 0 on success, everything else indicates an error.
 */
 static int
-UpdateDriver(parameter_t *Parameter)
+UpdateDriver(parameter_t *Parameter, char *PluginNames[])
 {
     int error = 0;
 
@@ -1248,7 +1286,7 @@ UpdateDriver(parameter_t *Parameter)
         }
 
         printf("\n");
-        error = CheckDriver(Parameter);
+        error = CheckDriver(Parameter, PluginNames);
 
     } while (0);
 
@@ -1273,6 +1311,8 @@ main(int Argc, char **Argv)
 {
     parameter_t parameter;
     int retValue = 0;
+
+    static char * pluginNames[] = { "xa1541", "xu1541", NULL };
 
     FUNC_ENTER();
 
@@ -1316,7 +1356,7 @@ main(int Argc, char **Argv)
 
         if (parameter.CheckInstall)
         {
-            retValue = CheckDriver(&parameter);
+            retValue = CheckDriver(&parameter, pluginNames);
         }
         else if (parameter.Remove)
         {
@@ -1334,13 +1374,13 @@ main(int Argc, char **Argv)
         {
             // Update driver parameters
 
-            retValue = UpdateDriver(&parameter);
+            retValue = UpdateDriver(&parameter, pluginNames);
         }
         else
         {
             // The driver should be installed
 
-            retValue = InstallDriver(&parameter);
+            retValue = InstallDriver(&parameter, pluginNames);
         }
     } while (0);
 

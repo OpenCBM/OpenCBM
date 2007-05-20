@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/iec.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: iec.c,v 1.2 2007-03-22 13:12:22 strik Exp $ \n
+** \version $Id: iec.c,v 1.3 2007-05-20 17:32:47 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -254,11 +254,11 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 */
 
 BOOL CBMAPIDECL
-cbm_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
+cbm_install_complete(OUT PULONG Buffer, IN ULONG BufferLen)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(cbm_i_i_driver_install(Buffer, BufferLen));
+    FUNC_LEAVE_BOOL(cbm_i_i_driver_install(Buffer, BufferLen));
 }
 
 
