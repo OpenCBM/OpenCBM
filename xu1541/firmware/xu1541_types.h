@@ -59,6 +59,9 @@
 #define XU1541_EEPROM_READ           (XU1541_IOCTL + 20)
 #define XU1541_EEPROM_WRITE          (XU1541_IOCTL + 21)
 
+/* start the flash bootloader */
+#define XU1541_FLASH                 (XU1541_IOCTL + 22)
+
 /* special protocol codes begin at 32 */
 #define XU1541_S1                    (32)
 #define XU1541_S2                    (XU1541_S1 + 1)

@@ -166,7 +166,7 @@ void usb_no_irq(void) {
 
 void display_device_info(void) {
   int nBytes;
-  unsigned char reply[4];
+  unsigned char reply[6];
 
   nBytes = usb_control_msg(handle, 
 	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
@@ -176,11 +176,13 @@ void display_device_info(void) {
     fprintf(stderr, "USB request for XU1541 info failed: %s!\n", 
 	    usb_strerror());
     return;
-  } else if(nBytes != sizeof(reply)) {
+  } else if((nBytes != sizeof(reply)) && (nBytes != 4)) {
     fprintf(stderr, "Unexpected number of bytes (%d) returned\n", nBytes);
     return;
   }
 
+  if (nBytes > 4)
+    printf("Device reports BIOS version %u.%02u\n", reply[4], reply[5]);
   printf("Device reports version %u.%02u\n", reply[0], reply[1]);
   printf("Device reports capabilities 0x%04x\n", *(unsigned short*)(reply+2));
 }

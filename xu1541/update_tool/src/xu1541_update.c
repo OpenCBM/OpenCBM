@@ -12,6 +12,8 @@
 #include "ihex.h"
 #include "flash.h"
 
+#include "../../firmware/xu1541_types.h"
+
 /* vendor and product id (donated by ftdi) */
 #define XU1541_VID  0x0403
 #define XU1541_PID  0xc632
@@ -65,8 +67,21 @@ static int  usb_get_string_ascii(usb_dev_handle *handle, int index,
   return 1;
 }
 
+/* try to set xu1541 into boot mode */
+static int set_to_boot_mode(usb_dev_handle *handle)
+{
+  printf("Setting xu1541 into boot mode... \n");
+
+  usb_control_msg(handle, 
+        USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
+        XU1541_FLASH, 0, 0, 0, 0, 1000);
+
+  sleep(3);
+  return 0;
+}
+
 /* find and open xu1541 device */
-static usb_dev_handle *xu1541_find(void) {
+static usb_dev_handle *xu1541_find(unsigned int firstcall) {
   struct usb_bus      *bus;
   struct usb_device   *dev;
   usb_dev_handle      *handle = 0;
@@ -96,15 +111,21 @@ static usb_dev_handle *xu1541_find(void) {
 	  if(handle) usb_close(handle);
 	  handle = NULL;
 	}
-	   
+	  
 	if(strcmp(string, "xu1541boot") != 0) {
-	  fprintf(stderr, "Error: Found %s device (version %u.%02u) not "
+          if (firstcall)  {
+            /* try to set xu1541 into boot mode */
+            set_to_boot_mode(handle);
+          }
+          else {
+	    fprintf(stderr, "Error: Found %s device (version %u.%02u) not "
 		  "in boot loader\n"
 		  "       mode, please install jumper switch "
 		  "and replug device!\n", 
 		  string, dev->descriptor.bcdDevice >> 8, 
 		  dev->descriptor.bcdDevice & 0xff);
-	  
+          }
+
 	  if(handle) usb_close(handle);
 	  handle = NULL;		  
 	}
@@ -113,7 +134,8 @@ static usb_dev_handle *xu1541_find(void) {
   }
   
   if(!handle) {
-    fprintf(stderr, "Could not find any xu1541 device in boot loader mode\n");
+    if (!firstcall)
+      fprintf(stderr, "Could not find any xu1541 device in boot loader mode\n");
     return NULL;
   }
 
@@ -198,6 +220,7 @@ int main(int argc, char **argv) {
   usb_dev_handle *handle = NULL;
   int page_size, i;
   char *page = NULL;
+  unsigned int soft_bootloader_mode = 0;
 
   printf("--        XU1541 flash updater        --\n");
   printf("--      (c) 2007 by Till Harbaum      --\n");
@@ -212,10 +235,14 @@ int main(int argc, char **argv) {
   usb_init();
 
   /* find required usb device */
-  if(!(handle = xu1541_find())) {
-    WINKEY;
-    exit(1);
+  if(!(handle = xu1541_find(1))) {
+    soft_bootloader_mode = 1;
+    if(!(handle = xu1541_find(0))) {
+      WINKEY;
+      exit(1);
+    }
   }
+
 
   /* check page size */
   if((page_size = xu1541_get_pagesize(handle)) != FLASH_PAGE_SIZE) {
@@ -277,8 +304,9 @@ int main(int argc, char **argv) {
   }
 
   printf(" done\n"
-	 "Please remove jumper switch and replug USB cable "
-	 "to return to normal operation!\n");
+	 "Please%s replug USB cable "
+	 "to return to normal operation!\n", 
+         (soft_bootloader_mode ? "" : " remove jumper switch and"));
 
   free(page);
   xu1541_close(handle);  

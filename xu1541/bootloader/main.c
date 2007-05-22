@@ -56,18 +56,54 @@ typedef byte_t uchar;
 #define STATE_IDLE 0
 #define STATE_WRITE_PAGE 1
 
+#include "xu1541bios.h"
+#include "version.h"
+
 static uchar state = STATE_IDLE;
 static unsigned int page_address;
 static unsigned int page_offset;
 
-void (*jump_to_app)(void) = 0x0000;
+#ifdef DEBUG_SRT_BLINK
+
+volatile long count = 5;
+
+void blink(void)
+{
+        DDRD  |=  _BV(1);
+        PORTD &= ~_BV(1);
+
+        while (1) {
+                unsigned long i;
+
+                for (i=0; i < 150000; i++) {
+                        if (count == 0) break;
+                }
+
+                PORTD ^= _BV(1);
+        }
+}
+#endif /* #ifdef DEBUG_SRT_BLINK */
+
+void start_flash_bootloader(void);
+
+/* This function is for communication with the firmware.
+ * It sets the xu1541_bios_data_t structure to the specified values.
+ */
+void bios_fill_data(unsigned int structsize, xu1541_bios_data_t *bios)
+{
+      bios->version_major = XU1541_BIOS_VERSION_MAJOR;
+      bios->version_minor = XU1541_BIOS_VERSION_MINOR;
+      bios->start_flash_bootloader = start_flash_bootloader;
+}
+
+void (*jump_to_app)(int magic, xu1541_bios_fill_data_t) = 0x0000;
 
 void leaveBootloader() {
       cli();
       boot_rww_enable();
       GICR = (1 << IVCE);  /* enable change of interrupt vectors */
       GICR = (0 << IVSEL); /* move interrupts to application flash section */
-      jump_to_app();
+      jump_to_app(12345, bios_fill_data);
 }
 
 #ifndef USBTINY
@@ -157,16 +193,8 @@ void usb_out ( byte_t* data, byte_t len )
 #endif
 }
 
-int main(void)
+void start_flash_bootloader(void)
 {
-    /* check if portb.4 (miso) is tied to gnd and call main application if not */
-    PORTB |= _BV(4);    // drive pin high
-    DDRB  &=  ~_BV(4);  // pin is input (with pullup)
-
-    // check if pin goes high
-    if(PINB & _BV(4))
-      leaveBootloader();
-
     /* make led output and switch it on */
     DDRD  |=  _BV(1);
     PORTD &= ~_BV(1);
@@ -192,6 +220,19 @@ int main(void)
     for(;;){    /* main event loop */
         usbPoll();
     }
-    return 0;
 }
 
+int main(void)
+{
+    /* check if portb.4 (miso) is tied to gnd and call main application if not */
+    PORTB |= _BV(4);    // drive pin high
+    DDRB  &=  ~_BV(4);  // pin is input (with pullup)
+
+    // check if pin goes high
+    if(PINB & _BV(4))
+      leaveBootloader();
+
+    start_flash_bootloader();
+
+    return 0;
+}

@@ -4,10 +4,16 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.9 2007-05-20 18:51:05 harbaum Exp $
+ * This Revision: $Id: main.c,v 1.10 2007-05-22 19:31:16 strik Exp $
  *
  * $Log: main.c,v $
- * Revision 1.9  2007-05-20 18:51:05  harbaum
+ * Revision 1.10  2007-05-22 19:31:16  strik
+ * Started working on making the bootloader a kind of BIOS. It now has an own
+ * version number, and the bootloader can be started without installing the
+ * jumper. Just start xu1541_update with the xu1541 plugged in, and the firmware
+ * will be updated. For this, BIOS >= 1.1 and firmware >= 1.10 must be installed.
+ *
+ * Revision 1.9  2007/05/20 18:51:05  harbaum
  * New usbtiny version and first eeprom work
  *
  * Revision 1.8  2007/03/15 17:40:51  harbaum
@@ -85,6 +91,11 @@ static uchar io_mode;
 #include "p2.h"
 #include "event_log.h"
 
+#include "../bootloader/xu1541bios.h"
+
+xu1541_bios_data_t bios_data;
+
+
 #ifdef DEBUG
 #define DEBUGF(format, args...) printf_P(PSTR(format), ##args)
 
@@ -149,9 +160,17 @@ extern	byte_t	usb_setup ( byte_t data[8] )
     replyBuf[0] = XU1541_VERSION_MAJOR;
     replyBuf[1] = XU1541_VERSION_MINOR;
     *(ushort*)(replyBuf+2) = XU1541_CAPABILIIES;
-    return 4;
+    replyBuf[4] = bios_data.version_major;
+    replyBuf[5] = bios_data.version_minor;
+    return 6;
     break;
 
+  case XU1541_FLASH:
+    wdt_disable();
+    bios_data.start_flash_bootloader();
+    return 0;
+    break;
+      
   case XU1541_EEPROM_READ:
     io_mode = MODE_EEPROM;
     return(data[2]?0xff:0x00);
@@ -276,7 +295,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
       replyBuf[1] = S1_VERSION_MINOR;
       return 2;
       break;
-      
+
     case XU1541_READ:
       io_mode = MODE_S1;
       /* more data to be expected? */
@@ -498,10 +517,15 @@ void usb_out ( byte_t* data, byte_t len )
 #endif
 }
 
-
 /* ------------------------------------------------------------------------- */
 
-int	main(void) {
+int	main(int magic, xu1541_bios_fill_data_t bios_fill_data) {
+
+  memset(&bios_data, 0, sizeof(bios_data));
+
+  if (magic == 12345)
+    bios_fill_data(sizeof(bios_data), &bios_data);
+
   wdt_enable(WDTO_1S);
 
 #ifdef ENABLE_EVENT_LOG
