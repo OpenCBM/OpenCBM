@@ -29,6 +29,26 @@ usb_dev_handle      *handle = NULL;
 #define QUIT_KEY
 #endif
 
+#if __BYTE_ORDER == __BIG_ENDIAN
+inline void convert_to_little_endian(unsigned short ret[2])
+{
+  char tmp;
+  char *retc = (char *) ret;
+
+  tmp = retc[0];
+  retc[0] = retc[1];
+  retc[1] = tmp;
+
+  tmp = retc[2];
+  retc[2] = retc[3];
+  retc[3] = tmp;
+}
+#else
+inline void convert_to_little_endian(unsigned short ret[2])
+{
+}
+#endif
+
 /* send a number of 16 bit words to the xu1541 interface */
 /* and verify that they are correctly returned by the echo */
 /* command. This may be used to check the reliability of */
@@ -40,11 +60,6 @@ void usb_echo(void) {
   int i, nBytes, errors=0;
   unsigned short val[2], ret[2];
 
-#ifdef BIG_ENDIAN
-  char tmp;
-  char *retc = (char *)ret;
-#endif
-
   printf("=== Running standard echo test ===\n");
 
   for(i=0;i<ECHO_NUM;i++) {
@@ -55,14 +70,7 @@ void usb_echo(void) {
 	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
 	   XU1541_ECHO, val[0], val[1], (char*)ret, sizeof(ret), 1000);
 
-#ifdef BIG_ENDIAN
-    tmp = retc[0];
-    retc[0] = retc[1];
-    retc[1] = tmp;
-    tmp = retc[2];
-    retc[2] = retc[3];
-    retc[3] = tmp;
-#endif
+    convert_to_little_endian(ret);
 
     if(nBytes < 0) {
       fprintf(stderr, "USB request failed: %s!\n", usb_strerror());
@@ -88,11 +96,6 @@ void usb_no_irq(void) {
 
   int i, nBytes, errors=0, tos=0, recovered=0, failed=0;
   unsigned short val[2], ret[2];
-
-#ifdef BIG_ENDIAN
-  char tmp;
-  char *retc = (char *)ret;
-#endif
 
   printf("=== Running irq disabled echo test ===\n");
 
@@ -120,14 +123,7 @@ void usb_no_irq(void) {
 	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
 	   XU1541_ECHO, val[0], val[1], (char*)ret, sizeof(ret), 1000);
 
-#ifdef BIG_ENDIAN
-    tmp = retc[0];
-    retc[0] = retc[1];
-    retc[1] = tmp;
-    tmp = retc[2];
-    retc[2] = retc[3];
-    retc[3] = tmp;
-#endif
+    convert_to_little_endian(ret);
 
     if(nBytes < 0) {
       fprintf(stderr, "Expected error: %s!\n", usb_strerror());
