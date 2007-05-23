@@ -29,6 +29,7 @@
 #include <avr/wdt.h>
 #include <avr/boot.h>
 #include <util/delay.h>
+#include <avr/eeprom.h>
 
 #ifndef USBTINY
 // use avrusb library
@@ -58,6 +59,10 @@ typedef byte_t uchar;
 
 #include "xu1541bios.h"
 #include "version.h"
+
+#define BOOTLOADER_NO_APPLICATION_MAGIC 0xFF
+#define BOOTLOADER_START_MAGIC 0x80
+#define BOOTLOADER_DONOTSTART_MAGIC 0x12
 
 static uchar state = STATE_IDLE;
 static unsigned int page_address;
@@ -117,7 +122,10 @@ extern  byte_t  usb_setup ( byte_t data[8] ) {
   uchar len = 0;
   
   if (data[1] == USBBOOT_FUNC_LEAVE_BOOT) {
-    leaveBootloader();
+//    leaveBootloader();
+    eeprom_write_byte(0, BOOTLOADER_DONOTSTART_MAGIC);
+    wdt_enable(1);
+a:  goto a;
   } else if (data[1] == USBBOOT_FUNC_WRITE_PAGE) {
     state = STATE_WRITE_PAGE;
     
@@ -193,8 +201,22 @@ void usb_out ( byte_t* data, byte_t len )
 #endif
 }
 
-void start_flash_bootloader(void)
+int main(void)
 {
+    /* check if portb.4 (miso) is tied to gnd and call main application if not */
+    PORTB |= _BV(4);    // drive pin high
+    DDRB  &=  ~_BV(4);  // pin is input (with pullup)
+
+    switch (eeprom_read_byte(0)) {
+      case BOOTLOADER_DONOTSTART_MAGIC:
+        // check if pin goes high
+        if(PINB & _BV(4))
+          leaveBootloader();
+
+      case BOOTLOADER_NO_APPLICATION_MAGIC:
+        eeprom_write_byte(0, BOOTLOADER_DONOTSTART_MAGIC);
+    }
+
     /* make led output and switch it on */
     DDRD  |=  _BV(1);
     PORTD &= ~_BV(1);
@@ -220,19 +242,16 @@ void start_flash_bootloader(void)
     for(;;){    /* main event loop */
         usbPoll();
     }
-}
-
-int main(void)
-{
-    /* check if portb.4 (miso) is tied to gnd and call main application if not */
-    PORTB |= _BV(4);    // drive pin high
-    DDRB  &=  ~_BV(4);  // pin is input (with pullup)
-
-    // check if pin goes high
-    if(PINB & _BV(4))
-      leaveBootloader();
-
-    start_flash_bootloader();
 
     return 0;
+}
+
+void start_flash_bootloader(void)
+{
+    eeprom_write_byte(0, BOOTLOADER_START_MAGIC);
+
+    /* enable watch dog and make sure it fires
+     * This way, we reboot the AVR */
+    wdt_enable(1);
+a:  goto a;
 }

@@ -191,10 +191,14 @@ int xu1541_start_application(usb_dev_handle *handle) {
 	   USBBOOT_FUNC_LEAVE_BOOT, 0, 0, 
 	   NULL, 0, 1000);
 
+/*
+ * This will always be an error, as the xu1541 just reboots, and does not answer!
+
   if (nBytes != 0) {
     fprintf(stderr, "Error starting application: %s\n", usb_strerror());
     return -1;
   }
+*/
   return 0;
 }
 
@@ -303,10 +307,14 @@ int main(int argc, char **argv) {
     return -1;
   }
 
+  xu1541_start_application(handle);
+
   printf(" done\n"
-	 "Please%s replug USB cable "
-	 "to return to normal operation!\n", 
-         (soft_bootloader_mode ? "" : " remove jumper switch and"));
+	 "%s\n", 
+         (soft_bootloader_mode
+          ? "Rebooting the xu1541." 
+          : "Please remove jumper switch and replug USB cable "
+	    "to return to normal operation!"));
 
   free(page);
   xu1541_close(handle);  
