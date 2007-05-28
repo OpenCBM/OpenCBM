@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.4 2007-04-29 09:24:20 wmsr Exp $";
+    "@(#) $Id: main.c,v 1.5 2007-05-28 14:25:46 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -17,6 +17,7 @@ static char *rcsid =
 #include "d64copy_int.h"
 
 #include "arch.h"
+#include "libmisc.h"
 
 #include <getopt.h>
 #include <stdarg.h>
@@ -397,11 +398,13 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     int c;
     int dst_is_cbm;
     unsigned char drive;
+    char *adapter = NULL;
 
     struct option longopts[] =
     {
         { "help"       , no_argument      , NULL, 'h' },
         { "version"    , no_argument      , NULL, 'V' },
+        { "adapter"    , required_argument, NULL, '@' },
         { NULL         , 0                , NULL, 0   }
     };
     const char shortopts[] ="hV";
@@ -414,6 +417,15 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                       return 0;
             case 'V': printf("weaktest %s\n", OPENCBM_VERSION);
                       return 0;
+            case '@': if (adapter == NULL)
+                          adapter = cbmlibmisc_strdup(optarg);
+                      else
+                      {
+                          fprintf(stderr, "--adapter/-@ given more than once.");
+                          hint(argv[0]);
+                          return 1;
+                      }
+                      break;
             case 0:   break; // needed for --no-warp
             default : hint(argv[0]);
                       return 1;
@@ -435,7 +447,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         return 1;
     }
 
-    if(cbm_driver_open(&fd_cbm, 0) == 0)
+    if(cbm_driver_open_ex(&fd_cbm, adapter) == 0)
     {
         drive = (unsigned char)atoi(dst_arg);
         settings->warp = 1;
@@ -459,9 +471,10 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     if(rv!=0)
     {
-        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
+        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name_ex(adapter));
     }
 
+    cbmlibmisc_strfree(adapter);
     free(settings);
     
     return rv;

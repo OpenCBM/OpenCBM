@@ -13,7 +13,7 @@
  
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: frm_analyzer.c,v 1.2 2007-04-22 16:03:24 strik Exp $";
+    "@(#) $Id: frm_analyzer.c,v 1.3 2007-05-28 14:25:46 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -25,6 +25,7 @@ static char *rcsid =
 #include <string.h>
 
 #include "arch.h"
+#include "libmisc.h"
 
 static unsigned char dskfrmt[] = {
 #include "frm_analyzer.inc"
@@ -63,11 +64,13 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     unsigned char drive, tracks = 35, bump = 1, orig = 0x4b, show_progress = 0;
     char cmd[40], c, name[20], *arg;
     int erroroccured = 0;
+    char *adapter = NULL;
 
     struct option longopts[] =
     {
         { "help"       , no_argument      , NULL, 'h' },
         { "version"    , no_argument      , NULL, 'V' },
+        { "adapter"    , required_argument, NULL, '@' },
         { "no-bump"    , no_argument      , NULL, 'n' },
         { "extended"   , no_argument      , NULL, 'x' },
 //        { "original"   , no_argument      , NULL, 'o' },
@@ -105,6 +108,15 @@ orig=arch_atoc(optarg);
             case 'p': show_progress = 1;
                       break;
             case 't': tracks = arch_atoc(optarg);
+                      break;
+            case '@': if (adapter == NULL)
+                          adapter = cbmlibmisc_strdup(optarg);
+                      else
+                      {
+                          fprintf(stderr, "--adapter/-@ given more than once.");
+                          hint(argv[0]);
+                          return 1;
+                      }
                       break;
             default : hint(argv[0]);
                       return 1;
@@ -149,8 +161,8 @@ orig=arch_atoc(optarg);
         arg++;
     }
     name[name_len] = 0;
-    
-    if(cbm_driver_open(&fd, 0) == 0)
+
+    if(cbm_driver_open_ex(&fd, adapter) == 0)
     {
         cbm_upload(fd, drive, 0x0300, dskfrmt, sizeof(dskfrmt));
         sprintf(cmd, "M-E%c%c%c%c%c%c0:%s", 3, 3, tracks + 1, 
@@ -360,11 +372,13 @@ orig=arch_atoc(optarg);
         }
 #endif
         cbm_driver_close(fd);
+        cbmlibmisc_strfree(adapter);
         return 0;
     }
     else
     {
-        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name(0));
+        arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name_ex(adapter));
+        cbmlibmisc_strfree(adapter);
         return 1;
     }
 }

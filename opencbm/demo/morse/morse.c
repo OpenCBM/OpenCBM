@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: morse.c,v 1.4 2006-05-23 12:24:31 wmsr Exp $";
+    "@(#) $Id: morse.c,v 1.5 2007-05-28 14:25:46 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -28,7 +28,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     __u_char drv = argc > 1 ? arch_atoc(argv[1]) : 8;
     CBM_FILE fd;
     
-    if(cbm_driver_open(&fd, 0) == 0)
+    if(cbm_driver_open_ex(&fd, NULL) == 0)
     {
         cbm_upload(fd, drv, 0x0500, morse, sizeof(morse));
         cbm_listen(fd, drv, 15);

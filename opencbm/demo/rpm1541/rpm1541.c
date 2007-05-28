@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: rpm1541.c,v 1.6 2006-07-20 11:45:28 strik Exp $";
+    "@(#) $Id: rpm1541.c,v 1.7 2007-05-28 14:25:47 wmsr Exp $";
 #endif
 
 
@@ -59,7 +59,7 @@ main(int argc, char **argv)
     const char *type_str;
 
 
-    if (cbm_driver_open(&fd, 0) != 0)
+    if (cbm_driver_open_ex(&fd, NULL) != 0)
         return -1;
 
     if (argc > 1)
