@@ -172,8 +172,9 @@ void display_device_info(void) {
   }
 
   if (nBytes > 4)
-    printf("Device reports BIOS version %u.%02u\n", reply[4], reply[5]);
-  printf("Device reports version %u.%02u\n", reply[0], reply[1]);
+    printf("Device reports BIOS version %x.%02x\n", reply[4], reply[5]);
+
+  printf("Device reports version %x.%02x\n", reply[0], reply[1]);
   printf("Device reports capabilities 0x%04x\n", *(unsigned short*)(reply+2));
 }
 
@@ -181,9 +182,10 @@ int main(int argc, char *argv[]) {
   struct usb_bus      *bus;
   struct usb_device   *dev;
   
-  printf("--    XU1541 USB test application      --\n");
-  printf("--      (c) 2007 by Till Harbaum       --\n");
-  printf("-- http://www.harbaum.org/till/xu1541  --\n");
+  printf("--      XU1541 USB test application        --\n");
+  printf("--       (c) 2007 the opencbm team         --\n");
+  printf("--   http://www.harbaum.org/till/xu1541    --\n");
+  printf("-- http://sourceforge.net/projects/opencbm --\n");
 
   usb_init();
   
