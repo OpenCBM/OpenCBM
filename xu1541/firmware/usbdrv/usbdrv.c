@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: GNU GPL v2 (see License.txt) or proprietary (CommercialLicense.txt)
- * This Revision: $Id: usbdrv.c,v 1.3 2007-03-21 18:02:12 harbaum Exp $
+ * This Revision: $Id: usbdrv.c,v 1.4 2007-06-06 19:26:45 harbaum Exp $
  */
 
 #include "iarcompat.h"
@@ -123,7 +123,7 @@ PROGMEM int usbDescriptorStringSerialNumber[] = {
 PROGMEM char usbDescriptorDevice[] = {    /* USB device descriptor */
     18,         /* sizeof(usbDescriptorDevice): length of descriptor in bytes */
     USBDESCR_DEVICE,        /* descriptor type */
-    0x01, 0x01,             /* USB version supported */
+    0x10, 0x01,             /* USB version supported */
     USB_CFG_DEVICE_CLASS,
     USB_CFG_DEVICE_SUBCLASS,
     0,                      /* protocol */

@@ -147,7 +147,7 @@ static	byte_t	descr_device [18] PROGMEM =
 {
 	18,				// bLength
 	DESCRIPTOR_TYPE_DEVICE,		// bDescriptorType
-	LE(0x0101),			// bcdUSB
+	LE(0x0110),			// bcdUSB
 	USBTINY_DEVICE_CLASS,		// bDeviceClass
 	USBTINY_DEVICE_SUBCLASS,	// bDeviceSubClass
 	USBTINY_DEVICE_PROTOCOL,	// bDeviceProtocol
