@@ -7,8 +7,6 @@
 #include <string.h>
 #include <usb.h>
 
-#include <arpa/inet.h>   // for htons
-
 /* vendor and product id */
 #define XU1541_VID  0x0403
 #define XU1541_PID  0xc632
@@ -53,8 +51,11 @@ void usb_echo(void) {
     
     nBytes = usb_control_msg(handle, 
 	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
-	   XU1541_ECHO, htons(val[0]), htons(val[1]), 
+			     XU1541_ECHO, val[0], val[1], 
 			     (char*)ret, sizeof(ret), 1000);
+    
+    USB_LE16_TO_CPU(ret[0]);
+    USB_LE16_TO_CPU(ret[1]);
 
     if(nBytes < 0) {
       fprintf(stderr, "USB request failed: %s!\n", usb_strerror());
@@ -62,7 +63,7 @@ void usb_echo(void) {
     } else if(nBytes != sizeof(ret)) {
       fprintf(stderr, "Unexpected number of bytes (%d) returned\n", nBytes);
       errors++;
-    } else if((val[0] != SWAP16(ret[0])) ||(val[1] != SWAP16(ret[1]))) {
+    } else if((val[0] != ret[0]) || (val[1] != ret[1])) {
       fprintf(stderr, "Echo payload mismatch (%x/%x -> %x/%x)\n",
 	      val[0], val[1], ret[0], ret[1]);
       errors++;
@@ -105,8 +106,11 @@ void usb_no_irq(void) {
     
     nBytes = usb_control_msg(handle, 
 	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
-	   XU1541_ECHO, htons(val[0]), htons(val[1]), 
+			     XU1541_ECHO, val[0], val[1], 
 			     (char*)ret, sizeof(ret), 1000);
+
+    USB_LE16_TO_CPU(ret[0]);
+    USB_LE16_TO_CPU(ret[1]);
 
     if(nBytes < 0) {
       fprintf(stderr, "Expected error: %s!\n", usb_strerror());
@@ -117,7 +121,7 @@ void usb_no_irq(void) {
 	      "expected %d\n", nBytes, (int)sizeof(ret));
       failed = 1;
       tos++;
-    } else if((val[0] != SWAP16(ret[0])) ||(val[1] != SWAP16(ret[1]))) {
+    } else if((val[0] != ret[0]) || (val[1] != ret[1])) {
       fprintf(stderr, "Echo payload mismatch (%x/%x -> %x/%x)\n",
 	      val[0], val[1], ret[0], ret[1]);
       errors++;
