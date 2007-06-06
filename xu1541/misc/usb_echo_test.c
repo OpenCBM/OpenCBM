@@ -29,9 +29,6 @@ usb_dev_handle      *handle = NULL;
 #define QUIT_KEY
 #endif
 
-/* swap the bytes of a word (change endianess) */
-#define SWAP16(a)  (((a&0xff)<<8)|((a&0xff00)>>8))
-
 /* send a number of 16 bit words to the xu1541 interface */
 /* and verify that they are correctly returned by the echo */
 /* command. This may be used to check the reliability of */
@@ -54,6 +51,12 @@ void usb_echo(void) {
 			     XU1541_ECHO, val[0], val[1], 
 			     (char*)ret, sizeof(ret), 1000);
     
+    /* the val[x] values are sent through a control message which */
+    /* causes libusb to convert their endianess to little endian */
+    /* if necessary (read: on big endian machines). since the */
+    /* return values ret[x] are just returned as a bytes stream */
+    /* and are thus not converted. They have to be explicitely */
+    /* converted using the appropriate macros. */
     USB_LE16_TO_CPU(ret[0]);
     USB_LE16_TO_CPU(ret[1]);
 
