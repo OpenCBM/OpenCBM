@@ -1,0 +1,29 @@
+#
+# Makefile.cygwin
+#
+
+#
+# Tell, where your libusb-win32 installation resides
+# (if not part of Cygwin in the latest version)
+#
+# LIBUSB_ROOT=/cygdrive/c/drivers/LibUSB
+
+#
+# For compiling for MinGw32 target
+#
+CYGWINFLAGS=-mno-cygwin
+
+CFLAGS+=-I $(LIBUSB_ROOT)/include -g -Wall -pedantic
+LFLAGS+=-s -L $(LIBUSB_ROOT)/lib/gcc -lusb
+
+ECHO_TEST = usb_echo_test
+EVENT_LOG = read_event_log
+
+all: $(ECHO_TEST) $(EVENT_LOG)
+
+clean:
+	rm -f $(ECHO_TEST) $(EVENT_LOG) $(ECHO_TEST).exe $(EVENT_LOG).exe
+
+%: %.c
+	$(CC) $(CYGWINFLAGS) $(CFLAGS) -o $@ $< $(LFLAGS)
+
