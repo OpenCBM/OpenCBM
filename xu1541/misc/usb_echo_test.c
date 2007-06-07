@@ -11,7 +11,7 @@
 #define XU1541_VID  0x0403
 #define XU1541_PID  0xc632
 
-#ifdef WIN
+#ifdef WIN32
 #include <windows.h>
 #include <winbase.h>
 #define MSLEEP(a) Sleep(a)
