@@ -1,0 +1,28 @@
+#
+# Makefile.cygwin
+#
+
+#
+# Tell, where your libusb-win32 installation resides
+# (if not part of Cygwin in the latest version)
+#
+# LIBUSB_ROOT=/cygdrive/c/drivers/LibUSB
+
+#
+# For compiling for MinGw32 target
+#
+CYGWINFLAGS=-mno-cygwin
+
+CFLAGS+=$(CYGWINFLAGS) -I $(LIBUSB_ROOT)/include -g -Wall -pedantic
+LFLAGS+=$(CYGWINFLAGS) -s -L $(LIBUSB_ROOT)/lib/gcc -lusb
+
+APP = xu1541_update
+OBJS = xu1541_update.o ihex.o flash.o
+
+all: ../$(APP).exe
+
+clean:
+	rm -f ../$(APP).exe *.o
+
+../$(APP).exe: $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LFLAGS)
