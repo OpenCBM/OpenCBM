@@ -13,14 +13,14 @@
 /* normal commands */
 #define XU1541_INFO                  0
 
-#define XU1541_CAP_CBM               0x0001   // supports CBM commands
-#define XU1541_CAP_LL                0x0002   // supports low level io
-#define XU1541_CAP_PP                0x0004   // supports 8 bit port
-#define XU1541_CAP_NIB               0x0008   // supports nibbler
-#define XU1541_CAP_PROTO_S1          0x0010   // supports serial1 protocol
-#define XU1541_CAP_PROTO_S2          0x0020   // supports serial2 protocol
-#define XU1541_CAP_PROTO_PP          0x0040   // supports parallel protocol
-#define XU1541_CAP_PROTO_P2          0x0080   // supports parallel2 protocol
+#define XU1541_CAP_CBM               0x0001   /* supports CBM commands */
+#define XU1541_CAP_LL                0x0002   /* supports low level io */
+#define XU1541_CAP_PP                0x0004   /* supports 8 bit port */
+#define XU1541_CAP_NIB               0x0008   /* supports nibbler */
+#define XU1541_CAP_PROTO_S1          0x0010   /* supports serial1 protocol */
+#define XU1541_CAP_PROTO_S2          0x0020   /* supports serial2 protocol */
+#define XU1541_CAP_PROTO_PP          0x0040   /* supports parallel protocol */
+#define XU1541_CAP_PROTO_P2          0x0080   /* supports parallel2 protocol */
 
 #define XU1541_CAPABILIIES  (XU1541_CAP_CBM | XU1541_CAP_LL | XU1541_CAP_PP  | XU1541_CAP_PROTO_S1 | XU1541_CAP_PROTO_S2 | XU1541_CAP_PROTO_PP | XU1541_CAP_PROTO_P2)
 
@@ -79,7 +79,7 @@
 #define XU1541_IO_ASYNC          7
 
 /* max time to wait for device */
-#define XU1541_W4L_TIMEOUT        20  // seconds, max. 60 possible here
+#define XU1541_W4L_TIMEOUT        20  /* seconds, max. 60 possible here */
 #define XU1541_IO_BUFFER_SIZE    128
 
-#endif // XU1541_TYPES_H
+#endif /* XU1541_TYPES_H */
