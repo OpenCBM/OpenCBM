@@ -134,7 +134,7 @@ void usb_no_irq(void) {
       printf("Echo successful\n");
     }
 
-    MSLEEP(200); // wait 200ms
+    MSLEEP(200); /* wait 200ms */
   }
 
   fprintf(stderr, "USB timeout states: %d\n", tos);
