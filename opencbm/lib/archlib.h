@@ -58,8 +58,10 @@ EXTERN void         CBMAPIDECL cbmarch_pp_dc_write_n(CBM_FILE HandleDevice, cons
 EXTERN void         CBMAPIDECL cbmarch_pp_cc_read_n (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
 EXTERN void         CBMAPIDECL cbmarch_pp_cc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
 
+#if defined WIN32
 EXTERN BOOL CBMAPIDECL cbm_install_complete(OUT PULONG Buffer, IN ULONG BufferLen);
 /*! Function pointer for the cbm_i_driver_install() function */
 typedef BOOL (CBMAPIDECL *P_CBM_INSTALL_COMPLETE)(OUT PULONG Buffer, IN ULONG BufferLen);
+#endif
 
 #endif // #ifndef ARCHLIB_H
