@@ -18,6 +18,14 @@
 #define XU1541_VID  0x0403
 #define XU1541_PID  0xc632
 
+#ifdef WIN32
+#include <windows.h>
+#include <winbase.h>
+#define MSLEEP(a) Sleep(a)
+#else
+#define MSLEEP(a) usleep(a*1000)
+#endif
+
 /* usb bootloader constants */
 #define USBBOOT_FUNC_LEAVE_BOOT 1
 #define USBBOOT_FUNC_WRITE_PAGE 2
@@ -76,7 +84,7 @@ static int set_to_boot_mode(usb_dev_handle *handle)
         USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
         XU1541_FLASH, 0, 0, 0, 0, 1000);
 
-  sleep(3);
+  MSLEEP(3000); /* wait 3s */
   return 0;
 }
 
