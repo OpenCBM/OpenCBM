@@ -38,4 +38,4 @@ unsigned char event_log_get(unsigned char index);
 #define EVENT(a)
 #endif
 
-#endif // EVENT_LOG_H
+#endif /* EVENT_LOG_H */
