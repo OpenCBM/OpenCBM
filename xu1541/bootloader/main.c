@@ -116,7 +116,7 @@ uchar   usbFunctionSetup(uchar data[8]) {
   static uchar replyBuf[8];
   usbMsgPtr = replyBuf;
 #else
-extern  byte_t  usb_setup ( byte_t data[8] ) {
+byte_t  usb_setup ( byte_t data[8] ) {
   byte_t *replyBuf = data;
 #endif
   uchar len = 0;
