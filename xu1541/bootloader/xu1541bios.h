@@ -1,14 +1,16 @@
 #ifndef XU1541_BIOS_H
 #define XU1541_BIOS_H
 
+#define BIOSTABLE __attribute__ ((section (".textbiostable")))
+
 typedef
 struct xu1541_bios_data_s {
-        int version_major;
-        int version_minor;
+        unsigned char version_major;
+        unsigned char version_minor;
         void (*start_flash_bootloader)(void);
 } xu1541_bios_data_t;
 
-typedef void (*xu1541_bios_fill_data_t)(unsigned int structsize, xu1541_bios_data_t *data);
+extern xu1541_bios_data_t bios_data BIOSTABLE;
 
 #endif /* #ifndef XU1541_BIOS_H */
 

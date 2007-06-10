@@ -34,11 +34,11 @@ clobber:	clean
 	rm -f bootldr-usbtiny.hex $(SCHEM)
 
 bootldr-usbtiny.bin:	$(MODULES)
-	$(LINK.o) -o $@ $(MODULES)
+	$(LINK.o) -o $@ $(MODULES) $(LDFLAGS)
 
 bootldr-usbtiny.hex:	bootldr-usbtiny.bin $(UTIL)/check.py
 	@$(UTIL)/check.py bootldr-usbtiny.bin $(STACK) $(FLASHSIZE) $(RAMSIZE)
-	avr-objcopy -j .text -j .data -O ihex bootldr-usbtiny.bin bootldr-usbtiny.hex
+	avr-objcopy -j .text -j .data -j .textbiostable -j .textadd -O ihex bootldr-usbtiny.bin bootldr-usbtiny.hex
 
 disasm:		bootldr-usbtiny.bin
 	avr-objdump -S bootldr-usbtiny.bin

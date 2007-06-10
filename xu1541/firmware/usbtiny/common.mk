@@ -21,7 +21,7 @@
 CC	= avr-gcc
 CFLAGS	= -Os -g -Wall -I. -I$(USBTINY)
 ASFLAGS	= -Os -g -Wall -I.
-LDFLAGS	= -g
+LDFLAGS	+= -g
 MODULES = crc.o int.o usb.o $(OBJECTS)
 UTIL	= $(USBTINY)/../util
 
@@ -30,20 +30,20 @@ firmware-usbtiny.hex:
 all:		firmware-usbtiny.hex $(SCHEM)
 
 clean:
-	rm -f firmware-usbtiny.elf *.o tags *.sch~ gschem.log
+	rm -f firmware-usbtiny.bin *.o tags *.sch~ gschem.log
 
 clobber:	clean
 	rm -f firmware-usbtiny.hex $(SCHEM)
 
-firmware-usbtiny.elf:	$(MODULES)
-	$(LINK.o) -o $@ $(MODULES)
+firmware-usbtiny.bin:	$(MODULES)
+	$(LINK.o) -o $@ $(MODULES) $(LDFLAGS)
 
-firmware-usbtiny.hex:	firmware-usbtiny.elf $(UTIL)/check.py
-	@python $(UTIL)/check.py firmware-usbtiny.elf $(STACK) $(FLASH) $(SRAM)
-	avr-objcopy -j .text -j .data -O ihex firmware-usbtiny.elf firmware-usbtiny.hex
+firmware-usbtiny.hex:	firmware-usbtiny.bin $(UTIL)/check.py
+	@python $(UTIL)/check.py firmware-usbtiny.bin $(STACK) $(FLASH) $(SRAM)
+	avr-objcopy -j .text -j .data -O ihex firmware-usbtiny.bin firmware-usbtiny.hex
 
-disasm:		firmware-usbtiny.elf
-	avr-objdump -S firmware-usbtiny.elf
+disasm:		firmware-usbtiny.bin
+	avr-objdump -S firmware-usbtiny.bin
 
 flash:		firmware-usbtiny.hex
 	$(FLASH_CMD)

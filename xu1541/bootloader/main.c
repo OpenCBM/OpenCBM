@@ -68,9 +68,17 @@ static uchar state = STATE_IDLE;
 static unsigned int page_address;
 static unsigned int page_offset;
 
+#define MOVESECTION __attribute__ ((section (".textadd")))
+
+void start_flash_bootloader(void) MOVESECTION;
+
+// #define DEBUG_SRT_BLINK
+
 #ifdef DEBUG_SRT_BLINK
 
 volatile long count = 5;
+
+void blink(void) MOVESECTION;
 
 void blink(void)
 {
@@ -89,26 +97,21 @@ void blink(void)
 }
 #endif /* #ifdef DEBUG_SRT_BLINK */
 
-void start_flash_bootloader(void);
-
-/* This function is for communication with the firmware.
- * It sets the xu1541_bios_data_t structure to the specified values.
- */
-void bios_fill_data(unsigned int structsize, xu1541_bios_data_t *bios)
+xu1541_bios_data_t bios_data BIOSTABLE =
 {
-      bios->version_major = XU1541_BIOS_VERSION_MAJOR;
-      bios->version_minor = XU1541_BIOS_VERSION_MINOR;
-      bios->start_flash_bootloader = start_flash_bootloader;
-}
+        XU1541_BIOS_VERSION_MAJOR,
+        XU1541_BIOS_VERSION_MINOR,
+        start_flash_bootloader
+};
 
-void (*jump_to_app)(int magic, xu1541_bios_fill_data_t) = 0x0000;
+void (*jump_to_app)(void) = 0x0000;
 
 void leaveBootloader() {
       cli();
       boot_rww_enable();
       GICR = (1 << IVCE);  /* enable change of interrupt vectors */
       GICR = (0 << IVSEL); /* move interrupts to application flash section */
-      jump_to_app(12345, bios_fill_data);
+      jump_to_app();
 }
 
 #ifndef USBTINY

@@ -5,7 +5,11 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile-avrusb,v 1.5 2007-03-03 12:18:09 harbaum Exp $
+# This Revision: $Id: Makefile-avrusb,v 1.6 2007-06-10 16:49:38 strik Exp $
+
+BOOTLOADER_BIOSTABLE = 1700
+LDFLAGS += -Wl,--section-start=.textbiostable=$(BOOTLOADER_BIOSTABLE)
+
 
 SERIAL = `echo /dev/tty.[Uu][Ss]*`
 UISP = uisp -dprog=stk200
@@ -61,7 +65,7 @@ clean:
 
 # file targets:
 firmware-avrusb.bin:	$(OBJECTS)
-	$(COMPILE) -o firmware-avrusb.bin $(OBJECTS)
+	$(COMPILE) -o firmware-avrusb.bin $(OBJECTS) ${LDFLAGS}
 
 firmware-avrusb.hex:	firmware-avrusb.bin
 	rm -f firmware-avrusb.hex firmware-avrusb.eep.hex

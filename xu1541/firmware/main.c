@@ -4,10 +4,14 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.10 2007-05-22 19:31:16 strik Exp $
+ * This Revision: $Id: main.c,v 1.11 2007-06-10 16:49:39 strik Exp $
  *
  * $Log: main.c,v $
- * Revision 1.10  2007-05-22 19:31:16  strik
+ * Revision 1.11  2007-06-10 16:49:39  strik
+ * Some more BIOS work: bios_fill_data() is not used anymore; instead, the flash memory at 0x1700 contains the table. 0x1700-0x17ff is used for the bIOS now (outside of the bootloader area).
+ * These versions are incompatible with previous ones!
+ *
+ * Revision 1.10  2007/05/22 19:31:16  strik
  * Started working on making the bootloader a kind of BIOS. It now has an own
  * version number, and the bootloader can be started without installing the
  * jumper. Just start xu1541_update with the xu1541 plugged in, and the firmware
@@ -95,7 +99,6 @@ static uchar io_mode;
 
 xu1541_bios_data_t bios_data;
 
-
 #ifdef DEBUG
 #define DEBUGF(format, args...) printf_P(PSTR(format), ##args)
 
@@ -160,15 +163,18 @@ extern	byte_t	usb_setup ( byte_t data[8] )
     replyBuf[0] = XU1541_VERSION_MAJOR;
     replyBuf[1] = XU1541_VERSION_MINOR;
     *(ushort*)(replyBuf+2) = XU1541_CAPABILIIES;
-    replyBuf[4] = bios_data.version_major;
-    replyBuf[5] = bios_data.version_minor;
+    *(ushort*)(replyBuf+4) = pgm_read_word_near(&bios_data.version_major);
     return 6;
     break;
 
   case XU1541_FLASH:
-    wdt_disable();
-    bios_data.start_flash_bootloader();
-    return 0;
+   {
+        register void (*start_flash_bootloader)(void);
+
+        wdt_disable();
+        start_flash_bootloader = pgm_read_word_near(&bios_data.start_flash_bootloader);
+        start_flash_bootloader();
+    }
     break;
       
   case XU1541_EEPROM_READ:
@@ -519,12 +525,7 @@ void usb_out ( byte_t* data, byte_t len )
 
 /* ------------------------------------------------------------------------- */
 
-int	main(int magic, xu1541_bios_fill_data_t bios_fill_data) {
-
-  memset(&bios_data, 0, sizeof(bios_data));
-
-  if (magic == 12345)
-    bios_fill_data(sizeof(bios_data), &bios_data);
+int	main(void) {
 
   wdt_enable(WDTO_1S);
 
