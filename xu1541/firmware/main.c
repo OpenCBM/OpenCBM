@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.11 2007-06-10 16:49:39 strik Exp $
+ * This Revision: $Id: main.c,v 1.12 2007-06-10 17:07:00 strik Exp $
  *
  * $Log: main.c,v $
- * Revision 1.11  2007-06-10 16:49:39  strik
+ * Revision 1.12  2007-06-10 17:07:00  strik
+ * Removed a warning.
+ *
+ * Revision 1.11  2007/06/10 16:49:39  strik
  * Some more BIOS work: bios_fill_data() is not used anymore; instead, the flash memory at 0x1700 contains the table. 0x1700-0x17ff is used for the bIOS now (outside of the bootloader area).
  * These versions are incompatible with previous ones!
  *
@@ -169,10 +172,12 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 
   case XU1541_FLASH:
    {
-        register void (*start_flash_bootloader)(void);
+        typedef void (*start_flash_bootloader_t)(void);
+
+        register start_flash_bootloader_t start_flash_bootloader;
 
         wdt_disable();
-        start_flash_bootloader = pgm_read_word_near(&bios_data.start_flash_bootloader);
+        start_flash_bootloader = (start_flash_bootloader_t) pgm_read_word_near(&bios_data.start_flash_bootloader);
         start_flash_bootloader();
     }
     break;
