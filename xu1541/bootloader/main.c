@@ -29,7 +29,6 @@
 #include <avr/wdt.h>
 #include <avr/boot.h>
 #include <util/delay.h>
-#include <avr/eeprom.h>
 
 #ifndef USBTINY
 // use avrusb library
@@ -60,9 +59,16 @@ typedef byte_t uchar;
 #include "xu1541bios.h"
 #include "version.h"
 
-#define BOOTLOADER_NO_APPLICATION_MAGIC 0xFF
-#define BOOTLOADER_START_MAGIC 0x80
-#define BOOTLOADER_DONOTSTART_MAGIC 0x12
+#define BOOTLOADER_MAGIC_ADDRESS 0x1fe
+#define WRITE_BOOTLOADER_TYPE(_x) \
+        *((unsigned int *)BOOTLOADER_MAGIC_ADDRESS) = (_x);
+
+#define READ_BOOTLOADER_TYPE() \
+        (*((unsigned int *)BOOTLOADER_MAGIC_ADDRESS))
+
+#define BOOTLOADER_NO_APPLICATION_MAGIC 0xF347
+#define BOOTLOADER_START_MAGIC 0x8123
+#define BOOTLOADER_DONOTSTART_MAGIC 0xBCDE
 
 static uchar state = STATE_IDLE;
 static unsigned int page_address;
@@ -126,7 +132,7 @@ byte_t  usb_setup ( byte_t data[8] ) {
   
   if (data[1] == USBBOOT_FUNC_LEAVE_BOOT) {
 //    leaveBootloader();
-    eeprom_write_byte(0, BOOTLOADER_DONOTSTART_MAGIC);
+    WRITE_BOOTLOADER_TYPE(BOOTLOADER_DONOTSTART_MAGIC);
     wdt_enable(1);
 a:  goto a;
   } else if (data[1] == USBBOOT_FUNC_WRITE_PAGE) {
@@ -135,7 +141,6 @@ a:  goto a;
     page_address = (data[3] << 8) | data[2]; /* page address */
     page_offset = 0;
     
-    eeprom_busy_wait();
     cli();
     boot_page_erase(page_address); /* erase page */
     sei();
@@ -210,14 +215,18 @@ int main(void)
     PORTB |= _BV(4);    // drive pin high
     DDRB  &=  ~_BV(4);  // pin is input (with pullup)
 
-    switch (eeprom_read_byte(0)) {
+    if (pgm_read_word_near(0) == 0xffff) {
+        WRITE_BOOTLOADER_TYPE(BOOTLOADER_NO_APPLICATION_MAGIC);
+    }
+
+    switch (READ_BOOTLOADER_TYPE()) {
       case BOOTLOADER_DONOTSTART_MAGIC:
         // check if pin goes high
         if(PINB & _BV(4))
           leaveBootloader();
 
       case BOOTLOADER_NO_APPLICATION_MAGIC:
-        eeprom_write_byte(0, BOOTLOADER_DONOTSTART_MAGIC);
+        WRITE_BOOTLOADER_TYPE(BOOTLOADER_DONOTSTART_MAGIC);
     }
 
     /* make led output and switch it on */
@@ -251,7 +260,7 @@ int main(void)
 
 void start_flash_bootloader(void)
 {
-    eeprom_write_byte(0, BOOTLOADER_START_MAGIC);
+    WRITE_BOOTLOADER_TYPE(BOOTLOADER_START_MAGIC);
 
     /* enable watch dog and make sure it fires
      * This way, we reboot the AVR */
