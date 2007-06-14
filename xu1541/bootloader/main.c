@@ -221,12 +221,16 @@ int main(void)
 
     switch (READ_BOOTLOADER_TYPE()) {
       case BOOTLOADER_DONOTSTART_MAGIC:
+      default:
         // check if pin goes high
         if(PINB & _BV(4))
           leaveBootloader();
 
       case BOOTLOADER_NO_APPLICATION_MAGIC:
-        WRITE_BOOTLOADER_TYPE(BOOTLOADER_DONOTSTART_MAGIC);
+        /* FALL THROUGH */
+
+      case BOOTLOADER_START_MAGIC:
+        break;
     }
 
     /* make led output and switch it on */
