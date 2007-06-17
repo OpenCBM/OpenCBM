@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.15 2007-05-01 17:51:37 strik Exp $
+# $Id: config.make,v 1.16 2007-06-17 12:50:07 strik Exp $
 #
 
 # get package version (major.minor.release).
@@ -79,7 +79,16 @@ OD_FLAGS     = -w8 -txC -v -An
 #KERNEL_SOURCE = /lib/modules/`uname -r`/build       # for kernel 2.6
 
 # from patch #1189489 on SourceForge, with fix from #1189492):
-KERNEL_SOURCE = `for d in {/lib/modules/\`uname -r\`/build,/usr/src/linux}; do test -d $$d && echo $$d; done | head -n 1`
+KERNEL_SOURCE = ${shell for d in {/lib/modules/`uname -r`/build,/usr/src/linux}; do test -d $$d && echo $$d; done | head -n 1}
+
+#
+# Find out if we should include linux/autoconf.h or linux/conf.h in the kernel module
+#
+KERNEL_INCLUDE_CONFIG = ${shell for c in ${KERNEL_SOURCE}/include/linux/autoconf.h ${KERNEL_SOURCE}/include/linux/config.h; do test -f $$c && echo $$c; done | head -n 1}
+
+ifeq "${shell basename ${KERNEL_INCLUDE_CONFIG}}" "config.h"
+KERNEL_DEFINE+=-DKERNEL_INCLUDE_OLD_CONFIG_H=1
+endif
 
 #
 # kernel driver compile flags.
@@ -91,7 +100,7 @@ KERNEL_SOURCE = `for d in {/lib/modules/\`uname -r\`/build,/usr/src/linux}; do t
 #   XE1541-like cable. Don't to it. Upgrade to XM1541 instead.
 #
 #KERNEL_FLAGS = -DDIRECT_PORT_ACCESS
-KERNEL_FLAGS =
+KERNEL_FLAGS = ${KERNEL_DEFINE}
 
 #
 # Mac specific modifications
