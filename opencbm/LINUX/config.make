@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.16 2007-06-17 12:50:07 strik Exp $
+# $Id: config.make,v 1.17 2007-06-23 17:37:38 strik Exp $
 #
 
 # get package version (major.minor.release).
@@ -38,6 +38,7 @@ INFODIR     = $(PREFIX)/info
 INCDIR      = $(PREFIX)/include
 MODDIR      = `for d in /lib/modules/\`uname -r\`/{extra,misc,kernel/drivers/char}; do test -d $$d && echo $$d; done | head -n 1`
 PLUGINDIR   = $(PREFIX)/lib/opencbm/plugin/
+UDEV_RULES  = /etc/udev/rules.d/
 
 #
 # Where to find the xu1541 firmware
