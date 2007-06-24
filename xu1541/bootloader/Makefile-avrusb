@@ -8,7 +8,7 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile-avrusb,v 1.3 2007-06-10 16:49:37 strik Exp $
+# This Revision: $Id: Makefile-avrusb,v 1.4 2007-06-24 09:38:35 harbaum Exp $
 
 BOOTLOADER_ADDRESS = 1800
 BOOTLOADER_EXT_ADDRESS = 1710
@@ -52,6 +52,9 @@ flash:	all
 
 program: bootldr-avrusb.hex
 	avrdude -c stk200 -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc8:m -U flash:w:bootldr-avrusb.hex
+
+program-usb: bootldr-avrusb.hex
+	avrdude -c usbasp -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc8:m -U flash:w:bootldr-avrusb.hex
 
 # Fuse high byte:
 # 0xc9 = 1 1 0 0   1 0 0 0 <-- BOOTRST (boot reset vector at boot code)
