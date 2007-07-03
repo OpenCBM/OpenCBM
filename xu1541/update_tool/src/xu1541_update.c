@@ -75,6 +75,32 @@ static int  usb_get_string_ascii(usb_dev_handle *handle, int index,
   return 1;
 }
 
+static void display_device_info(usb_dev_handle *handle) {
+  int nBytes;
+  unsigned char reply[6];
+
+  nBytes = usb_control_msg(handle, 
+	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
+	   XU1541_INFO, 0, 0, (char*)reply, sizeof(reply), 1000);
+
+  if(nBytes < 0) {
+    fprintf(stderr, "USB request for XU1541 info failed: %s!\n", 
+	    usb_strerror());
+    return;
+  }
+  else if((nBytes != sizeof(reply)) && (nBytes != 4)) {
+    fprintf(stderr, "Unexpected number of bytes (%d) returned\n", nBytes);
+    return;
+  }
+
+  if (nBytes > 4) {
+    printf("Device reports BIOS version %x.%02x\n", reply[4], reply[5]);
+  }
+
+  printf("Device reports version %x.%02x\n", reply[0], reply[1]);
+  printf("Device reports capabilities 0x%04x\n", *(unsigned short*)(reply+2));
+}
+
 /* try to set xu1541 into boot mode */
 static int set_to_boot_mode(usb_dev_handle *handle)
 {
@@ -85,6 +111,7 @@ static int set_to_boot_mode(usb_dev_handle *handle)
         XU1541_FLASH, 0, 0, 0, 0, 1000);
 
   MSLEEP(3000); /* wait 3s */
+
   return 0;
 }
 
@@ -99,10 +126,10 @@ static usb_dev_handle *xu1541_find(unsigned int firstcall) {
   
   for(bus=usb_get_busses(); bus && !handle; bus=bus->next){
     for(dev=bus->devices; dev && !handle; dev=dev->next){
-      if(dev->descriptor.idVendor == XU1541_VID && 
-	 dev->descriptor.idProduct == XU1541_PID){
+      if( ( dev->descriptor.idVendor == XU1541_VID && 
+	    dev->descriptor.idProduct == XU1541_PID ) ){
 	char    string[32];
-	
+
 	/* we need to open the device in order to query strings */
 	handle = usb_open(dev); 
 	if(!handle){
@@ -119,9 +146,10 @@ static usb_dev_handle *xu1541_find(unsigned int firstcall) {
 	  if(handle) usb_close(handle);
 	  handle = NULL;
 	}
-	  
+
 	if(strcmp(string, "xu1541boot") != 0) {
           if (firstcall)  {
+            display_device_info(handle);
             /* try to set xu1541 into boot mode */
             set_to_boot_mode(handle);
           }
@@ -207,6 +235,8 @@ int xu1541_start_application(usb_dev_handle *handle) {
     return -1;
   }
 */
+  usb_reset( handle ); /* re-enumerate that device */
+
   return 0;
 }
 
