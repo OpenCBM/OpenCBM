@@ -7,8 +7,8 @@
 # Public License as published by the Free Software Foundation.
 # ======================================================================
 
-BOOTLOADER_BIOSTABLE = 1700
-LDFLAGS         = -Wl,--section-start=.textbiostable=$(BOOTLOADER_BIOSTABLE)
+include ../bootloader/Makefile.common
+LDFLAGS         = -Wl,$(COMMON_SECTIONS)
 
 USBTINY         = ./usbtiny
 TARGET_ARCH     = -DF_CPU=12000000 -DAVR -DUSBTINY -mmcu=atmega8
@@ -19,6 +19,8 @@ FLASH_CMD       = $(AVRDUDE) -c $(CABLE) -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w
 STACK           = 32
 FLASH       	= 8192
 SRAM            = 1024
+
+.INTERMEDIATE: crc.o int.o usb.o main.o xu1541.o s1.o s2.o pp.o p2.o event_log.o
 
 include $(USBTINY)/common.mk
 

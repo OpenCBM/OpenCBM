@@ -71,12 +71,17 @@ typedef byte_t uchar;
 #define BOOTLOADER_DONOTSTART_MAGIC 0xBCDE
 
 static uchar state = STATE_IDLE;
-static unsigned int page_address;
-static unsigned int page_offset;
+static uint16_t page_address;
+static uint8_t page_offset;
 
 #define MOVESECTION __attribute__ ((section (".textadd")))
+#define SECTIONFLASH __attribute__ ((section (".textflash")))
 
 void start_flash_bootloader(void) MOVESECTION;
+void leaveBootloader() MOVESECTION;
+
+void spm(uint8_t what, uint16_t address, uint16_t data) ; // SECTIONFLASH;
+// void spm(uint8_t what, uint16_t address, uint16_t data) SECTIONFLASH;
 
 // #define DEBUG_SRT_BLINK
 
@@ -107,7 +112,8 @@ xu1541_bios_data_t bios_data BIOSTABLE =
 {
         XU1541_BIOS_VERSION_MAJOR,
         XU1541_BIOS_VERSION_MINOR,
-        start_flash_bootloader
+        start_flash_bootloader,
+        spm
 };
 
 void (*jump_to_app)(void) = 0x0000;
@@ -270,4 +276,27 @@ void start_flash_bootloader(void)
      * This way, we reboot the AVR */
     wdt_enable(1);
 a:  goto a;
+}
+
+void spm(uint8_t what, uint16_t address, uint16_t data)
+{
+        __asm__ __volatile__
+        (
+                "movw  r0, %3\n\t"
+                "movw r30, %2\n\t"
+                "sts %0, %1\n\t"
+                "spm\n\t"
+                "clr  r1\n\t"
+                :
+                : "i" (_SFR_MEM_ADDR(__SPM_REG)),
+                  "r" (what),
+                  "r" ((uint16_t)address),
+                  "r" ((uint16_t)data)
+                : "r0", "r30", "r31"
+        );
+
+        if (what != __BOOT_PAGE_FILL) {
+                boot_spm_busy_wait();      // Wait until the memory is written.
+                boot_rww_enable();
+        }
 }

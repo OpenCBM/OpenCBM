@@ -6,10 +6,9 @@
 # This is free software, licensed under the terms of the GNU General
 # Public License as published by the Free Software Foundation.
 # ======================================================================
-BOOTLOADER_ADDRESS = 1800
-BOOTLOADER_EXT_ADDRESS = 1710
-BOOTLOADER_BIOSTABLE = 1700
-LDFLAGS += -Wl,--section-start=.textbiostable=$(BOOTLOADER_BIOSTABLE),--section-start=.textadd=$(BOOTLOADER_EXT_ADDRESS),--section-start=.text=$(BOOTLOADER_ADDRESS)
+
+include Makefile.common
+LDFLAGS += $(LDFLAGS_BOOTLOADER)
 
 USBTINY         = ./usbtiny
 TARGET_ARCH     = -DF_CPU=12000000 -DAVR -DUSBTINY -mmcu=atmega8
@@ -22,5 +21,7 @@ FLASH           = $(AVRDUDE) -c $(CABLE) -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w
 STACK           = 32
 FLASHSIZE       = 8192
 RAMSIZE         = 1024
+
+.INTERMEDIATE: crc.o int.o main.o usb.o
 
 include $(USBTINY)/common.mk

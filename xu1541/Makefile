@@ -29,7 +29,7 @@ bootloader-usbtiny:
 	make -C bootloader -f Makefile-usbtiny
 
 update-bootloader:
-#	make -C update-bootloader
+	make -C update-bootloader
 
 misc:
 	make -C misc/
