@@ -37,6 +37,8 @@
 #define WINKEY
 #endif
 
+static int usb_was_resetted = 0;
+
 static int  usb_get_string_ascii(usb_dev_handle *handle, int index, 
 				 char *string, int size) {
   unsigned char buffer[64], *c;
@@ -193,7 +195,7 @@ static usb_dev_handle *xu1541_find(unsigned int firstcall) {
 
 void xu1541_close(usb_dev_handle *handle) {
   /* release exclusive access to device */
-  if(usb_release_interface(handle, 0))
+  if(!usb_was_resetted && usb_release_interface(handle, 0))
     fprintf(stderr, "USB error: %s\n", usb_strerror());
   
   /* close usb device */
@@ -236,6 +238,7 @@ int xu1541_start_application(usb_dev_handle *handle) {
   }
 */
   usb_reset( handle ); /* re-enumerate that device */
+  usb_was_resetted = 1;
 
   return 0;
 }
