@@ -14,9 +14,9 @@
 
 #include "../../firmware/xu1541_types.h"
 
-/* vendor and product id (donated by ftdi) */
-#define XU1541_VID  0x0403
-#define XU1541_PID  0xc632
+/* do not recognize other xu1541-BIOS adopted firmwares */
+/* comment out to enable "foreign" firmwares            */
+#define RECOGNIZE_TRUE_XU1541_ONLY
 
 #ifdef WIN32
 #include <windows.h>
@@ -36,6 +36,16 @@
 #else
 #define WINKEY
 #endif
+
+const static struct recognized_usb_devices_t {
+  unsigned short vid;
+  unsigned short pid;
+} recognized_usb_devices[] = {
+  { 0x0403, 0xc632 }   /* xu1541 vendor and product id (donated by ftdi) */
+#if !defined(RECOGNIZE_TRUE_XU1541_ONLY)
+  , { 0x16c0, 0x05dc } /* USBasp vendor and product id */
+#endif
+};
 
 static int usb_was_resetted = 0;
 
@@ -117,6 +127,18 @@ static int set_to_boot_mode(usb_dev_handle *handle)
   return 0;
 }
 
+/* check for known firmwares with xu1541 BIOS abilities */
+static int is_xu1541bios_device(unsigned short vid, unsigned short pid) {
+  int i;
+  for(i=0;i<sizeof(recognized_usb_devices);++i) {
+    if( recognized_usb_devices[i].vid == vid &&
+        recognized_usb_devices[i].pid == pid ) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 /* find and open xu1541 device */
 static usb_dev_handle *xu1541_find(unsigned int firstcall) {
   struct usb_bus      *bus;
@@ -128,8 +150,8 @@ static usb_dev_handle *xu1541_find(unsigned int firstcall) {
   
   for(bus=usb_get_busses(); bus && !handle; bus=bus->next){
     for(dev=bus->devices; dev && !handle; dev=dev->next){
-      if( ( dev->descriptor.idVendor == XU1541_VID && 
-	    dev->descriptor.idProduct == XU1541_PID ) ){
+      if(is_xu1541bios_device(dev->descriptor.idVendor,
+                              dev->descriptor.idProduct)) {
 	char    string[32];
 
 	/* we need to open the device in order to query strings */
