@@ -19,6 +19,8 @@ LFLAGS+=$(CYGWINFLAGS) -s -L $(LIBUSB_ROOT)/lib/gcc -lusb
 APP = xu1541_update
 OBJS = xu1541_update.o ihex.o flash.o
 
+.INTERMEDIATE: $(OBJS)
+
 all: ../$(APP).exe
 
 clean:

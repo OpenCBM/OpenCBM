@@ -5,6 +5,8 @@ LFLAGS+=`$(LIBUSB_CONFIG) --libs` -lusb
 APP = xu1541_update
 OBJS = xu1541_update.o ihex.o flash.o
 
+.INTERMEDIATE: $(OBJS)
+
 all:
 	make ../$(APP)
 
