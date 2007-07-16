@@ -354,8 +354,9 @@ int main(int argc, char **argv) {
 	 "%s\n", 
          (soft_bootloader_mode
           ? "Rebooting the xu1541." 
-          : "Please remove jumper switch and replug USB cable "
-	    "to return to normal operation!"));
+          : "If you had installed a jumper switch, please remove it and replug the USB cable\n"
+	    "to return to normal operation!\n"
+            "If not, the xu1541 will reboot itself automatically.\n"));
 
   free(page);
   xu1541_close(handle);  
