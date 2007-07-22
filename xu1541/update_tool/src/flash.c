@@ -7,13 +7,16 @@
 #include "ihex.h"
 #include "flash.h"
 
-int flash_get_pages(ihex_file_t *ifile, int psize) {
+int flash_get_pages(ihex_file_t *ifile, int psize, int * pstart) {
   int start = ihex_file_get_start_address(ifile);
   int end = ihex_file_get_end_address(ifile);
 
   /* make sure start and end sum up to full pages */
   start &= ~(psize-1);
-  end = (end & ~(psize-1)) + (psize - 1);  
+  end = (end & ~(psize-1)) + (psize - 1);
+
+  if (pstart)
+    *pstart = start;
 
   return((end-start+psize-1)/psize);
 }

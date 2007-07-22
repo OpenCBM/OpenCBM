@@ -4,7 +4,7 @@ LDFLAGS += -Wl,$(COMMON_SECTIONS)
 DEFINES += -DF_CPU=12000000
 COMPILE = avr-gcc -Wall -O2 -Iusbdrv -I. -mmcu=atmega8 $(DEFINES)
 
-OBJECTS = flasher.o
+OBJECTS = flasher.o spm.o
 
 TARGET=flash-firmware
 
@@ -38,5 +38,24 @@ cpp:
 program: $(TARGET).hex
 	../update_tool/xu1541_update $(TARGET).hex
 
+program-avrusb: $(TARGET).hex ibootldr-avrusb.hex
+	../update_tool/xu1541_update $(TARGET).hex ibootldr-avrusb.hex
+
+program-usbtiny: $(TARGET).hex ibootldr-usbtiny.hex
+	../update_tool/xu1541_update $(TARGET).hex ibootldr-usbtiny.hex
+
+ibootldr-avrusb.hex: ../bootloader/bootldr-avrusb.hex
+	cat ../bootloader/bootldr-avrusb.hex|grep -v "^:04000" > ibootldr-avrusb.hex
+
+ibootldr-usbtiny.hex: ../bootloader/bootldr-usbtiny.hex
+	cat ../bootloader/bootldr-usbtiny.hex|grep -v "^:04000" > ibootldr-usbtiny.hex
+
 terminal:
 	avrdude -c stk200 -p atmega8 -t
+
+dump:
+	echo "dump flash 0x1700 0x900" > 123
+	echo "dump flash 0x0 0x1700" >> 123
+	echo "quit" >> 123
+	avrdude -c stk200 -p atmega8 -t < 123
+	rm 123

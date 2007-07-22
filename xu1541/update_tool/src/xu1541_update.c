@@ -286,6 +286,7 @@ int main(int argc, char **argv) {
   ihex_file_t *ifile = NULL;
   usb_dev_handle *handle = NULL;
   int page_size, i;
+  int start;
   char *page = NULL;
   unsigned int soft_bootloader_mode = 0;
 
@@ -293,8 +294,8 @@ int main(int argc, char **argv) {
   printf("--      (c) 2007 by Till Harbaum      --\n");
   printf("-- http://www.harbaum.org/till/xu1541 --\n");
   
-  if(argc != 2) {
-    fprintf(stderr, "Usage: xu1541_update <ihex_file>\n");
+  if(argc < 2) {
+    fprintf(stderr, "Usage: xu1541_update <ihex_file> [<ihex_file2> ...]\n");
     WINKEY;
     exit(-1);
   }
@@ -324,10 +325,12 @@ int main(int argc, char **argv) {
     exit(-1);
   }
 
+  do {
   /* load the file into memory */
   ifile = ihex_parse_file(argv[1]);
 
   if(ifile) {
+#if 0
     /* check if xu1541 memory limits are met */
     if(ihex_file_get_start_address(ifile) != 0) {
       fprintf(stderr, "ERROR: Image does not start at address $0\n");
@@ -346,17 +349,25 @@ int main(int argc, char **argv) {
       xu1541_close(handle);
       return -1;
     }
+#endif
 
     /* and flash it */
-    printf("Uploading %d pages\n", flash_get_pages(ifile, page_size));
+    printf("Uploading %d pages ", flash_get_pages(ifile, page_size, &start));
+    printf("starting from 0x%04x", start);
 
-    for(i=0;i<flash_get_pages(ifile, page_size);i++) {
+    if (start >= 0x1700) {
+            start -= 0x1000;
+            printf(", moved to 0x%04x", start);
+    }
+    printf("\n");
+
+    for(i=0;i<flash_get_pages(ifile, page_size, NULL);i++) {
 
       /* fill page from ihex image */
       flash_get_page(ifile, i, page, page_size);
 
       /* and flash it */
-      xu1541_write_page(handle, page, i*page_size, page_size);
+      xu1541_write_page(handle, page, i*page_size + start, page_size);
   
       printf(".");
       fflush(stdout);
@@ -369,6 +380,10 @@ int main(int argc, char **argv) {
     xu1541_close(handle);
     return -1;
   }
+
+  // proceed to next file
+  --argc; ++argv;
+  } while (argc >= 2);
 
   xu1541_start_application(handle);
 
