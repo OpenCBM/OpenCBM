@@ -27,3 +27,5 @@ include $(USBTINY)/common.mk
 program-usb: firmware-usbtiny.hex
 	avrdude -c usbasp -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc9:m -U flash:w:firmware-usbtiny.hex
 
+program-xu: firmware-usbtiny.hex
+	../update_tool/xu1541_update firmware-usbtiny.hex

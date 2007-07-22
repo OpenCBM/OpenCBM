@@ -5,7 +5,7 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile-avrusb,v 1.8 2007-07-22 12:57:49 strik Exp $
+# This Revision: $Id: Makefile-avrusb,v 1.9 2007-07-22 16:15:32 strik Exp $
 
 include ../bootloader/Makefile.common
 LDFLAGS += -Wl,$(COMMON_SECTIONS)
@@ -81,6 +81,9 @@ program: firmware-avrusb.hex
 
 program-usb: firmware-avrusb.hex
 	avrdude -c usbasp -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc9:m -U flash:w:firmware-avrusb.hex
+
+program-xu: firmware-avrusb.hex
+	../update_tool/xu1541_update firmware-avrusb.hex
 
 cpp:
 	$(COMPILE) -E main.c
