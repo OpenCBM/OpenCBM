@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file flasher.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: flasher.c,v 1.2 2007-07-22 15:33:29 strik Exp $ \n
+** \version $Id: flasher.c,v 1.3 2007-07-22 16:18:49 strik Exp $ \n
 ** \n
 ** \brief Flash the bootloader from the application space
 **
@@ -103,7 +103,7 @@ blink(unsigned long count)
 
         count *= 2;
 
-        while (--count) {
+        while (count != 0 && --count) {
                 delay_ms(300);
                 PORTD ^= _BV(1);
         }
@@ -149,8 +149,35 @@ boot_read_page(uint16_t page, uint8_t *buf)
 }
 
 STATIC
+int
+program_check_same(uint16_t to, uint16_t from, uint16_t length)
+{
+        uint8_t data2[SPM_PAGESIZE];
+
+        do {
+                boot_read_page(from, data);
+                boot_read_page(to, data2);
+
+                if (memcmp(data, data2, sizeof(data2) != 0)) {
+                   return 0;
+                }
+
+                if (length > SPM_PAGESIZE)
+                        length -= SPM_PAGESIZE;
+                else
+                        length = 0;
+
+                to     += SPM_PAGESIZE;
+                from   += SPM_PAGESIZE;
+
+        } while (length != 0);
+
+        return 1;
+}
+
+STATIC
 void
-program_copy(uint16_t to, uint16_t from, uint16_t length)
+program_copy_i(uint16_t to, uint16_t from, uint16_t length)
 {
         do {
                 boot_read_page(from, data);
@@ -168,15 +195,32 @@ program_copy(uint16_t to, uint16_t from, uint16_t length)
 }
 
 STATIC
+int
+program_copy(uint16_t to, uint16_t from, uint16_t length)
+{
+        uint8_t tries = 3;
+
+        do {
+                program_copy_i(to, from, length);
+
+        } while ( ! program_check_same(to, from, length) && --tries > 0);
+
+        if (tries == 0) {
+                blink(0);
+        }
+}
+
+STATIC
 void
 program_spm(void)
 {
         uint16_t addressOwnSpm = 0x1840;
 
-        // \TODO: determine if the SPM implementation is already there. In this case,
-        // use it, as the "original" SPM might have been already overwritten!
+        // determine if the SPM implementation is already there. In this case,
+        // do not write it again, as the "original" SPM might have been already overwritten!
 
-        program_copy(addressOwnSpm, ((uint16_t) &spm_copy) << 1, sizeof(spm_copy));
+        if ( ! program_check_same(addressOwnSpm, ((uint16_t) &spm_copy) << 1, sizeof(spm_copy)))
+                program_copy(addressOwnSpm, ((uint16_t) &spm_copy) << 1, sizeof(spm_copy));
 
         OwnSpm = addressOwnSpm >> 1;
 }
