@@ -1,2 +1,4 @@
 flash-firmware.bin
 flash-firmware.hex
+ibootldr-avrusb.hex
+ibootldr-usbtiny.hex

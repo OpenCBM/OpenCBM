@@ -326,63 +326,72 @@ int main(int argc, char **argv) {
   }
 
   do {
-  /* load the file into memory */
-  ifile = ihex_parse_file(argv[1]);
+          /* load the file into memory */
 
-  if(ifile) {
+          ifile = ihex_parse_file(argv[1]);
+
+          if(ifile) {
 #if 0
-    /* check if xu1541 memory limits are met */
-    if(ihex_file_get_start_address(ifile) != 0) {
-      fprintf(stderr, "ERROR: Image does not start at address $0\n");
-      ihex_free_file(ifile);
-      free(page);
-      xu1541_close(handle);
-      return -1;
-    }
-    
-    /* xu1541 has 6k free flash since 2k are being used by the bootloader */
-    if(ihex_file_get_end_address(ifile) >= 6*1024) {
-      fprintf(stderr, "ERROR: Image too long by %d bytes\n", 
-	      ihex_file_get_end_address(ifile) - 6*1024);
-      ihex_free_file(ifile);
-      free(page);
-      xu1541_close(handle);
-      return -1;
-    }
+            /* these checks do not make any sense currently... We will
+             * have to think about them! - SRT
+             */
+
+            /* check if xu1541 memory limits are met */
+            if(ihex_file_get_start_address(ifile) != 0) {
+              fprintf(stderr, "ERROR: Image does not start at address $0\n");
+              ihex_free_file(ifile);
+              free(page);
+              xu1541_close(handle);
+              return -1;
+            }
+            
+            /* xu1541 has 6k free flash since 2k are being used by the bootloader */
+            if(ihex_file_get_end_address(ifile) >= 6*1024) {
+              fprintf(stderr, "ERROR: Image too long by %d bytes\n", 
+                      ihex_file_get_end_address(ifile) - 6*1024);
+              ihex_free_file(ifile);
+              free(page);
+              xu1541_close(handle);
+              return -1;
+            }
 #endif
 
-    /* and flash it */
-    printf("Uploading %d pages ", flash_get_pages(ifile, page_size, &start));
-    printf("starting from 0x%04x", start);
+            /* and flash it */
+            printf("Uploading %d pages ", flash_get_pages(ifile, page_size, &start));
+            printf("starting from 0x%04x", start);
 
-    if (start >= 0x1700) {
-            start -= 0x1000;
-            printf(", moved to 0x%04x", start);
-    }
-    printf("\n");
+            if (start >= 0x1700) {
+                    start -= 0x1000;
+                    printf(", moved to 0x%04x", start);
+            }
+            printf("\n");
 
-    for(i=0;i<flash_get_pages(ifile, page_size, NULL);i++) {
+            for(i=0;i<flash_get_pages(ifile, page_size, NULL);i++) {
 
-      /* fill page from ihex image */
-      flash_get_page(ifile, i, page, page_size);
+              /* fill page from ihex image */
+              flash_get_page(ifile, i, page, page_size);
 
-      /* and flash it */
-      xu1541_write_page(handle, page, i*page_size + start, page_size);
-  
-      printf(".");
-      fflush(stdout);
-    }
-      
-    ihex_free_file(ifile);
-  } else {
-    fprintf(stderr, "ERROR: Failed to load hex image\n");
-    free(page);
-    xu1541_close(handle);
-    return -1;
-  }
+              /* and flash it */
+              xu1541_write_page(handle, page, i*page_size + start, page_size);
+          
+              printf(".");
+              fflush(stdout);
+            }
+              
+            ihex_free_file(ifile);
+          } else {
+            fprintf(stderr, "ERROR: Failed to load hex image\n");
+            free(page);
+            xu1541_close(handle);
+            return -1;
+          }
 
-  // proceed to next file
-  --argc; ++argv;
+          /* proceed to next file */
+          if (argc > 2)
+             printf(" done\n");
+          --argc;
+          ++argv;
+
   } while (argc >= 2);
 
   xu1541_start_application(handle);
