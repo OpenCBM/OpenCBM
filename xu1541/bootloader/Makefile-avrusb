@@ -8,7 +8,7 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile-avrusb,v 1.5 2007-07-15 14:05:41 strik Exp $
+# This Revision: $Id: Makefile-avrusb,v 1.6 2007-07-22 12:57:49 strik Exp $
 
 include Makefile.common
 LDFLAGS += $(LDFLAGS_BOOTLOADER)
@@ -32,7 +32,7 @@ OBJECTS = usbdrv/usbdrv.o usbdrv/usbdrvasm.o usbdrv/oddebug.o main.o
 # symbolic targets:
 all:	bootldr-avrusb.hex
 
-.INTERMEDIATE: $(OBJECTS)
+.INTERMEDIATE: $(OBJECTS) bootldr-avrusb.bin
 
 .c.o:
 	$(COMPILE) -c $< -o $@

@@ -10,7 +10,7 @@ TARGET=flash-firmware
 
 all:	$(TARGET).hex
 
-.INTERMEDIATE: $(OBJECTS)
+.INTERMEDIATE: $(OBJECTS) flash-firmware.bin
 
 .c.o:
 	$(COMPILE) -c $< -o $@
