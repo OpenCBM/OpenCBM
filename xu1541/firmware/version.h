@@ -5,7 +5,7 @@
 #define XU1541_VERSION_MINOR        0x13
 
 #ifdef USBTINY
-/* usbtiny version has even major number */ 
+/* usbtiny version has even major number */
 #define XU1541_VERSION_MAJOR  (XU1541_VERSION_MAJOR_BASE + 1)
 #else
 /* avrusb has the odd number */

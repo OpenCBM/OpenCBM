@@ -8,7 +8,7 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile-avrusb,v 1.6 2007-07-22 12:57:49 strik Exp $
+# This Revision: $Id: Makefile-avrusb,v 1.7 2007-07-25 16:41:30 strik Exp $
 
 include Makefile.common
 LDFLAGS += $(LDFLAGS_BOOTLOADER)
@@ -19,7 +19,7 @@ UISP = uisp -dprog=avr910 -dserial=$(SERIAL) -dpart=auto
 # to a Keyspan USB to serial converter to a Mac running Mac OS X.
 # Choose your favorite programmer and interface.
 
-COMPILE = avr-gcc -Wall -Os -Iusbdrv -I. -mmcu=atmega8 
+COMPILE = avr-gcc -Wall -Os -Iusbdrv -I. -mmcu=atmega8
 #-DDEBUG_LEVEL=2
 # NEVER compile the final product with debugging! Any debug output will
 # distort timing so that the specs can't be met.

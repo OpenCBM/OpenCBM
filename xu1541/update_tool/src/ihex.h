@@ -37,7 +37,7 @@ extern ihex_file_t *ihex_parse_file(char *filename);
 extern int ihex_file_get_chunks(ihex_file_t *ifile);
 extern int ihex_file_get_start_address(ihex_file_t *ifile);
 extern int ihex_file_get_end_address(ihex_file_t *ifile);
-extern int ihex_file_get_mem(ihex_file_t *ifile, int start, int len, char *data); 
+extern int ihex_file_get_mem(ihex_file_t *ifile, int start, int len, char *data);
 
 #endif /* IHEX_H */
- 
+
