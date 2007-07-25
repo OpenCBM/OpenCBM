@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.15 2007-05-01 17:51:37 strik Exp $
+# $Id: Makefile,v 1.16 2007-07-25 16:37:51 strik Exp $
 
 RELATIVEPATH=./
 include ${RELATIVEPATH}LINUX/config.make
@@ -129,7 +129,7 @@ plugin-xa1541:
 
 plugin: $(PLUGINS)
 
-uninstall: 
+uninstall:
 	@for subdir in $(SUBDIRS_ALL_NON_OPTIONAL); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done

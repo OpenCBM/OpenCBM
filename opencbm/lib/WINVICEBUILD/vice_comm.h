@@ -8,10 +8,10 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/WINVICEBUILD/vice_comm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vice_comm.h,v 1.2 2006-02-22 09:52:09 strik Exp $ \n
+** \version $Id: vice_comm.h,v 1.3 2007-07-25 16:37:51 strik Exp $ \n
 ** \n
 ** \brief Library interface for communicating with VICE.
 **

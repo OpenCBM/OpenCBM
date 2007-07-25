@@ -1,7 +1,7 @@
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.18 2007-04-22 10:32:34 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.19 2007-07-25 16:37:51 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -37,7 +37,7 @@ enum iec_cabletype
  */
 #define CBM_REGKEY_SERVICE "System\\CurrentControlSet\\Services\\opencbm"
 
-/*! Registry entry (under CBM_REGKEY_SERVICE) of the default LPT port 
+/*! Registry entry (under CBM_REGKEY_SERVICE) of the default LPT port
  */
 #define CBM_REGKEY_SERVICE_DEFAULTLPT "DefaultLpt"
 
@@ -58,13 +58,13 @@ enum iec_cabletype
 /*! The name of the driver with which to communicate */
 #define OPENCBM_DRIVERNAME "opencbm"
 
-/*! The device name of the driver 
+/*! The device name of the driver
  * This is necessary for DOS drivers and "old-style" DLLs
  * A number is appended to this name, starting with 0.
  */
 #define CBMDEVICENAME_MAINPART "\\\\.\\" OPENCBM_DRIVERNAME
 
-/*! the GUID for communication with the kernel-mode driver 
+/*! the GUID for communication with the kernel-mode driver
  \todo Currently, this is unused! */
 
 // {9C3B5B5E-558E-47cc-9C05-F1FCF5175407}
@@ -83,7 +83,7 @@ DEFINE_GUID(GUID_OPENCBM, 0x9c3b5b5e, 0x558e, 0x47cc, 0x9c, 0x5, 0xf1, 0xfc, 0xf
 // Data structures for accessing the kernel mode driver:
 
 /*! This type provides primary and secondary address on the IEC bus */
-typedef 
+typedef
 struct CBMT_IECADDRESS
 {
     /*! The primary address a.k.a. device number of the drive to be accessed */
@@ -104,7 +104,7 @@ struct CBMT_SINGLEBYTE
 } CBMT_SINGLEBYTE;
 
 /*! This type gives a line (one out of IEC_ATN, IEC_DATA, IEC_CLOCK) */
-typedef 
+typedef
 struct CBMT_LINE
 {
     /*! The line to be accessed. Must be one of IEC_LINE_RESET, IEC_LINE_ATN,
@@ -113,10 +113,10 @@ struct CBMT_LINE
 
 } CBMT_LINE;
 
-/*! This type gives a line (one out of IEC_ATN, IEC_DATA, IEC_CLOCK) 
+/*! This type gives a line (one out of IEC_ATN, IEC_DATA, IEC_CLOCK)
     and the corresponding state.
  */
-typedef 
+typedef
 struct CBMT_LINESTATE
 {
     /*! The line to be accessed. Must be one of IEC_LINE_RESET, IEC_LINE_ATN,
@@ -137,7 +137,7 @@ struct CBMT_BOOLEAN
 
 } CBMT_BOOLEAN;
 
-/*! These macros define how to extract version information 
+/*! These macros define how to extract version information
  * from CBMT_I_INSTALL_OUT.DriverVersion and/or .DllVersion
  * Assume that a version is x.y.z.w
  */
@@ -197,11 +197,11 @@ struct CBMT_I_TESTIRQ
         from the driver? */
     CHAR ErrAcquireIrq;
 
-    /*! Was there an error while trying to generate an interrupt 
+    /*! Was there an error while trying to generate an interrupt
         on the rising edge? */
     CHAR ErrIrqRisingEdge;
 
-    /*! Was there an error while trying to generate an interrupt 
+    /*! Was there an error while trying to generate an interrupt
         on the falling edge? */
     CHAR ErrIrqFallingEdge;
 
@@ -273,7 +273,7 @@ typedef CBMT_SINGLEBYTE CBMT_PARBURST_PWRITE_IN;
 //! IOCTL for setting the PP values
 #define CBMCTRL_PP_WRITE    _CBMIO(CBMCTRL_BASE, 11) // CBMT_PP_WRITE_IN     -
 //! IOCTL for polling an IEC line
-#define CBMCTRL_IEC_POLL    _CBMIO(CBMCTRL_BASE, 12) // -                    CBMT_IEC_POLL_OUT    
+#define CBMCTRL_IEC_POLL    _CBMIO(CBMCTRL_BASE, 12) // -                    CBMT_IEC_POLL_OUT
 //! IOCTL for setting an IEC line
 #define CBMCTRL_IEC_SET     _CBMIO(CBMCTRL_BASE, 13) // CBMT_IEC_SET_IN      -
 //! IOCTL for releasing an IEC line

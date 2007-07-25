@@ -1,7 +1,7 @@
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.13 2007-04-29 17:56:56 strik Exp $ \n
+** \version $Id: debug.h,v 1.14 2007-07-25 16:37:51 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -62,7 +62,7 @@
        /*! debugging flag: show leaving of functions */
        #define DBGF_LEAVE   0x20000000
 
-       /*! debugging flag: show leaving of functions with return value NTSTATUS, 
+       /*! debugging flag: show leaving of functions with return value NTSTATUS,
            if it is not STATUS_SUCCESS */
        #define DBGF_LEAVE_FAILURE 0x10000000
 
@@ -252,7 +252,7 @@ int __cdecl main(int argc, char *argv[])
 #else // #if DBG_KERNELMODE
        #define _DBG_START() _DBG_START_ADD DbgBufferPos[DEBUG_BUFFER_NO] = 0; DbgOutputIntoBuffer(DBG_PREFIX "%s," __FUNCTION__ "(%u): ", DBG_PROGNAME, __LINE__)
 #endif // #if DBG_KERNELMODE
-       #define _DBG_END()   DbgOutputIntoBuffer(DBG_PREFIX "\n"); _DBG_PERFORM(&DbgBuffer[DEBUG_BUFFER_NO][0]) _DBG_END_ADD 
+       #define _DBG_END()   DbgOutputIntoBuffer(DBG_PREFIX "\n"); _DBG_PERFORM(&DbgBuffer[DEBUG_BUFFER_NO][0]) _DBG_END_ADD
 
        #define DBGO(_xxx) { _DBG_START(); _DBGO(_xxx); _DBG_END() }
 

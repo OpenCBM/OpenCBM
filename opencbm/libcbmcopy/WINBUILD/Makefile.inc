@@ -1,4 +1,4 @@
-a65: 
+a65:
 
 ..\cbmcopy.c: ..\turboread1541.inc ..\turbowrite1541.inc ..\turboread1571.inc ..\turbowrite1571.inc ..\turboread1581.inc ..\turbowrite1581.inc
 

@@ -8,10 +8,10 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.18 2007-05-20 10:20:46 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.19 2007-07-25 16:37:52 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -126,7 +126,7 @@ struct IEC_TIMEOUTS
 
     //! = 10 us: For cbmiec_iec_wait(): Granularity (short)
     ULONG T_8_IEC_WAIT_SHORT_DELAY;
-    
+
     //! x T_9a, is 100: On send, how long to wait for driver to set DATA
     ULONG T_9_Times;
 
@@ -144,7 +144,7 @@ struct IEC_TIMEOUTS
 
     //! = 20 us: On listener-talker-turnaround, how long to wait until CLK is released
     ULONG T_13_SEND_TURN_AROUND_LISTENER_TALKER_T_TK;
-    
+
     //! = 100 us: Extra wait after sending a block
     ULONG T_14_SEND_AT_END_DELAY;
 

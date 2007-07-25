@@ -7,7 +7,7 @@
  *  Copyright 2005 Spiro Trikaliotis
 */
 
-/* $Id: o65_int.h,v 1.2 2006-05-23 12:01:05 wmsr Exp $ */
+/* $Id: o65_int.h,v 1.3 2007-07-25 16:37:52 strik Exp $ */
 
 #ifndef O65_INT_H
 #define O65_INT_H
@@ -15,7 +15,7 @@
 #include "packon.h"
 
 /*
- * currently, v1.3 of the o65 file format as specified at 
+ * currently, v1.3 of the o65 file format as specified at
  * http://www.6502.org/users/andre/o65/fileformat.html
  * (from 31 mar 2005) is supported.
  */

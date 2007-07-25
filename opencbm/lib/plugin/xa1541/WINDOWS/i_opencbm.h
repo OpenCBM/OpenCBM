@@ -8,10 +8,10 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.3 2007-05-20 17:32:47 strik Exp $ \n
+** \version $Id: i_opencbm.h,v 1.4 2007-07-25 16:37:51 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **
@@ -22,9 +22,9 @@
 
 #include "opencbm.h"
 
-extern BOOL cbm_ioctl(IN CBM_FILE HandleDevice, IN DWORD ControlCode, 
+extern BOOL cbm_ioctl(IN CBM_FILE HandleDevice, IN DWORD ControlCode,
 #if DBG
-          IN char *TextControlCode, 
+          IN char *TextControlCode,
 #endif // #if DBG
           IN PVOID InBuffer, IN ULONG InBufferSize,
           OUT PVOID OutBuffer, IN ULONG OutBufferSize);

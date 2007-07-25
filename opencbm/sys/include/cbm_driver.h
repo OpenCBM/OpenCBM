@@ -8,10 +8,10 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.9 2006-10-15 16:43:50 strik Exp $ \n
+** \version $Id: cbm_driver.h,v 1.10 2007-07-25 16:37:52 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **

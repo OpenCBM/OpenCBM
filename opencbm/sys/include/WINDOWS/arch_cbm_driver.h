@@ -8,10 +8,10 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.12 2007-04-22 10:32:38 strik Exp $ \n
+** \version $Id: arch_cbm_driver.h,v 1.13 2007-07-25 16:37:52 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **
@@ -50,7 +50,7 @@ struct _ARCH_DEVICE_EXTENSION {
     /*! Are we running on an NT4 system? */
     BOOLEAN IsNT4;
 
-    /*! != 0 if ECP/EPP modes are not handled by parport.sys, but by us. 
+    /*! != 0 if ECP/EPP modes are not handled by parport.sys, but by us.
      *  This is only allowed if we are running on NT4.
      *  \remark The NT4 code uses this internally to remember the type
      *  of parallel port (ECP, EPP, SPP, bidir).
@@ -82,7 +82,7 @@ struct _ARCH_DEVICE_EXTENSION {
     /*! Return value after connection the ISR */
     PARALLEL_INTERRUPT_INFORMATION Pii;
 
-    /*! This even is used to wake-up the task inside of 
+    /*! This even is used to wake-up the task inside of
         wait_for_listener() again */
     KEVENT EventWaitForListener;
 
@@ -94,7 +94,7 @@ struct _ARCH_DEVICE_EXTENSION {
 
     /*! FLAG: We already allocated the parallel port */
     BOOLEAN ParallelPortAllocated;
-    
+
     /*! FLAG: The mode of the parallel port has already been set */
     BOOLEAN ParallelPortModeSet;
 
@@ -124,7 +124,7 @@ struct _ARCH_DEVICE_EXTENSION {
 #endif
 
     /*! Countdown for the initialization of the parallel port on startup */
-    LONG CableInitTimer; 
+    LONG CableInitTimer;
 
 } ARCH_DEVICE_EXTENSION;
 
@@ -172,10 +172,10 @@ cbm_startio(IN PDEVICE_OBJECT Fdo, IN PIRP Irp);
 extern NTSTATUS
 cbm_createopenclose(IN PDEVICE_OBJECT Fdo, IN PIRP Irp);
 
-extern NTSTATUS 
+extern NTSTATUS
 cbm_readwrite(IN PDEVICE_OBJECT Fdo, IN PIRP Irp);
 
-extern NTSTATUS 
+extern NTSTATUS
 cbm_execute_readwrite(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp);
 
 extern NTSTATUS
@@ -187,7 +187,7 @@ cbm_cleanup(IN PDEVICE_OBJECT Fdo, IN PIRP Irp);
 extern NTSTATUS
 cbm_execute_close(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp);
 
-extern NTSTATUS 
+extern NTSTATUS
 cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp);
 
 extern NTSTATUS
@@ -210,10 +210,10 @@ cbm_stop_thread(IN PDEVICE_EXTENSION Pdx);
    typedef PVOID PENUMERATE;
 #endif
 
-extern NTSTATUS 
+extern NTSTATUS
 ParPortEnumerateOpen(PENUMERATE *EnumStruct);
 
-extern NTSTATUS 
+extern NTSTATUS
 ParPortEnumerate(PENUMERATE EnumStruct, PCWSTR *DriverName);
 
 extern VOID

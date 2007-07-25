@@ -75,7 +75,7 @@
 # include <stdlib.h> /* for getenv */
 
 /* Make sure that getenv() will not be defined with a prototype
-   in arch/windows/getopt.c, which would result in a compiler error 
+   in arch/windows/getopt.c, which would result in a compiler error
    "error C2373: 'getenv' : redefinition; different type modifiers".
 */
 # define getenv getenv

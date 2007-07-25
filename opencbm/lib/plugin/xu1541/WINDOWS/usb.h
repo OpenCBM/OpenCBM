@@ -8,8 +8,8 @@
 #define EXTERN __declspec(dllimport) /*!< we are importing the functions */
 #define APIDECL __cdecl /*!< On Windows, we need c-type function declarations */
 
-/* 
- * 'interface' is defined somewhere in the Windows header files. This macro 
+/*
+ * 'interface' is defined somewhere in the Windows header files. This macro
  * is deleted here to avoid conflicts and compile errors.
  */
 
@@ -19,7 +19,7 @@
 
 /*
  * PATH_MAX from limits.h can't be used on Windows if the dll and
- * import libraries are build/used by different compilers 
+ * import libraries are build/used by different compilers
  */
 
 #define LIBUSB_PATH_MAX 512
@@ -71,7 +71,7 @@
 
 
 /* ensure byte-packed structures */
-#include <pshpack1.h> 
+#include <pshpack1.h>
 
 
 /* All standard descriptors have these 2 fields in common */
@@ -340,7 +340,7 @@ extern "C" {
                          int timeout);
   EXTERN
   int APIDECL usb_control_msg(usb_dev_handle *dev, int requesttype, int request,
-                      int value, int index, char *bytes, int size, 
+                      int value, int index, char *bytes, int size,
                       int timeout);
   EXTERN
   int APIDECL usb_set_configuration(usb_dev_handle *dev, int configuration);
@@ -382,7 +382,7 @@ extern "C" {
   EXTERN
   void CALLBACK usb_install_service_np_rundll(HWND wnd, HINSTANCE instance,
                                               LPSTR cmd_line, int cmd_show);
-  
+
   #define LIBUSB_HAS_UNINSTALL_SERVICE_NP 1
   EXTERN
   int APIDECL usb_uninstall_service_np(void);

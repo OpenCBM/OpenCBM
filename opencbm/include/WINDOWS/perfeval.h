@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/WINDOWS/perfeval.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.h,v 1.5 2006-03-20 11:45:53 strik Exp $ \n
+** \version $Id: perfeval.h,v 1.6 2007-07-25 16:37:51 strik Exp $ \n
 ** \n
 ** \brief Functions and macros for performance evaluation purposes
 **
@@ -35,7 +35,7 @@ PERFORMANCE_EVAL_ENTRY
 
     /*! The event which is logged */
     ULONG_PTR Event;
- 
+
     /*! Additional data for the event */
     ULONG_PTR Data;
 

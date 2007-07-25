@@ -7,7 +7,7 @@
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbmcopy.h,v 1.10 2006-05-23 12:24:31 wmsr Exp $ */
+/* $Id: cbmcopy.h,v 1.11 2007-07-25 16:37:51 strik Exp $ */
 
 #ifndef CBMCOPY_H
 #define CBMCOPY_H
@@ -17,7 +17,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 typedef struct
 {
     int transfer_mode;
@@ -102,5 +102,5 @@ extern int cbmcopy_read_file_ts(CBM_FILE cbm_fd,
 #ifdef __cplusplus
 }
 #endif
-    
+
 #endif  /* CBMCOPY_H */

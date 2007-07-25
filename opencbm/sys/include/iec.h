@@ -8,10 +8,10 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.17 2007-05-20 10:20:46 strik Exp $ \n
+** \version $Id: iec.h,v 1.18 2007-07-25 16:37:52 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -103,7 +103,7 @@ cbmiec_global_init(IN PHANDLE HKey);
 extern NTSTATUS
 cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx, IN const PUCHAR Buffer, IN ULONG BufferLength, OUT ULONG* Written);
 
-extern NTSTATUS 
+extern NTSTATUS
 cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx, OUT PUCHAR Buffer, IN ULONG BufferLength, OUT ULONG* Read);
 
 extern VOID

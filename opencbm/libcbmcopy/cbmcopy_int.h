@@ -7,7 +7,7 @@
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbmcopy_int.h,v 1.8 2006-05-23 12:24:31 wmsr Exp $ */
+/* $Id: cbmcopy_int.h,v 1.9 2007-07-25 16:37:51 strik Exp $ */
 
 #ifndef CBMCOPY_INT_H
 #define CBMCOPY_INT_H
@@ -16,9 +16,9 @@
 #include "cbmcopy.h"
 
 typedef struct {
-    int  (*write_byte)(CBM_FILE, unsigned char); 
-    unsigned char (*read_byte)(CBM_FILE); 
-    int  (*check_error)(CBM_FILE,int); 
+    int  (*write_byte)(CBM_FILE, unsigned char);
+    unsigned char (*read_byte)(CBM_FILE);
+    int  (*check_error)(CBM_FILE,int);
     int  (*upload_turbo)(CBM_FILE, unsigned char, enum cbm_device_type_e,int);
     int  (*start_turbo)(CBM_FILE,int);
     void (*exit_turbo)(CBM_FILE,int);

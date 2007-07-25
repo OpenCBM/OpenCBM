@@ -8,10 +8,10 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/configuration.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration.h,v 1.3 2007-05-01 17:51:38 strik Exp $ \n
+** \version $Id: configuration.h,v 1.4 2007-07-25 16:37:51 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file

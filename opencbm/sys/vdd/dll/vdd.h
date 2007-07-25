@@ -7,10 +7,10 @@
  *  Copyright 2004 Spiro Trikaliotis
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/vdd/dll/vdd.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.h,v 1.6 2006-05-23 12:24:31 wmsr Exp $ \n
+** \version $Id: vdd.h,v 1.7 2007-07-25 16:37:52 strik Exp $ \n
 ** \n
 ** \brief Function prototypes for the VDD
 **

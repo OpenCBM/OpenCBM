@@ -8,10 +8,10 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/include/WINDOWS/queue.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: queue.h,v 1.3 2006-04-08 13:41:20 strik Exp $ \n
+** \version $Id: queue.h,v 1.4 2007-07-25 16:37:52 strik Exp $ \n
 ** \n
 ** \brief Definitions for the queueing functions
 **
@@ -30,7 +30,7 @@ typedef NTSTATUS (*PCBMDRIVER_STARTIO)(IN PDEVICE_OBJECT DeviceObject, IN PIRP I
 
 /*! \brief A QUEUE object
  * A QUEUE object is an object which can be used to queue
- * IRPs for processing. 
+ * IRPs for processing.
  * This QUEUE object is optimized for being polled from
  * an own worker thread. Anyway, a concept called FastStart
  * is also implemented, which allows some IRPs to be completed

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2007-04-29 10:46:21 strik Exp $
+# $Id: Makefile,v 1.6 2007-07-25 16:37:51 strik Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
@@ -50,7 +50,7 @@ install: install-files
 	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
 
-uninstall: 
+uninstall:
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done

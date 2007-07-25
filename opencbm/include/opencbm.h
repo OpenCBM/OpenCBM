@@ -9,10 +9,10 @@
  *  Copyright 2006 Wolfgang Moser (http://d81.de)
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.22 2007-05-01 17:51:38 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.23 2007-07-25 16:37:51 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \authors With additions from Wolfgang Moser \n
@@ -57,7 +57,7 @@ extern "C" {
   /* we have MS-DOS */
 
 #include <stdlib.h>
-                                                         
+
 # define EXTERN extern /*!< EXTERN is not defined on MS-DOS */
 # define CBMAPIDECL /*!< CBMAPIDECL is a dummy on MS-DOS */
 # define WINAPI /*!< WINAPI is a dummy on MS-DOS */
@@ -94,7 +94,7 @@ typedef unsigned char __u_char;
 #define IEC_RESET  0x08 /*!< Specify the RESET line */
 
 /*! Specifies the type of a device for cbm_identify() */
-enum cbm_device_type_e 
+enum cbm_device_type_e
 {
     cbm_dt_unknown = -1, /*!< The device could not be identified */
     cbm_dt_cbm1541,      /*!< The device is a VIC 1541 */

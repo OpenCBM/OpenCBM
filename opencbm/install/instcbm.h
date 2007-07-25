@@ -8,10 +8,10 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file instcbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.h,v 1.9 2007-05-20 17:32:46 strik Exp $ \n
+** \version $Id: instcbm.h,v 1.10 2007-07-25 16:37:51 strik Exp $ \n
 ** \n
 ** \brief Header for installation routines
 **

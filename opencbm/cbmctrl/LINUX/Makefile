@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2007-04-29 10:46:22 strik Exp $
+# $Id: Makefile,v 1.4 2007-07-25 16:37:51 strik Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
@@ -30,6 +30,6 @@ uninstall:
 
 cbmctrl.o: cbmctrl.c tdchange.inc
 	$(CC) $(CFLAGS) -c cbmctrl.c -o $@
-	
+
 cbmctrl: $(OBJS)
 	$(CC) $(CFLAGS) $< -o $@ $(LINK_FLAGS)

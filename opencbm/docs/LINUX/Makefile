@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.7 2007-04-29 10:46:23 strik Exp $
+# $Id: Makefile,v 1.8 2007-07-25 16:37:51 strik Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
@@ -18,7 +18,7 @@ HTML = html/opencbm.html
 %.win.txt: %.txt
 	sed -e 's/.//g;' -e 's/\[[0-9]*m//g;' $< > $@
 	unix2dos $@
-	
+
 %.txt: %.sgml
 	sgml2txt $<
 
