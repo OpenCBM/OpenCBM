@@ -30,6 +30,8 @@
 #include <avr/boot.h>
 #include <util/delay.h>
 
+#include "flasher.h"
+
 /*
 #include "xu1541bios.h"
 #include "version.h"

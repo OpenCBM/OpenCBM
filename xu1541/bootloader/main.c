@@ -74,49 +74,19 @@ static uchar state = STATE_IDLE;
 static uint16_t page_address;
 static uint8_t page_offset;
 
-#define MOVESECTION __attribute__ ((section (".textadd")))
-#define SECTIONFLASH __attribute__ ((section (".textflash")))
+#define MOVESECTION // __attribute__ ((section (".textadd")))
+// #define SECTIONFLASH __attribute__ ((section (".textflash")))
 
 void start_flash_bootloader(void) MOVESECTION;
 void leaveBootloader() MOVESECTION;
 
-void spm(uint8_t what, uint16_t address, uint16_t data) ; // SECTIONFLASH;
+uint8_t data BIOSTABLE;
+
+void spm(uint8_t what, uint16_t address, uint16_t data);
 // void spm(uint8_t what, uint16_t address, uint16_t data) SECTIONFLASH;
 
-// #define DEBUG_SRT_BLINK
-
-#ifdef DEBUG_SRT_BLINK
-
-volatile long count = 5;
-
-void blink(void) MOVESECTION;
-
-void blink(void)
-{
-        DDRD  |=  _BV(1);
-        PORTD &= ~_BV(1);
-
-        while (1) {
-                unsigned long i;
-
-                for (i=0; i < 150000; i++) {
-                        if (count == 0) break;
-                }
-
-                PORTD ^= _BV(1);
-        }
-}
-#endif /* #ifdef DEBUG_SRT_BLINK */
-
-xu1541_bios_data_t bios_data BIOSTABLE =
-{
-        XU1541_BIOS_VERSION_MAJOR,
-        XU1541_BIOS_VERSION_MINOR,
-        start_flash_bootloader,
-        spm
-};
-
-void (*jump_to_app)(void) = 0x0000;
+#define jump_to_app() \
+        ((void(*)(void))0)()
 
 void leaveBootloader() {
       cli();
@@ -139,6 +109,8 @@ byte_t  usb_setup ( byte_t data[8] ) {
   if (data[1] == USBBOOT_FUNC_LEAVE_BOOT) {
 //    leaveBootloader();
     WRITE_BOOTLOADER_TYPE(BOOTLOADER_DONOTSTART_MAGIC);
+
+    /*! \todo: change to leaveBootloader(); */
     wdt_enable(1);
 a:  goto a;
   } else if (data[1] == USBBOOT_FUNC_WRITE_PAGE) {
@@ -274,6 +246,7 @@ void start_flash_bootloader(void)
 
     /* enable watch dog and make sure it fires
      * This way, we reboot the AVR */
+    /*! \todo: change to leaveBootloader(); */
     wdt_enable(1);
 a:  goto a;
 }

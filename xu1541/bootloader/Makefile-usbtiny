@@ -12,7 +12,7 @@ LDFLAGS += $(LDFLAGS_BOOTLOADER)
 
 USBTINY         = ./usbtiny
 TARGET_ARCH     = -DF_CPU=12000000 -DAVR -DUSBTINY -mmcu=atmega8
-OBJECTS         = main.o
+#OBJECTS         = biostable.o main.o
 CABLE           = stk200
 #CABLE           = usbasp
 AVRDUDE         = avrdude
@@ -22,6 +22,6 @@ STACK           = 32
 FLASHSIZE       = 8192
 RAMSIZE         = 1024
 
-.INTERMEDIATE: crc.o int.o main.o usb.o bootldr-usbtiny.bin
+.INTERMEDIATE: crc.o int.o usb.o bootldr-usbtiny.bin $(OBJECTS)
 
 include $(USBTINY)/common.mk

@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file flasher.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: flasher.c,v 1.3 2007-07-22 16:18:49 strik Exp $ \n
+** \version $Id: flasher.c,v 1.4 2007-07-25 16:47:57 strik Exp $ \n
 ** \n
 ** \brief Flash the bootloader from the application space
 **
@@ -30,12 +30,9 @@
 
 #include <util/delay.h>
 
-#include "../bootloader/xu1541bios.h"
+#include "flasher.h"
 
 #define STATIC static
-
-extern void spm_copy(uint8_t what, uint16_t address, uint16_t data);
-extern void spm_end(void);
 
 STATIC
 uint16_t OwnSpm = 0;
@@ -56,16 +53,16 @@ xu1541_bios_data_t bios_data;
 STATIC
 void
 start_bootloader(void) {
-        ((start_flash_bootloader_t) pgm_read_word_near(&bios_data.start_flash_bootloader))();
+        bios_start_flash_bootloader();
 }
 
 STATIC
 void
 spm(uint8_t what, uint16_t address, uint16_t data) {
         if (OwnSpm) {
-                ((spm_t) OwnSpm)(what, address, data);
+                spm_copy(what, address, data);
         } else {
-                ((spm_t) pgm_read_word_near(&bios_data.spm))(what, address, data);
+                bios_spm(what, address, data);
         }
 }
 
@@ -177,7 +174,7 @@ program_check_same(uint16_t to, uint16_t from, uint16_t length)
 
 STATIC
 void
-program_copy_i(uint16_t to, uint16_t from, uint16_t length)
+program_copy_once(uint16_t to, uint16_t from, uint16_t length)
 {
         do {
                 boot_read_page(from, data);
@@ -195,13 +192,13 @@ program_copy_i(uint16_t to, uint16_t from, uint16_t length)
 }
 
 STATIC
-int
+void
 program_copy(uint16_t to, uint16_t from, uint16_t length)
 {
         uint8_t tries = 3;
 
         do {
-                program_copy_i(to, from, length);
+                program_copy_once(to, from, length);
 
         } while ( ! program_check_same(to, from, length) && --tries > 0);
 
@@ -222,7 +219,7 @@ program_spm(void)
         if ( ! program_check_same(addressOwnSpm, ((uint16_t) &spm_copy) << 1, sizeof(spm_copy)))
                 program_copy(addressOwnSpm, ((uint16_t) &spm_copy) << 1, sizeof(spm_copy));
 
-        OwnSpm = addressOwnSpm >> 1;
+        OwnSpm = 1;
 }
 
 int
@@ -243,6 +240,7 @@ main(void)
 
         boot_program_page(0x1800, data);
 
+#if 0
         /*
          * Now, flash my own SPM command into the bootloader area
          */
@@ -277,6 +275,6 @@ main(void)
         boot_page_erase(0);
 
         start_bootloader();
-
+#endif
         return 0;
 }

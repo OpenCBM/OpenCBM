@@ -4,10 +4,18 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.12 2007-06-10 17:07:00 strik Exp $
+ * This Revision: $Id: main.c,v 1.13 2007-07-25 16:47:56 strik Exp $
  *
  * $Log: main.c,v $
- * Revision 1.12  2007-06-10 17:07:00  strik
+ * Revision 1.13  2007-07-25 16:47:56  strik
+ * DO NOT USE THIS VERSION!
+ *
+ * Some more work on the bootloader and updater. Now, the BIOS table consists of
+ * RJMP instead of pointers. This saves flash space and RAM space, as the calls
+ * are easier.  The bootloader-update with update-bootloader does not work
+ * currently. Because of this, no new .hex files are checked in.
+ *
+ * Revision 1.12  2007/06/10 17:07:00  strik
  * Removed a warning.
  *
  * Revision 1.11  2007/06/10 16:49:39  strik
@@ -171,15 +179,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
     break;
 
   case XU1541_FLASH:
-   {
-        typedef void (*start_flash_bootloader_t)(void);
-
-        register start_flash_bootloader_t start_flash_bootloader;
-
-        wdt_disable();
-        start_flash_bootloader = (start_flash_bootloader_t) pgm_read_word_near(&bios_data.start_flash_bootloader);
-        start_flash_bootloader();
-    }
+    bios_start_flash_bootloader();
     break;
       
   case XU1541_EEPROM_READ:
