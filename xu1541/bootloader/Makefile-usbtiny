@@ -10,8 +10,9 @@
 include Makefile.common
 LDFLAGS += $(LDFLAGS_BOOTLOADER)
 
+DUSBVERSION     = -DUSBTINY
 USBTINY         = ./usbtiny
-TARGET_ARCH     = -DF_CPU=12000000 -DAVR -DUSBTINY -mmcu=atmega8
+TARGET_ARCH     = -DF_CPU=12000000 -DAVR $(DUSBVERSION) -mmcu=atmega8
 #OBJECTS         = biostable.o main.o
 CABLE           = stk200
 #CABLE           = usbasp

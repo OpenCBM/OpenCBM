@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file flasher.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: flasher.c,v 1.4 2007-07-25 16:47:57 strik Exp $ \n
+** \version $Id: flasher.c,v 1.5 2007-07-26 19:37:53 strik Exp $ \n
 ** \n
 ** \brief Flash the bootloader from the application space
 **
@@ -32,7 +32,7 @@
 
 #include "flasher.h"
 
-#define STATIC static
+#define ADDRESS_OWN_SPM (0x1840u)
 
 STATIC
 uint16_t OwnSpm = 0;
@@ -60,7 +60,7 @@ STATIC
 void
 spm(uint8_t what, uint16_t address, uint16_t data) {
         if (OwnSpm) {
-                spm_copy(what, address, data);
+                ((void(*)(uint8_t what, uint16_t address, uint16_t data)) (ADDRESS_OWN_SPM >> 1))(what, address, data);
         } else {
                 bios_spm(what, address, data);
         }
@@ -100,7 +100,7 @@ blink(unsigned long count)
 
         count *= 2;
 
-        while (count != 0 && --count) {
+        while (count == 0 || --count) {
                 delay_ms(300);
                 PORTD ^= _BV(1);
         }
@@ -211,7 +211,7 @@ STATIC
 void
 program_spm(void)
 {
-        uint16_t addressOwnSpm = 0x1840;
+        uint16_t addressOwnSpm = ADDRESS_OWN_SPM;
 
         // determine if the SPM implementation is already there. In this case,
         // do not write it again, as the "original" SPM might have been already overwritten!
@@ -227,6 +227,7 @@ main(void)
 {
         cli();
 
+        blink(1); // dummy; most probably, this will not be visible.
         blink(1);
 
         /*
@@ -240,7 +241,6 @@ main(void)
 
         boot_program_page(0x1800, data);
 
-#if 0
         /*
          * Now, flash my own SPM command into the bootloader area
          */
@@ -275,6 +275,6 @@ main(void)
         boot_page_erase(0);
 
         start_bootloader();
-#endif
+
         return 0;
 }

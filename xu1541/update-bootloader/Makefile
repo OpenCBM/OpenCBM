@@ -35,6 +35,7 @@ disasm:	$(TARGET).bin
 cpp:
 	$(COMPILE) -E flasher.c
 
+#program: program-avrusb
 program: $(TARGET).hex
 	../update_tool/xu1541_update $(TARGET).hex
 
@@ -45,10 +46,10 @@ program-usbtiny: $(TARGET).hex ibootldr-usbtiny.hex
 	../update_tool/xu1541_update $(TARGET).hex ibootldr-usbtiny.hex
 
 ibootldr-avrusb.hex: ../bootloader/bootldr-avrusb.hex
-	cat ../bootloader/bootldr-avrusb.hex|grep -v "^:04000" > ibootldr-avrusb.hex
+	grep -v "^:04000" ../bootloader/bootldr-avrusb.hex > ibootldr-avrusb.hex
 
 ibootldr-usbtiny.hex: ../bootloader/bootldr-usbtiny.hex
-	cat ../bootloader/bootldr-usbtiny.hex|grep -v "^:04000" > ibootldr-usbtiny.hex
+	grep -v "^:04000" ../bootloader/bootldr-usbtiny.hex > ibootldr-usbtiny.hex
 
 terminal:
 	avrdude -c stk200 -p atmega8 -t

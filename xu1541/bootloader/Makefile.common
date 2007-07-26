@@ -12,3 +12,12 @@ LDFLAGS_BOOTLOADER = -Wl,$(COMMON_SECTIONS),--section-start=.textadd=$(BOOTLOADE
 # does not define anything in the section .textbiostable.
 
 OBJECTS = biostable.o main.o
+
+.S.o:
+	$(COMPILE.c) -x assembler-with-cpp $(DUSBVERSION) -c $< -o $@
+# "-x assembler-with-cpp" should not be necessary since this is the default
+# file type for the .S (with capital S) extension. However, upper case
+# characters are not always preserved on Windows. To ensure WinAVR
+# compatibility define the file type manually.
+
+

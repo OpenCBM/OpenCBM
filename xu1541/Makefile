@@ -3,7 +3,7 @@
 all:	all-linux
 
 mrproper: clean
-	rm -f firmware/*.hex bootloader/*.hex misc/read_event_log.exe misc/usb_echo_test.exe update_tool/xu1541_update.exe
+	rm -f firmware/*.hex bootloader/*.hex update-bootloader/*.hex misc/read_event_log.exe misc/usb_echo_test.exe update_tool/xu1541_update.exe
 
 distclean: mrproper
 
