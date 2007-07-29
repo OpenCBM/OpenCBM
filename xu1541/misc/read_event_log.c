@@ -132,12 +132,15 @@ void display_device_info(void) {
     fprintf(stderr, "USB request for XU1541 info failed: %s!\n", 
 	    usb_strerror());
     return;
-  } else if(nBytes != sizeof(reply)) {
+  } else if((nBytes != sizeof(reply)) && (nBytes != 4)) {
     fprintf(stderr, "Unexpected number of bytes (%d) returned\n", nBytes);
     return;
   }
 
-  printf("Device reports version %u.%02u\n", reply[0], reply[1]);
+  if (nBytes > 4)
+    printf("Device reports BIOS version %x.%02x\n", reply[4], reply[5]);
+
+  printf("Device reports version %x.%02x\n", reply[0], reply[1]);
   printf("Device reports capabilities 0x%04x\n", *(unsigned short*)(reply+2));
 }
 
