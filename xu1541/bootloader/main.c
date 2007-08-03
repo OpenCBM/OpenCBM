@@ -59,12 +59,7 @@ typedef byte_t uchar;
 #include "xu1541bios.h"
 #include "version.h"
 
-#define BOOTLOADER_MAGIC_ADDRESS 0x1fe
-#define WRITE_BOOTLOADER_TYPE(_x) \
-        *((unsigned int *)BOOTLOADER_MAGIC_ADDRESS) = (_x);
-
-#define READ_BOOTLOADER_TYPE() \
-        (*((unsigned int *)BOOTLOADER_MAGIC_ADDRESS))
+extern unsigned int bios_magic;
 
 #define BOOTLOADER_NO_APPLICATION_MAGIC 0xF347
 #define BOOTLOADER_START_MAGIC 0x8123
@@ -79,6 +74,8 @@ static uint8_t page_offset;
 
 void start_flash_bootloader(void) MOVESECTION;
 void leaveBootloader() MOVESECTION;
+
+extern void bios_restart(void);
 
 uint8_t data BIOSTABLE;
 
@@ -108,7 +105,7 @@ byte_t  usb_setup ( byte_t data[8] ) {
   
   if (data[1] == USBBOOT_FUNC_LEAVE_BOOT) {
 //    leaveBootloader();
-    WRITE_BOOTLOADER_TYPE(BOOTLOADER_DONOTSTART_MAGIC);
+    bios_magic = BOOTLOADER_DONOTSTART_MAGIC;
 
     /*! \todo: change to leaveBootloader(); */
     wdt_enable(1);
@@ -218,10 +215,10 @@ int main(void)
     DDRB  &=  ~_BV(4);  // pin is input (with pullup)
 
     if (pgm_read_word_near(0) == 0xffff) {
-        WRITE_BOOTLOADER_TYPE(BOOTLOADER_NO_APPLICATION_MAGIC);
+        bios_magic = BOOTLOADER_NO_APPLICATION_MAGIC;
     }
 
-    switch (READ_BOOTLOADER_TYPE()) {
+    switch (bios_magic) {
       case BOOTLOADER_DONOTSTART_MAGIC:
       default:
         // check if pin goes high
@@ -271,10 +268,10 @@ void main_poll(void)
 
 void start_flash_bootloader(void)
 {
-    WRITE_BOOTLOADER_TYPE(BOOTLOADER_START_MAGIC);
+    bios_magic = BOOTLOADER_START_MAGIC;
 
     /* jump to the RESET vector */
-    ((void (*)(void)) (0x1800 / 2))();
+    bios_restart();
 }
 
 void spm(uint8_t what, uint16_t address, uint16_t data)
