@@ -74,7 +74,7 @@ static uchar state = STATE_IDLE;
 static uint16_t page_address;
 static uint8_t page_offset;
 
-#define MOVESECTION // __attribute__ ((section (".textadd")))
+#define MOVESECTION __attribute__ ((section (".textadd")))
 // #define SECTIONFLASH __attribute__ ((section (".textflash")))
 
 void start_flash_bootloader(void) MOVESECTION;
@@ -140,6 +140,27 @@ a:  goto a;
   return len;
 }
 
+/*---------------------------------------------------------------------------*/
+/* usbFunctionRead                                                           */
+/*---------------------------------------------------------------------------*/
+
+#ifndef USBTINY
+uchar usbFunctionRead( uchar *data, uchar len )
+#else
+byte_t usb_in ( byte_t* data, byte_t len )
+#endif
+        MOVESECTION;
+
+#ifndef USBTINY
+uchar usbFunctionRead( uchar *data, uchar len )
+#else
+byte_t usb_in ( byte_t* data, byte_t len )
+#endif
+{
+  char rv = 0;
+  return rv;
+}
+
 #ifndef USBTINY
 uchar usbFunctionWrite( uchar *data, uchar len )
 #else
@@ -187,6 +208,9 @@ void usb_out ( byte_t* data, byte_t len )
 #endif
 }
 
+int main(void) MOVESECTION;
+void main_poll(void);
+
 int main(void)
 {
     /* check if portb.4 (miso) is tied to gnd and call main application if not */
@@ -233,22 +257,24 @@ int main(void)
     usbInit();
     sei();
 
+    main_poll();
+
+    return 0;
+}
+
+void main_poll(void)
+{
     for(;;){    /* main event loop */
         usbPoll();
     }
-
-    return 0;
 }
 
 void start_flash_bootloader(void)
 {
     WRITE_BOOTLOADER_TYPE(BOOTLOADER_START_MAGIC);
 
-    /* enable watch dog and make sure it fires
-     * This way, we reboot the AVR */
-    /*! \todo: change to leaveBootloader(); */
-    wdt_enable(1);
-a:  goto a;
+    /* jump to the RESET vector */
+    ((void (*)(void)) (0x1800 / 2))();
 }
 
 void spm(uint8_t what, uint16_t address, uint16_t data)

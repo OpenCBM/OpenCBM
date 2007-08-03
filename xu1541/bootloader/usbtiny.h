@@ -61,7 +61,7 @@
 // as 1, you have the option of returning 0xff instead. In that case, the
 // USB driver will call a function usb_in() to obtain the data to send
 // back to the host. This can be used to generate the data on-the-fly.
-#define	USBTINY_CALLBACK_IN		0
+#define	USBTINY_CALLBACK_IN		1
 
 // When this macro is defined as 0, OUT packets are simply ignored.
 // When defined as 1, the function usb_out() is called for OUT packets.
