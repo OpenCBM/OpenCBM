@@ -5,7 +5,7 @@ Imports System.Resources
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang 0.6.5
+' Copyright (C) 2006      Wolfgang 0.4.0
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -39,12 +39,12 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("http://sf.net/project/showfiles.php?group_id=122047")> 
 <Assembly: AssemblyCompany("opencbm.sf.net")> 
 <Assembly: AssemblyProduct("Gui4Cbm4Win")> 
-<Assembly: AssemblyCopyright("Copyright 2005 Leif Bloomquist, Copyright 2006 Wolfgang 0.6.5 (http://d81.de), Spiro Trikaliotis, Payton Byrd")> 
+<Assembly: AssemblyCopyright("Copyright 2005 Leif Bloomquist, Copyright 2006 Wolfgang 0.4.0 (http://d81.de), Spiro Trikaliotis, Payton Byrd")> 
 <Assembly: AssemblyTrademark("OpenCBM, Gui4cbm4win, cbm4linux, OpenCBM")> 
 <Assembly: AssemblyCulture("")> 
 
-<Assembly: AssemblyVersion("0.6.5.0")> 
-<Assembly: AssemblyFileVersionAttribute("0.6.5.0")> 
+<Assembly: AssemblyVersion("0.6.5.1")> 
+<Assembly: AssemblyFileVersionAttribute("0.6.5.1")> 
 
 <Assembly: ComVisibleAttribute(False)> 
 <Assembly: NeutralResourcesLanguageAttribute("en-US")> 

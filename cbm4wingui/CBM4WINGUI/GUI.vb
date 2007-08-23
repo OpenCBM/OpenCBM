@@ -3,7 +3,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang 0.6.5
+' Copyright (C) 2006      Wolfgang 0.4.0
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -40,7 +40,7 @@
 '                Fixed hardcoded reference to c:\ drive in two places
 '                Improved handling of default values when INI file has errors.
 '
-'   Additions by Wolfgang 0.6.5, based on Gui4Cbm4Win 0.0.9
+'   Additions by Wolfgang 0.4.0, based on Gui4Cbm4Win 0.0.9
 '         0.40 - Renamed all "Warp"-Options into "No-Warp" ones
 '                Added "auto" transfer option
 '                Renamed the stdout and stderr log files to g4c4w*.log
@@ -127,32 +127,34 @@ Friend Class frmMain
 
     'Format a floppy.
     Private Sub CBMFormat_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles CBMFormat.Click
-
-
         Dim Result As Object
-        Dim Status As ReturnStringType
-        Dim args As String
 
         Result = MsgBox(ResourceManager.GetString("FORMAT_MESSAGE"), _
             MsgBoxStyle.Exclamation Or MsgBoxStyle.YesNo, _
             ResourceManager.GetString("FORMAT_TITLE"))
 
         If Not (Result = MsgBoxResult.No) Then
-
-            Prompt.Ask(ResourceManager.GetString("FORMAT_DISK_NAME"))
-
-            If (Prompt.LastResult = CANCELSTRING) Then Exit Sub
-
-            args = String.Format(" -vso {0} ""{1}""", DriveNumber, Prompt.LastResult.ToUpper())
-
-            Status = DoCommand("cbmforng", args, ResourceManager.GetString("FORMATTING_DISK"))
-
-            LastStatus.Text = UCase(Status.Output)
-
-            System.Threading.Thread.Sleep(1000)
-
-            RefreshCBMDir()
+            FormatDisk()
         End If
+    End Sub
+
+    Private Sub FormatDisk()
+        Dim Status As ReturnStringType
+        Dim args As String
+
+        Prompt.Ask(ResourceManager.GetString("FORMAT_DISK_NAME"))
+
+        If (Prompt.LastResult = CANCELSTRING) Then Exit Sub
+
+        args = String.Format(" -vso {0} ""{1}""", DriveNumber, Prompt.LastResult.ToUpper())
+
+        Status = DoCommand("cbmforng", args, ResourceManager.GetString("FORMATTING_DISK"))
+
+        LastStatus.Text = UCase(Status.Output)
+
+        System.Threading.Thread.Sleep(1000)
+
+        RefreshCBMDir()
     End Sub
 
     Private Sub CBMInitialize_Click(ByVal eventSender As System.Object, ByVal eventArgs As System.EventArgs) Handles CBMInitialize.Click
@@ -380,6 +382,9 @@ Friend Class frmMain
                 FilesSelected = FilesSelected + 1
 
                 If PCDirectory.Items(T).ToUpper().EndsWith(".D64") Then 'Make Disk from D64
+                    If MessageBox.Show("Do you want to format the disk first?", "Copy D64 to Disk", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) = Windows.Forms.DialogResult.Yes Then
+                        FormatDisk()
+                    End If
                     WriteD64toFloppy(PCDirectory.Items(T))
                     Exit Sub 'Exit so only 1 D64 is copied!
                 Else 'Copy a File
