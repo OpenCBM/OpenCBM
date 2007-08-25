@@ -40,10 +40,10 @@ program: $(TARGET).hex
 	../update_tool/xu1541_update $(TARGET).hex
 
 program-avrusb: $(TARGET).hex
-	../update_tool/xu1541_update $(TARGET).hex ../bootloader/bootldr-avrusb.hex
+	../update_tool/xu1541_update $(TARGET).hex -o=0x1000 ../bootloader/bootldr-avrusb.hex
 
 program-usbtiny: $(TARGET).hex
-	../update_tool/xu1541_update $(TARGET).hex ../bootloader/bootldr-usbtiny.hex
+	../update_tool/xu1541_update $(TARGET).hex -o=0x1000 ../bootloader/bootldr-usbtiny.hex
 
 terminal:
 	avrdude -c stk200 -p atmega8 -t

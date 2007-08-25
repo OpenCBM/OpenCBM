@@ -295,7 +295,7 @@ int main(int argc, char **argv) {
   printf("-- http://www.harbaum.org/till/xu1541 --\n");
   
   if(argc < 2) {
-    fprintf(stderr, "Usage: xu1541_update <ihex_file> [<ihex_file2> ...]\n");
+    fprintf(stderr, "Usage: xu1541_update [-o OFFSET] <ihex_file> [[-o OFFSET] <ihex_file2> ...]\n");
     WINKEY;
     exit(-1);
   }
@@ -326,6 +326,28 @@ int main(int argc, char **argv) {
   }
 
   do {
+          unsigned int flash_offset = 0;
+
+          if (strncmp(argv[1], "-o", 2) == 0) {
+            char *pos = argv[1]+2;
+
+            if (*pos == '=')
+              ++pos;
+
+            flash_offset = strtol(pos, &pos, 0);
+            printf("A offset of 0x%04x is specified, pos = %p!\n", flash_offset, pos);
+
+            if (*pos != 0) {
+              fprintf(stderr, "ERROR: extra input '%s' after offset of 0x%04x.\n", pos, flash_offset);
+              xu1541_close(handle);
+              return -1;
+            }
+
+            /* proceed to next argument */
+            ++argv;
+            --argc;
+          }
+
           /* load the file into memory */
 
           ifile = ihex_parse_file(argv[1]);
@@ -360,8 +382,8 @@ int main(int argc, char **argv) {
             printf("Uploading %d pages ", flash_get_pages(ifile, page_size, &start));
             printf("starting from 0x%04x", start);
 
-            if (start >= 0x1700) {
-                    start -= 0x1000;
+            if (flash_offset != 0) {
+                    start -= flash_offset;
                     printf(", moved to 0x%04x", start);
             }
             printf("\n");
