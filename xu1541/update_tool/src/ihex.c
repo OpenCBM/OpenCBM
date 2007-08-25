@@ -11,6 +11,7 @@
 
 #define RECORD_DATA  0
 #define RECORD_END   1
+#define RECORD_START_SEGMENT_ADDRESS 3
 
 static int ihex_iswhite(unsigned char c) {
   return( (c == ' ')||(c == '\n')||(c == '\r')||(c == '\t'));
@@ -124,7 +125,8 @@ static ihex_line_t *ihex_parse_line(char *line, int line_num) {
     return NULL;
   }
 
-  if(iline->type == RECORD_DATA) {
+  /* (always) process the data bytes */
+  {
     int i;
 
     /* check if remaining line is long enough for data + crc */
@@ -151,6 +153,16 @@ static ihex_line_t *ihex_parse_line(char *line, int line_num) {
 
       /* store byte */
       iline->data[i] = tmp;
+    }
+  }
+
+  /* special handling for RECORD_START_SEGMENT_ADDRESS */
+  if(iline->type == RECORD_START_SEGMENT_ADDRESS) {
+    if(iline->length != 4) {
+      fprintf(stderr, "wrong length of start address: %d.\n", iline->length);
+    }
+    else {
+      fprintf(stderr, "start address from file: 0x%02x%02x:0x%02x%02x.\n", iline->data[0], iline->data[1], iline->data[2], iline->data[3]);
     }
   }
 

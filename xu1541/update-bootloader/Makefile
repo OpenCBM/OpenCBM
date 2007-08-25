@@ -39,17 +39,11 @@ cpp:
 program: $(TARGET).hex
 	../update_tool/xu1541_update $(TARGET).hex
 
-program-avrusb: $(TARGET).hex ibootldr-avrusb.hex
-	../update_tool/xu1541_update $(TARGET).hex ibootldr-avrusb.hex
+program-avrusb: $(TARGET).hex
+	../update_tool/xu1541_update $(TARGET).hex ../bootloader/bootldr-avrusb.hex
 
-program-usbtiny: $(TARGET).hex ibootldr-usbtiny.hex
-	../update_tool/xu1541_update $(TARGET).hex ibootldr-usbtiny.hex
-
-ibootldr-avrusb.hex: ../bootloader/bootldr-avrusb.hex
-	grep -v "^:04000" ../bootloader/bootldr-avrusb.hex > ibootldr-avrusb.hex
-
-ibootldr-usbtiny.hex: ../bootloader/bootldr-usbtiny.hex
-	grep -v "^:04000" ../bootloader/bootldr-usbtiny.hex > ibootldr-usbtiny.hex
+program-usbtiny: $(TARGET).hex
+	../update_tool/xu1541_update $(TARGET).hex ../bootloader/bootldr-usbtiny.hex
 
 terminal:
 	avrdude -c stk200 -p atmega8 -t
