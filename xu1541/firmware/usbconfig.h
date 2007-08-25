@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: Proprietary, free under certain conditions. See Documentation.
- * This Revision: $Id: usbconfig.h,v 1.4 2007-03-21 18:02:10 harbaum Exp $
+ * This Revision: $Id: usbconfig.h,v 1.5 2007-08-25 17:26:43 harbaum Exp $
  */
 
 #ifndef __usbconfig_h_included__
@@ -90,7 +90,7 @@ must be adapted to your hardware.
 #define	USB_CFG_DEVICE_VERSION	XU1541_VERSION_MINOR, XU1541_VERSION_MAJOR
 /* Version number of the device: Minor number first, then major number.
  */
-#define	USB_CFG_VENDOR_NAME		'T', 'i', 'l', 'l', ' ', 'H', 'a', 'r', 'b', 'a', 'u', 'm'
+#define USB_CFG_VENDOR_NAME  'o','p','e','n','c','b','m',' ','t','e','a','m'
 #define	USB_CFG_VENDOR_NAME_LEN	12
 /* These two values define the vendor name returned by the USB device. The name
  * must be given as a list of characters under single quotes. The characters

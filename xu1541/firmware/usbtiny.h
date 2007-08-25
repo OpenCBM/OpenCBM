@@ -42,7 +42,7 @@
 
 // The following optional macros may be used as an identification of
 // your device. Undefine them when you run out of flash space.
-#define	USBTINY_VENDOR_NAME		"Till Harbaum"
+#define	USBTINY_VENDOR_NAME		"opencbm team"
 #define	USBTINY_DEVICE_NAME		"xu1541"
 #undef	USBTINY_SERIAL
 

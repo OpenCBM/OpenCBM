@@ -261,8 +261,9 @@ int xu1541_start_application(usb_dev_handle *handle, int page_size) {
   int nBytes;
 
   if (page_for_address_0_is_valid) {
-    /* page 0 was flashed 'invalidly', correct it now as last step before rebooting. */
-    xu1541_write_page(handle, page_for_address_0, 0, page_size);
+    /* page 0 was flashed 'invalidly', correct it now as last step */
+    /* before rebooting. */
+    xu1541_write_page(handle, (char*)page_for_address_0, 0, page_size);
   }
 
   nBytes = usb_control_msg(handle, 
@@ -271,7 +272,8 @@ int xu1541_start_application(usb_dev_handle *handle, int page_size) {
 	   NULL, 0, 1000);
 
 /*
- * This will always be an error, as the xu1541 just reboots, and does not answer!
+ * This will always be an error, as the xu1541 just reboots, and does 
+ * not answer!
 
   if (nBytes != 0) {
     fprintf(stderr, "Error starting application: %s\n", usb_strerror());
@@ -310,7 +312,7 @@ int main(int argc, char **argv) {
   unsigned int soft_bootloader_mode = 0;
 
   printf("--        XU1541 flash updater        --\n");
-  printf("--      (c) 2007 by Till Harbaum      --\n");
+  printf("--    (c) 2007 by the opencbm team    --\n");
   printf("-- http://www.harbaum.org/till/xu1541 --\n");
   
   if(argc < 2) {
@@ -361,7 +363,7 @@ int main(int argc, char **argv) {
               ++pos;
 
             flash_offset = strtol(pos, &pos, 0);
-            printf("A offset of 0x%04x is specified, pos = %p!\n", flash_offset, pos);
+            printf("An offset of 0x%04x is specified, pos = %p!\n", flash_offset, pos);
 
             if (*pos != 0) {
               fprintf(stderr, "ERROR: extra input '%s' after offset of 0x%04x.\n", pos, flash_offset);
