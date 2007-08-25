@@ -37,6 +37,9 @@
 #define WINKEY
 #endif
 
+int xu1541_write_page(usb_dev_handle *handle, 
+		      char *data, int address, int len);
+
 const static struct recognized_usb_devices_t {
   unsigned short vid;
   unsigned short pid;
@@ -48,6 +51,9 @@ const static struct recognized_usb_devices_t {
 };
 
 static int usb_was_resetted = 0;
+
+static unsigned char *page_for_address_0 = NULL;
+static unsigned int   page_for_address_0_is_valid = 0;
 
 static int  usb_get_string_ascii(usb_dev_handle *handle, int index, 
 				 char *string, int size) {
@@ -113,8 +119,16 @@ static void display_device_info(usb_dev_handle *handle) {
   printf("Device reports capabilities 0x%04x\n", *(unsigned short*)(reply+2));
 }
 
+/* wait for the xu1541 to react again */
+static void xu1541_wait(usb_dev_handle *handle)
+{
+  /* TODO: currently a dummy only */
+
+  MSLEEP(3000); /* wait 3s */
+}
+
 /* try to set xu1541 into boot mode */
-static int set_to_boot_mode(usb_dev_handle *handle)
+static int xu1541_set_to_boot_mode(usb_dev_handle *handle)
 {
   printf("Setting xu1541 into boot mode... \n");
 
@@ -122,7 +136,7 @@ static int set_to_boot_mode(usb_dev_handle *handle)
         USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
         XU1541_FLASH, 0, 0, 0, 0, 1000);
 
-  MSLEEP(3000); /* wait 3s */
+  xu1541_wait(handle);
 
   return 0;
 }
@@ -175,7 +189,7 @@ static usb_dev_handle *xu1541_find(unsigned int firstcall) {
           if (firstcall)  {
             display_device_info(handle);
             /* try to set xu1541 into boot mode */
-            set_to_boot_mode(handle);
+            xu1541_set_to_boot_mode(handle);
           }
           else {
 	    fprintf(stderr, "Error: Found %s device (version %u.%02u) not "
@@ -243,8 +257,13 @@ int xu1541_get_pagesize(usb_dev_handle *handle) {
   return 256 * retval[0] + retval[1];
 }
 
-int xu1541_start_application(usb_dev_handle *handle) {
+int xu1541_start_application(usb_dev_handle *handle, int page_size) {
   int nBytes;
+
+  if (page_for_address_0_is_valid) {
+    /* page 0 was flashed 'invalidly', correct it now as last step before rebooting. */
+    xu1541_write_page(handle, page_for_address_0, 0, page_size);
+  }
 
   nBytes = usb_control_msg(handle, 
 	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
@@ -325,9 +344,16 @@ int main(int argc, char **argv) {
     exit(-1);
   }
 
+  if(!(page_for_address_0 = malloc(page_size))) {
+    fprintf(stderr, "Error: Out of memory allocating page buffer\n");
+    xu1541_close(handle);
+    exit(-1);
+  }
+
   do {
           unsigned int flash_offset = 0;
 
+          /* process -o (offset) parameter */
           if (strncmp(argv[1], "-o", 2) == 0) {
             char *pos = argv[1]+2;
 
@@ -348,37 +374,34 @@ int main(int argc, char **argv) {
             --argc;
           }
 
+          /* process -R (reboot) parameter */
+          if (strcmp(argv[1], "-R") == 0) {
+            printf("Starting application...\n");
+            xu1541_start_application(handle, page_size);
+            printf("Waiting for reboot...\n");
+            xu1541_wait(handle);
+            xu1541_wait(handle); /* TODO: remove that and replace the xu1541_wait with a better approach */
+
+            /* find required usb device */
+            printf("Find xu1541 again...\n");
+            if(!(handle = xu1541_find(1))) {
+              if(!(handle = xu1541_find(0))) {
+                WINKEY;
+                exit(1);
+              }
+            }
+
+            /* proceed to next argument */
+            ++argv;
+            --argc;
+          }
+
           /* load the file into memory */
 
           ifile = ihex_parse_file(argv[1]);
 
           if(ifile) {
-#if 0
-            /* these checks do not make any sense currently... We will
-             * have to think about them! - SRT
-             */
-
-            /* check if xu1541 memory limits are met */
-            if(ihex_file_get_start_address(ifile) != 0) {
-              fprintf(stderr, "ERROR: Image does not start at address $0\n");
-              ihex_free_file(ifile);
-              free(page);
-              xu1541_close(handle);
-              return -1;
-            }
-            
-            /* xu1541 has 6k free flash since 2k are being used by the bootloader */
-            if(ihex_file_get_end_address(ifile) >= 6*1024) {
-              fprintf(stderr, "ERROR: Image too long by %d bytes\n", 
-                      ihex_file_get_end_address(ifile) - 6*1024);
-              ihex_free_file(ifile);
-              free(page);
-              xu1541_close(handle);
-              return -1;
-            }
-#endif
-
-            /* and flash it */
+            /* flash the file */
             printf("Uploading %d pages ", flash_get_pages(ifile, page_size, &start));
             printf("starting from 0x%04x", start);
 
@@ -392,6 +415,18 @@ int main(int argc, char **argv) {
 
               /* fill page from ihex image */
               flash_get_page(ifile, i, page, page_size);
+
+              /* special handling of page 0: */
+
+              if (i * page_size + start == 0) {
+                /* remember the data to write */
+                memcpy(page_for_address_0, page, page_size);
+                page_for_address_0_is_valid = 1;
+
+                /* mark the page address is invalid application */
+                page[0] = -1;
+                page[1] = -1;
+              }
 
               /* and flash it */
               xu1541_write_page(handle, page, i*page_size + start, page_size);
@@ -416,7 +451,7 @@ int main(int argc, char **argv) {
 
   } while (argc >= 2);
 
-  xu1541_start_application(handle);
+  xu1541_start_application(handle, page_size);
 
   printf(" done\n"
 	 "%s\n", 
