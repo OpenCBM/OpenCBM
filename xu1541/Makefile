@@ -1,4 +1,4 @@
-.PHONY: all mrproper distclean clean all-linux firmware firmware-avrusb firmware-usbtiny bootloader bootloader-avrusb bootloader-usbtiny update-bootloader misc update_tool program-bios-avrusb program-bios-usbtiny update-avrusb update-usbtiny update-bios-avrusb update-bios-usbtiny diff
+.PHONY: all mrproper distclean clean all-linux firmware firmware-avrusb firmware-usbtiny bootloader bootloader-avrusb bootloader-usbtiny update-bootloader misc update_tool program-bios-avrusb program-bios-usbtiny update-avrusb update-usbtiny update-bios-avrusb update-bios-usbtiny update-all-avrusb update-all-usbtiny diff terminal version
 
 all:	all-linux
 
@@ -55,6 +55,18 @@ update-bios-avrusb: bootloader-avrusb update_tool update-bootloader
 update-bios-usbtiny: bootloader-usbtiny update_tool update-bootloader
 	make -C update-bootloader program-usbtiny
 
+update-all-avrusb: bootloader-avrusb update_tool update-bootloader firmware-avrusb
+	./update_tool/xu1541_update ./update-bootloader/flash-firmware.hex -o=0x1000 ./bootloader/bootldr-avrusb.hex -R ./firmware/firmware-avrusb.hex
+
+update-all-usbtiny: bootloader-usbtiny update_tool update-bootloader firmware-usbtiny
+	./update_tool/xu1541_update ./update-bootloader/flash-firmware.hex -o=0x1000 ./bootloader/bootldr-usbtiny.hex -R ./firmware/firmware-usbtiny.hex
+
 diff:
 	make distclean
 	cvs diff|view -
+
+terminal:
+	make -C update-bootloader terminal
+
+version: misc
+	./misc/usb_echo_test
