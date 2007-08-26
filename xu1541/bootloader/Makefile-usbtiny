@@ -23,6 +23,6 @@ STACK           = 32
 FLASHSIZE       = 8192
 RAMSIZE         = 1024
 
-.INTERMEDIATE: crc.o int.o usb.o bootldr-usbtiny.bin $(OBJECTS)
+.INTERMEDIATE: crc.o int.o usb.o $(OBJECTS)
 
 include $(USBTINY)/common.mk

@@ -10,7 +10,7 @@ TARGET=flash-firmware
 
 all:	$(TARGET).hex
 
-.INTERMEDIATE: $(OBJECTS) flash-firmware.bin ibootldr-avrusb.hex ibootldr-usbtiny.hex
+.INTERMEDIATE: $(OBJECTS)
 
 .c.o:
 	$(COMPILE) -c $< -o $@

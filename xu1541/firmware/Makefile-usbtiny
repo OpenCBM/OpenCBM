@@ -20,7 +20,7 @@ STACK           = 32
 FLASH       	= 8192
 SRAM            = 1024
 
-.INTERMEDIATE: crc.o int.o usb.o main.o xu1541.o s1.o s2.o pp.o p2.o event_log.o firmware-usbtiny.bin
+.INTERMEDIATE: crc.o int.o usb.o main.o xu1541.o s1.o s2.o pp.o p2.o event_log.o
 
 include $(USBTINY)/common.mk
 
