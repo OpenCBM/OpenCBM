@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.2 2007-03-22 13:12:23 strik Exp $ \n
+** \version $Id: xu1541.c,v 1.3 2007-08-26 15:54:09 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -178,10 +178,10 @@ int xu1541_init(void) {
     return -1;
   }
 
-  xu1541_dbg(0, "firmware version %u.%02u", ret[0], ret[1]);
+  xu1541_dbg(0, "firmware version %x.%02x", ret[0], ret[1]);
 
   if(ret[1] < 8) {
-    fprintf(stderr, "Device reports firmware version %u.%02u\n", 
+    fprintf(stderr, "Device reports firmware version %x.%02x\n", 
 	    ret[0], ret[1]);
     fprintf(stderr, "but this version of opencbm requires at least "
 	    "version x.08\n");
