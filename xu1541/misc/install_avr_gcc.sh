@@ -22,13 +22,14 @@ ARCHIVES=./archives
 # tools required for build process
 REQUIRED="wget bison flex gcc g++"
 
-# updated for latest versions on 12/31/05
+# updated for latest versions on 25/05/07
 # versions of tools to be built
 BINUTILS=binutils-2.17
-GCC=gcc-4.1.1
-GDB=gdb-6.5
-AVRLIBC=avr-libc-1.4.4
-AVRDUDE=avrdude-5.2
+# no patches yet for 4.2.0
+GCC=gcc-4.1.2
+GDB=gdb-6.6
+AVRLIBC=avr-libc-1.4.6
+AVRDUDE=avrdude-5.4
 
 echo "---------------------------"
 echo "- Installation of avr-gcc -"
@@ -115,16 +116,16 @@ check_md5 "${BINUTILS}.tar.bz2" \
     "e26e2e06b6e4bf3acf1dc8688a94c0d1"
 check_md5 "${GCC}.tar.bz2" \
     ftp://ftp.gnu.org/pub/gnu/gcc/${GCC}/${GCC}.tar.bz2 \
-    "ad9f97a4d04982ccf4fd67cb464879f3"
+    "a4a3eb15c96030906d8494959eeda23c"
 check_md5 "${GDB}.tar.bz2" \
     ftp://ftp.gnu.org/pub/gnu/gdb/${GDB}.tar.bz2 \
-    "af6c8335230d7604aee0803b1df14f54"
+    "a4df41d28dd514d64e8ccbfe125fd9a6"
 check_md5 "${AVRLIBC}.tar.bz2" \
     http://savannah.nongnu.org/download/avr-libc/${AVRLIBC}.tar.bz2 \
-    "04f774841b9dc9886de8120f1dfb16e3"
+    "504b5e3beefc0d500ff94ea88391f71d"
 check_md5 "${AVRDUDE}.tar.gz" \
     http://download.savannah.gnu.org/releases/avrdude/${AVRDUDE}.tar.gz \
-    "2535657ddf7c7451e1b6c1279d8002a4"
+    "92a58374016bd43c0997a970c895799c"
 echo
 
 echo "Build environment seems fine!"
@@ -142,6 +143,10 @@ read
 echo Building binutils ...
 tar xvfj ${ARCHIVES}/${BINUTILS}.tar.bz2       
 cd ${BINUTILS}
+patch -p0 <../binutils-patches/patch-aa
+patch -p0 <../binutils-patches/patch-atmega256x
+patch -p0 <../binutils-patches/patch-coff-avr
+patch -p0 <../binutils-patches/patch-newdevices
 mkdir obj-avr
 cd obj-avr
 ../configure  --prefix=$PREFIX --target=avr --disable-nls --enable-install-libbfd
@@ -153,7 +158,13 @@ rm -rf ${BINUTILS}
 echo Building GCC ...
 tar xvfj ${ARCHIVES}/${GCC}.tar.bz2
 cd ${GCC}
-patch -p1 <../gcc-newdevices.patch
+patch -p0 <../gcc-patches/patch-0b-constants
+patch -p0 <../gcc-patches/patch-attribute_alias
+patch -p0 <../gcc-patches/patch-bug25672
+patch -p0 <../gcc-patches/patch-dwarf
+patch -p0 <../gcc-patches/patch-libiberty-Makefile.in
+patch -p0 <../gcc-patches/patch-newdevices
+patch -p0 <../gcc-patches/patch-zz-atmega256x
 mkdir obj-avr
 cd obj-avr
 ../configure --prefix=$PREFIX --target=avr --enable-languages=c,c++ --disable-nls
