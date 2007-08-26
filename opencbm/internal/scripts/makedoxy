@@ -1,3 +1,0 @@
-#! /bin/sh
-# $Id: makedoxy,v 1.1 2006-02-12 13:41:04 strik Exp $
-doxygen Doxyfile > doxygen.con.log 2> doxygen.err.log
