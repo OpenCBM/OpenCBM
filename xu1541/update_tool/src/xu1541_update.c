@@ -363,7 +363,7 @@ int main(int argc, char **argv) {
               ++pos;
 
             flash_offset = strtol(pos, &pos, 0);
-            printf("An offset of 0x%04x is specified, pos = %p!\n", flash_offset, pos);
+            printf("An offset of 0x%04x is specified!\n", flash_offset);
 
             if (*pos != 0) {
               fprintf(stderr, "ERROR: extra input '%s' after offset of 0x%04x.\n", pos, flash_offset);
