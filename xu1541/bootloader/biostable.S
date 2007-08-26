@@ -4,7 +4,7 @@
 ;; nothing
 
 	.text
-        .section .textbiostable
+        .section .textbiostable, "ax"
 
 	.global	bios_data
 	.type	bios_data, @function

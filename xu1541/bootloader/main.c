@@ -77,8 +77,6 @@ void leaveBootloader() MOVESECTION;
 
 extern void bios_restart(void);
 
-uint8_t data BIOSTABLE;
-
 void spm(uint8_t what, uint16_t address, uint16_t data);
 // void spm(uint8_t what, uint16_t address, uint16_t data) SECTIONFLASH;
 

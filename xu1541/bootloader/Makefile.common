@@ -7,11 +7,6 @@ COMMON_SECTIONS=--section-start=.textbiostable=$(BOOTLOADER_BIOSTABLE)
 
 LDFLAGS_BOOTLOADER = -Wl,$(COMMON_SECTIONS),--section-start=.textadd=$(BOOTLOADER_EXT_ADDRESS),--section-start=.text=$(BOOTLOADER_ADDRESS),--section-start=.data=$(BOOTLOADER_DATA)
 
-# NOTE: biostable.o MUST be placed before main.o!
-# This is a work-around for the problem that avr-objcopy
-# will not copy the section into the .hex file if main.o
-# does not define anything in the section .textbiostable.
-
 OBJECTS = biostable.o main.o
 
 .S.o:
