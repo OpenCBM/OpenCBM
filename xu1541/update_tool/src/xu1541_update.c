@@ -192,7 +192,7 @@ static usb_dev_handle *xu1541_find(unsigned int firstcall) {
             xu1541_set_to_boot_mode(handle);
           }
           else {
-	    fprintf(stderr, "Error: Found %s device (version %u.%02u) not "
+	    fprintf(stderr, "Error: Found %s device (version %x.%02x) not "
 		  "in boot loader\n"
 		  "       mode, please install jumper switch "
 		  "and replug device!\n", 
