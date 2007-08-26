@@ -3,10 +3,9 @@ BOOTLOADER_EXT_ADDRESS = 1700
 BOOTLOADER_BIOSTABLE = 1ff0
 BOOTLOADER_DATA = 00800360
 
-COMMON_SECTIONS=--section-start=.textbiostable=$(BOOTLOADER_BIOSTABLE),--section-start=.data=$(BOOTLOADER_DATA)
+COMMON_SECTIONS=--section-start=.textbiostable=$(BOOTLOADER_BIOSTABLE)
 
-
-LDFLAGS_BOOTLOADER = -Wl,$(COMMON_SECTIONS),--section-start=.textadd=$(BOOTLOADER_EXT_ADDRESS),--section-start=.text=$(BOOTLOADER_ADDRESS)
+LDFLAGS_BOOTLOADER = -Wl,$(COMMON_SECTIONS),--section-start=.textadd=$(BOOTLOADER_EXT_ADDRESS),--section-start=.text=$(BOOTLOADER_ADDRESS),--section-start=.data=$(BOOTLOADER_DATA)
 
 # NOTE: biostable.o MUST be placed before main.o!
 # This is a work-around for the problem that avr-objcopy
