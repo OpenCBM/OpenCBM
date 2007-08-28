@@ -1,4 +1,4 @@
-.PHONY: all mrproper distclean clean all-linux firmware firmware-avrusb firmware-usbtiny bootloader bootloader-avrusb bootloader-usbtiny update-bootloader misc update_tool program-bios-avrusb program-bios-usbtiny update-avrusb update-usbtiny update-bios-avrusb update-bios-usbtiny update-all-avrusb update-all-usbtiny diff terminal version
+.PHONY: all mrproper distclean clean all-linux firmware bootloader bootloader-avrusb bootloader-usbtiny update-bootloader misc update_tool program-avrusb program-usbtiny update-avrusb update-usbtiny update-bios-avrusb update-bios-usbtiny update-all-avrusb update-all-usbtiny diff terminal version
 
 all:	all-linux
 
@@ -12,13 +12,8 @@ clean:
 
 all-linux: misc update_tool firmware bootloader update-bootloader
 
-firmware: firmware-avrusb firmware-usbtiny
-
-firmware-avrusb:
-	make -C firmware -f Makefile-avrusb
-
-firmware-usbtiny:
-	make -C firmware -f Makefile-usbtiny
+firmware:
+	make -C firmware
 
 bootloader: bootloader-avrusb bootloader-usbtiny
 
@@ -37,29 +32,28 @@ misc:
 update_tool:
 	make -C update_tool/src/
 
-program-bios-avrusb: bootloader-avrusb
+program-avrusb: bootloader-avrusb
 	make -C bootloader -f Makefile-avrusb program
 
-program-bios-usbtiny: bootloader-usbtiny
+program-usbtiny: bootloader-usbtiny
 	make -C bootloader -f Makefile-usbtiny program
 
-update-avrusb: firmware-avrusb update_tool
-	./update_tool/xu1541_update ./firmware/firmware-avrusb.hex
+update-firmware: firmware update_tool
+	./update_tool/xu1541_update ./firmware/firmware.hex
 
-update-usbtiny: firmware-usbtiny update_tool
-	./update_tool/xu1541_update ./firmware/firmware-usbtiny.hex
-
-update-bios-avrusb: bootloader-avrusb update_tool update-bootloader
+update-bios-avrusb: update-avrusb
+update-avrusb: bootloader-avrusb update_tool update-bootloader
 	make -C update-bootloader program-avrusb
 
-update-bios-usbtiny: bootloader-usbtiny update_tool update-bootloader
+update-bios-usbtiny: update-usbtiny
+update-usbtiny: bootloader-usbtiny update_tool update-bootloader
 	make -C update-bootloader program-usbtiny
 
-update-all-avrusb: bootloader-avrusb update_tool update-bootloader firmware-avrusb
-	./update_tool/xu1541_update ./update-bootloader/flash-firmware.hex -o=0x1000 ./bootloader/bootldr-avrusb.hex -R ./firmware/firmware-avrusb.hex
+update-all-avrusb: bootloader-avrusb update_tool update-bootloader firmware
+	./update_tool/xu1541_update ./update-bootloader/flash-firmware.hex -o=0x1000 ./bootloader/bootldr-avrusb.hex -R ./firmware/firmware.hex
 
-update-all-usbtiny: bootloader-usbtiny update_tool update-bootloader firmware-usbtiny
-	./update_tool/xu1541_update ./update-bootloader/flash-firmware.hex -o=0x1000 ./bootloader/bootldr-usbtiny.hex -R ./firmware/firmware-usbtiny.hex
+update-all-usbtiny: bootloader-usbtiny update_tool update-bootloader firmware
+	./update_tool/xu1541_update ./update-bootloader/flash-firmware.hex -o=0x1000 ./bootloader/bootldr-usbtiny.hex -R ./firmware/firmware.hex
 
 diff:
 	make distclean

@@ -5,10 +5,10 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile-avrusb,v 1.10 2007-08-26 16:56:55 strik Exp $
+# This Revision: $Id: Makefile,v 1.6 2007-08-28 17:37:37 strik Exp $
 
 include ../bootloader/Makefile.common
-LDFLAGS += -Wl,$(COMMON_SECTIONS)
+LDFLAGS += -Wl,$(COMMON_SECTIONS) -nostdlib
 
 
 SERIAL = `echo /dev/tty.[Uu][Ss]*`
@@ -19,13 +19,13 @@ UISP = uisp -dprog=stk200
 # Choose your favorite programmer and interface.
 
 DEFINES += -DF_CPU=12000000
-COMPILE = avr-gcc -Wall -O2 -Iusbdrv -I. -mmcu=atmega8 $(DEFINES)
+COMPILE = avr-gcc -Wall -O2 -I. -mmcu=atmega8 $(DEFINES)
 
-OBJECTS = usbdrv/usbdrv.o usbdrv/usbdrvasm.o usbdrv/oddebug.o main.o xu1541.o s1.o s2.o pp.o p2.o event_log.o
+OBJECTS = gcrt1.o memcpy.o firmwaretable.o main.o xu1541.o s1.o s2.o pp.o p2.o event_log.o
 
 
 # symbolic targets:
-all:	firmware-avrusb.hex
+all:	firmware.hex
 
 .INTERMEDIATE: $(OBJECTS)
 
@@ -63,27 +63,33 @@ fuse:
 
 
 clean:
-	rm -f firmware-avrusb.hex firmware-avrusb.lst firmware-avrusb.obj firmware-avrusb.cof firmware-avrusb.list firmware-avrusb.map firmware-avrusb.eep.hex firmware-avrusb.bin *.o usbdrv/*.o firmware-avrusb.s usbdrv/oddebug.s usbdrv/usbdrv.s
+	rm -f firmware.hex firmware.lst firmware.obj firmware.cof firmware.list firmware.map firmware.eep.hex firmware.bin *.o firmware.s
 
 # file targets:
-firmware-avrusb.bin:	$(OBJECTS)
-	$(COMPILE) -o firmware-avrusb.bin $(OBJECTS) ${LDFLAGS}
+firmware.bin:	$(OBJECTS)
+	echo	$(COMPILE) -o firmware.bin $(OBJECTS) ${LDFLAGS}
+	$(COMPILE) -o firmware.bin $(OBJECTS) ${LDFLAGS}
 
-firmware-avrusb.hex:	firmware-avrusb.bin
-	rm -f firmware-avrusb.hex firmware-avrusb.eep.hex
-	avr-objcopy -j .text -j .data -O ihex firmware-avrusb.bin firmware-avrusb.hex
-	./checksize firmware-avrusb.bin 8192 960
+firmware.hex:	firmware.bin
+	rm -f firmware.hex firmware.eep.hex
+	avr-objcopy -j .text -j .data -j .textfirmwaretable -O ihex firmware.bin firmware.hex
+	./checksize firmware.bin 8192 960
 # do the checksize script as our last action to allow successful compilation
 # on Windows with WinAVR where the Unix commands will fail.
 
-program: firmware-avrusb.hex
-	avrdude -c stk200 -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc9:m -U flash:w:firmware-avrusb.hex
+program: firmware.hex
+	avrdude -c stk200 -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc9:m -U flash:w:firmware.hex
 
-program-usb: firmware-avrusb.hex
-	avrdude -c usbasp -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc9:m -U flash:w:firmware-avrusb.hex
+program-usb: firmware.hex
+	avrdude -c usbasp -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc9:m -U flash:w:firmware.hex
 
-program-xu: firmware-avrusb.hex
-	../update_tool/xu1541_update firmware-avrusb.hex
+program-xu: firmware.hex
+	../update_tool/xu1541_update firmware.hex
 
 cpp:
 	$(COMPILE) -E main.c
+
+disasm:	firmware.bin
+	avr-objdump -d $<
+
+

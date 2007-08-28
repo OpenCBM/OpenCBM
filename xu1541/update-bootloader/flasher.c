@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file flasher.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: flasher.c,v 1.5 2007-07-26 19:37:53 strik Exp $ \n
+** \version $Id: flasher.c,v 1.6 2007-08-28 17:37:38 strik Exp $ \n
 ** \n
 ** \brief Flash the bootloader from the application space
 **
@@ -223,6 +223,12 @@ program_spm(void)
 }
 
 int
+dummy(void)
+{
+        return 0;
+}
+
+int
 main(void)
 {
         cli();
@@ -231,7 +237,7 @@ main(void)
         blink(1);
 
         /*
-         * first of all, make sure we all called in case there is some interruption (i.e., power failure)
+         * first of all, make sure we are called in case there is some interruption (i.e., power failure)
          */
 
         boot_read_page(0x1800, data);
@@ -273,6 +279,7 @@ main(void)
 
         /* make sure we are not called anymore */
         boot_page_erase(0);
+        boot_page_erase(0x16c0);
 
         start_bootloader();
 

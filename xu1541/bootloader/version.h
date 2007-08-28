@@ -2,7 +2,7 @@
 #define VERSION_H
 
 #define XU1541_BIOS_VERSION_MAJOR_BASE   0x01
-#define XU1541_BIOS_VERSION_MINOR        0x10
+#define XU1541_BIOS_VERSION_MINOR        0x11
 
 #ifdef USBTINY
 /* usbtiny version has even major number */

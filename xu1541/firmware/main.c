@@ -4,10 +4,22 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.13 2007-07-25 16:47:56 strik Exp $
+ * This Revision: $Id: main.c,v 1.14 2007-08-28 17:37:38 strik Exp $
  *
  * $Log: main.c,v $
- * Revision 1.13  2007-07-25 16:47:56  strik
+ * Revision 1.14  2007-08-28 17:37:38  strik
+ * First version of firmware that does not include its own USB stack, but uses the
+ * USB stack from the BIOS.
+ *
+ * Note for usage:
+ * 1. This is not fully tested yet, but it shows where we are going
+ * 2. if there was a firmware flashed when updating the BIOS, the xu1541 often hangs.
+ *    Powering it off (removing it from USB) and powering on helps in this case.
+ *    (There is still a problem with the initialization done by the firmware and the bootloader flasher)
+ * 3. The actual CBM transfer routines have not been tested yet.
+ * Thus, HANDLE WITH CARE!
+ *
+ * Revision 1.13  2007/07/25 16:47:56  strik
  * DO NOT USE THIS VERSION!
  *
  * Some more work on the bootloader and updater. Now, the BIOS table consists of
@@ -71,6 +83,9 @@
 
 #include "xu1541.h"
 
+typedef uchar byte_t;
+
+/*
 #ifndef USBTINY
 // use avrusb library
 #include "usbdrv.h"
@@ -90,6 +105,7 @@ typedef uchar byte_t;
 #define usbInit()  usb_init()
 #define usbPoll()  usb_poll()
 #endif
+*/
 
 #define MODE_ORIGINAL  0
 #define MODE_S1        1
@@ -128,14 +144,11 @@ static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL,
 #define DEBUGF(format, args...)
 #endif
 
-extern byte_t usb_tx_state;
-
 /* ------------------------------------------------------------------------- */
 
 #ifndef USBTINY
-uchar	usbFunctionSetup(uchar data[8]) {
-  static uchar replyBuf[4];
-  usbMsgPtr = replyBuf;
+uchar	usbFunctionSetup(uchar data[8], byte_t *replyBuf) {
+/*  static uchar replyBuf[4]; */
 #else
 extern	byte_t	usb_setup ( byte_t data[8] )
 {
@@ -180,6 +193,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 
   case XU1541_FLASH:
     bios_start_flash_bootloader();
+    return 0;
     break;
       
   case XU1541_EEPROM_READ:
@@ -530,6 +544,7 @@ void usb_out ( byte_t* data, byte_t len )
 
 /* ------------------------------------------------------------------------- */
 
+#if 0
 int	main(void) {
 
   wdt_enable(WDTO_1S);
@@ -584,26 +599,27 @@ int	main(void) {
 
   cbm_init();
 
-  /* clear usb ports */
+  /* clear usb ports * @@@
   USB_CFG_IOPORT   &= (uchar)~((1<<USB_CFG_DMINUS_BIT)|(1<<USB_CFG_DPLUS_BIT));
 
-  /* make usb data lines outputs */
+  * make usb data lines outputs *
   USBDDR    |= ((1<<USB_CFG_DMINUS_BIT)|(1<<USB_CFG_DPLUS_BIT));
 
-  /* USB Reset by device only required on Watchdog Reset */
+  * USB Reset by device only required on Watchdog Reset *
   _delay_ms(10);
 
-  /* make usb data lines inputs */
+  * make usb data lines inputs *
   USBDDR &= ~((1<<USB_CFG_DMINUS_BIT)|(1<<USB_CFG_DPLUS_BIT));
 
   usbInit();
+*/
 
   sei();
 
   LED_OFF();
 
   for(;;) {	/* main event loop */
-    extern byte_t usb_idle(void);
+/* @@@    extern byte_t usb_idle(void); */
     wdt_reset();
     usbPoll();
 
@@ -614,5 +630,12 @@ int	main(void) {
 
   return 0;
 }
+#endif
 
+void init(void)
+{
+  cbm_init();
+
+  LED_OFF();
+}
 /* ------------------------------------------------------------------------- */

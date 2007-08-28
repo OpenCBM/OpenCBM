@@ -4,7 +4,7 @@ LDFLAGS += -Wl,$(COMMON_SECTIONS)
 DEFINES += -DF_CPU=12000000
 COMPILE = avr-gcc -Wall -O2 -Iusbdrv -I. -mmcu=atmega8 $(DEFINES)
 
-OBJECTS = flasher.o spm.o
+OBJECTS = flasher.o spm.o firmwaretable.o
 
 TARGET=flash-firmware
 
@@ -26,7 +26,7 @@ $(TARGET).bin:	$(OBJECTS)
 
 $(TARGET).hex:	$(TARGET).bin
 	rm -f $(TARGET).hex $(TARGET).eep.hex
-	avr-objcopy -j .text -j .data -O ihex $(TARGET).bin $(TARGET).hex
+	avr-objcopy -j .text -j .data -j .textfirmwaretable -O ihex $(TARGET).bin $(TARGET).hex
 	./checksize $(TARGET).bin 8192 960
 
 disasm:	$(TARGET).bin

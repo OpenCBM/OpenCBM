@@ -93,9 +93,23 @@ static int  usb_get_string_ascii(usb_dev_handle *handle, int index,
   return 1;
 }
 
-static void display_device_info(usb_dev_handle *handle) {
+typedef struct {
+        uint8_t FirmwareVersionMajor;
+        uint8_t FirmwareVersionMinor;
+        uint16_t DeviceCapabilities;
+        uint8_t BiosVersionMajor;
+        uint8_t BiosVersionMinor;
+
+        uint8_t FirmwareVersionAvailable;
+        uint8_t BiosVersionAvailable;
+        uint8_t BootloaderMode;
+} xu1541_device_info_t;
+
+static int get_device_info(usb_dev_handle *handle, xu1541_device_info_t *device_info) {
   int nBytes;
   unsigned char reply[6];
+
+  memset(device_info, 0, sizeof(*device_info));
 
   nBytes = usb_control_msg(handle, 
 	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
@@ -104,19 +118,57 @@ static void display_device_info(usb_dev_handle *handle) {
   if(nBytes < 0) {
     fprintf(stderr, "USB request for XU1541 info failed: %s!\n", 
 	    usb_strerror());
-    return;
+    return 0;
   }
   else if((nBytes != sizeof(reply)) && (nBytes != 4)) {
     fprintf(stderr, "Unexpected number of bytes (%d) returned\n", nBytes);
-    return;
+    return 0;
   }
 
   if (nBytes > 4) {
-    printf("Device reports BIOS version %x.%02x\n", reply[4], reply[5]);
+    device_info->BiosVersionAvailable = 1;
+    device_info->BiosVersionMajor = reply[4];
+    device_info->BiosVersionMinor = reply[5];
   }
 
-  printf("Device reports version %x.%02x\n", reply[0], reply[1]);
-  printf("Device reports capabilities 0x%04x\n", *(unsigned short*)(reply+2));
+  device_info->FirmwareVersionMajor = reply[0];
+  device_info->FirmwareVersionMinor = reply[1];
+  device_info->DeviceCapabilities = *(unsigned short*)(reply+2);
+  if (device_info->FirmwareVersionMajor != 0xff && device_info->FirmwareVersionMinor != 0xff) {
+     device_info->FirmwareVersionAvailable = 1;
+  }
+
+  if (device_info->DeviceCapabilities & XU1541_CAP_BOOTLOADER) {
+     device_info->BootloaderMode = 1;
+  }
+
+  return 1;
+}
+
+static void display_device_info(usb_dev_handle *handle) {
+  xu1541_device_info_t device_info;
+
+  if (get_device_info(handle, &device_info)) {
+    if (device_info.BiosVersionAvailable)
+      printf("Device reports BIOS version %x.%02x.\n", device_info.BiosVersionMajor, device_info.BiosVersionMinor);
+
+    if (device_info.FirmwareVersionAvailable)
+      printf("Device reports firmware version %x.%02x.\n", device_info.FirmwareVersionMajor, device_info.FirmwareVersionMinor);
+    else
+      printf("Device reports: No firmware available.\n");
+
+    printf("Device reports capabilities 0x%04x.\n", device_info.DeviceCapabilities);
+    printf("Device is %sin bootloader mode.\n", device_info.BootloaderMode ? "" : "not ");
+  }
+}
+
+static int is_xu1541_in_bootloader_mode(usb_dev_handle *handle) {
+  xu1541_device_info_t device_info;
+
+  if (get_device_info(handle, &device_info)) {
+    return device_info.BootloaderMode ? 1 : 0;
+  }
+  return 0;
 }
 
 /* wait for the xu1541 to react again */
@@ -185,9 +237,12 @@ static usb_dev_handle *xu1541_find(unsigned int firstcall) {
 	  handle = NULL;
 	}
 
-	if(strcmp(string, "xu1541boot") != 0) {
+        if (firstcall) {
+          display_device_info(handle);
+        }
+
+	if(strcmp(string, "xu1541boot") != 0 && ! is_xu1541_in_bootloader_mode(handle)) {
           if (firstcall)  {
-            display_device_info(handle);
             /* try to set xu1541 into boot mode */
             xu1541_set_to_boot_mode(handle);
           }
