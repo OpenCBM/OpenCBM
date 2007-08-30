@@ -30,7 +30,7 @@
 #include <avr/boot.h>
 #include <util/delay.h>
 
-#include "../firmware/xu1541_types.h"
+#include "xu1541_types.h"
 
 #ifndef USBTINY
 // use avrusb library

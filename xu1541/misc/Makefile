@@ -11,7 +11,7 @@ LIBUSB_DIR = /usr
 endif
 
 # add libusb
-CFLAGS  = -I$(LIBUSB_DIR)/include -Wall
+CFLAGS  = -I$(LIBUSB_DIR)/include -I../include/ -Wall
 LDFLAGS = -L$(LIBUSB_DIR)/lib
 LIBS    = -lusb
 

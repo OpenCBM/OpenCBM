@@ -12,7 +12,7 @@
 #include "ihex.h"
 #include "flash.h"
 
-#include "../../firmware/xu1541_types.h"
+#include "xu1541_types.h"
 
 /* do not recognize other xu1541-BIOS adopted firmwares */
 /* comment out to enable "foreign" firmwares            */

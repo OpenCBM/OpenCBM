@@ -11,6 +11,8 @@ LDFLAGS_BOOTLOADER = -Wl,$(COMMON_SECTIONS),--section-start=.textadd=$(BOOTLOADE
 
 OBJECTS = biostable.o main.o
 
+XU1541_INCLUDE=../include/
+
 .S.o:
 	$(COMPILE.c) -x assembler-with-cpp $(DUSBVERSION) -c $< -o $@
 # "-x assembler-with-cpp" should not be necessary since this is the default

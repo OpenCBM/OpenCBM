@@ -19,7 +19,7 @@
 #define MSLEEP(a) usleep(a*1000)
 #endif
 
-#include "../firmware/xu1541_types.h"
+#include "xu1541_types.h"
 
 usb_dev_handle      *handle = NULL;
 

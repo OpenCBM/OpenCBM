@@ -4,10 +4,14 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.14 2007-08-28 17:37:38 strik Exp $
+ * This Revision: $Id: main.c,v 1.15 2007-08-30 18:50:15 strik Exp $
  *
  * $Log: main.c,v $
- * Revision 1.14  2007-08-28 17:37:38  strik
+ * Revision 1.15  2007-08-30 18:50:15  strik
+ * Small restructure: Moved .h files which are used to communicate between
+ * different parts of the project into the include/ directory. (more to come.)
+ *
+ * Revision 1.14  2007/08/28 17:37:38  strik
  * First version of firmware that does not include its own USB stack, but uses the
  * USB stack from the BIOS.
  *
@@ -120,9 +124,9 @@ static uchar io_mode;
 #include "s2.h"
 #include "pp.h"
 #include "p2.h"
-#include "event_log.h"
+#include "xu1541_event_log.h"
 
-#include "../bootloader/xu1541bios.h"
+#include "xu1541bios.h"
 
 xu1541_bios_data_t bios_data;
 

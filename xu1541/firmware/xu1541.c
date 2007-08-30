@@ -4,10 +4,14 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.13 2007-03-19 18:58:36 harbaum Exp $
+ * This Revision: $Id: xu1541.c,v 1.14 2007-08-30 18:50:15 strik Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.13  2007-03-19 18:58:36  harbaum
+ * Revision 1.14  2007-08-30 18:50:15  strik
+ * Small restructure: Moved .h files which are used to communicate between
+ * different parts of the project into the include/ directory. (more to come.)
+ *
+ * Revision 1.13  2007/03/19 18:58:36  harbaum
  * Change in async state handling
  *
  * Revision 1.12  2007/03/18 20:40:34  harbaum
@@ -54,7 +58,7 @@
 #include <util/delay.h>
 
 #include "xu1541.h"
-#include "event_log.h"
+#include "xu1541_event_log.h"
 
 #ifdef DEBUG
 #define DEBUGF(format, args...) printf_P(PSTR(format), ##args)

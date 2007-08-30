@@ -5,7 +5,7 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile,v 1.6 2007-08-28 17:37:37 strik Exp $
+# This Revision: $Id: Makefile,v 1.7 2007-08-30 18:50:14 strik Exp $
 
 include ../bootloader/Makefile.common
 LDFLAGS += -Wl,$(COMMON_SECTIONS) -nostdlib
@@ -19,7 +19,7 @@ UISP = uisp -dprog=stk200
 # Choose your favorite programmer and interface.
 
 DEFINES += -DF_CPU=12000000
-COMPILE = avr-gcc -Wall -O2 -I. -mmcu=atmega8 $(DEFINES)
+COMPILE = avr-gcc -Wall -O2 -I. -mmcu=atmega8 $(DEFINES) -I../include/
 
 OBJECTS = gcrt1.o memcpy.o firmwaretable.o main.o xu1541.o s1.o s2.o pp.o p2.o event_log.o
 

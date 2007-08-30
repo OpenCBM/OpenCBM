@@ -17,7 +17,7 @@
 # ======================================================================
 
 CC	= avr-gcc
-CFLAGS	= -Os -g -Wall -I. -I$(USBTINY)
+CFLAGS	= -Os -g -Wall -I. -I$(USBTINY) -I$(XU1541_INCLUDE)
 ASFLAGS	= -Os -g -Wall -I.
 LDFLAGS	+= -g 
 MODULES = crc.o int.o usb.o $(OBJECTS)

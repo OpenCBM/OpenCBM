@@ -11,8 +11,8 @@
 #define XU1541_VID  0x0403
 #define XU1541_PID  0xc632
 
-#include "../firmware/xu1541_types.h"
-#include "../firmware/event_log.h"
+#include "xu1541_types.h"
+#include "xu1541_event_log.h"
 
 usb_dev_handle      *handle = NULL;
 

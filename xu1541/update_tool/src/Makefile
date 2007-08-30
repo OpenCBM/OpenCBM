@@ -1,5 +1,5 @@
 LIBUSB_CONFIG   = libusb-config
-CFLAGS+=-g -Wall -pedantic `$(LIBUSB_CONFIG) --cflags`
+CFLAGS+=-g -Wall -pedantic `$(LIBUSB_CONFIG) --cflags` -I../../include/
 LFLAGS+=`$(LIBUSB_CONFIG) --libs` -lusb
 
 APP = xu1541_update

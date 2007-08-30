@@ -11,13 +11,13 @@
 /*! ************************************************************** 
 ** \file flasher.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: flasher.h,v 1.1 2007-07-25 16:47:57 strik Exp $ \n
+** \version $Id: flasher.h,v 1.2 2007-08-30 18:50:16 strik Exp $ \n
 ** \n
 ** \brief Flash the bootloader from the application space
 **
 ****************************************************************/
 
-#include "../bootloader/xu1541bios.h"
+#include "xu1541bios.h"
 
 #define STATIC static
 

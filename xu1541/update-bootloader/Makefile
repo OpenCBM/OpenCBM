@@ -2,7 +2,7 @@ include ../bootloader/Makefile.common
 LDFLAGS += -Wl,$(COMMON_SECTIONS)
 
 DEFINES += -DF_CPU=12000000
-COMPILE = avr-gcc -Wall -O2 -Iusbdrv -I. -mmcu=atmega8 $(DEFINES)
+COMPILE = avr-gcc -Wall -O2 -Iusbdrv -I. -mmcu=atmega8 $(DEFINES) -I../include/
 
 OBJECTS = flasher.o spm.o firmwaretable.o
 
