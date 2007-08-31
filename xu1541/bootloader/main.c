@@ -65,8 +65,8 @@ typedef byte_t uchar;
 extern unsigned int bios_magic;
 
 #define BOOTLOADER_NO_APPLICATION_MAGIC 0xF347
-#define BOOTLOADER_START_MAGIC 0x8123
-#define BOOTLOADER_DONOTSTART_MAGIC 0xBCDE
+#define BOOTLOADER_START_FLASHER_MAGIC 0x8123
+#define BOOTLOADER_START_APPLICATION_MAGIC 0xBCDE
 
 static uchar state = STATE_IDLE;
 static uint16_t page_address;
@@ -79,9 +79,14 @@ xu1541_firmware_data_t firmware_data;
 // #define SECTIONFLASH __attribute__ ((section (".textflash")))
 
 void start_flash_bootloader(void) MOVESECTION;
-/* void leaveBootloader() MOVESECTION; */
+void leaveBootloader() MOVESECTION;
 
-extern void bios_restart(void);
+static void bios_reboot(void)
+{
+  wdt_enable(1);
+  while (1) {
+  }
+}
 
 void spm(uint8_t what, uint16_t address, uint16_t data);
 // void spm(uint8_t what, uint16_t address, uint16_t data) SECTIONFLASH;
@@ -100,8 +105,6 @@ void leaveBootloader() {
    
       /* we now have a fully working firmware */
       use_firmware = 1;
-
-      firmware_init();
 }
 
 #ifndef USBTINY
@@ -127,15 +130,9 @@ byte_t  usb_setup ( byte_t data[8] ) {
     return 6;
   } else
   if (data[1] == USBBOOT_FUNC_LEAVE_BOOT) {
-#if 0
-    leaveBootloader();
-#else
-    bios_magic = BOOTLOADER_DONOTSTART_MAGIC;
+    bios_magic = BOOTLOADER_START_APPLICATION_MAGIC;
 
-    /*! \todo: change to leaveBootloader(); */
-    wdt_enable(1);
-a:  goto a;
-#endif
+    bios_reboot();
   } else if (data[1] == USBBOOT_FUNC_WRITE_PAGE) {
     state = STATE_WRITE_PAGE;
     
@@ -255,16 +252,17 @@ int main(void)
     }
 
     switch (bios_magic) {
-      case BOOTLOADER_DONOTSTART_MAGIC:
+      case BOOTLOADER_START_APPLICATION_MAGIC:
       default:
         // check if pin goes high
-        if(PINB & _BV(4))
+        if(PINB & _BV(4)) {
           leaveBootloader();
+        }
 
       case BOOTLOADER_NO_APPLICATION_MAGIC:
         /* FALL THROUGH */
 
-      case BOOTLOADER_START_MAGIC:
+      case BOOTLOADER_START_FLASHER_MAGIC:
         break;
     }
 
@@ -314,10 +312,10 @@ void main_poll(void)
 
 void start_flash_bootloader(void)
 {
-    bios_magic = BOOTLOADER_START_MAGIC;
+    bios_magic = BOOTLOADER_START_FLASHER_MAGIC;
 
-    /* jump to the RESET vector */
-    bios_restart();
+    /* reboot the AVR */
+    bios_reboot();
 }
 
 void spm(uint8_t what, uint16_t address, uint16_t data)

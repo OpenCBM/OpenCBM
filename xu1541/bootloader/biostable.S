@@ -20,9 +20,12 @@ bios_data:
 
 ;; allow for using rcall to jump to the bios reset vector:
 ;;
+
+#if 0
 	.section .text
 	.global	bios_restart
 bios_restart = 0x1800
+#endif
 
 ;; give the address for the "magic" byte here
 ;; this allows for a more "elegant" C access to it
