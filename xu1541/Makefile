@@ -1,4 +1,4 @@
-.PHONY: all mrproper distclean clean all-linux firmware bootloader bootloader-avrusb bootloader-usbtiny update-bootloader misc update_tool program-avrusb program-usbtiny update-avrusb update-usbtiny update-bios-avrusb update-bios-usbtiny update-all-avrusb update-all-usbtiny diff terminal version
+.PHONY: all mrproper distclean clean all-linux firmware bootloader bootloader-avrusb bootloader-usbtiny update-bootloader misc update_tool program-avrusb program-usbtiny update-avrusb update-usbtiny update-bios-avrusb update-bios-usbtiny update-all-avrusb update-all-usbtiny diff terminal version xu1541lib
 
 all:	all-linux
 
@@ -10,7 +10,7 @@ distclean: mrproper
 clean:
 	cvspurge
 
-all-linux: misc update_tool firmware bootloader update-bootloader
+all-linux: xu1541lib misc update_tool firmware bootloader update-bootloader
 
 firmware:
 	make -C firmware
@@ -64,3 +64,6 @@ terminal:
 
 version: misc
 	./misc/usb_echo_test
+
+xu1541lib:
+	make -C lib

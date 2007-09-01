@@ -4,8 +4,10 @@ LFLAGS+=`$(LIBUSB_CONFIG) --libs` -lusb
 
 APP = xu1541_update
 OBJS = xu1541_update.o ihex.o flash.o
+LIBS = -L ../../lib/ -lxu1541
 
 .INTERMEDIATE: $(OBJS)
+.PHONY:	all clean lib
 
 all:
 	make ../$(APP)
@@ -13,5 +15,8 @@ all:
 clean:
 	rm -f *.o *~
 
-../$(APP): $(OBJS)
-	gcc $(OBJS) -o $@ $(LFLAGS)
+../$(APP): $(OBJS) lib
+	gcc $(OBJS) -o $@ $(LFLAGS) $(LIBS)
+
+lib:
+	make -C ../../lib/

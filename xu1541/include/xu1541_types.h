@@ -5,6 +5,11 @@
 #ifndef XU1541_TYPES_H
 #define XU1541_TYPES_H
 
+/* usb bootloader command constants */
+#define USBBOOT_FUNC_LEAVE_BOOT 1
+#define USBBOOT_FUNC_WRITE_PAGE 2
+#define USBBOOT_FUNC_GET_PAGESIZE 3
+
 /* special commands used for testing and debugging */
 #define XU1541_ECHO                  0xff
 #define XU1541_GET_EVENT             0xfe
