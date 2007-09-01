@@ -7,24 +7,28 @@
 # (if not part of Cygwin in the latest version)
 #
 # LIBUSB_ROOT=/cygdrive/c/drivers/LibUSB
+LIBUSB_ROOT=/cygdrive/n/Programme/LibUSB
 
 #
 # For compiling for MinGw32 target
 #
 CYGWINFLAGS=-mno-cygwin
 
-CFLAGS+=$(CYGWINFLAGS) -I $(LIBUSB_ROOT)/include -g -Wall -pedantic
+CFLAGS+=$(CYGWINFLAGS) -I $(LIBUSB_ROOT)/include -g -Wall -pedantic -I../../include/
 LFLAGS+=$(CYGWINFLAGS) -s -L $(LIBUSB_ROOT)/lib/gcc -lusb
 
 APP = xu1541_update
 OBJS = xu1541_update.o ihex.o flash.o
+LIBS = -L ../../lib/ -lxu1541
 
 .INTERMEDIATE: $(OBJS)
+.PHONY:	all clean lib
 
-all: ../$(APP).exe
+../$(APP): $(OBJS) lib
+	gcc $(OBJS) -o $@ $(LIBS) $(LFLAGS)
 
 clean:
-	rm -f ../$(APP).exe *.o
+	rm -f *.o *~
 
-../$(APP).exe: $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LFLAGS)
+lib:
+	make -C ../../lib/
