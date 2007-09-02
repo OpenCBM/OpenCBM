@@ -4,10 +4,12 @@
 #define XU1541_VID  0x0403
 #define XU1541_PID  0xc632
 
+#include <stdint.h>
+
 typedef struct {
         uint8_t FirmwareVersionMajor;
         uint8_t FirmwareVersionMinor;
-        uint16_t DeviceCapabilities;
+        uint16_t Capabilities;
         uint8_t BiosVersionMajor;
         uint8_t BiosVersionMinor;
 

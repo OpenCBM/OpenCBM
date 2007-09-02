@@ -41,12 +41,12 @@ int xu1541lib_get_device_info(usb_dev_handle *handle, xu1541_device_info_t *devi
 
   device_info->FirmwareVersionMajor = reply[0];
   device_info->FirmwareVersionMinor = reply[1];
-  device_info->DeviceCapabilities = *(unsigned short*)(reply+2);
+  device_info->Capabilities = *(unsigned short*)(reply+2);
   if (device_info->FirmwareVersionMajor != 0xff && device_info->FirmwareVersionMinor != 0xff) {
      device_info->FirmwareVersionAvailable = 1;
   }
 
-  if (device_info->DeviceCapabilities & XU1541_CAP_BOOTLOADER) {
+  if (device_info->Capabilities & XU1541_CAP_BOOTLOADER) {
      device_info->BootloaderMode = 1;
   }
 

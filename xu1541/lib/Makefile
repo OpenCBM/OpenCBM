@@ -1,6 +1,11 @@
-CFLAGS+=-g -Wall -pedantic -I../include/
+include ../include/common.mk
 
-LIB = libxu1541.a
+CFLAGS+= $(CFLAGS_EXTRA) -g -Wall -pedantic -I../include/
+LDFLAGS+=$(LDFLAGS_EXTRA)
+
+#LIB_SUFFIX=.a
+
+LIB = libxu1541$(LIB_WIN).a
 
 SRCS = \
 	close.c \
@@ -20,6 +25,9 @@ all: $(LIB)
 
 clean:
 	rm -f *.o *~
+
+mrproper: clean
+	rm -f $(LIB)
 
 $(LIB): $(OBJS)
 	$(AR) -r $@ $(OBJS)

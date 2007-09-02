@@ -1,13 +1,16 @@
-LIBUSB_CONFIG   = libusb-config
-CFLAGS+=-g -Wall -pedantic `$(LIBUSB_CONFIG) --cflags` -I../../include/
-LFLAGS+=`$(LIBUSB_CONFIG) --libs` -lusb
+include ../../include/common.mk
 
-APP = xu1541_update
+LIBUSB_CONFIG   = libusb-config
+CFLAGS+=-g -Wall -pedantic `$(LIBUSB_CONFIG) --cflags` -I../../include/ $(CFLAGS_EXTRA)
+LFLAGS+=$(LDFLAGS_EXTRA) `$(LIBUSB_CONFIG) --libs` -lusb
+
+APP = xu1541_update$(EXE_SUFFIX)
 OBJS = xu1541_update.o ihex.o flash.o
-LIBS = -L ../../lib/ -lxu1541
+LFLAGS := -L ../../lib/ -lxu1541$(LIB_WIN) $(LFLAGS)
 
 .INTERMEDIATE: $(OBJS)
-.PHONY:	all clean lib
+
+.PHONY:	all clean mrproper xu1541lib
 
 all:
 	make ../$(APP)
@@ -15,8 +18,11 @@ all:
 clean:
 	rm -f *.o *~
 
-../$(APP): $(OBJS) lib
-	gcc $(OBJS) -o $@ $(LFLAGS) $(LIBS)
+mrproper: clean
+	rm -f ../xu1541_update ../xu1541_update.exe
 
-lib:
+../$(APP): $(OBJS) xu1541lib
+	$(CC) $(OBJS) -o $@ $(LFLAGS)
+
+xu1541lib:
 	make -C ../../lib/

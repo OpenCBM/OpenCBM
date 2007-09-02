@@ -1,4 +1,4 @@
-.PHONY: all mrproper distclean clean all-linux firmware bootloader bootloader-avrusb bootloader-usbtiny update-bootloader misc update_tool program-avrusb program-usbtiny update-avrusb update-usbtiny update-bios-avrusb update-bios-usbtiny update-all-avrusb update-all-usbtiny diff terminal version xu1541lib
+.PHONY: all mrproper distclean clean all-linux firmware bootloader bootloader-avrusb bootloader-usbtiny update-bootloader misc update_tool program-avrusb program-usbtiny update-avrusb update-usbtiny update-bios-avrusb update-bios-usbtiny update-all-avrusb update-all-usbtiny diff terminal version xu1541lib xmingw
 
 all:	all-linux
 
@@ -67,3 +67,8 @@ version: misc
 
 xu1541lib:
 	make -C lib
+
+xmingw:
+	(export MINGW=1; make -C lib/)
+	(export MINGW=1; make -C misc/)
+	(export MINGW=1; make -C update_tool/src/)

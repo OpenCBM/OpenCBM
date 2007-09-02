@@ -20,7 +20,7 @@ void xu1541lib_display_device_info(usb_dev_handle *handle) {
     else
       printf("Device reports: No firmware available.\n");
 
-    printf("Device reports capabilities 0x%04x.\n", device_info.DeviceCapabilities);
+    printf("Device reports capabilities 0x%04x.\n", device_info.Capabilities);
     printf("Device is %sin bootloader mode.\n", device_info.BootloaderMode ? "" : "not ");
   }
 }
