@@ -7,6 +7,7 @@
 LIB_SUFFIX=.a
 LIB_WIN=
 AR=ar
+CYGWIN=
 
 ifneq "$(MINGW)" ""
  # we are using the MINGW cross compiler
@@ -33,22 +34,24 @@ else
 
    LIBUSB_DIR = $(HOME)/libusb
  else
-   ifeq "$(OS)" "Cygwin"
+   ifeq "$(shell uname -o)" "Cygwin"
      # Cygwin compilation
  
      # Tell, where your libusb-win32 installation resides
      # (if not part of Cygwin in the latest version)
      #
      # LIBUSB_DIR=/cygdrive/c/drivers/LibUSB
-     LIBUSB_DIR=/cygdrive/n/Programme/LibUSB
+#     LIBUSB_DIR=/cygdrive/n/Programme/LibUSB
+     LIBUSB_DIR=$(HOME)/LibUSB
      LIB_WIN = .lib
      EXE_SUFFIX = .exe
 
-     LDFLAGS_EXTRA=-L $(LIBUSB_DIR)/lib/gcc
+     LDFLAGS_EXTRA=-mno-cygwin -L $(LIBUSB_DIR)/lib/gcc
+     CYGWIN=1
 
      # For compiling for MinGw32 target
      #
-     CFLAGS_EXTRA=-mno-cygwin
+     CFLAGS_EXTRA=-mno-cygwin -DWIN
    else
      LIBUSB_DIR = /usr
    endif

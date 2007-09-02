@@ -1,8 +1,15 @@
 include ../../include/common.mk
 
-LIBUSB_CONFIG   = libusb-config
-CFLAGS+=-g -Wall -pedantic `$(LIBUSB_CONFIG) --cflags` -I../../include/ $(CFLAGS_EXTRA)
-LFLAGS+=$(LDFLAGS_EXTRA) `$(LIBUSB_CONFIG) --libs` -lusb
+ifeq "$(CYGWIN)" ""
+  LIBUSB_CONFIG   = libusb-config
+  CFLAGS+=-g -Wall -pedantic `$(LIBUSB_CONFIG) --cflags` -I../../include/ $(CFLAGS_EXTRA)
+  LFLAGS+=$(LDFLAGS_EXTRA) `$(LIBUSB_CONFIG) --libs` -lusb
+else
+  # special handling for CYGWIN:
+ 
+  CFLAGS+=-I $(LIBUSB_ROOT)/include -g -Wall -pedantic -I../../include/ $(CFLAGS_EXTRA)
+  LFLAGS+=$(LDFLAGS_EXTRA) -L $(LIBUSB_ROOT)/lib/gcc -lusb
+endif
 
 APP = xu1541_update$(EXE_SUFFIX)
 OBJS = xu1541_update.o ihex.o flash.o
