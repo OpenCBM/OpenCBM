@@ -52,6 +52,9 @@ endif
 
 include ../include/common.mk
 
+# remove if you want to generate debugging information
+LDFLAGS_EXTRA+=-s
+
 .PHONY: all clean mrproper xu1541lib
 
 # add libusb

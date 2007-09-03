@@ -11,6 +11,9 @@ else
   LFLAGS+=$(LDFLAGS_EXTRA) -L $(LIBUSB_ROOT)/lib/gcc -lusb
 endif
 
+# remove if you want to generate debugging information
+LFLAGS+=-s
+
 APP = xu1541_update$(EXE_SUFFIX)
 OBJS = xu1541_update.o ihex.o flash.o
 LFLAGS := -L ../../lib/ -lxu1541$(LIB_WIN) $(LFLAGS)
