@@ -270,6 +270,11 @@ int main(void)
     DDRD  |=  _BV(1);
     PORTD &= ~_BV(1);
 
+    /* initialize the core firmware before the USB stack */
+    if (use_firmware) {
+      firmware_init();
+    }
+
     /* clear usb ports */
     USB_CFG_IOPORT   &= (uchar)~((1<<USB_CFG_DMINUS_BIT)|(1<<USB_CFG_DPLUS_BIT));
 
@@ -286,9 +291,6 @@ int main(void)
     GICR = (1 << IVSEL); /* move interrupts to boot flash section */
 
     usbInit();
-    if (use_firmware) {
-      firmware_init();
-    }
     sei();
 
     main_poll();
