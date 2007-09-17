@@ -1,6 +1,0 @@
-LIBRARY OCBMVDD
-
-EXPORTS
-       VDDInitialize
-       VDDRegisterInit
-       VDDDispatch
