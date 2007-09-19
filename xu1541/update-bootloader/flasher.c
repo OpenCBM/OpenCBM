@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file flasher.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: flasher.c,v 1.6 2007-08-28 17:37:38 strik Exp $ \n
+** \version $Id: flasher.c,v 1.7 2007-09-19 19:22:30 wmsr Exp $ \n
 ** \n
 ** \brief Flash the bootloader from the application space
 **
@@ -211,13 +211,15 @@ STATIC
 void
 program_spm(void)
 {
-        uint16_t addressOwnSpm = ADDRESS_OWN_SPM;
+        static uint16_t addressOwnSpm = ADDRESS_OWN_SPM;
+        uint16_t addressSpmCopy = (uint16_t)spm_copy << 1;
+        uint16_t sizeSpmCopy = ((uint16_t)spm_end << 1) - addressSpmCopy;
 
         // determine if the SPM implementation is already there. In this case,
         // do not write it again, as the "original" SPM might have been already overwritten!
 
-        if ( ! program_check_same(addressOwnSpm, ((uint16_t) &spm_copy) << 1, sizeof(spm_copy)))
-                program_copy(addressOwnSpm, ((uint16_t) &spm_copy) << 1, sizeof(spm_copy));
+        if ( ! program_check_same(addressOwnSpm, addressSpmCopy, sizeSpmCopy) )
+                program_copy(addressOwnSpm, addressSpmCopy, sizeSpmCopy);
 
         OwnSpm = 1;
 }
@@ -233,8 +235,10 @@ main(void)
 {
         cli();
 
-        blink(1); // dummy; most probably, this will not be visible.
-        blink(1);
+        /*
+         * signal flasher start and wait for host system usb enumeration completion
+         */
+        blink(5);
 
         /*
          * first of all, make sure we are called in case there is some interruption (i.e., power failure)
