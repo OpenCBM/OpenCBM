@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2005-07-31 08:39:47 strik Exp $
+# $Id: Makefile,v 1.2.8.1 2007-10-28 10:54:25 strik Exp $
 
 include ../LINUX/config.make
 
@@ -28,7 +28,7 @@ uninstall:
 	for f in $(MAN1); do rm -f $(MANDIR)/$$f{,.gz}; done
 
 cbmctrl.o: cbmctrl.c tdchange.inc
-	$(CC) $(CFLAGS) -c cbmctrl.c -o $@
+	$(CC) $(ALL_CFLAGS) -c cbmctrl.c -o $@
 	
 cbmctrl: $(OBJS)
-	$(CC) $(CFLAGS) $< -o $@ $(LINK_FLAGS)
+	$(CC) $(ALL_CFLAGS) $< -o $@ $(LINK_FLAGS)

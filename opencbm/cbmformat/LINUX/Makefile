@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-03-02 18:17:17 strik Exp $
+# $Id: Makefile,v 1.1.10.1 2007-10-28 10:54:25 strik Exp $
 
 include ../LINUX/config.make
 
@@ -26,7 +26,7 @@ uninstall:
 	rm -f $(BINDIR)/$(PROG) $(MANDIR)/$(MAN1)
 
 cbmformat.o: cbmformat.c cbmformat.inc
-	$(CC) $(CFLAGS) -c cbmformat.c -o $@
+	$(CC) $(ALL_CFLAGS) -c cbmformat.c -o $@
 
 cbmformat: cbmformat.o
 	$(CC) $< -o $@ $(LINK_FLAGS)

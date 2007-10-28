@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-03-02 18:17:17 strik Exp $
+# $Id: Makefile,v 1.1.10.1 2007-10-28 10:54:24 strik Exp $
 
 include ../LINUX/config.make
 
@@ -14,7 +14,7 @@ all: $(PROG)
 mrproper: clean
 
 .c.o:
-	$(CC) -g $(CFLAGS) -o $@ -c $<
+	$(CC) -g $(ALL_CFLAGS) -o $@ -c $<
 
 clean:
 	rm -f $(PROG) $(OBJS)

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-03-02 18:17:18 strik Exp $
+# $Id: Makefile,v 1.1.10.1 2007-10-28 10:54:25 strik Exp $
 
 include ../LINUX/config.make
 
@@ -9,7 +9,7 @@ PROG = d64copy
 MAN1 = d64copy.1
 
 .c.o:
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(ALL_CFLAGS) -c $< -o $@
 
 all: $(PROG)
 

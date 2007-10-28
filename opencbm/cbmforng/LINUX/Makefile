@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2006-03-21 18:48:32 wmsr Exp $
+# $Id: Makefile,v 1.2.4.1 2007-10-28 10:54:25 strik Exp $
 
 include ../LINUX/config.make
 
@@ -28,7 +28,7 @@ uninstall:
 cbmforng.inc: cbmforng.a65 cbmfmacs.i65 cbmfsubs.i65 cbmforng.idh
 
 cbmforng.o: cbmforng.c cbmforng.inc cbmforng.h cbmforng.idh
-	$(CC) $(CFLAGS) -c cbmforng.c -o $@
+	$(CC) $(ALL_CFLAGS) -c cbmforng.c -o $@
 
 cbmforng: cbmforng.o
 	$(CC) $< -o $@ $(LINK_FLAGS)

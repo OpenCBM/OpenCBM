@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2005-04-20 14:09:58 strik Exp $
+# $Id: Makefile,v 1.1.10.1 2007-10-28 10:54:25 strik Exp $
 
 include ../config.make
 
@@ -18,7 +18,7 @@ mrproper: clean
 	rm -f $(INC)
 
 $(DEMO).o: $(DEMO).c $(DEMO).inc
-	$(CC) $(CFLAGS) -c $(DEMO).c -o $@
+	$(CC) $(ALL_CFLAGS) -c $(DEMO).c -o $@
 
 $(DEMO): $(DEMO).o
 	$(CC) $< -o $@ $(LINK_FLAGS)

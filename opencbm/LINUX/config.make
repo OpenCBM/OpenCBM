@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.7.4.2 2007-10-28 10:27:00 strik Exp $
+# $Id: config.make,v 1.7.4.3 2007-10-28 10:54:24 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -25,10 +25,11 @@ UDEV_RULES  = /etc/udev/rules.d/
 #
 ARCH	     = linux
 
-CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DOPENCBM_VERSION=$(VERSION)
-LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
+CFLAGS       = -O2 -Wall
+ALL_CFLAGS   = -I../include -I../include/LINUX -DOPENCBM_VERSION=$(VERSION) $(CFLAGS)
+LIB_CFLAGS   = $(ALL_CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
-LINK_FLAGS   = -L../lib -L../arch/$(ARCH) -lopencbm -larch
+LINK_FLAGS   = -L../lib -L../arch/$(ARCH) -lopencbm -larch $(LDFLAGS)
 SONAME       = -Wl,-soname -Wl,
 CC           = gcc
 AR           = ar

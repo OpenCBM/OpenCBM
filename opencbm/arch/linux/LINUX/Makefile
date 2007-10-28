@@ -1,10 +1,10 @@
-# $Id: Makefile,v 1.1.8.1 2007-10-28 10:17:05 strik Exp $
+# $Id: Makefile,v 1.1.8.2 2007-10-28 10:54:24 strik Exp $
 
 include ../../LINUX/config.make
 
 .PHONY: all clean mrproper install uninstall install-files
 
-CFLAGS += -I../../include
+ALL_CFLAGS += -I../../include
 
 LIB     = libarch.a
 SRCS    = file.c
