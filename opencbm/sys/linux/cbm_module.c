@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.1 2007-10-28 10:10:56 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.2 2007-10-28 10:19:22 strik Exp $";
 #endif
 
 #include <linux/config.h>
@@ -368,7 +368,7 @@ static void wait_for_listener(void)
 }
 
 #ifdef KERNEL_VERSION
-static int cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
+static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
 #else
 static int cbm_read(struct inode *inode, struct file *f, char *buf, int count)
 #endif
@@ -542,7 +542,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
 }
 
 #ifdef KERNEL_VERSION
-static int cbm_write(struct file *f, const char *buf, size_t cnt, loff_t *ppos)
+static ssize_t cbm_write(struct file *f, const char *buf, size_t cnt, loff_t *ppos)
 #else
 static int cbm_write(struct inode *inode, struct file *f, const char *buf, int cnt)
 #endif
