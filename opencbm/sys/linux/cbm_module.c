@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.3 2007-10-28 10:24:40 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.4 2007-10-28 11:09:01 strik Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -151,6 +151,10 @@ MODULE_LICENSE("GPL");
 
 #define NAME      "cbm"
 #define CBM_MINOR 177
+
+#ifdef MODULE_ALIAS_MISCDEV
+MODULE_ALIAS_MISCDEV(CBM_MINOR);
+#endif
 
 #define IEC_DATA   1
 #define IEC_CLOCK  2
