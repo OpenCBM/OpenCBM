@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5.4.1 2007-10-28 11:29:01 strik Exp $
+# $Id: Makefile,v 1.5.4.2 2007-10-28 11:38:38 strik Exp $
 
 include ../LINUX/config.make
 
@@ -59,6 +59,7 @@ $(LIB): $(OBJS)
 	cp $(LIBARCH)/libarch.a ar.tmp/
 	cd ar.tmp && $(AR) x libarch.a
 	$(AR) r $@ $(OBJS) ar.tmp/*.o
+	rm -rf ar.tmp
 
 ### dependencies:
 
