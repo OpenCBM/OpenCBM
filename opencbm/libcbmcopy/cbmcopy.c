@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.15 2006-04-17 18:46:17 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.15.2.1 2007-10-28 11:04:00 strik Exp $";
 #endif
 
 #include <stdio.h>
@@ -163,7 +163,7 @@ static int cbmcopy_read(CBM_FILE fd,
     *filedata = NULL;
     *filedata_size = 0;
 
-    msg_cb( sev_debug, "using transfer mode `%s´",
+    msg_cb( sev_debug, "using transfer mode `%s'",
             transfers[settings->transfer_mode].name);
     trf = transfers[settings->transfer_mode].trf;
 
@@ -499,7 +499,7 @@ int cbmcopy_write_file(CBM_FILE fd,
     const transfer_funcs *trf;
     int blocks_written;
 
-    msg_cb( sev_debug, "using transfer mode `%s´",
+    msg_cb( sev_debug, "using transfer mode `%s'",
             transfers[settings->transfer_mode].name);
     trf = transfers[settings->transfer_mode].trf;
 

@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.8 2006-04-06 16:52:27 strik Exp $";
+    "@(#) $Id: main.c,v 1.8.2.1 2007-10-28 11:04:00 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -95,7 +95,7 @@ static void help()
 "                           for extended tracks (36-40), SpeedDOS BAM format\n"
 "                           is assumed. Use with caution.\n"
 "\n"
-"  -B, --bam-save           save BAM-only copy; this is like the `-b´ option\n"
+"  -B, --bam-save           save BAM-only copy; this is like the `-b' option\n"
 "                           but copies always the entire directory track.\n"
 "\n"
 "  -d, --drive-type=TYPE    specify drive type:\n"
