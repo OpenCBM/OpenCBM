@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.4 2007-10-28 11:09:01 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.5 2007-10-28 11:16:05 strik Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -797,7 +797,7 @@ cbm_release(struct inode *inode, struct file *f)
 #endif
 }
 
-static irqreturn_t cbm_interrupt(int irq, void *dev_id, struct pt_regs *regs)
+static irqreturn_t cbm_interrupt(int irq, void *dev_id)
 {
         POLL();         /* acknowledge interrupt */
 
@@ -814,9 +814,13 @@ static irqreturn_t cbm_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 
 
 /* discard return value from cbm_interrupt */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19))
 static void cbm_interrupt_pp(int irq, void *dev_id, struct pt_regs *regs)
+#else
+static void cbm_interrupt_pp(int irq, void *dev_id)
+#endif
 {
-    cbm_interrupt(irq, dev_id, regs);
+    cbm_interrupt(irq, dev_id);
 }
 
 
