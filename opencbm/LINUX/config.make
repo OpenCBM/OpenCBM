@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.7.4.3 2007-10-28 10:54:24 strik Exp $
+# $Id: config.make,v 1.7.4.4 2007-10-28 10:56:30 strik Exp $
 #
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
@@ -50,8 +50,10 @@ KERNEL_SOURCE = ${shell for d in {/lib/modules/`uname -r`/build,/usr/src/linux};
 #
 KERNEL_INCLUDE_CONFIG = ${shell for c in ${KERNEL_SOURCE}/include/linux/autoconf.h ${KERNEL_SOURCE}/include/linux/config.h; do test -f $$c && echo $$c; done | head -n 1}
 
+ifneq "$(KERNEL_INCLUDE_CONFIG)" ""
 ifeq "${shell basename ${KERNEL_INCLUDE_CONFIG}}" "config.h"
 KERNEL_DEFINE+=-DKERNEL_INCLUDE_OLD_CONFIG_H=1
+endif
 endif
 
 #
