@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2006-02-07 19:00:11 strik Exp $
+# $Id: Makefile,v 1.5.4.1 2007-10-28 11:29:01 strik Exp $
 
 include ../LINUX/config.make
 
@@ -26,6 +26,7 @@ all: $(SHLIB) $(LIB) $(SHLIBV) $(SHLIBV3)
 clean:
 	rm -f $(OBJS) $(SHOBJS) $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
 	rm -f $(LIBD64COPY)/*.o65 $(LIBCBMCOPY)/*.o65
+	rm -rf ar.tmp
 
 mrproper: clean
 	rm -f $(LIBCBMCOPY)/*.inc $(LIBD64COPY)/*.inc
@@ -51,10 +52,13 @@ $(SHLIBV): $(SHLIBV3)
 	ln -sf $< $@
 
 $(SHLIBV3): $(SHOBJS)
-	$(CC) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch.a
+	$(CC) -shared -o $@ $(SONAME)$(SHLIBV) $(SHOBJS) $(LIBARCH)/libarch_fpic.a
 
 $(LIB): $(OBJS)
-	$(AR) r $@ $(OBJS)
+	mkdir -p ar.tmp
+	cp $(LIBARCH)/libarch.a ar.tmp/
+	cd ar.tmp && $(AR) x libarch.a
+	$(AR) r $@ $(OBJS) ar.tmp/*.o
 
 ### dependencies:
 
