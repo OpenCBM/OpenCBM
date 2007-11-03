@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawwrite.c,v 1.9 2006-03-09 17:31:35 strik Exp $ \n
+** \version $Id: i_rawwrite.c,v 1.9.2.1 2007-11-03 18:35:31 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -208,13 +208,14 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, ULONG Count, ULON
         CBMIEC_SET(PP_DATA_OUT);
         CBMIEC_RELEASE(PP_ATN_OUT);
 
-        PERF_EVENT_VERBOSE(0x1032, 0);
-
-        cbmiec_udelay(libiec_global_timeouts.T_13_SEND_TURN_AROUND_LISTENER_TALKER_T_TK);
-
         PERF_EVENT_VERBOSE(0x1033, 0);
 
         CBMIEC_RELEASE(PP_CLK_OUT);
+
+        PERF_EVENT_VERBOSE(0x1032, 0);
+
+        while (!CBMIEC_GET(PP_CLK_IN) && !QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
+              ;
 
         PERF_EVENT_VERBOSE(0x1034, 0);
 
