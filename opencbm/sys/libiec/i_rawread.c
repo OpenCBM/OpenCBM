@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.10 2006-03-12 16:35:40 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.10.2.1 2007-11-03 18:39:12 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -228,7 +228,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
             // want to monopolize the complete CPU, schedule a
             // timeout every 256 bytes.
 
-            if (Count % 256)
+            if (received % 256)
             {
                 cbmiec_udelay(libiec_global_timeouts.T_7_RECV_INTER_BYTE_DELAY);
             }
