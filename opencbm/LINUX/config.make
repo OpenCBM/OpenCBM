@@ -1,5 +1,11 @@
-# $Id: config.make,v 1.7.4.4 2007-10-28 10:56:30 strik Exp $
+# $Id: config.make,v 1.7.4.5 2007-11-03 18:57:53 strik Exp $
 #
+
+
+# NEVER CHANGE THIS!
+# we rely on bash features, thus, we need bash to compile successfully!
+export SHELL=/bin/bash
+
 # choose your crossassembler (if you have one).
 # mandatory if you want to hack any of the 6502 sources.
 #
