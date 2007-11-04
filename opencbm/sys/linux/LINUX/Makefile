@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3.4.1 2007-10-28 10:27:00 strik Exp $
+# $Id: Makefile,v 1.3.4.2 2007-11-04 11:03:53 strik Exp $
 
 ifneq ($(KERNELRELEASE),)
 EXTRA_CFLAGS := $(CBM4LINUX_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
@@ -32,7 +32,7 @@ install: install-files
 	-depmod -a
 
 uninstall:
-	rm -f $(MODDIR)/cbm.o
+	rm -f $(MODDIR)/cbm.o $(MODDIR)/cbm.ko
 ifneq ($(UDEV_RULES),)
 	rm -f $(UDEV_RULES)/45-opencbm-parallel.rules
 endif
