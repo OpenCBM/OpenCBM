@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.7.4.5 2007-11-03 18:57:53 strik Exp $
+# $Id: config.make,v 1.7.4.6 2007-11-04 11:05:39 strik Exp $
 #
 
 
@@ -22,7 +22,7 @@ LIBDIR      = $(PREFIX)/lib
 MANDIR      = $(PREFIX)/man/man1
 INFODIR     = $(PREFIX)/info
 INCDIR      = $(PREFIX)/include
-MODDIR      = `for d in /lib/modules/\`uname -r\`/{extra,misc,kernel/drivers/char}; do test -d $$d && echo $$d; done | head -n 1`
+MODDIR      = `for d in /lib/modules/\`uname -r\`/{kernel/drivers/char,extra,misc}; do test -d $$d && echo $$d; done | head -n 1`
 UDEV_RULES  = /etc/udev/rules.d/
 
 

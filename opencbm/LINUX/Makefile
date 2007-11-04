@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6.2.2 2007-11-02 19:22:07 strik Exp $
+# $Id: Makefile,v 1.6.2.3 2007-11-04 11:05:39 strik Exp $
 
 include LINUX/config.make
 
@@ -121,7 +121,7 @@ showvars:
 
 	echo
 	echo EXTRA:
-	echo MODDIR ALL = `for d in /lib/modules/\`uname -r\`/{extra,misc,kernel/drivers/char}; do test -d $$d && echo $$d; done`
+	echo MODDIR ALL = `for d in /lib/modules/\`uname -r\`/{kernel/drivers/char,extra,misc}; do test -d $$d && echo $$d; done`
 	echo KERNEL_SOURCE ALL = ${shell for d in {/lib/modules/`uname -r`/build,/usr/src/linux}; do test -d $$d && echo $$d; done}
 
 	echo KERNEL_INCLUDE_CONFIG ALL = ${shell for c in ${KERNEL_SOURCE}/include/linux/autoconf.h ${KERNEL_SOURCE}/include/linux/config.h; do test -f $$c && echo $$c; done}
