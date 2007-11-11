@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.4 2006-03-04 14:08:19 strik Exp $ \n
+** \version $Id: openclose.c,v 1.4.4.1 2007-11-11 16:58:48 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -94,6 +94,11 @@ cbmiec_close(IN PDEVICE_EXTENSION Pdx, IN UCHAR Device, IN UCHAR Secaddr)
     buffer[0] = 0x20 | Device;
     buffer[1] = 0xe0 | Secaddr;
     ntStatus = cbmiec_i_raw_write(Pdx, buffer, 2, &sent, 1, 0);
+
+    if (NT_SUCCESS(ntStatus))
+    {
+        ntStatus = cbmiec_unlisten(Pdx);
+    }
 
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }
