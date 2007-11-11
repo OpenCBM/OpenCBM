@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.7 2007-11-03 18:39:12 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.8 2007-11-11 17:16:54 strik Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -601,6 +601,11 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                         buf[0] |= 0x20;
                         buf[1] |= (cmd == CBMCTRL_OPEN) ? 0xf0 : 0xe0;
                         rv = cbm_raw_write(buf, 2, 1, 0);
+                        if ((cmd == CBMCTRL_CLOSE) && (rv == 0)) {
+                          /* issue a unlisten */
+                          buf[0] = 0x3f;
+                          cbm_raw_write(buf, 1, 1, 0);
+                        }
                         return rv > 0 ? 0 : rv;
 
                 case CBMCTRL_GET_EOI:
