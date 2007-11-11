@@ -1,7 +1,7 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.5.4.1 2007-11-11 15:09:32 strik Exp $ -->
+<!-- $Id: opencbm.sgml,v 1.5.4.2 2007-11-11 17:19:11 strik Exp $ -->
 <title>OpenCBM 0.4.1 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
@@ -239,13 +239,10 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 
  <item>General:
   <itemize>
-  <item>@@@
-  </itemize>
-
- <item>General, Windows specific:
-  <itemize>
+  <item>Issue a UNLISTEN after a successfull cbm_close(). This was a deviation from the original protocol.
+        I don't know if this has any practical implications.
   <item>When doing transfers, give the kernel time to `breath' between the singled bytes (code was already there,
-        but erroneous) (found by Till Harbaum for Linux)
+        but erroneous) (found by Till Harbaum)
   </itemize>
 
  <item>Linux driver:
@@ -254,14 +251,12 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
   <item>Fixed build errors with newer Linux kernels (Spiro Trikaliotis, Frédéric Brière)
   <item>Fixed build errors with AMD64 targets (Spiro Trikaliotis, Frédéric Brière)
   <item>Implementation of cbm_setrelease() was wrong, as only only lines was modified (fixed by Till Harbaum)
-  <item>When doing transfers, give the kernel time to `breath' between the singled bytes (code was already there,
-        but erroneous) (fixed by Till Harbaum)
   <item>Remove all files on uninstall
   </itemize>
 
  <item>Windows driver:
   <itemize>
-  <item>@@@
+  <item>If the parallel port supported neither ECP nor EPP, OpenCBM refused to load. Fixed this.
   </itemize>
 </itemize>
 
