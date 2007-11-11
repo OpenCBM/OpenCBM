@@ -1,15 +1,15 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.5 2006-04-29 07:47:52 strik Exp $ -->
-<title>opencbm 0.4.0 Users Guide
+<!-- $Id: opencbm.sgml,v 1.5.4.1 2007-11-11 15:09:32 strik Exp $ -->
+<title>OpenCBM 0.4.1 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
 name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de/" name="d81.de">
-<!-- _DATE_ --><date>2006-04-28
+<!-- _DATE_ --><date>2007-11-11
 
 <abstract>
-This document describes the opencbm package, a Linux kernel module and Windows
+This document describes the OpenCBM package, a Linux kernel module and Windows
 kernel mode driver, and a few user space support programs to control and use
 serial devices as used by most Commodore (CBM) 8-bit machines.
 </abstract>
@@ -25,7 +25,7 @@ serial devices as used by most Commodore (CBM) 8-bit machines.
 <p>
 The popular Commodore 8-bit home-computers like the C-64 and the VIC-20 are
 using a custom serial bus to talk to attached devices (disk drive, printer).
-The opencbm kernel module provides an interface to this so-called IEC bus at
+The OpenCBM kernel module provides an interface to this so-called IEC bus at
 the level of simple TALK and LISTEN commands, similar to the one provided by
 the Commodore kernel routines. Additionally, some higher and lower level bus
 control is available as well, allowing for full control of the bus. The serial
@@ -33,11 +33,11 @@ devices are connected to the PC's parallel port via an XM1541 or XA1541 cable
 and, optionally, an XP1541 or XP1571 add-on cable. For cables, cf. <ref
 id="cable" name="cable">.
 
-<sect1>Introduction to opencbm<label id="introduction">
+<sect1>Introduction to OpenCBM<label id="introduction">
 
 <p>
-This is version 0.4.0 of opencbm, a kernel device driver for the serial CBM bus
-(C64, VIC-20, etc.) for Linux and Windows. opencbm is a re-join of the two
+This is version 0.4.1 of OpenCBM, a kernel device driver for the serial CBM bus
+(C64, VIC-20, etc.) for Linux and Windows. OpenCBM is a re-join of the two
 projects cbm4linux (latest standalone version: 0.3.2) and cbm4win (latest
 standalone version: 0.1.0a). It should be noted that both projects were highly
 related from the beginning, as cbm4win 0.1.0 was based on cbm4linux 0.3.2.
@@ -80,33 +80,45 @@ damage or data loss caused by it or by any use of it.
 <sect1>Supported operating systems<label id="supported-os">
 
 <p>
-<it/opencbm/ supports the following operating systems:
+<it/OpenCBM/ supports the following operating systems:
 
 <itemize>
-<item>Linux 2.4 and 2.6; 2.0 and 2.2 might still work, but have not been tested
-      for ages. For Linux, i386 and AMD64 architectures are supported.
-<item>Windows NT 4.0, 2000, XP and Server 2003. The i386 architecture is fully
+<item>Linux distributions based on the Linux kernels 2.4 and 2.6;
+      Kernels based on 2.0 and 2.2 might still work, but have not been tested
+      for ages. For Linux, i386 and AMD64 architectures have been tested so far.
+<item>Windows NT 4.0, 2000, XP, Server 2003 and Vista. The i386 architecture is fully
       supported; additionally, there are experimental AMD64 and iA64 versions
-      available.
+      available. Note that OpenCBM will not work on Vista 64 bit versions, as
+      the driver is not signed.
 </itemize>
 
 <sect1>Supported CBM hardware<label id="supported-drives">
 
 <p>
-Currently, opencbm supports the following CBM devices:
+Currently, OpenCBM supports the following CBM devices:
 
 <itemize>
 <item>VIC 1541 (all variants, including VIC 1540 and clones)
 <item>VIC 1570
 <item>VIC 1571
 <item>VIC 1581 (not with d64copy, not with cbmformat or cbmforng)
+<item>The IEC2IEEE (<htmlurl url="http://home.arcor.de/jochen.adler/ajnhome.htm"
+  name="http://home.arcor.de/jochen.adler/ajnhome.htm">) adapter
 <item>other CBM IEC drives, printers, and compatibles (only with cbmctrl)
 </itemize>
 
 <sect1>Cables<label id="cable">
 
 <p>
-A standard X(E)1541 cable won't work with _this_ driver. In fact, there will
+First of all, note that you need a parallel port cannot directly to your
+system bus on your machine. That is, the parallel port should be on your
+mainboard, or it should reside on a ISA card. A PCI card might work, but
+we have not need much success with them, cf. <ref id="knownbugs" name="Known
+Bugs">. Note also that a USB-to-parallel port connector will not work
+by design!
+
+<p>
+A standard X(E)1541 cable won't work with this driver. In fact, there will
 probably never be a multitasking OS which works with one of these, that's why
 we call it XM1541, M for Multi­ tasking. Anyway, if you have a XE1541, the
 necessary modification is simple:
@@ -208,7 +220,7 @@ of the same connections as the XM1541, but instead of using diodes, it uses
 transistors which drive the lines better. Because of this difference, the logic
 for outputs is reversed between the XA1541 and the XM1541.
 
-<p>Additionally to the cable types above, opencbm also supports XP1541 and
+<p>Additionally to the cable types above, OpenCBM also supports XP1541 and
 XP1571 parallel cables, which have to be used <em>in conjunction</em> with the
 XM1541 or XA1541 cable.
 
@@ -221,7 +233,39 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 
 <p>
 <descrip>
-<tag/opencbm v0.4.0:/
+<tag/OpenCBM v0.4.1 (2007-11-11):/
+
+<itemize>
+
+ <item>General:
+  <itemize>
+  <item>@@@
+  </itemize>
+
+ <item>General, Windows specific:
+  <itemize>
+  <item>When doing transfers, give the kernel time to `breath' between the singled bytes (code was already there,
+        but erroneous) (found by Till Harbaum for Linux)
+  </itemize>
+
+ <item>Linux driver:
+  <itemize>
+  <item>The build system is more robust regarding the shell used. It now specifically asks for bash.
+  <item>Fixed build errors with newer Linux kernels (Spiro Trikaliotis, Frédéric Brière)
+  <item>Fixed build errors with AMD64 targets (Spiro Trikaliotis, Frédéric Brière)
+  <item>Implementation of cbm_setrelease() was wrong, as only only lines was modified (fixed by Till Harbaum)
+  <item>When doing transfers, give the kernel time to `breath' between the singled bytes (code was already there,
+        but erroneous) (fixed by Till Harbaum)
+  <item>Remove all files on uninstall
+  </itemize>
+
+ <item>Windows driver:
+  <itemize>
+  <item>@@@
+  </itemize>
+</itemize>
+
+<tag/OpenCBM v0.4.0 (2006-04-28):/
 
 <itemize>
 
@@ -242,7 +286,7 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
   <item>compiles for AMD64, iA64, i386 (Windows only)
   <item>VDD to allow DOS programs to access cbm4win
   <item>new unit file for Delphi, to allow to access cbm4win from Delphi
-  <item>New project opencbmvice for debugging with the help of VICE (<htmlurl
+  <item>New project OpenCBMvice for debugging with the help of VICE (<htmlurl
   url="http://www.viceteam.org/" name="http://www.viceteam.org/">). For this, a
   special version of VICE is needed.
   </itemize>
@@ -351,14 +395,14 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 <sect>Installation<label id="installation">
 
 <p>
-Depending on the system you are running opencbm on, there are different ways to
-install opencbm. Use the appropriate category for you:
+Depending on the system you are running OpenCBM on, there are different ways to
+install OpenCBM. Use the appropriate category for you:
 
-<sect1>Installing opencbm on Linux (cbm4linux)<label id="cbm4linux-install">
+<sect1>Installing OpenCBM on Linux (cbm4linux)<label id="cbm4linux-install">
 
 <p>
 The kernel module (cbm.o) does not require any kernel patches and should
-compile right out of the box, at least with kernel 2.2.x and 2.4.x, but 2.0.x
+compile right out of the box, at least with kernel 2.2.x, 2.4.x and 2.6.x, but 2.0.x
 might still work as well.
 
 If you intend to modify the drive routines for `d64copy' and `cbmformat' you
@@ -369,7 +413,7 @@ url="http://www.lb.shuttle.de/puffin/cbm4linux/"
 name="http://www.lb.shuttle.de/puffin/cbm4linux/">; Note: xa has not been tested
 lately, and might not work anymore) and Ullrich von Bassewitz' `cl65' (comes
 with cc65, <htmlurl url="http://www.cc65.org/" name="http://www.cc65.org/">).
-Starting with version cbm4linux 0.2.3, opencbm includes precompiled 6502
+Starting with version cbm4linux 0.2.3, OpenCBM includes precompiled 6502
 binaries, so as long as you don't touch the .a65 files, there's no need for a
 crossassembler.
 
@@ -379,7 +423,7 @@ process. Additionally, all files needed to built Debian .DEB packages are
 included. If you upgrade from a previous (non-RPM and non-DEB) version and want
 to install a packetized binary version (RPM or DEB), don't forget to remove the
 old files hanging aroung (just do "<it/make uninstall/", preferably in the
-*old* source directory. For a >= 0.4.0 version of opencbm, change the line to
+*old* source directory. For a >= 0.4.0 version of OpenCBM, change the line to
 "<it>make -f LINUX/Makefile uninstall</it>".).
 
 <sect2>Compile-time configuration
@@ -400,7 +444,7 @@ Type
 to  build  the  kernel module, libraries and utility programs (no
 root privileges required),
 
-<item><it>make -f LINUX/Makefile dev</it>    (as root)
+<item><it>make -f LINUX/Makefile dev</it>    (as root; only needed if you do not use UDEV (<htmlurl url="http://en.wikipedia.org/wiki/Udev" name="http://en.wikipedia.org/wiki/Udev">)
 
 to   create   the  character  device "/dev/cbm" with major 10 and
 minor 177 (this number is registered,  so  it  shouldn't  collide
@@ -421,8 +465,8 @@ should now be able to load the driver module by issuing (as root)
 <p>
 <itemize>
 <item><it>/sbin/depmod</it>
-<item><it>/sbin/modprobe parport</it>      (unless compiled into the kernel)
-<item><it>/sbin/insmod cbm lp=</it>your_lp   (usually 0, which is default)
+<item><it>/sbin/modprobe parport</it>      (unless parport is compiled into the kernel, or already loaded)
+<item><it>/sbin/modprobe cbm lp=</it>your_lp   (usually 0, which is default); if you only have one parallel port, you can also use <it>/sbin/modprobe cbm</it> instead)
 </itemize>
 
 <p>
@@ -430,7 +474,7 @@ or, when built with -DDIRECT_PORT_ACCESS:
 
 <p>
 <itemize>
-<item><it>/sbin/insmod cbm port=your_ioport irq=your_irq</it>
+<item><it>/sbin/modprobe cbm port=your_ioport irq=your_irq</it>
 (default is 0x378 for port, 7 for irq)
 </itemize>
 
@@ -514,9 +558,9 @@ some older SuSE systems)
 With [options] being one or more of:
 
 <itemize>
-<item><it/lp=*lp*/       (parport only, as used in <it>/sbin/insmod</it> above)
-<item><it/irq=*irq*/     (direct port only, as used in <it>/sbin/insmod</it> above)
-<item><it/port=*port*/   (direct port only, as used in <it>/sbin/insmod</it> above)
+<item><it/lp=*lp*/       (parport only, as used in <it>/sbin/modprobe</it> above)
+<item><it/irq=*irq*/     (direct port only, as used in <it>/sbin/modprobe</it> above)
+<item><it/port=*port*/   (direct port only, as used in <it>/sbin/modprobe</it> above)
 <item><it/cable=*n*/      force cable type:
  <itemize>
  <item>               -1  for autodetection (default)
@@ -533,11 +577,76 @@ With [options] being one or more of:
  </itemize>
 </itemize>
 
+<sect2>Security considerations
+
 <p>
-Congratulation, you have successfully set up your opencbm installation!
+By default, OpenCBM installs the device driver so that anyone has access to
+the CBM devices:
+
+<tscreen><verb>
+    $ ls -l /dev/cbm
+    crw-rw-rw- 1 root root 10, 177 2007-11-11 14:34 /dev/cbm
+</verb></tscreen>
+
+You might want to change this behaviour to control more specifically who is
+allowed to use OpenCBM, and who is not.
+
+The best way is to define a group (for example, `cbmuser') and restrict the
+access rights to the owner (root) and this group (cbmuser) only.
+
+I assume you already have defined a group `cbmuser', for example, by using
+groupadd(8) (all Linux variants) or addgroup(8) (all Debian based Linux
+distributions).
+
+Now, you can restrict the access by two different means, depending upon if you
+are using devfs or udev:
+<itemize>
+<item>If you are using devfs (all Linux kernels prior to
+ 2.6.0), this can be done by issuing the commands
+
+ <tscreen><verb>
+    $ chmod 660 /dev/cbm
+    $ chgrp cbmuser /dev/cbm
+    $ ls -l /dev/cbm
+    crw-rw---- 1 root cbmuser 10, 177 2007-11-11 14:34 /dev/cbm
+ </verb></tscreen>
+<item>If you are using udev (newer 2.6.x kernels) instead, you have to modify
+ the file /etc/udev/rules.d/45-opencbm-parallel.rules. It looks like follows:
+ <tscreen><verb>
+ACTION!="add", GOTO="opencbm_plugin_xa1541_rules_end"
+
+# xa1541/xm1541 parallel port driver
+KERNEL=="cbm", GROUP="root", MODE="0666"
+
+LABEL="opencbm_plugin_xa1541_rules_end"
+ </verb></tscreen>
+
+To change the group to another one, change the part `root' in `GROUP="root"' 
+by the name of the group you want to use. To change the access mode,
+change `MODE="0666"' to `MODE="0660"', so your files looks like:
+ <tscreen><verb>
+ACTION!="add", GOTO="opencbm_plugin_xa1541_rules_end"
+
+# xa1541/xm1541 parallel port driver
+KERNEL=="cbm", GROUP="cbmuser", MODE="0660"
+
+LABEL="opencbm_plugin_xa1541_rules_end"
+ </verb></tscreen>
+
+ For your changes to take effect, issue
+ <tscreen><verb>
+ $ rmmod cbm
+ $ modprobe cbm
+ </verb></tscreen>
+ You might also want to adjust the file `sys/linux/45-opencbm-parallel.rules', which
+ is used when installing the OpenCBM driver out of the source package.
+</itemize>
+
+<p>
+Congratulation, you have successfully set up your OpenCBM installation!
 
 
-<sect1>Installing opencbm on Windows (cbm4win)<label id="cbm4win-install">
+<sect1>Installing OpenCBM on Windows (cbm4win)<label id="cbm4win-install">
 
 <p>
 <it/WARNING! If you have already installed a previous version of CBM4WIN on your
@@ -607,7 +716,7 @@ type: "<it/instcbm --lpt=X --update/"
 
 <sect>Checking if the installation is complete
 <p>
-After you installed opencbm (cf. <ref id="installation" name="Installation">,
+After you installed OpenCBM (cf. <ref id="installation" name="Installation">,
 it is wise to check if the installation works as expected. For this, do the
 following:
 
@@ -748,7 +857,7 @@ programs are included with this package:
 
 <sect1>instcbm (Windows only)<label id="instcbm">
 <p>
-<it/instcbm/ is used on Windows to install the opencbm driver.
+<it/instcbm/ is used on Windows to install the OpenCBM driver.
 
 <sect2>instcbm invocation<label id="instcbm command structure">
 <p>Synopsis: <tt>instcbm <it>[options]</it></tt>
@@ -812,7 +921,7 @@ The opposite of <it/--automatic/.
 
 <p>
 Install the driver and the DLL on the machine. The driver and the DLL
-are copied into the Windows system directory, so opencbm can be used from
+are copied into the Windows system directory, so OpenCBM can be used from
 every program:
 <code>
 instcbm
@@ -832,7 +941,7 @@ instcbm --check
 </code>
 
 <p>
-Remove the driver from the system. You will not be able to use opencbm
+Remove the driver from the system. You will not be able to use OpenCBM
 after this command, unless you re-install it. If files were copied into
 the Windows system directory, they will be removed:
 <code>
@@ -840,14 +949,14 @@ instcbm --remove
 </code>
 
 <p>
-After opencbm has been installed (with <it/instcbm/>), change the parallel
+After OpenCBM has been installed (with <it/instcbm/>), change the parallel
 port to be used to 2:
 <code>
 instcbm --lpt=2 --update
 </code>
 
 <p>
-Install opencbm, directly specifying LPT3 as the parallel port to use:
+Install OpenCBM, directly specifying LPT3 as the parallel port to use:
 <code>
 instcbm --lpt=3
 </code>
@@ -903,7 +1012,7 @@ on a special action together with its arguments and parameters
 <tag>detect</tag>
 <p>Detect all drives on the IEC bus
 <tag>lock</tag>
-<p>Lock the parallel port for opencbm (cbm4linux/cbm4win) use
+<p>Lock the parallel port for OpenCBM (cbm4linux/cbm4win) use
 <tag>unlock</tag>
 <p>Unlock the parallel port from exclusive usage
 <tag>listen</tag>
@@ -984,18 +1093,18 @@ for disk drives only).
 
 <label id="action-lock">
 <tag>lock</tag>
-This command locks the parallel port for the use by opencbm, so that
+This command locks the parallel port for the use by OpenCBM, so that
 sequences of e.g. <it/talk//<it/read//<it/untalk or <it/listen//<it/write//<it/unlisten/
 are not broken by concurrent processes wanting to access the parallel port.
 
-You should issue <it/cbmctrl lock/ before doing any access to opencbm tools,
+You should issue <it/cbmctrl lock/ before doing any access to OpenCBM tools,
 and <it/cbmctrl unlock/ after you are done.
 
 <label id="action-unlock">
 <tag>unlock</tag>
-This command unlocks the parallel port after the use by opencbm.
+This command unlocks the parallel port after the use by OpenCBM.
 
-You should issue <it/cbmctrl lock/ before doing any access to opencbm tools,
+You should issue <it/cbmctrl lock/ before doing any access to OpenCBM tools,
 and <it/cbmctrl unlock/ after you are done.
 
 <label id="action-listen">
@@ -1517,7 +1626,7 @@ transfer times will dramatically increase.
 
 <tag>-w, --warp</tag>
 Enable warp mode. This is default now; this option is only supported for
-backward-compatibility with opencbm (cbm4linux/cbm4win) versions before 0.4.0.
+backward-compatibility with OpenCBM (cbm4linux/cbm4win) versions before 0.4.0.
 
 <tag>--no-warp</tag>
 Disable warp mode. Warp mode is usually a good idea for transferring disk
@@ -1767,7 +1876,7 @@ cbmctrl unlock
 </code>
 
 
-<sect>opencbm API<label id="opencbm-API">
+<sect>OpenCBM API<label id="opencbm-API">
 <p>
 All communication between the user space applications and the kernel module
 is done with ioctl's. Since ioctl's are quite unportable and hardly provide
@@ -2016,7 +2125,7 @@ Types and prototypes are defined in <tt/cbmcopy.h/.
 
 <sect>Known bugs and problems<label id="knownbugs">
 <p>
-There are some known bugs in opencbm:
+There are some known problems in OpenCBM:
 
 <itemize>
 <item><it/cbmcopy/ is still known to have some protocol races, especially with
@@ -2025,16 +2134,17 @@ There are some known bugs in opencbm:
  recognize the drive type if some custom ROM is used.
 <item>Windows: If you have any other devices connected to your parallel port,
  you cannot use them as long as cbm4win is installed. In this case, either
- remove opencbm whenever you want to access that other device, or install
- opencbm with <it/instcbm --lock=no/ and make sure to issue <it/cbmctrl lock/
+ remove OpenCBM whenever you want to access that other device, or install
+ OpenCBM with <it/instcbm --lock=no/ and make sure to issue <it/cbmctrl lock/
  before accessing the drive, and <it/cbmctrl unlock/ afterwards.
-<item>Windows: No third party PCI parallel port card does work with
-  opencbm on Windows currently; to say it with other words: there
-  is no proof or positive report that any third party PCI
-  parallel port card does or did work with opencbm on Windows. The exact
-  failure reason is not known to date, but we are investigating
-  further since that feature is a must, when integrated parallel
-  ports were removed from mainstream mainboards in the future.
+<item>Windows: Third party PCI parallel port cards are problematic.
+  In fact, I tried several, but none of them did work with
+  OpenCBM on Windows currently. Anyway, I have had at least one positive
+  report that this is possible.
+  It seems the drivers for such parallel port cards do not specifically
+  allow the interrupt to be routed to the PC, as most parallel devices
+  nowadays do not need the interrupt. Unfortunately, this is not true
+  for OpenCBM, which actually needs it!
 </itemize>
 
 <sect>Misc
@@ -2053,7 +2163,7 @@ The XA1541 cable (C) by Michael Klein and Nicolas Welte
 <sect1>Contributions
 
 <p>
-People who directly or indirectly contributed to opencbm (in no particular
+People who directly or indirectly contributed to OpenCBM (in no particular
 order):
 
 <itemize>
@@ -2062,7 +2172,7 @@ order):
 part)
 <item>
 <it>Joe Forster/STA</it> made the Star Commander and supplied the source and
-about the X?1541 interfaces; who knows, without this work, opencbm might never
+about the X?1541 interfaces; who knows, without this work, OpenCBM might never
 have appeared at all.
 <item>
 <it/Nicolas Welte/ helped with the XA1541 and XM1541 interfaces and supplied a
@@ -2079,6 +2189,21 @@ whenever it was needed.
 <item>
 <it/Spiro Trikaliotis/ with discussions, lots of fixes and doing an overall
 great review while porting the driver to "other" operating systems ;-)
+<item>
+<it/Andreas Senk/ reported a problem with <htmlurl
+ url="http://home.arcor.de/jochen.adler/ajnhome.htm" name="IEC2IEEE"> and donated
+ an IEC2IEEE device. This led to the discovery of a severe protocol bug in the
+ implementation of OpenCBM.
+<item>
+<it/Jochen Alder/, author of <htmlurl
+ url="http://home.arcor.de/jochen.adler/ajnhome.htm" name="IEC2IEEE">, helped
+ in debugging the problem Andreas Senk reported (cf. above).
+<item>
+<it/Till Harbaum/ found some bugs while working on the
+<htmlurl url="http://www.harbaum.org/till/xu1541/index.shtml" name="XU1541">
+<item>
+<it/Frédéric Brière/ prepared a Debian package of OpenCBM. While he was doing
+this, he discovered some problems and fixed them.
 </itemize>
 
 <p>
@@ -2090,9 +2215,17 @@ And anyone else who sent patches, suggestions, praises & flames!
 Feel free to drop a note if you have ideas, patches etc. or if you just want to
 tell how happy you are with this program ;-)
 
+<p>
+If possible, we would prefer if you send bug reports, patches and wishlist
+itemts to the <htmlurl url="http://sf.net/" name="SourceForge"> tracker on
+<htmlurl url="http://sourceforge.net/tracker/?group_id=122047"
+name="http://sourceforge.net/tracker/?group_id=122047">, and general
+discussions on the SourceForge mailing list `opencbm-user' on <htmlurl
+url="http://sourceforge.net/mail/?group_id=122047"
+name="http://sourceforge.net/mail/?group_id=122047">.
 
 Have fun,
 
-The opencbm team.
+The OpenCBM team.
 
 </article>
