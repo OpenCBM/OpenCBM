@@ -8,7 +8,7 @@ Signature = "$Chicago$"
 Class     = OpenCBM4Wdm
 ClassGuid = {270C079C-E1CE-49cf-B8C9-80DC4C33221F}
 Provider  = %Spiro%
-DriverVer = 04/28/2006,0.4.0
+DriverVer = 11/11/2007,0.4.1
 Catalogfile = cbm4wdm.cat ; in case we decide to sign that driver some day...
 
 ;

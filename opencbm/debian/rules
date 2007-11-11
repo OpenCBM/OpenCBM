@@ -20,7 +20,7 @@ endif
 subdirs="include arch/linux lib cbmctrl cbmformat d64copy cbmcopy docs"
 
 # shared library versions, option 1
-version=0.4.0
+version=0.4.1
 major=0
 # option 2, assuming the library is created as src/.libs/libfoo.so.2.0.5 or so
 #version=`ls src/.libs/lib*.so.* | \

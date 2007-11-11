@@ -1,5 +1,5 @@
 
-              README for opencbm/cbm4linux 0.4.0
+              README for opencbm/cbm4linux 0.4.1
               ----------------------------------
 
 This README is not maintained separately, but has been integrated
@@ -11,6 +11,9 @@ Either built it yourself:
   cd docs/
   make -f LINUX/Makefile
 
+or have a look at the online version at
+
+  http://opencbm.trikaliotis.net/
 
 The documentation comes in ASCII, DVI, HTML and Texinfo. If you have the
 GNU info program installed you can access the latter one with

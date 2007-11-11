@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.7.4.6 2007-11-04 11:05:39 strik Exp $
+# $Id: config.make,v 1.7.4.7 2007-11-11 17:48:41 strik Exp $
 #
 
 
@@ -93,7 +93,7 @@ KERNEL_FLAGS = ${KERNEL_DEFINE}
 #
 MAJ = 0
 MIN = 4
-REL = 0
+REL = 1
 
 VERSION = '"$(MAJ).$(MIN).$(REL)"'
 
