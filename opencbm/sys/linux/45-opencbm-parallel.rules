@@ -1,6 +1,0 @@
-ACTION!="add", GOTO="opencbm_plugin_xa1541_rules_end"
-
-# xa1541/xm1541 parallel port driver
-KERNEL=="cbm", GROUP="root", MODE="0666"
-
-LABEL="opencbm_plugin_xa1541_rules_end"
