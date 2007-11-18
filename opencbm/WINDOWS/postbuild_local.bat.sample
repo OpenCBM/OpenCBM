@@ -1,4 +1,4 @@
-rem $Id: postbuild_local.bat.sample,v 1.6.4.1 2007-11-11 17:48:42 strik Exp $
+rem $Id: postbuild_local.bat.sample,v 1.6.4.2 2007-11-18 13:04:09 strik Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR POSTBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
@@ -25,7 +25,7 @@ if not defined DDKBUILD_PLATFORM set DDKBUILD_PLATFORM=i386
 for /f "tokens=3 delims=, " %%f in ('%1\bin\%DDKBUILD_PLATFORM%\cbmctrl.exe --version') do set VERSION=%%f
 echo Version is set to: %VERSION%
 
-set REPLVERSTRING=sed s/%VERSION%/0.4.1/g
+set REPLVERSTRING=sed s/%VERSION%/0.4.2/g
 REM set REPLVERSTRING=cat
 (
 	setlocal

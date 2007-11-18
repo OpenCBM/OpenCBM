@@ -1,4 +1,10 @@
-cbm4linux (0.4.1-1) unstable; urgency=low
+copencbm (0.4.2-1) unstable; urgency=low
+
+  * new version
+
+ -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Sun, 18 Nov 2007 12:36:44 +0100
+
+opencbm (0.4.1-1) unstable; urgency=low
 
   * new version
 

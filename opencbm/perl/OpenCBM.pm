@@ -6,14 +6,14 @@
 #
 #  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 #
-#  $Id: OpenCBM.pm,v 1.3.4.1 2007-11-11 17:48:44 strik Exp $
+#  $Id: OpenCBM.pm,v 1.3.4.2 2007-11-18 13:04:09 strik Exp $
 
 package OpenCBM;
 
 use IO::File;
 use IO::Handle;
 
-my $VERSION = '0.4.1';
+my $VERSION = '0.4.2';
 
 # _IO constants, from cbm_module.h
 my $CBMCTRL_TALK=0xcb00;

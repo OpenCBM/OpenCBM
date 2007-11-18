@@ -1,5 +1,5 @@
 %define name opencbm
-%define ver 0.4.1
+%define ver 0.4.2
 Summary: OPENCBM/CBM4Linux kernel module, runtime libraries and utilities
 Name: %{name}
 Version: %{ver}

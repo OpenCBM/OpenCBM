@@ -1,12 +1,12 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.5.4.2 2007-11-11 17:19:11 strik Exp $ -->
-<title>OpenCBM 0.4.1 Users Guide
+<!-- $Id: opencbm.sgml,v 1.5.4.3 2007-11-18 13:04:09 strik Exp $ -->
+<title>OpenCBM 0.4.2 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
 name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de/" name="d81.de">
-<!-- _DATE_ --><date>2007-11-11
+<!-- _DATE_ --><date>2007-11-18
 
 <abstract>
 This document describes the OpenCBM package, a Linux kernel module and Windows
@@ -36,7 +36,7 @@ id="cable" name="cable">.
 <sect1>Introduction to OpenCBM<label id="introduction">
 
 <p>
-This is version 0.4.1 of OpenCBM, a kernel device driver for the serial CBM bus
+This is version 0.4.2 of OpenCBM, a kernel device driver for the serial CBM bus
 (C64, VIC-20, etc.) for Linux and Windows. OpenCBM is a re-join of the two
 projects cbm4linux (latest standalone version: 0.3.2) and cbm4win (latest
 standalone version: 0.1.0a). It should be noted that both projects were highly
@@ -233,6 +233,18 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 
 <p>
 <descrip>
+<tag/OpenCBM v0.4.2 (2007-11-18):/
+
+<itemize>
+ <item>Windows:
+  <itemize>
+  <item>Added upgrade instructions to the manual
+  <item>The 0.4.1 Windows binary release was not wrong, but the resulting binary files were way to
+        big. Additionally, the documentation was missing. Fixed that. (Found by Joe Forster)
+  </itemize>
+</itemize>
+
+<descrip>
 <tag/OpenCBM v0.4.1 (2007-11-11):/
 
 <itemize>
@@ -387,6 +399,24 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 
 </descrip>
 
+<sect>Upgrading OpenCBM from an older installation<label id="upgrading">
+
+<p>
+Currently, OpenCBM does not support a upgrade other than completely uninstalling
+it, and re-installing it from scratch. Have a look at the uninstall instructions
+for Linux (<ref id="cbm4linux-uninstall">) and the corresponding install
+instructions (<ref id="cbm4linux-install">) or for Windows (<ref
+id="cbm4win-uninstall", <ref id="cbm4win-install">).
+
+
+<sect>Uninstallation/Removal <label id="uninstallation">
+
+<p>
+Depending on the system you are running OpenCBM on, there are different ways to
+remove OpenCBM from your system. Use the appropriate category for you:
+
+
+<p>
 <sect>Installation<label id="installation">
 
 <p>
@@ -791,6 +821,42 @@ You can have a look at the available cbmctrl commands by issuing cbmctrl on
 your command line, or look at <ref id="cbmctrl" name="cbmctrl">. For the other
 programs, you get help by issuing the "--help" option, or look at the
 appropriate section in <ref id="utilities" name="utilities">.
+
+<sect1>Uninstalling OpenCBM on Linux (cbm4linux)<label id="cbm4linux-uninstall">
+
+<p>
+When running OpenCBM on Linux, you need the source distribution to remove
+it from your machine. Just run the following commands with root privileges to
+remove it:
+
+<itemize>
+<item><it>rmmod cbm</it>    (to ensure the module is not loaded anymore)
+<item><it>make -f LINUX/Makefile uninstall</it>    (to remove OpenCBM from the system)
+</itemize>
+
+<p>
+If you are uninstalling OpenCBM to upgrade it, proceed with <ref id="cbm4linux-install">.
+
+
+<sect1>Uninstalling OpenCBM on Windows (cbm4win)<label id="cbm4win-uninstall">
+
+<p>
+When running OpenCBM on Windows, just run the following commands with
+administrative rights to remove it:
+
+<itemize<
+<item>Get a command-line (Start/Run, and type "<it/cmd.exe/"), change into the
+directory you unpackaged the drivers into (with "<it/cd/").
+
+<item>Type "<it/cd exe/"
+
+<item>Type "<it/instcbm -r/" and check the outputs.
+<item>If the outputs from the previous command do not report success, reboot
+      the machine. OpenCBM will be removed on next reboot.
+</itemize>
+
+<p>
+If you are uninstalling OpenCBM to upgrade it, proceed with <ref id="cbm4win-install">.
 
 <sect>Utilities<label id="utilities">
 
