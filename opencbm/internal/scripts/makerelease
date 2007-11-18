@@ -2,6 +2,8 @@
 
 SYMSTORELOC=\\\\sieg\\transfer\\symstore
 
+AVAILABLE_ARCHS=i386 ia64 amd64 i386checked ia64checked amd64checked
+
 if [ "$3" = "" ]; then
 	echo "Usage: $0 MAJORVER MINORVER SUBVER [DEVELVER [chk|fre]]"
 	exit 1
@@ -48,67 +50,114 @@ else
 	esac
 fi
 
+ORIG=`pwd`
+
 echo MAKING RELEASE $VERSION, Tag $TAGVERSION
 
 sleep 10
 
-if [ -d /tmp/make-cbm4win ]; then
-	echo "/tmp/make-cbm4win already exists, before we generated it!"
+if [ -d /tmp/make-opencbm ]; then
+	echo "/tmp/make-opencbm already exists, before we generated it!"
 	exit 1
 fi
 
-mkdir /tmp/make-cbm4win/
+mkdir /tmp/make-opencbm/
 
-if [ ! -d /tmp/make-cbm4win ]; then
-	echo "COULD NOT GENERATE /tmp/make-cbm4win/"
+if [ ! -d /tmp/make-opencbm ]; then
+	echo "COULD NOT GENERATE /tmp/make-opencbm/"
 	exit 1
 fi
-cd /tmp/make-cbm4win/
-cvs co -r cbm4win-$TAGVERSION cbm4win
-cd cbm4win
+cd /tmp/make-opencbm/
+cvs co -r opencbm-$TAGVERSION opencbm
+cd opencbm
+
+chmod 700 WINDOWS/buildinc internal/scripts/*
+
+cat > ../DDKBUILD_LOCAL.BAT <<!
+
+set BASEDIR=
+set W2KBASE=
+set WXPBASE=
+set WNETBASE=d:\WINDDK\3790.1830
+
+set CYGWIN=d:\programme\cygwin
+set BASH=%CYGWIN%\bin\bash
+
+set COPYTARGET=
+set COPYSYM=
+
+set DDKBUILD_HOLLIS=1
+set CMDARGUMENTS=
+set DDKBUILD_QUIET_VERBOSE=-quiet
+set DDKBUILD_CMD_HOLLIS=ddkbuild.bat
+
+set WINSED=D:\Programme\Cygwin\bin\sed.exe
+
+rem Settings for the BASH CC65 build process:
+
+set CC65PATH=/usr/local/bin/
+
+set CL65=%CC65PATH%cl65
+set LD65=%CC65PATH%ld65
+set OD=/usr/bin/od
+set SED=/usr/bin/sed
+set RM=/usr/bin/rm
+
+set XU1541DIR=d:\home\trikalio\cbm\xu1541\include
+!
 
 ./WINDOWS/buildinc
 
-cmd /c WINDOWS\\ddkbuild_start $CHKFRE -cZ
+#cmd /c WINDOWS\\ddkbuild_start $CHKFRE -cZ
+cmd /c internal\\scripts\\buildall.bat
 
-cd bin/i386/
+for ARCH in $AVAILABLE_ARCHS; do
 
-mkdir exe
-mkdir exe/exe
-mkdir pdb
-cp -p *.exe *.sys *.dll exe/exe/
-cp -p *.pdb pdb/
-cp -p ../../COPYING exe/
-cat >> exe/README.TXT <<+
-  cbm4win $VERSION - for documentation, look into the DOC directory.
+	cd bin/$ARCH/
+
+	mkdir exe
+	mkdir exe/exe
+	mkdir pdb
+	cp -p *.exe *.sys *.dll exe/exe/
+	cp -p *.pdb pdb/
+	cp -p ../../COPYING exe/
+	cat >> exe/README.TXT <<+
+  opencbm $VERSION - for documentation, look into the DOC directory.
 +
 
-cd exe/
-zip -r ../../../../../cbm4win-$VERSION.zip *
+	cd exe/
+	zip -r ../../../../../opencbm-$VERSION-$ARCH.zip *
+	cd ..
+	zip -r ../../../../opencbm-$VERSION-$ARCH-pdb.zip pdb/*
+
+	# Now, check in the pdbs into the symbol store
+	cd pdb
+echo	/cygdrive/c/Programme/Debugging\ Tools\ for\ Windows/symstore add /r /f \*.pdb /s $SYMSTORELOC /t "opencbm" /v "$VERSION $CHECKEDFREE $ARCH" /c "Import $VERSION $CHECKEDFREE $ARCH"
+	cd ..
+
+	rm -r exe/
+	rm -r pdb/
+
+	cd ../..
+done
+
+cvs export -d opencbm-$VERSION -r opencbm-$TAGVERSION opencbm
+chmod 700 WINDOWS/buildinc internal/scripts/*
+(cd opencbm-$VERSION; ./WINDOWS/buildinc)
+zip -r ../../opencbm-$VERSION-src.zip opencbm-$VERSION/*
+cd opencbm-$VERSION/
+rm -r docs/
+cp -pr $ORIG/../opencbm-docs docs
+for A in $AVAILABLE_ARCHS; do
+	zip -r -u ../../../opencbm-$VERSION-$ARCH.zip docs/*
+done
 cd ..
-zip -r ../../../../cbm4win-$VERSION-pdb.zip pdb/*
-
-# Now, check in the pdbs into the symbol store
-cd pdb
-/cygdrive/c/Programme/Debugging\ Tools\ for\ Windows/symstore add /r /f \*.pdb /s $SYMSTORELOC /t "cbm4win" /v "$VERSION $CHECKEDFREE" /c "Import $VERSION $CHECKEDFREE"
-cd ..
-
-rm -r exe/
-rm -r pdb/
-
-cd ../..
-
-cvs export -d cbm4win-$VERSION -r cbm4win-$TAGVERSION cbm4win
-(cd cbm4win-$VERSION; ./WINDOWS/buildinc)
-zip -r ../../cbm4win-$VERSION-src.zip cbm4win-$VERSION/*
-cd cbm4win-$VERSION/
-zip -r -u ../../../cbm4win-$VERSION.zip docs/*
-cd ..
-rm -r cbm4win-$VERSION/
+rm -r opencbm-$VERSION/
 
 cd ..
-cvs release -d cbm4win
+cvs release -d opencbm
+rm DDKBUILD_LOCAL.BAT
 cd ..
-rmdir make-cbm4win/
+rmdir make-opencbm/
 
-mv /tmp/cbm4win-*.zip //sieg/transfer/cbm/cbm4win-bin
+# mv /tmp/opencbm-*.zip //sieg/transfer/cbm/opencbm-bin/
