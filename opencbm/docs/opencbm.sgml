@@ -1,7 +1,7 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.5.4.3 2007-11-18 13:04:09 strik Exp $ -->
+<!-- $Id: opencbm.sgml,v 1.5.4.4 2007-11-18 14:27:18 strik Exp $ -->
 <title>OpenCBM 0.4.2 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
@@ -238,13 +238,12 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 <itemize>
  <item>Windows:
   <itemize>
-  <item>Added upgrade instructions to the manual
+  <item>Added upgrade instructions to the manual (<ref id="upgrading">)
   <item>The 0.4.1 Windows binary release was not wrong, but the resulting binary files were way to
         big. Additionally, the documentation was missing. Fixed that. (Found by Joe Forster)
   </itemize>
 </itemize>
 
-<descrip>
 <tag/OpenCBM v0.4.1 (2007-11-11):/
 
 <itemize>
@@ -406,14 +405,7 @@ Currently, OpenCBM does not support a upgrade other than completely uninstalling
 it, and re-installing it from scratch. Have a look at the uninstall instructions
 for Linux (<ref id="cbm4linux-uninstall">) and the corresponding install
 instructions (<ref id="cbm4linux-install">) or for Windows (<ref
-id="cbm4win-uninstall", <ref id="cbm4win-install">).
-
-
-<sect>Uninstallation/Removal <label id="uninstallation">
-
-<p>
-Depending on the system you are running OpenCBM on, there are different ways to
-remove OpenCBM from your system. Use the appropriate category for you:
+id="cbm4win-uninstall">, <ref id="cbm4win-install">).
 
 
 <p>
@@ -821,6 +813,13 @@ You can have a look at the available cbmctrl commands by issuing cbmctrl on
 your command line, or look at <ref id="cbmctrl" name="cbmctrl">. For the other
 programs, you get help by issuing the "--help" option, or look at the
 appropriate section in <ref id="utilities" name="utilities">.
+
+<sect>Uninstallation/Removal <label id="uninstallation">
+
+<p>
+Depending on the system you are running OpenCBM on, there are different ways to
+remove OpenCBM from your system. Use the appropriate category for you:
+
 
 <sect1>Uninstalling OpenCBM on Linux (cbm4linux)<label id="cbm4linux-uninstall">
 
