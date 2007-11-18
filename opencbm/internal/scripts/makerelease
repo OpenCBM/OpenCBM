@@ -2,7 +2,7 @@
 
 SYMSTORELOC=\\\\sieg\\transfer\\symstore
 
-AVAILABLE_ARCHS=i386 ia64 amd64 i386checked ia64checked amd64checked
+AVAILABLE_ARCHS="i386 ia64 amd64 i386checked ia64checked amd64checked"
 
 if [ "$3" = "" ]; then
 	echo "Usage: $0 MAJORVER MINORVER SUBVER [DEVELVER [chk|fre]]"
