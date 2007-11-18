@@ -126,7 +126,7 @@ funccheckfile sys/wdm/cbm4win.inf           DriverVer               "DriverVer[ 
 funccheckfile debian/rules                  "^version="             "version\=\(.*\)"                $VERSION
 
 funccheckfile cbm4linux.spec                "^\%define ver"         "\%define ver \(.*\)"            $VERSION
-funccheckfile docs/opencbm.sgml             "^<title>opencbm"       ".*opencbm \(.*\) Users Guide" $VERSION
+funccheckfile docs/opencbm.sgml             "^<title>OpenCBM"       ".*OpenCBM \(.*\) Users Guide" $VERSION
 funccheckfile perl/OpenCBM.pm               "my \$VERSION"          ".*VERSION \= '\(.*\)';"         $VERSION
 
 funccheckfile README                        "README for opencbm/cbm4linux"  ".*cbm4linux \(.*\)"             $VERSION
