@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.7 2007-06-23 17:37:38 strik Exp $
+# $Id: Makefile,v 1.8 2008-01-13 17:52:45 strik Exp $
 
 ifneq ($(KERNELRELEASE),)
 EXTRA_CFLAGS := $(CBM4LINUX_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
@@ -6,7 +6,7 @@ obj-m 	     := cbm.o
 cbm-objs     := cbm_module.o
 
 # for 2.2/2.4:
-modules:
+modules: checksources
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c -o $(obj-m) cbm_module.c
 
 else
@@ -16,7 +16,7 @@ include ${RELATIVEPATH}LINUX/config.make
 
 all: cbm.o
 
-.PHONY: all clean mrproper install uninstall install-files
+.PHONY: all clean mrproper install uninstall install-files checksources
 clean:
 	rm -f cbm.mod.c *.o *.ko .cbm* Modules.symvers
 	rm -fr .tmp_versions
@@ -41,9 +41,15 @@ ifneq ($(UDEV_RULES),)
 	rm -f $(UDEV_RULES)/45-opencbm-parallel.rules
 endif
 
-cbm.o: cbm_module.c
+cbm.o: checksources cbm_module.c
 	-ln -s LINUX/Makefile Makefile
 	$(MAKE) -C $(KERNEL_SOURCE) here=`pwd` CBM4LINUX_KERNEL_FLAGS=$(KERNEL_FLAGS) SUBDIRS=`pwd` modules
 	-rm -f Makefile
 
 endif
+
+checksources:
+	# check if KERNEL_SOURCE is set
+	if [ -z "${KERNEL_SOURCE}" ]; then echo "No KERNEL_SOURCE found, aborting!"; exit 1; fi
+
+
