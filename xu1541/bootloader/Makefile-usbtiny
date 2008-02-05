@@ -18,10 +18,10 @@ CABLE           = stk200
 #CABLE           = usbasp
 AVRDUDE         = avrdude
 #AVRDUDE         = sudo /usr/local/avr/bin/avrdude
-FLASH           = $(AVRDUDE) -c $(CABLE) -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc8:m -U flash:w:bootldr-usbtiny.hex
+FLASH_CMD       = $(AVRDUDE) -c $(CABLE) -p atmega8 -U lfuse:w:0x9f:m -U hfuse:w:0xc8:m -U flash:w:bootldr-usbtiny.hex
 STACK           = 32
-FLASHSIZE       = 8192
-RAMSIZE         = 1024
+FLASH           = 8192
+SRAM            = 1024
 
 .INTERMEDIATE: crc.o int.o usb.o $(OBJECTS)
 

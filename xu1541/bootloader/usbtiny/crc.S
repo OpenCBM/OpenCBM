@@ -1,19 +1,19 @@
 ; ======================================================================
 ; Calculate and append CRC
 ;
-; The CRC is calculated 4 bits at a time, using a precomputed table of
-; 16 values. Each value is 16 bits, but only the 8 significant bits are
-; stored. The table should not cross a 256-byte page. The check.py script
-; will check for this.
+; There are two versions of the CRC16 calculation, selectable by the
+; USBTINY_FAST_CRC macro. The default implementation calculates one bit
+; at a time, and is compact but relatively slow. The "fast" version
+; processes 4 bits at a time, and is therefor about twice as fast, but
+; 30 bytes larger.
 ;
-; A bitwise algorithm would be a little smaller, but takes more time.
-; In fact, it takes too much time for the USB controller in my laptop.
-; The poll frequently is so high, that a lot of time is spent in the
-; interrupt handler, sending NAK packets, leaving little time for the
-; actual checksum calculation. An 8 bit algoritm would be even faster,
+; The fast version calculates 4 bits at a time, using a precomputed table
+; of 16 values. Each value is 16 bits, but only the 8 significant bits
+; are stored. The table should not cross a 256-byte page. The check.py
+; script will check for this. An 8 bit algoritm would be even faster,
 ; but requires a lookup table of 512 bytes.
 ;
-; Copyright (C) 2006 Dick Streefland
+; Copyright 2006-2008 Dick Streefland
 ;
 ; This is free software, licensed under the terms of the GNU General
 ; Public License as published by the Free Software Foundation.
@@ -21,6 +21,7 @@
 
 #include "def.h"
 
+#if	USBTINY_FAST_CRC
 ; ----------------------------------------------------------------------
 ; void crc(unsigned char *data, unsigned char len);
 ; ----------------------------------------------------------------------
@@ -121,3 +122,52 @@ for crc in range(16):
 			crc ^= 0xA001	# X^16 + X^15 + X^2 + 1 (reversed)
 	print "\t.byte\t0x%02x+0x%02x" % (crc >> 8, crc & 0xff)
 \* ---------------------------------------------------------------------- */
+#else
+; ----------------------------------------------------------------------
+; void crc(unsigned char *data, unsigned char len);
+; ----------------------------------------------------------------------
+#define	data	r24
+#define	len	r22
+
+#define	b	r18
+#define	con_01	r19
+#define	con_a0	r20
+#define	crc_l	r24
+#define	crc_h	r25
+
+	.text
+	.global	crc
+	.type	crc, @function
+crc:
+	movw	XL, r24
+	ldi	crc_h, 0xff
+	ldi	crc_l, 0xff
+	tst	len
+	breq	done1
+	ldi	con_a0, 0xa0
+	ldi	con_01, 0x01
+next_byte:
+	ld	b, X+
+	sec
+	ror	b
+next_bit:
+	brcc	noflip
+	eor	crc_l, con_01
+noflip:
+	lsr	crc_h
+	ror	crc_l
+	brcc	noxor
+	eor	crc_h, con_a0
+	eor	crc_l, con_01
+noxor:
+	lsr	b
+	brne	next_bit
+	dec	len
+	brne	next_byte
+done1:
+	com	crc_l
+	com	crc_h
+	st	X+, crc_l
+	st	X+, crc_h
+	ret
+#endif

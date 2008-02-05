@@ -132,3 +132,62 @@ Scroll down to the bottom to see the most recent changes.
     itself, PLEASE grant us a royalty free license to your changes for our
     commercial license.
 
+* Release 2007-03-29
+
+  - New configuration option "USB_PUBLIC" in usbconfig.h.
+  - Set USB version number to 1.10 instead of 1.01.
+  - Code used USB_CFG_DESCR_PROPS_STRING_DEVICE and
+    USB_CFG_DESCR_PROPS_STRING_PRODUCT inconsistently. Changed all occurrences
+    to USB_CFG_DESCR_PROPS_STRING_PRODUCT.
+  - New assembler module for 16.5 MHz RC oscillator clock with PLL in receiver
+    code.
+  - New assembler module for 16 MHz crystal.
+  - usbdrvasm.S contains common code only, clock-specific parts have been moved
+    to usbdrvasm12.S, usbdrvasm16.S and usbdrvasm165.S respectively.
+
+* Release 2007-06-25
+
+  - 16 MHz module: Do SE0 check in stuffed bits as well.
+
+* Release 2007-07-07
+
+  - Define hi8(x) for IAR compiler to limit result to 8 bits. This is necessary
+    for negative values.
+  - Added 15 MHz module contributed by V. Bosch.
+  - Interrupt vector name can now be configured. This is useful if somebody
+    wants to use a different hardware interrupt than INT0.
+
+* Release 2007-08-07
+
+  - Moved handleIn3 routine in usbdrvasm16.S so that relative jump range is
+    not exceeded.
+  - More config options: USB_RX_USER_HOOK(), USB_INITIAL_DATATOKEN,
+    USB_COUNT_SOF
+  - USB_INTR_PENDING can now be a memory address, not just I/O
+
+* Release 2007-09-19
+
+  - Split out common parts of assembler modules into separate include file
+  - Made endpoint numbers configurable so that given interface definitions
+    can be matched. See USB_CFG_EP3_NUMBER in usbconfig-prototype.h.
+  - Store endpoint number for interrupt/bulk-out so that usbFunctionWriteOut()
+    can handle any number of endpoints.
+  - Define usbDeviceConnect() and usbDeviceDisconnect() even if no
+    USB_CFG_PULLUP_IOPORTNAME is defined. Directly set D+ and D- to 0 in this
+    case.
+
+* Release 2007-12-01
+
+  - Optimize usbDeviceConnect() and usbDeviceDisconnect() for less code size
+    when USB_CFG_PULLUP_IOPORTNAME is not defined.
+
+* Release 2007-12-13
+
+  - Renamed all include-only assembler modules from *.S to *.inc so that
+    people don't add them to their project sources.
+  - Distribute leap bits in tx loop more evenly for 16 MHz module.
+  - Use "macro" and "endm" instead of ".macro" and ".endm" for IAR
+  - Avoid compiler warnings for constant expr range by casting some values in
+    USB descriptors.
+
+* Release 2008-01-21

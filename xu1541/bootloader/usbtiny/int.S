@@ -15,10 +15,10 @@
 ; single spare cycle in the receiver loop, and only two in the transmitter
 ; loop. In addition, the various code paths are laid out in such a way that
 ; the various USB timeouts are not violated, in particular the maximum time
-; between the reception of a packet and the reply, which is 6.5 bit times
-; for a detachable cable (TRSPIPD1), and 7.5 bit times for a captive cable
-; (TRSPIPD2). The worst-case delay here is 51 cycles, which is just below
-; the 52 cycles for a detachable cable.
+; between the reception of a packet and the reply, which is 7.5 bit times
+; (TRSPIPD2) for the captive cable that is mandatory for a low-speed USB
+; device. The worst-case delay here is 55 cycles, which is well below the
+; 60 cycles limit.
 ;
 ; The interrupt handler must be reached within 34 cycles after D+ goes high
 ; for the first time, so the interrupts should not be disabled for longer
@@ -30,7 +30,7 @@
 ;
 ; Stack usage including the return address: 11 bytes.
 ;
-; Copyright (C) 2006 Dick Streefland
+; Copyright 2006-2008 Dick Streefland
 ;
 ; This is free software, licensed under the terms of the GNU General
 ; Public License as published by the Free Software Foundation.
@@ -365,9 +365,11 @@ is_in:
 	tst	tmp			; unprocessed input packet?
 	brne	nak			; yes, don't send old data for new packet
 	sts	usb_tx_len, tmp		; buffer is available again (after reti)
+	lds	tmp, usb_new_address
+	sts	usb_address, tmp	; assign new address at end of transfer
 	ldi	YL, lo8(usb_tx_buf)
 	ldi	YH, hi8(usb_tx_buf)
-	rjmp	send_packet		; SE0+40, SE0 --> SOP <= 51
+	rjmp	send_packet		; SE0+44, SE0 --> SOP <= 55
 
 ; ----------------------------------------------------------------------
 ; Handle DATA0/DATA1 (SE0+17)

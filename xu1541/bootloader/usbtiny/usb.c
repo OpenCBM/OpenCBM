@@ -20,7 +20,7 @@
 // Maximum stack usage (gcc 3.4.3 & 4.1.0) of usb_poll(): 5 bytes plus
 // possible additional stack usage in usb_setup(), usb_in() or usb_out().
 //
-// Copyright (C) 2006 Dick Streefland
+// Copyright 2006-2008 Dick Streefland
 //
 // This is free software, licensed under the terms of the GNU General
 // Public License as published by the Free Software Foundation.
@@ -58,7 +58,8 @@ byte_t	usb_rx_token;			// PID of token packet: SETUP or OUT
 byte_t	usb_tx_buf[USB_BUFSIZE];	// output buffer
 byte_t	usb_tx_len;			// output buffer size, 0 means empty
 
-byte_t	usb_address;			// assigned USB address
+byte_t	usb_address;			// assigned device address
+byte_t	usb_new_address;		// new device address
 
 // ----------------------------------------------------------------------
 // Local data
@@ -75,7 +76,6 @@ enum
 static	byte_t	usb_tx_state;		// TX_STATE_*, see enum above
 static	byte_t	usb_tx_total;		// total transmit size
 static	byte_t*	usb_tx_data;		// pointer to data to transmit
-static	byte_t	new_address;		// new device address
 
 byte_t usb_idle(void) {
   return((usb_tx_state == TX_STATE_IDLE) &&
@@ -147,7 +147,7 @@ static	byte_t	descr_device [18] PROGMEM =
 {
 	18,				// bLength
 	DESCRIPTOR_TYPE_DEVICE,		// bDescriptorType
-	LE(0x0110),			// bcdUSB
+	LE(0x0101),			// bcdUSB
 	USBTINY_DEVICE_CLASS,		// bDeviceClass
 	USBTINY_DEVICE_SUBCLASS,	// bDeviceSubClass
 	USBTINY_DEVICE_PROTOCOL,	// bDeviceProtocol
@@ -228,7 +228,7 @@ static	void	usb_receive ( byte_t* data, byte_t rx_len )
 			}
 			else if	( data[1] == 5 )	// SET_ADDRESS
 			{
-				new_address = data[2];
+				usb_new_address = data[2];
 			}
 			else if	( data[1] == 6 )	// GET_DESCRIPTOR
 			{
@@ -397,16 +397,9 @@ extern	void	usb_poll ( void )
 		usb_rx_len = 0;	// accept next packet
 	}
 	// refill an empty transmit buffer, when the transmitter is active
-	if	( usb_tx_len == 0 )
+	if	( usb_tx_len == 0 && usb_tx_state != TX_STATE_IDLE )
 	{
-		if	( usb_tx_state != TX_STATE_IDLE )
-		{
-			usb_transmit();
-		}
-		else
-		{	// change the USB address at the end of a transfer
-			usb_address = new_address;
-		}
+		usb_transmit();
 	}
 	// check for USB bus reset
 	for	( i = 10; i > 0 && ! (USB_IN & USB_MASK_DMINUS); i-- )
@@ -414,10 +407,7 @@ extern	void	usb_poll ( void )
 	}
 	if	( i == 0 )
 	{	// SE0 for more than 2.5uS is a reset
-	         cli();
-                 usb_tx_len=0;
-                 usb_rx_len=0;
-                 new_address = 0;
-                 sei();
+		usb_new_address = 0;
+		usb_address = 0;
 	}
 }

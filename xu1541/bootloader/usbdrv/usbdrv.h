@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: GNU GPL v2 (see License.txt) or proprietary (CommercialLicense.txt)
- * This Revision: $Id: usbdrv.h,v 1.2 2007-03-21 18:02:09 harbaum Exp $
+ * This Revision: $Id: usbdrv.h,v 1.3 2008-02-05 11:23:37 strik Exp $
  */
 
 #ifndef __usbdrv_h_included__
@@ -16,8 +16,10 @@
 /*
 Hardware Prerequisites:
 =======================
-USB lines D+ and D- MUST be wired to the same I/O port. D+ must (also) be
-connected to INT0. D- requires a pullup of 1.5k to +3.5V (and the device
+USB lines D+ and D- MUST be wired to the same I/O port. We recommend that D+
+triggers the interrupt (best achieved by using INT0 for D+), but it is also
+possible to trigger the interrupt from D-. If D- is used, interrupts are also
+triggered by SOF packets. D- requires a pullup of 1.5k to +3.5V (and the device
 must be powered at 3.5V) to identify as low-speed USB device. A pullup of
 1M SHOULD be connected from D+ to +3.5V to prevent interference when no USB
 master is connected. We use D+ as interrupt source and not D- because it
@@ -29,10 +31,8 @@ usbDeviceConnect() and usbDeviceDisconnect() further down in this file.
 
 Please adapt the values in usbconfig.h according to your hardware!
 
-The device MUST be clocked at 12 MHz. This is more than the 10 MHz allowed by
-an AT90S2313 powered at 4.5V. However, if the supply voltage to maximum clock
-relation is interpolated linearly, an ATtiny2313 meets the requirement by
-specification. In practice, the AT90S2313 can be overclocked and works well.
+The device MUST be clocked at exactly 12 MHz, 15 MHz or 16 MHz
+or at 16.5 MHz +/- 1%. See usbconfig-prototype.h for details.
 
 
 Limitations:
@@ -55,16 +55,26 @@ bit rate over the same hardware, we should be on the safe side. Even the spec
 requires detection of asymmetric states at high bit rate for SE0 detection.
 
 Number of endpoints:
-The driver supports up to four endpoints: One control endpoint (endpoint 0),
-two interrupt-in (or bulk-in) endpoints (endpoint 1 and 3) and one
-interrupt-out (or bulk-out) endpoint (endpoint 1). Please note that the USB
-standard forbids bulk endpoints for low speed devices! Most operating systems
-allow them anyway, but the AVR will spend 90% of the CPU time in the USB
-interrupt polling for bulk data.
-By default, only the control endpoint 0 is enabled. To get the other endpoints,
-define USB_CFG_HAVE_INTRIN_ENDPOINT, USB_CFG_HAVE_INTRIN_ENDPOINT3 and/or
-USB_CFG_IMPLEMENT_FN_WRITEOUT respectively (see usbconfig-prototype.h for
-details).
+The driver supports the following endpoints:
+
+- Endpoint 0, the default control endpoint.
+- Any number of interrupt- or bulk-out endpoints. The data is sent to
+  usbFunctionWriteOut() and USB_CFG_IMPLEMENT_FN_WRITEOUT must be defined
+  to 1 to activate this feature. The endpoint number can be found in the
+  global variable 'usbRxToken'.
+- One default interrupt- or bulk-in endpoint. This endpoint is used for
+  interrupt- or bulk-in transfers which are not handled by any other endpoint.
+  You must define USB_CFG_HAVE_INTRIN_ENDPOINT in order to activate this
+  feature and call usbSetInterrupt() to send interrupt/bulk data.
+- One additional interrupt- or bulk-in endpoint. This was endpoint 3 in
+  previous versions of this driver but can now be configured to any endpoint
+  number. You must define USB_CFG_HAVE_INTRIN_ENDPOINT3 in order to activate
+  this feature and call usbSetInterrupt3() to send interrupt/bulk data. The
+  endpoint number can be set with USB_CFG_EP3_NUMBER.
+
+Please note that the USB standard forbids bulk endpoints for low speed devices!
+Most operating systems allow them anyway, but the AVR will spend 90% of the CPU
+time in the USB interrupt polling for bulk data.
 
 Maximum data payload:
 Data payload of control in and out transfers may be up to 254 bytes. In order
@@ -78,29 +88,29 @@ bus power anyway. Bus-powered devices can achieve this only by putting the
 CPU in sleep mode. The driver does not implement suspend handling by itself.
 However, the application may implement activity monitoring and wakeup from
 sleep. The host sends regular SE0 states on the bus to keep it active. These
-SE0 states can be detected by wiring the INT1 pin to D-. It is not necessary
-to enable the interrupt, checking the interrupt pending flag should suffice.
-Before entering sleep mode, the application should enable INT1 for a wakeup
-on the next bus activity.
+SE0 states can be detected by using D- as the interrupt source. Define
+USB_COUNT_SOF to 1 and use the global variable usbSofCount to check for bus
+activity.
 
 Operation without an USB master:
 The driver behaves neutral without connection to an USB master if D- reads
 as 1. To avoid spurious interrupts, we recommend a high impedance (e.g. 1M)
-pullup resistor on D+. If D- becomes statically 0, the driver may block in
-the interrupt routine.
+pullup resistor on D+ (interrupt). If D- becomes statically 0, the driver may
+block in the interrupt routine.
 
 Interrupt latency:
 The application must ensure that the USB interrupt is not disabled for more
-than 20 cycles. This implies that all interrupt routines must either be
-declared as "INTERRUPT" instead of "SIGNAL" (see "avr/signal.h") or that they
-are written in assembler with "sei" as the first instruction.
+than 25 cycles (this is for 12 MHz, faster clocks allow longer latency).
+This implies that all interrupt routines must either be declared as "INTERRUPT"
+instead of "SIGNAL" (see "avr/signal.h") or that they are written in assembler
+with "sei" as the first instruction.
 
 Maximum interrupt duration / CPU cycle consumption:
 The driver handles all USB communication during the interrupt service
 routine. The routine will not return before an entire USB message is received
-and the reply is sent. This may be up to ca. 1200 cycles = 100us if the host
-conforms to the standard. The driver will consume CPU cycles for all USB
-messages, even if they address another (low-speed) device on the same bus.
+and the reply is sent. This may be up to ca. 1200 cycles @ 12 MHz (= 100us) if
+the host conforms to the standard. The driver will consume CPU cycles for all
+USB messages, even if they address another (low-speed) device on the same bus.
 
 */
 
@@ -108,7 +118,7 @@ messages, even if they address another (low-speed) device on the same bus.
 /* --------------------------- Module Interface ---------------------------- */
 /* ------------------------------------------------------------------------- */
 
-#define USBDRV_VERSION  20070319
+#define USBDRV_VERSION  20080121
 /* This define uniquely identifies a driver version. It is a decimal number
  * constructed from the driver's release date in the form YYYYMMDD. If the
  * driver's behavior or interface changes, you can use this constant to
@@ -116,8 +126,18 @@ messages, even if they address another (low-speed) device on the same bus.
  * older than 2006-01-25.
  */
 
-#ifndef __ASSEMBLER__
 
+#ifndef USB_PUBLIC
+#define USB_PUBLIC
+#endif
+/* USB_PUBLIC is used as declaration attribute for all functions exported by
+ * the USB driver. The default is no attribute (see above). You may define it
+ * to static either in usbconfig.h or from the command line if you include
+ * usbdrv.c instead of linking against it. Including the C module of the driver
+ * directly in your code saves a couple of bytes in flash memory.
+ */
+
+#ifndef __ASSEMBLER__
 #ifndef uchar
 #define uchar   unsigned char
 #endif
@@ -128,23 +148,23 @@ messages, even if they address another (low-speed) device on the same bus.
 
 struct usbRequest;  /* forward declaration */
 
-extern void     usbInit(void);
+USB_PUBLIC void usbInit(void);
 /* This function must be called before interrupts are enabled and the main
  * loop is entered.
  */
-extern void     usbPoll(void);
+USB_PUBLIC void usbPoll(void);
 /* This function must be called at regular intervals from the main loop.
  * Maximum delay between calls is somewhat less than 50ms (USB timeout for
  * accepting a Setup message). Otherwise the device will not be recognized.
  * Please note that debug outputs through the UART take ~ 0.5ms per byte
  * at 19200 bps.
  */
-extern uchar    *usbMsgPtr;
+extern uchar *usbMsgPtr;
 /* This variable may be used to pass transmit data to the driver from the
  * implementation of usbFunctionWrite(). It is also used internally by the
  * driver for standard control requests.
  */
-extern uchar    usbFunctionSetup(uchar data[8]);
+USB_PUBLIC uchar usbFunctionSetup(uchar data[8]);
 /* This function is called when the driver receives a SETUP transaction from
  * the host which is not answered by the driver itself (in practice: class and
  * vendor requests). All control transfers start with a SETUP transaction where
@@ -171,14 +191,14 @@ extern uchar    usbFunctionSetup(uchar data[8]);
  * Note that calls to the functions usbFunctionRead() and usbFunctionWrite()
  * are only done if enabled by the configuration in usbconfig.h.
  */
-extern uchar usbFunctionDescriptor(struct usbRequest *rq);
+USB_PUBLIC uchar usbFunctionDescriptor(struct usbRequest *rq);
 /* You need to implement this function ONLY if you provide USB descriptors at
  * runtime (which is an expert feature). It is very similar to
  * usbFunctionSetup() above, but it is called only to request USB descriptor
  * data. See the documentation of usbFunctionSetup() above for more info.
  */
 #if USB_CFG_HAVE_INTRIN_ENDPOINT
-void    usbSetInterrupt(uchar *data, uchar len);
+USB_PUBLIC void usbSetInterrupt(uchar *data, uchar len);
 /* This function sets the message which will be sent during the next interrupt
  * IN transfer. The message is copied to an internal buffer and must not exceed
  * a length of 8 bytes. The message may be 0 bytes long just to indicate the
@@ -192,7 +212,7 @@ extern volatile uchar usbTxLen1;
  * message already buffered will be lost.
  */
 #if USB_CFG_HAVE_INTRIN_ENDPOINT3
-void    usbSetInterrupt3(uchar *data, uchar len);
+USB_PUBLIC void usbSetInterrupt3(uchar *data, uchar len);
 extern volatile uchar usbTxLen3;
 #define usbInterruptIsReady3()   (usbTxLen3 & 0x10)
 /* Same as above for endpoint 3 */
@@ -209,7 +229,7 @@ extern volatile uchar usbTxLen3;
  */
 #endif  /* USB_CFG_HID_REPORT_DESCRIPTOR_LENGTH */
 #if USB_CFG_IMPLEMENT_FN_WRITE
-extern uchar    usbFunctionWrite(uchar *data, uchar len);
+USB_PUBLIC uchar usbFunctionWrite(uchar *data, uchar len);
 /* This function is called by the driver to provide a control transfer's
  * payload data (control-out). It is called in chunks of up to 8 bytes. The
  * total count provided in the current control transfer can be obtained from
@@ -227,7 +247,7 @@ extern uchar    usbFunctionWrite(uchar *data, uchar len);
  */
 #endif /* USB_CFG_IMPLEMENT_FN_WRITE */
 #if USB_CFG_IMPLEMENT_FN_READ
-extern uchar usbFunctionRead(uchar *data, uchar len);
+USB_PUBLIC uchar usbFunctionRead(uchar *data, uchar len);
 /* This function is called by the driver to ask the application for a control
  * transfer's payload data (control-in). It is called in chunks of up to 8
  * bytes each. You should copy the data to the location given by 'data' and
@@ -239,7 +259,7 @@ extern uchar usbFunctionRead(uchar *data, uchar len);
  */
 #endif /* USB_CFG_IMPLEMENT_FN_READ */
 #if USB_CFG_IMPLEMENT_FN_WRITEOUT
-extern void usbFunctionWriteOut(uchar *data, uchar len);
+USB_PUBLIC void usbFunctionWriteOut(uchar *data, uchar len);
 /* This function is called by the driver when data on interrupt-out or bulk-
  * out endpoint 1 is received. You must define USB_CFG_IMPLEMENT_FN_WRITEOUT
  * to 1 in usbconfig.h to get this function called.
@@ -248,17 +268,19 @@ extern void usbFunctionWriteOut(uchar *data, uchar len);
 #ifdef USB_CFG_PULLUP_IOPORTNAME
 #define usbDeviceConnect()      ((USB_PULLUP_DDR |= (1<<USB_CFG_PULLUP_BIT)), \
                                   (USB_PULLUP_OUT |= (1<<USB_CFG_PULLUP_BIT)))
-/* This macro (intended to look like a function) connects the device to the
- * USB bus. It is only available if you have defined the constants
- * USB_CFG_PULLUP_IOPORT and USB_CFG_PULLUP_BIT in usbconfig.h.
- */
 #define usbDeviceDisconnect()   ((USB_PULLUP_DDR &= ~(1<<USB_CFG_PULLUP_BIT)), \
                                   (USB_PULLUP_OUT &= ~(1<<USB_CFG_PULLUP_BIT)))
-/* This macro (intended to look like a function) disconnects the device from
- * the USB bus. It is only available if you have defined the constants
- * USB_CFG_PULLUP_IOPORT and USB_CFG_PULLUP_BIT in usbconfig.h.
+#else /* USB_CFG_PULLUP_IOPORTNAME */
+#define usbDeviceConnect()      (USBDDR &= ~(1<<USBMINUS))
+#define usbDeviceDisconnect()   (USBDDR |= (1<<USBMINUS))
+#endif /* USB_CFG_PULLUP_IOPORTNAME */
+/* The macros usbDeviceConnect() and usbDeviceDisconnect() (intended to look
+ * like a function) connect resp. disconnect the device from the host's USB.
+ * If the constants USB_CFG_PULLUP_IOPORT and USB_CFG_PULLUP_BIT are defined
+ * in usbconfig.h, a disconnect consists of removing the pull-up resisitor
+ * from D-, otherwise the disconnect is done by brute-force pulling D- to GND.
+ * This does not conform to the spec, but it works.
  */
-#endif /* USB_CFG_PULLUP_IOPORT */
 extern unsigned usbCrc16(unsigned data, uchar len);
 #define usbCrc16(data, len) usbCrc16((unsigned)(data), len)
 /* This function calculates the binary complement of the data CRC used in
@@ -280,6 +302,13 @@ extern uchar    usbConfiguration;
  * You may want to reflect the "configured" status with a LED on the device or
  * switch on high power parts of the circuit only if the device is configured.
  */
+#if USB_COUNT_SOF
+extern volatile uchar   usbSofCount;
+/* This variable is incremented on every SOF packet. It is only available if
+ * the macro USB_COUNT_SOF is defined to a value != 0.
+ */
+#endif
+
 #define USB_STRING_DESCRIPTOR_HEADER(stringLength) ((2*(stringLength)+2) | (3<<8))
 /* This macro builds a descriptor header for a string descriptor given the
  * string's length. See usbdrv.c for an example how to use it.
@@ -348,8 +377,8 @@ extern volatile schar   usbRxLen;
 #ifndef USB_CFG_DESCR_PROPS_STRING_VENDOR
 #define USB_CFG_DESCR_PROPS_STRING_VENDOR           0
 #endif
-#ifndef USB_CFG_DESCR_PROPS_STRING_DEVICE
-#define USB_CFG_DESCR_PROPS_STRING_DEVICE           0
+#ifndef USB_CFG_DESCR_PROPS_STRING_PRODUCT
+#define USB_CFG_DESCR_PROPS_STRING_PRODUCT          0
 #endif
 #ifndef USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER
 #define USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER    0
@@ -480,6 +509,9 @@ int usbDescriptorStringSerialNumber[];
 #define USB_CFG_PULLUP_IOPORT   USB_OUTPORT(USB_CFG_PULLUP_IOPORTNAME)
 #endif
 
+#ifndef USB_CFG_EP3_NUMBER  /* if not defined in usbconfig.h */
+#define USB_CFG_EP3_NUMBER  3
+#endif
 
 #define USB_BUFSIZE     11  /* PID, 8 bytes data, 2 bytes CRC */
 
@@ -549,6 +581,10 @@ at90s1200, attiny11, attiny12, attiny15, attiny28: these have no RAM
 #define USBPID_ACK      0xd2
 #define USBPID_NAK      0x5a
 #define USBPID_STALL    0x1e
+
+#ifndef USB_INITIAL_DATATOKEN
+#define USB_INITIAL_DATATOKEN   USBPID_DATA0
+#endif
 
 #ifndef __ASSEMBLER__
 

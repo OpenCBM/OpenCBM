@@ -1,7 +1,7 @@
 // ======================================================================
 // Common definitions for the USB driver
 //
-// Copyright (C) 2006 Dick Streefland
+// Copyright 2006-2008 Dick Streefland
 //
 // This is free software, licensed under the terms of the GNU General
 // Public License as published by the Free Software Foundation.
@@ -59,6 +59,9 @@
 #  define USB_INT_PENDING	GIFR
 #endif
 #define	USB_INT_PENDING_BIT	CAT2(INTF,USBTINY_INT)
+#if	defined INF0 && ! defined INTF0
+#  define	INTF0		INF0	// fix for incorrect definition in iotn13.h
+#endif
 
 // USB PID values
 #define	USB_PID_SETUP		0x2d
