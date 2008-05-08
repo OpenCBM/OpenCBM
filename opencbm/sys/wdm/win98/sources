@@ -13,7 +13,6 @@ TARGETLIBS= \
 		../../../bin/*/libw98.lib \
 		../../../bin/*/libcommon.lib
 
-BROWSER_INFO=1
 BROWSERFILE=w98driver.bsc -n
 
 INCLUDES=../../include;../../include/WINDOWS;../../../include;../../../include/WINDOWS;../../libcommon

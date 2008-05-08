@@ -10,7 +10,6 @@ TARGETLIBS=	$(DDK_LIB_PATH)/csq.lib \
 		../../bin/*/libwnt.lib \
 		../../bin/*/libcommon.lib
 
-BROWSER_INFO=1
 BROWSERFILE=nt4driver.bsc -n
 
 INCLUDES=../include;../include/WINDOWS;../../include;../../include/WINDOWS;../libcommon

@@ -13,7 +13,6 @@ TARGETLIBS= \
 		../../../bin/*/libwnt.lib \
 		../../../bin/*/libcommon.lib
 
-BROWSER_INFO=1
 BROWSERFILE=wdmdriver.bsc -n
 
 INCLUDES=../../include;../../include/WINDOWS;../../../include;../../../include/WINDOWS;../../libcommon
