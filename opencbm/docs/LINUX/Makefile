@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2006-04-28 12:57:35 strik Exp $
+# $Id: Makefile,v 1.4.2.1 2008-06-09 20:19:38 fbriere Exp $
 
 include ../LINUX/config.make
 
@@ -19,21 +19,21 @@ HTML = html/opencbm.html
 	unix2dos $@
 	
 %.txt: %.sgml
-	sgml2txt $<
+	sgml2txt -c latin $<
 
 %.pdf: %.dvi
 	dvipdf $<
 
 %.dvi: %.sgml
-	sgml2latex -o dvi $<
+	sgml2latex -c latin -o dvi $<
 
 %.info: %.sgml
-	sgml2info $<
+	sgml2info -c latin $<
 	perl -p -i -e 'if(m/^   \\input texinfo/){print "INFO-DIR-SECTION Miscellaneous\nSTART-INFO-DIR-ENTRY\n* opencbm: (opencbm).	Commodore serial IEC bus support.\nEND-INFO-DIR-ENTRY\n";}' $@
 
 %.html: opencbm.sgml
 	-[ ! -d html ] && mkdir html/
-	cd html; sgml2html -s 2 ../$<; cd ..
+	cd html; sgml2html -c latin -s 2 ../$<; cd ..
 
 all: $(TXT) $(DVI) $(INFO) $(HTML) ${PDF}
 
