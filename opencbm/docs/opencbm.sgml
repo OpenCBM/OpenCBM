@@ -1,7 +1,7 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.5.4.4 2007-11-18 14:27:18 strik Exp $ -->
+<!-- $Id: opencbm.sgml,v 1.5.4.5 2008-06-09 19:55:38 fbriere Exp $ -->
 <title>OpenCBM 0.4.2 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
@@ -120,7 +120,7 @@ by design!
 <p>
 A standard X(E)1541 cable won't work with this driver. In fact, there will
 probably never be a multitasking OS which works with one of these, that's why
-we call it XM1541, M for Multi­ tasking. Anyway, if you have a XE1541, the
+we call it XM1541, M for Multi-tasking. Anyway, if you have a XE1541, the
 necessary modification is simple:
 
 <p>
@@ -1128,7 +1128,7 @@ specifed <it>[DEVICE]</it> . IEC bus channel numbers can be denoted in the
 range from 0 to 15. Take note that for floppy disk drive devices some
 secondary addresses are interpreted in a special way. Secondary address 0 is
 used, when a program is loaded, address 1, when a program is saved. Address
-number 15 represents the command channel of the disk drive, so e®ectively,
+number 15 represents the command channel of the disk drive, so effectively,
 for bulk data transfers to and from disk drives, only the logical channel
 numbers 2 to 14 can be used.
 </descrip>
