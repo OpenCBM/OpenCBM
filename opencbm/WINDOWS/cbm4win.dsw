@@ -119,6 +119,12 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name opencbmxa1541
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name install
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -349,6 +355,12 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libmisc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbmxa1541
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbmxu1541
     End Project Dependency
 }}}
 

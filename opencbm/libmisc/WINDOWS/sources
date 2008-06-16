@@ -6,6 +6,7 @@ TARGETTYPE=LIBRARY
 INCLUDES=../../include;../../include/WINDOWS
 
 SOURCES= \
+	../configuration.c \
 	../libstring.c
 
 UMTYPE=console

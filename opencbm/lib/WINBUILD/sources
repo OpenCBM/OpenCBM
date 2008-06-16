@@ -22,9 +22,7 @@ SOURCES=../cbm.c \
 	../petscii.c \
 	../gcr_4b5b.c \
 	../upload.c \
-	../configuration.c \
 	configuration_name.c \
-	i_opencbm.c \
 	archlib.c \
 	getpluginaddress.c \
 	opencbm.rc

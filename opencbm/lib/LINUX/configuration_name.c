@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/LINUX/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration_name.c,v 1.4 2007-05-01 17:51:38 strik Exp $ \n
+** \version $Id: configuration_name.c,v 1.5 2008-06-16 19:24:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file
@@ -19,6 +19,7 @@
 ****************************************************************/
 
 #include "configuration.h"
+#include "libmisc.h"
 
 #include <assert.h>
 #include <string.h>
@@ -29,31 +30,16 @@
 # define DEFAULT_FILENAME "/etc/opencbm.conf"
 #endif
 
-#define MAX_PATH_ 1024
-
 
 /*! \brief \internal Get the default filename for the configuration file
 
  Get the default filename of the configuration file.
 
- \param Buffer
-   Pointer to a buffer which will hold the filename.
-
- \param BufferLength
-   The size of the buffer Buffer. It must be enough to hold the full
-   filename, including the trailing zero.
-
  \return 
-   Returns the input variable Buffer.
+   Returns a newly allocated memory area with the default file name.
 */
 const char *
-configuration_get_default_filename(char Buffer[], unsigned int BufferLength)
+configuration_get_default_filename(void)
 {
-    if (Buffer)
-    {
-        assert(sizeof(DEFAULT_FILENAME) <= BufferLength);
-        strcpy(Buffer, DEFAULT_FILENAME);
-    }
-
-    return Buffer;
+    return cbmlibmisc_strdup(DEFAULT_FILENAME);
 }

@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis
+ *  Copyright 2004, 2008 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
-** \file service.c \n
+** \file lib/plugin/xa1541/WINDOWS/service.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: service.c,v 1.8 2006-09-14 19:15:17 strik Exp $ \n
+** \version $Id: service.c,v 1.1 2008-06-16 19:24:27 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the service control manager for the OPENCBM driver
 **
@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include "cbmioctl.h"
 
-#include "instcbm.h"
+// #include "instcbm.h"
 
 #include "i_opencbm.h"
 
@@ -30,11 +30,11 @@
 #define DBG_USERMODE
 
 /*! The name of the executable */
-#define DBG_PROGNAME "INSTCBM.EXE"
+#define DBG_PROGNAME "OPENCBM-XA1541.DLL"
 
 #include "debug.h"
 
-/*! \brief Set a DWORD value in the registry
+/*! \internal \brief Set a DWORD value in the registry
 
  This function sets a DWORD value in the registry. It is a simple
  wrapper for convenience.
@@ -50,7 +50,7 @@
    The value the registry setting is to be set to.
 */
 
-VOID
+static VOID
 RegSetDWORD(HKEY RegKey, char *SubKey, DWORD Value)
 {
     DWORD rc;
@@ -66,7 +66,7 @@ RegSetDWORD(HKEY RegKey, char *SubKey, DWORD Value)
     FUNC_LEAVE();
 }
 
-/*! \brief Set an EXPANDSZ value in the registry
+/*! \internal \brief Set an EXPANDSZ value in the registry
 
  This function sets an EXPANDSZ value in the registry. 
  It is a simple wrapper for convenience.
@@ -82,7 +82,7 @@ RegSetDWORD(HKEY RegKey, char *SubKey, DWORD Value)
    The value the registry setting is to be set to.
 */
 
-VOID
+static VOID
 RegSetEXPANDSZ(HKEY RegKey, char *SubKey, IN LPCTSTR Value)
 {
     DWORD rc;
@@ -97,7 +97,7 @@ RegSetEXPANDSZ(HKEY RegKey, char *SubKey, IN LPCTSTR Value)
 }
 
 
-/*! \brief Create the registry keys for the event service
+/*! \internal \brief Create the registry keys for the event service
 
  This function sets some registry keys, so our driver can issue
  events which are expanded afterwards.
@@ -106,47 +106,59 @@ RegSetEXPANDSZ(HKEY RegKey, char *SubKey, IN LPCTSTR Value)
    The path to the executable which contains the logging texts
 
  \return
-   TRUE on success, else FALSE.
+   TRUE if an error occurred, else FALSE.
 */
 
-BOOL
+static BOOL
 CreateLogRegistryKeys(IN LPCTSTR ServiceExe)
 {
     DWORD dwDisposition;
     HKEY RegKey;
+    BOOL error;
 
     FUNC_ENTER();
 
-    // Open a registry key to HKLM\<%REGKEY_EVENTLOG%>
+    error = TRUE;
 
-    if (RegCreateKeyEx(HKEY_LOCAL_MACHINE,                         
-                       REGKEY_EVENTLOG,
-                       0,
-                       NULL,
-                       REG_OPTION_NON_VOLATILE,
-                       KEY_SET_VALUE,
-                       NULL,
-                       &RegKey,
-                       &dwDisposition
-                      )
-       )
-    {         
-        FUNC_LEAVE_BOOL(FALSE);
-    }  
+    do {
 
-    // Store the path to the file which contains the event service entries
+        // Open a registry key to HKLM\<%REGKEY_EVENTLOG%>
 
-    RegSetEXPANDSZ(RegKey, "EventMessageFile", ServiceExe);
+        if (RegCreateKeyEx(HKEY_LOCAL_MACHINE,                         
+                           REGKEY_EVENTLOG,
+                           0,
+                           NULL,
+                           REG_OPTION_NON_VOLATILE,
+                           KEY_SET_VALUE,
+                           NULL,
+                           &RegKey,
+                           &dwDisposition
+                          )
+           )
+        {
+            RegKey = NULL;
+            break;
+        }  
 
-    // The written "FACILITY" is 0x07 (FACILITY_PARALLEL_ERROR_CODE)
+        // Store the path to the file which contains the event service entries
 
-    RegSetDWORD(RegKey, "TypesSupported", 0x07);
+        RegSetEXPANDSZ(RegKey, "EventMessageFile", ServiceExe);
+
+        // The written "FACILITY" is 0x07 (FACILITY_PARALLEL_ERROR_CODE)
+
+        RegSetDWORD(RegKey, "TypesSupported", 0x07);
+
+        error = FALSE;
+
+    } while (0);
 
     // We're done, close the registry handle.
 
-    RegCloseKey(RegKey);
+    if (RegKey) {
+        RegCloseKey(RegKey);
+    }
 
-    FUNC_LEAVE_BOOL(TRUE);
+    FUNC_LEAVE_BOOL(error);
 }
 
 /*! \internal \brief Create a registry keys for default LPT
@@ -274,7 +286,7 @@ CreateDefaultRegistryKeys(IN ULONG DefaultLpt,
    If FALSE, it is put to "MANUAL".
 
  \return
-   TRUE on success, else FALSE.
+   TRUE if an error occurred, else FALSE.
 */
 
 BOOL
@@ -282,12 +294,12 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
 {
     SC_HANDLE scManager;
     SC_HANDLE scService;
-    DWORD error;
-    BOOL success;
+    DWORD lasterror;
+    BOOL error;
 
     FUNC_ENTER();
 
-    success = TRUE;
+    error = FALSE;
 
     scManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
@@ -304,24 +316,24 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
 
         if (scService == NULL)
         {
-            error = GetLastError();
+            lasterror = GetLastError();
 
-            if (error == ERROR_SERVICE_EXISTS)
+            if (lasterror == ERROR_SERVICE_EXISTS)
             {
-                //  This is not an error, so process it different from the others.
+                //  This is not an error, so process it differently from the others.
 
                 DBG_WARN((DBG_PREFIX "CreateService (0x%02x) '%s'",
-                    error, FormatErrorMessage(error)));
+                    lasterror, FormatErrorMessage(lasterror)));
                 printf("WARNING: opencbm is already installed!\n");
             }
             else
             {
                 DBG_ERROR((DBG_PREFIX "CreateService (0x%02x) '%s'",
-                    error, FormatErrorMessage(error)));
+                    lasterror, FormatErrorMessage(lasterror)));
                 printf("ERROR: CreateService (0x%02x) '%s'\n",
-                    error, FormatErrorMessage(error));
+                    lasterror, FormatErrorMessage(lasterror));
 
-                success = FALSE;
+                error = TRUE;
             }
         }
         else
@@ -339,21 +351,21 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
         // Create the registry settings for being able to output to the
         // event service
 
-        success = CreateLogRegistryKeys(ServiceExe);
+        error = CreateLogRegistryKeys(ServiceExe);
 
         // If the driver is to be started automatically, start it now
 
         if (AutomaticStart)
         {
-            cbm_i_driver_start();
+            cbm_driver_start();
         }
     }
     else
     {
-        success = FALSE;
+        error = TRUE;
     }
 
-    FUNC_LEAVE_BOOL(success);
+    FUNC_LEAVE_BOOL(error);
 }
 
 
@@ -402,7 +414,7 @@ CbmUpdateParameter(IN ULONG DefaultLpt,
                 DebugFlagsDriverPresent, DebugFlagsDriver,
                 DebugFlagsDllPresent, DebugFlagsDll);
 
-    CbmInstallUpdate();
+//    CbmInstallUpdate();
 
     FUNC_LEAVE_BOOL(ret);
 }
@@ -431,7 +443,7 @@ CbmRemove(IN LPCTSTR DriverName)
 
     // Make sure the driver is stopped before being unloaded
 
-    cbm_i_driver_stop();
+    cbm_driver_stop();
 
     scManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
@@ -518,4 +530,37 @@ CbmCheckPresence(IN LPCTSTR DriverName)
     }
 
     FUNC_LEAVE_BOOL(scService ? TRUE : FALSE);
+}
+
+/*! \brief Format a returned error code into a string
+
+ This function formats a returned error code into a string.
+
+ \param Error
+   The error number to be formatted.
+
+ \return 
+   The string describing the error given by the error code.
+*/
+PCHAR
+FormatErrorMessage(DWORD Error)
+{
+    static char ErrorMessageBuffer[2048];
+    int n;
+
+    // Format the message
+
+    n = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_MAX_WIDTH_MASK,
+        NULL,
+        Error,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+        (LPTSTR) &ErrorMessageBuffer,
+        sizeof(ErrorMessageBuffer)-1,
+        NULL);
+
+    // make sure there is a trailing zero
+
+    ErrorMessageBuffer[n] = 0;
+
+    return ErrorMessageBuffer;
 }

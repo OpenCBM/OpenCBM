@@ -5,11 +5,12 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright 2008 Spiro Trikaliotis
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.10 2007-03-22 12:50:28 strik Exp $";
+    "@(#) $Id: s1.c,v 1.11 2008-06-16 19:24:27 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -19,9 +20,9 @@ static char *rcsid =
 
 #include "opencbm-plugin.h"
 
-static cbm_plugin_s1_read_n_t cbm_plugin_s1_read_n = NULL;
+static cbm_plugin_s1_read_n_t * cbm_plugin_s1_read_n = NULL;
 
-static cbm_plugin_s1_write_n_t cbm_plugin_s1_write_n = NULL;
+static cbm_plugin_s1_write_n_t * cbm_plugin_s1_write_n = NULL;
 
 static const unsigned char s1r15x1[] = {
 #include "s1r.inc"

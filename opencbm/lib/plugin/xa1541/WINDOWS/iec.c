@@ -5,14 +5,14 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005,2007 Spiro Trikaliotis
+ *  Copyright 2001-2005,2007,2008 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/iec.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: iec.c,v 1.3 2007-05-20 17:32:47 strik Exp $ \n
+** \version $Id: iec.c,v 1.4 2008-06-16 19:24:27 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -141,7 +141,7 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
     {
         // Read the debugging flags from the registry
 
-        cbm_i_get_debugging_flags();
+        cbm_get_debugging_flags();
     }
 
 #endif
@@ -178,7 +178,7 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
                 else
                 {
                     Status  = TRUE;
-                    bIsOpen = cbm_i_driver_start();
+                    bIsOpen = cbm_driver_start();
                 }
             }
 
@@ -212,7 +212,7 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
                     // it is arguable if the driver should be stopped
                     // whenever the DLL is unloaded.
 
-                    cbm_i_driver_stop();
+                    cbm_driver_stop();
                     bIsOpen = FALSE;
                 }
             }
@@ -233,34 +233,6 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 
     FUNC_LEAVE_BOOL(Status);
 }
-
-/*! \brief Complete driver installation, "external version"
-
- This function performs anything that is needed to successfully
- complete the driver installation.
-
- \param Buffer
-   Pointer to a buffer which will return the install information
-
- \param BufferLen
-   The length of the buffer Buffer points to (in bytes).
-
- \return
-   FALSE on success, TRUE on error
-
- This function is for use of the installation routines only!
-
- This version of this function is for exporting out of the DLL.
-*/
-
-BOOL CBMAPIDECL
-cbm_install_complete(OUT PULONG Buffer, IN ULONG BufferLen)
-{
-    FUNC_ENTER();
-
-    FUNC_LEAVE_BOOL(cbm_i_i_driver_install(Buffer, BufferLen));
-}
-
 
 /*! \brief Lock the parallel port for the driver
 
@@ -1026,3 +998,87 @@ cbm_get_debugging_buffer(CBM_FILE HandleDevice, char *buffer, size_t len)
 }
 
 #endif // #if DBG
+
+/*! \brief Read a byte from the parallel port input register
+
+ This function reads a byte from the parallel port input register.
+ (STATUS_PORT). It is a helper function for debugging the cable
+ (i.e., for the XCDETECT tool) only!
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   If the routine succeeds, it returns a non-negative value
+   which corresponds to the data in the parallel port input
+   register (status port).
+
+   If the routine fails, the return value is -1.
+
+ \remark
+   Do not use this function in anything but a debugging aid tool
+   like XCDETECT!
+
+   This functions masks some bits off. The bits that are not masked
+   off are defined in PARALLEL_STATUS_PORT_MASK_VALUES.
+*/
+int CBMAPIDECL
+cbmarch_iec_dbg_read(CBM_FILE HandleDevice)
+{
+    CBMT_IEC_DBG_READ result;
+    int returnValue = -1;
+
+    FUNC_ENTER();
+
+    if ( cbm_ioctl(HandleDevice, CBMCTRL(IEC_DBG_READ), NULL, 0, &result, sizeof(result)) ) {
+        returnValue = result.Value;
+    }
+
+    FUNC_LEAVE_INT(returnValue);
+}
+
+/*! \brief Write a byte to the parallel port output register
+
+ This function writes a byte to the parallel port output register.
+ (CONTROL_PORT). It is a helper function for debugging the cable
+ (i.e., for the XCDETECT tool) only!
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Value
+   The value to set the control port to
+
+ \return 
+   If the routine succeeds, it returns 0.
+   
+   If the routine fails, it returns -1.
+
+ \remark
+   Do not use this function in anything but a debugging aid tool
+   like XCDETECT!
+
+   After this function has been called, it is NOT safe to use the
+   parallel port again unless you close the driver (cbm_driver_close())
+   and open it again (cbm_driver_open())!
+
+   This functions masks some bits off. That is, the bits not in the
+   mask are not changed at all. The bits that are not masked
+   off are defined in PARALLEL_CONTROL_PORT_MASK_VALUES.
+*/
+int CBMAPIDECL
+cbmarch_iec_dbg_write(CBM_FILE HandleDevice, unsigned char Value)
+{
+    CBMT_IEC_DBG_WRITE parameter;
+    int returnValue = -1;
+
+    FUNC_ENTER();
+
+    parameter.Value = Value;
+
+    if ( cbm_ioctl(HandleDevice, CBMCTRL(IEC_DBG_WRITE), &parameter, sizeof(parameter), NULL, 0) ) {
+        returnValue = 0;
+    }
+
+    FUNC_LEAVE_INT(returnValue);
+}

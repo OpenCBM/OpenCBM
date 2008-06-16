@@ -5,14 +5,14 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005,2007 Spiro Trikaliotis
+ *  Copyright 2001-2005,2007,2008 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.22 2007-05-06 11:01:02 strik Exp $ \n
+** \version $Id: cbm.c,v 1.23 2008-06-16 19:24:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -57,10 +57,20 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
 {
     int error = 1;
 
-    do {
-        char plugin_name[1024] = "";
+    const char * configurationFilename = configuration_get_default_filename();
 
-        opencbm_configuration_handle handle_configuration = opencbm_configuration_open();
+    char * default_plugin_name = NULL;
+    char * plugin_name = NULL;
+
+    do {
+
+        opencbm_configuration_handle handle_configuration;
+
+        if (configurationFilename == NULL) {
+            break;
+        }
+
+        handle_configuration = opencbm_configuration_open(configurationFilename);
 
         if (handle_configuration)
         {
@@ -73,15 +83,14 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
                 //
 
                 error = opencbm_configuration_get_data(handle_configuration, 
-                           "plugins", "default", plugin_name, sizeof(plugin_name));
+                           "plugins", "default", &default_plugin_name);
             }
             else
             {
                 //
                 // Use the given plugin name
                 //
-                if (strlen(Adapter) < sizeof(plugin_name))
-                    strcpy(plugin_name, Adapter);
+                plugin_name = cbmlibmisc_strdup(Adapter);
             }
 
             //
@@ -90,7 +99,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
             if (!error)
             {
                 error = opencbm_configuration_get_data(handle_configuration,
-                           plugin_name, "location", plugin_name, sizeof(plugin_name));
+                           default_plugin_name, "location", &plugin_name);
             }
 
             //
@@ -98,12 +107,13 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
             //
             if (error)
             {
+                cbmlibmisc_strfree(plugin_name);
                 *plugin_name = 0;
             }
 
             opencbm_configuration_close(handle_configuration);
         }
-        DBG_PRINT((DBG_PREFIX "Using plugin at '%s'", plugin_name));
+        DBG_PRINT((DBG_PREFIX "Using plugin at '%s'", plugin_name ? plugin_name : "(none)"));
 
         memset(&Plugin_information->Plugin, 0, sizeof(Plugin_information->Plugin));
 
@@ -141,6 +151,9 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         Plugin_information->Plugin.cbm_plugin_parallel_burst_write       = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track  = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read_track");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write_track");
+
+        Plugin_information->Plugin.cbm_plugin_iec_dbg_read               = plugin_get_address(Plugin_information->Library, "cbmarch_iec_dbg_read");
+        Plugin_information->Plugin.cbm_plugin_iec_dbg_write              = plugin_get_address(Plugin_information->Library, "cbmarch_iec_dbg_write");
 
         /* Make sure that all required functions are available: */
 
@@ -225,6 +238,10 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
             break;
 
     } while (0);
+
+    cbmlibmisc_strfree(default_plugin_name);
+    cbmlibmisc_strfree(plugin_name);
+    cbmlibmisc_strfree(configurationFilename);
 
     return error;
 }
@@ -1527,4 +1544,84 @@ cbm_get_plugin_function_address(const char * Functionname)
         pointer = plugin_get_address(Plugin_information.Library, Functionname);
 
     FUNC_LEAVE_PTR(pointer, void*);
+}
+
+/*! \brief Read a byte from the parallel port input register
+
+ This function reads a byte from the parallel port input register.
+ (STATUS_PORT). It is a helper function for debugging the cable
+ (i.e., for the XCDETECT tool) only!
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   If the routine succeeds, it returns a non-negative value
+   which corresponds to the data in the parallel port input
+   register (status port).
+
+   If the routine fails, the return value is -1.
+
+ \remark
+   Do not use this function in anything but a debugging aid tool
+   like XCDETECT!
+
+   This functions masks some bits off. The bits that are not masked
+   off are defined in PARALLEL_STATUS_PORT_MASK_VALUES.
+*/
+int CBMAPIDECL
+cbm_iec_dbg_read(CBM_FILE HandleDevice)
+{
+    int returnValue = -1;
+
+    FUNC_ENTER();
+
+    if ( Plugin_information.Plugin.cbm_plugin_iec_dbg_read ) {
+        returnValue = Plugin_information.Plugin.cbm_plugin_iec_dbg_read(HandleDevice);
+    }
+
+    FUNC_LEAVE_INT(returnValue);
+}
+
+/*! \brief Write a byte to the parallel port output register
+
+ This function writes a byte to the parallel port output register.
+ (CONTROL_PORT). It is a helper function for debugging the cable
+ (i.e., for the XCDETECT tool) only!
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Value
+   The value to set the control port to
+
+ \return 
+   If the routine succeeds, it returns 0.
+   
+   If the routine fails, it returns -1.
+
+ \remark
+   Do not use this function in anything but a debugging aid tool
+   like XCDETECT!
+
+   After this function has been called, it is NOT safe to use the
+   parallel port again unless you close the driver (cbm_driver_close())
+   and open it again (cbm_driver_open())!
+
+   This functions masks some bits off. That is, the bits not in the
+   mask are not changed at all. The bits that are not masked
+   off are defined in PARALLEL_CONTROL_PORT_MASK_VALUES.
+*/
+int CBMAPIDECL
+cbm_iec_dbg_write(CBM_FILE HandleDevice, unsigned char Value)
+{
+    int returnValue = -1;
+
+    FUNC_ENTER();
+
+    if ( Plugin_information.Plugin.cbm_plugin_iec_dbg_write ) {
+        returnValue = Plugin_information.Plugin.cbm_plugin_iec_dbg_write(HandleDevice, Value);
+    }
+
+    FUNC_LEAVE_INT(returnValue);
 }

@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2007 Spiro Trikaliotis
+ *  Copyright 2004-2008 Spiro Trikaliotis
  *
  */
 
 /*! **************************************************************
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.18 2007-07-25 16:37:52 strik Exp $ \n
+** \version $Id: iec.h,v 1.19 2008-06-16 19:24:28 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -81,6 +81,12 @@ cbmiec_iec_release(IN PDEVICE_EXTENSION Pdx, IN USHORT Line);
 
 extern NTSTATUS
 cbmiec_iec_setrelease(IN PDEVICE_EXTENSION Pdx, IN USHORT Set, IN USHORT Release);
+
+extern NTSTATUS
+cbmiec_iec_dbg_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR * Value);
+
+extern NTSTATUS
+cbmiec_iec_dbg_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Value);
 
 extern NTSTATUS
 cbmiec_pp_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Byte);

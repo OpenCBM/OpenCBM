@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.3 2007-04-22 10:32:36 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.4 2008-06-16 19:24:27 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -172,7 +172,7 @@ cbm_get_default_port(VOID)
 */
 
 VOID
-cbm_i_get_debugging_flags(VOID)
+cbm_get_debugging_flags(VOID)
 {
     DWORD ret;
     HKEY RegKey;
@@ -659,7 +659,7 @@ cbm_ioctl(IN CBM_FILE HandleDevice, IN DWORD ControlCode,
 */
 
 BOOL
-cbm_i_driver_start(VOID)
+cbm_driver_start(VOID)
 {
     SC_HANDLE schManager;
     SC_HANDLE schService;
@@ -734,7 +734,7 @@ cbm_i_driver_start(VOID)
 */
 
 BOOL
-cbm_i_driver_stop(VOID)
+cbm_driver_stop(VOID)
 {
     SERVICE_STATUS  serviceStatus;
     SC_HANDLE schManager;
@@ -799,7 +799,7 @@ cbm_i_driver_stop(VOID)
 */
 
 BOOL
-cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
+cbm_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
 {
     PCBMT_I_INSTALL_OUT outBuffer;
     CBM_FILE HandleDevice;

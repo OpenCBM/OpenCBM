@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.4 2007-07-25 16:37:51 strik Exp $ \n
+** \version $Id: i_opencbm.h,v 1.5 2008-06-16 19:24:27 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **
@@ -39,16 +39,16 @@ extern BOOL cbm_ioctl(IN CBM_FILE HandleDevice, IN DWORD ControlCode,
     #define CBMCTRL( _x_ ) CBMCTRL_##_x_
 #endif // #if DBG
 
-extern BOOL cbm_i_driver_stop(VOID);
-extern BOOL cbm_i_driver_start(VOID);
+extern BOOL cbm_driver_stop(VOID);
+extern BOOL cbm_driver_start(VOID);
 
-extern BOOL cbm_i_i_driver_install(OUT PULONG Buffer, IN ULONG BufferLen);
+extern BOOL cbm_driver_install(OUT PULONG Buffer, IN ULONG BufferLen);
 
 extern LONG RegGetDWORD(IN HKEY RegKey, IN char *SubKey, OUT LPDWORD Value);
 extern BOOL IsDriverStartedAutomatically(VOID);
 
 #if DBG
-    extern VOID cbm_i_get_debugging_flags(VOID);
+    extern VOID cbm_get_debugging_flags(VOID);
 #endif
 
 extern VOID WaitForIoCompletionInit(VOID);
@@ -57,5 +57,32 @@ extern VOID WaitForIoCompletionCancelAll(VOID);
 extern VOID WaitForIoCompletionConstruct(LPOVERLAPPED Overlapped);
 extern BOOL WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped, DWORD *BytesTransferred);
 
+/*! Registry key where the opencbm driver is located (under HKLM) */
+#define REGKEY_EVENTLOG \
+            "System\\CurrentControlSet\\Services\\Eventlog\\System\\opencbm"
+
+extern PCHAR FormatErrorMessage(DWORD Error);
+extern BOOL CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart);
+extern VOID CbmInstallUpdate(VOID);
+
+extern BOOL CbmRemove(IN LPCTSTR DriverName);
+extern BOOL CbmCheckPresence(IN LPCTSTR DriverName);
+
+extern int CbmCheckDriver(void);
+
+
+extern VOID CbmParportRestart(VOID);
+
+extern BOOL CbmUpdateParameter(IN ULONG DefaultLpt,
+                               IN ULONG IecCableType,
+                               IN ULONG PermanentlyLock,
+                               IN BOOL DebugFlagsDriverPresent, IN ULONG DebugFlagsDriver,
+                               IN BOOL DebugFlagsDllPresent, IN ULONG DebugFlagsDll);
+
+extern BOOL CbmTestIrq(VOID);
+
+#if DBG
+extern VOID CbmOutputDebuggingBuffer(VOID);
+#endif
 
 #endif /* I_OPENCBM_H */

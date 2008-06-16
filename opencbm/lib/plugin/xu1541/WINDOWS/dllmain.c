@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: dllmain.c,v 1.3 2007-05-20 17:32:47 strik Exp $ \n
+** \version $Id: dllmain.c,v 1.4 2008-06-16 19:24:27 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -65,30 +65,4 @@ BOOL WINAPI
 DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
     return TRUE;
-}
-
-/*! \brief Complete driver installation, "external version"
-
- This function performs anything that is needed to successfully
- complete the driver installation.
-
- \param Buffer
-   Pointer to a buffer which will return the install information
-
- \param BufferLen
-   The length of the buffer Buffer points to (in bytes).
-
- \return
-   FALSE on success, TRUE on error
-
- This function is for use of the installation routines only!
-
- This version of this function is for exporting out of the DLL.
-*/
-
-BOOL CBMAPIDECL
-cbm_install_complete(OUT PULONG Buffer, IN ULONG BufferLen)
-{
-    FUNC_ENTER();
-    FUNC_LEAVE_BOOL(FALSE);
 }

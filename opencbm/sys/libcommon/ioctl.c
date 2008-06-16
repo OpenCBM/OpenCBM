@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2007 Spiro Trikaliotis
+ *  Copyright 2004-2008 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.19 2007-02-11 16:53:41 strik Exp $ \n
+** \version $Id: ioctl.c,v 1.20 2008-06-16 19:24:28 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -286,6 +286,18 @@ cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
 
 #endif // #if DBG
 
+        case CBMCTRL_IEC_DBG_READ:
+            DBG_IRP(CBMCTRL_IEC_DBG_READ);
+            ntStatus = cbm_checkoutputbuffer(irpSp, sizeof(CBMT_IEC_DBG_READ), STATUS_SUCCESS);
+            fastStart = TRUE;
+            break;
+
+        case CBMCTRL_IEC_DBG_WRITE:
+            DBG_IRP(CBMCTRL_IEC_DBG_WRITE);
+            ntStatus = cbm_checkinputbuffer(irpSp, sizeof(CBMT_IEC_DBG_WRITE), STATUS_SUCCESS);
+            fastStart = TRUE;
+            break;
+
         default:
             DBG_ERROR((DBG_PREFIX "unknown IRP_MJ_DEVICE_CONTROL"));
             ntStatus = STATUS_INVALID_PARAMETER;
@@ -543,6 +555,18 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
             break;
 
 #endif // #if DBG
+
+        case CBMCTRL_IEC_DBG_READ:
+            DBG_IRP(CBMCTRL_IEC_DBG_READ);
+            returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
+            returnLength = sizeof(CBMT_IEC_DBG_READ);
+            ntStatus = cbmiec_iec_dbg_read(Pdx, &(OUTPUTVALUE(CBMT_IEC_DBG_READ)->Value));
+            break;
+
+        case CBMCTRL_IEC_DBG_WRITE:
+            DBG_IRP(CBMCTRL_IEC_DBG_WRITE);
+            ntStatus = cbmiec_iec_dbg_write(Pdx, INPUTVALUE(CBMT_IEC_DBG_WRITE)->Value);
+            break;
 
         default:
             // As cbm_devicecontrol() already checked the IRP,

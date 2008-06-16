@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.19 2008-01-13 17:53:47 strik Exp $
+# $Id: config.make,v 1.20 2008-06-16 19:24:22 strik Exp $
 #
 
 # get package version (major.minor.release).
@@ -80,7 +80,7 @@ OD_FLAGS     = -w8 -txC -v -An
 #KERNEL_SOURCE = /lib/modules/`uname -r`/build       # for kernel 2.6
 
 # from patch #1189489 on SourceForge, with fix from #1189492):
-KERNEL_SOURCE = ${shell for d in {/lib/modules/`uname -r`/build,/usr/src/linux}; do test -d $$d && echo $$d; done | head -n 1}
+KERNEL_SOURCE = ${shell for d in /lib/modules/`uname -r`/build /usr/src/linux; do test -e $$d && echo $$d; done | head -n 1}
 
 #
 # Find out if we should include linux/autoconf.h or linux/conf.h in the kernel module

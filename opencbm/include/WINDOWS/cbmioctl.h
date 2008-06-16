@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.19 2007-07-25 16:37:51 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.20 2008-06-16 19:24:22 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -16,7 +16,7 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2006 Spiro Trikaliotis
+ *  Copyright 2001-2006,2008 Spiro Trikaliotis
 */
 
 #ifndef CBM_IOCTL_H
@@ -207,6 +207,13 @@ struct CBMT_I_TESTIRQ
 
 } CBMT_I_TESTIRQ, *PCBMT_I_TESTIRQ;
 
+/*! A value for both the CBMT_IEC_DBG_READ and CBMT_IEC_DBG_WRITE IOCTLs */
+typedef
+struct CBMT_IEC_DBG_VALUE
+{
+    UCHAR Value;
+} CBMT_IEC_DBG_VALUE;
+
 /*! Input buffer for TALK */
 typedef CBMT_IECADDRESS CBMT_TALK_IN;
 /*! Input buffer for LISTEN */
@@ -237,6 +244,10 @@ typedef CBMT_LINE_STATE CBMT_IEC_SETRELEASE_IN;
 typedef CBMT_SINGLEBYTE CBMT_PARBURST_PREAD_OUT;
 /*! Input buffer for IEC_PARBURST_PAR_WRITE */
 typedef CBMT_SINGLEBYTE CBMT_PARBURST_PWRITE_IN;
+/*! Output buffer for IEC_DBG_READ */
+typedef CBMT_IEC_DBG_VALUE CBMT_IEC_DBG_READ;
+/*! Input buffer for IEC_DBG_WRITE */
+typedef CBMT_IEC_DBG_VALUE CBMT_IEC_DBG_WRITE;
 
 
 /*! BASE number of the custom IOCTL */
@@ -323,6 +334,13 @@ typedef CBMT_SINGLEBYTE CBMT_PARBURST_PWRITE_IN;
 //! IOCTL for testing the interrupt facilities of the hardware
 #define CBMCTRL_TEST_IRQ \
                             _CBMIO(CBMCTRL_BASE, 26) // -                    -
+
+//! IOCTL for debugging a cable: Read all the input lines in a hardware-specific way
+#define CBMCTRL_IEC_DBG_READ  _CBMIO(CBMCTRL_BASE, 27) // CBMT_IEC_DBG_READ    -
+
+//! IOCTL for debugging a cable: Write all the output lines in a hardware-specific way
+#define CBMCTRL_IEC_DBG_WRITE _CBMIO(CBMCTRL_BASE, 28) // -                    CBMT_IEC_DBG_WRITE
+
 
 /* these are the return codes of CBMCTRL_I_INSTALL: */
 

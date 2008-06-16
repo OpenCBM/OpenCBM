@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.14 2007-07-25 16:37:51 strik Exp $ \n
+** \version $Id: debug.h,v 1.15 2008-06-16 19:24:22 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -273,6 +273,8 @@ int __cdecl main(int argc, char *argv[])
        /*! leave the function with a return value of type INT */
        #define FUNC_LEAVE_INT(    _xxx ) { const int     _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with INT=%u (%d)",    __FUNCTION__, (unsigned int)(_OUT_), (signed int)(_OUT_) )); } return _OUT_; }
        /*! leave the function with a return value of type INT */
+       #define FUNC_LEAVE_UINT(   _xxx ) { const unsigned int _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with INT=%u (%d)",    __FUNCTION__, _OUT_, _OUT_ )); } return _OUT_; }
+       /*! leave the function with a return value of type INT */
        #define FUNC_LEAVE_USHORT( _xxx ) { const USHORT  _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with INT=%u (%d)",    __FUNCTION__, (unsigned int)(_OUT_), (signed int)(_OUT_) )); } return _OUT_; }
        /*! leave the function with a return value of type UCHAR */
        #define FUNC_LEAVE_UCHAR(  _xxx ) { const UCHAR   _OUT_ = _xxx; if (ISDBG_LEAVE()) { DBGO(( DBG_PREFIX "Leaving  %s with UCHAR=%u",  __FUNCTION__, (unsigned int)(_OUT_) )); }  return _OUT_; }
@@ -296,6 +298,9 @@ int __cdecl main(int argc, char *argv[])
               #define FUNC_LEAVE_NTSTATUS(       _xxx ) { NTSTATUS _OUT_ = _xxx; if (ISDBG_LEAVE() || (ISDBG_LEAVE_FAILURE() && (_xxx != STATUS_SUCCESS))) { DBGO(( DBG_PREFIX "Leaving  %s with NTSTATUS=%s", __FUNCTION__, DebugNtStatus(_OUT_) )); } return _OUT_; }
               /*! Output if DBGF_ASSERTIRQL is defined */
               #define DBG_IRQL(  _xxx ) { if (!(KeGetCurrentIrql() _xxx)) if (ISDBG_ASSERTIRQL()) { DBGO(( DBG_PREFIX "***IRQL ASSERTION FAILED!***: '%s' in %s:%s(%u)", #_xxx, __FILE__, __FUNCTION__, __LINE__ )); DBG_BREAKPOINT(); } }
+       #else
+              /*! leave the function with a return value of a pointer type */
+              #define FUNC_LEAVE_HMODULE(  _xxx )  FUNC_LEAVE_TYPE( _xxx, HMODULE, "0x%08x")
        #endif
 
        /*! Output if DBGF_PPORT is defined */

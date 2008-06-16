@@ -94,6 +94,14 @@ SOURCE=.\checkdevice.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\dbgread.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbgwrite.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\debug.c
 # End Source File
 # Begin Source File

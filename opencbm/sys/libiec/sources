@@ -12,6 +12,8 @@ C_DEFINES=$(C_DEFINES) -DCSQ_STATIC=1
 INCLUDES=../include;../include/WINDOWS;../../include;../../include/WINDOWS;../libcommon
 
 SOURCES= 	init.c \
+		dbgread.c \
+		dbgwrite.c \
 		testirq.c \
 		checkcable.c \
 		debug.c \

@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis
+ *  Copyright 2004, 2008 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.26 2007-05-20 17:32:46 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.27 2008-06-16 19:24:23 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -23,10 +23,12 @@
 #include <stdlib.h>
 #include <direct.h>
 
-#include "cbmioctl.h"
-#include "version.h"
 #include "arch.h"
+#include "cbmioctl.h"
 #include "i_opencbm.h"
+#include "libmisc.h"
+#include "opencbm-plugin.h"
+#include "version.h"
 
 #include <getopt.h>
 
@@ -42,52 +44,6 @@
 #include "debug.h"
 
 #include "instcbm.h"
-
-/*! \brief Format a returned error code into a string
-
- This function formats a returned error code into a string.
-
- \param Error
-   The error number to be formatted.
-
- \return 
-   The string describing the error given by the error code.
-*/
-PCHAR
-FormatErrorMessage(DWORD Error)
-{
-    static char ErrorMessageBuffer[2048];
-    int n;
-
-    // Format the message
-
-    n = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_MAX_WIDTH_MASK,
-        NULL,
-        Error,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-        (LPTSTR) &ErrorMessageBuffer,
-        sizeof(ErrorMessageBuffer)-1,
-        NULL);
-
-    // make sure there is a trailing zero
-
-    ErrorMessageBuffer[n] = 0;
-
-    return ErrorMessageBuffer;
-}
-
-/*! This type describes the operating system we are running on */
-typedef 
-enum osversion_e
-{
-    WINUNSUPPORTED, //!< an unsupported operating system
-    WINNT3,         //!< Windows NT 3.x (does the driver work there?
-    WINNT4,         //!< Windows NT 4.x
-    WIN2000,        //!< Windows 2000 (NT 5.0)
-    WINXP,          //!< Windows XP (NT 5.1)
-    WINNEWER        //!< newer than WIN XP
-} osversion_t;
-
 
 /*! \internal \brief Check if we have the needed access rights
 
@@ -167,6 +123,12 @@ GetOsVersion(VOID)
             {
             case 0: case 1: case 2: /* SHOULD NOT OCCUR AT ALL! */
                 /* unsupported */
+                retValue = WINUNSUPPORTED;
+                DBG_PRINT((DBG_PREFIX "Running on NT %u.%02u, that is, *BEFORE* 3.x! "
+                    "Something is going wrong here...",
+                    ovi.dwMajorVersion, ovi.dwMinorVersion));
+                fprintf(stderr, "You're using Windows NT %u.%02u. THESE VERSIONS SHOULD NOT EXIST!\n",
+                    ovi.dwMajorVersion, ovi.dwMinorVersion);
                 break;
 
             case 3:
@@ -191,12 +153,22 @@ GetOsVersion(VOID)
                 }
                 break;
 
+            case 6:
+                retValue = WINVISTA;
+                break;
+
             default:
                 // This is a version of Windows we do not know; anyway, since
-                // it is NT based, and it's major version is >= 5, we support it
+                // it is NT based, and it's major version is >= 7, we support it
                 // anyway!
 
                 retValue = WINNEWER;
+
+                DBG_PRINT((DBG_PREFIX "Running on NT %u.%02u.",
+                    ovi.dwMajorVersion, ovi.dwMinorVersion));
+                fprintf(stderr, "You're using Windows NT %u.%02u.\n"
+                    "I do not know it, but OpenCBM should work, anymore.\n",
+                    ovi.dwMajorVersion, ovi.dwMinorVersion);
                 break;
             }
             break;
@@ -233,118 +205,30 @@ usage(VOID)
 
     version();
 
-    printf("\nUsage: instcbm [options]\n"
-            "Install the cbm4win driver on the system, or remove it.\n"
+    printf("\nUsage: instcbm [options] pluginname [plugin-options] [pluginname [plugin-options] ...]\n"
+            "Install OpenCBM and one or more plugins on the system, or remove it.\n"
+            "\n"
+            "pluginname is the name of the plugin to install. Any subsequent option is\n"
+            "passed to the plugin, and it will have a different meaning! See the\n"
+            "description of each plugin for details.\n"
             "\n"
             "Options:\n"
-            "  -h, --help      display this help and exit\n"
-            "  -V, --version   display version information about cbm4win\n"
-            "  -r, --remove    remove (uninstall) the driver\n"
-            "  -e, --enumpport re-enumerate the parallel port driver\n"
+            "  -h, --help       display this help and exit\n"
+            "  -V, --version    display version information about OpenCBM\n"
+            "  -r, --remove    remove (uninstall) OpenCBM or a plugin\n"
             "  -u, --update    update parameters if driver is already installed.\n"
-            "  -l, --lpt=no    set default LPT port\n"
-            "  -t, --cabletype=TYPE set cabletype to 'auto', 'xa1541' or 'xm1541'.\n"
-            "                  If not specified, --cabletype=auto is assumed.\n"
-            "  -L, --lock=WHAT automatically lock the driver 'yes' or not 'no'.\n"
-            "                  If not specified, --lock=yes is assumed.\n"
-            "  -n, --nocopy    do not copy the driver files into the system directory\n"
             "  -c, --check     only check if the installation is ok\n"
-#ifdef _X86_
-            "  -F, --forcent4  force NT4 driver on a Win 2000, XP, or newer systems\n" 
-            "                  (NOT RECOMMENDED!)\n"
-#endif // #ifdef _X86_
-            "  -A, --automatic (default) automatically start the driver on system boot.\n"
-            "                  The driver can be used from a normal user, no need for\n"
-            "                  administrator rights.\n"
-            "                  The opposite of --on-demand.\n"
-            "  -O, --on-demand start the driver only on demand.\n"
-            "                  The opposite of --automatic.\n"
+            "  -n, --nocopy    do not copy the driver files into the system directory\n"
             "\n");
-
     FUNC_LEAVE();
 }
 
 /*! \brief \internal Print out a hint how to get help */
 static VOID
-hint(char *s)
+hint(const char *s)
 {
     fprintf(stderr, "Try `%s' --help for more information.\n", s);
 }
-
-/*! \brief The parameter which are given on the command-line */
-typedef
-struct parameter_s
-{
-    /*! Do not execute anything */
-    BOOL NoExecute;
-
-    /*! Administrator privileges not needed */
-    BOOL NoAdminNeeded;
-
-    /*! Find out of more than one "execute" parameter is given */
-    BOOL ExecuteParameterGiven;
-
-    /*! --remove was given */
-    BOOL Remove;
-
-    /*! --enum was given */
-    BOOL EnumerateParport;
-
-    /*! --nocopy was given */
-    BOOL NoCopy;
-
-    /*! --forcent4 was given */
-    BOOL ForceNt4;
-
-    /*! --update was given */
-    BOOL Update;
-
-    /*! --check was given */
-    BOOL CheckInstall;
-
-    /*! --lpt was given, the number which was there */
-    ULONG Lpt;
-
-    /*! the IEC cable type was specified */
-    IEC_CABLETYPE IecCableType;
-    
-    /*! It was specified that the driver is to be permanently locked */
-    ULONG PermanentlyLock;
-
-    /*! --automatic or --on-demand was given */
-    BOOL AutomaticOrOnDemandStart;
-
-    /*! --automatic was given, start the driver automatically */
-    BOOL AutomaticStart;
-
-#if DBG
-
-    /*! --buffer was given */
-    BOOL OutputDebuggingBuffer;
-
-    /*! --debugflags was given */
-    BOOL DebugFlagsDriverWereGiven;
-
-    /*! --debugflags, a second parameter (for the DLL) was given */
-    BOOL DebugFlagsDllWereGiven;
-
-    /*! --debugflags, a third parameter (for INSTCBM itself) was given */
-    BOOL DebugFlagsInstallWereGiven;
-
-    /*! if --debugflags was given: the number which was there */
-    ULONG DebugFlagsDriver;
-
-    /*! if --debugflags with 2 parameters was given: the number which was there */
-    ULONG DebugFlagsDll;
-
-    /*! if --debugflags with 3 parameters was given: the number which was there */
-    ULONG DebugFlagsInstall;
-
-#endif // #if DBG
-
-    /*! The type of the OS version */
-    osversion_t OsVersion;
-} parameter_t;
 
 /*! \internal \brief Process a number
 
@@ -453,6 +337,29 @@ processNumber(const PCHAR Argument, PCHAR *NextChar, PBOOL ParameterGiven, PULON
     FUNC_LEAVE_BOOL(error);
 }
 
+static BOOL
+enforceOnlyOneExecutingCommand(cbm_install_parameter_t *Parameter, const char *ExecutableName)
+{
+    BOOL error = FALSE;
+
+    FUNC_ENTER();
+
+    if (Parameter->ExecuteParameterGiven)
+    {
+        error = TRUE;
+        printf("Colliding parameters were given, aborting!");
+        hint(ExecutableName);
+    }
+    Parameter->ExecuteParameterGiven = TRUE;
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+/* ------------------------------------------------------------------------------------- */
+#include "opencbm-plugin.h"
+
+/* ------------------------------------------------------------------------------------- */
+
 /*! \internal \brief Process the command line arguments
 
  This function processes the command line arguments.
@@ -471,7 +378,7 @@ processNumber(const PCHAR Argument, PCHAR *NextChar, PBOOL ParameterGiven, PULON
    TRUE on error, else FALSE.
 */
 static BOOL
-processargs(int Argc, char **Argv, parameter_t *Parameter)
+processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
 {
     BOOL error;
     int c;
@@ -481,184 +388,64 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         { "help",       no_argument,       NULL, 'h' },
         { "version",    no_argument,       NULL, 'V' },
         { "remove",     no_argument,       NULL, 'r' },
-        { "enumpport",  no_argument,       NULL, 'e' },
-#ifdef _X86_
-        { "forcent4",   no_argument,       NULL, 'F' },
-#endif // #ifdef _X86_
-        { "lpt",        required_argument, NULL, 'l' },
         { "update",     no_argument,       NULL, 'u' },
         { "check",      no_argument,       NULL, 'c' },
-        { "cabletype",  required_argument, NULL, 't' },
-        { "lock",       required_argument, NULL, 'L' },
+        { "nocopy",     no_argument,       NULL, 'n' },
 #if DBG
         { "debugflags", required_argument, NULL, 'D' },
         { "buffer",     no_argument,       NULL, 'B' },
 #endif // #if DBG
-        { "nocopy",     no_argument,       NULL, 'n' },
-        { "automatic",  no_argument,       NULL, 'A' },
-        { "on-demand",  no_argument,       NULL, 'O' },
         { NULL,         0,                 NULL, 0   }
     };
 
-    const char shortopts[] = "hrel:nuct:L:AOV"
-#ifdef _X86_
-                             "F"
-#endif // #ifdef _X86_
+    const char shortopts[] = "-hVrucn"
 
 #if DBG
                              "D:B"
 #endif // #if DBG
                              ;
 
+    BOOL quitGlobalProcessing = FALSE;
+
     FUNC_ENTER();
 
     error = FALSE;
 
-    // Clear the Parameter set 
 
     DBG_ASSERT(Parameter);
-    memset(Parameter, 0, sizeof(*Parameter));
 
-    // We have not specified an LPT port yet
-
-    Parameter->Lpt = (ULONG) -1;
-
-    // No IEC cable type was specified
-
-    Parameter->IecCableType = IEC_CABLETYPE_UNSPEC;
-
-    // It was not specified if the driver is to be permenently locked
-
-    Parameter->PermanentlyLock = (ULONG) -1;
-
-    // set the default: automaticstart -A
-
-    Parameter->AutomaticStart = TRUE;
-
-#if DBG
-
-    // Until now, no DebugFlags were on the line
-
-    Parameter->DebugFlagsDriverWereGiven = FALSE;
-    Parameter->DebugFlagsDllWereGiven = FALSE;
-
-#endif // #if DBG
-
-    while ((c=getopt_long(Argc, Argv, shortopts, longopts, NULL)) != -1)
+    while ( ! quitGlobalProcessing && (c=getopt_long(Argc, Argv, shortopts, longopts, NULL)) != -1)
     {
         switch (c)
         {
         case 'h':
             usage();
             Parameter->NoExecute = TRUE;
-            Parameter->NoAdminNeeded = TRUE;
             break;
 
         case 'V':
             version();
             Parameter->NoExecute = TRUE;
-            Parameter->NoAdminNeeded = TRUE;
             break;
 
         case 'r':
-            if (Parameter->ExecuteParameterGiven)
-            {
-                error = TRUE;
-                printf("Colliding parameters were given, aborting!");
-                hint(Argv[0]);
-            }
-            else
-            {
-                Parameter->ExecuteParameterGiven = TRUE;
-                Parameter->Remove = TRUE;
-            }
+            error = enforceOnlyOneExecutingCommand(Parameter, Argv[0]) || error;
+            Parameter->Remove = TRUE;
             break;
 
-        case 'e':
-            if (Parameter->ExecuteParameterGiven)
-            {
-                error = TRUE;
-                printf("Colliding parameters were given, aborting!");
-                hint(Argv[0]);
-            }
-            else
-            {
-                Parameter->ExecuteParameterGiven = TRUE;
-                Parameter->EnumerateParport = TRUE;
-            }
+        case 'u':
+            Parameter->Update = TRUE;
             break;
 
-        case 't':
-            if ((optarg == NULL) || (strcmp(optarg, "auto") == 0))
-                Parameter->IecCableType = IEC_CABLETYPE_AUTO;
-            else if (strcmp(optarg, "xa1541") == 0)
-                Parameter->IecCableType = IEC_CABLETYPE_XA;
-            else if (strcmp(optarg, "xm1541") == 0)
-                Parameter->IecCableType = IEC_CABLETYPE_XM;
-            else
-            {
-                fprintf(stderr, "you must specify 'xa1541', 'xm1541' or 'auto' for --cabletype\n");
-                error = TRUE;
-            }
-            break;
-
-        case 'L':
-            if (optarg == NULL
-                || (strcmp(optarg, "+") == 0)
-                || (strcmp(optarg, "yes") == 0)
-                || (strcmp(optarg, "true") == 0)
-               )
-            {
-                Parameter->PermanentlyLock = 1;
-            }
-            else if (optarg != NULL &&
-                    (   (strcmp(optarg, "-") == 0)
-                     || (strcmp(optarg, "no") == 0)
-                     || (strcmp(optarg, "false") == 0)
-                    )
-                    )
-            {
-                Parameter->PermanentlyLock = 0;
-            }
-            else
-            {
-                fprintf(stderr, "you must specify 'yes' or 'no' for --lock\n");
-                error = TRUE;
-            }
+        case 'c':
+            Parameter->CheckInstall = TRUE;
             break;
 
         case 'n':
             Parameter->NoCopy = TRUE;
             break;
 
-        case 'c':
-            Parameter->CheckInstall = TRUE;
-            Parameter->NoAdminNeeded = TRUE;
-            break;
-
-#ifdef _X86_
-        case 'F':
-            if (Parameter->ExecuteParameterGiven)
-            {
-                error = TRUE;
-                printf("Colliding parameters were given, aborting!");
-                hint(Argv[0]);
-            }
-            else
-            {
-                Parameter->ExecuteParameterGiven = TRUE;
-                Parameter->ForceNt4 = TRUE;
-                Parameter->Remove = FALSE;
-            }
-            break;
-#endif // #ifdef _X86_
-
-        case 'l':
-            error = processNumber(optarg, NULL, NULL, &Parameter->Lpt);
-            break;
-
 #if DBG
-
         case 'D':
             {
                 PCHAR next;
@@ -693,39 +480,13 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         case 'B':
             Parameter->OutputDebuggingBuffer = TRUE;
             Parameter->NoExecute = TRUE;
-            Parameter->NoAdminNeeded = TRUE;
             break;
 
 #endif // #if DBG
 
-        case 'u':
-            Parameter->Update = TRUE;
-            break;
-
-        case 'A':
-            if (Parameter->AutomaticOrOnDemandStart)
-            {
-                fprintf(stderr, "--automatic and --on-demand cannot be specified at the same time!\n");
-                error = TRUE;
-            }
-            else
-            {
-                Parameter->AutomaticStart = TRUE;
-                Parameter->AutomaticOrOnDemandStart = TRUE;
-            }
-            break;
-
-        case 'O':
-            if (Parameter->AutomaticOrOnDemandStart)
-            {
-                fprintf(stderr, "--automatic and --on-demand cannot be specified at the same time!\n");
-                error = TRUE;
-            }
-            else
-            {
-                Parameter->AutomaticStart = FALSE;
-                Parameter->AutomaticOrOnDemandStart = TRUE;
-            }
+        case 1: /* This is not a parameter, thus, it is the name of the plugin to process */
+            quitGlobalProcessing = TRUE;
+            --optind;
             break;
 
         default:
@@ -735,45 +496,20 @@ processargs(int Argc, char **Argv, parameter_t *Parameter)
         }
     }
 
-    FUNC_LEAVE_BOOL(error);
-}
 
-/*! \internal \brief Concatenate two string
-
- This function concatenates two strings and returns the
- result in a malloc()ed memory region.
-
- \param String1
-   The first string to concatenate.
-
- \param String2
-   The second string to concatenate.
-
- \return
-   The malloc()ed memory for the concatenated string, or NULL
-   if there was not enough memory.
-*/
-static char *
-AllocateConcatenatedString(const char *String1, const char *String2)
-{
-    char *string;
-
-    FUNC_ENTER();
-
-    DBG_ASSERT(String1 != NULL);
-    DBG_ASSERT(String2 != NULL);
-
-    string = malloc(strlen(String1) + strlen(String2) + 1);
-
-    if (string)
-    {
-        strcpy(string, String1);
-        strcat(string, String2);
-
-        DBG_ASSERT(strlen(string) == strlen(String1) + strlen(String2));
+    while (! error && Argv[optind++]) {
+        error = error || ProcessPluginCommandline(Argv[optind - 1], Parameter, Argc, Argv);
     }
 
-    FUNC_LEAVE_STRING(string);
+    if (Parameter->PluginList == NULL && ! error) {
+        error = get_all_plugins(Parameter) || error;
+    }
+
+    if (Parameter->PluginList == NULL) {
+        error = TRUE;
+    }
+
+    FUNC_LEAVE_BOOL(error);
 }
 
 /*! \internal \brief Copy a file from a path to another
@@ -792,14 +528,11 @@ AllocateConcatenatedString(const char *String1, const char *String2)
  \param Filename
    The name of the file to copy.
 
- \param ErrorCode
-   The error code to return if the copy fails.
-
  \return
-   0 on success, or ErrorCode in case of an error.
+   0 on success, else 1.
 */
 static int
-CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *Filename, const int ErrorCode)
+CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *Filename)
 {
     char *sourceFile = NULL;
     char *destFile = NULL;
@@ -807,8 +540,8 @@ CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *File
 
     FUNC_ENTER();
 
-    sourceFile = AllocateConcatenatedString(SourcePath, Filename);
-    destFile = AllocateConcatenatedString(DestPath, Filename);
+    sourceFile = cbmlibmisc_strcat(SourcePath, Filename);
+    destFile = cbmlibmisc_strcat(DestPath, Filename);
 
     if (sourceFile && destFile)
     {
@@ -817,7 +550,7 @@ CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *File
         printf("Copying '%s' to '%s'", sourceFile, destFile);
         if (!CopyFile(sourceFile, destFile, FALSE))
         {
-            error = ErrorCode;
+            error = 1;
             DBG_PRINT((DBG_PREFIX "--> FAILED!" ));
             printf(" FAILED!\n");
         }
@@ -841,407 +574,139 @@ CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *File
     FUNC_LEAVE_INT(error);
 }
 
-/*! \internal \brief Delete a file at a path
-
- This function deletes a file at a specified path.
-
- \param Path
-   The path from where to delete the file.
-   The path has to be terminated with a backslash ("\").
-
- \param Filename
-   The name of the file to copy.
-*/
-static VOID
-DeleteFileInDirectory(const char *Path, const char *Filename)
+static char *
+GetWorkingDirectory(void)
 {
-    char *file = NULL;
+    char * tmpPathString;
+    unsigned int stringLength;
+    BOOL error = TRUE;
 
     FUNC_ENTER();
 
     do {
-        file = AllocateConcatenatedString(Path, Filename);
 
-        if (!file)
-            break;
+        //
+        // determine the length of the string
+        //
 
-        DBG_PRINT((DBG_PREFIX "Trying to delete %s", file));
+        stringLength = GetCurrentDirectory(0, NULL);
 
-        DeleteFile(file);
+        //
+        // Allocate memory for the working directory
+        //
 
-    } while (0);
+        tmpPathString = malloc(stringLength + 1);
 
-    if (file)
-        free(file);
-
-    FUNC_LEAVE();
-}
-
-/*! \internal \brief Process a remove request
-
- This function removes the the driver from the machine.
-
- \param Parameter
-   Pointer to parameter_t struct which contains the
-   description of the parameters given on the command-line.
-
- \return 
-   Return value which will be given on return from main()
-   That is, 0 on success, everything else indicates an error.
-*/
-static int
-RemoveDriver(parameter_t *Parameter)
-{
-    char *driverSystemPath = NULL;
-    char *driverPath = NULL;
-
-    FUNC_ENTER();
-
-    UNREFERENCED_PARAMETER(Parameter);
-
-    do {
-        char tmpPathString[MAX_PATH];
-
-        if (!CbmCheckPresence(OPENCBM_DRIVERNAME))
+        if (tmpPathString == NULL)
         {
-            printf("No driver installed, cannot remove.\n");
             break;
         }
 
-        printf("REMOVING driver...\n");
-
-        CbmRemove(OPENCBM_DRIVERNAME);
-
-        // Now, check if we copied the driver and the DLL into the
-        // system directory. If this is the case, delete them from
-        // there.
-
-        GetSystemDirectory(tmpPathString, sizeof(tmpPathString));
-        driverSystemPath = AllocateConcatenatedString(tmpPathString, "\\");
-        driverPath = AllocateConcatenatedString(tmpPathString, "\\DRIVERS\\");
-
-        if (!driverSystemPath || !driverPath)
-            break;
-
-        // try to delete opencbm.dll
-
-        DeleteFileInDirectory(driverSystemPath, "OPENCBM.DLL");
-
-        // try to delete opencbmvdd.dll
-
-        DeleteFileInDirectory(driverSystemPath, "OPENCBMVDD.DLL");
-
-        // try to delete cbm4nt.sys
-
-        DeleteFileInDirectory(driverPath, "CBM4NT.SYS");
-
-        // try to delete cbm4wdm.sys
-
-        DeleteFileInDirectory(driverPath, "CBM4WDM.SYS");
-
-    } while (0);
-
-    if (driverSystemPath)
-        free(driverSystemPath);
-
-    if (driverPath)
-        free(driverPath);
-
-    FUNC_LEAVE_INT(0);
-}
-
-/*! \internal \brief Check for the correct installation
-
- This function checks if the driver was corretly installed.
-
- \param Parameter
-   Pointer to parameter_t struct which contains the
-   description of the parameters given on the command-line.
-
- \param PluginNames
-    Array of pointers to strings which holds the names of all plugins to process.
-    This array has to be finished by a NULL pointer.
-
- \return 
-   Return value which will be given on return from main().
-   That is, 0 on success, everything else indicates an error.
-*/
-static int
-CheckDriver(parameter_t *Parameter, char *PluginNames[])
-{
-    int error;
-
-    FUNC_ENTER();
-
-    UNREFERENCED_PARAMETER(Parameter);
-
-    DBG_PRINT((DBG_PREFIX "Checking configuration for cbm4win"));
-    printf("Checking configuration for cbm4win\n");
-
-    if (CbmCheckCorrectInstallation(NeededAccessRights(), PluginNames))
-    {
-        DBG_PRINT((DBG_PREFIX "There were errors in the current configuration."
-            "Please fix them before trying to use the driver!"));
-        printf("*** There were errors in the current configuration.\n"
-            "*** Please fix them before trying to use the driver!");
-        error = 11;
-    }
-    else
-    {
-        error = 0;
-        DBG_PRINT((DBG_PREFIX "No problems found in current configuration"));
-        printf("No problems found in current configuration\n\n");
-
-        /*! \todo Suggested output from WoMo:
-            Checking configuration for cbm4win/opencbm:
-            No problems found in current configuration:
-
-            Driver configuration:
-             Port:               automatic (0), currently using LPT 1
-             IRQ mode:           enabled
-             Driver start mode:  manually (3)
-        */
-    }
-
-    FUNC_LEAVE_INT(error);
-}
-
-/*! \internal \brief Force re-enumeration of parallel port driver
-
- This function forces a re-enumeration of the parallel port driver(s).
-
- \param Parameter
-   Pointer to parameter_t struct which contains the
-   description of the parameters given on the command-line.
-
- \return 
-   Return value which will be given on return from main().
-   That is, 0 on success, everything else indicates an error.
-*/
-static int
-EnumParportDriver(parameter_t *Parameter)
-{
-    FUNC_ENTER();
-
-    UNREFERENCED_PARAMETER(Parameter);
-
-    DBG_PRINT((DBG_PREFIX "Re-enumerating parallel port driver"));
-    printf("Re-enumerating parallel port driver\n");
-
-    CbmParportRestart();
-
-    FUNC_LEAVE_INT(0);
-}
-
-/*! \internal \brief Copy the driver files to the system path
-
- This function copies the driver files to the system path.
-
- \param Parameter
-   Pointer to parameter_t struct which contains the
-   description of the parameters given on the command-line.
-
- \param PluginNames
-    Array of pointers to strings which holds the names of all plugins to process.
-    This array has to be finished by a NULL pointer.
-
- \return 
-   Return value which will be given on return from main()
-   That is, 0 on success, everything else indicates an error.
-*/
-static int
-CopyDriverFiles(parameter_t *Parameter, char *PluginNames[])
-{
-    char tmpPathString[MAX_PATH];
-
-    char *driverSystemPath = NULL;
-    char *driverPath = NULL;
-    char *driverLocalPath = NULL;
-    char *driverFilename = NULL;
-
-    const char *driverToUse;
-
-    int error = 0;
-
-    FUNC_ENTER();
-
-    printf("Installing driver...\n");
-
-    do {
         //
-        // First of all, determine the current working directory
+        // determine the working directory
         //
 
-        if (GetCurrentDirectory(sizeof(tmpPathString), tmpPathString) == 0)
+        if (GetCurrentDirectory(stringLength, tmpPathString) == 0)
         {
             DBG_PRINT((DBG_PREFIX "Could not determine the current working directory!"));
             printf("Could not determine the current working directory!\n");
-            error = 4;
             break;
         }
 
-        driverLocalPath = AllocateConcatenatedString(tmpPathString, "\\");
+        DBG_ASSERT(strlen(tmpPathString) < stringLength);
 
-        //
-        // Get the system directory
-        //
+        strcat(tmpPathString, "\\");
 
-        GetSystemDirectory(tmpPathString, sizeof(tmpPathString));
-        driverSystemPath = AllocateConcatenatedString(tmpPathString, "\\");
-        driverPath = AllocateConcatenatedString(tmpPathString, "\\DRIVERS\\");
-
-        if (!driverLocalPath || !driverSystemPath || !driverPath)
-        {
-            DBG_ERROR((DBG_PREFIX "error allocating memory for the paths" ));
-            fprintf(stderr, "error allocating memory for the paths\n");
-            error = 15;
-            break;
-        }
-
-        //
-        // Find out which driver to use (cbm4wdm.sys, cbm4nt.sys)
-        //
-        
-        driverToUse = ((Parameter->OsVersion > WINNT4) && !Parameter->ForceNt4) ? "cbm4wdm.sys" : "cbm4nt.sys";
-
-        printf("Using driver '%s'\n", driverLocalPath);
-
-        //
-        // If we have to copy the files, perform the copy operation for them.
-        //
-
-        if (!Parameter->NoCopy)
-        {
-            // copy the driver into the appropriate directory
-
-            if ((error = CopyFileToNewPath(driverLocalPath, driverPath, driverToUse, 6)) != 0)
-                break;
-
-            if ((error = CopyFileToNewPath(driverLocalPath, driverSystemPath, "opencbm.dll", 7)) != 0)
-                break;
-
-            if (PluginNames)
-            {
-                unsigned int i;
-
-                for (i = 0; PluginNames[i] != NULL; i++)
-                {
-                    char *filename = get_plugin_filename(PluginNames[i]);
-
-                    if (!filename)
-                    {
-                        error = TRUE;
-                        break;
-                    }
-
-                    if ((error = CopyFileToNewPath(driverLocalPath, driverSystemPath, filename, 7)) != 0) {
-                        free(filename);
-                        break;
-                    }
-
-                    free(filename);
-                }
-
-                if (error)
-                    break;
-            }
-
-#ifdef _X86_
-            if ((error = CopyFileToNewPath(driverLocalPath, driverSystemPath, "opencbmvdd.dll", 10)) != 0)
-                break;
-#endif // #ifdef _X86_
-        }
-
-        printf("\n");
-
-        //
-        // Install the driver
-        //
-
-        driverFilename = AllocateConcatenatedString(Parameter->NoCopy ? driverLocalPath : driverPath, driverToUse);
-
-        if (!driverFilename)
-        {
-            error = 14;
-            break;
-        }
-
-        CbmInstall(OPENCBM_DRIVERNAME, driverFilename, Parameter->AutomaticStart);
+        error = FALSE;
 
     } while (0);
 
-    if (driverSystemPath)
-        free(driverSystemPath);
+    if (error)
+    {
+        free(tmpPathString);
+        tmpPathString = NULL;
+    }
 
-    if (driverPath)
-        free(driverPath);
-
-    if (driverFilename)
-        free(driverFilename);
-
-    if (driverLocalPath)
-        free(driverLocalPath);
-
-    FUNC_LEAVE_INT(error);
+    FUNC_LEAVE_STRING(tmpPathString);
 }
 
-/*! \internal \brief Install the driver
-
- This function installs the driver on the current machine.
-
- \param Parameter
-   Pointer to parameter_t struct which contains the
-   description of the parameters given on the command-line.
-
- \param PluginNames
-    Array of pointers to strings which holds the names of all plugins to process.
-    This array has to be finished by a NULL pointer.
-
- \return 
-   Return value which will be given on return from main()
-   That is, 0 on success, everything else indicates an error.
-*/
-static int
-InstallDriver(parameter_t *Parameter, char *PluginNames[])
+static char *
+GetWindowsSystemDirectory(void)
 {
-    int error = 0;
+#ifdef USE_FAKE_WIN_DIRECTORY_AS_COPY_TARGET
+    FUNC_LEAVE_STRING(cbmlibmisc_strdup(USE_FAKE_WIN_DIRECTORY_AS_COPY_TARGET "\\System32\\"));
+#else
+    char * tmpPathString;
+    unsigned int stringLength;
+    BOOL error = TRUE;
 
     FUNC_ENTER();
 
     do {
-        if (CbmCheckPresence(OPENCBM_DRIVERNAME))
+
+        //
+        // determine the length of the string
+        //
+
+        stringLength = GetSystemDirectory(NULL, 0);
+
+        //
+        // Allocate memory for the system directory
+        //
+
+        tmpPathString = malloc(stringLength + 1);
+
+        if (tmpPathString == NULL)
         {
-            printf("Driver is already installed, remove it before you try a new installation,\n"
-                "or use the --update option!\n");
-            error = 8;
             break;
         }
 
-        if ((error = CopyDriverFiles(Parameter, PluginNames)) != 0)
-            break;
+        //
+        // determine the working directory
+        //
 
-        if (!CbmUpdateParameter(Parameter->Lpt,
-            Parameter->IecCableType, Parameter->PermanentlyLock,
-#if DBG
-            Parameter->DebugFlagsDriverWereGiven, Parameter->DebugFlagsDriver,
-            Parameter->DebugFlagsDllWereGiven, Parameter->DebugFlagsDll
-#else
-            0, 0, 0, 0
-#endif // #if DBG
-            ))
+        if (GetSystemDirectory(tmpPathString, stringLength) == 0)
         {
-            error = 9;
+            DBG_PRINT((DBG_PREFIX "Could not determine the current windows system directory!"));
+            printf("Could not determine the current windows system directory!\n");
             break;
         }
 
-        printf("\n");
+        DBG_ASSERT(strlen(tmpPathString) < stringLength);
 
-        if ((error = CheckDriver(Parameter, PluginNames)) != 0)
-            break;
-        
+        strcat(tmpPathString, "\\");
+
+        error = FALSE;
+
     } while (0);
 
-    FUNC_LEAVE_INT(error);
+    if (error)
+    {
+        free(tmpPathString);
+        tmpPathString = NULL;
+    }
+
+    FUNC_LEAVE_STRING(tmpPathString);
+#endif
+}
+
+static char *
+GetWindowsDriverDirectory(void)
+{
+    char * tmpPathString;
+    char * driverPathString = NULL;
+
+    FUNC_ENTER();
+
+    tmpPathString = GetWindowsSystemDirectory();
+
+    if (NULL != tmpPathString) {
+        driverPathString = cbmlibmisc_strcat(tmpPathString, "DRIVERS\\");
+    }
+
+    free(tmpPathString);
+
+    FUNC_LEAVE_STRING(driverPathString);
 }
 
 /*! \internal \brief Update driver settings
@@ -1257,40 +722,833 @@ InstallDriver(parameter_t *Parameter, char *PluginNames[])
    That is, 0 on success, everything else indicates an error.
 */
 static int
-UpdateDriver(parameter_t *Parameter, char *PluginNames[])
+UpdateOpenCBM(cbm_install_parameter_t *Parameter)
 {
-    int error = 0;
+    int success = 0;
+
+    FUNC_ENTER();
+
+    // @@@
+
+    FUNC_LEAVE_INT(success);
+}
+
+static opencbm_plugin_install_neededfiles_t NeededFilesGeneric[] = 
+{
+    { SYSTEM_DIR, "opencbm.dll" },
+#ifdef _X86_
+    { SYSTEM_DIR, "opencbmvdd.dll" },
+#endif // #ifdef _X86_
+    { LIST_END,   "" }
+};
+
+static char *
+GetPathForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, const char * PluginName, const char * WorkingDirectory, const char * SystemDirectory, const char * DriverDirectory)
+{
+    char * filepath = NULL;
 
     FUNC_ENTER();
 
     do {
-        if (!CbmCheckPresence(OPENCBM_DRIVERNAME))
-        {
-            printf("Driver is not installed, cannot update the parameters,\n");
-            error = 12;
+
+        /* if we already have a copy of the path, use that */
+
+        if (NeededFile->FileLocationString != NULL) {
+            filepath = cbmlibmisc_strdup(NeededFile->FileLocationString);
             break;
         }
 
-        if (!CbmUpdateParameter(Parameter->Lpt,
-            Parameter->IecCableType, Parameter->PermanentlyLock,
-#if DBG
-            Parameter->DebugFlagsDriverWereGiven, Parameter->DebugFlagsDriver,
-            Parameter->DebugFlagsDllWereGiven, Parameter->DebugFlagsDll
-#else
-            0, 0, 0, 0
-#endif // #if DBG
-            ))
+        switch (NeededFile->FileLocation)
         {
-            error = 13;
+        case LOCAL_PLUGIN_DIR:
+            if (NULL != PluginName) {
+                filepath = cbmlibmisc_strcat(WorkingDirectory, PluginName);
+            }
+            break;
+
+        case LOCAL_DIR:
+            filepath = cbmlibmisc_strcat(WorkingDirectory, "");
+            break;
+
+        case SYSTEM_DIR:
+            filepath = cbmlibmisc_strcat(SystemDirectory, "");
+            break;
+
+        case DRIVER_DIR:
+            filepath = cbmlibmisc_strcat(DriverDirectory, "");
+            break;
+
+        default:
+            DBG_ASSERT(("wrong enum in neededfiles array!", 0));
             break;
         }
 
-        printf("\n");
-        error = CheckDriver(Parameter, PluginNames);
+        if (filepath == NULL)
+        {
+            DBG_ASSERT(("internal error on building file path!", 0));
+        }
+
+        /* take a copy of the path so we can refer to it later */
+
+        NeededFile->FileLocationString = cbmlibmisc_strdup(filepath);
 
     } while (0);
 
+    FUNC_LEAVE_STRING(filepath);
+}
+
+static char *
+GetFilenameForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, const char * PluginName, const char * WorkingDirectory, const char * SystemDirectory, const char * DriverDirectory)
+{
+    char * filename = NULL;
+    char * path = NULL;
+
+    FUNC_ENTER();
+
+    path = GetPathForNeededFile(NeededFile, PluginName, WorkingDirectory, SystemDirectory, DriverDirectory);
+
+    if (NULL != path) 
+    {
+        filename = cbmlibmisc_strcat(path, NeededFile->Filename);
+        free(path);
+    }
+
+    if (filename == NULL)
+    {
+        DBG_ASSERT(("internal error on building file name!", 0));
+    }
+
+    FUNC_LEAVE_STRING(filename);
+}
+
+static BOOL
+IsPresentOpenCBM(opencbm_plugin_install_neededfiles_t NeededFiles[])
+{
+    BOOL isPresent = FALSE;
+
+    char * workingDirectory = NULL;
+    char * systemDirectory = NULL;
+    char * driverDirectory = NULL;
+
+    char * filename = NULL;
+
+    opencbm_plugin_install_neededfiles_t * neededfiles;
+
+    DWORD fileattributes;
+
+    FUNC_ENTER();
+
+    do {
+        workingDirectory = GetWorkingDirectory();
+        systemDirectory = GetWindowsSystemDirectory();
+        driverDirectory = GetWindowsDriverDirectory();
+
+        if ( ! workingDirectory || ! systemDirectory || ! driverDirectory)
+            break;
+
+        printf("Working directory = '%s',\n"
+               "system  directory = '%s',\n"
+               "driver  directory = '%s'.\n",
+               workingDirectory, systemDirectory, driverDirectory);
+
+        //
+        // Check if the necessary files all exist
+        //
+
+        isPresent = TRUE; // assume all files are available
+
+        for (neededfiles = NeededFiles; neededfiles->FileLocation != LIST_END; neededfiles++)
+        {
+            filename = GetFilenameForNeededFile(neededfiles, NULL, workingDirectory, systemDirectory, driverDirectory);
+
+            fileattributes = GetFileAttributes(filename);
+
+            /*
+             * Yes, this constant 0xFFFFFFFF is defined for the function failing,
+             * not ((DWORD)-1) as one might expect.
+             * Thus, this most hold even for 64 bit platforms
+             */
+            if (fileattributes == 0xFFFFFFFF)
+            {
+                DBG_PRINT((DBG_PREFIX "File '%s' not found.", filename));
+                isPresent = FALSE;
+            }
+
+            free(filename);
+            filename = NULL;
+        }
+    } while (0);
+
+    free(workingDirectory);
+    free(systemDirectory);
+    free(driverDirectory);
+
+    FUNC_LEAVE_BOOL(isPresent);
+}
+
+static BOOL
+IsPresentGenericOpenCBM(void)
+{
+    FUNC_ENTER();
+    FUNC_LEAVE_BOOL(IsPresentOpenCBM(NeededFilesGeneric));
+}
+
+typedef BOOL HandleOpenCbmFilesCallback_t(const char * Path, const char * File);
+
+static BOOL
+HandleOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const char ** PathToInstalledPluginFile, HandleOpenCbmFilesCallback_t * Callback)
+{
+    char * workingDirectory = NULL;
+    char * systemDirectory = NULL;
+    char * driverDirectory = NULL;
+
+    char * destinationPath = NULL;
+
+    BOOL error = FALSE;
+
+    opencbm_plugin_install_neededfiles_t * neededfiles;
+
+    FUNC_ENTER();
+
+    if (PathToInstalledPluginFile != NULL)
+    {
+        *PathToInstalledPluginFile = NULL;
+    }
+
+    do
+    {
+        workingDirectory = GetWorkingDirectory();
+        systemDirectory = GetWindowsSystemDirectory();
+        driverDirectory = GetWindowsDriverDirectory();
+
+        for (neededfiles = NeededFiles; (neededfiles->FileLocation != LIST_END) && ! error; neededfiles++)
+        {
+            destinationPath = GetPathForNeededFile(neededfiles, NULL, workingDirectory, systemDirectory, driverDirectory);
+
+            error = Callback(destinationPath, neededfiles->Filename);
+
+            if (PathToInstalledPluginFile && *PathToInstalledPluginFile == NULL) {
+                *PathToInstalledPluginFile = cbmlibmisc_strcat(destinationPath, neededfiles->Filename);
+            }
+
+            free(destinationPath);
+
+            destinationPath = NULL;
+
+            if (error)
+                break;
+        }
+
+        if (error)
+            break;
+
+    } while (0);
+
+
+    free(workingDirectory);
+    free(systemDirectory);
+    free(driverDirectory);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+static HandleOpenCbmFilesCallback_t CopyOpenCbmFilesCallback;
+
+static BOOL
+CopyOpenCbmFilesCallback(const char * Path, const char * File)
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_BOOL(CopyFileToNewPath(".\\", Path, File));
+}
+
+static BOOL
+CopyOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const char ** PathToInstalledPluginFile)
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_BOOL(HandleOpenCbmFiles(NeededFiles, PathToInstalledPluginFile, CopyOpenCbmFilesCallback));
+}
+
+static HMODULE
+LoadOpenCBMDll(BOOL AtSystemDirectory)
+{
+    char * systemDirectory = NULL;
+    char * dllPath = NULL;
+    HMODULE dll = NULL;
+
+    FUNC_ENTER();
+
+    do {
+        if (AtSystemDirectory) {
+            /* 
+             * make sure to load the right DLL in the system directory
+             */
+
+            systemDirectory = GetWindowsSystemDirectory();
+        }
+        else {
+            /* 
+             * make sure to load the local DLL
+             */
+
+            systemDirectory = cbmlibmisc_strdup("./");
+        }
+
+        if ( systemDirectory == NULL) {
+            break;
+        }
+
+        dllPath = cbmlibmisc_strcat(systemDirectory, "opencbm.dll");
+        if (dllPath == NULL) {
+            break;
+        }
+
+        /* now, load the correct DLL ... */
+
+        dll = LoadLibrary(dllPath);
+        if (dll == NULL) {
+            break;
+        }
+    } while (0);
+
+    if (dllPath != NULL) {
+        free(dllPath);
+    }
+
+    if (systemDirectory != NULL) {
+        free(systemDirectory);
+    }
+
+    FUNC_LEAVE_HMODULE(dll);
+}
+
+static HMODULE
+LoadDestinationOpenCBMDll(void)
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_HMODULE(LoadOpenCBMDll(TRUE));
+}
+
+static HMODULE
+LoadLocalOpenCBMDll(void)
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_HMODULE(LoadOpenCBMDll(FALSE));
+}
+
+static BOOL
+SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
+{
+    BOOL error = TRUE;
+    cbm_plugin_install_generic_t * cbm_plugin_install_generic = NULL;
+
+    FUNC_ENTER();
+
+    do {
+        /* ... get the address of cbm_plugin_install_generic() ... */
+
+        cbm_plugin_install_generic = (void *) GetProcAddress(OpenCbmDllHandle, 
+            "cbm_plugin_install_generic");
+
+        if (cbm_plugin_install_generic == NULL) {
+            DBG_PRINT((DBG_PREFIX "Could not get address of "
+                "opencbm.dll::cbm_plugin_install_generic()."));
+            fprintf(stderr, "Could not get address of "
+                "opencbm.dll::cbm_plugin_install_generic().\n");
+            break;
+        }
+
+        /* ... and execute it */
+        error = cbm_plugin_install_generic(DefaultPluginname);
+
+    } while (0);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+static BOOL
+CopyGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
+{
+    BOOL error = TRUE;
+
+    FUNC_ENTER();
+
+    do {
+        error = CopyOpenCbmFiles(NeededFilesGeneric, NULL);
+        if (error) {
+            break;
+        }
+
+        error = SelfInitGenericOpenCBM(OpenCbmDllHandle, DefaultPluginname);
+        if (error) {
+            break;
+        }
+
+    } while (0);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+static HMODULE
+LoadPluginDll(const char * PluginName, const char * PathToPluginDllFile)
+{
+    HMODULE pluginDll = NULL;
+
+    UINT oldErrorMode;
+
+    FUNC_ENTER();
+
+    /*
+     * Load the DLL. Make sure that we do not get a warning dialog
+     * if a dependancy DLL is not found.
+     */
+
+    oldErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
+
+    pluginDll = LoadLibrary(PathToPluginDllFile);
+
+    SetErrorMode(oldErrorMode);
+
+    if (pluginDll == NULL) {
+        fprintf(stderr, "Error loading plugin '%s' at '%s'.\n", PluginName, PathToPluginDllFile);
+        DBG_ERROR((DBG_PREFIX "Error loading plugin '%s' at '%s'.", PluginName, PathToPluginDllFile));
+    }
+
+    FUNC_LEAVE_HMODULE(pluginDll);
+}
+
+static void
+FreePluginDll(HMODULE PluginDll)
+{
+    FUNC_ENTER();
+
+    FreeLibrary(PluginDll);
+
+    FUNC_LEAVE();
+}
+
+static void *
+GetPluginFunctionAddress(HMODULE PluginDll, const char * FunctionName)
+{
+    void * pointer;
+
+    FUNC_ENTER();
+
+    pointer = GetProcAddress(PluginDll, FunctionName);
+
+    FUNC_LEAVE_PTR(pointer, void*);
+}
+
+static BOOL
+PluginExecuteFunction(const char * PluginName, const char * PathToPluginDllFile, const char * FunctionName, BOOL (*Callback)(const char * PluginName, void * FunctionPointer, void * Context), void * Context)
+{
+    BOOL error = TRUE;
+    HMODULE pluginDll = NULL;
+
+    FUNC_ENTER();
+
+    do {
+        void * functionPointer = NULL;
+
+        pluginDll = LoadPluginDll(PluginName, PathToPluginDllFile);
+
+        if (pluginDll == NULL) {
+            break;
+        }
+
+        functionPointer = GetPluginFunctionAddress(pluginDll, FunctionName);
+
+        error = Callback(PluginName, functionPointer, Context);
+
+    } while (0);
+
+    if (pluginDll) {
+        FreePluginDll(pluginDll);
+    }
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+static BOOL
+perform_cbm_plugin_install_do_install(const char * PluginName, void * FunctionPointer, void * Context)
+{
+    cbm_plugin_install_do_install_t * cbm_plugin_install_do_install = FunctionPointer;
+
+    BOOL error = TRUE;
+
+    FUNC_ENTER();
+
+    do {
+        if (cbm_plugin_install_do_install == NULL) {
+            break;
+        }
+
+        error = cbm_plugin_install_do_install(Context);
+
+        if (error) {
+            DBG_ERROR((DBG_PREFIX "Installation of plugin '%s' failed!", PluginName));
+            fprintf(stderr, "Installation of plugin '%s' failed!\n", PluginName);
+            break;
+        }
+
+    } while (0);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+typedef
+struct InstallPluginCallback_context_s {
+    HMODULE OpenCbmDllHandle;
+} InstallPluginCallback_context_t;
+
+static BOOL
+InstallPluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, void * Context)
+{
+    InstallPluginCallback_context_t * context = Context;
+
+    BOOL error = TRUE;
+
+    cbm_plugin_install_plugin_data_t * cbm_plugin_install_plugin_data = NULL;
+
+    const char * pathToInstalledPluginFile = NULL;
+
+
+    FUNC_ENTER();
+
+    do {
+        printf("++++ Install: '%s' with filename '%s'.\n", PluginInstallParameter->Name, PluginInstallParameter->FileName);
+
+        if ( CopyOpenCbmFiles(PluginInstallParameter->NeededFiles, &pathToInstalledPluginFile) ) {
+            break;
+        }
+
+        if ( pathToInstalledPluginFile == NULL ) {
+            break;
+        }
+
+        cbm_plugin_install_plugin_data = (void *) GetProcAddress(context->OpenCbmDllHandle, 
+            "cbm_plugin_install_plugin_data");
+
+        if (cbm_plugin_install_plugin_data == NULL) {
+            DBG_PRINT((DBG_PREFIX "Could not get address of "
+                "opencbm.dll::cbm_plugin_install_plugin_data()"));
+            fprintf(stderr, "Could not get address of "
+                "opencbm.dll::cbm_plugin_install_plugin_data()");
+            break;
+        }
+
+        error = cbm_plugin_install_plugin_data(PluginInstallParameter->Name, pathToInstalledPluginFile, PluginInstallParameter->OptionMemory);
+
+        if (error) {
+            break;
+        }
+
+        /*
+         * Tell the plugin to self-init itself
+         */
+
+        error = PluginExecuteFunction(PluginInstallParameter->Name,
+            pathToInstalledPluginFile, 
+            "cbm_plugin_install_do_install",
+            perform_cbm_plugin_install_do_install,
+            PluginInstallParameter);
+
+    } while (0);
+
+    cbmlibmisc_strfree(pathToInstalledPluginFile);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+/*! \internal \brief Install OpenCBM
+
+ This function installs the driver on the current machine.
+
+ \param OpenCbmDllHandle
+   Handle to opencbm.dll.
+
+ \param Parameter
+   Pointer to parameter_t struct which contains the
+   description of the parameters given on the command-line.
+
+ \return 
+   Return value which will be given on return from main()
+   That is, 0 on success, everything else indicates an error.
+*/
+static int
+InstallOpenCBM(cbm_install_parameter_t *Parameter)
+{
+    HMODULE openCbmDllHandle = NULL;
+    int error = 1;
+
+    FUNC_ENTER();
+
+    do {
+        InstallPluginCallback_context_t callbackContext;
+
+        memset(&callbackContext, 0, sizeof(callbackContext));
+
+        openCbmDllHandle = LoadLocalOpenCBMDll();
+        if (openCbmDllHandle  == NULL) {
+            DBG_PRINT((DBG_PREFIX "Could not open the OpenCBM DLL."));
+            fprintf(stderr, "Could not open the OpenCBM DLL.");
+            break;
+        }
+
+        if ( ! IsPresentGenericOpenCBM())
+        {
+            // install generic OpenCBM files
+
+            if ( CopyGenericOpenCBM(openCbmDllHandle, Parameter->PluginList->Name) ) {
+                break;
+            }
+        }
+
+        callbackContext.OpenCbmDllHandle = openCbmDllHandle;
+
+        error = PluginForAll(Parameter, InstallPluginCallback, &callbackContext);
+
+        error = UpdateOpenCBM(Parameter) || error;
+
+    } while (0);
+
+    if (openCbmDllHandle) {
+        FreeLibrary(openCbmDllHandle);
+    }
+
     FUNC_LEAVE_INT(error);
+}
+
+/*! \internal \brief Delete a file at a path
+
+ This function deletes a file at a specified path.
+
+ \param Path
+   The path from where to delete the file.
+   The path has to be terminated with a backslash ("\").
+
+ \param Filename
+   The name of the file to copy.
+*/
+
+static BOOL
+RemoveOpenCbmFilesCallback(const char * Path, const char * Filename)
+{
+    char * fileToDelete = NULL;
+    BOOL error = TRUE;
+
+    FUNC_ENTER();
+
+    do
+    {
+        fileToDelete = cbmlibmisc_strcat(Path, Filename);
+
+        if (fileToDelete)
+        {
+            DBG_PRINT((DBG_PREFIX "Trying to delete '%s'.", fileToDelete));
+
+            fprintf(stderr, "Trying to delete '%s'.\n", fileToDelete);
+            DeleteFile(fileToDelete);
+            error = 0;
+        }
+
+    } while (0);
+
+    free(fileToDelete);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+static BOOL
+RemoveOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[])
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_BOOL(HandleOpenCbmFiles(NeededFiles, NULL, RemoveOpenCbmFilesCallback));
+}
+
+static BOOL
+perform_cbm_plugin_install_do_uninstall(const char * PluginName, void * FunctionPointer, void * Context)
+{
+    cbm_plugin_install_do_uninstall_t * cbm_plugin_install_do_uninstall = FunctionPointer;
+
+    BOOL error = TRUE;
+
+    FUNC_ENTER();
+
+    do {
+        if (cbm_plugin_install_do_uninstall == NULL) {
+            break;
+        }
+
+        error = cbm_plugin_install_do_uninstall(Context);
+
+        if (error) {
+            DBG_ERROR((DBG_PREFIX "Uninstallation of plugin '%s' failed!", PluginName));
+            fprintf(stderr, "Uninstallation of plugin '%s' failed!\n", PluginName);
+            break;
+        }
+
+    } while (0);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+static BOOL
+RemovePluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, void * Context)
+{
+    InstallPluginCallback_context_t * context = Context;
+
+    BOOL error = TRUE;
+
+    FUNC_ENTER();
+
+    do {
+        error = PluginExecuteFunction(PluginInstallParameter->Name,
+            PluginInstallParameter->FileName,
+            "cbm_plugin_install_do_uninstall",
+            perform_cbm_plugin_install_do_uninstall,
+            PluginInstallParameter);
+
+        if (error) {
+            break;
+        }
+
+        error = RemoveOpenCbmFiles(PluginInstallParameter->NeededFiles);
+        if (error) {
+            break;
+        }
+
+    } while (0);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+
+static BOOL
+RemoveGenericOpenCBM(HMODULE OpenCbmDllHandle)
+{
+    BOOL error = TRUE;
+
+    FUNC_ENTER();
+
+    do {
+        error = RemoveOpenCbmFiles(NeededFilesGeneric);
+        if (error) {
+            break;
+        }
+
+    } while (0);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+/*! \internal \brief Process a remove request
+
+ This function removes the the driver from the machine.
+
+ \param Parameter
+   Pointer to parameter_t struct which contains the
+   description of the parameters given on the command-line.
+
+ \return 
+   Return value which will be given on return from main()
+   That is, 0 on success, everything else indicates an error.
+*/
+static int
+RemoveOpenCBM(cbm_install_parameter_t *Parameter)
+{
+    HMODULE openCbmDllHandle = NULL;
+    int error = 1;
+
+    FUNC_ENTER();
+
+    /*! \TODO:
+      1. Partial remove (only one or more plugins)
+      2. if the default plugin is removed, make another one the default
+      3. remove the plugin from the configuration file
+      4. only remove OpenCBM if all plugins are removed
+      5. Remove opencbm.conf is OpenCBM is removed completely
+    */
+
+    do {
+        InstallPluginCallback_context_t callbackContext;
+
+        memset(&callbackContext, 0, sizeof(callbackContext));
+
+        openCbmDllHandle = LoadLocalOpenCBMDll();
+        if (openCbmDllHandle  == NULL) {
+            DBG_PRINT((DBG_PREFIX "Could not open the OpenCBM DLL."));
+            fprintf(stderr, "Could not open the OpenCBM DLL.");
+            break;
+        }
+
+        if ( ! IsPresentGenericOpenCBM())
+        {
+            fprintf(stderr, "trying to remove OpenCBM, but it is not installed!\n");
+            error = 0;
+            break;
+        }
+
+        callbackContext.OpenCbmDllHandle = openCbmDllHandle;
+
+        // Remove all plugins first
+
+        error = PluginForAll(Parameter, RemovePluginCallback, &callbackContext);
+
+        if (error) {
+            break;
+        }
+
+        // remove generic OpenCBM files
+
+        if ( RemoveGenericOpenCBM(openCbmDllHandle) ) {
+            break;
+        }
+
+        error = 0;
+
+    } while (0);
+
+    if (openCbmDllHandle) {
+        FreeLibrary(openCbmDllHandle);
+    }
+
+    FUNC_LEAVE_INT(error);
+}
+
+/*
+ This function checks if the driver was corretly installed.
+
+ \param Parameter
+   Pointer to parameter_t struct which contains the
+   description of the parameters given on the command-line.
+
+ \param PluginNames
+    Array of pointers to strings which holds the names of all plugins to process.
+    This array has to be finished by a NULL pointer.
+
+ \return 
+   Return value which will be given on return from main().
+   That is, 0 on success, everything else indicates an error.
+*/
+static int
+CheckOpenCBM(cbm_install_parameter_t *Parameter)
+{
+    int success = 0;
+
+    FUNC_ENTER();
+
+    do {
+
+        // @@@
+
+    } while (0);
+
+    FUNC_LEAVE_INT(success);
 }
 
 /*! \brief Main function
@@ -1309,23 +1567,17 @@ UpdateDriver(parameter_t *Parameter, char *PluginNames[])
 int __cdecl
 main(int Argc, char **Argv)
 {
-    parameter_t parameter;
+    cbm_install_parameter_t parameter;
     int retValue = 0;
-
-    static char * pluginNames[] = { "xa1541", "xu1541", NULL };
 
     FUNC_ENTER();
 
-    WaitForIoCompletionInit();
+    /* initialize parameters */
+
+    memset(&parameter, 0, sizeof(parameter));
+    parameter.PluginList = NULL;
 
     do {
-        if (processargs(Argc, Argv, &parameter))
-        {
-            DBG_PRINT((DBG_PREFIX "Error processing command line arguments"));
-            retValue = 1;
-            break;
-        }
-
         parameter.OsVersion = GetOsVersion();
 
         if (parameter.OsVersion == WINUNSUPPORTED)
@@ -1336,10 +1588,18 @@ main(int Argc, char **Argv)
             break;
         }
 
+        if (processargs(Argc, Argv, &parameter))
+        {
+            DBG_PRINT((DBG_PREFIX "Error processing command line arguments."));
+            fprintf(stderr, "Error processing command line arguments.\n");
+            retValue = 1;
+            break;
+        }
+
         if (parameter.NoExecute)
             break;
 
-        if (!parameter.NoAdminNeeded && !NeededAccessRights())
+        if (parameter.AdminNeeded && !NeededAccessRights())
         {
             DBG_PRINT((DBG_PREFIX "You do not have necessary privileges. " 
                 "Please try installing only as administrator."));
@@ -1356,31 +1616,25 @@ main(int Argc, char **Argv)
 
         if (parameter.CheckInstall)
         {
-            retValue = CheckDriver(&parameter, pluginNames);
+            retValue = CheckOpenCBM(&parameter);
         }
         else if (parameter.Remove)
         {
             // The driver should be removed
 
-            retValue = RemoveDriver(&parameter);
-        }
-        else if (parameter.EnumerateParport)
-        {
-            // The driver should be removed
-
-            retValue = EnumParportDriver(&parameter);
+            retValue = RemoveOpenCBM(&parameter);
         }
         else if (parameter.Update)
         {
             // Update driver parameters
 
-            retValue = UpdateDriver(&parameter, pluginNames);
+            retValue = UpdateOpenCBM(&parameter);
         }
         else
         {
             // The driver should be installed
 
-            retValue = InstallDriver(&parameter, pluginNames);
+            retValue = InstallOpenCBM(&parameter);
         }
     } while (0);
 
@@ -1388,12 +1642,12 @@ main(int Argc, char **Argv)
 
     if (parameter.OutputDebuggingBuffer)
     {
-        CbmOutputDebuggingBuffer();
+// @@@        CbmOutputDebuggingBuffer();
     }
 
 #endif // #if DBG
 
-    WaitForIoCompletionDeinit();
+    PluginListFree(&parameter);
 
     FUNC_LEAVE_INT(retValue);
 }

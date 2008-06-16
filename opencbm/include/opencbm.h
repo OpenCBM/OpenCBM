@@ -5,14 +5,14 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005 Spiro Trikaliotis
+ *  Copyright 2001-2005,2008 Spiro Trikaliotis
  *  Copyright 2006 Wolfgang Moser (http://d81.de)
  */
 
 /*! **************************************************************
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.23 2007-07-25 16:37:51 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.24 2008-06-16 19:24:22 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \authors With additions from Wolfgang Moser \n
@@ -179,6 +179,9 @@ EXTERN int CBMAPIDECL gcr_4_to_5_encode(const unsigned char *source, unsigned ch
 #if DBG
 EXTERN int CBMAPIDECL cbm_get_debugging_buffer(CBM_FILE HandleDevice, char *buffer, size_t len);
 #endif
+
+EXTERN int CBMAPIDECL cbm_iec_dbg_read (CBM_FILE HandleDevice);
+EXTERN int CBMAPIDECL cbm_iec_dbg_write(CBM_FILE HandleDevice, unsigned char Value);
 
 /* functions specifically for parallel burst */
 

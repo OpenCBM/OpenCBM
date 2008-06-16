@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004 Spiro Trikaliotis
+ *  Copyright 2004, 2008 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
-** \file parport.c \n
+** \file lib/plugin/xa1541/WINDOWS/parport.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: parport.c,v 1.7 2006-07-21 11:52:59 strik Exp $ \n
+** \version $Id: parport.c,v 1.1 2008-06-16 19:24:27 strik Exp $ \n
 ** \n
 ** \brief Program to handle the parallel port for the OPENCBM driver
 **
@@ -21,7 +21,8 @@
 #include <windows.h>
 #include <stdio.h>
 
-#include "instcbm.h"
+// #include "instcbm.h"
+#include "i_opencbm.h"
 
 #include <setupapi.h>
 #include <cfgmgr32.h>
@@ -33,7 +34,7 @@
 #define DBG_USERMODE
 
 /*! The name of the executable */
-#define DBG_PROGNAME "INSTCBM.EXE"
+#define DBG_PROGNAME "OPENCBM-XA1541.DLL"
 
 #include "debug.h"
 
