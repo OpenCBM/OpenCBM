@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2007-07-25 16:37:51 strik Exp $
+# $Id: Makefile,v 1.9 2008-08-21 19:44:54 strik Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
@@ -20,21 +20,21 @@ HTML = html/opencbm.html
 	unix2dos $@
 
 %.txt: %.sgml
-	sgml2txt $<
+	${LINUXDOCTXT} ${LINUXDOCTXTPARAM} $<
 
 %.pdf: %.dvi
 	dvipdf $<
 
 %.dvi: %.sgml
-	sgml2latex -o dvi $<
+	${LINUXDOCLATEX} ${LINUXDOCLATEXPARAM} -o dvi $<
 
 %.info: %.sgml
-	sgml2info $<
+	${LINUXDOCINFO} ${LINUXDOCINFOPARAM} $<
 	perl -p -i -e 'if(m/^   \\input texinfo/){print "INFO-DIR-SECTION Miscellaneous\nSTART-INFO-DIR-ENTRY\n* opencbm: (opencbm).	Commodore serial IEC bus support.\nEND-INFO-DIR-ENTRY\n";}' $@
 
 %.html: opencbm.sgml
 	([ ! -d html ] && mkdir html/) || true
-	cd html; sgml2html -s 2 ../$<; cd ..
+	cd html; ${LINUXDOCHTML} ${LINUXDOCHTMLPARAM} -s 2 ../$<; cd ..
 
 all: $(TXT) $(DVI) $(INFO) $(HTML) ${PDF}
 
