@@ -12,10 +12,11 @@ USE_MSVCRT = 1
 
 DLLBASE=0x71000000
 
-INCLUDES=../../../../include;../../../../include/WINDOWS;../../..;$(XU1541DIR)
+INCLUDES=../../../../include;../../../../include/WINDOWS;../../..;../../../../arch/windows;$(XU1541DIR)
 
 SOURCES=../archlib.c \
 	../xu1541.c \
 	../s1_s2_pp.c \
-        dllmain.c \
+	dllmain.c \
+	install.c \
 	opencbm-xu1541.rc
