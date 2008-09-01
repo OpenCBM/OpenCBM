@@ -41,8 +41,8 @@ CFG=all - Win32 Debug
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "ddkbuild_start fre"
-# PROP Rebuild_Opt "-cZ"
+# PROP Cmd_Line "cmd /c exit"
+# PROP Rebuild_Opt ""
 # PROP Target_File "all.exe"
 # PROP Bsc_Name ""
 # PROP Target_Dir ""
