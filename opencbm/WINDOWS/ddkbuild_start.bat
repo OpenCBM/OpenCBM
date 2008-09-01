@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.21 2008-05-02 19:46:03 wmsr Exp $
+rem $Id: ddkbuild_start.bat,v 1.22 2008-09-01 18:27:44 strik Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -29,6 +29,12 @@ if not defined BASEDIR  set BASEDIR=c:\WINDDK\nt4.ddk
 if not defined W2KBASE  set W2KBASE=
 if not defined WXPBASE  set WXPBASE=c:\WINDDK\2600
 if not defined WNETBASE set WNETBASE=c:\WINDDK\3790
+if not defined WLHBASE  set WLHBASE=
+if not defined WDF_DDK  set WDF_DDK=c:\WINDDK\6000
+if not defined WDF_ROOT set WDF_ROOT=%WDF_DDK%
+
+if not defined DDK_TO_USE_HOLLIS set DDK_TO_USE_HOLLIS=-WNET
+if not defined DDK_TO_USE_OSR    set DDK_TO_USE_OSR=-WNET
 
 rem After building the driver, the PDB debugging symbols file will be copied
 rem to this location here (leave empty of no copying is to be done):
@@ -112,12 +118,12 @@ rem Now, adjust the parameters for the DDKBUILD
 rem version we are using
 if %DDKBUILD_HOLLIS% EQU 1 (
 	set DDKBUILD=%DDKBUILD_COMMAND_HOLLIS%
-	set TARGETSPEC=%DDKBUILD_QUIET_VERBOSE% -WNET%DDKBUILD_PLATFORM_OPTION%
+	set TARGETSPEC=%DDKBUILD_QUIET_VERBOSE% %DDK_TO_USE_HOLLIS%%DDKBUILD_PLATFORM_OPTION%
 	set CHECKEDFREE=checked
 	if /i "%0" EQU "fre" set CHECKEDFREE=free
 ) else (
 	set DDKBUILD=%DDKBUILD_COMMAND_OSR%
-	set TARGETSPEC=-WNET%DDKBUILD_PLATFORM_OPTION%
+	set TARGETSPEC=%DDK_TO_USE_OSR%%DDKBUILD_PLATFORM_OPTION%
 	set CHECKEDFREE=chk
 	if /i "%0" EQU ="fre" set CHECKEDFREE=fre
 )
@@ -136,6 +142,7 @@ if exist build*.err del build*.err
 echo CMDLINE="%CMDLINE%"
 echo COPYTARGET="%COPYTARGET%"
 
+echo Calling: %DDKBUILD% %CMDLINE%
 call %DDKBUILD% %CMDLINE%
 
 rem Copy the INF file into the bin directory
