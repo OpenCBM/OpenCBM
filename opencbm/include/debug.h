@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.16 2008-09-01 18:23:12 strik Exp $ \n
+** \version $Id: debug.h,v 1.17 2008-09-01 18:27:08 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -389,6 +389,9 @@ int __cdecl main(int argc, char *argv[])
 
        //! On release builds, a dummy
        #define FUNC_LEAVE_ULONG(  _xxx ) return _xxx
+
+       //! On release builds, a dummy
+       #define FUNC_LEAVE_LONG(   _xxx ) return _xxx
 
        //! On release builds, a dummy
        #define FUNC_LEAVE_TYPE(  _xxx, _TYPE, _FORMAT) return _xxx

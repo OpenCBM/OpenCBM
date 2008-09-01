@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/testirq.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: testirq.c,v 1.6 2007-04-29 17:56:56 strik Exp $ \n
+** \version $Id: testirq.c,v 1.7 2008-09-01 18:27:08 strik Exp $ \n
 ** \n
 ** \brief Test for IRQ capabilities
 **
@@ -38,7 +38,9 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
     PCBMT_I_TESTIRQ bufferTestIrq = Buffer;
     NTSTATUS ntStatus;
     LONG ret;
+#if DBG
     LONG oldDbgFlags = DbgFlags;
+#endif
 
     FUNC_ENTER();
 
@@ -62,8 +64,10 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
         UCHAR  ecr     = READ_PORT_UCHAR(ecrPort);
         UCHAR  ecp0, ecp1;
 
+#if DBG
 //        DbgFlags |= 0x7;
 //        DbgFlags |= 0x7fffffff;
+#endif
 
         //
         // Did we get a an interrupt at all? If not, no need
@@ -222,7 +226,9 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
 
     } while (0);
 
+#if DBG
     DbgFlags = oldDbgFlags;
+#endif
 
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }
