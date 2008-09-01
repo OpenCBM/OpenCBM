@@ -18,4 +18,6 @@ SOURCES=../frm_analyzer.c \
 UMTYPE=console
 #UMBASE=0x100000
 
+USE_MSVCRT=1
+
 NTTARGETFILE0=a65
