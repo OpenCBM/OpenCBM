@@ -111,6 +111,33 @@ SOURCE=..\common.i65
 # Begin Source File
 
 SOURCE=..\tdchange.a65
+
+!IF  "$(CFG)" == "cbmctrl - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\cbmctrl
+InputPath=..\tdchange.a65
+InputName=tdchange
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "cbmctrl - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\cbmctrl
+InputPath=..\tdchange.a65
+InputName=tdchange
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Source File

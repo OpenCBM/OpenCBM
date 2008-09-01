@@ -13,7 +13,7 @@ CFG=libtrans - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "libtrans.mak" CFG="libopencbmtransfer - Win32 Debug"
+!MESSAGE NMAKE /f "libtrans.mak" CFG="libtrans - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -142,22 +142,157 @@ SOURCE=..\common.i65
 # Begin Source File
 
 SOURCE=..\pp1541.a65
+
+!IF  "$(CFG)" == "libtrans - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libtrans
+InputPath=..\pp1541.a65
+InputName=pp1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libtrans - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libtrans
+InputPath=..\pp1541.a65
+InputName=pp1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\pp1571.a65
+
+!IF  "$(CFG)" == "libtrans - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libtrans
+InputPath=..\pp1571.a65
+InputName=pp1571
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libtrans - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libtrans
+InputPath=..\pp1571.a65
+InputName=pp1571
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\s1.a65
+
+!IF  "$(CFG)" == "libtrans - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libtrans
+InputPath=..\s1.a65
+InputName=s1
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libtrans - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libtrans
+InputPath=..\s1.a65
+InputName=s1
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\s2.a65
+
+!IF  "$(CFG)" == "libtrans - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libtrans
+InputPath=..\s2.a65
+InputName=s2
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libtrans - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libtrans
+InputPath=..\s2.a65
+InputName=s2
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\turbomain.a65
+
+!IF  "$(CFG)" == "libtrans - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libtrans
+InputPath=..\turbomain.a65
+InputName=turbomain
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libtrans - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libtrans
+InputPath=..\turbomain.a65
+InputName=turbomain
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Source File

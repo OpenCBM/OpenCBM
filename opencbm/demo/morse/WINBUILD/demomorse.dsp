@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "../../../Release/demomorse"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2  /I "../../../include/" /I "../../../include/WINDOWS/" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "../../../include/" /I "../../../include/WINDOWS/" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /i "../../../include" /i "../../../include/WINDOWS" /d "NDEBUG"
 BSC32=bscmake.exe
@@ -114,6 +114,33 @@ SOURCE=.\morse.rc
 # Begin Source File
 
 SOURCE=..\morse.a65
+
+!IF  "$(CFG)" == "demomorse - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\demo\morse
+InputPath=..\morse.a65
+InputName=morse
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\..\WINDOWS\buildoneinc ..\..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "demomorse - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\demo\morse
+InputPath=..\morse.a65
+InputName=morse
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\..\WINDOWS\buildoneinc ..\..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Source File

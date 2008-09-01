@@ -115,6 +115,33 @@ SOURCE=.\rpm1541.rc
 # Begin Source File
 
 SOURCE=..\rpm1541.a65
+
+!IF  "$(CFG)" == "demorpm1541 - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\demo\rpm1541
+InputPath=..\rpm1541.a65
+InputName=rpm1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\..\WINDOWS\buildoneinc ..\..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "demorpm1541 - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\demo\rpm1541
+InputPath=..\rpm1541.a65
+InputName=rpm1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\..\WINDOWS\buildoneinc ..\..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Source File

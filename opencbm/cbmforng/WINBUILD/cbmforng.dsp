@@ -13,7 +13,7 @@ CFG=cbmforng - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "cbmforng.mak" CFG="cbmformat - Win32 Debug"
+!MESSAGE NMAKE /f "cbmforng.mak" CFG="cbmforng - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -65,7 +65,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "../../include" /I "/WINDOWS" /I "../../arch/windows/" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "../../include" /I "../../arch/windows/" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /I /WINDOWS" /GZ " /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /i "../../include/" /i "../../include/WINDOWS/" /d "_DEBUG"
 BSC32=bscmake.exe
@@ -107,6 +107,33 @@ SOURCE=.\cbmformat.rc
 # Begin Source File
 
 SOURCE=..\cbmforng.a65
+
+!IF  "$(CFG)" == "cbmforng - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\cbmforng
+InputPath=..\cbmforng.a65
+InputName=cbmforng
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "cbmforng - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\cbmforng
+InputPath=..\cbmforng.a65
+InputName=cbmforng
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Source File

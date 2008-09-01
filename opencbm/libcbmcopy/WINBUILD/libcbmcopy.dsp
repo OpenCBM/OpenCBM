@@ -118,74 +118,560 @@ SOURCE=..\cbmcopy_int.h
 # Begin Source File
 
 SOURCE="..\ppr-1541.a65"
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\ppr-1541.a65"
+InputName=ppr-1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\ppr-1541.a65"
+InputName=ppr-1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE="..\ppr-1571.a65"
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\ppr-1571.a65"
+InputName=ppr-1571
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\ppr-1571.a65"
+InputName=ppr-1571
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE="..\ppw-1541.a65"
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\ppw-1541.a65"
+InputName=ppw-1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\ppw-1541.a65"
+InputName=ppw-1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE="..\ppw-1571.a65"
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\ppw-1571.a65"
+InputName=ppw-1571
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\ppw-1571.a65"
+InputName=ppw-1571
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE="..\s1r-1581.a65"
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\s1r-1581.a65"
+InputName=s1r-1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\s1r-1581.a65"
+InputName=s1r-1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\s1r.a65
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\s1r.a65
+InputName=s1r
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\s1r.a65
+InputName=s1r
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE="..\s1w-1581.a65"
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\s1w-1581.a65"
+InputName=s1w-1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\s1w-1581.a65"
+InputName=s1w-1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\s1w.a65
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\s1w.a65
+InputName=s1w
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\s1w.a65
+InputName=s1w
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE="..\s2r-1581.a65"
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\s2r-1581.a65"
+InputName=s2r-1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\s2r-1581.a65"
+InputName=s2r-1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\s2r.a65
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\s2r.a65
+InputName=s2r
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\s2r.a65
+InputName=s2r
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE="..\s2w-1581.a65"
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\s2w-1581.a65"
+InputName=s2w-1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath="..\s2w-1581.a65"
+InputName=s2w-1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\s2w.a65
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\s2w.a65
+InputName=s2w
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\s2w.a65
+InputName=s2w
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\turboread1541.a65
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turboread1541.a65
+InputName=turboread1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turboread1541.a65
+InputName=turboread1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\turboread1571.a65
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turboread1571.a65
+InputName=turboread1571
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turboread1571.a65
+InputName=turboread1571
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\turboread1581.a65
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turboread1581.a65
+InputName=turboread1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turboread1581.a65
+InputName=turboread1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\turbowrite1541.a65
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turbowrite1541.a65
+InputName=turbowrite1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turbowrite1541.a65
+InputName=turbowrite1541
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\turbowrite1571.a65
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turbowrite1571.a65
+InputName=turbowrite1571
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turbowrite1571.a65
+InputName=turbowrite1571
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=..\turbowrite1581.a65
+
+!IF  "$(CFG)" == "libcbmcopy - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turbowrite1581.a65
+InputName=turbowrite1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libcbmcopy - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\libcbmcopy
+InputPath=..\turbowrite1581.a65
+InputName=turbowrite1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Source File

@@ -114,6 +114,33 @@ SOURCE=.\flash.rc
 # Begin Source File
 
 SOURCE=..\flash.a65
+
+!IF  "$(CFG)" == "demoflash - Win32 Release"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\demo\flash
+InputPath=..\flash.a65
+InputName=flash
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\..\WINDOWS\buildoneinc ..\..\.. $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "demoflash - Win32 Debug"
+
+# Begin Custom Build
+InputDir=\cygwin\home\tri\cbm\opencbm\demo\flash
+InputPath=..\flash.a65
+InputName=flash
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\..\WINDOWS\buildoneinc ..\..\.. $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Source File
