@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file libmisc/configuration.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration.c,v 1.1 2008-06-16 19:24:28 strik Exp $ \n
+** \version $Id: configuration.c,v 1.2 2008-09-01 18:39:00 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Process configuration file
@@ -28,7 +28,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*! the maximum line length we will accept in a configuration file */
+/*! \brief the maximum line length we expect in a configuration file 
+ * \remark: 
+ *   If a line is longer, it will still be processed. The only
+ *   drawback is that the line is read in with multiple fgets()
+ *   calls. Thus, it is slower and produces more work and possibly
+ *   fragmentation on the heap.
+ */
 #define ASSUMED_MAX_LINE_LENGTH 256
 
 /*! a convenient name for opencbm_configuration_entry_s */
@@ -869,6 +875,38 @@ opencbm_configuration_free_all(opencbm_configuration_handle Handle)
     free(Handle);
 }
 
+/*! \brief Flush the configuration file
+
+ Flushes the configuration file. This is, if it
+ has been changed, it is stored to permanent storage.
+
+ \param Handle
+   Handle to the opened configuration file, as obtained from
+   opencbm_configuration_open()
+
+ \return
+   0 if the function succeeded,
+   1 otherwise.
+*/
+int
+opencbm_configuration_flush(opencbm_configuration_handle Handle)
+{
+    int error = 0;
+
+    do {
+        if (Handle == NULL) {
+            break;
+        }
+
+        if (Handle->Changed) {
+            error = opencbm_configuration_write_file(Handle);
+        }
+
+    } while(0);
+
+    return error;
+}
+
 /*! \brief Close the configuration file
 
  Closes the configuration file after it has been used.
@@ -893,15 +931,85 @@ opencbm_configuration_close(opencbm_configuration_handle Handle)
             break;
         }
 
-        if (Handle->Changed) {
-            error = opencbm_configuration_write_file(Handle);
-        }
+        error = opencbm_configuration_flush(Handle);
 
         opencbm_configuration_free_all(Handle);
 
     } while(0);
 
     return error;
+}
+
+/*! \internal \brief Find data from the configuration file
+
+ This function searches for a specific entry in the configuration
+ file and returns the value found there.
+
+ \param Handle
+   Handle to the opened configuration file, as obtained from
+   opencbm_configuration_open().
+ 
+ \param Section
+   A string which holds the name of the section from where to get the data.
+
+ \param Create
+   If 0, we only try to find an existing entry. If none exists, we return
+   with NULL.
+   If 1, we create a new entry if no entry exists.
+
+ \return
+   Returns a pointer to the data entry. If it cannot be found, this
+   function returns NULL.
+*/
+static opencbm_configuration_section_t *
+opencbm_configuration_find_section(opencbm_configuration_handle Handle,
+                                   const char Section[],
+                                   unsigned int Create,
+                                   opencbm_configuration_section_t ** PreviousSection)
+{
+    opencbm_configuration_section_t *currentSection = NULL;
+    opencbm_configuration_section_t *lastSection = NULL;
+    opencbm_configuration_entry_t   *lastEntry = NULL;
+
+    do {
+        /* Check if there is a section given */
+
+        if (Section == NULL) {
+            break;
+        }
+
+        for (currentSection = Handle->Sections;
+             currentSection != NULL;
+             currentSection = currentSection->Next)
+        {
+            int foundSection = 0;
+
+            if (currentSection->Name == NULL) {
+                foundSection = Section == NULL;
+            }
+            else {
+                if (Section) {
+                    foundSection = (strcmp(currentSection->Name, Section) == 0);
+                }
+            }
+
+            if (foundSection) {
+                break;
+            }
+
+            lastSection = currentSection;
+        }
+
+        if (Create && currentSection == NULL) {
+
+            /* there was no section with that name, generate a new one */
+            
+            currentSection = section_alloc_new(Handle, lastSection, Section, NULL);
+        }
+
+    } while(0);
+
+    return currentSection;
 }
 
 /*! \internal \brief Find data from the configuration file
@@ -933,13 +1041,11 @@ opencbm_configuration_find_data(opencbm_configuration_handle Handle,
                                 const char Section[], const char Entry[],
                                 unsigned int Create)
 {
-    opencbm_configuration_entry_t * foundEntry = NULL;
-
     opencbm_configuration_section_t *currentSection = NULL;
     opencbm_configuration_section_t *lastSection = NULL;
     opencbm_configuration_entry_t   *lastEntry = NULL;
 
-    int error = 1;
+    opencbm_configuration_entry_t * currentEntry;
 
     do {
         /* Check if there is a section and an entry given */
@@ -948,55 +1054,32 @@ opencbm_configuration_find_data(opencbm_configuration_handle Handle,
             break;
         }
 
-        for (currentSection = Handle->Sections;
-             (currentSection != NULL) && (foundEntry == NULL);
-             currentSection = currentSection->Next)
-        {
-            int foundSection = 0;
+        currentSection = opencbm_configuration_find_section(Handle, Section, Create, &lastSection);
 
-            if (currentSection->Name == NULL) {
-                foundSection = Section == NULL;
-            }
-            else {
-                if (Section) {
-                    foundSection = (strcmp(currentSection->Name, Section) == 0);
-                }
-            }
-
-            if (foundSection) {
-                opencbm_configuration_entry_t * currentEntry;
-
-                for (currentEntry = currentSection->Entries;
-                     (currentEntry != NULL) && (foundEntry == NULL);
-                     currentEntry = currentEntry->Next)
-                {
-                    if (strcmp(currentEntry->Name, Entry) == 0) {
-
-                        /* If ReturnBufferLength is 0, we only wanted to find out if 
-                         * that entry existed. Thus, report "no error" and quit.
-                         */
-
-                        foundEntry = currentEntry;
-                        error = 0;
-                        break;
-                    }
-
-                    /* This if() ensures that we do not add the line after
-                     * some comments which most probably are meant for the next
-                     * section.
-                     */
-                    if (currentEntry->Name != NULL) {
-                        lastEntry = currentEntry;
-                    }
-                }
-
-                break;
-            }
-
-            lastSection = currentSection;
+        if (currentSection == NULL) {
+            break;
         }
 
-        if (foundEntry || Create == 0) {
+        {
+            for (currentEntry = currentSection->Entries;
+                 currentEntry != NULL;
+                 currentEntry = currentEntry->Next)
+            {
+                if (strcmp(currentEntry->Name, Entry) == 0) {
+                    break;
+                }
+
+                /* This if() ensures that we do not add the line after
+                 * some comments which most probably are meant for the next
+                 * section.
+                 */
+                if (currentEntry->Name != NULL) {
+                    lastEntry = currentEntry;
+                }
+            }
+        }
+
+        if (currentEntry || Create == 0) {
             break;
         }
 
@@ -1007,11 +1090,11 @@ opencbm_configuration_find_data(opencbm_configuration_handle Handle,
             currentSection = section_alloc_new(Handle, lastSection, Section, NULL);
         }
 
-        foundEntry = entry_alloc_new(currentSection, lastEntry, Entry, NULL, NULL);
+        currentEntry = entry_alloc_new(currentSection, lastEntry, Entry, NULL, NULL);
 
     } while(0);
 
-    return foundEntry;
+    return currentEntry;
 }
 
 /*! \brief Read data from the configuration file
@@ -1033,17 +1116,14 @@ opencbm_configuration_find_data(opencbm_configuration_handle Handle,
    A buffer which holds the return value on success. If the function returns
    with something different than 0, the buffer pointer to by ReturnBuffer will
    not be changed.
-   Can be NULL if ReturnBufferLength is zero, too. Cf. note below.
-
- \param ReturnBufferLength
-   The length of the buffer pointed to by ReturnBuffer.
+   Can be NULL, cf. note below.
 
  \return
    Returns 0 if the data entry was found. If ReturnBufferLength != 0, the
    return value is 0 only if the buffer was large enough to hold the data.
 
  \note
-   If ReturnBufferLength is zero, this function only tests if the Entry exists
+   If ReturnBuffer is NULL, this function only tests if the Entry exists
    in the given Section. In this case, this function returns 0; otherwise, it
    returns 1.
 */
@@ -1074,6 +1154,111 @@ opencbm_configuration_get_data(opencbm_configuration_handle Handle,
                 *ReturnBuffer = p;
                 error = 0;
             }
+        }
+
+    } while (0);
+
+    return error;
+}
+
+
+/*! \brief Enumerate sections in the configuration file
+
+ This function enumerates all sections in the configuration
+ file. For every section name, a given callback function is called.
+
+ \param Handle
+   Handle to the opened configuration file, as obtained from
+   opencbm_configuration_open().
+ 
+ \param Callback
+   The callback function to call with the section name
+
+ \param Data
+   Some data which is forwarded to the Callback function.
+
+ \return
+   Returns 0 if the data entry was found. If ReturnBufferLength != 0, the
+   return value is 0 only if the buffer was large enough to hold the data.
+
+ \note
+   If ReturnBufferLength is zero, this function only tests if the Entry exists
+   in the given Section. In this case, this function returns 0; otherwise, it
+   returns 1.
+*/
+int
+opencbm_configuration_enum_sections(opencbm_configuration_handle Handle,
+                                    opencbm_configuration_enum_sections_callback_t Callback,
+                                    void * Data)
+{
+    unsigned int error = 0;
+
+    do {
+        char * section = NULL;
+
+        opencbm_configuration_section_t *currentSection = NULL;
+
+        for (currentSection = Handle->Sections;
+             currentSection != NULL;
+             currentSection = currentSection->Next)
+        {
+            error = error || Callback( Handle, currentSection->Name, Data);
+        }
+
+    } while (0);
+
+    return error;
+}
+
+/*! \brief Enumerate data in the configuration file
+
+ This function enumerates all entries in a given section
+ of the configuration file. For every entry, a given callback
+ function is called.
+
+ \param Handle
+   Handle to the opened configuration file, as obtained from
+   opencbm_configuration_open().
+ 
+ \param Section
+   A string which holds the name of the section from where to get the data.
+
+ \return
+   Returns 0 if the data entry was found. If ReturnBufferLength != 0, the
+   return value is 0 only if the buffer was large enough to hold the data.
+
+ \note
+   If ReturnBufferLength is zero, this function only tests if the Entry exists
+   in the given Section. In this case, this function returns 0; otherwise, it
+   returns 1.
+*/
+int
+opencbm_configuration_enum_data(opencbm_configuration_handle Handle,
+                                const char Section[],
+                                opencbm_configuration_enum_data_callback_t Callback,
+                                void * Data)
+{
+    unsigned int error = 0;
+
+    do {
+        char * section = NULL;
+
+        opencbm_configuration_entry_t * currentEntry = NULL;
+        opencbm_configuration_section_t * currentSection;
+
+        currentSection = opencbm_configuration_find_section(Handle,
+                                   Section, 0, NULL);
+
+        if ( ! currentSection ) {
+            error = 0;
+            break;
+        }
+
+        for (currentEntry = currentSection->Entries;
+             currentEntry != NULL;
+             currentEntry = currentEntry->Next)
+        {
+            error = error || Callback( Handle, currentSection->Name, currentEntry->Name, Data);
         }
 
     } while (0);
@@ -1139,17 +1324,20 @@ opencbm_configuration_set_data(opencbm_configuration_handle Handle,
     return error;
 }
 
-/* @@@ #define OPENCBM_STANDALONE_TEST 1 */
+/* #define OPENCBM_STANDALONE_TEST 1 */
 
 #ifdef OPENCBM_STANDALONE_TEST
 
+#if 0
     #ifndef NDEBUG
         #include <crtdbg.h>
     #endif
+#endif
 
 static void
 EnableCrtDebug(void)
 {
+#if 0
 #ifndef NDEBUG
     int tmpFlag;
 
@@ -1165,6 +1353,7 @@ EnableCrtDebug(void)
     // Set flag to the new value
     _CrtSetDbgFlag(tmpFlag);
 #endif
+#endif
 }
 
 static unsigned int started_an_op = 0;
@@ -1172,7 +1361,7 @@ static unsigned int started_an_op = 0;
 static void 
 OpSuccess(void)
 {
-    fprintf(stderr, "success.\n");
+    fprintf(stderr, "success.\n\n");
     fflush(stderr);
     started_an_op = 0;
 }
@@ -1180,7 +1369,7 @@ OpSuccess(void)
 static void 
 OpFail(void)
 {
-    fprintf(stderr, "FAILED!\n");
+    fprintf(stderr, "FAILED!\n\n");
     fflush(stderr);
     started_an_op = 0;
 }
@@ -1203,6 +1392,24 @@ OpStart(const char * const Operation)
     fflush(stderr);
 }
 
+static void enum_data_callback(opencbm_configuration_handle Handle,
+                               const char Section[],
+                               const char Entry[],
+                               void * Data)
+{
+      fprintf(stderr, "\n    enum_data_callback(Handle, %s, %s, 0x%p\n", Section, Entry, Data);
+      fflush(stderr);
+}
+
+static void enum_sections_callback(opencbm_configuration_handle Handle,
+                                   const char Section[],
+                                   void * Data)
+{
+    fprintf(stderr, "\n  enum_sections_callback(Handle, %s, 0x%p\n", Section, Data);
+    fflush(stderr);
+    opencbm_configuration_enum_data(Handle, Section, enum_data_callback, Data);
+}
+
 /*! \brief Simple test case for configuration
 
  This function implements a very simple test case for
@@ -1219,12 +1426,12 @@ int ARCH_MAINDECL main(void)
     EnableCrtDebug();
 
     do {
-        char buffer[4096];
+        char * buffer;
 
         opencbm_configuration_handle handle = NULL;
 
         OpStart("opencbm_configuration_create()");
-        handle = opencbm_configuration_create();
+        handle = opencbm_configuration_create("TestFile.inf");
 
         if (handle == NULL) {
             break;
@@ -1243,7 +1450,7 @@ int ARCH_MAINDECL main(void)
 
 
         OpStart("opencbm_configuration_get_data(handle, \"SectTest\", \"NewTest\")");
-        if (opencbm_configuration_get_data(handle, "SectTest", "NewTest", buffer, sizeof(buffer)) != 0) {
+        if (opencbm_configuration_get_data(handle, "SectTest", "NewTest", &buffer) != 0) {
             break;
         }
         OpEnd();
@@ -1268,12 +1475,27 @@ int ARCH_MAINDECL main(void)
 
 
         OpStart("opencbm_configuration_get_data(handle, \"SectTest\", \"NewTest\")");
-        if (opencbm_configuration_get_data(handle, "SectTest", "NewTest", buffer, sizeof(buffer)) != 0) {
+        if (opencbm_configuration_get_data(handle, "SectTest", "NewTest", &buffer) != 0) {
             break;
         }
         OpEnd();
         fprintf(stderr, "  returned: %s\n", buffer);
 
+        OpStart("opencbm_configuration_enum_sections(handle, ..., NULL)");
+        opencbm_configuration_enum_sections(handle, enum_sections_callback, NULL);
+        OpEnd();
+
+        OpStart("opencbm_configuration_enum_sections(handle, ..., 0x12345678)");
+        opencbm_configuration_enum_sections(handle, enum_sections_callback, 0x12345678);
+        OpEnd();
+#if 0
+
+
+        int
+opencbm_configuration_enum_sections(opencbm_configuration_handle Handle,
+                                    opencbm_configuration_enum_sections_callback_t Callback,
+                                    void * Data)
+#endif
 
         OpStart("opencbm_configuration_close()");
         if (opencbm_configuration_close(handle) != 0) {
