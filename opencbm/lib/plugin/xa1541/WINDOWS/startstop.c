@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.1 2008-06-16 19:24:27 strik Exp $ \n
+** \version $Id: startstop.c,v 1.2 2008-09-01 18:40:51 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -431,6 +431,10 @@ CompleteDriverInstallation(HMODULE HandleDll)
 {
     BOOL error = TRUE;
 
+#ifdef _X86_
+    __asm int 3;
+#endif /* #ifdef __X86__ */
+
 #if 0 //! \TODO rewrite, it does not make any sense to call an internal function via GetProcAddress()!
 
     cbm_install_complete_t * p_cbm_install_complete;
@@ -467,8 +471,12 @@ CbmCheckDriver(void)
 
     FUNC_ENTER();
 
-    DBG_PRINT((DBG_PREFIX "Checking configuration for cbm4win"));
-    printf("Checking configuration for cbm4win\n");
+#ifdef _X86_
+    __asm int 3;
+#endif /* #ifdef __X86__ */
+
+    DBG_PRINT((DBG_PREFIX "Checking configuration for OpenCBM"));
+    printf("Checking configuration for OpenCBM\n");
 
     if (CbmCheckCorrectInstallation(TRUE /*! \TODO NeededAccessRights() */))
     {
@@ -485,7 +493,7 @@ CbmCheckDriver(void)
         printf("No problems found in current configuration\n\n");
 
         /*! \todo Suggested output from WoMo:
-            Checking configuration for cbm4win/opencbm:
+            Checking configuration for OpenCBM:
             No problems found in current configuration:
 
             Driver configuration:
@@ -526,7 +534,7 @@ get_plugin_filename(char *PluginName)
 /*! \brief Check version information
 
  This function checks (and outputs) the version
- information for cbm4win.
+ information for OpenCBM.
 
  \param InstallOutBuffer
     A buffer which will hold the version information for the
