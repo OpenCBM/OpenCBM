@@ -10,7 +10,7 @@
 /*! **************************************************************
 ** \file include/opencbm-plugin.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm-plugin.h,v 1.3 2008-06-16 19:24:22 strik Exp $ \n
+** \version $Id: opencbm-plugin.h,v 1.4 2008-09-01 18:41:50 strik Exp $ \n
 ** \n
 ** \brief Plugin DLL interface
 **
@@ -124,6 +124,9 @@ typedef int          CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice
         /*! Find out of more than one "execute" parameter is given */
         BOOL ExecuteParameterGiven;
 
+        /*! Install OpenCBM, that is, no other command has been given */
+        BOOL Install;
+
         /*! --remove was given */
         BOOL Remove;
 
@@ -171,6 +174,9 @@ typedef int          CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice
         // @@@ char ** PluginNames;
         cbm_install_parameter_plugin_t * PluginList;
 
+        /*! if set, there was no explicit plugin name given, but the list is a default one */
+        BOOL NoExplicitPluginGiven;
+
     } cbm_install_parameter_t;
 
     typedef struct CbmPluginInstallProcessCommandlineData_s {
@@ -214,6 +220,16 @@ typedef int          CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice
 
     typedef BOOL CBMAPIDECL cbm_plugin_install_generic_t(const char * DefaultPluginname);
     typedef BOOL CBMAPIDECL cbm_plugin_install_plugin_data_t(const char * Pluginname, const char * Filepath, const CbmPluginInstallProcessCommandlineData_t * CommandlineData);
+
+    typedef BOOL CBMAPIDECL cbm_plugin_get_all_plugin_names_callback_t(cbm_install_parameter_t * InstallParameter, const char * PluginName);
+    typedef struct cbm_plugin_get_all_plugin_names_context_s {
+        cbm_plugin_get_all_plugin_names_callback_t * Callback;
+        cbm_install_parameter_t                    * InstallParameter;
+    } cbm_plugin_get_all_plugin_names_context_t;
+
+    typedef BOOL CBMAPIDECL cbm_plugin_get_all_plugin_names_t(cbm_plugin_get_all_plugin_names_context_t * Callback);
+
+    typedef int  CBMAPIDECL cbm_plugin_self_init_plugin_t(void);
 
 #endif
 

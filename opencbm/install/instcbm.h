@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file instcbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.h,v 1.11 2008-06-16 19:24:23 strik Exp $ \n
+** \version $Id: instcbm.h,v 1.12 2008-09-01 18:41:50 strik Exp $ \n
 ** \n
 ** \brief Header for installation routines
 **
@@ -27,6 +27,7 @@ typedef struct CbmPluginInstallProcessCommandlineData_s CbmPluginInstallProcessC
 typedef struct cbm_install_parameter_plugin_s cbm_install_parameter_plugin_t;
 
 extern BOOL get_all_plugins(cbm_install_parameter_t * InstallParameter);
+extern BOOL get_all_installed_plugins(cbm_install_parameter_t * InstallParameter);
 extern BOOL ProcessPluginCommandline(const char * const Plugin, cbm_install_parameter_t * Parameter, int Argc, char * const Argv[]);
 
 extern void PluginListFree(cbm_install_parameter_t * InstallParameter);
@@ -34,5 +35,7 @@ extern void PluginListFree(cbm_install_parameter_t * InstallParameter);
 typedef BOOL PluginForAll_Callback_t(cbm_install_parameter_plugin_t * PluginInstallParameter, void * Context);
 
 extern BOOL PluginForAll(cbm_install_parameter_t * InstallParameter, PluginForAll_Callback_t * Callback, void * Context);
+
+extern HMODULE LoadLocalOpenCBMDll(void);
 
 #endif // #ifndef INSTCBM_H

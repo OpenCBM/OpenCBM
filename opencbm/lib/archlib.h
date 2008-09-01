@@ -72,8 +72,10 @@ EXTERN cbm_plugin_install_do_install_t          cbm_plugin_install_do_install;
 EXTERN cbm_plugin_install_do_uninstall_t        cbm_plugin_install_do_uninstall;
 EXTERN cbm_plugin_install_get_needed_files_t    cbm_plugin_install_get_needed_files;
 
-EXTERN cbm_plugin_install_generic_t cbm_plugin_install_generic;
-EXTERN cbm_plugin_install_plugin_data_t cbm_plugin_install_plugin_data;
+EXTERN cbm_plugin_install_generic_t             cbm_plugin_install_generic;
+EXTERN cbm_plugin_install_plugin_data_t         cbm_plugin_install_plugin_data;
+EXTERN cbm_plugin_get_all_plugin_names_t        cbm_plugin_get_all_plugin_names;
+EXTERN cbm_plugin_self_init_plugin_t            cbm_plugin_self_init_plugin;
 
 #endif
 

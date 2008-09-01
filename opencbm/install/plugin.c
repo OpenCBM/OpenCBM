@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file plugin.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: plugin.c,v 1.1 2008-06-16 19:24:23 strik Exp $ \n
+** \version $Id: plugin.c,v 1.2 2008-09-01 18:41:50 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver; handling of plugins
 **
@@ -25,7 +25,9 @@
 
 #include <getopt.h>
 
+#include "archlib.h"
 #include "cbmioctl.h"
+#include "configuration.h"
 #include "version.h"
 #include "arch.h"
 #include "i_opencbm.h"
@@ -432,6 +434,73 @@ get_all_plugins(cbm_install_parameter_t * InstallParameter)
             }
         } while (0);
     } while (0);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+static BOOL CBMAPIDECL
+get_all_installed_plugins_callback(cbm_install_parameter_t * InstallParameter, const char * PluginName)
+{
+    cbm_install_parameter_plugin_t *pluginParameter;
+
+    BOOL error = TRUE;
+
+    FUNC_ENTER();
+
+    pluginParameter = GetPluginData(PluginName, InstallParameter, 1, NULL);
+
+    error = pluginParameter == NULL ? TRUE : FALSE;
+
+    if ( ! error ) {
+        PluginAdd(InstallParameter, pluginParameter);
+    }
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+BOOL
+get_all_installed_plugins(cbm_install_parameter_t * InstallParameter)
+{
+    HMODULE openCbmDllHandle = NULL;
+    BOOL error = TRUE;
+    opencbm_configuration_handle configuration_handle = NULL;
+
+    FUNC_ENTER();
+
+    do {
+        cbm_plugin_get_all_plugin_names_context_t cbm_plugin_get_all_plugin_names_context;
+        cbm_plugin_get_all_plugin_names_t * cbm_plugin_get_all_plugin_names;
+
+        openCbmDllHandle = LoadLocalOpenCBMDll();
+        if (openCbmDllHandle  == NULL) {
+            DBG_PRINT((DBG_PREFIX "Could not open the OpenCBM DLL."));
+            fprintf(stderr, "Could not open the OpenCBM DLL.");
+            break;
+        }
+
+        cbm_plugin_get_all_plugin_names = (cbm_plugin_get_all_plugin_names_t *) 
+            GetProcAddress(openCbmDllHandle, "cbm_plugin_get_all_plugin_names");
+
+        if ( ! cbm_plugin_get_all_plugin_names ) {
+            break;
+        }
+
+        cbm_plugin_get_all_plugin_names_context.Callback = get_all_installed_plugins_callback;
+        cbm_plugin_get_all_plugin_names_context.InstallParameter = InstallParameter;
+
+        if ( cbm_plugin_get_all_plugin_names(&cbm_plugin_get_all_plugin_names_context) ) {
+            break;
+        }
+
+        error = FALSE;
+
+    } while (0);
+
+    if (openCbmDllHandle) {
+        FreeLibrary(openCbmDllHandle);
+    }
+
+    opencbm_configuration_close(configuration_handle);
 
     FUNC_LEAVE_BOOL(error);
 }

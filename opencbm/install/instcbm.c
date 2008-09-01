@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.27 2008-06-16 19:24:23 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.28 2008-09-01 18:41:50 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -411,6 +411,8 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
 
     error = FALSE;
 
+    Parameter->Install = TRUE;
+
 
     DBG_ASSERT(Parameter);
 
@@ -421,24 +423,29 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
         case 'h':
             usage();
             Parameter->NoExecute = TRUE;
+            Parameter->Install = FALSE;
             break;
 
         case 'V':
             version();
             Parameter->NoExecute = TRUE;
+            Parameter->Install = FALSE;
             break;
 
         case 'r':
             error = enforceOnlyOneExecutingCommand(Parameter, Argv[0]) || error;
             Parameter->Remove = TRUE;
+            Parameter->Install = FALSE;
             break;
 
         case 'u':
             Parameter->Update = TRUE;
+            Parameter->Install = FALSE;
             break;
 
         case 'c':
             Parameter->CheckInstall = TRUE;
+            Parameter->Install = FALSE;
             break;
 
         case 'n':
@@ -480,6 +487,7 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
         case 'B':
             Parameter->OutputDebuggingBuffer = TRUE;
             Parameter->NoExecute = TRUE;
+            Parameter->Install = FALSE;
             break;
 
 #endif // #if DBG
@@ -502,13 +510,22 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
     }
 
     if (Parameter->PluginList == NULL && ! error) {
-        error = get_all_plugins(Parameter) || error;
+
+        Parameter->NoExplicitPluginGiven = TRUE;
+
+        if (Parameter->Install) {
+            error = get_all_plugins(Parameter);
+        }
+        else {
+            error = get_all_installed_plugins(Parameter);
+        }
     }
 
-    if (Parameter->PluginList == NULL) {
+/*! \TODO is this needed anymore?
+    if (Parameter->Install && Parameter->PluginList == NULL) {
         error = TRUE;
     }
-
+*/
     FUNC_LEAVE_BOOL(error);
 }
 
@@ -1031,7 +1048,7 @@ LoadDestinationOpenCBMDll(void)
     FUNC_LEAVE_HMODULE(LoadOpenCBMDll(TRUE));
 }
 
-static HMODULE
+HMODULE
 LoadLocalOpenCBMDll(void)
 {
     FUNC_ENTER();
@@ -1486,8 +1503,7 @@ RemoveOpenCBM(cbm_install_parameter_t *Parameter)
             break;
         }
 
-        if ( ! IsPresentGenericOpenCBM())
-        {
+        if ( ! IsPresentGenericOpenCBM() )  {
             fprintf(stderr, "trying to remove OpenCBM, but it is not installed!\n");
             error = 0;
             break;
@@ -1580,27 +1596,25 @@ main(int Argc, char **Argv)
     do {
         parameter.OsVersion = GetOsVersion();
 
-        if (parameter.OsVersion == WINUNSUPPORTED)
-        {
+        if (parameter.OsVersion == WINUNSUPPORTED) {
             DBG_PRINT((DBG_PREFIX "This version of Windows is not supported!"));
             printf("Sorry, this version of Windows is not supported!\n");
             retValue = 2;
             break;
         }
 
-        if (processargs(Argc, Argv, &parameter))
-        {
+        if (processargs(Argc, Argv, &parameter)) {
             DBG_PRINT((DBG_PREFIX "Error processing command line arguments."));
             fprintf(stderr, "Error processing command line arguments.\n");
             retValue = 1;
             break;
         }
 
-        if (parameter.NoExecute)
+        if (parameter.NoExecute) {
             break;
+        }
 
-        if (parameter.AdminNeeded && !NeededAccessRights())
-        {
+        if (parameter.AdminNeeded && !NeededAccessRights()) {
             DBG_PRINT((DBG_PREFIX "You do not have necessary privileges. " 
                 "Please try installing only as administrator."));
             printf("You do not have necessary privileges.\n"
@@ -1614,27 +1628,27 @@ main(int Argc, char **Argv)
         // execute the command
         //
 
-        if (parameter.CheckInstall)
-        {
+        if (parameter.CheckInstall) {
             retValue = CheckOpenCBM(&parameter);
         }
-        else if (parameter.Remove)
-        {
+        else if (parameter.Remove) {
             // The driver should be removed
 
             retValue = RemoveOpenCBM(&parameter);
         }
-        else if (parameter.Update)
-        {
+        else if (parameter.Update) {
             // Update driver parameters
 
             retValue = UpdateOpenCBM(&parameter);
         }
-        else
-        {
+        else if (parameter.Install) {
             // The driver should be installed
 
             retValue = InstallOpenCBM(&parameter);
+        }
+        else {
+            fprintf(stderr, "Internal problem: Which command has been given to instcbm?\n");
+            DBG_PRINT((DBG_PREFIX "Internal problem: Which command has been given to instcbm?"));
         }
     } while (0);
 

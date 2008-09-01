@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file lib/getpluginaddress.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: getpluginaddress.h,v 1.3 2007-07-25 16:37:51 strik Exp $ \n
+** \version $Id: getpluginaddress.h,v 1.4 2008-09-01 18:41:50 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Functions for obtaining the addresses of plugin functions
@@ -24,9 +24,13 @@
 
   typedef HINSTANCE SHARED_OBJECT_HANDLE;
 
+  #define SHARED_OBJECT_HANDLE_INVALID NULL
+
 #else
 
   typedef void * SHARED_OBJECT_HANDLE;
+
+  #define SHARED_OBJECT_HANDLE_INVALID NULL
 
 #endif
 

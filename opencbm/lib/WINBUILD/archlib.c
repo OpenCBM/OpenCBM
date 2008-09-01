@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.18 2008-06-16 19:24:26 strik Exp $ \n
+** \version $Id: archlib.c,v 1.19 2008-09-01 18:41:50 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -34,6 +34,7 @@
 
 #include "configuration.h"
 #include "debug.h"
+#include "getpluginaddress.h"
 
 
 /*! mark: We are building the DLL */
@@ -97,13 +98,14 @@ BOOL CBMAPIDECL cbm_plugin_install_generic(const char * DefaultPluginname)
 
     opencbm_configuration_handle configuration_handle;
 
-    const char * configurationFilename = configuration_get_default_filename();
+    const char * configurationFilename = NULL;
 
     FUNC_ENTER();
 
     do {
         /* create the INI file, if not present, and create the needed keys */
 
+        configurationFilename = configuration_get_default_filename();
         if (configurationFilename == NULL) {
             break;
         }
@@ -128,36 +130,130 @@ BOOL CBMAPIDECL cbm_plugin_install_generic(const char * DefaultPluginname)
     FUNC_LEAVE_BOOL(error);
 }
 
+static BOOL
+cbm_plugin_call_self_init_plugin(const char * Pluginname, const char * Filepath, const CbmPluginInstallProcessCommandlineData_t * CommandlineData)
+{
+    BOOL error = TRUE;
+    SHARED_OBJECT_HANDLE pluginHandle = SHARED_OBJECT_HANDLE_INVALID;
+
+    FUNC_ENTER();
+
+    do {
+        cbm_plugin_self_init_plugin_t * cbm_plugin_self_init_plugin = NULL;
+
+        pluginHandle = plugin_load(Pluginname);
+        if (pluginHandle == SHARED_OBJECT_HANDLE_INVALID) {
+            DBG_ERROR((DBG_PREFIX "Could not load plugin '%s' at '%s' for self-init!\n", Pluginname, Filepath));
+            break;
+        }
+
+        cbm_plugin_self_init_plugin = plugin_get_address(pluginHandle, "cbm_plugin_self_init_plugin");
+        if ( ! cbm_plugin_self_init_plugin ) {
+            error = FALSE;
+            break;
+        }
+
+        error = cbm_plugin_self_init_plugin();
+
+    } while (0);
+
+    if (pluginHandle != SHARED_OBJECT_HANDLE_INVALID) {
+        plugin_unload(pluginHandle);
+    }
+
+    FUNC_LEAVE_BOOL(error);
+}
+
 BOOL CBMAPIDECL cbm_plugin_install_plugin_data(const char * Pluginname, const char * Filepath, const CbmPluginInstallProcessCommandlineData_t * CommandlineData)
 {
     BOOL error = TRUE;
 
     opencbm_configuration_handle configuration_handle;
 
-    const char * configurationFilename = configuration_get_default_filename();
+    const char * configurationFilename = NULL; 
 
     FUNC_ENTER();
 
     do {
         /* create the INI file, if not present, and create the needed keys */
 
+        configurationFilename = configuration_get_default_filename();
+
         if (configurationFilename == NULL) {
             break;
         }
 
         configuration_handle = opencbm_configuration_open(configurationFilename);
+        if (configuration_handle == NULL) {
+            DBG_PRINT((DBG_PREFIX "No configuration file present. Is OpenCBM installed at all?"));
+            break;
+        }
 
         error = opencbm_configuration_set_data(configuration_handle, 
                    Pluginname, "location", Filepath);
 
         if (error == 0) {
-            // call self-init
-            CommandlineData->OptionMemory;
+            error = cbm_plugin_call_self_init_plugin(Pluginname, Filepath, CommandlineData->OptionMemory);
         }
 
         error = opencbm_configuration_close(configuration_handle) || error;
 
     } while (0);
+
+    cbmlibmisc_strfree(configurationFilename);
+
+    FUNC_LEAVE_BOOL(error);
+}
+
+opencbm_configuration_enum_sections_callback_t callback;
+
+static int cbm_plugin_get_all_plugin_names_callback(opencbm_configuration_handle Handle,
+                                                    const char Section[],
+                                                    void * Data)
+{
+    cbm_plugin_get_all_plugin_names_context_t * Context = Data;
+
+    BOOL error = 0;
+
+    FUNC_ENTER();
+
+    do {
+        if ( ! Section || strcmp(Section, "plugins") == 0 ) {
+            break;
+        }
+
+        error = error || Context->Callback(Context->InstallParameter, Section);
+
+    } while (0);
+    FUNC_LEAVE_BOOL(error);
+}
+
+EXTERN BOOL CBMAPIDECL cbm_plugin_get_all_plugin_names(cbm_plugin_get_all_plugin_names_context_t * Context)
+{
+    BOOL error = TRUE;
+    opencbm_configuration_handle configuration_handle = NULL;
+    const char * configurationFilename = NULL;
+
+    FUNC_ENTER();
+
+    do {
+        configurationFilename = configuration_get_default_filename();
+        if (configurationFilename == NULL) {
+            break;
+        }
+
+        configuration_handle = opencbm_configuration_open(configurationFilename);
+        if (configuration_handle == NULL) {
+            DBG_PRINT((DBG_PREFIX "No configuration file present. Is OpenCBM installed at all?"));
+            break;
+        }
+
+        error = opencbm_configuration_enum_sections(configuration_handle,
+            cbm_plugin_get_all_plugin_names_callback, Context);
+
+    } while (0);
+
+    opencbm_configuration_close(configuration_handle);
 
     cbmlibmisc_strfree(configurationFilename);
 
