@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.15 2008-06-16 19:24:22 strik Exp $ \n
+** \version $Id: debug.h,v 1.16 2008-09-01 18:23:12 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -373,6 +373,9 @@ int __cdecl main(int argc, char *argv[])
        #define FUNC_LEAVE_INT(    _xxx ) return _xxx
 
        //! On release builds, a dummy
+       #define FUNC_LEAVE_UINT(   _xxx ) return _xxx
+
+       //! On release builds, a dummy
        #define FUNC_LEAVE_USHORT(  _xxx ) return _xxx
 
        //! On release builds, a dummy
@@ -462,6 +465,10 @@ int __cdecl main(int argc, char *argv[])
 
               //! On release builds, a dummy
               #define DBG_CABLE(   _xxx )
+
+       #else
+
+              #define FUNC_LEAVE_HMODULE(  _xxx )  return _xxx;
 
        #endif
 
