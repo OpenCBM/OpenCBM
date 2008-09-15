@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.22 2008-09-01 18:27:44 strik Exp $
+rem $Id: ddkbuild_start.bat,v 1.23 2008-09-15 18:24:31 strik Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -106,10 +106,10 @@ if /I "%0" EQU "-i386" (
 ) else if /I "%0" EQU "-amd64" (
 	set DDKBUILD_PLATFORM=amd64
 	if %DDKBUILD_HOLLIS% EQU 0 (
-		echo "AMD64 only with DDKBUILD FROM HOLLIS!"
-		exit
+		set DDKBUILD_PLATFORM_OPTION=x64
+	) else (
+		set DDKBUILD_PLATFORM_OPTION=A64
 	)
-	set DDKBUILD_PLATFORM_OPTION=A64
 	set OPTIONAL_DIRS=xu1541
 	shift
 )
