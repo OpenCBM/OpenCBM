@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.17 2008-09-01 18:27:08 strik Exp $ \n
+** \version $Id: debug.h,v 1.18 2008-09-15 18:24:02 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -25,6 +25,14 @@
   #define DBG 1
   #define __FUNCTION__ ""
  #endif
+#endif
+
+#if defined(_PREFAST_)
+  #define DBG_I_BREAKPOINT() __debugbreak
+#elif defined(DBG_KERNELMODE)
+  #define DBG_I_BREAKPOINT() DbgBreakPoint()
+#else
+  #define DBG_I_BREAKPOINT() DebugBreak()
 #endif
 
 #if DBG
@@ -129,13 +137,14 @@ int __cdecl main(int argc, char *argv[])
 }
 #endif
 
+
+#define DBG_I_ASSUME(_x) __assume(_x)
+
 #ifdef DBG_KERNELMODE
 
        /*! return the name of NTSTATUS values */
        extern const UCHAR *DebugNtStatus(NTSTATUS Value);
 
-#else
-       #define DbgBreakPoint DebugBreak
 #endif // #ifdef DBG_KERNELMODE
 
 
@@ -257,7 +266,7 @@ int __cdecl main(int argc, char *argv[])
        #define DBGO(_xxx) { _DBG_START(); _DBGO(_xxx); _DBG_END() }
 
        /*! set a hard-coded breakpoint */
-       #define DBG_BREAKPOINT() { if (ISDBG_BREAK()) { DbgBreakPoint(); }; }
+       #define DBG_BREAKPOINT() { if (ISDBG_BREAK()) { DBG_I_BREAKPOINT(); }; }
 
        /*! enter a function */
        #define FUNC_ENTER()             FUNC_DEF { if (ISDBG_ENTER()) { DBGO(( DBG_PREFIX "Entering %s", __FUNCTION__ )); } }
@@ -314,7 +323,7 @@ int __cdecl main(int argc, char *argv[])
        /*! Output if DBGF_PANIC is defined */
        #define DBG_PANIC(   _xxx ) { if (ISDBG_PANIC())   { _DBG_START(); _DBGO(( DBG_PREFIX "***PANIC***: ")); _DBGO( _xxx ); _DBG_END(); } }
        /*! Output if DBGF_ASSERT is defined */
-       #define DBG_ASSERT(  _xxx ) { if (!(_xxx)) if (ISDBG_ASSERT()) { DBGO(( DBG_PREFIX "***ASSERTION FAILED!***: %s in %s:%s(%u)", #_xxx, __FILE__, __FUNCTION__, __LINE__ )); DBG_BREAKPOINT(); } }
+       #define DBG_ASSERT(  _xxx ) { if (!(_xxx)) if (ISDBG_ASSERT()) { DBGO(( DBG_PREFIX "***ASSERTION FAILED!***: %s in %s:%s(%u)", #_xxx, __FILE__, __FUNCTION__, __LINE__ )); DBG_BREAKPOINT(); } DBG_I_ASSUME(_xxx); }
        /*! Output always */
        #define DBG_PRINT(   _xxx ) { DBGO( _xxx ); }
 
