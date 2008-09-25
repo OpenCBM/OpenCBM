@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.2 2008-09-01 18:40:51 strik Exp $ \n
+** \version $Id: startstop.c,v 1.3 2008-09-25 18:38:46 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -431,10 +431,6 @@ CompleteDriverInstallation(HMODULE HandleDll)
 {
     BOOL error = TRUE;
 
-#ifdef _X86_
-    __asm int 3;
-#endif /* #ifdef __X86__ */
-
 #if 0 //! \TODO rewrite, it does not make any sense to call an internal function via GetProcAddress()!
 
     cbm_install_complete_t * p_cbm_install_complete;
@@ -470,10 +466,6 @@ CbmCheckDriver(void)
     int error;
 
     FUNC_ENTER();
-
-#ifdef _X86_
-    __asm int 3;
-#endif /* #ifdef __X86__ */
 
     DBG_PRINT((DBG_PREFIX "Checking configuration for OpenCBM"));
     printf("Checking configuration for OpenCBM\n");
