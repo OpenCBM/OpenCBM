@@ -5,14 +5,14 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005 Spiro Trikaliotis
+ *  Copyright 2001-2005,2008 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.6 2007-04-22 09:41:19 strik Exp $ \n
+** \version $Id: upload.c,v 1.7 2008-09-25 18:31:23 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -37,6 +37,66 @@
 /*-------------------------------------------------------------------*/
 /*--------- HELPER FUNCTIONS ----------------------------------------*/
 
+/*! \internal \brief Write a 8 bit value into the buffer
+
+ This function writes a 8 bit value into the given buffer.
+
+ \param Buffer
+   A pointer to the memory address where the address and the byte
+   count are to be written to.
+
+ \param Value
+   The 8 bit value to be written.
+*/
+
+static __inline void StoreInt8IntoBuffer(unsigned char * Buffer, unsigned int Value)
+{
+    DBG_ASSERT(Buffer != NULL);
+    *Buffer = (unsigned char) Value;
+}
+
+/*! \internal \brief Write a 16 bit value into the buffer
+
+ This function writes a 16 bit value into the given buffer.
+ The value is written in low endian, that is, the low byte first.
+
+ \param Buffer
+   A pointer to the memory address where the address and the byte
+   count are to be written to.
+
+ \param Value
+   The 16 bit value to be written.
+*/
+
+static __inline void StoreInt16IntoBuffer(unsigned char * Buffer, unsigned int Value)
+{
+    DBG_ASSERT(Buffer != NULL);
+    StoreInt8IntoBuffer(Buffer++, Value % 256);
+    StoreInt8IntoBuffer(Buffer,   Value / 256);
+}
+
+/*! \internal \brief Write an address and a count number into memory
+
+ This function is used to write the drive address and the byte count
+ for the "M-W" and "M-R" command.
+
+ \param Buffer
+   A pointer to the memory address where the address and the byte
+   count are to be written to.
+
+ \param DriveMemAddress
+   The address in the drive's memory where the program is to be
+   stored.
+   
+ \param ByteCount
+   The number of bytes to be transferred.
+*/
+
+static __inline void StoreAddressAndCount(unsigned char * Buffer, unsigned int DriveMemAddress, unsigned int ByteCount)
+{
+    StoreInt16IntoBuffer(Buffer, DriveMemAddress);
+    StoreInt8IntoBuffer(Buffer + 2, ByteCount);
+}
 
 /*! \brief Upload a program into a floppy's drive memory.
 
@@ -88,11 +148,11 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
     {
         cbm_listen(HandleDevice, DeviceAddress, 15);
 
-        // Calculate how much bytes are left
+        // Calculate how many bytes are left
 
         c = Size - i;
 
-        // Do we have more than 32? Than, restrict to 32
+        // Do we have more than 32? Then, restrict to 32
 
         if (c > 32)
         {
@@ -103,9 +163,7 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
         // M-W <lowaddress> <highaddress> <count>
         // build that command:
 
-        command[3] = (unsigned char) (DriveMemAddress % 256);
-        command[4] = (unsigned char) (DriveMemAddress / 256);
-        command[5] = (unsigned char) c; 
+        StoreAddressAndCount(&command[3], DriveMemAddress, c);
 
         // Write the M-W command to the drive...
 
@@ -170,8 +228,8 @@ int CBMAPIDECL
 cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress, 
              int DriveMemAddress, void *const Buffer, size_t Size)
 {
-    __u_char command[] = { 'M', '-', 'R', ' ', ' ', '\0', '\r' };
-    __u_char *StoreBuffer = Buffer;
+    unsigned char command[] = { 'M', '-', 'R', ' ', ' ', '\0', '\r' };
+    unsigned char *StoreBuffer = Buffer;
 
     size_t i;
     int rv = 0;
@@ -197,9 +255,8 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
         // The command M-R consists of:
         // M-R <lowaddress> <highaddress> <count> '\r'
         // build that command:
-        command[3] = (__u_char) (DriveMemAddress & 0xFF);   // 0x100 becomes 0x00
-        command[4] = (__u_char) (DriveMemAddress >>   8);
-        command[5] = (__u_char) (c & 0xFF); 
+
+        StoreAddressAndCount(&command[3], DriveMemAddress, c);
 
         // Write the M-R command to the drive...
         cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command));
