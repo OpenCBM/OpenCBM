@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.19 2008-09-01 18:41:50 strik Exp $ \n
+** \version $Id: archlib.c,v 1.20 2008-09-25 18:24:25 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -141,7 +141,7 @@ cbm_plugin_call_self_init_plugin(const char * Pluginname, const char * Filepath,
     do {
         cbm_plugin_self_init_plugin_t * cbm_plugin_self_init_plugin = NULL;
 
-        pluginHandle = plugin_load(Pluginname);
+        pluginHandle = plugin_load(Filepath);
         if (pluginHandle == SHARED_OBJECT_HANDLE_INVALID) {
             DBG_ERROR((DBG_PREFIX "Could not load plugin '%s' at '%s' for self-init!\n", Pluginname, Filepath));
             break;
