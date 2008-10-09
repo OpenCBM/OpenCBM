@@ -22,16 +22,16 @@ const static struct recognized_usb_devices_t {
 #endif
 };
 
-static int usb_get_string_ascii(usb_dev_handle *handle, int index, 
+static int usb_get_string_ascii(usb_dev_handle *handle, int index,
 				 char *string, int size) {
   unsigned char buffer[64], *c;
   int len, i;
-  
-  if((len = usb_control_msg(handle, USB_ENDPOINT_IN, 
-			    USB_REQ_GET_DESCRIPTOR, index, 0x0409, 
+
+  if((len = usb_control_msg(handle, USB_ENDPOINT_IN,
+			    USB_REQ_GET_DESCRIPTOR, index, 0x0409,
 			    (char*)buffer, sizeof(buffer), 1000)) < 0)
     return 0;
-  
+
   /* string is shorter than the number of bytes returned? */
   if(buffer[0] < len)
     len = buffer[0];
@@ -39,14 +39,14 @@ static int usb_get_string_ascii(usb_dev_handle *handle, int index,
   /* not a string? */
   if(buffer[1] != USB_DT_STRING)
     return 0;
-  
+
   /* length is in unicode 16 bit chars and includes 2 byte header */
   len = (len-2)/2;
-  
+
   /* string is longer than buffer provided? */
   if(len > size-1)
     len = size-1;
-  
+
   /* take only lower byte for simple unicode to ascii conversion */
   for(i=0,c = buffer+2;i<len;i++,c+=2){
     if(!(*(c+1)))
@@ -54,7 +54,7 @@ static int usb_get_string_ascii(usb_dev_handle *handle, int index,
     else
       string[i] = '_';
   }
-  
+
   /* terminate string and return length */
   string[i] = 0;
   return 1;
@@ -77,10 +77,10 @@ static usb_dev_handle *find_internal(unsigned int displaydeviceinfo, unsigned in
   struct usb_bus      *bus;
   struct usb_device   *dev;
   usb_dev_handle      *handle = 0;
-  
+
   usb_find_busses();
   usb_find_devices();
-  
+
   for(bus=usb_get_busses(); bus && !handle; bus=bus->next){
     for(dev=bus->devices; dev && !handle; dev=dev->next){
       if(is_xu1541bios_device(dev->descriptor.idVendor,
@@ -88,15 +88,15 @@ static usb_dev_handle *find_internal(unsigned int displaydeviceinfo, unsigned in
 	char string[32];
 
 	/* we need to open the device in order to query strings */
-	handle = usb_open(dev); 
+	handle = usb_open(dev);
 	if(!handle){
-	  fprintf(stderr, "Warning: cannot open USB device: %s\n", 
+	  fprintf(stderr, "Warning: cannot open USB device: %s\n",
 		  usb_strerror());
 	  continue;
 	}
-	
-	if(!usb_get_string_ascii(handle, 
-		 (USB_DT_STRING << 8) | dev->descriptor.iProduct, 
+
+	if(!usb_get_string_ascii(handle,
+		 (USB_DT_STRING << 8) | dev->descriptor.iProduct,
 		 string, sizeof(string))) {
 	  fprintf(stderr, "Error: Cannot query product name "
 		  "for device: %s\n", usb_strerror());
@@ -117,18 +117,18 @@ static usb_dev_handle *find_internal(unsigned int displaydeviceinfo, unsigned in
 	    fprintf(stderr, "Error: Found %s device (version %x.%02x) not "
 		  "in boot loader\n"
 		  "       mode, please install jumper switch "
-		  "and replug device!\n", 
-		  string, dev->descriptor.bcdDevice >> 8, 
+		  "and replug device!\n",
+		  string, dev->descriptor.bcdDevice >> 8,
 		  dev->descriptor.bcdDevice & 0xff);
           }
 
 	  if(handle) usb_close(handle);
-	  handle = NULL;		  
+	  handle = NULL;
 	}
       }
     }
   }
-  
+
   if(!handle) {
     if (print_error)
       fprintf(stderr, "Could not find any xu1541 device%s!\n", in_bootmode ? " in boot loader mode" : "");
@@ -147,7 +147,7 @@ static usb_dev_handle *find_internal(unsigned int displaydeviceinfo, unsigned in
     usb_close(handle);
     return NULL;
   }
-  
+
   return handle;
 }
 

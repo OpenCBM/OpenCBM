@@ -19,12 +19,12 @@ int xu1541lib_get_device_info(usb_dev_handle *handle, xu1541_device_info_t *devi
 
   memset(device_info, 0, device_info_size);
 
-  nBytes = usb_control_msg(handle, 
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
+  nBytes = usb_control_msg(handle,
+	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
 	   XU1541_INFO, 0, 0, (char*)reply, sizeof(reply), 1000);
 
   if(nBytes < 0) {
-    fprintf(stderr, "USB request for XU1541 info failed: %s!\n", 
+    fprintf(stderr, "USB request for XU1541 info failed: %s!\n",
 	    usb_strerror());
     return 0;
   }

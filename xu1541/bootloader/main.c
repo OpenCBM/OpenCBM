@@ -17,7 +17,7 @@
   - bootloaderconfig.h:
     Define the condition when the bootloader should be started
   - usbconfig.h:
-    Define the used data line pins. You have to adapt USB_CFG_IOPORT, USB_CFG_DMINUS_BIT and 
+    Define the used data line pins. You have to adapt USB_CFG_IOPORT, USB_CFG_DMINUS_BIT and
     USB_CFG_DPLUS_BIT to your hardware. The rest should be left unchanged.
 */
 
@@ -102,7 +102,7 @@ void leaveBootloader() {
       GICR = (0 << IVSEL); /* move interrupts to application flash section */
       jump_to_app();
 #endif
-   
+
       /* we now have a fully working firmware */
       use_firmware = 1;
 }
@@ -116,9 +116,9 @@ byte_t  usb_setup ( byte_t data[8] ) {
   byte_t *replyBuf = data;
 #endif
   uchar len = 0;
-  
+
   if (use_firmware) {
-    return firmware_usbFunctionSetup(data, replyBuf); 
+    return firmware_usbFunctionSetup(data, replyBuf);
   }
 
   if (data[1] == XU1541_INFO) {
@@ -135,22 +135,22 @@ byte_t  usb_setup ( byte_t data[8] ) {
     bios_reboot();
   } else if (data[1] == USBBOOT_FUNC_WRITE_PAGE) {
     state = STATE_WRITE_PAGE;
-    
+
     page_address = (data[3] << 8) | data[2]; /* page address */
     page_offset = 0;
-    
+
     cli();
     boot_page_erase(page_address); /* erase page */
     sei();
     boot_spm_busy_wait(); /* wait until page is erased */
-    
+
 #ifdef USBTINY
     /* usbtiny always returns 0 on write */
     len = 0;
 #else
     len = 0xff; /* multiple out */
 #endif
-   
+
   } else if (data[1] == USBBOOT_FUNC_GET_PAGESIZE) {
     replyBuf[0] = SPM_PAGESIZE >> 8;
     replyBuf[1] = SPM_PAGESIZE & 0xff;
@@ -190,9 +190,9 @@ void usb_out ( byte_t* data, byte_t len )
 
   if (use_firmware) {
 #ifndef USBTINY
-    return firmware_usbFunctionWrite(data, len); 
+    return firmware_usbFunctionWrite(data, len);
 #else
-    firmware_usbFunctionWrite(data, len); 
+    firmware_usbFunctionWrite(data, len);
     return;
 #endif
   }
@@ -204,17 +204,17 @@ void usb_out ( byte_t* data, byte_t len )
 #else
     return;
 #endif
-  
+
   for (i = 0; i < len; i+=2) {
 
-    cli();    
+    cli();
     boot_page_fill(page_address + page_offset, data[i] | (data[i + 1] << 8));
     sei();
     page_offset += 2;
 
     /* check if we are at the end of a page */
     if (page_offset >= SPM_PAGESIZE) {
-      
+
       /* write page */
       cli();
       boot_page_write(page_address);
@@ -230,7 +230,7 @@ void usb_out ( byte_t* data, byte_t len )
     }
 
   }
-  
+
 #ifndef USBTINY
   return 0;
 #endif

@@ -30,7 +30,7 @@ else
  else
    ifeq "$(OS)" "Cygwin"
      # Cygwin compilation
- 
+
      # Tell, where your libusb-win32 installation resides
      # (if not part of Cygwin in the latest version)
      #

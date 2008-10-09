@@ -36,7 +36,7 @@ else
  else
    ifeq "$(shell uname -o)" "Cygwin"
      # Cygwin compilation
- 
+
      # Tell, where your libusb-win32 installation resides
      # (if not part of Cygwin in the latest version)
      #

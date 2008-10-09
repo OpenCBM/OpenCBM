@@ -6,7 +6,7 @@ ifeq "$(CYGWIN)" ""
   LFLAGS+=$(LDFLAGS_EXTRA) `$(LIBUSB_CONFIG) --libs` -lusb
 else
   # special handling for CYGWIN:
- 
+
   CFLAGS+=-I $(LIBUSB_ROOT)/include -g -Wall -pedantic -I../../include/ $(CFLAGS_EXTRA)
   LFLAGS+=$(LDFLAGS_EXTRA) -L $(LIBUSB_ROOT)/lib/gcc -lusb
 endif

@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: p2.c,v 1.2 2007-03-15 17:40:51 harbaum Exp $
+ * This Revision: $Id: p2.c,v 1.3 2008-10-09 18:55:45 strik Exp $
  *
  * $Log: p2.c,v $
- * Revision 1.2  2007-03-15 17:40:51  harbaum
+ * Revision 1.3  2008-10-09 18:55:45  strik
+ * Removed spaces and tabs before LF.
+ *
+ * Revision 1.2  2007/03/15 17:40:51  harbaum
  * Plenty of changes incl. first async support
  *
  * Revision 1.1  2007/02/18 19:47:32  harbaum
@@ -39,7 +42,7 @@ static void p2_write_byte(uchar c) {
 
 uchar p2_write(uchar *data, uchar len) {
   uchar i;
-  
+
   for(i=0;i<len;i++)
     p2_write_byte(*data++);
 
@@ -53,10 +56,10 @@ static uchar p2_read_byte(void) {
   while(iec_get(DATA));
 
   c = xu1541_pp_read();
-  
+
   iec_set(CLK);
   while(!iec_get(DATA));
-  
+
   return c;
 }
 

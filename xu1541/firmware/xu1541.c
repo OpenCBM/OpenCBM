@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.14 2007-08-30 18:50:15 strik Exp $
+ * This Revision: $Id: xu1541.c,v 1.15 2008-10-09 18:55:45 strik Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.14  2007-08-30 18:50:15  strik
+ * Revision 1.15  2008-10-09 18:55:45  strik
+ * Removed spaces and tabs before LF.
+ *
+ * Revision 1.14  2007/08/30 18:50:15  strik
  * Small restructure: Moved .h files which are used to communicate between
  * different parts of the project into the include/ directory. (more to come.)
  *
@@ -63,7 +66,7 @@
 #ifdef DEBUG
 #define DEBUGF(format, args...) printf_P(PSTR(format), ##args)
 #else
-#define DEBUGF(format, args...) 
+#define DEBUGF(format, args...)
 #endif
 
 /* specifiers for the lines (must match values from opencbm.h) */
@@ -141,20 +144,20 @@ uchar iec_poll(void) {
 /* set line means: make it an output and drive it low */
 void iec_set(uchar line) {
   _delay_us(IEC_DELAY);
-  CBM_PORT &= ~line; 
+  CBM_PORT &= ~line;
   CBM_DDR |= line;
 }
 
 /* release means: make it an input and enable the pull-ups */
 void iec_release(uchar line) {
   _delay_us(IEC_DELAY);
-  CBM_DDR &= ~line; 
+  CBM_DDR &= ~line;
   CBM_PORT |= line;
 }
 
 void iec_set_release(uchar s, uchar r) {
   _delay_us(IEC_DELAY);
-  CBM_PORT &= ~s; 
+  CBM_PORT &= ~s;
   CBM_DDR = (CBM_DDR | s) & ~r;
   CBM_PORT |= r;
 }
@@ -211,7 +214,7 @@ static char check_if_bus_free(void) {
     return 0;
   }
 
-  // ok, at least one drive reacted. Now, test releasing ATN:    
+  // ok, at least one drive reacted. Now, test releasing ATN:
   iec_release(ATN);
   DELAY_US(100);
 
@@ -226,15 +229,15 @@ static char check_if_bus_free(void) {
 
 static void wait_for_free_bus(void) {
   short i=1;
-  
+
   while (1) {
     wdt_reset();
 
     if (check_if_bus_free())
       break;
-    
+
     ++i;
-    
+
     if (i == 2000) {
       EVENT(EVENT_TIMEOUT_FREE_BUS);
       DEBUGF("wait4free bus to\n");
@@ -250,11 +253,11 @@ void do_reset( void ) {
   iec_set(RESET);
   DELAY_MS(20);
   iec_release(RESET);
-  
+
   wait_for_free_bus();
 }
 
-/* timeout in milliseconds, max 5.4 */ 
+/* timeout in milliseconds, max 5.4 */
 #define IEC_TIMEOUT_MS(a)  ((uchar)((a) * F_CPU / 256000))
 
 static uchar iec_wait_timeout_2ms(uchar mask, uchar state) {
@@ -268,8 +271,8 @@ static uchar iec_wait_timeout_2ms(uchar mask, uchar state) {
   /* e.g. 2ms timeout == 94 ticks @ 46.8khz, or of course until expected */
   /* event arrives. this is in negative notation since iec_poll returns */
   /* 0 for "active" bits */
-  while(!(TIFR & _BV(TOV2)) && (((iec_poll() & mask) == state)));    
-  
+  while(!(TIFR & _BV(TOV2)) && (((iec_poll() & mask) == state)));
+
   return ((iec_poll() & mask) != state);
 }
 
@@ -284,7 +287,7 @@ static char send_byte(uchar b) {
     /* each _bit_ takes a total of 90us to send ... */
     DELAY_US(70);
 
-    if( !(b & 1) ) 
+    if( !(b & 1) )
       iec_set(DATA);
 
     iec_release(CLK);
@@ -327,7 +330,7 @@ static char wait_for_listener(void) {
 /* return number of successful written bytes or 0 on error */
 uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
   uchar rv = len;
-  
+
   eoi = 0;
 
   DEBUGF("wr %d, atn %d\n", len, atn);
@@ -346,7 +349,7 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
   while(len && rv) {
 
     /* wait 50 us */
-    DELAY_US(50);      
+    DELAY_US(50);
 
     /* data line must be pulled by device */
     if(iec_get(DATA)) {
@@ -395,7 +398,7 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
       rv = 0;
     }
   }
-  
+
   if(talk) {
     iec_set(DATA);
     iec_release(CLK | ATN);
@@ -404,7 +407,7 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
     iec_release(ATN);
   }
   DELAY_US(100);
-  
+
   DEBUGF("rv=%d\n", rv);
 
   return rv;
@@ -434,7 +437,7 @@ void xu1541_handle(void) {
     DEBUGF("h-as\n");
     LED_ON();
     /* write async cmd byte(s) used for (un)talk/(un)listen, open and close */
-    io_result = !cbm_raw_write(io_buffer+2, io_buffer_fill, 
+    io_result = !cbm_raw_write(io_buffer+2, io_buffer_fill,
 			       io_buffer[0], io_buffer[1]);
     LED_OFF();
 
@@ -506,37 +509,37 @@ void xu1541_handle(void) {
 	DELAY_US(70);
 	iec_release(DATA);
       }
-      
+
       cli();
 
       /* wait 2ms for clock to be asserted */
       ok = iec_wait_timeout_2ms(CLK, CLK);
-      
+
       /* read all bits of byte */
       for(bit = b = 0; (bit < 8) && ok; bit++) {
-	
+
 	/* wait 2ms for clock to be released */
 	if((ok = iec_wait_timeout_2ms(CLK, 0))) {
 	  b >>= 1;
-	  if(!iec_get(DATA)) 
+	  if(!iec_get(DATA))
 	    b |= 0x80;
-	  
+
 	  /* wait 2ms for clock to be asserted */
 	  ok = iec_wait_timeout_2ms(CLK, CLK);
 	}
       }
-      
+
       sei();
 
       /* acknowledge byte */
       if(ok)
 	iec_set(DATA);
-      
+
       if(ok) {
 	io_buffer[received++] = b;
 	DELAY_US(50);
       }
-      
+
     } while(received < io_buffer_fill && ok && !eoi);
 
     if(!ok) {
@@ -584,7 +587,7 @@ uchar xu1541_read(uchar *data, uchar len) {
 
   /* stop after last byte has been transferred */
   if(!io_buffer_fill)
-    io_request = XU1541_IO_IDLE;  
+    io_request = XU1541_IO_IDLE;
 
   return len;
 }
@@ -625,12 +628,12 @@ void xu1541_get_result(unsigned char *data) {
 
 #if 0
   /* reset flag if result has been delivered */
-  if(io_request == XU1541_IO_RESULT) 
+  if(io_request == XU1541_IO_RESULT)
      io_request = XU1541_IO_IDLE;
 #endif
 }
 
-void xu1541_request_async(const uchar *buf, uchar cnt, 
+void xu1541_request_async(const uchar *buf, uchar cnt,
 			   uchar atn, uchar talk) {
 
   io_request = XU1541_IO_ASYNC;
@@ -657,7 +660,7 @@ uchar xu1541_wait(uchar line, uchar state) {
 	DEBUGF("iec_wait to\n");
 	return 0xff;
       }
-      
+
       i = 0;
     } else {
       i++;
@@ -669,11 +672,11 @@ uchar xu1541_wait(uchar line, uchar state) {
 
 uchar xu1541_poll(void) {
   uchar rv = 0;
-  
+
   if((iec_poll() & DATA) == 0) rv |= IEC_DATA;
   if((iec_poll() & CLK)  == 0) rv |= IEC_CLOCK;
   if((iec_poll() & ATN)  == 0) rv |= IEC_ATN;
-  
+
   return rv;
 }
 
@@ -709,7 +712,7 @@ void xu1541_pp_write(uchar val) {
   /* mask pins */
   PAR_PORT0_PORT &= ~PAR_PORT0_MASK;
   PAR_PORT1_PORT &= ~PAR_PORT1_MASK;
-  
+
   /* and put data bits on port */
   PAR_PORT0_PORT |= val & PAR_PORT0_MASK;
   PAR_PORT1_PORT |= val & PAR_PORT1_MASK;

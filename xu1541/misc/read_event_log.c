@@ -25,8 +25,8 @@ void dump_event_log(void) {
   int nBytes, i, log_len;
   unsigned char ret[2];
 
-  nBytes = usb_control_msg(handle, 
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
+  nBytes = usb_control_msg(handle,
+	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
 	   XU1541_GET_EVENT, 0, 0, (char*)ret, sizeof(ret), 1000);
 
   if(nBytes < 0) {
@@ -43,8 +43,8 @@ void dump_event_log(void) {
   printf("Event log:\n");
 
   for(i=0;i<log_len;i++) {
-    nBytes = usb_control_msg(handle, 
-		  USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
+    nBytes = usb_control_msg(handle,
+		  USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
 		  XU1541_GET_EVENT, i, 0, (char*)ret, sizeof(ret), 1000);
 
     if(nBytes < 0) {
@@ -58,7 +58,7 @@ void dump_event_log(void) {
     switch(ret[1]) {
     case EVENT_NONE:      /* ignore unused entries */
       break;
-      
+
     case EVENT_START:
       printf("  system started\n");
       break;
@@ -66,15 +66,15 @@ void dump_event_log(void) {
     case EVENT_RESET_EXT:
       printf("  booted by external reset\n");
       break;
-      
+
     case EVENT_RESET_WATCHDOG:
       printf("  booted by watchdog reset\n");
       break;
-      
+
     case EVENT_RESET_BROWNOUT:
       printf("  booted by brownout reset\n");
       break;
-      
+
     case EVENT_TIMEOUT_FREE_BUS:
       printf("  timeout while waiting for free bus\n");
       break;
@@ -102,7 +102,7 @@ void dump_event_log(void) {
     case EVENT_READ_TIMEOUT:
       printf("  read timeout\n");
       break;
-      
+
     case EVENT_READ_ERROR:
       printf("  read error\n");
       break;
@@ -110,10 +110,10 @@ void dump_event_log(void) {
     case EVENT_TIMEOUT_IEC_WAIT:
       printf("  timeout in iec wait\n");
       break;
-      
+
     default:
       printf("  Unknown event!\n");
-      break;    
+      break;
     }
   }
 }
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
   printf("-- http://www.harbaum.org/till/xu1541  --\n");
 
   usb_init();
- 
+
   if (!(handle = xu1541lib_find())) {
     return 1;
   }

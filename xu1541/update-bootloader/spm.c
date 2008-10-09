@@ -17,7 +17,7 @@
   - bootloaderconfig.h:
     Define the condition when the bootloader should be started
   - usbconfig.h:
-    Define the used data line pins. You have to adapt USB_CFG_IOPORT, USB_CFG_DMINUS_BIT and 
+    Define the used data line pins. You have to adapt USB_CFG_IOPORT, USB_CFG_DMINUS_BIT and
     USB_CFG_DPLUS_BIT to your hardware. The rest should be left unchanged.
 */
 

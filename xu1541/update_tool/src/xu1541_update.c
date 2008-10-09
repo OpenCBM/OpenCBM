@@ -30,7 +30,7 @@
 #define WINKEY
 #endif
 
-int xu1541_write_page(usb_dev_handle *handle, 
+int xu1541_write_page(usb_dev_handle *handle,
 		      char *data, int address, int len);
 
 static int usb_was_reset = 0;
@@ -57,13 +57,13 @@ int xu1541_start_application(usb_dev_handle *handle, int page_size) {
     xu1541_write_page(handle, (char*)page_for_address_0, 0, page_size);
   }
 
-  nBytes = usb_control_msg(handle, 
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN, 
-	   USBBOOT_FUNC_LEAVE_BOOT, 0, 0, 
+  nBytes = usb_control_msg(handle,
+	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
+	   USBBOOT_FUNC_LEAVE_BOOT, 0, 0,
 	   NULL, 0, 1000);
 
 /*
- * This will always be an error, as the xu1541 just reboots, and does 
+ * This will always be an error, as the xu1541 just reboots, and does
  * not answer!
 
   if (nBytes != 0) {
@@ -77,13 +77,13 @@ int xu1541_start_application(usb_dev_handle *handle, int page_size) {
   return 0;
 }
 
-int xu1541_write_page(usb_dev_handle *handle, 
+int xu1541_write_page(usb_dev_handle *handle,
 		      char *data, int address, int len) {
   int nBytes;
 
-  nBytes = usb_control_msg(handle, 
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT, 
-	   USBBOOT_FUNC_WRITE_PAGE, address, 0, 
+  nBytes = usb_control_msg(handle,
+	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT,
+	   USBBOOT_FUNC_WRITE_PAGE, address, 0,
 	   data, len, 1000);
 
   if(nBytes != len) {
@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
   printf("--        XU1541 flash updater        --\n");
   printf("--    (c) 2007 by the opencbm team    --\n");
   printf("-- http://www.harbaum.org/till/xu1541 --\n");
-  
+
   if(argc < 2) {
     fprintf(stderr, "Usage: xu1541_update [-o OFFSET] <ihex_file> [[-o OFFSET] <ihex_file2> ...]\n");
     WINKEY;
@@ -217,11 +217,11 @@ int main(int argc, char **argv) {
 
               /* and flash it */
               xu1541_write_page(handle, page, i*page_size + start, page_size);
-          
+
               printf(".");
               fflush(stdout);
             }
-              
+
             ihex_free_file(ifile);
           } else {
             fprintf(stderr, "ERROR: Failed to load hex image\n");
@@ -241,14 +241,14 @@ int main(int argc, char **argv) {
   xu1541_start_application(handle, page_size);
 
   printf(" done\n"
-	 "%s\n", 
+	 "%s\n",
          (soft_bootloader_mode
-          ? "Rebooting the xu1541." 
+          ? "Rebooting the xu1541."
           : "If you had installed a jumper switch, please remove it and replug the USB cable\n"
 	    "to return to normal operation!\n"
             "If not, the xu1541 will reboot itself automatically.\n"));
 
   free(page);
-  xu1541_close(handle);  
+  xu1541_close(handle);
   return 0;
 }

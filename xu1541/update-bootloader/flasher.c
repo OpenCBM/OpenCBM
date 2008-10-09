@@ -1,17 +1,17 @@
 /*
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
- *  as published by the Free Software Foundation, version 
+ *  as published by the Free Software Foundation, version
  *  2 of the License.
  *
  *  Copyright 2007 Spiro Trikaliotis
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file flasher.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: flasher.c,v 1.7 2007-09-19 19:22:30 wmsr Exp $ \n
+** \version $Id: flasher.c,v 1.8 2008-10-09 18:55:45 strik Exp $ \n
 ** \n
 ** \brief Flash the bootloader from the application space
 **
@@ -69,7 +69,7 @@ spm(uint8_t what, uint16_t address, uint16_t data) {
 #undef boot_page_erase
 STATIC
 void
-boot_page_erase(uint16_t address) 
+boot_page_erase(uint16_t address)
 {
         spm(__BOOT_PAGE_ERASE, address, 0);
 }
@@ -77,7 +77,7 @@ boot_page_erase(uint16_t address)
 #undef boot_page_fill
 STATIC
 void
-boot_page_fill(uint16_t address, uint16_t data) 
+boot_page_fill(uint16_t address, uint16_t data)
 {
         spm(__BOOT_PAGE_FILL, address, data);
 }
@@ -85,7 +85,7 @@ boot_page_fill(uint16_t address, uint16_t data)
 #undef boot_page_write
 STATIC
 void
-boot_page_write(uint16_t address) 
+boot_page_write(uint16_t address)
 {
         spm(__BOOT_PAGE_WRITE, address, 0);
 }
@@ -245,7 +245,7 @@ main(void)
          */
 
         boot_read_page(0x1800, data);
-        
+
         data[0] = 0xff; /* replace the RESET with a RJMP $0 */
         data[1] = 0xc3;
 
@@ -267,7 +267,7 @@ main(void)
 
 
         // use the newly flashed SPM in the bootloader
- 
+
         OwnSpm = 0;
 
         // flash 0x0840-0x093f to 0x1840 - 0x193f
