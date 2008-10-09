@@ -4,10 +4,13 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.15 2007-08-30 18:50:15 strik Exp $
+ * This Revision: $Id: main.c,v 1.16 2008-10-09 18:03:00 strik Exp $
  *
  * $Log: main.c,v $
- * Revision 1.15  2007-08-30 18:50:15  strik
+ * Revision 1.16  2008-10-09 18:03:00  strik
+ * Removed references to AVRUSB (usbconfig.h) and USBTINY in the firmware.
+ *
+ * Revision 1.15  2007/08/30 18:50:15  strik
  * Small restructure: Moved .h files which are used to communicate between
  * different parts of the project into the include/ directory. (more to come.)
  *
@@ -89,28 +92,6 @@
 
 typedef uchar byte_t;
 
-/*
-#ifndef USBTINY
-// use avrusb library
-#include "usbdrv.h"
-#include "oddebug.h"
-typedef uchar byte_t;
-#else
-// use usbtiny library 
-#include "usb.h"
-#include "usbtiny.h"
-
-#define USBDDR DDRC
-#define USB_CFG_IOPORT PORTC
-
-#define USB_CFG_DMINUS_BIT USBTINY_DMINUS
-#define USB_CFG_DPLUS_BIT USBTINY_DPLUS
-
-#define usbInit()  usb_init()
-#define usbPoll()  usb_poll()
-#endif
-*/
-
 #define MODE_ORIGINAL  0
 #define MODE_S1        1
 #define MODE_S2        2
@@ -150,14 +131,8 @@ static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL,
 
 /* ------------------------------------------------------------------------- */
 
-#ifndef USBTINY
 uchar	usbFunctionSetup(uchar data[8], byte_t *replyBuf) {
 /*  static uchar replyBuf[4]; */
-#else
-extern	byte_t	usb_setup ( byte_t data[8] )
-{
-  byte_t *replyBuf = data;
-#endif
   char talk;
   uchar len = data[2];
   
@@ -207,12 +182,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 
   case XU1541_EEPROM_WRITE:
     io_mode = MODE_EEPROM;
-#ifdef USBTINY
-    /* usbtiny always returns 0 on write */
-    return 0;
-#else
     return(data[2]?0xff:0x00);
-#endif
     break;
     
   case XU1541_REQUEST_READ:
@@ -235,12 +205,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
   case XU1541_WRITE:
     io_mode = MODE_ORIGINAL;
     xu1541_prepare_write(data[2]);
-#ifdef USBTINY
-    /* usbtiny always returns 0 on write */
-    return 0;
-#else
     return(data[2]?0xff:0x00);
-#endif
     break;
 
   case XU1541_TALK:
@@ -333,12 +298,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
       
     case XU1541_WRITE:
       io_mode = MODE_S1;
-#ifdef USBTINY
-      /* usbtiny always returns 0 on write */
-      return 0;
-#else
       return(data[4]?0xff:0x00);
-#endif
       break;
       
       break;
@@ -365,12 +325,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
       
     case XU1541_WRITE:
       io_mode = MODE_S2;
-#ifdef USBTINY
-      /* usbtiny always returns 0 on write */
-      return 0;
-#else
       return(data[4]?0xff:0x00);
-#endif
       break;
       
       break;
@@ -397,12 +352,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
       
     case XU1541_WRITE:
       io_mode = MODE_PP;
-#ifdef USBTINY
-      /* usbtiny always returns 0 on write */
-      return 0;
-#else
       return(data[4]?0xff:0x00);
-#endif
       break;
 	  
       break;
@@ -429,12 +379,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
       
     case XU1541_WRITE:
       io_mode = MODE_P2;
-#ifdef USBTINY
-      /* usbtiny always returns 0 on write */
-      return 0;
-#else
       return(data[4]?0xff:0x00);
-#endif
       break;
       
       break;
@@ -458,11 +403,7 @@ extern	byte_t	usb_setup ( byte_t data[8] )
 /* usbFunctionRead                                                           */
 /*---------------------------------------------------------------------------*/
 
-#ifndef USBTINY
 uchar usbFunctionRead( uchar *data, uchar len )
-#else
-byte_t usb_in ( byte_t* data, byte_t len )
-#endif
 {
   char rv = 0;
 
@@ -504,11 +445,7 @@ byte_t usb_in ( byte_t* data, byte_t len )
 /* usbFunctionWrite                                                          */
 /*---------------------------------------------------------------------------*/
 
-#ifndef USBTINY
 uchar usbFunctionWrite( uchar *data, uchar len )
-#else
-void usb_out ( byte_t* data, byte_t len )
-#endif
 {
   char rv = 0;  
   LED_ON();  
@@ -541,9 +478,7 @@ void usb_out ( byte_t* data, byte_t len )
   }
 
   LED_OFF();  
-#ifndef USBTINY
   return (rv>0)?rv:0;
-#endif
 }
 
 /* ------------------------------------------------------------------------- */
