@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.4 2008-06-16 19:24:27 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.5 2008-10-09 17:14:26 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -47,7 +47,7 @@
 
 #include "version.h"
 
-#define OPENCBM_PLUGIN 1
+#define OPENCBM_PLUGIN 1 /*!< \brief mark: we are exporting plugin functions */
 
 #include "archlib.h"
 

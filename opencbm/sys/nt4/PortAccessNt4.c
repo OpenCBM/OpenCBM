@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/PortAccessNt4.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccessNt4.c,v 1.5 2006-05-23 12:24:31 wmsr Exp $ \n
+** \version $Id: PortAccessNt4.c,v 1.6 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver,
 **        NT4 version
@@ -26,32 +26,37 @@
 
 
 
-// Set ExtendedTests to 1, if you want to try searching for unusual EPP's
-// But take notice that the functionality of this test is not guaranteed!
+/*! \brief search for unusual EPPs
+
+  Set AdvancedEPPTests to 1 if you want to try searching for unusual EPPs
+  But take notice that the functionality of this test is not guaranteed!
+*/
 #define AdvancedEPPTests 1
 
+/*! the mode the parallel port is in */
 enum lptMode
 {
-    lptN_A    = 0,
-    lptSPP    = 1,
-    lptPS2    = 2,
-    lptEPP    = 3,
-    lptECP    = 4,
-    lptEPPc    = 5,            // EPP with special control word to enable
+    lptN_A    = 0,  /*!< no parallel port */
+    lptSPP    = 1,  /*!< SPP parallel port */
+    lptPS2    = 2,  /*!< PS2 parallel port */
+    lptEPP    = 3,  /*!< EPP parallel port */
+    lptECP    = 4,  /*!< ECP parallel port */
+    lptEPPc   = 5,  /*!< EPP with special control word to enable */
 };
 
+/*! the available ecp modes */
 enum ecpMode
 {
-    ecpNOECR   = 0,      // no ECP-Port found!!!
+    ecpNOECR   = 0,  /*!< no ECP-Port found */
 
-    ecpSTNDRD  = 1,
-    ecpBYTE    = 2,
-    ecpSTDFIFO = 3,
-    ecpECPFIFO = 4,
-    ecpEPP     = 5,
-    ecpRESVRD  = 6,
-    ecpFIFOTST = 7,
-    ecpCONFIG  = 8
+    ecpSTNDRD  = 1,  /*!< standard mode */
+    ecpBYTE    = 2,  /*!< BYTE mode */
+    ecpSTDFIFO = 3,  /*!< Standard FIFO mode */
+    ecpECPFIFO = 4,  /*!< ECP FIFO mode */
+    ecpEPP     = 5,  /*!< EPP mode */
+    ecpRESVRD  = 6,  /*!< reserved mode */
+    ecpFIFOTST = 7,  /*!< FIFO test mode */
+    ecpCONFIG  = 8   /*!< config mode */
 };
 
 // set the Bidirectional-Flag to output (normal mode)
@@ -215,7 +220,15 @@ ResetLPT(PUCHAR port)
 //----------------------------------------------------------------
 
 #if AdvancedEPPTests
-enum lptMode AdvEPP(PUCHAR port){
+/*! \internal \brief Test for advanced EPP (with different control words)
+
+ \param port
+    (Base) port number of parallel port to test for advanced EPP
+
+ \return
+    lptEPPc if advanced EPP port has been found; else lptN_A.
+*/
+static enum lptMode AdvEPP(PUCHAR port){
     unsigned char EPPctrl=0;
 
     // check all control words to free up the EPP
@@ -501,6 +514,9 @@ ParPortUnsetModeNt4(PDEVICE_EXTENSION Pdx)
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }
 
+extern VOID
+cbmiec_udelay(IN ULONG howlong); // howlong in ms!
+
 /*! \brief Set the operational mode of the parallel port
 
  This function sets the operational mode of the parallel port.
@@ -513,9 +529,6 @@ ParPortUnsetModeNt4(PDEVICE_EXTENSION Pdx)
 
  This function must be run at IRQL == PASSIVE_LEVEL.
 */
-extern VOID
-cbmiec_udelay(IN ULONG howlong); // howlong in ms!
-
 NTSTATUS
 ParPortSetMode(PDEVICE_EXTENSION Pdx)
 {

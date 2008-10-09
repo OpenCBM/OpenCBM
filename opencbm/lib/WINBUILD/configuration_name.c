@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration_name.c,v 1.4 2008-06-16 19:24:26 strik Exp $ \n
+** \version $Id: configuration_name.c,v 1.5 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file
@@ -29,10 +29,11 @@
 
 #include <windows.h>
 
+/*! \brief @@@@@ \todo document */
 #define DEFAULT_FILENAME "/System32/opencbm.conf"
 
 
-/*! \brief \internal Get the default filename for the configuration file
+/*! \brief Get the default filename for the configuration file
 
  Get the default filename of the configuration file.
 

@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/cbmfile.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmfile.c,v 1.3 2005-02-13 17:58:12 strik Exp $ \n
+** \version $Id: cbmfile.c,v 1.4 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Function for handling the CBM_FILE to BX conversions
 **
@@ -31,6 +31,7 @@
 #include <stdlib.h>
 
 
+/*! \brief @@@@@ \todo document */
 #define MAX_CBMFILE_VALUES 10
 
 static CBM_FILE CbmFile[MAX_CBMFILE_VALUES];
@@ -52,6 +53,12 @@ init_cbmfiles(void)
     }
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param a
+
+ \return
+*/
 CBM_FILE
 vdd_cbmfile_get(WORD a)
 {
@@ -71,6 +78,12 @@ vdd_cbmfile_get(WORD a)
     return ret;
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param cbmfile
+
+ \return
+*/
 WORD
 vdd_cbmfile_store(CBM_FILE cbmfile)
 {
@@ -97,6 +110,12 @@ vdd_cbmfile_store(CBM_FILE cbmfile)
     return i;
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param a
+
+ \return
+*/
 CBM_FILE
 vdd_cbmfile_delete(WORD a)
 {
@@ -118,6 +137,9 @@ vdd_cbmfile_delete(WORD a)
     return cbmfile;
 }
 
+/*! \brief @@@@@ \todo document
+
+*/
 VOID
 vdd_cbmfile_closeall(VOID)
 {

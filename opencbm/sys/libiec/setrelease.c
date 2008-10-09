@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/setrelease.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: setrelease.c,v 1.5 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: setrelease.c,v 1.6 2008-10-09 17:14:26 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -23,6 +23,14 @@
 #include <wdm.h>
 #include "cbm_driver.h"
 #include "i_iec.h"
+
+/*! \brief set and release line
+
+  This macro only makes sense in the context of cbmiec_iec_setrelease().
+*/
+#define SET_RELEASE_LINE(_LineName, _PPName) \
+        if (Set     & IEC_LINE_##_LineName) { set_mask     |= PP_##_PPName##_OUT; } \
+        if (Release & IEC_LINE_##_LineName) { release_mask |= PP_##_PPName##_OUT; }
 
 /*! \brief Activate and deactive a line on the IEC serial bus
 
@@ -75,10 +83,6 @@ cbmiec_iec_setrelease(IN PDEVICE_EXTENSION Pdx, IN USHORT Set, IN USHORT Release
         ULONG set_mask = 0;
         ULONG release_mask = 0;
 
-#define SET_RELEASE_LINE(_LineName, _PPName) \
-        if (Set     & IEC_LINE_##_LineName) { set_mask     |= PP_##_PPName##_OUT; } \
-        if (Release & IEC_LINE_##_LineName) { release_mask |= PP_##_PPName##_OUT; }
-
         SET_RELEASE_LINE(DATA,  DATA);
         SET_RELEASE_LINE(CLOCK, CLK);
         SET_RELEASE_LINE(ATN,   ATN);
@@ -95,8 +99,6 @@ cbmiec_iec_setrelease(IN PDEVICE_EXTENSION Pdx, IN USHORT Set, IN USHORT Release
         #undef IEC_LINE_BIDIR
 
 #endif // #ifdef TEST_BIDIR
-
-#undef SET_RELEASE_LINE
 
         CBMIEC_SET_RELEASE(set_mask, release_mask);
 

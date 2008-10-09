@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/testirq.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: testirq.c,v 1.7 2008-09-01 18:27:08 strik Exp $ \n
+** \version $Id: testirq.c,v 1.8 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Test for IRQ capabilities
 **
@@ -30,6 +30,12 @@
  \param Pdx
    Pointer to the device extension of the device to be
    tested.
+
+ \param Buffer
+   @@@@@ \todo document
+
+ \param BufferLength
+   @@@@@ \todo document
 */
 
 NTSTATUS

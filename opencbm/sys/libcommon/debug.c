@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.16 2006-03-09 17:31:35 strik Exp $ \n
+** \version $Id: debug.c,v 1.17 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **
@@ -32,6 +32,22 @@
 # define min(_x, _y) ( ((_x) < (_y)) ? (_x) : (_y) )
 #endif
 
+/*! \brief @@@@@ \todo document 
+
+ \param _no
+
+ \param _a
+
+ \param _b
+
+ \param _c
+
+ \param _d
+
+ \param _str
+
+ \return
+*/
 #if 0
     #define REPORT_BUG(_no, _a, _b, _c, _d, _str) KeBugCheckEx(_no, _a, _b, _c, _d)
 #else
@@ -1027,8 +1043,10 @@ DebugNtStatus(NTSTATUS Value)
 
 #if DBG
 
+/*! \brief use a spinlock for the debugging buffer implementation */
 #define USE_SPINLOCK 1
 
+/* \brief use IRQL elevation for the debugging buffer implementation */
 // #define USE_IRQL_ELEVATION 1
 
 static volatile PCHAR DbgMemoryBuffer = NULL;
@@ -1050,6 +1068,7 @@ static LONG DbgMemoryBufferUsageCounter = 0;
 
 #endif // #ifdef USE_SPINLOCK
 
+/*! \brief the size of the memory buffer used for the debugging buffer */
 #define DBG_SIZE_MEMORY_BUFFER 0x20000u
 
 /*! \brief Start access to the debug memory buffer.
@@ -1150,6 +1169,11 @@ DbgBufferSynchronizeStop(VOID)
 #endif // #ifdef USE_SPINLOCK
 }
 
+/*! \brief Initialise debugging system
+
+ This function performs initialisation which does not need any undoing.
+
+*/
 VOID
 DbgInit(VOID)
 {

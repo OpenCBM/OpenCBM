@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.5 2008-06-16 19:24:27 strik Exp $ \n
+** \version $Id: i_opencbm.h,v 1.6 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **
@@ -63,7 +63,6 @@ extern BOOL WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED
 
 extern PCHAR FormatErrorMessage(DWORD Error);
 extern BOOL CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart);
-extern VOID CbmInstallUpdate(VOID);
 
 extern BOOL CbmRemove(IN LPCTSTR DriverName);
 extern BOOL CbmCheckPresence(IN LPCTSTR DriverName);
@@ -78,8 +77,6 @@ extern BOOL CbmUpdateParameter(IN ULONG DefaultLpt,
                                IN ULONG PermanentlyLock,
                                IN BOOL DebugFlagsDriverPresent, IN ULONG DebugFlagsDriver,
                                IN BOOL DebugFlagsDllPresent, IN ULONG DebugFlagsDll);
-
-extern BOOL CbmTestIrq(VOID);
 
 #if DBG
 extern VOID CbmOutputDebuggingBuffer(VOID);

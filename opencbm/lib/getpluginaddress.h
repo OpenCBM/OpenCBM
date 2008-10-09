@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file lib/getpluginaddress.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: getpluginaddress.h,v 1.4 2008-09-01 18:41:50 strik Exp $ \n
+** \version $Id: getpluginaddress.h,v 1.5 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Functions for obtaining the addresses of plugin functions
@@ -22,14 +22,18 @@
 
   #include <windows.h>
 
+  /*! \brief @@@@@ \todo document */
   typedef HINSTANCE SHARED_OBJECT_HANDLE;
 
+  /*! \brief @@@@@ \todo document */
   #define SHARED_OBJECT_HANDLE_INVALID NULL
 
 #else
 
+  /*! \brief @@@@@ \todo document */
   typedef void * SHARED_OBJECT_HANDLE;
 
+  /*! \brief @@@@@ \todo document */
   #define SHARED_OBJECT_HANDLE_INVALID NULL
 
 #endif

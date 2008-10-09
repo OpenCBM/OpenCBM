@@ -14,7 +14,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.17 2006-06-21 10:11:55 strik Exp $ \n
+** \version $Id: mnib.c,v 1.18 2008-10-09 17:14:26 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -22,51 +22,59 @@
 **
 ****************************************************************/
 
-#define TO_HANDSHAKED_READ  libiec_global_timeouts.T_PARALLEL_BURST_READ_BYTE_HANDSHAKED
-#define TO_HANDSHAKED_WRITE libiec_global_timeouts.T_PARALLEL_BURST_WRITE_BYTE_HANDSHAKED
+#define TO_HANDSHAKED_READ  libiec_global_timeouts.T_PARALLEL_BURST_READ_BYTE_HANDSHAKED  /*!< timeout value for handshaked read */
+#define TO_HANDSHAKED_WRITE libiec_global_timeouts.T_PARALLEL_BURST_WRITE_BYTE_HANDSHAKED /*!< timeout value for handshaked write */
 
 #include <wdm.h>
 #include "cbm_driver.h"
 #include "i_iec.h"
 
-#define PERF_EVENT_PARBURST_PAR_READ_ENTER()           PERF_EVENT(0x5000, 0)
-#define PERF_EVENT_PARBURST_PAR_READ_DELAY1(_x_)       PERF_EVENT(0x5001, _x_)
-#define PERF_EVENT_PARBURST_PAR_READ_PP_READ()         PERF_EVENT(0x5002, 0)
-#define PERF_EVENT_PARBURST_PAR_READ_RELEASED(_x_)     PERF_EVENT(0x5003, _x_)
-#define PERF_EVENT_PARBURST_PAR_READ_DELAY2(_x_)       PERF_EVENT(0x5004, _x_)
-#define PERF_EVENT_PARBURST_PAR_READ_TIMEOUT(_x_)      PERF_EVENT(0x5005, _x_)
-#define PERF_EVENT_PARBURST_PAR_READ_EXIT(_x_)         PERF_EVENT(0x5006, _x_)
+#define PERF_EVENT_PARBURST_PAR_READ_ENTER()           PERF_EVENT(0x5000, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_PAR_READ_DELAY1(_x_)       PERF_EVENT(0x5001, _x_)    /*!< Mark performance event: @@@@@ */ 
+#define PERF_EVENT_PARBURST_PAR_READ_PP_READ()         PERF_EVENT(0x5002, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_PAR_READ_RELEASED(_x_)     PERF_EVENT(0x5003, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_PAR_READ_DELAY2(_x_)       PERF_EVENT(0x5004, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_PAR_READ_TIMEOUT(_x_)      PERF_EVENT(0x5005, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_PAR_READ_EXIT(_x_)         PERF_EVENT(0x5006, _x_)    /*!< Mark performance event: @@@@@ */
 
-#define PERF_EVENT_PARBURST_PAR_WRITE_ENTER()          PERF_EVENT(0x5100, 0)
-#define PERF_EVENT_PARBURST_PAR_WRITE_DELAY1(_x_)      PERF_EVENT(0x5101, _x_)
-#define PERF_EVENT_PARBURST_PAR_WRITE_PP_WRITE(_x_)    PERF_EVENT(0x5102, _x_)
-#define PERF_EVENT_PARBURST_PAR_WRITE_RELEASE()        PERF_EVENT(0x5103, 0)
-#define PERF_EVENT_PARBURST_PAR_WRITE_DELAY2(_x_)      PERF_EVENT(0x5104, _x_)
-#define PERF_EVENT_PARBURST_PAR_WRITE_DUMMY_READ(_x_)  PERF_EVENT(0x5105, _x_)
+#define PERF_EVENT_PARBURST_PAR_WRITE_ENTER()          PERF_EVENT(0x5100, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_PAR_WRITE_DELAY1(_x_)      PERF_EVENT(0x5101, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_PAR_WRITE_PP_WRITE(_x_)    PERF_EVENT(0x5102, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_PAR_WRITE_RELEASE()        PERF_EVENT(0x5103, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_PAR_WRITE_DELAY2(_x_)      PERF_EVENT(0x5104, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_PAR_WRITE_DUMMY_READ(_x_)  PERF_EVENT(0x5105, _x_)    /*!< Mark performance event: @@@@@ */
 
-#define PERF_EVENT_PARBURST_SEND_CMD(_x_)              PERF_EVENT(0x5200, _x_)
+#define PERF_EVENT_PARBURST_SEND_CMD(_x_)              PERF_EVENT(0x5200, _x_)    /*!< Mark performance event: @@@@@ */
 
-#define PERF_EVENT_PARBURST_NREAD_RELEASE()         PERF_EVENT(0x5300, 0)
-#define PERF_EVENT_PARBURST_NREAD_AFTERDELAY()      PERF_EVENT(0x5301, 0)
-#define PERF_EVENT_PARBURST_NREAD_EXIT(_x_)         PERF_EVENT(0x5302, _x_)
+#define PERF_EVENT_PARBURST_NREAD_RELEASE()            PERF_EVENT(0x5300, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_NREAD_AFTERDELAY()         PERF_EVENT(0x5301, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_NREAD_EXIT(_x_)            PERF_EVENT(0x5302, _x_)    /*!< Mark performance event: @@@@@ */
 
-#define PERF_EVENT_PARBURST_NWRITE_RELEASE()        PERF_EVENT(0x5400, 0)
-#define PERF_EVENT_PARBURST_NWRITE_VALUE(_x_)       PERF_EVENT(0x5401, _x_)
-#define PERF_EVENT_PARBURST_NWRITE_EXIT(_x_)        PERF_EVENT(0x5402, _x_)
+#define PERF_EVENT_PARBURST_NWRITE_RELEASE()           PERF_EVENT(0x5400, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_NWRITE_VALUE(_x_)          PERF_EVENT(0x5401, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_NWRITE_EXIT(_x_)           PERF_EVENT(0x5402, _x_)    /*!< Mark performance event: @@@@@ */
 
-#define PERF_EVENT_PARBURST_READ_TRACK_ENTER()         PERF_EVENT(0x5500, 0)
-#define PERF_EVENT_PARBURST_READ_TRACK_STARTLOOP()     PERF_EVENT(0x5500, 0)
-#define PERF_EVENT_PARBURST_READ_TRACK_VALUE(_x_)      PERF_EVENT(0x5500, _x_)
-#define PERF_EVENT_PARBURST_READ_TRACK_TIMEOUT(_x_)    PERF_EVENT(0x5500, _x_)
-#define PERF_EVENT_PARBURST_READ_TRACK_READ_DUMMY(_x_) PERF_EVENT(0x5500, _x_)
-#define PERF_EVENT_PARBURST_READ_TRACK_EXIT(_x_)       PERF_EVENT(0x5500, _x_)
+#define PERF_EVENT_PARBURST_READ_TRACK_ENTER()         PERF_EVENT(0x5500, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_READ_TRACK_STARTLOOP()     PERF_EVENT(0x5500, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_READ_TRACK_VALUE(_x_)      PERF_EVENT(0x5500, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_READ_TRACK_TIMEOUT(_x_)    PERF_EVENT(0x5500, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_READ_TRACK_READ_DUMMY(_x_) PERF_EVENT(0x5500, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_READ_TRACK_EXIT(_x_)       PERF_EVENT(0x5500, _x_)    /*!< Mark performance event: @@@@@ */
 
-#define PERF_EVENT_PARBURST_WRITE_TRACK_ENTER()        PERF_EVENT(0x5500, 0)
-#define PERF_EVENT_PARBURST_WRITE_TRACK_STARTLOOP()    PERF_EVENT(0x5500, 0)
-#define PERF_EVENT_PARBURST_WRITE_TRACK_VALUE(_x_)     PERF_EVENT(0x5500, _x_)
-#define PERF_EVENT_PARBURST_WRITE_TRACK_TIMEOUT(_x_)   PERF_EVENT(0x5500, _x_)
-#define PERF_EVENT_PARBURST_WRITE_TRACK_EXIT(_x_)      PERF_EVENT(0x5500, _x_)
+#define PERF_EVENT_PARBURST_WRITE_TRACK_ENTER()        PERF_EVENT(0x5500, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_WRITE_TRACK_STARTLOOP()    PERF_EVENT(0x5500, 0)      /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_WRITE_TRACK_VALUE(_x_)     PERF_EVENT(0x5500, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_WRITE_TRACK_TIMEOUT(_x_)   PERF_EVENT(0x5500, _x_)    /*!< Mark performance event: @@@@@ */
+#define PERF_EVENT_PARBURST_WRITE_TRACK_EXIT(_x_)      PERF_EVENT(0x5500, _x_)    /*!< Mark performance event: @@@@@ */
 
+/*! \brief @@@@@ \todo document
+
+ \param Pdx
+
+ \param Byte
+
+ \return
+*/
 NTSTATUS
 cbmiec_parallel_burst_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Byte)
 {
@@ -114,6 +122,14 @@ cbmiec_parallel_burst_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Byte)
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param Pdx
+
+ \param Byte
+
+ \return
+*/
 NTSTATUS
 cbmiec_parallel_burst_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
 {
@@ -162,6 +178,14 @@ cbmiec_parallel_burst_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
     FUNC_LEAVE_NTSTATUS_CONST(STATUS_SUCCESS);
 }
 
+/*! \internal \brief @@@@@ \todo document
+
+ \param Pdx
+
+ \param Toggle
+
+ \return
+*/
 static int
 cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
 {
@@ -208,6 +232,16 @@ cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
     return returnValue;
 }
 
+/*! \internal \brief @@@@@ \todo document
+
+ \param Pdx
+
+ \param Data
+
+ \param Toggle
+
+ \return
+*/
 static int
 cbm_handshaked_write(PDEVICE_EXTENSION Pdx, char Data, int Toggle)
 {
@@ -253,9 +287,19 @@ cbm_handshaked_write(PDEVICE_EXTENSION Pdx, char Data, int Toggle)
     FUNC_LEAVE_INT(retval);
 }
 
-#define enable()  cbmiec_release_irq(Pdx)
-#define disable() cbmiec_block_irq(Pdx)
+#define enable()  cbmiec_release_irq(Pdx)    /*!< enable interrupts for transfer */
+#define disable() cbmiec_block_irq(Pdx)      /*!< disable interrupts for transfer */
 
+/*! \brief @@@@@ \todo document
+
+ \param Pdx
+
+ \param Buffer
+
+ \param ReturnLength
+
+ \return
+*/
 NTSTATUS
 cbmiec_parallel_burst_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG ReturnLength)
 {
@@ -313,6 +357,16 @@ cbmiec_parallel_burst_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param Pdx
+
+ \param Buffer
+
+ \param BufferLength
+
+ \return
+*/
 NTSTATUS
 cbmiec_parallel_burst_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR* Buffer, IN ULONG BufferLength)
 {

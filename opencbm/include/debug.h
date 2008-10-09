@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.18 2008-09-15 18:24:02 strik Exp $ \n
+** \version $Id: debug.h,v 1.19 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -27,6 +27,12 @@
  #endif
 #endif
 
+/*! \brief Execute a breakpoint
+
+ \remark
+   Depending upon the environment, this macro uses different means
+   to generate a system agnostic breakpoint.
+*/
 #if defined(_PREFAST_)
   #define DBG_I_BREAKPOINT() __debugbreak
 #elif defined(DBG_KERNELMODE)
@@ -37,25 +43,44 @@
 
 #if DBG
 
-       /* as dumping memory is used regularly when debugging,
-          we give a debug helper function for this */
-
        extern void dbg_memdump(const char *Where,
            const unsigned char *InputBuffer,
            const unsigned int Count);
 
+       /*! \brief output a memory dump to the debugging system
+
+        Generates a byte dump and outputs it to the debugging system
+
+        \param _Where
+           Some text to output in front of the memory dump.
+           This text can be used to identify where this dump
+           occurred.
+
+        \param _Buffer
+           Pointer to a buffer which contains the data
+           bytes to be dumped.
+
+        \param _Count
+           The size of the buffer to be dumped.
+
+        \remark
+           as dumping memory is used regularly when debugging,
+           we give a debug helper function for this
+       */
        #define DBG_MEMDUMP(_Where, _Buffer, _Count) dbg_memdump(_Where, _Buffer, _Count)
 
+        /*! \brief Maximum size of a debugging buffer */
        #define DBG_MAX_BUFFERLEN 4096
 
 #ifdef DBG_KERNELMODE
 
-       // the maximum number of buffers to be used for debugging
+       /*! \brief the maximum number of buffers to be used for debugging */
        #define DBG_MAX_BUFFER 32 /* This *MUST* be a power of 2! */
 
 #else
 
-       #define DBG_MAX_BUFFER 1
+       /*! \brief the maximum number of buffers to be used for debugging */
+       #define DBG_MAX_BUFFER 1 /* This *MUST* be a power of 2! */
 
 #endif // #ifdef DBG_KERNELMODE
 
@@ -138,6 +163,7 @@ int __cdecl main(int argc, char *argv[])
 #endif
 
 
+/*! hint for the optimiser (and prefast): _x holds true */
 #define DBG_I_ASSUME(_x) __assume(_x)
 
 #ifdef DBG_KERNELMODE
@@ -157,30 +183,30 @@ int __cdecl main(int argc, char *argv[])
 
        /* Some makros for handling the various debug conditions */
 
-       #define ISDBG_BREAK()          (DbgFlags & DBGF_BREAK)
-       #define ISDBG_ENTER()          (DbgFlags & DBGF_ENTER)
-       #define ISDBG_LEAVE()          (DbgFlags & DBGF_LEAVE)
-       #define ISDBG_LEAVE_FAILURE()  (DbgFlags & (DBGF_LEAVE|DBGF_LEAVE_FAILURE))
-       #define ISDBG_PARAM()          (DbgFlags & DBGF_PARAM)
+       #define ISDBG_BREAK()          (DbgFlags & DBGF_BREAK)                      /*!< is DBGF_BREAK defined? */
+       #define ISDBG_ENTER()          (DbgFlags & DBGF_ENTER)                      /*!< is DBGF_ENTER defined? */
+       #define ISDBG_LEAVE()          (DbgFlags & DBGF_LEAVE)                      /*!< is DBGF_LEAVE defined? */
+       #define ISDBG_LEAVE_FAILURE()  (DbgFlags & (DBGF_LEAVE|DBGF_LEAVE_FAILURE)) /*!< is DBGF_LEAVE or DBGF_LEAVE_FAILURE defined? */
+       #define ISDBG_PARAM()          (DbgFlags & DBGF_PARAM)                      /*!< is DBGF_PARAM defined? */
 #ifdef DBG_KERNELMODE
-       #define ISDBG_IEC()            (DbgFlags & DBGF_IEC)
-       #define ISDBG_IRQ()            (DbgFlags & DBGF_IRQ)
-       #define ISDBG_ASSERTIRQL()     (DbgFlags & DBGF_ASSERTIRQL)
-       #define ISDBG_PORT()           (DbgFlags & DBGF_PORT)
-       #define ISDBG_THREAD()         (DbgFlags & DBGF_THREAD)
-       #define ISDBG_IRPPATH()        (DbgFlags & DBGF_IRPPATH)
-       #define ISDBG_IRP()            (DbgFlags & DBGF_IRP)
-       #define ISDBG_DPC()            (DbgFlags & DBGF_DPC)
-       #define ISDBG_CABLE()          (DbgFlags & DBGF_CABLE)
-       #define ISDBG_DBGMEMBUF()      (DbgFlags & DBGF_DBGMEMBUF)
-       #define ISDBG_DBGPRINT()       (DbgFlags & DBGF_DBGPRINT)
+       #define ISDBG_IEC()            (DbgFlags & DBGF_IEC)                        /*!< is DBGF_IEC defined? */
+       #define ISDBG_IRQ()            (DbgFlags & DBGF_IRQ)                        /*!< is DBGF_IRQ defined? */
+       #define ISDBG_ASSERTIRQL()     (DbgFlags & DBGF_ASSERTIRQL)                 /*!< is DBGF_ASSERTIRQL defined? */
+       #define ISDBG_PORT()           (DbgFlags & DBGF_PORT)                       /*!< is DBGF_PORT defined? */
+       #define ISDBG_THREAD()         (DbgFlags & DBGF_THREAD)                     /*!< is DBGF_THREAD defined? */
+       #define ISDBG_IRPPATH()        (DbgFlags & DBGF_IRPPATH)                    /*!< is DBGF_IRPPATH defined? */
+       #define ISDBG_IRP()            (DbgFlags & DBGF_IRP)                        /*!< is DBGF_IRP defined? */
+       #define ISDBG_DPC()            (DbgFlags & DBGF_DPC)                        /*!< is DBGF_DPC defined? */
+       #define ISDBG_CABLE()          (DbgFlags & DBGF_CABLE)                      /*!< is DBGF_CABLE defined? */
+       #define ISDBG_DBGMEMBUF()      (DbgFlags & DBGF_DBGMEMBUF)                  /*!< is DBGF_DBGMEMBUF defined? */
+       #define ISDBG_DBGPRINT()       (DbgFlags & DBGF_DBGPRINT)                   /*!< is DBGF_DBGPRINT defined? */
 #endif // #ifdef DBG_KERNELMODE
-       #define ISDBG_PPORT()          (DbgFlags & DBGF_PPORT)
-       #define ISDBG_SUCCESS()        (DbgFlags & DBGF_SUCCESS)
-       #define ISDBG_WARN()           (DbgFlags & DBGF_WARNING)
-       #define ISDBG_ERROR()          (DbgFlags & DBGF_ERROR)
-       #define ISDBG_ASSERT()         (DbgFlags & DBGF_ASSERT)
-       #define ISDBG_PANIC()          (1)
+       #define ISDBG_PPORT()          (DbgFlags & DBGF_PPORT)                      /*!< is DBGF_PPORT defined? */
+       #define ISDBG_SUCCESS()        (DbgFlags & DBGF_SUCCESS)                    /*!< is DBGF_SUCCESS defined? */
+       #define ISDBG_WARN()           (DbgFlags & DBGF_WARNING)                    /*!< is DBGF_WARNING defined? */
+       #define ISDBG_ERROR()          (DbgFlags & DBGF_ERROR)                      /*!< is DBGF_ERROR defined? */
+       #define ISDBG_ASSERT()         (DbgFlags & DBGF_ASSERT)                     /*!< is DBGF_ASSERT defined? */
+       #define ISDBG_PANIC()          (1)                                          /*!< is DBGF_PANIC defined? (does not exist, always 1 = yes) */
 
 /* Now, abstract from some differences between user-mode and kernel-mode */
 
@@ -257,12 +283,20 @@ int __cdecl main(int argc, char *argv[])
 
 #ifdef DBG_KERNELMODE
 
+       /*! start the debugging output line */
        #define _DBG_START() _DBG_START_ADD DbgBufferPos[DEBUG_BUFFER_NO] = 0; DbgOutputIntoBuffer(DBG_PREFIX "%s(%u,%02x)," __FUNCTION__ "(%u): ", DBG_PROGNAME, CbmGetCurrentProcessorNumber(), DebugBufferNo, __LINE__)
+
 #else // #if DBG_KERNELMODE
+
+       /*! start the debugging output line */
        #define _DBG_START() _DBG_START_ADD DbgBufferPos[DEBUG_BUFFER_NO] = 0; DbgOutputIntoBuffer(DBG_PREFIX "%s," __FUNCTION__ "(%u): ", DBG_PROGNAME, __LINE__)
+
 #endif // #if DBG_KERNELMODE
+
+       /*! end the debugging output line */
        #define _DBG_END()   DbgOutputIntoBuffer(DBG_PREFIX "\n"); _DBG_PERFORM(&DbgBuffer[DEBUG_BUFFER_NO][0]) _DBG_END_ADD
 
+       /*! Output exactly one line to the debugging output */
        #define DBGO(_xxx) { _DBG_START(); _DBGO(_xxx); _DBG_END() }
 
        /*! set a hard-coded breakpoint */
@@ -308,7 +342,7 @@ int __cdecl main(int argc, char *argv[])
               /*! Output if DBGF_ASSERTIRQL is defined */
               #define DBG_IRQL(  _xxx ) { if (!(KeGetCurrentIrql() _xxx)) if (ISDBG_ASSERTIRQL()) { DBGO(( DBG_PREFIX "***IRQL ASSERTION FAILED!***: '%s' in %s:%s(%u)", #_xxx, __FILE__, __FUNCTION__, __LINE__ )); DBG_BREAKPOINT(); } }
        #else
-              /*! leave the function with a return value of a pointer type */
+              /*! leave the function with a return value of a HMODULE */
               #define FUNC_LEAVE_HMODULE(  _xxx )  FUNC_LEAVE_TYPE( _xxx, HMODULE, "0x%08x")
        #endif
 
@@ -327,6 +361,7 @@ int __cdecl main(int argc, char *argv[])
        /*! Output always */
        #define DBG_PRINT(   _xxx ) { DBGO( _xxx ); }
 
+       /*! Similar to DBG_ASSERT(). However, the argument is executed even on release builds. */
        #define DBG_VERIFY(  _xxx ) DBG_ASSERT( _xxx )
 
        /*! only execute the command when debugging is compiled in */
@@ -358,6 +393,7 @@ int __cdecl main(int argc, char *argv[])
 
 #else  // #if DBG
 
+       //! On release builds, a dummy
        #define DBG_MEMDUMP(_Where, _Buffer, _Count)
 
        //! On release builds, a dummy
@@ -480,6 +516,7 @@ int __cdecl main(int argc, char *argv[])
 
        #else
 
+              //! On release builds, a dummy
               #define FUNC_LEAVE_HMODULE(  _xxx )  return _xxx;
 
        #endif

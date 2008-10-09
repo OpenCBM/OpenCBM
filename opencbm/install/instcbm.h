@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file instcbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.h,v 1.12 2008-09-01 18:41:50 strik Exp $ \n
+** \version $Id: instcbm.h,v 1.13 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Header for installation routines
 **
@@ -20,18 +20,27 @@
 #ifndef INSTCBM_H
 #define INSTCBM_H
 
-extern char *get_plugin_filename(char *Plugin);
-
+/*! @@@@@ \todo document */
 typedef struct cbm_install_parameter_s cbm_install_parameter_t;
+/*! @@@@@ \todo document */
 typedef struct CbmPluginInstallProcessCommandlineData_s CbmPluginInstallProcessCommandlineData_t;
+/*! @@@@@ \todo document */
 typedef struct cbm_install_parameter_plugin_s cbm_install_parameter_plugin_t;
 
 extern BOOL get_all_plugins(cbm_install_parameter_t * InstallParameter);
 extern BOOL get_all_installed_plugins(cbm_install_parameter_t * InstallParameter);
-extern BOOL ProcessPluginCommandline(const char * const Plugin, cbm_install_parameter_t * Parameter, int Argc, char * const Argv[]);
+extern BOOL ProcessPluginCommandlineAndAddIt(cbm_install_parameter_t * Parameter, const char * const Plugin, int Argc, char * const Argv[]);
 
 extern void PluginListFree(cbm_install_parameter_t * InstallParameter);
 
+/*! @@@@@ \todo document
+
+ \param PluginInstallParameter
+
+ \param Context
+
+ \return
+*/
 typedef BOOL PluginForAll_Callback_t(cbm_install_parameter_plugin_t * PluginInstallParameter, void * Context);
 
 extern BOOL PluginForAll(cbm_install_parameter_t * InstallParameter, PluginForAll_Callback_t * Callback, void * Context);

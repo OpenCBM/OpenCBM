@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.10 2006-05-23 12:24:31 wmsr Exp $ \n
+** \version $Id: execute.c,v 1.11 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **
@@ -35,6 +35,7 @@
 #include "opencbm.h"
 
 
+/*! \brief @@@@@ \todo document */
 #define NEW_IMPLEMENTATION_WITH_SETRELEASE
 
 /*-------------------------------------------------------------------*/
@@ -64,8 +65,20 @@ release_vdm_address(WORD Offset, WORD Length, PVOID Buffer)
 }
 
 
+/*! \brief @@@@@ \todo document
+
+ \param _x_
+
+ \return
+*/
 #define retAX( _x_ )  setAX((WORD) _x_)
 
+/*! \brief @@@@@ \todo document
+
+ \param _offset_
+
+ \param _length_
+*/
 #define FUNC_CHECKEDBUFFERACCESS(_offset_, _length_) \
 \
     BOOLEAN error; \
@@ -78,6 +91,7 @@ release_vdm_address(WORD Offset, WORD Length, PVOID Buffer)
     offset = _offset_; \
     length = _length_;
 
+/*! \brief @@@@@ \todo document */
 #define CHECKEDBUFFERACCESS_PROLOG()  \
 \
     buffer = get_vdm_address(offset, length); \
@@ -92,6 +106,7 @@ release_vdm_address(WORD Offset, WORD Length, PVOID Buffer)
 \
         error = FALSE;
 
+/*! \brief @@@@@ \todo document */
 #define CHECKEDBUFFERACCESS_EPILOG() \
         release_vdm_address(offset, length, buffer); \
 \
@@ -99,6 +114,10 @@ release_vdm_address(WORD Offset, WORD Length, PVOID Buffer)
     } \
     FUNC_LEAVE_BOOLEAN(error);
 
+/*! \brief @@@@@ \todo document
+
+ \param _func_
+*/
 #define CHECKEDBUFFERACCESS(_func_) \
         CHECKEDBUFFERACCESS_PROLOG(); \
         ret = _func_; \

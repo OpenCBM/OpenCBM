@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.19 2008-06-16 19:24:28 strik Exp $ \n
+** \version $Id: iec.h,v 1.20 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -20,12 +20,13 @@
 #ifndef CBMIEC_H
 #define CBMIEC_H
 
+/*! status of the bus after a call to cbmiec_check_device() */
 typedef
 enum iec_checkdevice
 {
-    IEC_CHECKDEVICE_BUSFREE = 0,
-    IEC_CHECKDEVICE_NODEVICE = 1,
-    IEC_CHECKDEVICE_BUSBUSY = 2
+    IEC_CHECKDEVICE_BUSFREE = 0,  /*!< we are free to use the bus */
+    IEC_CHECKDEVICE_NODEVICE = 1, /*!< no device attached */
+    IEC_CHECKDEVICE_BUSBUSY = 2   /*!< the bus is still busy */
 } IEC_CHECKDEVICE;
 
 extern NTSTATUS

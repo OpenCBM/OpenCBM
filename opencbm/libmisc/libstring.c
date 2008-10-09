@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file libmisc/libstring.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: libstring.c,v 1.2 2008-06-16 19:24:28 strik Exp $ \n
+** \version $Id: libstring.c,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Helper function for string handling
 **
@@ -21,6 +21,23 @@
 
 #include <stdlib.h>
 
+/*! \brief allocate memory for a string of a given size
+
+ This function allocates memory for a string with
+ a given size.
+
+ \param Length
+   The size of the string.
+   The trailing zero does not count, that is, extra
+   space for an additional zero is allocated.
+
+ \return
+   NULL on failure;
+   otherwise, a pointer to the newly allocated memory.
+
+ \remark
+   The string must be freed with cbmlibmisc_strfree().
+*/
 char *
 cbmlibmisc_stralloc(unsigned int Length)
 {
@@ -44,6 +61,26 @@ cbmlibmisc_stralloc(unsigned int Length)
     return buffer;
 }
 
+/*! \brief Duplicate a given string
+
+ This function allocates memory for a string.
+ This string is initialised with a copy of the given
+ parameter string.
+
+ \param OldString
+   The string to duplicate. Can also be NULL.
+
+ \return
+   NULL on failure;
+   otherwise, a pointer to the newly allocated string.
+
+ \remark
+   If OldString is given as a NULL pointer, this function
+   allocates an empty string (<i>not</i> a NULL pointer)
+
+ \remark
+   The string must be freed with cbmlibmisc_strfree().
+*/
 char *
 cbmlibmisc_strdup(const char * const OldString)
 {
@@ -65,6 +102,37 @@ cbmlibmisc_strdup(const char * const OldString)
     return newString;
 }
 
+/*! \brief Duplicate a prefix of a given string
+
+ This function allocates memory for a string.
+ This string is initialised with a copy of a 
+ prefix of the given parameter string.
+
+ \param OldString
+   The string to duplicate. Can also be NULL.
+
+ \param Length
+   The size of the prefix to copy.
+
+ \return
+   NULL on failure;
+   otherwise, a pointer to the newly allocated string.
+
+ \remark
+   If the OldString has Length characters or more, the
+   first Length characters are returned in the new copy
+   of the string.
+
+   If the OldString has less than Length characters, a
+   full copy of OldString is returned.
+
+ \remark
+   If OldString is given as a NULL pointer, this function
+   allocates an empty string (<i>not</i> a NULL pointer)
+
+ \remark
+   The string must be freed with cbmlibmisc_strfree().
+*/
 char *
 cbmlibmisc_strndup(const char * const OldString, size_t Length)
 {
@@ -84,9 +152,23 @@ cbmlibmisc_strndup(const char * const OldString, size_t Length)
             newString[len] = 0;
         }
     }
+    else
+    {
+        newString = cbmlibmisc_strdup(NULL);
+    }
+
     return newString;
 }
 
+/*! \brief Free a string
+
+ This function frees a string which has been
+ previously allocated by any of the functions in
+ this file.
+
+ \param String
+   A pointer to the string to be freed.
+*/
 void
 cbmlibmisc_strfree(const char * String)
 {
@@ -113,6 +195,9 @@ cbmlibmisc_strfree(const char * String)
  \return
    The malloc()ed memory for the concatenated string, or NULL
    if there was not enough memory.
+
+ \remark
+   The string must be freed with cbmlibmisc_strfree().
 */
 char *
 cbmlibmisc_strcat(const char * First, const char * Second)

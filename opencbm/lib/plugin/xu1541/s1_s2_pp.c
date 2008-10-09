@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/s1_s2_pp.c \n
 ** \author Till Harbaum, Spiro Trikaliotis \n
-** \version $Id: s1_s2_pp.c,v 1.2 2007-03-22 13:12:23 strik Exp $ \n
+** \version $Id: s1_s2_pp.c,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver: Code for accessing fast protocols of xu1541
 **
@@ -50,48 +50,136 @@
 /*-------------------------------------------------------------------*/
 /*--------- OPENCBM ARCH FUNCTIONS ----------------------------------*/
 
+/*! \brief Read data with serial1 protocol
+
+  \param HandleDevice
+    A CBM_FILE which contains the file handle of the driver.
+
+  \param data
+    Pointer to the data buffer which will hold the read bytes.
+
+  \param size
+    The size of the data buffer the read bytes will be written to.
+*/
 void CBMAPIDECL
 cbmarch_s1_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
 	xu1541_special_read(XU1541_S1, data, size); 
 }
 
+/*! \brief Write data with serial1 protocol
+
+  \param HandleDevice
+    A CBM_FILE which contains the file handle of the driver.
+
+  \param data
+    Pointer to the data buffer to be written
+
+  \param size
+    The size of the data buffer to be written
+*/
 void CBMAPIDECL
 cbmarch_s1_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
 	xu1541_special_write(XU1541_S1, data, size); 
 }
 
+/*! \brief Read data with serial2 protocol
+
+  \param HandleDevice
+    A CBM_FILE which contains the file handle of the driver.
+
+  \param data
+    Pointer to the data buffer which will hold the read bytes.
+
+  \param size
+    The size of the data buffer the read bytes will be written to.
+*/
 void CBMAPIDECL
 cbmarch_s2_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
 	xu1541_special_read(XU1541_S2, data, size); 
 }
 
+/*! \brief Write data with serial2 protocol
+
+  \param HandleDevice
+    A CBM_FILE which contains the file handle of the driver.
+
+  \param data
+    Pointer to the data buffer to be written
+
+  \param size
+    The size of the data buffer to be written
+*/
 void CBMAPIDECL
 cbmarch_s2_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
 	xu1541_special_write(XU1541_S2, data, size); 
 }
 
+/*! \brief Read data with parallel protocol (d64copy)
+
+  \param HandleDevice
+    A CBM_FILE which contains the file handle of the driver.
+
+  \param data
+    Pointer to the data buffer which will hold the read bytes.
+
+  \param size
+    The size of the data buffer the read bytes will be written to.
+*/
 void CBMAPIDECL
 cbmarch_pp_dc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
 	xu1541_special_read(XU1541_PP, data, size); 
 }
 
+/*! \brief Write data with parallel protocol (d64copy)
+
+  \param HandleDevice
+    A CBM_FILE which contains the file handle of the driver.
+
+  \param data
+    Pointer to the data buffer to be written
+
+  \param size
+    The size of the data buffer to be written
+*/
 void CBMAPIDECL
 cbmarch_pp_dc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
 	xu1541_special_write(XU1541_PP, data, size); 
 }
 
+/*! \brief Read data with parallel protocol (cbmcopy)
+
+  \param HandleDevice
+    A CBM_FILE which contains the file handle of the driver.
+
+  \param data
+    Pointer to the data buffer which will hold the read bytes.
+
+  \param size
+    The size of the data buffer the read bytes will be written to.
+*/
 void CBMAPIDECL
 cbmarch_pp_cc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
 	xu1541_special_read(XU1541_P2, data, size); 
 }
 
+/*! \brief Write data with parallel protocol (cbmcopy)
+
+  \param HandleDevice
+    A CBM_FILE which contains the file handle of the driver.
+
+  \param data
+    Pointer to the data buffer to be written
+
+  \param size
+    The size of the data buffer to be written
+*/
 void CBMAPIDECL
 cbmarch_pp_cc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {

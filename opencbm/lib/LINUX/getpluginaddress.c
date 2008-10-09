@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/LINUX/getpluginaddress.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: getpluginaddress.c,v 1.2 2007-03-22 13:12:21 strik Exp $ \n
+** \version $Id: getpluginaddress.c,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -22,18 +22,38 @@
 
 #include <dlfcn.h>
 
+/*! \brief @@@@@ \todo document
+
+ \param name
+
+ \return
+*/
 SHARED_OBJECT_HANDLE 
 plugin_load(const char * name)
 {
     return dlopen(name, RTLD_NOW);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param handle
+
+ \param name
+
+ \return
+*/
 void *
 plugin_get_address(SHARED_OBJECT_HANDLE handle, const char * name)
 {
     return dlsym(handle, name);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param handle
+
+ \return
+*/
 void
 plugin_unload(SHARED_OBJECT_HANDLE handle)
 {

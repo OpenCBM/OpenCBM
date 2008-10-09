@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.20 2008-09-25 18:24:25 strik Exp $ \n
+** \version $Id: archlib.c,v 1.21 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -41,8 +41,7 @@
 #define DLL
 #include "i_opencbm.h"
 
-/*! mark: we are exporting plugin entries */
-#define OPENCBM_PLUGIN 1
+#define OPENCBM_PLUGIN 1 /*!< \brief mark: we are exporting plugin functions */
 #include "archlib.h"
 #include "libmisc.h"
 
@@ -92,6 +91,12 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 }
 
 
+/*! \brief @@@@@ \todo document
+
+ \param DefaultPluginname
+
+ \return
+*/
 BOOL CBMAPIDECL cbm_plugin_install_generic(const char * DefaultPluginname)
 {
     BOOL error = TRUE;
@@ -164,6 +169,16 @@ cbm_plugin_call_self_init_plugin(const char * Pluginname, const char * Filepath,
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param Pluginname
+
+ \param Filepath
+
+ \param CommandlineData
+
+ \return
+*/
 BOOL CBMAPIDECL cbm_plugin_install_plugin_data(const char * Pluginname, const char * Filepath, const CbmPluginInstallProcessCommandlineData_t * CommandlineData)
 {
     BOOL error = TRUE;
@@ -205,8 +220,19 @@ BOOL CBMAPIDECL cbm_plugin_install_plugin_data(const char * Pluginname, const ch
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document */
 opencbm_configuration_enum_sections_callback_t callback;
 
+/*! \brief @@@@@ \todo document
+
+ \param Handle
+
+ \param Section
+
+ \param Data
+
+ \return
+*/
 static int cbm_plugin_get_all_plugin_names_callback(opencbm_configuration_handle Handle,
                                                     const char Section[],
                                                     void * Data)
@@ -228,6 +254,12 @@ static int cbm_plugin_get_all_plugin_names_callback(opencbm_configuration_handle
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param Context
+
+ \return
+*/
 EXTERN BOOL CBMAPIDECL cbm_plugin_get_all_plugin_names(cbm_plugin_get_all_plugin_names_context_t * Context)
 {
     BOOL error = TRUE;

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.23 2008-06-16 19:24:26 strik Exp $ \n
+** \version $Id: cbm.c,v 1.24 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -42,10 +42,13 @@
 
 #include "configuration.h"
 
+/*! \brief @@@@@ \todo document */
 struct plugin_information_s {
-    SHARED_OBJECT_HANDLE Library;
-    opencbm_plugin_t     Plugin;
+    SHARED_OBJECT_HANDLE Library; /*!< \brief @@@@@ \todo document */
+    opencbm_plugin_t     Plugin;  /*!< \brief @@@@@ \todo document */
 };
+
+/*! \brief @@@@@ \todo document */
 typedef struct plugin_information_s plugin_information_t;
 
 static
@@ -445,7 +448,7 @@ cbm_get_driver_name(int PortNumber)
    ==0: This function completed successfully
    !=0: otherwise
 
- \limitation
+ \todo
  PortNumber is not allowed to exceed 10. 
 
  \remark

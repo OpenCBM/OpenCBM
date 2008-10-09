@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.19 2007-07-25 16:37:52 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.20 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -184,8 +184,13 @@ DbgWp(IN PUCHAR Port, IN UCHAR Value);
 extern UCHAR
 DbgRp(IN PUCHAR Port);
 
-/* cbmiec_show_port() is used to show the value of the
- * parallel port lines if needed for debugging
+/*! \brief show the value of parallel port lines
+
+ cbmiec_show_port() is used to show the value of the
+ parallel port lines if needed for debugging
+
+ \param s
+    @@@@@ \todo document
  */
 extern VOID
 cbmiec_show_port(UCHAR *s);
@@ -196,7 +201,24 @@ cbmiec_show_port(UCHAR *s);
  * here with our own functions:
  */
 
+/*! \brief READ_PORT_UCHAR replacement for debugging
+
+ \param _x_
+    the port number to read
+
+ \return
+    The current value on that port
+*/
 #define READ_PORT_UCHAR(_x_)       DbgRp(_x_)
+
+/*! \brief WRITE_PORT_UCHAR replacement for debugging
+
+ \param _x_
+    the port number to read
+
+ \param _y_
+    the value to put into that port number
+*/
 #define WRITE_PORT_UCHAR(_x_, _y_) DbgWp(_x_, _y_)
 
 /*

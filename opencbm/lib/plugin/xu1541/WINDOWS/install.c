@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/WINDOWS/install.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: install.c,v 1.1 2008-08-24 08:20:57 strik Exp $ \n
+** \version $Id: install.c,v 1.2 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Helper functions for installing the plugin
 **        on a Windows machine
@@ -39,7 +39,7 @@
 #include "libmisc.h"
 #include "version.h"
 
-#define OPENCBM_PLUGIN 1
+#define OPENCBM_PLUGIN 1 /*!< \brief mark: we are exporting plugin functions */
 
 #include "archlib.h"
 
@@ -218,6 +218,12 @@ processNumber(const PCHAR Argument, PCHAR *NextChar, PBOOL ParameterGiven, PULON
 /*-------------------------------------------------------------------*/
 /*--------- OPENCBM INSTALL HELPER FUNCTIONS ------------------------*/
 
+/*! \brief @@@@@ \todo document
+
+ \param Data
+
+ \return
+*/
 unsigned int CBMAPIDECL
 cbm_plugin_install_process_commandline(CbmPluginInstallProcessCommandlineData_t * Data)
 {
@@ -286,6 +292,12 @@ cbm_plugin_install_process_commandline(CbmPluginInstallProcessCommandlineData_t 
     FUNC_LEAVE_UINT(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param Context
+
+ \return
+*/
 BOOL CBMAPIDECL
 cbm_plugin_install_do_install(void * Context)
 {
@@ -302,6 +314,12 @@ cbm_plugin_install_do_install(void * Context)
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param Context
+
+ \return
+*/
 BOOL CBMAPIDECL
 cbm_plugin_install_do_uninstall(void * Context)
 {
@@ -318,6 +336,14 @@ cbm_plugin_install_do_uninstall(void * Context)
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param Data
+
+ \param Destination
+
+ \return
+*/
 unsigned int CBMAPIDECL
 cbm_plugin_install_get_needed_files(CbmPluginInstallProcessCommandlineData_t * Data, opencbm_plugin_install_neededfiles_t * Destination)
 {

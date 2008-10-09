@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/checkcable.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: checkcable.c,v 1.7 2007-05-20 10:20:46 strik Exp $ \n
+** \version $Id: checkcable.c,v 1.8 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Check and test the cable type
 **
@@ -23,46 +23,46 @@
 
 /* XA1541: */
 
-#define PP_XA_ATN_OUT    0x01
-#define PP_XA_CLK_OUT    0x02
-#define PP_XA_DATA_OUT   0x04
-#define PP_XA_RESET_OUT  0x08
-#define PP_XA_EOR_OUT    0xcb
+#define PP_XA_ATN_OUT    0x01             /*!< \brief @@@@@ \todo document */
+#define PP_XA_CLK_OUT    0x02             /*!< \brief @@@@@ \todo document */
+#define PP_XA_DATA_OUT   0x04             /*!< \brief @@@@@ \todo document */
+#define PP_XA_RESET_OUT  0x08             /*!< \brief @@@@@ \todo document */
+#define PP_XA_EOR_OUT    0xcb             /*!< \brief @@@@@ \todo document */
 
-#define PP_XA_ATN_IN     0x10
-#define PP_XA_CLK_IN     0x20
-#define PP_XA_DATA_IN    0x40
-#define PP_XA_RESET_IN   0x80
-#define PP_XA_EOR_IN     0x80
+#define PP_XA_ATN_IN     0x10             /*!< \brief @@@@@ \todo document */
+#define PP_XA_CLK_IN     0x20             /*!< \brief @@@@@ \todo document */
+#define PP_XA_DATA_IN    0x40             /*!< \brief @@@@@ \todo document */
+#define PP_XA_RESET_IN   0x80             /*!< \brief @@@@@ \todo document */
+#define PP_XA_EOR_IN     0x80             /*!< \brief @@@@@ \todo document */
 
 
 /* XM1541: */
 
-#define PP_XM_ATN_OUT    PP_XA_ATN_OUT
-#define PP_XM_CLK_OUT    PP_XA_CLK_OUT
-#define PP_XM_DATA_OUT   PP_XA_DATA_OUT
-#define PP_XM_RESET_OUT  PP_XA_RESET_OUT
-#define PP_XM_EOR_OUT    0xc4
+#define PP_XM_ATN_OUT    PP_XA_ATN_OUT    /*!< \brief @@@@@ \todo document */
+#define PP_XM_CLK_OUT    PP_XA_CLK_OUT    /*!< \brief @@@@@ \todo document */
+#define PP_XM_DATA_OUT   PP_XA_DATA_OUT   /*!< \brief @@@@@ \todo document */
+#define PP_XM_RESET_OUT  PP_XA_RESET_OUT  /*!< \brief @@@@@ \todo document */
+#define PP_XM_EOR_OUT    0xc4             /*!< \brief @@@@@ \todo document */
 
-#define PP_XM_ATN_IN     PP_XA_ATN_IN
-#define PP_XM_CLK_IN     PP_XA_CLK_IN
-#define PP_XM_DATA_IN    PP_XA_DATA_IN
-#define PP_XM_RESET_IN   PP_XA_RESET_IN
-#define PP_XM_EOR_IN     PP_XA_EOR_IN
+#define PP_XM_ATN_IN     PP_XA_ATN_IN     /*!< \brief @@@@@ \todo document */
+#define PP_XM_CLK_IN     PP_XA_CLK_IN     /*!< \brief @@@@@ \todo document */
+#define PP_XM_DATA_IN    PP_XA_DATA_IN    /*!< \brief @@@@@ \todo document */
+#define PP_XM_RESET_IN   PP_XA_RESET_IN   /*!< \brief @@@@@ \todo document */
+#define PP_XM_EOR_IN     PP_XA_EOR_IN     /*!< \brief @@@@@ \todo document */
 
 /* XE1541: */
 
-#define PP_XE_ATN_OUT    PP_XM_ATN_OUT
-#define PP_XE_CLK_OUT    PP_XM_CLK_OUT
-#define PP_XE_DATA_OUT   PP_XM_RESET_OUT
-#define PP_XE_RESET_OUT  PP_XM_DATA_OUT
-#define PP_XE_EOR_OUT    PP_XM_EOR_OUT
+#define PP_XE_ATN_OUT    PP_XM_ATN_OUT    /*!< \brief @@@@@ \todo document */
+#define PP_XE_CLK_OUT    PP_XM_CLK_OUT    /*!< \brief @@@@@ \todo document */
+#define PP_XE_DATA_OUT   PP_XM_RESET_OUT  /*!< \brief @@@@@ \todo document */
+#define PP_XE_RESET_OUT  PP_XM_DATA_OUT   /*!< \brief @@@@@ \todo document */
+#define PP_XE_EOR_OUT    PP_XM_EOR_OUT    /*!< \brief @@@@@ \todo document */
 
-#define PP_XE_ATN_IN     PP_XM_ATN_IN
-#define PP_XE_CLK_IN     PP_XM_CLK_IN
-#define PP_XE_DATA_IN    PP_XM_RESET_IN
-#define PP_XE_RESET_IN   PP_XM_DATA_IN
-#define PP_XE_EOR_IN     PP_XM_EOR_IN
+#define PP_XE_ATN_IN     PP_XM_ATN_IN     /*!< \brief @@@@@ \todo document */
+#define PP_XE_CLK_IN     PP_XM_CLK_IN     /*!< \brief @@@@@ \todo document */
+#define PP_XE_DATA_IN    PP_XM_RESET_IN   /*!< \brief @@@@@ \todo document */
+#define PP_XE_RESET_IN   PP_XM_DATA_IN    /*!< \brief @@@@@ \todo document */
+#define PP_XE_EOR_IN     PP_XM_EOR_IN     /*!< \brief @@@@@ \todo document */
 
 
 /*! \internal \brief Reflect cable type
@@ -148,6 +148,32 @@ cbmiec_set_cablevalues(IN PDEVICE_EXTENSION Pdx)
     FUNC_LEAVE();
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param _x
+
+ \return
+*/
+#define READ(_x) ((((READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor)) & (_x)) ? 1 : 0)
+
+/*! \brief @@@@@ \todo document
+
+ \param _x
+
+ \param _y
+
+*/
+#define SHOW(_x, _y) 
+    // DBG_CABLE((DBG_PREFIX "CBMIEC_GET(" #_x ") = $%02x, READ(" #_y ") = $%02x", CBMIEC_GET(_x), READ(_y) ));
+
+/*! \brief @@@@@ \todo document */
+#define SHOW1() \
+    DBG_CABLE((DBG_PREFIX "############ ATN OUT = %u, CLOCK OUT = %u, DATA OUT = %u, RESET OUT = %u", \
+        READ(PP_ATN_OUT), READ(PP_CLK_OUT), READ(PP_DATA_OUT), READ(PP_RESET_OUT) )); \
+\
+    DBG_CABLE((DBG_PREFIX "############ ATN IN  = %u, CLOCK IN  = %u, DATA IN  = %u, RESET IN  = %u", \
+        CBMIEC_GET(PP_ATN_IN), CBMIEC_GET(PP_CLK_IN), CBMIEC_GET(PP_DATA_IN), CBMIEC_GET(PP_RESET_IN) ));
+
 /*! \internal \brief Check if the cable works at all
 
  This function tries to find out if there is a cable connected,
@@ -177,18 +203,6 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
 
     DBG_CABLE((DBG_PREFIX "############ Status: out: $%02x, in: $%02x ($%02x ^ $%02x)",
         READ_PORT_UCHAR(OUT_PORT), ch, ch ^ Pdx->IecOutEor, Pdx->IecOutEor));
-
-#define READ(_x) ((((READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor)) & (_x)) ? 1 : 0)
-
-#define SHOW(_x, _y) 
-    // DBG_CABLE((DBG_PREFIX "CBMIEC_GET(" #_x ") = $%02x, READ(" #_y ") = $%02x", CBMIEC_GET(_x), READ(_y) ));
-
-#define SHOW1() \
-    DBG_CABLE((DBG_PREFIX "############ ATN OUT = %u, CLOCK OUT = %u, DATA OUT = %u, RESET OUT = %u", \
-        READ(PP_ATN_OUT), READ(PP_CLK_OUT), READ(PP_DATA_OUT), READ(PP_RESET_OUT) )); \
-\
-    DBG_CABLE((DBG_PREFIX "############ ATN IN  = %u, CLOCK IN  = %u, DATA IN  = %u, RESET IN  = %u", \
-        CBMIEC_GET(PP_ATN_IN), CBMIEC_GET(PP_CLK_IN), CBMIEC_GET(PP_DATA_IN), CBMIEC_GET(PP_RESET_IN) ));
 
     do {
         /* 
@@ -488,6 +502,12 @@ cbmiec_setcablestate(PDEVICE_EXTENSION Pdx, CABLESTATE State)
 }
 
 
+/*! \brief @@@@@ \todo document
+
+ \param Pdx
+
+ \return
+*/
 BOOLEAN
 cbmiec_is_cable_state_wrong(PDEVICE_EXTENSION Pdx)
 {

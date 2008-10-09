@@ -11,13 +11,17 @@
 /*! **************************************************************
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.10 2007-07-25 16:37:52 strik Exp $ \n
+** \version $Id: cbm_driver.h,v 1.11 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **
 ****************************************************************/
 
-typedef struct _DEVICE_EXTENSION DEVICE_EXTENSION, *PDEVICE_EXTENSION;
+/*! \brief @@@@@ \todo document */
+typedef struct DEVICE_EXTENSION_s DEVICE_EXTENSION;
+
+/*! \brief @@@@@ \todo document */
+typedef struct DEVICE_EXTENSION_s * PDEVICE_EXTENSION;
 
 #include "arch_cbm_driver.h"
 
@@ -85,11 +89,12 @@ typedef struct _DEVICE_EXTENSION DEVICE_EXTENSION, *PDEVICE_EXTENSION;
 /*! Performance evaluation: Writing bit no. _x_ */
 #define PERF_EVENT_WRITE_BIT_NO(_x_)    PERF_EVENT(0x212, _x_)
 
+/*! \brief @@@@@ \todo document */
 typedef enum cablestate_e CABLESTATE;
 
 /*! The device extension for the device */
 typedef
-struct _DEVICE_EXTENSION {
+struct DEVICE_EXTENSION_s {
 
     /*! the architecture specific stuff */
     ARCH_DEVICE_EXTENSION;

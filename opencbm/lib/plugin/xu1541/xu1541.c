@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.3 2007-08-26 15:54:09 strik Exp $ \n
+** \version $Id: xu1541.c,v 1.4 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -26,11 +26,20 @@
 #include "xu1541.h"
 #include "arch.h"
 
-static int debug_level = -10000;
-static usb_dev_handle *xu1541_handle = NULL;
+static int debug_level = -10000; /*!< \internal \brief the debugging level for debugging output */
+static usb_dev_handle *xu1541_handle = NULL; /*!< \internal \brief handle to the xu1541 device */
 
+/*! \brief timeout value, used mainly after errors \todo What is the exact purpose of this? */
 #define TIMEOUT_DELAY  25000   // 25ms
 
+/*! \internal \brief Output debugging information for the xu1541
+
+ \param level
+   The output level; output will only be produced if this level is less or equal the debugging level
+
+ \param msg
+   The printf() style message to be output
+*/
 static void xu1541_dbg(int level, char *msg, ...) 
 {
     va_list argp;
@@ -53,6 +62,20 @@ static void xu1541_dbg(int level, char *msg, ...)
     }
 }
 
+/*! \internal \brief @@@@@ \todo document
+
+ \param dev
+
+ \param index
+
+ \param langid
+
+ \param buf
+
+ \param buflen
+
+ \return
+*/
 static int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid, 
 			      char *buf, int buflen)
 {
@@ -84,6 +107,23 @@ static int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
     return i-1;
 }
 
+/*! \brief initialise the xu1541 device
+
+  This function tries to find and identify the xu1541 device.
+
+  \return
+    0 on success, -1 on error.
+
+  \remark
+    On success, xu1541_handle contains a valid handle to the xu1541 device.
+    In this case, the device configuration has been set and the interface
+    been claimed.
+
+  \bug
+    On some error types, this function might return error, but might
+    has opened the xu1541_handle. In this case, the handle is leaked, as
+    xu1541_close() is not to be called.
+*/
 /* try to find a xu1541 cable */
 int xu1541_init(void) {
   struct usb_bus      *bus;
@@ -191,6 +231,11 @@ int xu1541_init(void) {
   return 0;
 }
 
+/*! \brief close the xu1541 device
+
+ \remark
+    This function releases the interface and closes the xu1541 handle.
+*/
 void xu1541_close(void)
 {
     xu1541_dbg(0, "Closing USB link");
@@ -201,6 +246,23 @@ void xu1541_close(void)
     usb_close(xu1541_handle);
 }
 
+/*! \brief perform an ioctl on the xu1541
+
+ \param cmd
+   The IOCTL number
+
+ \param addr
+   The (IEC) device to use
+
+ \param secaddr
+   The (IEC) secondary address to use
+
+ \return
+   Depends upon the IOCTL.
+
+ \todo
+   Rework for cleaner structure. Currently, this is a mess!
+*/
 int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
   int nBytes;
@@ -299,6 +361,17 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
   return ret[0];
 }
 
+/*! \brief write data to the xu1541 device
+
+ \param data
+    Pointer to buffer which contains the data to be written to the xu1541
+
+ \param len
+    The length of the data buffer to be written to the xu1541
+
+ \return
+    The number of bytes written
+*/
 int xu1541_write(const __u_char *data, size_t len) 
 {
     int bytesWritten = 0;
@@ -370,6 +443,17 @@ int xu1541_write(const __u_char *data, size_t len)
     return bytesWritten;
 }
 
+/*! \brief read data from the xu1541 device
+
+ \param data
+    Pointer to a buffer which will contain the data read from the xu1541
+
+ \param len
+    The number of bytes to read from the xu1541
+
+ \return
+    The number of bytes read
+*/
 int xu1541_read(__u_char *data, size_t len) 
 {
     int bytesRead = 0;
@@ -475,9 +559,28 @@ int xu1541_read(__u_char *data, size_t len)
     return bytesRead;
 }
 
-/* current all special mode are able to work asynchronously. this means */
-/* that we can just handle them in the device at the same time as the USB */
-/* transfers. */
+/*! \brief "special" write data to the xu1541 device
+
+ \todo
+    What is so special?
+
+ \param mode
+    \todo ???
+
+ \param data
+    Pointer to buffer which contains the data to be written to the xu1541
+
+ \param size
+    The length of the data buffer to be written to the xu1541
+
+ \return
+    The number of bytes written
+
+ \remark
+     current all special mode are able to work asynchronously. this means
+     that we can just handle them in the device at the same time as the USB
+     transfers.
+*/
 int xu1541_special_write(int mode, const __u_char *data, size_t size) 
 {
     int bytesWritten = 0;
@@ -509,6 +612,23 @@ int xu1541_special_write(int mode, const __u_char *data, size_t size)
     return bytesWritten;
 }
 
+/*! \brief "special" read data from the xu1541 device
+
+ \todo
+    What is so special?
+
+ \param mode
+    \todo ???
+
+ \param data
+    Pointer to a buffer which will contain the data read from the xu1541
+
+ \param size
+    The number of bytes to read from the xu1541
+
+ \return
+    The number of bytes read
+*/
 int xu1541_special_read(int mode, __u_char *data, size_t size) 
 {
     int bytesRead = 0;

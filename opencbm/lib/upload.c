@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.7 2008-09-25 18:31:23 strik Exp $ \n
+** \version $Id: upload.c,v 1.8 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -209,7 +209,7 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
    The address in the drive's memory where the program is to be
    stored.
    
- \param StoreBuffer
+ \param Buffer
    Pointer to a byte buffer where the data from the drive's
    memory is stored.
 

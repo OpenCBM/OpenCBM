@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.28 2008-09-01 18:41:50 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.29 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -337,6 +337,14 @@ processNumber(const PCHAR Argument, PCHAR *NextChar, PBOOL ParameterGiven, PULON
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param Parameter
+
+ \param ExecutableName
+
+ \return
+*/
 static BOOL
 enforceOnlyOneExecutingCommand(cbm_install_parameter_t *Parameter, const char *ExecutableName)
 {
@@ -354,9 +362,6 @@ enforceOnlyOneExecutingCommand(cbm_install_parameter_t *Parameter, const char *E
 
     FUNC_LEAVE_BOOL(error);
 }
-
-/* ------------------------------------------------------------------------------------- */
-#include "opencbm-plugin.h"
 
 /* ------------------------------------------------------------------------------------- */
 
@@ -506,7 +511,7 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
 
 
     while (! error && Argv[optind++]) {
-        error = error || ProcessPluginCommandline(Argv[optind - 1], Parameter, Argc, Argv);
+        error = error || ProcessPluginCommandlineAndAddIt(Parameter, Argv[optind - 1], Argc, Argv);
     }
 
     if (Parameter->PluginList == NULL && ! error) {
@@ -521,7 +526,7 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
         }
     }
 
-/*! \TODO is this needed anymore?
+/*! \todo is this needed anymore?
     if (Parameter->Install && Parameter->PluginList == NULL) {
         error = TRUE;
     }
@@ -591,6 +596,10 @@ CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *File
     FUNC_LEAVE_INT(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \return
+*/
 static char *
 GetWorkingDirectory(void)
 {
@@ -647,6 +656,10 @@ GetWorkingDirectory(void)
     FUNC_LEAVE_STRING(tmpPathString);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \return
+*/
 static char *
 GetWindowsSystemDirectory(void)
 {
@@ -707,6 +720,10 @@ GetWindowsSystemDirectory(void)
 #endif
 }
 
+/*! \brief @@@@@ \todo document
+
+ \return
+*/
 static char *
 GetWindowsDriverDirectory(void)
 {
@@ -750,6 +767,7 @@ UpdateOpenCBM(cbm_install_parameter_t *Parameter)
     FUNC_LEAVE_INT(success);
 }
 
+/*! \brief @@@@@ \todo document */
 static opencbm_plugin_install_neededfiles_t NeededFilesGeneric[] = 
 {
     { SYSTEM_DIR, "opencbm.dll" },
@@ -759,6 +777,20 @@ static opencbm_plugin_install_neededfiles_t NeededFilesGeneric[] =
     { LIST_END,   "" }
 };
 
+/*! \brief @@@@@ \todo document
+
+ \param NeededFile
+
+ \param PluginName
+
+ \param WorkingDirectory
+
+ \param SystemDirectory
+
+ \param DriverDirectory
+
+ \return
+*/
 static char *
 GetPathForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, const char * PluginName, const char * WorkingDirectory, const char * SystemDirectory, const char * DriverDirectory)
 {
@@ -814,6 +846,20 @@ GetPathForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, const ch
     FUNC_LEAVE_STRING(filepath);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param NeededFile
+
+ \param PluginName
+
+ \param WorkingDirectory
+
+ \param SystemDirectory
+
+ \param DriverDirectory
+
+ \return
+*/
 static char *
 GetFilenameForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, const char * PluginName, const char * WorkingDirectory, const char * SystemDirectory, const char * DriverDirectory)
 {
@@ -838,6 +884,12 @@ GetFilenameForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, cons
     FUNC_LEAVE_STRING(filename);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param NeededFiles
+
+ \return
+*/
 static BOOL
 IsPresentOpenCBM(opencbm_plugin_install_neededfiles_t NeededFiles[])
 {
@@ -903,6 +955,10 @@ IsPresentOpenCBM(opencbm_plugin_install_neededfiles_t NeededFiles[])
     FUNC_LEAVE_BOOL(isPresent);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \return
+*/
 static BOOL
 IsPresentGenericOpenCBM(void)
 {
@@ -910,8 +966,26 @@ IsPresentGenericOpenCBM(void)
     FUNC_LEAVE_BOOL(IsPresentOpenCBM(NeededFilesGeneric));
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param Path
+
+ \param File
+
+ \return
+*/
 typedef BOOL HandleOpenCbmFilesCallback_t(const char * Path, const char * File);
 
+/*! \brief @@@@@ \todo document
+
+ \param NeededFiles
+
+ \param PathToInstalledPluginFile
+
+ \param Callback
+
+ \return
+*/
 static BOOL
 HandleOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const char ** PathToInstalledPluginFile, HandleOpenCbmFilesCallback_t * Callback)
 {
@@ -969,8 +1043,17 @@ HandleOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const cha
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document */
 static HandleOpenCbmFilesCallback_t CopyOpenCbmFilesCallback;
 
+/*! \brief @@@@@ \todo document
+
+ \param Path
+
+ \param File
+
+ \return
+*/
 static BOOL
 CopyOpenCbmFilesCallback(const char * Path, const char * File)
 {
@@ -979,6 +1062,14 @@ CopyOpenCbmFilesCallback(const char * Path, const char * File)
     FUNC_LEAVE_BOOL(CopyFileToNewPath(".\\", Path, File));
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param NeededFiles
+
+ \param PathToInstalledPluginFile
+
+ \return
+*/
 static BOOL
 CopyOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const char ** PathToInstalledPluginFile)
 {
@@ -987,6 +1078,12 @@ CopyOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const char 
     FUNC_LEAVE_BOOL(HandleOpenCbmFiles(NeededFiles, PathToInstalledPluginFile, CopyOpenCbmFilesCallback));
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param AtSystemDirectory
+
+ \return
+*/
 static HMODULE
 LoadOpenCBMDll(BOOL AtSystemDirectory)
 {
@@ -1040,6 +1137,10 @@ LoadOpenCBMDll(BOOL AtSystemDirectory)
     FUNC_LEAVE_HMODULE(dll);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \return
+*/
 static HMODULE
 LoadDestinationOpenCBMDll(void)
 {
@@ -1048,6 +1149,10 @@ LoadDestinationOpenCBMDll(void)
     FUNC_LEAVE_HMODULE(LoadOpenCBMDll(TRUE));
 }
 
+/*! \brief @@@@@ \todo document
+
+ \return
+*/
 HMODULE
 LoadLocalOpenCBMDll(void)
 {
@@ -1056,6 +1161,14 @@ LoadLocalOpenCBMDll(void)
     FUNC_LEAVE_HMODULE(LoadOpenCBMDll(FALSE));
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param OpenCbmDllHandle
+
+ \param DefaultPluginname
+
+ \return
+*/
 static BOOL
 SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
 {
@@ -1086,6 +1199,14 @@ SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param OpenCbmDllHandle
+
+ \param DefaultPluginname
+
+ \return
+*/
 static BOOL
 CopyGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
 {
@@ -1109,6 +1230,14 @@ CopyGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param PluginName
+
+ \param PathToPluginDllFile
+
+ \return
+*/
 static HMODULE
 LoadPluginDll(const char * PluginName, const char * PathToPluginDllFile)
 {
@@ -1137,6 +1266,10 @@ LoadPluginDll(const char * PluginName, const char * PathToPluginDllFile)
     FUNC_LEAVE_HMODULE(pluginDll);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param PluginDll
+*/
 static void
 FreePluginDll(HMODULE PluginDll)
 {
@@ -1147,6 +1280,14 @@ FreePluginDll(HMODULE PluginDll)
     FUNC_LEAVE();
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param PluginDll
+
+ \param FunctionName
+
+ \return
+*/
 static void *
 GetPluginFunctionAddress(HMODULE PluginDll, const char * FunctionName)
 {
@@ -1159,8 +1300,26 @@ GetPluginFunctionAddress(HMODULE PluginDll, const char * FunctionName)
     FUNC_LEAVE_PTR(pointer, void*);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param PluginName
+
+ \param PathToPluginDllFile
+
+ \param FunctionName
+
+ \param Callback
+
+ \param Context
+
+ \return
+*/
 static BOOL
-PluginExecuteFunction(const char * PluginName, const char * PathToPluginDllFile, const char * FunctionName, BOOL (*Callback)(const char * PluginName, void * FunctionPointer, void * Context), void * Context)
+PluginExecuteFunction(const char * PluginName,
+                      const char * PathToPluginDllFile,
+                      const char * FunctionName,
+                      BOOL (*Callback)(const char * PluginName, void * FunctionPointer, void * Context),
+                      void * Context)
 {
     BOOL error = TRUE;
     HMODULE pluginDll = NULL;
@@ -1189,6 +1348,16 @@ PluginExecuteFunction(const char * PluginName, const char * PathToPluginDllFile,
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param PluginName
+
+ \param FunctionPointer
+
+ \param Context
+
+ \return
+*/
 static BOOL
 perform_cbm_plugin_install_do_install(const char * PluginName, void * FunctionPointer, void * Context)
 {
@@ -1216,11 +1385,20 @@ perform_cbm_plugin_install_do_install(const char * PluginName, void * FunctionPo
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document */
 typedef
 struct InstallPluginCallback_context_s {
-    HMODULE OpenCbmDllHandle;
+    HMODULE OpenCbmDllHandle; /*!< @@@@@ \todo document */
 } InstallPluginCallback_context_t;
 
+/*! \brief @@@@@ \todo document
+
+ \param PluginInstallParameter
+
+ \param Context
+
+ \return
+*/
 static BOOL
 InstallPluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, void * Context)
 {
@@ -1379,6 +1557,12 @@ RemoveOpenCbmFilesCallback(const char * Path, const char * Filename)
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param NeededFiles
+
+ \return
+*/
 static BOOL
 RemoveOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[])
 {
@@ -1387,6 +1571,16 @@ RemoveOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[])
     FUNC_LEAVE_BOOL(HandleOpenCbmFiles(NeededFiles, NULL, RemoveOpenCbmFilesCallback));
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param PluginName
+
+ \param FunctionPointer
+
+ \param Context
+
+ \return
+*/
 static BOOL
 perform_cbm_plugin_install_do_uninstall(const char * PluginName, void * FunctionPointer, void * Context)
 {
@@ -1414,6 +1608,14 @@ perform_cbm_plugin_install_do_uninstall(const char * PluginName, void * Function
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief @@@@@ \todo document
+
+ \param PluginInstallParameter
+
+ \param Context
+
+ \return
+*/
 static BOOL
 RemovePluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, void * Context)
 {
@@ -1445,6 +1647,12 @@ RemovePluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, vo
 }
 
 
+/*! \brief @@@@@ \todo document
+
+ \param OpenCbmDllHandle
+
+ \return
+*/
 static BOOL
 RemoveGenericOpenCBM(HMODULE OpenCbmDllHandle)
 {
@@ -1483,7 +1691,7 @@ RemoveOpenCBM(cbm_install_parameter_t *Parameter)
 
     FUNC_ENTER();
 
-    /*! \TODO:
+    /*! \todo:
       1. Partial remove (only one or more plugins)
       2. if the default plugin is removed, make another one the default
       3. remove the plugin from the configuration file

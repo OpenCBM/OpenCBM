@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.20 2008-06-16 19:24:22 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.21 2008-10-09 17:14:26 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -211,7 +211,7 @@ struct CBMT_I_TESTIRQ
 typedef
 struct CBMT_IEC_DBG_VALUE
 {
-    UCHAR Value;
+    UCHAR Value;   /*!< some value. This is used in different ways */
 } CBMT_IEC_DBG_VALUE;
 
 /*! Input buffer for TALK */

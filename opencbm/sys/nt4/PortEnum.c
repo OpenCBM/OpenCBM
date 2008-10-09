@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/PortEnum.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortEnum.c,v 1.3 2006-02-24 12:21:44 strik Exp $ \n
+** \version $Id: PortEnum.c,v 1.4 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **
@@ -21,7 +21,7 @@
 #include <ntddk.h>
 
 #define PENUMERATE_DEFINED //!< Make sure the PENUMERATE is correctly defined
-typedef struct ENUMERATE_NT4 *PENUMERATE;
+typedef struct ENUMERATE_NT4 *PENUMERATE; //!< pointer to a ENUMERATE_WDM or ENUMERATE_NT4 struct
 #include "cbm_driver.h"
 
 #undef ExFreePool

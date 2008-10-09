@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.12 2007-05-20 10:20:46 strik Exp $ \n
+** \version $Id: openclose.c,v 1.13 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **
@@ -133,7 +133,7 @@ cbm_execute_createopen(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
         // do not lock it now.
         ntStatus = STATUS_SUCCESS;
 
-        // \TODO: try workaround: As the machine might have been 
+        // \todo: try workaround: As the machine might have been 
         // suspended or hibernated without knowing it, test if
         // all lines are exactly as expected. If not, lock und unlock
         // the parallel port again

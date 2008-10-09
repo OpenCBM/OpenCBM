@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file libmisc/configuration.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration.c,v 1.2 2008-09-01 18:39:00 strik Exp $ \n
+** \version $Id: configuration.c,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Process configuration file
@@ -77,13 +77,14 @@ struct opencbm_configuration_section_s {
 /*! this struct holds a complete configuration file
  * The handle to the configuration file is a pointer to this struct, actually.
  */
+typedef
 struct opencbm_configuration_s {
     opencbm_configuration_section_t * Sections;         /*!< pointer to a linked list of sections contained in the configuration file */
     const char *                      FileName;         /*!< the file name of the configuration file */
     const char *                      FileNameForWrite; /*!< the special file name used when the configuration file is written */
 
     unsigned int Changed;                               /*!< marker if this file has been changed after it has been read. 0 if no changed occurred, 1 otherwise. */
-};
+} opencbm_configuration_t;
 
 /*! \brief \internal allocate memory for a new configuration entry
 
@@ -1222,6 +1223,12 @@ opencbm_configuration_enum_sections(opencbm_configuration_handle Handle,
  
  \param Section
    A string which holds the name of the section from where to get the data.
+
+ \param Callback
+   The callback function to call with the section name
+
+ \param Data
+   Some data which is forwarded to the Callback function.
 
  \return
    Returns 0 if the data entry was found. If ReturnBufferLength != 0, the

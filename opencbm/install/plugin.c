@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file plugin.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: plugin.c,v 1.2 2008-09-01 18:41:50 strik Exp $ \n
+** \version $Id: plugin.c,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver; handling of plugins
 **
@@ -49,34 +49,90 @@
 
 #include "opencbm-plugin.h"
 
+/*! \brief name prefix for the plugin executable
+
+  \remark
+    The "main" executable for the plugin has to be named as follows:
+
+    If the plugin if named "AAA", the plugin file must be named
+
+    PLUGIN_PREFIX "AAA" PLUGIN_SUFFIX
+*/
 #define PLUGIN_PREFIX "opencbm-"
+
+/*! \brief name suffix for the plugin executable
+
+  \remark
+    The "main" executable for the plugin has to be named as follows:
+
+    If the plugin if named "AAA", the plugin file must be named
+
+    PLUGIN_PREFIX "AAA" PLUGIN_SUFFIX
+*/
 #define PLUGIN_SUFFIX ".dll"
 
+/*! \brief \internal Get the file name of a plugin
+
+ This function returns the file name for a plugin
+ with the given name.
+
+ \param PluginName
+   The name of the plugin.
+
+ \return
+   Pointer to a string containing the name of the plugin main executable;
+   NULL if not enough memory to hold the name.
+
+   This string is allocated from the heap with malloc().
+
+ \remark
+   The plugin functions are not multi-thread safe!
+
+ \remark
+   This implementation is not very efficient (strcat()), but we do
+   not care here.
+*/
 static char *
-malloc_plugin_file_name(const char *plugin_name)
+malloc_plugin_file_name(const char *PluginName)
 {
     char * filename = NULL;
 
     FUNC_ENTER();
 
     do {
-        /*
-         * remark: sizeof(PLUGIN_PREFIX) and sizeof(PLUGIN_SUFFIX) already contain the terminating null;
-         * thus, there is no need to add 1 to this. In fact, we are already one char to long!
-         */
-        filename = malloc(sizeof(PLUGIN_PREFIX) + sizeof(PLUGIN_SUFFIX) + strlen(plugin_name));
+        filename = cbmlibmisc_stralloc( sizeof(PLUGIN_PREFIX) - 1
+                                        + strlen(PluginName) 
+                                        + sizeof(PLUGIN_SUFFIX) - 1 );
 
         if (filename == NULL)
             break;
 
         strcpy(filename, PLUGIN_PREFIX);
-        strcat(filename, plugin_name);
+        strcat(filename, PluginName);
         strcat(filename, PLUGIN_SUFFIX);
+
     } while (0);
 
     FUNC_LEAVE_STRING(filename);
 }
 
+/*! \brief \internal Check if a plugin is already in the list of plugins
+
+ This function checks if the given plugin is already in the list
+ of plugins to be processed.
+
+ \param PluginName
+   The name of the plugin to check.
+
+ \param InstallParameter
+   The install parameters which contain the plugin list.
+
+ \return
+   TRUE if the plugin already exists, else FALSE:
+
+ \remark
+   The plugin functions are not multi-thread safe!
+*/
 static BOOL
 PluginAlreadyInList(const char * const PluginName, cbm_install_parameter_t * InstallParameter)
 {
@@ -98,8 +154,28 @@ PluginAlreadyInList(const char * const PluginName, cbm_install_parameter_t * Ins
     FUNC_LEAVE_BOOL(exists);
 }
 
+/*! \brief \internal Add a plugin to the list of plugins
+
+ This function adds data of a plugin to the list of plugins to
+ be processed.
+
+ \param InstallParameter
+   The install parameters which contain the plugin list.
+
+ \param Plugin
+   The plugin to add. This pointer must point to dynamically
+   allocated memory (via malloc()). Once added, the caller
+   looses ownership if this memory area.
+
+ \remark
+   The plugin functions are not multi-thread safe!
+
+ \remark
+   The memory pointer to by Plugin can be freed
+   for all plugins with a call to PluginListFree().
+*/
 static void
-PluginAdd(cbm_install_parameter_t * InstallParameter, cbm_install_parameter_plugin_t * Plugin)
+PluginAddToList(cbm_install_parameter_t * InstallParameter, cbm_install_parameter_plugin_t * Plugin)
 {
     cbm_install_parameter_plugin_t * previousPlugin;
 
@@ -123,6 +199,17 @@ PluginAdd(cbm_install_parameter_t * InstallParameter, cbm_install_parameter_plug
     FUNC_LEAVE();
 }
 
+/*! \brief Free all the memory occupied by plugin management
+
+ This function frees all the memory that was needed in order
+ to remember plugins and their data.
+
+ \param InstallParameter
+   The install parameters from which to free the plugin list.
+
+ \remark
+   The plugin functions are not multi-thread safe!
+*/
 void
 PluginListFree(cbm_install_parameter_t * InstallParameter)
 {
@@ -149,44 +236,32 @@ PluginListFree(cbm_install_parameter_t * InstallParameter)
     FUNC_LEAVE();
 }
 
-static BOOL
-plugin_exists(const char * plugin_name)
-{
-    BOOL exists = FALSE;
-    char * filename = NULL;;
+/*! \brief Callback for getopt_long()
 
-    FUNC_ENTER();
+ This function is used as a callback from the plugin
+ to process the command-line parameters.
+ It resembles the getopt_long() POSIX call.
 
-    /* try to open opencbm-XXX.dll, with XXX being the plugin_name */
+ \param Argc
+   see getopt_long()
 
-    do {
-        FILE * file;
+ \param Argv
+   see getopt_long()
 
-        filename = malloc_plugin_file_name(plugin_name);
+ \param Optstring
+   see getopt_long()
 
-        if (filename == NULL)
-            break;
+ \param Longopts
+   see getopt_long()
 
-        file = fopen(filename, "r");
-
-        if (file) {
-            fclose(file);
-            exists = TRUE;
-        }
-        else {
-            fprintf(stderr, "Plugin '%s' does not exist, aborting...\n", plugin_name);
-        }
-
-    } while (0);
-
-    if (filename)
-        free(filename);
-
-    FUNC_LEAVE_BOOL(exists);
-}
-
+ \return
+   see getopt_long()
+*/
 static int CBMAPIDECL
-getopt_long_callback(int Argc, char * const Argv[], const char *Optstring, const struct option *Longopts)
+getopt_long_callback(int Argc,
+                     char * const Argv[],
+                     const char *Optstring,
+                     const struct option *Longopts)
 {
     int retValue;
 
@@ -260,7 +335,7 @@ GetPluginData(const char * const PluginName, cbm_install_parameter_t * InstallPa
         cbm_plugin_install_process_commandline = (void *) GetProcAddress(library, "cbm_plugin_install_process_commandline");
         cbm_plugin_install_get_needed_files = (void *) GetProcAddress(library, "cbm_plugin_install_get_needed_files");
 
-        if (0 == (cbm_plugin_install_process_commandline && cbm_plugin_install_get_needed_files)) 
+        if (0 == (cbm_plugin_install_process_commandline && cbm_plugin_install_get_needed_files))
             break;
 
         option_memory_size = cbm_plugin_install_process_commandline(&commandLineData);
@@ -344,13 +419,36 @@ GetPluginData(const char * const PluginName, cbm_install_parameter_t * InstallPa
     FUNC_LEAVE_PTR(returnValue, cbm_install_parameter_plugin_t *);
 }
 
-BOOL
-ProcessPluginCommandline(const char * const PluginName, cbm_install_parameter_t * InstallParameter, int Argc, char * const Argv[])
-{
-    HINSTANCE library = NULL;
-    char *plugin_file_name = NULL;
-    void *option_memory = NULL;
+/*! \brief Process the command-line parameters for a plugin and add that plugin to the plugin list.
 
+ This function lets the specified plugin process its own
+ command-line parameters. Afterwards, an entry for that
+ plugin with the plugin-specific data is added to the
+ plugin list.
+
+ \param InstallParameter
+   The install parameters which contain the plugin list.
+
+ \param PluginName
+   The name of the plugin.
+
+ \param Argc
+   The (remaining) argc value, as if given to
+   int main(int, char **);
+
+ \param Argv
+   The (remaining) argv value, as if given to
+   int main(int, char **);
+
+ \return
+    TRUE on error, else FALSE.
+*/
+BOOL
+ProcessPluginCommandlineAndAddIt(cbm_install_parameter_t * InstallParameter,
+                                 const char * const PluginName,
+                                 int Argc,
+                                 char * const Argv[])
+{
     cbm_install_parameter_plugin_t *pluginParameter;
 
     BOOL error = TRUE;
@@ -361,13 +459,29 @@ ProcessPluginCommandline(const char * const PluginName, cbm_install_parameter_t 
 
     error = pluginParameter == NULL ? TRUE : FALSE;
 
-    if ( ! error) {
-        PluginAdd(InstallParameter, pluginParameter);
+    if ( ! error ) {
+        PluginAddToList(InstallParameter, pluginParameter);
     }
 
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief Get all the plugins
+
+ This function searches for all plugins available 
+ and adds an entry for that plugin to the plugin list.
+
+ \param InstallParameter
+   The install parameters which contain the plugin list.
+
+ \return
+    TRUE on error, else FALSE.
+
+ \remark
+    An available plugin is a plugin in the current
+    directory. A plugin is determined by all files
+    that match the pattern PLUGIN_PREFIX "*" PLUGIN_SUFFIX.
+*/
 BOOL
 get_all_plugins(cbm_install_parameter_t * InstallParameter)
 {
@@ -410,12 +524,10 @@ get_all_plugins(cbm_install_parameter_t * InstallParameter)
                         strcpy(pluginName, finddata.cFileName + sizeof(PLUGIN_PREFIX) - 1);
                         pluginName[strlen(pluginName) - (sizeof(PLUGIN_SUFFIX) - 1)] = '\0';
 
-//                      fprintf(stderr, "Found plugin '%s'.\n", pluginName);
-
                         pluginParameter = GetPluginData(pluginName, InstallParameter, 1, NULL);
 
                         if (pluginParameter) {
-                            PluginAdd(InstallParameter, pluginParameter);
+                            PluginAddToList(InstallParameter, pluginParameter);
                         }
                         else {
                             error = TRUE;
@@ -435,29 +547,51 @@ get_all_plugins(cbm_install_parameter_t * InstallParameter)
         } while (0);
     } while (0);
 
+    cbmlibmisc_strfree(findfilename);
+
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief Callback for get_all_installed_plugins()
+
+ This function adds the specified plugin to the
+ plugins list.
+
+ \param InstallParameter
+   The install parameters which contain the plugin list.
+
+ \param PluginName
+   The name of the plugin to add.
+
+ \return
+    TRUE on error, else FALSE.
+
+ \remark
+    This function is called for every installed plugin
+    from the call to cbm_plugin_get_all_plugin_names() 
+    in get_all_installed_plugins().
+*/
 static BOOL CBMAPIDECL
 get_all_installed_plugins_callback(cbm_install_parameter_t * InstallParameter, const char * PluginName)
 {
-    cbm_install_parameter_plugin_t *pluginParameter;
-
-    BOOL error = TRUE;
-
-    FUNC_ENTER();
-
-    pluginParameter = GetPluginData(PluginName, InstallParameter, 1, NULL);
-
-    error = pluginParameter == NULL ? TRUE : FALSE;
-
-    if ( ! error ) {
-        PluginAdd(InstallParameter, pluginParameter);
-    }
-
-    FUNC_LEAVE_BOOL(error);
+    FUNC_LEAVE_BOOL(ProcessPluginCommandlineAndAddIt(InstallParameter, PluginName, 1, NULL));
 }
 
+/*! \brief Get all the installed plugins
+
+ This function searches all installed plugins 
+ and adds an entry for that plugin to the plugin list.
+
+ \param InstallParameter
+   The install parameters which contain the plugin list.
+
+ \return
+    TRUE on error, else FALSE.
+
+ \remark
+    An installed plugin is a plugin which is mentioned
+    in the configuration file.
+*/
 BOOL
 get_all_installed_plugins(cbm_install_parameter_t * InstallParameter)
 {
@@ -505,6 +639,27 @@ get_all_installed_plugins(cbm_install_parameter_t * InstallParameter)
     FUNC_LEAVE_BOOL(error);
 }
 
+/*! \brief Execute a callback function for all plugins in the plugin list
+
+ \param InstallParameter
+   The install parameters which contain the plugin list.
+
+ \param Callback
+   Callback function to execute for each plugin.
+
+ \param Context
+   Context data to give to the Callback function.
+   This data is Callback specific; it is not interpreted in any way
+   by this function here.
+
+ \return
+   TRUE if an error occurred (that is, a callback returned TRUE);
+   else FALSE:
+
+ \remark
+   If a callback function returns TRUE, this indicates an error.
+   In this case, all subsequent plugins will not be processed.
+*/
 BOOL PluginForAll(cbm_install_parameter_t * InstallParameter, PluginForAll_Callback_t * Callback, void * Context)
 {
     cbm_install_parameter_plugin_t * plugin = NULL;

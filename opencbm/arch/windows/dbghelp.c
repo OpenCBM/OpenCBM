@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file arch/windows/dbghelp.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dbghelp.c,v 1.3 2006-03-12 16:35:31 strik Exp $ \n
+** \version $Id: dbghelp.c,v 1.4 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Some debugging help functions
 **
@@ -41,6 +41,26 @@
 
 #if DBG
 
+/*! \brief output a memory dump to the debugging system
+
+ Generates a byte dump and outputs it to the debugging system
+
+ \param Where
+   Some text to output in front of the memory dump.
+   This text can be used to identify where this dump
+   occurred.
+
+ \param InputBuffer
+   Pointer to a buffer which contains the data
+   bytes to be dumped.
+
+ \param Count
+   The size of the buffer to be dumped.
+
+ \remark
+   as dumping memory is used regularly when debugging,
+   we give a debug helper function for this
+*/
 void 
 dbg_memdump(const char *Where, const unsigned char *InputBuffer, const unsigned int Count)
 {

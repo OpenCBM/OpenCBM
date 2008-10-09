@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/iec.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: iec.c,v 1.4 2008-06-16 19:24:27 strik Exp $ \n
+** \version $Id: iec.c,v 1.5 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -42,6 +42,7 @@
 
 #include <stdlib.h>
 
+//! mark: We are building the DLL */
 #define DLL
 #include "i_opencbm.h"
 

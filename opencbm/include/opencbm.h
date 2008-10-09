@@ -12,7 +12,7 @@
 /*! **************************************************************
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.24 2008-06-16 19:24:22 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.25 2008-10-09 17:14:26 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \authors With additions from Wolfgang Moser \n
@@ -50,7 +50,7 @@ extern "C" {
 #define CBMAPIDECL __cdecl /*!< On Windows, we need c-type function declarations */
 # define __u_char unsigned char /*!< __u_char as unsigned char */
 # define CBM_FILE HANDLE /*!< The "file descriptor" for an opened driver */
-# define CBM_FILE_INVALID INVALID_HANDLE_VALUE
+# define CBM_FILE_INVALID INVALID_HANDLE_VALUE /*!< An invalid "file descriptor" (CBM_FILE) */
 
 #elif defined(__MSDOS__)
 
@@ -78,7 +78,7 @@ extern void vdd_usleep(CBM_FILE f, unsigned int howlong);
 # define CBMAPIDECL /*!< CBMAPIDECL is a dummy on Linux */
 # define WINAPI /*!< WINAPI is a dummy on Linux */
 # define CBM_FILE int /*!< The "file descriptor" for an opened driver */
-# define CBM_FILE_INVALID ((CBM_FILE)-1)
+# define CBM_FILE_INVALID ((CBM_FILE)-1) /*!< An invalid "file descriptor" (CBM_FILE) */
 
 /* On Macs we need to define the __u_char */
 #ifdef __APPLE__

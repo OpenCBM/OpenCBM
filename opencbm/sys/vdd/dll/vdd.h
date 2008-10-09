@@ -10,7 +10,7 @@
 /*! **************************************************************
 ** \file sys/vdd/dll/vdd.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.h,v 1.7 2007-07-25 16:37:52 strik Exp $ \n
+** \version $Id: vdd.h,v 1.8 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Function prototypes for the VDD
 **
@@ -21,39 +21,40 @@
 
 #include <opencbm.h>
 
+/*! the different function codes recognised by the VDD */
 typedef
 enum FUNCTIONCODE
 {
-    FC_DRIVER_OPEN,
-    FC_DRIVER_CLOSE,
-    FC_LISTEN,
-    FC_TALK,
-    FC_OPEN,
-    FC_CLOSE,
-    FC_RAW_READ,
-    FC_RAW_WRITE,
-    FC_UNLISTEN,
-    FC_UNTALK,
-    FC_GET_EOI,
-    FC_CLEAR_EOI,
-    FC_RESET,
-    FC_PP_READ,
-    FC_PP_WRITE,
-    FC_IEC_POLL,
-    FC_IEC_GET,
-    FC_IEC_SET,
-    FC_IEC_RELEASE,
-    FC_IEC_WAIT,
-    FC_UPLOAD,
-    FC_DEVICE_STATUS,
-    FC_EXEC_COMMAND,
-    FC_IDENTIFY,
-    FC_GET_DRIVER_NAME,
-    FC_VDD_INSTALL_IOHOOK,
-    FC_VDD_UNINSTALL_IOHOOK,
-    FC_VDD_USLEEP,
-    FC_IEC_SETRELEASE,
-    FC_IDENTIFY_XP1541
+    FC_DRIVER_OPEN,          /*!< call vdd_driver_open() */
+    FC_DRIVER_CLOSE,         /*!< call vdd_driver_close() */
+    FC_LISTEN,               /*!< call vdd_listen() */
+    FC_TALK,                 /*!< call vdd_talk() */
+    FC_OPEN,                 /*!< call vdd_open() */
+    FC_CLOSE,                /*!< call vdd_close() */
+    FC_RAW_READ,             /*!< call vdd_raw_read() */
+    FC_RAW_WRITE,            /*!< call vdd_raw_write() */
+    FC_UNLISTEN,             /*!< call vdd_unlisten() */
+    FC_UNTALK,               /*!< call vdd_untalk() */
+    FC_GET_EOI,              /*!< call vdd_get_eoi() */
+    FC_CLEAR_EOI,            /*!< call vdd_clear_eoi() */
+    FC_RESET,                /*!< call vdd_reset() */
+    FC_PP_READ,              /*!< call vdd_pp_read() */
+    FC_PP_WRITE,             /*!< call vdd_pp_write() */
+    FC_IEC_POLL,             /*!< call vdd_iec_poll() */
+    FC_IEC_GET,              /*!< call vdd_iec_get() */
+    FC_IEC_SET,              /*!< call vdd_iec_set() */
+    FC_IEC_RELEASE,          /*!< call vdd_iec_release() */
+    FC_IEC_WAIT,             /*!< call vdd_iec_wait() */
+    FC_UPLOAD,               /*!< call vdd_upload() */
+    FC_DEVICE_STATUS,        /*!< call vdd_device_status() */
+    FC_EXEC_COMMAND,         /*!< call vdd_exec_command() */
+    FC_IDENTIFY,             /*!< call vdd_identify() */
+    FC_GET_DRIVER_NAME,      /*!< call vdd_get_driver_name() */
+    FC_VDD_INSTALL_IOHOOK,   /*!< call vdd_install_iohook() */
+    FC_VDD_UNINSTALL_IOHOOK, /*!< call vdd_uninstall_iohook() */
+    FC_VDD_USLEEP,           /*!< call vdd_usleep() */
+    FC_IEC_SETRELEASE,       /*!< call vdd_setrelease() */
+    FC_IDENTIFY_XP1541       /*!< call vdd_identify_xp1541() */
 } FUNCTIONCODE;
 
 extern HANDLE vdd_handle;

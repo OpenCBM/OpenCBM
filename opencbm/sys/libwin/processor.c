@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libwin/processor.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: processor.c,v 1.2 2006-02-24 12:21:44 strik Exp $ \n
+** \version $Id: processor.c,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Functions for determining processor number
 **
@@ -38,6 +38,22 @@ CbmGetCurrentProcessorNumber(VOID)
 #endif
 }
 
+/*! \brief Get the number of processors in the system
+ 
+ This function returns the count of processors available in the
+ current system.
+
+ \return
+    The number of processors in the system
+
+ \remark
+    This function is necessary to account between differences
+    between the W2K API and later APIs.
+    Additionally, on Windows 95/98/Me, there is no variable
+    available that returns this info. On the other hand, on
+    Win 95/98/Me, there is no chance for more than one processor,
+    as these systems do not support more than one.
+*/
 ULONG
 CbmGetNumberProcessors(VOID)
 {

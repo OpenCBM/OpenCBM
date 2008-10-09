@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.3 2008-09-25 18:38:46 strik Exp $ \n
+** \version $Id: startstop.c,v 1.4 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **
@@ -195,7 +195,7 @@ ReadDriverData(char *DriverPath, ULONG DriverPathLen, DWORD *StartMode, DWORD *L
         }
 
 
-        //! \TODO rewrite using libmisc string functions
+        //! \todo rewrite using libmisc string functions
 
         // Make sure there is a trailing zero
 
@@ -431,7 +431,7 @@ CompleteDriverInstallation(HMODULE HandleDll)
 {
     BOOL error = TRUE;
 
-#if 0 //! \TODO rewrite, it does not make any sense to call an internal function via GetProcAddress()!
+#if 0 //! \todo rewrite, it does not make any sense to call an internal function via GetProcAddress()!
 
     cbm_install_complete_t * p_cbm_install_complete;
     CBMT_I_INSTALL_OUT dllInstallOutBuffer;
@@ -452,9 +452,9 @@ CompleteDriverInstallation(HMODULE HandleDll)
     FUNC_LEAVE_BOOL(error);
 }
 
-/*! \internal \brief Check for the correct installation
+/*! \brief Check for the correct installation
 
- This function checks if the driver was corretly installed.
+ This function checks if the driver was correctly installed.
 
  \return 
    Return value which will be given on return from main().
@@ -470,7 +470,7 @@ CbmCheckDriver(void)
     DBG_PRINT((DBG_PREFIX "Checking configuration for OpenCBM"));
     printf("Checking configuration for OpenCBM\n");
 
-    if (CbmCheckCorrectInstallation(TRUE /*! \TODO NeededAccessRights() */))
+    if (CbmCheckCorrectInstallation(TRUE /*! \todo NeededAccessRights() */))
     {
         DBG_PRINT((DBG_PREFIX "There were errors in the current configuration."
             "Please fix them before trying to use the driver!"));
@@ -554,7 +554,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
     char driverPath[MAX_PATH] = "<unknown>";
     BOOL error;
     BOOL differentVersion = FALSE;
-    char **PluginNames = NULL; //! @@@ \TODO
+    char **PluginNames = NULL; //! @@@ \todo
 
     FUNC_ENTER();
 
@@ -648,7 +648,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
             OutputVersionString("Plugin version:  ", dllVersionPlugin, dllVersionPluginEx);
             OutputPathString   ("Plugin path:     ", dllPath);
 
-            /*! \TODO do we insist on plugins having the same version?
+            /*! \todo do we insist on plugins having the same version?
             differentVersion |= checkIfDifferentVersions(instcbmVersion, instcbmVersionEx,
                 dllVersionPlugin, dllVersionPluginEx);
             /**/
