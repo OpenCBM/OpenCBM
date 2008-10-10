@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.24 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: cbm.c,v 1.25 2008-10-10 16:47:09 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -111,7 +111,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
             if (error)
             {
                 cbmlibmisc_strfree(plugin_name);
-                *plugin_name = 0;
+                plugin_name = NULL;
             }
 
             opencbm_configuration_close(handle_configuration);
