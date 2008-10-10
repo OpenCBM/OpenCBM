@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.21 2008-08-21 19:44:54 strik Exp $
+# $Id: config.make,v 1.22 2008-10-10 19:05:37 strik Exp $
 #
 
 # get package version (major.minor.release).
@@ -36,7 +36,7 @@ LIBDIR      = $(PREFIX)/lib
 MANDIR      = $(PREFIX)/man/man1
 INFODIR     = $(PREFIX)/info
 INCDIR      = $(PREFIX)/include
-MODDIR      = `for d in /lib/modules/\`uname -r\`/{extra,misc,kernel/drivers/char}; do test -d $$d && echo $$d; done | head -n 1`
+MODDIR      = ${shell for d in /lib/modules/`uname -r`/extra /lib/modules/`uname -r`/misc /lib/modules/`uname -r`/kernel/drivers/char; do test -d $$d && echo $$d; done | head -n 1}
 PLUGINDIR   = $(PREFIX)/lib/opencbm/plugin/
 UDEV_RULES  = /etc/udev/rules.d/
 
@@ -60,7 +60,7 @@ OS = $(shell uname -s)
 #
 ARCH	     = linux
 
-CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\"
+CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\" -DOPENCBM_CONFIG_FILE=\"$(OPENCBM_CONFIG_FILE)\"
 LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
 SHLIB_EXT    = so
@@ -110,6 +110,7 @@ KERNEL_FLAGS = ${KERNEL_DEFINE}
 ifeq "$(OS)" "Darwin"
 
 LIBUSBDIR = $(HOME)/libusb
+OPENCBM_CONFIG_PATH = $(PREFIX)/etc
 
 OD_FLAGS  = -txC -v -An
 CFLAGS   += -DOPENCBM_MAC
@@ -117,7 +118,13 @@ SHLIB_EXT = dylib
 SHLIB_SWITCH = -dynamiclib -compatibility_version $(MAJ).$(MIN) -current_version $(MAJ).$(MIN).$(REL)
 SONAME = -install_name $(PREFIX)/lib/
 
+else
+
+OPENCBM_CONFIG_PATH = /etc
+
 endif
+
+OPENCBM_CONFIG_FILE = $(OPENCBM_CONFIG_PATH)/opencbm.conf
 
 #
 # Find out if we should use linuxdoc or sgml2txt/sgml2latex/sgml2info/sgml2html

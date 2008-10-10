@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/LINUX/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration_name.c,v 1.6 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: configuration_name.c,v 1.7 2008-10-10 19:05:37 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file
@@ -24,14 +24,15 @@
 #include <assert.h>
 #include <string.h>
 
-#ifdef OPENCBM_MAC
-/*! \brief @@@@@ \todo document */
-# define DEFAULT_FILENAME PREFIX "/etc/opencbm.conf"
-#else
-/*! \brief @@@@@ \todo document */
-# define DEFAULT_FILENAME "/etc/opencbm.conf"
-#endif
-
+/*! \brief The name (including path) of the configuration file.
+  
+  This defines the name of the configuration file for this platform.
+  
+  \remark
+    OPENCBM_CONFIG_FILE is defined in LINUX/config.make, and it
+    is given to the compiler via the command line!
+*/
+#define OPENCBM_DEFAULT_CONFIGURATION_FILE_NAME OPENCBM_CONFIG_FILE
 
 /*! \brief Get the default filename for the configuration file
 
@@ -43,5 +44,5 @@
 const char *
 configuration_get_default_filename(void)
 {
-    return cbmlibmisc_strdup(DEFAULT_FILENAME);
+    return cbmlibmisc_strdup(OPENCBM_DEFAULT_CONFIGURATION_FILE_NAME);
 }

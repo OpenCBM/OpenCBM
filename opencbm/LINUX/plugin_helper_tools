@@ -22,11 +22,12 @@ do_rebuild() {
 
 	NO_OF_FILES=`ls -1A $LOCATION_ETC_CONF/|wc -l`
 	if [ $NO_OF_FILES  -ne 0 ]; then
-		echo -e "; This is a GENERATED FILE! - DON'T EDIT!\n; Modify the files in $LOCATION_ETC_CONF instead...\n" > $CONF_FILE
+		echo -e "; This is a GENERATED FILE! - DO NOT EDIT!\n; Modify the files in `dirname $LOCATION_ETC_CONF`/`basename $LOCATION_ETC_CONF` instead,\n; and execute '`pwd`/`basename $0` rebuild'...\n" > $CONF_FILE
 		cat $LOCATION_ETC_CONF/*.conf >> $CONF_FILE
 	else
 		[ -e "$CONF_FILE" ] && rm "$CONF_FILE"
 		rmdir -p $LOCATION_ETC_CONF 2> /dev/null
+		echo -n "" # make sure we do not end with an errorlevel > 0
 	fi
 }
 
@@ -53,6 +54,26 @@ do_uninstall() {
 	do_rebuild $LOCATION_ETC
 }
 
+do_set_default_plugin() {
+	LOCATION_ETC="$1"
+	FILE_DESTINATION="$2"
+	PLUGIN_NAME="$3"
+
+	get_location_etc_conf "$LOCATION_ETC"
+
+	if [ -e "$LOCATION_ETC_CONF/00opencbm.conf" ]; then
+		if [ -z "`grep "^default=$" "$LOCATION_ETC_CONF/00opencbm.conf"`" ]; then
+			echo -e "------- Default already set, quitting...\n"
+			exit 0
+		fi
+	fi
+
+	echo -e "------ setting new default to: '${PLUGIN_NAME}'.\n"
+	echo -e "[plugins]\ndefault=${PLUGIN_NAME}\n" > "$LOCATION_ETC_CONF/$FILE_DESTINATION"
+
+	do_rebuild $LOCATION_ETC
+}
+
 process_commands() {
 	COMMAND=$1
 	shift
@@ -68,6 +89,10 @@ process_commands() {
 
 		"rebuild")
 			do_rebuild "$@"
+			;;
+
+		"setdefaultplugin")
+			do_set_default_plugin "$@"
 			;;
 
 		"help"|"")

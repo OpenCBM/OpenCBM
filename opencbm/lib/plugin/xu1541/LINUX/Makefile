@@ -1,11 +1,12 @@
-# $Id: Makefile,v 1.6 2007-04-29 10:46:23 strik Exp $
+# $Id: Makefile,v 1.7 2008-10-10 19:05:37 strik Exp $
 
 RELATIVEPATH=../../../
 include ${RELATIVEPATH}LINUX/config.make
 
 .PHONY: all clean mrproper install uninstall install-files
 
-LIBNAME = libopencbm-xu1541
+PLUGIN_NAME = xu1541
+LIBNAME = libopencbm-${PLUGIN_NAME}
 SRCS    = archlib.c xu1541.c s1_s2_pp.c
 LIBS    = -lusb -ldl
 

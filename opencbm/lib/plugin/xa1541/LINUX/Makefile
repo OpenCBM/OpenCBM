@@ -1,11 +1,12 @@
-# $Id: Makefile,v 1.4 2007-04-29 10:46:23 strik Exp $
+# $Id: Makefile,v 1.5 2008-10-10 19:05:37 strik Exp $
 
 RELATIVEPATH=../../../
 include ${RELATIVEPATH}LINUX/config.make
 
 .PHONY: all clean mrproper install uninstall install-files
 
-LIBNAME = libopencbm-xa1541
+PLUGIN_NAME = xa1541
+LIBNAME = libopencbm-${PLUGIN_NAME}
 SRCS    = LINUX/iec.c LINUX/parburst.c
 
 CFLAGS += -I../../../include/LINUX/ -I../../../include/ -I../../
