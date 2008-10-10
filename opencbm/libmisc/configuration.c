@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file libmisc/configuration.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration.c,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: configuration.c,v 1.4 2008-10-10 15:24:58 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Process configuration file
@@ -970,7 +970,6 @@ opencbm_configuration_find_section(opencbm_configuration_handle Handle,
 {
     opencbm_configuration_section_t *currentSection = NULL;
     opencbm_configuration_section_t *lastSection = NULL;
-    opencbm_configuration_entry_t   *lastEntry = NULL;
 
     do {
         /* Check if there is a section given */
@@ -1046,7 +1045,7 @@ opencbm_configuration_find_data(opencbm_configuration_handle Handle,
     opencbm_configuration_section_t *lastSection = NULL;
     opencbm_configuration_entry_t   *lastEntry = NULL;
 
-    opencbm_configuration_entry_t * currentEntry;
+    opencbm_configuration_entry_t * currentEntry = NULL;
 
     do {
         /* Check if there is a section and an entry given */
@@ -1195,8 +1194,6 @@ opencbm_configuration_enum_sections(opencbm_configuration_handle Handle,
     unsigned int error = 0;
 
     do {
-        char * section = NULL;
-
         opencbm_configuration_section_t *currentSection = NULL;
 
         for (currentSection = Handle->Sections;
@@ -1248,8 +1245,6 @@ opencbm_configuration_enum_data(opencbm_configuration_handle Handle,
     unsigned int error = 0;
 
     do {
-        char * section = NULL;
-
         opencbm_configuration_entry_t * currentEntry = NULL;
         opencbm_configuration_section_t * currentSection;
 
