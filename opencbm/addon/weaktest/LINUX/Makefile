@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2007-04-29 10:46:21 strik Exp $
+# $Id: Makefile,v 1.5 2008-10-10 16:44:38 strik Exp $
 
 RELATIVEPATH=../../
 include ${RELATIVEPATH}LINUX/config.make
@@ -29,4 +29,4 @@ install-files: $(PROG)
 install: install-files
 
 uninstall:
-	rm -f $(BINDIR)/$(PROG) $(MANDIR)/$(MAN1)
+	rm -f $(BINDIR)/$(PROG)
