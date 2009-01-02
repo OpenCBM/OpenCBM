@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/unlisten.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: unlisten.c,v 1.5 2006-03-06 05:54:35 strik Exp $ \n
+** \version $Id: unlisten.c,v 1.6 2009-01-02 18:19:15 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -44,7 +44,7 @@ cbmiec_unlisten(IN PDEVICE_EXTENSION Pdx)
 
     FUNC_ENTER();
 
-    // send a 0x3F (untalk) under control of ATN
+    // send a 0x3F (unlisten) under control of ATN
 
     buffer = 0x3f;
     ntStatus = cbmiec_i_raw_write(Pdx, &buffer, 1, &sent, 1, 0);
