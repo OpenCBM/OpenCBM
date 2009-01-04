@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.25 2008-10-10 16:47:09 strik Exp $ \n
+** \version $Id: cbm.c,v 1.26 2009-01-04 17:22:55 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -62,8 +62,8 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
 
     const char * configurationFilename = configuration_get_default_filename();
 
-    char * default_plugin_name = NULL;
     char * plugin_name = NULL;
+    char * plugin_location = NULL;
 
     do {
 
@@ -86,7 +86,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
                 //
 
                 error = opencbm_configuration_get_data(handle_configuration, 
-                           "plugins", "default", &default_plugin_name);
+                           "plugins", "default", &plugin_name);
             }
             else
             {
@@ -102,7 +102,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
             if (!error)
             {
                 error = opencbm_configuration_get_data(handle_configuration,
-                           default_plugin_name, "location", &plugin_name);
+                           plugin_name, "location", &plugin_location);
             }
 
             //
@@ -110,17 +110,17 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
             //
             if (error)
             {
-                cbmlibmisc_strfree(plugin_name);
-                plugin_name = NULL;
+                cbmlibmisc_strfree(plugin_location);
+                plugin_location = NULL;
             }
 
             opencbm_configuration_close(handle_configuration);
         }
-        DBG_PRINT((DBG_PREFIX "Using plugin at '%s'", plugin_name ? plugin_name : "(none)"));
+        DBG_PRINT((DBG_PREFIX "Using plugin at '%s'", plugin_location ? plugin_location : "(none)"));
 
         memset(&Plugin_information->Plugin, 0, sizeof(Plugin_information->Plugin));
 
-        Plugin_information->Library = plugin_load(plugin_name);
+        Plugin_information->Library = plugin_load(plugin_location);
 
         DBG_PRINT((DBG_PREFIX "LoadLibrary returned %p", Plugin_information->Library));
 
@@ -242,8 +242,8 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
 
     } while (0);
 
-    cbmlibmisc_strfree(default_plugin_name);
     cbmlibmisc_strfree(plugin_name);
+    cbmlibmisc_strfree(plugin_location);
     cbmlibmisc_strfree(configurationFilename);
 
     return error;
@@ -321,8 +321,17 @@ cbm_split_adapter_in_name_and_port(char * Adapter, unsigned int * PortNumber)
 
             adapter_stripped = cbmlibmisc_strndup(Adapter, p - Adapter);
 
-            if (adapter_stripped != NULL)
-                *PortNumber = atoi(p + 1);
+            if (adapter_stripped != NULL) {
+                char * nextchar;
+                unsigned int portNumber = strtoul(p + 1, &nextchar, 10); 
+
+                if (nextchar && *nextchar == 0) {
+                    *PortNumber = portNumber;
+                }
+                else {
+                    adapter_stripped[0] = 0;
+                }
+            }
         }
         else
         {
@@ -357,9 +366,9 @@ cbm_split_adapter_in_name_and_port(char * Adapter, unsigned int * PortNumber)
 const char * CBMAPIDECL
 cbm_get_driver_name_ex(char * Adapter)
 {
-    const char *ret;
+    const char *ret = NULL;
 
-    static char buffer[256];
+    static const char * buffer = NULL;
     char *adapter_stripped = NULL;
     unsigned int portNumber = 0;
 
@@ -367,35 +376,40 @@ cbm_get_driver_name_ex(char * Adapter)
 
     FUNC_ENTER();
 
+    if ( buffer ) {
+        cbmlibmisc_strfree(buffer);
+        buffer = NULL;
+    }
+
     if (Adapter != NULL)
     {
         adapter_stripped = cbm_split_adapter_in_name_and_port(Adapter, &portNumber);
 
-        DBG_PRINT((DBG_PREFIX "Using adapter '%s', that is, adapter '%s' with port '%u'",
+        DBG_PRINT((DBG_PREFIX 
+            (adapter_stripped == NULL 
+              ? "Using default adapter"
+              : "Using adapter '%s', that is, adapter '%s' with port '%u'"),
             Adapter, adapter_stripped, portNumber));
     }
 
     error = initialize_plugin(adapter_stripped);
 
-    if (Plugin_information.Plugin.cbm_plugin_get_driver_name)
+    if (Plugin_information.Plugin.cbm_plugin_get_driver_name) {
         ret = Plugin_information.Plugin.cbm_plugin_get_driver_name(portNumber);
-    else
+    }
+    else {
         ret = "NO PLUGIN DRIVER!";
+    }
 
-    if (error)
-    {
-        strncpy(buffer, ret, sizeof(buffer));
+    buffer = cbmlibmisc_strdup(ret);
 
-        buffer[sizeof(buffer)-1] = 0;
-
-        ret = buffer;
-
+    if (error) {
         uninitialize_plugin();
     }
 
     cbmlibmisc_strfree(adapter_stripped);
 
-    FUNC_LEAVE_STRING(ret);
+    FUNC_LEAVE_STRING(buffer);
 }
 
 /*! \brief Get the name of the driver for a specific parallel port
@@ -447,9 +461,6 @@ cbm_get_driver_name(int PortNumber)
  \return
    ==0: This function completed successfully
    !=0: otherwise
-
- \todo
- PortNumber is not allowed to exceed 10. 
 
  \remark
  cbm_driver_open_ex() should be balanced with cbm_driver_close().
@@ -505,7 +516,7 @@ cbm_driver_open_ex(CBM_FILE *HandleDevice, char * Adapter)
 
  \note
    Do not use this function.
-   It is only there for compatibility reasons with older applications.
+   It is only available for compatibility reasons with older applications.
    Use cbm_driver_open_ex() instead!
 
  cbm_driver_open() should be balanced with cbm_driver_close().
@@ -1326,10 +1337,11 @@ cbm_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
         if (cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
         {
-            int bytesRead = cbm_raw_read(HandleDevice, bufferToWrite, BufferLength);
+            unsigned int bytesRead;
+            
+            bytesRead = cbm_raw_read(HandleDevice, bufferToWrite, BufferLength - 1);
 
-            DBG_ASSERT(bytesRead >= 0);
-            DBG_ASSERT(((unsigned int)bytesRead) <= BufferLength);
+            DBG_ASSERT(bytesRead <= BufferLength);
 
             // make sure we have a trailing zero at the end of the status:
 
