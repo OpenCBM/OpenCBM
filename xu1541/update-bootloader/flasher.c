@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file flasher.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: flasher.c,v 1.8 2008-10-09 18:55:45 strik Exp $ \n
+** \version $Id: flasher.c,v 1.9 2009-01-04 19:09:03 strik Exp $ \n
 ** \n
 ** \brief Flash the bootloader from the application space
 **
@@ -238,7 +238,7 @@ main(void)
         /*
          * signal flasher start and wait for host system usb enumeration completion
          */
-        blink(5);
+        blink(2);
 
         /*
          * first of all, make sure we are called in case there is some interruption (i.e., power failure)
@@ -279,7 +279,7 @@ main(void)
 
         program_copy(0x1800, 0x0800, 0x40);
 
-        blink(3);
+        blink(1);
 
         /* make sure we are not called anymore */
         boot_page_erase(0);
