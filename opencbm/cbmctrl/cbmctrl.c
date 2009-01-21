@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.41 2007-05-01 17:51:37 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.42 2009-01-21 20:02:52 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -328,10 +328,10 @@ string_concat(const char *string1, int len1, const char *string2, int len2)
     if (buffer)
     {
         if (string1)
-            strcpy(buffer, string1);
+            memcpy(buffer, string1, len1);
 
         if (string2)
-            strcpy(buffer + len1, string2);
+            memcpy(buffer + len1, string2, len2);
     }
 
     return buffer;
@@ -777,6 +777,10 @@ static int do_put(CBM_FILE fd, OPTIONS * const options)
     if(rv < 0 || commandlinelen != (unsigned int) rv)
     {
         rv = 1;
+    }
+    else
+    {
+        rv = 0;
     }
 
     if (commandline != NULL)
