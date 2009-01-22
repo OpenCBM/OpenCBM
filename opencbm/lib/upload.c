@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.8 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: upload.c,v 1.9 2009-01-22 18:21:40 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -224,6 +224,8 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
  call this function.
 */
 
+enum { TRANSFER_SIZE_DOWNLOAD = 0x100u };
+
 int CBMAPIDECL
 cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress, 
              int DriveMemAddress, void *const Buffer, size_t Size)
@@ -239,7 +241,7 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
     DBG_ASSERT(sizeof(command) == 7);
 
-    for(i = 0; i < Size; i += 0x100)
+    for(i = 0; i < Size; i += TRANSFER_SIZE_DOWNLOAD)
     {
         char dummy;
 
@@ -247,9 +249,9 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
         c = Size - i;
 
         // Do we have more than 256? Then, restrict to 256
-        if (c > 0x100)
+        if (c > TRANSFER_SIZE_DOWNLOAD)
         {
-            c = 0x100;
+            c = TRANSFER_SIZE_DOWNLOAD;
         }
 
         // The command M-R consists of:
