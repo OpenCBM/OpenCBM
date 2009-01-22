@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.9 2009-01-22 18:21:40 strik Exp $ \n
+** \version $Id: upload.c,v 1.10 2009-01-22 19:52:43 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -272,8 +272,8 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
         // Now, advance the pointer into drive memory
         // as well to the program in PC's memory in case we
         // might need to use it again for another M-W command
-        DriveMemAddress += c;
-        StoreBuffer     += c;
+        DriveMemAddress += rv;
+        StoreBuffer     += rv;
 
         // skip the trailing CR
         cbm_raw_read(HandleDevice, &dummy, 1);
