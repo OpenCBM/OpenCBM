@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawread.c,v 1.13 2007-01-24 19:34:42 strik Exp $ \n
+** \version $Id: i_rawread.c,v 1.14 2009-01-22 19:53:00 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -261,7 +261,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
             received, Count, ok, Pdx->Eoi));
 
         cbmiec_setcablestate(Pdx, CABLESTATE_ERROR_OCCURRED);
-        Pdx->Eoi = 0;
+        Pdx->Eoi = FALSE;
         ntStatus = STATUS_UNEXPECTED_NETWORK_ERROR;
     }
 
