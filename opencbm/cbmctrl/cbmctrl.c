@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.42 2009-01-21 20:02:52 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.43 2009-01-22 18:21:19 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -323,7 +323,7 @@ string_concat(const char *string1, int len1, const char *string2, int len2)
     if ((string2 != NULL) && (len2 == 0))
         len2 = strlen(string2);
 
-    buffer = malloc(len1 + len2 + 1);
+    buffer = calloc(1, len1 + len2 + 1);
 
     if (buffer)
     {
