@@ -4,10 +4,14 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.15 2008-10-09 18:55:45 strik Exp $
+ * This Revision: $Id: xu1541.c,v 1.16 2009-01-24 14:51:01 strik Exp $
  *
  * $Log: xu1541.c,v $
- * Revision 1.15  2008-10-09 18:55:45  strik
+ * Revision 1.16  2009-01-24 14:51:01  strik
+ * New version 1.17;
+ * Do not return data for XU1541_READ after an EOI occurred.
+ *
+ * Revision 1.15  2008/10/09 18:55:45  strik
  * Removed spaces and tabs before LF.
  *
  * Revision 1.14  2007/08/30 18:50:15  strik
@@ -168,7 +172,7 @@ uchar iec_get(uchar line) {
 }
 
 /* global variable to keep track of eoi state */
-uchar eoi;
+uchar eoi = 0;
 
 void cbm_init(void) {
   DEBUGF("init\n");
@@ -484,6 +488,14 @@ void xu1541_handle(void) {
 	  to++;
 	  DELAY_US(20);
 	}
+      }
+
+      if (eoi) {
+          /* re-enable interrupts and return */
+          io_request = XU1541_IO_READ_DONE;
+          io_buffer_fill = received;
+          LED_OFF();
+          return;
       }
 
       /* disable IRQs to make sure IEC transfer goes uninterrupted */
