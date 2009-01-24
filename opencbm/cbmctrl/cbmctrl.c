@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.43 2009-01-22 18:21:19 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.44 2009-01-24 15:15:55 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -1018,6 +1018,7 @@ static int do_download(CBM_FILE fd, OPTIONS * const options)
         if(c != cbm_download(fd, unit, addr, buf, c))
         {
             rv = 1;
+            fprintf(stderr, "A transfer error occurred!\n");
             break;
         }
 
@@ -1146,6 +1147,10 @@ static int do_upload(CBM_FILE fd, OPTIONS * const options)
     }
 
     rv = (cbm_upload(fd, unit, addr, buf, size) == (int)size) ? 0 : 1;
+
+    if ( rv != 0 ) {
+        fprintf(stderr, "A transfer error occurred!\n");
+    }
 
     free(buf);
 
