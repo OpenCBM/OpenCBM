@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.10 2009-01-22 19:52:43 strik Exp $ \n
+** \version $Id: upload.c,v 1.11 2009-01-24 15:15:37 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -124,6 +124,7 @@ static __inline void StoreAddressAndCount(unsigned char * Buffer, unsigned int D
  \return
    Returns the number of bytes written into program memory.
    If it does not equal Size, than an error occurred.
+   Specifically, -1 is returned on transfer errors.
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
@@ -146,7 +147,9 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
     for(i = 0; i < Size; i += 32)
     {
-        cbm_listen(HandleDevice, DeviceAddress, 15);
+        if ( cbm_listen(HandleDevice, DeviceAddress, 15) ) {
+            return -1;
+        }
 
         // Calculate how many bytes are left
 
@@ -167,11 +170,18 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
         // Write the M-W command to the drive...
 
-        cbm_raw_write(HandleDevice, command, sizeof(command));
+        if ( cbm_raw_write(HandleDevice, command, sizeof(command)) != sizeof command) {
+            rv = -1;
+            break;
+        }
+
 
         // ... as well as the (up to 32) data bytes
 
-        cbm_raw_write(HandleDevice, bufferToProgram, c);
+        if ( cbm_raw_write(HandleDevice, bufferToProgram, c) != c ) {
+            rv = -1;
+            break;
+        }
 
         // Now, advance the pointer into drive memory
         // as well to the program in PC's memory in case we
@@ -187,7 +197,10 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
         // The UNLISTEN is the signal for the drive 
         // to start execution of the command
 
-        cbm_unlisten(HandleDevice);
+        if ( cbm_unlisten(HandleDevice) ) {
+            rv = -1;
+            break;
+        }
     }
 
     FUNC_LEAVE_INT(rv);
@@ -219,6 +232,7 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
  \return
    Returns the number of bytes written into the storage buffer.
    If it does not equal Size, than an error occurred.
+   Specifically, -1 is returned on transfer errors.
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
@@ -261,9 +275,16 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
         StoreAddressAndCount(&command[3], DriveMemAddress, c);
 
         // Write the M-R command to the drive...
-        cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command));
+        if ( cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) ) {
+            rv = -1;
+            break;
+        }
 
-        cbm_talk(HandleDevice, DeviceAddress, 15);
+
+        if ( cbm_talk(HandleDevice, DeviceAddress, 15) ) {
+            rv = -1;
+            break;
+        }
 
         // now read the (up to 256) data bytes
         // and advance the return value of send bytes, too.
@@ -276,10 +297,16 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
         StoreBuffer     += rv;
 
         // skip the trailing CR
-        cbm_raw_read(HandleDevice, &dummy, 1);
+        if ( cbm_raw_read(HandleDevice, &dummy, 1) != 1 ) {
+            rv = -1;
+            break;
+        }
 
         // The UNTALK is the signal for end of transmission
-        cbm_untalk(HandleDevice);
+        if ( cbm_untalk(HandleDevice) ) {
+            rv = -1;
+            break;
+        }
     }
 
     FUNC_LEAVE_INT(rv);
