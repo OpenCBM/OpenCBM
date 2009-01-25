@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.11 2009-01-24 15:15:37 strik Exp $ \n
+** \version $Id: upload.c,v 1.12 2009-01-25 14:24:09 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -249,13 +249,15 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
     size_t i;
     int rv = 0;
+    int readbytes = 0;
     int c;
+    int page2workaround = 0;
 
     FUNC_ENTER();
 
     DBG_ASSERT(sizeof(command) == 7);
 
-    for(i = 0; i < Size; i += TRANSFER_SIZE_DOWNLOAD)
+    for(i = 0; i < Size; i += c)
     {
         char dummy;
 
@@ -266,6 +268,15 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
         if (c > TRANSFER_SIZE_DOWNLOAD)
         {
             c = TRANSFER_SIZE_DOWNLOAD;
+        }
+
+        /*
+         * Workaround: The 154x/157x/1581 drives (and possibly others, too)
+         * cannot cross a page boundary on M-R. Thus, make sure we do not
+         * cross the boundary.
+         */
+        if (c + (DriveMemAddress & 0xFF) > 0x100) {
+            c = 0x100 - (DriveMemAddress & 0xFF);
         }
 
         // The command M-R consists of:
@@ -288,18 +299,46 @@ cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
         // now read the (up to 256) data bytes
         // and advance the return value of send bytes, too.
-        rv += cbm_raw_read(HandleDevice, StoreBuffer, c);
+        readbytes = cbm_raw_read(HandleDevice, StoreBuffer, c);
 
         // Now, advance the pointer into drive memory
         // as well to the program in PC's memory in case we
         // might need to use it again for another M-W command
-        DriveMemAddress += rv;
-        StoreBuffer     += rv;
+        DriveMemAddress += readbytes;
+        StoreBuffer     += readbytes;
+
+        rv              += readbytes;
 
         // skip the trailing CR
         if ( cbm_raw_read(HandleDevice, &dummy, 1) != 1 ) {
-            rv = -1;
-            break;
+            /*
+             * if there is no CR, there can be two reasons:
+             *
+             * 1. an unexpected error occurred. In this case, we
+             *    want to quit and report an error
+             *
+             * 2. we are reading page 2 of the floppy drive's memory
+             *    In this case, this error is due to the special
+             *    handling of the $02D4 address in the 154x/157x
+             *    ($02CF in the 1581). It returns a CR and aborts the
+             *    transfer.
+             *    If this is the case, restart the transmission for
+             *    the rest as a work-around.
+             */
+
+            if ( ( (DriveMemAddress & 0xFF00) >> 8 == 2) && page2workaround == 0 ) {
+                /* we are on page 2, try the workaround once */
+                page2workaround = 1;
+                c = readbytes - 1;
+                --rv;
+                --DriveMemAddress;
+                --StoreBuffer;
+                continue;
+            }
+            else {
+                rv = -1;
+                break;
+            }
         }
 
         // The UNTALK is the signal for end of transmission
