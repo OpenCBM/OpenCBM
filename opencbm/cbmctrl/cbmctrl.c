@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.44 2009-01-24 15:15:55 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.45 2009-01-26 18:27:24 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -1015,6 +1015,10 @@ static int do_download(CBM_FILE fd, OPTIONS * const options)
 
         c = (count > sizeof(buf)) ? sizeof(buf) : count;
 
+        if (c + (addr & 0xFF) > 0x100) {
+            c = 0x100 - (addr & 0xFF);
+        }
+
         if(c != cbm_download(fd, unit, addr, buf, c))
         {
             rv = 1;
@@ -1035,8 +1039,8 @@ static int do_download(CBM_FILE fd, OPTIONS * const options)
 
         fwrite(buf, 1, c, f);
 
-        addr  += sizeof(buf);
-        count -= sizeof(buf);
+        addr  += c;
+        count -= c;
     }
 
     fclose(f);
