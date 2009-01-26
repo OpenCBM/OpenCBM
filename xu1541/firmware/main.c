@@ -4,10 +4,16 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: main.c,v 1.17 2008-10-09 18:55:30 strik Exp $
+ * This Revision: $Id: main.c,v 1.18 2009-01-26 19:09:55 strik Exp $
  *
  * $Log: main.c,v $
- * Revision 1.17  2008-10-09 18:55:30  strik
+ * Revision 1.18  2009-01-26 19:09:55  strik
+ * usbFunctionRead(), usbFunctionWrite(): rv was signed, which is a big bug
+ * (transfers of 0x80 or higher are considered as failed). Fixed. Nate
+ * Lawson found the bug and provided the patch.
+ * New version 1.18.
+ *
+ * Revision 1.17  2008/10/09 18:55:30  strik
  * Removed superfluous "break;" instructions;
  * removed spaces and tabs before LF.
  *
@@ -373,7 +379,7 @@ uchar	usbFunctionSetup(uchar data[8], byte_t *replyBuf) {
 
 uchar usbFunctionRead( uchar *data, uchar len )
 {
-  char rv = 0;
+  uchar rv = 0;
 
   DEBUGF("rd %d\n", len);
   LED_ON();
@@ -406,7 +412,7 @@ uchar usbFunctionRead( uchar *data, uchar len )
   }
 
   LED_OFF();
-  return (rv>0)?rv:0;
+  return rv;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -415,7 +421,9 @@ uchar usbFunctionRead( uchar *data, uchar len )
 
 uchar usbFunctionWrite( uchar *data, uchar len )
 {
-  char rv = 0;
+  uchar rv = 0;
+
+  DEBUGF("wt %d\n", len);
   LED_ON();
 
   switch(io_mode) {
@@ -446,7 +454,7 @@ uchar usbFunctionWrite( uchar *data, uchar len )
   }
 
   LED_OFF();
-  return (rv>0)?rv:0;
+  return rv;
 }
 
 /* ------------------------------------------------------------------------- */
