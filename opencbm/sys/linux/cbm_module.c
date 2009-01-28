@@ -18,7 +18,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.13 2009-01-28 20:01:08 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.14 2009-01-28 20:10:38 strik Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -73,11 +73,11 @@ static char *rcsid =
 /* Defines needed by parallel burst-routines: */
 #include <linux/spinlock.h> /* the spinlock-system, used for parallel burst */
 
-#define IRQSTOPVARS	unsigned long flags; spinlock_t parallel_burst_lock = SPIN_LOCK_UNLOCKED;
-#define disable()	spin_lock_irqsave(&parallel_burst_lock, flags)
-#define enable()	spin_unlock_irqrestore(&parallel_burst_lock, flags)
-#define printf(x)	printk(x)
-#define msleep(x)	udelay(x) /* delay for x microseconds */
+#define IRQSTOPVARS     unsigned long flags; spinlock_t parallel_burst_lock = SPIN_LOCK_UNLOCKED;
+#define disable()       spin_lock_irqsave(&parallel_burst_lock, flags)
+#define enable()        spin_unlock_irqrestore(&parallel_burst_lock, flags)
+#define printf(x)       printk(x)
+#define msleep(x)       udelay(x) /* delay for x microseconds */
 
 /* forward references for parallel burst routines */
 int cbm_parallel_burst_read_track(unsigned char *buffer);
@@ -226,9 +226,9 @@ static struct pardevice *cbm_device;
 
 #ifdef FOUR_BIT_CONTROL
 # define set_data_forward() do { parport_data_forward(cbm_device->port); \
-				data_reverse = 0; } while (0)
+                                 data_reverse = 0; } while (0)
 # define set_data_reverse() do { parport_data_reverse(cbm_device->port); \
-				data_reverse = 1; } while (0)
+                                 data_reverse = 1; } while (0)
 #else
 # define set_data_forward() do { RELEASE(LP_BIDIR); data_reverse = 0; } while (0)
 # define set_data_reverse() do { SET(LP_BIDIR); data_reverse = 1; } while (0)
@@ -617,10 +617,10 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                      unsigned int cmd, unsigned long arg)
 {
 
-	/*linux parallel burst */
-	PARBURST_RW_VALUE *user_val;
-	PARBURST_RW_VALUE kernel_val;
-	/*linux parallel burst end*/
+        /*linux parallel burst */
+        PARBURST_RW_VALUE *user_val;
+        PARBURST_RW_VALUE kernel_val;
+        /*linux parallel burst end*/
 
 
         unsigned char buf[2], c, talk, mask, state, i;
@@ -710,53 +710,53 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                         return rv;
 
                 case CBMCTRL_IEC_SET:
-			if (arg & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET))
-			{
-				// there was some bit set that is not recognized, return
-				// with an error
-				return -EINVAL;
-			}
-			else
-			{
-				if (arg & IEC_DATA)  SET(DATA_OUT);
-				if (arg & IEC_CLOCK) SET(CLK_OUT);
-				if (arg & IEC_ATN)   SET(ATN_OUT);
-				if (arg & IEC_RESET) SET(RESET);
-			}
+                        if (arg & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET))
+                        {
+                                // there was some bit set that is not recognized, return
+                                // with an error
+                                return -EINVAL;
+                        }
+                        else
+                        {
+                                if (arg & IEC_DATA)  SET(DATA_OUT);
+                                if (arg & IEC_CLOCK) SET(CLK_OUT);
+                                if (arg & IEC_ATN)   SET(ATN_OUT);
+                                if (arg & IEC_RESET) SET(RESET);
+                        }
                         return 0;
 
                 case CBMCTRL_IEC_RELEASE:
-       			if (arg & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET))
-			{
-				// there was some bit set that is not recognized, return
-				// with an error
-				return -EINVAL;
-			}
-			else
-			{
-				if (arg & IEC_DATA)  RELEASE(DATA_OUT);
-				if (arg & IEC_CLOCK) RELEASE(CLK_OUT);
-				if (arg & IEC_ATN)   RELEASE(ATN_OUT);
-				if (arg & IEC_RESET) RELEASE(RESET);
-			}
+                        if (arg & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET))
+                        {
+                                // there was some bit set that is not recognized, return
+                                // with an error
+                                return -EINVAL;
+                        }
+                        else
+                        {
+                                if (arg & IEC_DATA)  RELEASE(DATA_OUT);
+                                if (arg & IEC_CLOCK) RELEASE(CLK_OUT);
+                                if (arg & IEC_ATN)   RELEASE(ATN_OUT);
+                                if (arg & IEC_RESET) RELEASE(RESET);
+                        }
                         return 0;
 
                 case CBMCTRL_IEC_SETRELEASE:
-			{
-				unsigned set = arg >> 8;
-				unsigned release = arg & 0xFF;
+                        {
+                                unsigned set = arg >> 8;
+                                unsigned release = arg & 0xFF;
                 unsigned set_mask = 0;
                 unsigned release_mask = 0;
 
-				if ( (set & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET))
-				  || (release & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)))
-				{
-					// there was some bit set that is not recognized, return
-					// with an error
-					return -EINVAL;
-				}
-				else
-				{
+                                if ( (set & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET))
+                                  || (release & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)))
+                                {
+                                        // there was some bit set that is not recognized, return
+                                        // with an error
+                                        return -EINVAL;
+                                }
+                                else
+                                {
                     if (set & IEC_DATA)  set_mask |= DATA_OUT;
                     if (set & IEC_CLOCK) set_mask |= CLK_OUT;
                     if (set & IEC_ATN)   set_mask |= ATN_OUT;
@@ -767,9 +767,9 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                     if (release & IEC_ATN)   release_mask |= ATN_OUT;
                     if (release & IEC_RESET) release_mask |= RESET;
 
-					SET_RELEASE(set_mask, release_mask);
-				}
-			}
+                                        SET_RELEASE(set_mask, release_mask);
+                                }
+                        }
                         return 0;
 
                 case CBMCTRL_PP_READ:
@@ -791,32 +791,32 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 
 
                 case CBMCTRL_PARBURST_READ:
-			return cbm_parallel_burst_read();
+                        return cbm_parallel_burst_read();
 
                 case CBMCTRL_PARBURST_WRITE:
-			return cbm_parallel_burst_write(arg);
+                        return cbm_parallel_burst_write(arg);
 
-		case CBMCTRL_PARBURST_READ_TRACK:
-			user_val=(PARBURST_RW_VALUE *) arg; // cast arg to structure pointer
-			/* copy the data to the kernel: */
-			if (copy_from_user(&kernel_val,		// kernel buffer
-						user_val,	// user buffer
-                           			sizeof(PARBURST_RW_VALUE))) return -EFAULT;
-			/* verify if it's ok to write into the buffer */
-			if(access_ok(VERIFY_WRITE, kernel_val.buffer, 0x2000)==0) return -EFAULT;
-			/* and do it: */
-			return cbm_parallel_burst_read_track(kernel_val.buffer);
-			
-		case CBMCTRL_PARBURST_WRITE_TRACK:
-			user_val=(PARBURST_RW_VALUE *) arg; // cast arg to structure pointer
-			/* copy the data to the kernel: */
-			if (copy_from_user(&kernel_val,		// kernel buffer
-						user_val,	// user buffer
-                           			sizeof(PARBURST_RW_VALUE))) return -EFAULT;
-			/* verify if it's ok to read from the buffer */
-			if(access_ok(VERIFY_READ, (void *)kernel_val.buffer, 0x2000)==0) return -EFAULT;
-			/* and do it: */
-			return cbm_parallel_burst_write_track(kernel_val.buffer, kernel_val.length);
+                case CBMCTRL_PARBURST_READ_TRACK:
+                        user_val=(PARBURST_RW_VALUE *) arg; // cast arg to structure pointer
+                        /* copy the data to the kernel: */
+                        if (copy_from_user(&kernel_val,         // kernel buffer
+                                                user_val,       // user buffer
+                                                sizeof(PARBURST_RW_VALUE))) return -EFAULT;
+                        /* verify if it's ok to write into the buffer */
+                        if(access_ok(VERIFY_WRITE, kernel_val.buffer, 0x2000)==0) return -EFAULT;
+                        /* and do it: */
+                        return cbm_parallel_burst_read_track(kernel_val.buffer);
+                        
+                case CBMCTRL_PARBURST_WRITE_TRACK:
+                        user_val=(PARBURST_RW_VALUE *) arg; // cast arg to structure pointer
+                        /* copy the data to the kernel: */
+                        if (copy_from_user(&kernel_val,         // kernel buffer
+                                                user_val,       // user buffer
+                                                sizeof(PARBURST_RW_VALUE))) return -EFAULT;
+                        /* verify if it's ok to read from the buffer */
+                        if(access_ok(VERIFY_READ, (void *)kernel_val.buffer, 0x2000)==0) return -EFAULT;
+                        /* and do it: */
+                        return cbm_parallel_burst_write_track(kernel_val.buffer, kernel_val.length);
         }
         return -EINVAL;
 }
@@ -1042,91 +1042,91 @@ int cbm_init(void)
 
 
 /* 
-	And here are the functions, used by parallel burst 
-	(they are all called by the ioctl-function)
+        And here are the functions, used by parallel burst 
+        (they are all called by the ioctl-function)
 */
 
 int cbm_parallel_burst_read_track(unsigned char *buffer)
 {
-	int i, byte;
+        int i, byte;
 
-	IRQSTOPVARS;
+        IRQSTOPVARS;
 
-	disable();
+        disable();
 
-	for (i = 0; i < 0x2000; i += 1)//2)
-	{
-		byte = cbm_handshaked_read(i&1);
-		if (byte == -1)
-		{
-			enable();
-			return 0;
-		}
-		buffer[i] = byte;
-	}
+        for (i = 0; i < 0x2000; i += 1)//2)
+        {
+                byte = cbm_handshaked_read(i&1);
+                if (byte == -1)
+                {
+                        enable();
+                        return 0;
+                }
+                buffer[i] = byte;
+        }
 
-	cbm_parallel_burst_read();
-	enable();
-	return 1;
+        cbm_parallel_burst_read();
+        enable();
+        return 1;
 }
 
 
 int cbm_parallel_burst_write_track(unsigned char *buffer, int length)
 {
-	int i;
+        int i;
 
-	IRQSTOPVARS;
+        IRQSTOPVARS;
 
-	disable();
+        disable();
 
-	for (i = 0; i < length; i++)
-	{
-		if(cbm_handshaked_write(buffer[i], i&1))
-		{
-			// timeout
-			enable();
-    			return 0;
-		}
-	}
-	cbm_handshaked_write(0, i&1);
-	cbm_parallel_burst_read();
-	enable();
-	return 1;
+        for (i = 0; i < length; i++)
+        {
+                if(cbm_handshaked_write(buffer[i], i&1))
+                {
+                        // timeout
+                        enable();
+                        return 0;
+                }
+        }
+        cbm_handshaked_write(0, i&1);
+        cbm_parallel_burst_read();
+        enable();
+        return 1;
 }
 
 unsigned char cbm_parallel_burst_read(void)
 {
-	int rv = 0;
+        int rv = 0;
 
-	RELEASE(DATA_OUT|CLK_OUT);
-	SET(ATN_OUT);
+        RELEASE(DATA_OUT|CLK_OUT);
+        SET(ATN_OUT);
         msleep(20); /* 200? */
         while(GET(DATA_IN));
         /*linux rv = inportb(parport); */
-		if(!data_reverse) {
-        		XP_WRITE(0xff);
-        		set_data_reverse();
-	        }
-		rv=XP_READ();	
+                if(!data_reverse) {
+                        XP_WRITE(0xff);
+                        set_data_reverse();
+                }
+                rv=XP_READ();   
         msleep(5);
         RELEASE(ATN_OUT);
         msleep(10);
         while(!GET(DATA_IN));
         return rv;
 
-	
-/* previous version: */			
-/**			RELEASE(DATA_OUT|CLK_OUT);
+        
+/* previous version: */                 
+/**                     RELEASE(DATA_OUT|CLK_OUT);
                         SET(ATN_OUT);
                         for (j=0; j < 20; j++) GET(DATA_IN);
                         while(GET(DATA_IN));
-			// rv = inportb(parport);
-			// rv=XP_READ();
-				if(!(out_bits & LP_BIDIR)) {
-                            		XP_WRITE(0xff);
-                            		SET(LP_BIDIR);
-                        	}
-                        	rv=XP_READ();	
+                        // rv = inportb(parport);
+                        // rv=XP_READ();
+                                if(!(out_bits & LP_BIDIR)) {
+                                        XP_WRITE(0xff);
+                                        SET(LP_BIDIR);
+                                }
+                                rv=XP_READ();   
                         for (j=0; j < 5; j++) GET(DATA_IN); // extra
                         RELEASE(ATN_OUT);
                         for (j=0; j < 20; j++) GET(DATA_IN);
@@ -1137,51 +1137,51 @@ unsigned char cbm_parallel_burst_read(void)
 
 int cbm_parallel_burst_write(unsigned char c)
 {
-	RELEASE(DATA_OUT|CLK_OUT);
-	SET(ATN_OUT);
-	msleep(20);
+        RELEASE(DATA_OUT|CLK_OUT);
+        SET(ATN_OUT);
+        msleep(20);
         while(GET(DATA_IN));
-	/*linux PARWRITE(); */
-		if(data_reverse) {
-			set_data_forward();
-        	}
-        	XP_WRITE(c);
+        /*linux PARWRITE(); */
+                if(data_reverse) {
+                        set_data_forward();
+                }
+                XP_WRITE(c);
         /*linux outportb(parport, arg); */
         msleep(5);
         RELEASE(ATN_OUT);
         msleep(20);
-	while(!GET(DATA_IN));
+        while(!GET(DATA_IN));
         /*linux PARREAD(); */
-		if(!data_reverse) {
-	        	XP_WRITE(0xff);
+                if(!data_reverse) {
+                        XP_WRITE(0xff);
                         set_data_reverse();
-		}
-		XP_READ();
-	return 0;
+                }
+                XP_READ();
+        return 0;
 
 
 /* previous version: */
 /**
-	 		RELEASE(DATA_OUT|CLK_OUT);
+                        RELEASE(DATA_OUT|CLK_OUT);
                         SET(ATN_OUT);
                         for (j=0; j < 20; j++) GET(DATA_IN);
                         while(GET(DATA_IN));
-			// outportb(parport, arg);
-			// XP_WRITE(arg);
-				if(out_bits & LP_BIDIR) {
-                            		RELEASE(LP_BIDIR);
-                        	}
-                        	XP_WRITE(c);
+                        // outportb(parport, arg);
+                        // XP_WRITE(arg);
+                                if(out_bits & LP_BIDIR) {
+                                        RELEASE(LP_BIDIR);
+                                }
+                                XP_WRITE(c);
                         for (j=0; j < 5; j++) GET(DATA_IN);
                         RELEASE(ATN_OUT);
                         for (j=0; j < 20; j++) GET(DATA_IN);
                         while(!GET(DATA_IN));
-			// XP_READ();
-				if(!(out_bits & LP_BIDIR)) {
-                        	    	XP_WRITE(0xff);
-                            		SET(LP_BIDIR);
-                        	}
-                        	XP_READ();
+                        // XP_READ();
+                                if(!(out_bits & LP_BIDIR)) {
+                                        XP_WRITE(0xff);
+                                        SET(LP_BIDIR);
+                                }
+                                XP_READ();
                         return 0;
 **/
 }
@@ -1196,23 +1196,23 @@ int cbm_handshaked_read(int toggle)
         int returnvalue2, returnvalue3, timeoutcount;
         int to = 0;
 
-	RELEASE(DATA_IN);  // not really needed?
-	
-	/*linux
-	RELEASE(DATA_OUT);
-	msleep(2);
-	 GET(DATA_IN); */
+        RELEASE(DATA_IN);  // not really needed?
+        
+        /*linux
+        RELEASE(DATA_OUT);
+        msleep(2);
+         GET(DATA_IN); */
 
-	if(!toggle)
-	{
-	    while (GET(DATA_IN))
-	        if (to++ > TO_HANDSHAKED_READ) return (-1);
-	}
-	else
-	{
-	    while (!GET(DATA_IN))
-		    if (to++ > TO_HANDSHAKED_READ) return (-1);
-	}
+        if(!toggle)
+        {
+            while (GET(DATA_IN))
+                if (to++ > TO_HANDSHAKED_READ) return (-1);
+        }
+        else
+        {
+            while (!GET(DATA_IN))
+                    if (to++ > TO_HANDSHAKED_READ) return (-1);
+        }
 
         timeoutcount = 0;
         
@@ -1238,24 +1238,24 @@ int cbm_handshaked_read(int toggle)
 
 int cbm_handshaked_write(char data, int toggle)
 {
-	int to=0;
+        int to=0;
 
-	RELEASE(CLK_IN);
+        RELEASE(CLK_IN);
 
-	if (!toggle)
-	{
-		while (GET(DATA_IN))
-		if (to++ > TO_HANDSHAKED_WRITE) return 1;
-	}
-	else
-	{
-		while (!GET(DATA_IN))
-		if (to++ > TO_HANDSHAKED_WRITE) return 1;
-	}
-	/*linux outportb(parport, data); */
-		if(data_reverse) {
+        if (!toggle)
+        {
+                while (GET(DATA_IN))
+                if (to++ > TO_HANDSHAKED_WRITE) return 1;
+        }
+        else
+        {
+                while (!GET(DATA_IN))
+                if (to++ > TO_HANDSHAKED_WRITE) return 1;
+        }
+        /*linux outportb(parport, data); */
+                if(data_reverse) {
                         set_data_forward();
-		}
-		XP_WRITE(data);
-	return 1;
+                }
+                XP_WRITE(data);
+        return 1;
 }
