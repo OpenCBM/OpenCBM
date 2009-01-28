@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.9 2009-01-28 19:42:40 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.10 2009-01-28 19:43:55 strik Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -821,15 +821,23 @@ static irqreturn_t cbm_interrupt(int irq, void *dev_id)
 }
 
 
+#ifndef DIRECT_PORT_ACCESS
 /* discard return value from cbm_interrupt */
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19))
+# if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19))
 static void cbm_interrupt_pp(int irq, void *dev_id, struct pt_regs *regs)
-#else
+# elif (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
 static void cbm_interrupt_pp(int irq, void *dev_id)
-#endif
+# else
+static void cbm_interrupt_pp(void *dev_id)
+# endif
 {
+# if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
     cbm_interrupt(irq, dev_id);
+# else
+    cbm_interrupt(cbm_device->port->irq, dev_id);
+# endif
 }
+#endif /* DIRECT_PORT_ACCESS */
 
 
 static struct file_operations cbm_fops =
