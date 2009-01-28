@@ -11,13 +11,14 @@
  *  Copyright 2000-2005 Pete Rittwage                    (Parallel Burst Routines)
  *  Copyright 2005      Tim Schürmann                    (Parallel Burst Routines)
  *  Copyright 2005-2006 Spiro Trikaliotis                (Parallel Burst Routines)
+ *  Copyright 2007-2009 Frédéric Brière                  (Adjustments on newer Linux kernels, abstraction from real hardware)
  *
  *
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.22 2009-01-28 19:29:05 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.23 2009-01-28 20:24:47 strik Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -34,16 +35,23 @@ static char *rcsid =
 #endif
 #include <linux/module.h>
 
-#ifndef KERNEL_VERSION
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,1,47)
 # define DIRECT_PORT_ACCESS
 #endif
-    
-#include <asm/io.h>
-#include <linux/ioport.h>
 
-#ifndef DIRECT_PORT_ACCESS
+/*
+ * Starting with 2.3.10, the IRQ and bi-directional bits are uncoupled from
+ * the control byte.
+ */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,10)) && !defined(DIRECT_PORT_ACCESS)
+# define FOUR_BIT_CONTROL
+#endif
+
+#ifdef DIRECT_PORT_ACCESS
+# include <asm/io.h>
+# include <linux/ioport.h>
+#else
 # include <linux/parport.h>
-# include <linux/parport_pc.h>
 #endif
 
 #include <linux/delay.h>
@@ -83,9 +91,8 @@ int cbm_handshaked_write(char data, int toggle);
 
 
 
-unsigned int port    = 0x378;           /* lpt port address             */
-
 #ifdef DIRECT_PORT_ACCESS
+unsigned int port    = 0x378;           /* lpt port address             */
 unsigned int irq     = 7;               /* lpt irq line                 */
 #else
 unsigned int lp      = 0;               /* parport number               */
@@ -152,6 +159,10 @@ MODULE_LICENSE("GPL");
 #define NAME      "cbm"
 #define CBM_MINOR 177
 
+#ifdef MODULE_ALIAS_MISCDEV
+MODULE_ALIAS_MISCDEV(CBM_MINOR);
+#endif
+
 #define IEC_DATA   1
 #define IEC_CLOCK  2
 #define IEC_ATN    4
@@ -167,8 +178,10 @@ MODULE_LICENSE("GPL");
 # define DATA_OUT  0x08
 # define RESET     0x04
 #endif
+#ifndef FOUR_BIT_CONTROL
 #define LP_IRQ     0x10
 #define LP_BIDIR   0x20
+#endif
 
 /* lpt input lines */
 #define ATN_IN     0x10
@@ -181,21 +194,45 @@ MODULE_LICENSE("GPL");
 
 static unsigned char out_bits, out_eor;
 static int busy;
+static int data_reverse;
 
+#ifdef DIRECT_PORT_ACCESS
 static int in_port;
 static int out_port;
+#endif
 
 #ifndef DIRECT_PORT_ACCESS
 static struct pardevice *cbm_device;
 #endif
 
-#define POLL()           (inb(in_port))
-#define SET(line)        (outb(out_eor^(out_bits|=line),out_port))
-#define RELEASE(line)    (outb(out_eor^(out_bits&=~(line)),out_port))
-#define SET_RELEASE(s,r) (outb(out_eor^(out_bits=(out_bits|(s))&~(r)),out_port))
-#define GET(line)        ((inb(in_port)&line)==0?1:0)
-#define XP_READ()        (inb(port))
-#define XP_WRITE(c)      (outb(c,port))
+#define GET(line)        ((POLL()&line)==0?1:0)
+#define SET(line)        (CTRL_WRITE(out_eor^(out_bits|=line)))
+#define RELEASE(line)    (CTRL_WRITE(out_eor^(out_bits&=~(line))))
+#define SET_RELEASE(s,r) (CTRL_WRITE(out_eor^(out_bits=(out_bits|(s))&~(r))))
+
+#ifdef DIRECT_PORT_ACCESS
+# define POLL()           (inb(in_port))
+# define XP_READ()        (inb(port))
+# define XP_WRITE(c)      (outb(c,port))
+# define CTRL_READ()      (inb(out_port))
+# define CTRL_WRITE(c)    (outb(c,out_port))
+#else
+# define POLL()           (parport_read_status(cbm_device->port))
+# define XP_READ()        (parport_read_data(cbm_device->port))
+# define XP_WRITE(c)      (parport_write_data(cbm_device->port,c))
+# define CTRL_READ()      (parport_read_control(cbm_device->port))
+# define CTRL_WRITE(c)    (parport_write_control(cbm_device->port,c))
+#endif
+
+#ifdef FOUR_BIT_CONTROL
+# define set_data_forward() do { parport_data_forward(cbm_device->port); \
+                                 data_reverse = 0; } while (0)
+# define set_data_reverse() do { parport_data_reverse(cbm_device->port); \
+                                 data_reverse = 1; } while (0)
+#else
+# define set_data_forward() do { RELEASE(LP_BIDIR); data_reverse = 0; } while (0)
+# define set_data_reverse() do { SET(LP_BIDIR); data_reverse = 1; } while (0)
+#endif
 
 #ifdef DEBUG
 # define DPRINTK(fmt,args...)     printk(fmt, ## args)
@@ -228,6 +265,10 @@ volatile static int irq_count;
 #  define IRQ_HANDLED
 typedef void irqreturn_t;
 # endif
+#endif
+
+#if defined(DIRECT_PORT_ACCESS) && (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18))
+# define SA_INTERRUPT IRQF_DISABLED
 #endif
 
 /*
@@ -303,7 +344,14 @@ static void wait_for_free_bus(void)
 static void do_reset( void )
 {
         printk("cbm: resetting devices\n");
+#ifdef FOUR_BIT_CONTROL
+        RELEASE(DATA_OUT | ATN_OUT | CLK_OUT);
+        parport_data_forward(cbm_device->port);
+        parport_disable_irq(cbm_device->port);
+#else
         RELEASE(DATA_OUT | ATN_OUT | CLK_OUT | LP_BIDIR | LP_IRQ);
+#endif
+        data_reverse = 0;
         SET(RESET);
         current->state = TASK_INTERRUPTIBLE;
 #ifdef KERNEL_VERSION
@@ -360,7 +408,11 @@ static void wait_for_listener(void)
         struct wait_queue wait = { current, NULL };
 #endif
 
+#ifdef FOUR_BIT_CONTROL
+        parport_enable_irq(cbm_device->port);
+#else
         SET(LP_IRQ);
+#endif
         add_wait_queue(&cbm_wait_q, &wait);
         current->state = TASK_INTERRUPTIBLE;
         RELEASE(CLK_OUT);
@@ -368,7 +420,11 @@ static void wait_for_listener(void)
             schedule();
         }
         remove_wait_queue(&cbm_wait_q, &wait);
+#ifdef FOUR_BIT_CONTROL
+        parport_disable_irq(cbm_device->port);
+#else
         RELEASE(LP_IRQ);
+#endif
 }
 
 #ifdef KERNEL_VERSION
@@ -534,9 +590,10 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
                 local_irq_save(flags);
                 SET(DATA_OUT);
                 RELEASE(ATN_OUT);
+
                 RELEASE(CLK_OUT);
-                while (!GET(CLK_IN)) // @@@
-                      ;              // @@@
+                while (!GET(CLK_IN))
+                      ;
 
                 local_irq_restore(flags);
         } else {
@@ -596,6 +653,11 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                         buf[0] |= 0x20;
                         buf[1] |= (cmd == CBMCTRL_OPEN) ? 0xf0 : 0xe0;
                         rv = cbm_raw_write(buf, 2, 1, 0);
+                        if ((cmd == CBMCTRL_CLOSE) && (rv == 0)) {
+                          /* issue a unlisten */
+                          buf[0] = 0x3f;
+                          cbm_raw_write(buf, 1, 1, 0);
+                        }
                         return rv > 0 ? 0 : rv;
 
                 case CBMCTRL_GET_EOI:
@@ -711,15 +773,15 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                         return 0;
 
                 case CBMCTRL_PP_READ:
-                        if(!(out_bits & LP_BIDIR)) {
+                        if(!data_reverse) {
                             XP_WRITE(0xff);
-                            SET(LP_BIDIR);
+                            set_data_reverse();
                         }
                         return XP_READ();
 
                 case CBMCTRL_PP_WRITE:
-                        if(out_bits & LP_BIDIR) {
-                            RELEASE(LP_BIDIR);
+                        if(data_reverse) {
+                            set_data_forward();
                         }
                         XP_WRITE(arg);
                         return 0;
@@ -795,7 +857,7 @@ cbm_release(struct inode *inode, struct file *f)
 #endif
 }
 
-static irqreturn_t cbm_interrupt(int irq, void *dev_id, struct pt_regs *regs)
+static irqreturn_t cbm_interrupt(int irq, void *dev_id)
 {
         POLL();         /* acknowledge interrupt */
 
@@ -811,11 +873,23 @@ static irqreturn_t cbm_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 }
 
 
+#ifndef DIRECT_PORT_ACCESS
 /* discard return value from cbm_interrupt */
+# if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19))
 static void cbm_interrupt_pp(int irq, void *dev_id, struct pt_regs *regs)
+# elif (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
+static void cbm_interrupt_pp(int irq, void *dev_id)
+# else
+static void cbm_interrupt_pp(void *dev_id)
+# endif
 {
-    cbm_interrupt(irq, dev_id, regs);
+# if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
+    cbm_interrupt(irq, dev_id);
+# else
+    cbm_interrupt(cbm_device->port->irq, dev_id);
+# endif
 }
+#endif /* DIRECT_PORT_ACCESS */
 
 
 static struct file_operations cbm_fops =
@@ -904,17 +978,17 @@ int cbm_init(void)
                 return -EBUSY;
         }
         DPRINTK("parallel port is mine now\n");
-
-        port = cbm_device->port->base;
 #endif
         misc_register(&cbm_dev);
 
+#ifdef DIRECT_PORT_ACCESS
         in_port   = port+1;
         out_port  = port+2;
+#endif
 
         if(cable < 0) {
                 in    = GET(ATN_IN);
-                out   = (inb(out_port) & ATN_OUT) ? 1 : 0;
+                out   = (CTRL_READ() & ATN_OUT) ? 1 : 0;
                 cable = (in != out);
                 msg   = " (auto)";
         } else {
@@ -934,14 +1008,21 @@ int cbm_init(void)
 
         irq_count = 0;
 
-        out_bits  = (inb(out_port) ^ out_eor) &
+        out_bits  = (CTRL_READ() ^ out_eor) &
                     (DATA_OUT|CLK_OUT|ATN_OUT|RESET);
 
         if((reset < 0 && (out_bits & RESET)) || reset > 0) do_reset();
 
         busy = 0;
 
+#ifdef FOUR_BIT_CONTROL
+        RELEASE(DATA_OUT | ATN_OUT | CLK_OUT);
+        parport_data_forward(pp);
+        parport_disable_irq(pp);
+#else
         RELEASE(RESET | DATA_OUT | ATN_OUT | LP_BIDIR | LP_IRQ);
+#endif
+        data_reverse = 0;
 
         current->state = TASK_INTERRUPTIBLE;
 #ifdef KERNEL_VERSION
@@ -1022,9 +1103,9 @@ unsigned char cbm_parallel_burst_read(void)
         msleep(20); /* 200? */
         while(GET(DATA_IN));
         /*linux rv = inportb(parport); */
-                if(!(out_bits & LP_BIDIR)) {
+                if(!data_reverse) {
                         XP_WRITE(0xff);
-                        SET(LP_BIDIR);
+                        set_data_reverse();
                 }
                 rv=XP_READ();   
         msleep(5);
@@ -1061,8 +1142,8 @@ int cbm_parallel_burst_write(unsigned char c)
         msleep(20);
         while(GET(DATA_IN));
         /*linux PARWRITE(); */
-                if(out_bits & LP_BIDIR) {
-                        RELEASE(LP_BIDIR);
+                if(data_reverse) {
+                        set_data_forward();
                 }
                 XP_WRITE(c);
         /*linux outportb(parport, arg); */
@@ -1071,9 +1152,9 @@ int cbm_parallel_burst_write(unsigned char c)
         msleep(20);
         while(!GET(DATA_IN));
         /*linux PARREAD(); */
-                if(!(out_bits & LP_BIDIR)) {
+                if(!data_reverse) {
                         XP_WRITE(0xff);
-                        SET(LP_BIDIR);
+                        set_data_reverse();
                 }
                 XP_READ();
         return 0;
@@ -1172,8 +1253,8 @@ int cbm_handshaked_write(char data, int toggle)
                 if (to++ > TO_HANDSHAKED_WRITE) return 1;
         }
         /*linux outportb(parport, data); */
-                if(out_bits & LP_BIDIR) {
-                        RELEASE(LP_BIDIR);
+                if(data_reverse) {
+                        set_data_forward();
                 }
                 XP_WRITE(data);
         return 1;
