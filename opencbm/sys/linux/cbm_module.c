@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.8 2007-11-11 17:16:54 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.9 2009-01-28 19:42:40 strik Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -297,7 +297,7 @@ static void wait_for_free_bus(void)
                 ++i;
 
                 if (i == 1000) {
-                        printk("Quiting because of timeout");
+                        printk("cbm: quitting because of timeout\n");
                         break;
                 }
                 timeout_us(1000);
