@@ -17,7 +17,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.10 2009-01-28 19:43:55 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.11 2009-01-28 19:44:31 strik Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -232,6 +232,10 @@ volatile static int irq_count;
 #  define IRQ_HANDLED
 typedef void irqreturn_t;
 # endif
+#endif
+
+#if defined(DIRECT_PORT_ACCESS) && (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18))
+# define SA_INTERRUPT IRQF_DISABLED
 #endif
 
 /*
