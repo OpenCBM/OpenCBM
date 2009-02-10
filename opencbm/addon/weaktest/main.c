@@ -4,12 +4,13 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright (C) 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright (C) 2007      Wolfgang Moser (http://d81.de)
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.5 2007-05-28 14:25:46 wmsr Exp $";
+    "@(#) $Id: main.c,v 1.6 2009-02-10 21:40:19 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -36,9 +37,6 @@ const unsigned char syncmark[] = {
 
 /* setable via command line */
 static d64copy_severity_e verbosity = sev_warning;
-#if 0 // @TODO unused variable
-static int no_progress = 0;
-#endif
 
 /* other globals */
 static CBM_FILE fd_cbm;
