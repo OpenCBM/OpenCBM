@@ -4,24 +4,14 @@ CBMForNG is a nearly complete rewrite (98%) of cbmformat that was
 improved by Spiro Trikalitotis to do GAP size probing and a verify
 round after the format.
 
-  Base code:                            (C)           Joe Forster
+  Base code:                            (C) 1994-2004 Joe Forster/STA
   Adaption to cbm4linux, progress bar:  (C) 1999      Michael Klein
   GAP probing and further improvements: (C) 2005      Spiro Trikaliotis
   All rewritten parts:                  (C) 2005,2006 Wolfgang Moser
 
-License change: Take note that I changed the licensing of all the
-  6502 code parts to the GNU Lesser General Public License to get a
-  chance to remove the special agreement again and have a clean
-  license then.
-  The licensing of the host program remains the same, it is
-  published under the GNU General Public License.
-  Changing the license of the drive code parts to the LGPL allows
-  linking compiled versions of that source to proprietary programs
-  or other software products, which licensing terms are incompatible
-  to the GPL.
-  Currently this license change is under discussion since all the
-  copyright holders of the drive code parts need to agree to the
-  license change.
+Licenses:
+  Host program: GNU General Public License
+  6502 code:    modified BSD license (the 3 clause BSD license)
 
 
 Some of the features implemented in the rewritten  6502  routine:
@@ -134,4 +124,4 @@ functionality will/may be removed in production versions of the next
 generation formatter.
 
 
-Wolfgang Moser, 2006-01-22
+Wolfgang Moser, 2009-02-10

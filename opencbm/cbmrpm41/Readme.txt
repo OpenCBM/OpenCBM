@@ -6,12 +6,9 @@ time measurements on a Commodore 1541 floppy disk drive.
 
   Code: (C) 2006 Wolfgang Moser
 
-License: GNU General Public License
-  On request I perhaps may want to publish the 6502 based code under
-  the GNU Lesser General Public License to allow others to link that
-  code to proprietary programs or other software products, which
-  licensing terms are incompatible to the GPL; The Star Commander
-  for example.
+Licenses:
+  Host program: GNU General Public License
+  6502 code:    modified BSD license (the 3 clause BSD license)
 
 Some of the features implemented in the rewritten  6502  routine:
 
@@ -47,4 +44,4 @@ Some of the features implemented in the rewritten  6502  routine:
     + measuring sector distances (on-track) and sector distribution
 
 
-Wolfgang Moser, 2006-06-04
+Wolfgang Moser, 2009-02-10
