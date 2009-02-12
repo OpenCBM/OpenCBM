@@ -4,9 +4,6 @@
 ; Copyright (C) 2005      Wolfgang Moser (http://d81.de)
 ; All rights reserved.
 ;
-; cbmforng   - 6502 based fast formatting routine with probing for
-;              the Commodore 1541 floppy disk drive and compatibles
-;
 ; This file is part of OpenCBM
 ;
 ; Redistribution and use in source and binary forms, with or without
@@ -34,7 +31,7 @@
 ; NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 ; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
-; "$Id: cbmformat.a65,v 1.7 2009-02-10 21:47:39 wmsr Exp $"
+; "$Id: cbmformat.a65,v 1.8 2009-02-12 21:44:40 wmsr Exp $"
 
 
 JOB_BUMP	= $C0 ; bump the head
