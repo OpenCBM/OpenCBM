@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.23 2009-02-21 08:43:54 cnvogelg Exp $
+# $Id: config.make,v 1.24 2009-02-21 09:18:20 cnvogelg Exp $
 #
 
 # get package version (major.minor.release).
@@ -109,8 +109,10 @@ KERNEL_FLAGS = ${KERNEL_DEFINE}
 #
 ifeq "$(OS)" "Darwin"
 
-LIBUSBDIR = $(HOME)/libusb
+PREFIX = /opt/opencbm
 OPENCBM_CONFIG_PATH = $(PREFIX)/etc
+XU1541DIR   = $(PWD)/xu1541/include
+LIBUSBDIR = $(shell libusb-config --prefix)
 
 OD_FLAGS  = -txC -v -An
 CFLAGS   += -DOPENCBM_MAC
