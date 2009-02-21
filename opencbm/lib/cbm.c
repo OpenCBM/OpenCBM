@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.26 2009-01-04 17:22:55 strik Exp $ \n
+** \version $Id: cbm.c,v 1.27 2009-02-21 22:48:08 cnvogelg Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -263,13 +263,18 @@ uninitialize_plugin(void)
 static int
 initialize_plugin(const char * const Adapter)
 {
-    int error = 1;
+    /* if library is already opened and initialized correctly then 
+       this function returns OK */
+    int error = 0;
 
+    /* init pointers if library was not yet opened */
     if (Plugin_information.Library == NULL)
     {
-        if (0 == initialize_plugin_pointer(&Plugin_information, Adapter))
+        /* if pointer init failed then close library and make Library NULL */
+        error = initialize_plugin_pointer(&Plugin_information, Adapter);
+        if(error != 0)
         {
-            error = 0;
+            uninitialize_plugin();
         }
     }
 
@@ -394,7 +399,7 @@ cbm_get_driver_name_ex(char * Adapter)
 
     error = initialize_plugin(adapter_stripped);
 
-    if (Plugin_information.Plugin.cbm_plugin_get_driver_name) {
+    if (error == 0) {
         ret = Plugin_information.Plugin.cbm_plugin_get_driver_name(portNumber);
     }
     else {
@@ -402,10 +407,6 @@ cbm_get_driver_name_ex(char * Adapter)
     }
 
     buffer = cbmlibmisc_strdup(ret);
-
-    if (error) {
-        uninitialize_plugin();
-    }
 
     cbmlibmisc_strfree(adapter_stripped);
 
@@ -489,9 +490,7 @@ cbm_driver_open_ex(CBM_FILE *HandleDevice, char * Adapter)
 
     cbmlibmisc_strfree(adapter_stripped);
 
-    if (error)
-        uninitialize_plugin();
-    else
+    if (error == 0)
         error = Plugin_information.Plugin.cbm_plugin_driver_open(HandleDevice, portNumber);
 
     FUNC_LEAVE_INT(error);
