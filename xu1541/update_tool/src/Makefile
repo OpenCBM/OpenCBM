@@ -16,7 +16,7 @@ LFLAGS+=-s
 
 APP = xu1541_update$(EXE_SUFFIX)
 OBJS = xu1541_update.o ihex.o flash.o
-LFLAGS := -L ../../lib/ -lxu1541$(LIB_WIN) $(LFLAGS)
+LFLAGS := -L../../lib/ -lxu1541$(LIB_WIN) $(LFLAGS)
 
 .INTERMEDIATE: $(OBJS)
 
