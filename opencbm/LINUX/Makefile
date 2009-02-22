@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.16 2007-07-25 16:37:51 strik Exp $
+# $Id: Makefile,v 1.17 2009-02-22 09:58:34 cnvogelg Exp $
 
 RELATIVEPATH=./
 include ${RELATIVEPATH}LINUX/config.make
@@ -22,7 +22,7 @@ SUBDIRS_PLUGIN_XU1541 = lib/plugin/xu1541
 
 SUBDIRS_PLUGIN_XA1541 = lib/plugin/xa1541 sys/linux/
 
-SUBDIRS_OPTIONAL = addon nibtools mnib36
+SUBDIRS_OPTIONAL = addon nibtools mnib36 cbmrpm41
 
 
 SUBDIRS_PLUGIN          = $(SUBDIRS_PLUGIN_XU1541) $(SUBDIRS_PLUGIN_XA1541)
