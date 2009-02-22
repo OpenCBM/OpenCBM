@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2007-04-29 10:46:22 strik Exp $
+# $Id: Makefile,v 1.3 2009-02-22 11:24:50 cnvogelg Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
@@ -8,6 +8,7 @@ include ${RELATIVEPATH}LINUX/config.make
 PROG = cbmrpm41
 INC  = $(PROG).inc
 MAN1 = $(PROG).1
+LINK_FLAGS += -lm
 
 all: $(PROG)
 
