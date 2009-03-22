@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/install.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: install.c,v 1.2 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: install.c,v 1.3 2009-03-22 14:09:20 strik Exp $ \n
 ** \n
 ** \brief Helper functions for installing the plugin
 **        on a Windows machine
@@ -130,7 +130,9 @@ static opencbm_plugin_install_neededfiles_t NeededFilesXA1541[] =
 {
     { SYSTEM_DIR, "opencbm-xa1541.dll", NULL },
     { DRIVER_DIR, "cbm4wdm.sys",        NULL },  /* this MUST be the same index as driver_cbm4wdm is defined */
+#ifdef _X86_
     { DRIVER_DIR, "cbm4nt.sys",         NULL },  /* this MUST be the same index as driver_cbm4nt is defined */
+#endif
     { LIST_END,   "",                   NULL }
 };
 
@@ -138,7 +140,9 @@ static opencbm_plugin_install_neededfiles_t NeededFilesXA1541[] =
 typedef
 enum driver_to_use_e {
     driver_cbm4wdm = 1,  /*!< use WDM driver */
+#ifdef _X86_
     driver_cbm4nt = 2    /*!< use NT4 driver */
+#endif
 } driver_to_use_t;
 
 /*! \brief \internal Print out a hint how to get help */
@@ -488,8 +492,12 @@ cbm_plugin_install_do_install(void * Context)
         //
         // Find out which driver to use (cbm4wdm.sys, cbm4nt.sys)
         //
-        
+
+#ifdef _X86_
         driverToUse = ((parameter->OsVersion > WINNT4) && ! parameter->ForceNt4) ? driver_cbm4wdm : driver_cbm4nt;
+#else
+        driverToUse = driver_cbm4wdm;
+#endif
 
         driverLocation = cbmlibmisc_strcat(
             pluginInstallParameter->NeededFiles[driverToUse].FileLocationString,
