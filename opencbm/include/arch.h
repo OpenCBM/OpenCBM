@@ -1,3 +1,22 @@
+/*
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
+ *
+ *  Copyright 2004-2007 Spiro Trikaliotis
+ */
+
+/*! **************************************************************
+** \file include/arch.h \n
+** \author Spiro Trikaliotis \n
+** \version $Id: arch.h,v 1.14 2009-05-09 17:42:21 strik Exp $ \n
+** \n
+** \brief Define makros and functions which account for differences
+** between the different architectures
+**
+****************************************************************/
+
 #ifndef CBM_ARCH_H
 #define CBM_ARCH_H
 

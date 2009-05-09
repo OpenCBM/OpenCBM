@@ -1,6 +1,15 @@
+/*
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
+ *
+ *  Copyright 2006 Spiro Trikaliotis
+*/
+
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.6 2006-07-20 11:45:29 strik Exp $";
+    "@(#) $Id: main.c,v 1.7 2009-05-09 17:42:21 strik Exp $";
 #endif
 
 #include "opencbm.h"

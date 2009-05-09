@@ -1,4 +1,22 @@
-/* $Id: version.common.h,v 1.4 2007-04-22 10:32:35 strik Exp $ */
+/*
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
+ *
+ *  Copyright 2005-2007 Spiro Trikaliotis
+ */
+
+/*! **************************************************************
+** \file include/WINDOWS/version.common.h \n
+** \author Spiro Trikaliotis \n
+** \version $Id: version.common.h,v 1.5 2009-05-09 17:42:21 strik Exp $ \n
+** \n
+** \brief Defining file version information for all OpenCBM tools
+**
+****************************************************************/
+
+/* $Id: version.common.h,v 1.5 2009-05-09 17:42:21 strik Exp $ */
 
 #include "version.h"
 

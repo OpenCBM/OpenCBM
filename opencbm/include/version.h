@@ -1,3 +1,21 @@
+/*
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
+ *
+ *  Copyright 2004-2009 Spiro Trikaliotis
+ */
+
+/*! **************************************************************
+** \file include/version.h \n
+** \author Spiro Trikaliotis \n
+** \version $Id: version.h,v 1.182 2009-05-09 17:42:21 strik Exp $ \n
+** \n
+** \brief Defining OpenCBM version
+**
+****************************************************************/
+
 #ifndef OPENCBM_VERSION_H
 #define OPENCBM_VERSION_H
 
@@ -11,7 +29,7 @@
 #define OPENCBM_BUILD_VERSION_STRING_PART(   _a        ) OPENCBM_BUILD_VERSION_HELP(_a)
 #define OPENCBM_BUILD_VERSION_STRING_RELEASE(_a, _b, _c) OPENCBM_BUILD_VERSION_HELP(_a) "." OPENCBM_BUILD_VERSION_HELP(_b) "." OPENCBM_BUILD_VERSION_HELP(_c)
 
-#define OPENCBM_BUILD_VERSION_STRING_CVS "$Id: version.h,v 1.181 2009-03-06 18:50:56 strik Exp $"
+#define OPENCBM_BUILD_VERSION_STRING_CVS "$Id: version.h,v 1.182 2009-05-09 17:42:21 strik Exp $"
 
 
 #if OPENCBM_VERSION_DEVEL == 0

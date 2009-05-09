@@ -1,6 +1,15 @@
+/*
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
+ *
+ *  Copyright 2006 Spiro Trikaliotis
+*/
+
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: turbo.c,v 1.4 2006-06-02 22:51:55 wmsr Exp $";
+    "@(#) $Id: turbo.c,v 1.5 2009-05-09 17:42:21 strik Exp $";
 #endif
 
 #include "libtrans.h"
