@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/nt4/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.8 2006-03-10 19:25:17 strik Exp $ \n
+** \version $Id: LoadUnload.c,v 1.9 2009-06-19 17:52:09 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **
@@ -19,7 +19,7 @@
 
 #include <ntddk.h>
 #include "cbm_driver.h"
-#include <cbmioctl.h>
+#include "cbmioctl.h"
 
 #undef ExFreePool
 
