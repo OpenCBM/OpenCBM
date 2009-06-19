@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/perfeval.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.c,v 1.7 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: perfeval.c,v 1.8 2009-06-19 17:51:32 strik Exp $ \n
 ** \n
 ** \brief Functions for performance evaluation purposes - KERNEL version
 **
@@ -332,7 +332,7 @@ PerfSynchronize(VOID)
         DBG_IRQL( == PASSIVE_LEVEL);
         InitializeObjectAttributes(&objectAttributes,
             &fileName,
-            OBJ_CASE_INSENSITIVE /*! \todo | OBJ_KERNEL_HANDLE */,
+            OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE,
             NULL,
             NULL
         );

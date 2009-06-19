@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/util-reg.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util-reg.c,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
+** \version $Id: util-reg.c,v 1.4 2009-06-19 17:51:32 strik Exp $ \n
 ** \n
 ** \brief Some utility functions for accessing the registry
 **
@@ -55,7 +55,7 @@ cbm_registry_open_for_read(OUT PHANDLE HandleKey, IN PUNICODE_STRING Path)
 
     DBG_IRQL( == PASSIVE_LEVEL); //+< according to NT4 DDK; later ones do not have this restriction!
     InitializeObjectAttributes(&objectAttributes,
-        Path, OBJ_CASE_INSENSITIVE /*! \todo | OBJ_KERNEL_HANDLE */, NULL, NULL);
+        Path, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, NULL, NULL);
 
     // Now, open the registry key
 
