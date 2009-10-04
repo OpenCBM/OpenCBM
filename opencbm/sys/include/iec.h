@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.11 2006-03-20 11:45:53 strik Exp $ \n
+** \version $Id: iec.h,v 1.11.2.1 2009-10-04 15:49:19 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -123,6 +123,9 @@ cbmiec_parallel_burst_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte);
 
 extern NTSTATUS
 cbmiec_parallel_burst_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG BufferLength);
+
+extern NTSTATUS
+cbmiec_parallel_burst_read_track_var(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG BufferLength);
 
 extern NTSTATUS
 cbmiec_parallel_burst_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR* Buffer, IN ULONG BufferLength);

@@ -6,13 +6,14 @@
  *
  *  Copyright 2005      Tim Schürmann
  *  Copyright 2005      Spiro Trikaliotis
+ *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archmnib.c \n
-** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: archmnib.c,v 1.6 2006-03-26 14:35:09 strik Exp $ \n
+** \author Tim Schürmann, Spiro Trikaliotis, Arnd \n
+** \version $Id: archmnib.c,v 1.6.4.1 2009-10-04 15:49:19 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **
@@ -133,6 +134,46 @@ cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsig
     if (retval == 0)
     {
         DBG_WARN((DBG_PREFIX "opencbm: cbm.c: parallel_burst_read_track: ioctl returned with error %u", retval));
+    }
+
+    FUNC_LEAVE_INT(retval);
+}
+
+/*! \brief PARBURST: Read a variable length track
+
+ This function is a helper function for parallel burst:
+ It reads a variable length track from the disk
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which will hold the bytes read.
+
+ \param Length
+   The length of the Buffer.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+int
+cbmarch_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+{
+    int retval = 0;
+
+    FUNC_ENTER();
+
+    retval = cbm_ioctl(HandleDevice, CBMCTRL(PARBURST_READ_TRACK_VAR),
+        NULL, 0,
+        Buffer, Length);
+
+    if (retval == 0)
+    {
+        DBG_WARN((DBG_PREFIX "opencbm: cbm.c: parallel_burst_read_track_var: ioctl returned with error %u", retval));
     }
 
     FUNC_LEAVE_INT(retval);

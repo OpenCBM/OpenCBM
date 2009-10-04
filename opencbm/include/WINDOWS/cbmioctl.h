@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.11 2006-03-26 14:35:09 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.11.2.1 2009-10-04 15:49:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -17,6 +17,7 @@
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2004 Spiro Trikaliotis
+ *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
 */
 
 #ifndef CBM_IOCTL_H
@@ -287,6 +288,10 @@ typedef CBMT_SINGLEBYTE CBMT_PARBURST_PWRITE_IN;
 //! IOCTL for updating settings of the driver
 #define CBMCTRL_UPDATE \
                             _CBMIO(CBMCTRL_BASE, 25) // -                    -
+
+//! IOCTL for reading a variable length track (for parallel burst)
+#define CBMCTRL_PARBURST_READ_TRACK_VAR \
+                            _CBMIO(CBMCTRL_BASE, 29) // -                    CBMT_PARBURST_READ_TRACK_OUT
 
 /* these are the return codes of CBMCTRL_I_INSTALL: */
 

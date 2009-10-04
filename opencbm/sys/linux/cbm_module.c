@@ -12,13 +12,14 @@
  *  Copyright 2005      Tim Schürmann                    (Parallel Burst Routines)
  *  Copyright 2005-2006 Spiro Trikaliotis                (Parallel Burst Routines)
  *  Copyright 2007-2009 Frédéric Brière                  (Adjustments on newer Linux kernels, abstraction from real hardware)
+ *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>      (Parallel Burst Routines)
  *
  *
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.14 2009-01-28 20:10:38 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.15 2009-10-04 15:49:19 strik Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -81,6 +82,7 @@ static char *rcsid =
 
 /* forward references for parallel burst routines */
 int cbm_parallel_burst_read_track(unsigned char *buffer);
+int cbm_parallel_burst_read_track_var(unsigned char *buffer);
 int cbm_parallel_burst_write_track(unsigned char *buffer, int length);
 unsigned char cbm_parallel_burst_read(void);
 int cbm_parallel_burst_write(unsigned char c);
@@ -806,6 +808,17 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                         if(access_ok(VERIFY_WRITE, kernel_val.buffer, 0x2000)==0) return -EFAULT;
                         /* and do it: */
                         return cbm_parallel_burst_read_track(kernel_val.buffer);
+
+                 case CBMCTRL_PARBURST_READ_TRACK_VAR:
+                        user_val=(PARBURST_RW_VALUE *) arg; // cast arg to structure pointer
+                        /* copy the data to the kernel: */
+                        if (copy_from_user(&kernel_val,         // kernel buffer
+                                                user_val,       // user buffer
+                                                sizeof(PARBURST_RW_VALUE))) return -EFAULT;
+                        /* verify if it's ok to write into the buffer */
+                        if(access_ok(VERIFY_WRITE, kernel_val.buffer, 0x2000)==0) return -EFAULT;
+                        /* and do it: */
+                        return cbm_parallel_burst_read_track_var(kernel_val.buffer);
                         
                 case CBMCTRL_PARBURST_WRITE_TRACK:
                         user_val=(PARBURST_RW_VALUE *) arg; // cast arg to structure pointer
@@ -1071,6 +1084,32 @@ int cbm_parallel_burst_read_track(unsigned char *buffer)
 }
 
 
+int cbm_parallel_burst_read_track_var(unsigned char *buffer)
+{
+	int i, byte;
+
+	IRQSTOPVARS;
+
+	disable();
+
+	for (i = 0; i < 0x2000; i += 1)//2)
+	{
+		byte = cbm_handshaked_read(i&1);
+		if (byte == -1)
+		{
+			enable();
+			return 0;
+		}
+		buffer[i] = byte;
+    if (byte == 0x55) break;
+	}
+
+	cbm_parallel_burst_read();
+	enable();
+	return 1;
+}
+
+
 int cbm_parallel_burst_write_track(unsigned char *buffer, int length)
 {
         int i;
@@ -1186,8 +1225,8 @@ int cbm_parallel_burst_write(unsigned char c)
 **/
 }
 
-#define TO_HANDSHAKED_READ  300000
-#define TO_HANDSHAKED_WRITE 300000
+#define TO_HANDSHAKED_READ  3300000
+#define TO_HANDSHAKED_WRITE 3300000
 
 int cbm_handshaked_read(int toggle)
 {

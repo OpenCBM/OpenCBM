@@ -1,11 +1,12 @@
 <!doctype linuxdoc system>
 
 <article>
-<!-- $Id: opencbm.sgml,v 1.5.4.5 2008-06-09 19:55:38 fbriere Exp $ -->
+<!-- $Id: opencbm.sgml,v 1.5.4.6 2009-10-04 15:49:19 strik Exp $ -->
 <title>OpenCBM 0.4.2 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
-name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de/" name="d81.de">
+name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de/" name="d81.de">,
+Arnd <htmlurl url="mailto:arnd(at)jonnz(dot)de" name="arnd(at)jonnz(dot)de">,
 <!-- _DATE_ --><date>2007-11-18
 
 <abstract>
@@ -2165,6 +2166,9 @@ Support function for mnib. Do not use.
 Support function for mnib. Do not use.
 
 <tag/int cbm_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int length);/
+Support function for mnib. Do not use.
+
+<tag/int cbm_parallel_burst_read_track_var(CBM_FILE f, __u_char *buffer, unsigned int length);/
 Support function for mnib. Do not use.
 
 <tag/int cbm_parallel_burst_write_track(CBM_FILE f, __u_char *buffer, unsigned int length);/

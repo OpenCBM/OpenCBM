@@ -6,13 +6,14 @@
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005 Spiro Trikaliotis
+ *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.17 2006-04-10 10:29:58 strik Exp $ \n
+** \version $Id: cbm.c,v 1.17.4.1 2009-10-04 15:49:19 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -1008,6 +1009,35 @@ cbm_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned 
     FUNC_ENTER();
 
     FUNC_LEAVE_INT(cbmarch_parallel_burst_read_track(HandleDevice, Buffer, Length));
+}
+
+/*! \brief PARBURST: Read a variable length track
+
+ This function is a helper function for parallel burst:
+ It reads a variable length track from the disk
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which will hold the bytes read.
+
+ \param Length
+   The length of the Buffer.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+int CBMAPIDECL
+cbm_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(cbmarch_parallel_burst_read_track_var(HandleDevice, Buffer, Length));
 }
 
 /*! \brief PARBURST: Write a complete track

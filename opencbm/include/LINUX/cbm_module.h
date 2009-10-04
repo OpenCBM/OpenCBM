@@ -5,9 +5,10 @@
  *	2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright 2009 Arnd <arnd(at)jonnz(dot)de>
 */
 
-/* $Id: cbm_module.h,v 1.5 2006-03-20 11:45:52 strik Exp $ */
+/* $Id: cbm_module.h,v 1.5.2.1 2009-10-04 15:49:19 strik Exp $ */
 
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H
@@ -40,6 +41,7 @@
 #define CBMCTRL_PARBURST_WRITE   _IO(CBMCTRL_BASE, 18)
 #define CBMCTRL_PARBURST_READ_TRACK        _IO(CBMCTRL_BASE, 19)
 #define CBMCTRL_PARBURST_WRITE_TRACK _IO(CBMCTRL_BASE, 20)
+#define CBMCTRL_PARBURST_READ_TRACK_VAR    _IO(CBMCTRL_BASE, 21)
 
 typedef struct PARBURST_RW_VALUE {     // all values needed by PARBURST_READ_TRACK and PARBURST_WRITE_TRACK
        unsigned char *buffer;

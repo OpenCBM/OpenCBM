@@ -8,13 +8,14 @@
  *  Copyright 2000-2005 Pete Rittwage
  *  Copyright 2005      Tim Schürmann
  *  Copyright 2005      Spiro Trikaliotis
+ *  Copyright 2009      Arnd M.
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
-** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: mnib.c,v 1.16 2006-04-28 10:48:17 strik Exp $ \n
+** \author Tim Schürmann, Spiro Trikaliotis, Arnd M. \n
+** \version $Id: mnib.c,v 1.16.2.1 2009-10-04 15:49:19 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n
@@ -202,8 +203,6 @@ cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
     }
     else
     {
-        static int oldValue = -1;
- 
         int returnValue2, returnValue3, timeoutCount=0;
 
         returnValue3 = READ_PORT_UCHAR(PAR_PORT);
@@ -212,16 +211,14 @@ cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
         do {
             if (++timeoutCount >= 8)
             {
-                DBG_PRINT((DBG_PREFIX "Triple-Debounce TIMEOUT: 0x%02x, 0x%02x, 0x%02x (%d, 0x%02x)",
-                    returnValue, returnValue2, returnValue3, timeoutCount, oldValue));
+                DBG_PRINT((DBG_PREFIX "Triple-Debounce TIMEOUT: 0x%02x, 0x%02x, 0x%02x (%d)",
+                    returnValue, returnValue2, returnValue3, timeoutCount));
                 break;
             }
             returnValue  = returnValue2;
             returnValue2 = returnValue3;
             returnValue3 = READ_PORT_UCHAR(PAR_PORT);
-        } while ((returnValue != returnValue2) || (returnValue != returnValue3));
-
-        oldValue = returnValue3;
+        } while ((returnValue != returnValue2) || (returnValue2 != returnValue3));
     }
 
     return returnValue;
@@ -304,6 +301,64 @@ cbmiec_parallel_burst_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN
             break;
         }
         Buffer[i] = (UCHAR) byte;
+
+        if (QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
+        {
+            PERF_EVENT_PARBURST_READ_TRACK_TIMEOUT(1);
+            timeout = 1; // FUNC_LEAVE_NTSTATUS_CONST(STATUS_TIMEOUT);
+        }
+    }
+
+    if(!timeout)
+    {
+        cbmiec_parallel_burst_read(Pdx, &dummy);
+        PERF_EVENT_PARBURST_READ_TRACK_READ_DUMMY(dummy);
+        enable();
+        ntStatus = STATUS_SUCCESS;
+    }
+    else
+    {
+        enable();
+        DBG_PRINT((DBG_PREFIX "timeout failure! Wanted to read %u, but only read %u",
+            ReturnLength, i));
+        ntStatus = STATUS_DATA_ERROR;
+    }
+
+    PERF_EVENT_PARBURST_READ_TRACK_EXIT(ntStatus);
+
+    FUNC_LEAVE_NTSTATUS(ntStatus);
+}
+
+NTSTATUS
+cbmiec_parallel_burst_read_track_var(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG ReturnLength)
+{
+    NTSTATUS ntStatus;
+    ULONG i;
+    UCHAR dummy;
+
+    int timeout = 0;
+    int byte;
+
+    FUNC_ENTER();
+
+    PERF_EVENT_PARBURST_READ_TRACK_ENTER();
+
+    disable();
+
+    PERF_EVENT_PARBURST_READ_TRACK_STARTLOOP();
+
+    for (i = 0; i < ReturnLength; i ++)
+    {
+        byte = cbm_handshaked_read(Pdx, i&1);
+        PERF_EVENT_PARBURST_READ_TRACK_VALUE(byte);
+        if (byte == -1)
+        {
+            PERF_EVENT_PARBURST_READ_TRACK_TIMEOUT(0);
+            timeout = 1;
+            break;
+        }
+        Buffer[i] = (UCHAR) byte;
+        if (byte == 0x55) break;
 
         if (QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
         {

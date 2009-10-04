@@ -5,11 +5,12 @@
  *	2 of the License, or (at your option) any later version.
  *
  *  Copyright 2005      Tim Schürmann
+ *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: archmnib.c,v 1.4 2006-03-20 11:45:53 strik Exp $";
+    "@(#) $Id: archmnib.c,v 1.4.2.1 2009-10-04 15:49:19 strik Exp $";
 #endif
 
 #include <fcntl.h>
@@ -46,6 +47,18 @@ int cbmarch_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int
 	mv.length=length; /* only needed in write_track */
 	retval=ioctl(f, CBMCTRL_PARBURST_READ_TRACK, &mv);  /* we have to catch retval to check on EFAULT */
 	if(retval==(-EFAULT)) {printf("cbm4linux: cbm.c: cbm_parallel_burst_read_track: ioctl returned -EFAULT"); return 0;}
+	return retval;
+}
+
+int cbmarch_parallel_burst_read_track_var(CBM_FILE f, __u_char *buffer, unsigned int length)
+{
+	int retval;
+
+	PARBURST_RW_VALUE mv;
+	mv.buffer=buffer;
+	mv.length=length; /* only needed in write_track */
+	retval=ioctl(f, CBMCTRL_PARBURST_READ_TRACK_VAR, &mv);  /* we have to catch retval to check on EFAULT */
+	if(retval==(-EFAULT)) {printf("cbm4linux: cbm.c: cbm_parallel_burst_read_track_var: ioctl returned -EFAULT"); return 0;}
 	return retval;
 }
 

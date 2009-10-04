@@ -6,13 +6,14 @@
  *
  *  Copyright 2005      Tim Schürmann
  *  Copyright 2005      Spiro Trikaliotis
+ *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/WINVICEBUILD/archmnib_vice.c \n
-** \author Tim Schürmann, Spiro Trikaliotis \n
-** \version $Id: archmnib_vice.c,v 1.4 2006-03-20 11:45:53 strik Exp $ \n
+** \author Tim Schürmann, Spiro Trikaliotis, Arnd \n
+** \version $Id: archmnib_vice.c,v 1.4.4.1 2009-10-04 15:49:19 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code for VICE emulation
 **
@@ -111,6 +112,14 @@ cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 
 int
 cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
+}
+
+int
+cbmarch_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     FUNC_ENTER();
 
