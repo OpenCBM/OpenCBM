@@ -304,12 +304,12 @@ on device
 \fBread\fP [\fIfile\fP]
 This command reads raw data from the IEC bus and outputs it into the
 given file, or to stdout if no file is given (or if it is a simple dash,
-`-').
+`\-').
 .TP
 \fBwrite\fP [\fIfile\fP]
 This command writes raw data to the IEC bus; the data is taken from the
 given file, or from stdin if no filename is given (or if it is a simple
-dash, `-').
+dash, `\-').
 .TP
 .BI status " device"
 Copies input from device
@@ -395,7 +395,7 @@ bytes from drive memory, starting at
 via one or more M-R commands.
 Memory contents are written to standard output if
 .I file
-is ommited or equivalent to `-'.
+is ommited or equivalent to `\-'.
 .TP
 \fBupload\fP \fIdevice\fP \fIaddress\fP [\fIfile\fP]
 Send
@@ -405,10 +405,10 @@ to drive memory, starting at
 via one or more M-W commands.
 If
 .I address
-is -1, the first two bytes from file are considered as start address.
+is \-1, the first two bytes from file are considered as start address.
 Reads standard input if
 .I file
-is ommited or equivalent to `-'.
+is ommited or equivalent to `\-'.
 .TP
 .BI change " device"
 Wait for a disk to be changed in the specified device.
