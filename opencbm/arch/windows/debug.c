@@ -1,7 +1,17 @@
+/*
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
+ *
+ *  Copyright 2005-2006 Spiro Trikaliotis
+ *
+ */
+
 /*! ************************************************************** 
 ** \file arch/windows/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.4 2006-04-08 13:41:14 strik Exp $ \n
+** \version $Id: debug.c,v 1.4.4.1 2009-11-15 16:56:05 strik Exp $ \n
 ** \n
 ** \brief Debugging help functions and definitions
 **
