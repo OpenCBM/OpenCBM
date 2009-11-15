@@ -5,14 +5,14 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2007 Spiro Trikaliotis
+ *  Copyright 2001-2007,2009 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.17 2007-04-29 17:56:56 strik Exp $ \n
+** \version $Id: init.c,v 1.18 2009-11-15 20:55:41 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -96,8 +96,8 @@ cbmiec_timeouts_init(IN PHANDLE HKey)
 
     // parallel burst related
 
-    READ_TIMEOUT_VALUE(T_PARALLEL_BURST_READ_BYTE_HANDSHAKED,   300000); // us
-    READ_TIMEOUT_VALUE(T_PARALLEL_BURST_WRITE_BYTE_HANDSHAKED,  300000); // us
+    READ_TIMEOUT_VALUE(T_PARALLEL_BURST_READ_BYTE_HANDSHAKED,  3300000); // us
+    READ_TIMEOUT_VALUE(T_PARALLEL_BURST_WRITE_BYTE_HANDSHAKED, 3300000); // us
 }
 #undef READ_TIMEOUT_VALUE
 

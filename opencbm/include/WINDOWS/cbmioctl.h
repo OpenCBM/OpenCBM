@@ -1,7 +1,7 @@
 /*! **************************************************************
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.21 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.22 2009-11-15 20:55:41 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -16,7 +16,8 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2006,2008 Spiro Trikaliotis
+ *  Copyright 2001-2006,2008-2009 Spiro Trikaliotis
+ *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
 */
 
 #ifndef CBM_IOCTL_H
@@ -341,6 +342,10 @@ typedef CBMT_IEC_DBG_VALUE CBMT_IEC_DBG_WRITE;
 //! IOCTL for debugging a cable: Write all the output lines in a hardware-specific way
 #define CBMCTRL_IEC_DBG_WRITE _CBMIO(CBMCTRL_BASE, 28) // -                    CBMT_IEC_DBG_WRITE
 
+
+//! IOCTL for reading a variable length track (for parallel burst)
+#define CBMCTRL_PARBURST_READ_TRACK_VAR \
+                            _CBMIO(CBMCTRL_BASE, 29) // -                    CBMT_PARBURST_READ_TRACK_OUT
 
 /* these are the return codes of CBMCTRL_I_INSTALL: */
 

@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2008 Spiro Trikaliotis
+ *  Copyright 2004-2009 Spiro Trikaliotis
  *
  */
 
 /*! **************************************************************
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.20 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: iec.h,v 1.21 2009-11-15 20:55:41 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **
@@ -127,6 +127,9 @@ cbmiec_parallel_burst_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte);
 
 extern NTSTATUS
 cbmiec_parallel_burst_read_track(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG BufferLength);
+
+extern NTSTATUS
+cbmiec_parallel_burst_read_track_var(IN PDEVICE_EXTENSION Pdx, OUT UCHAR* Buffer, IN ULONG BufferLength);
 
 extern NTSTATUS
 cbmiec_parallel_burst_write_track(IN PDEVICE_EXTENSION Pdx, IN UCHAR* Buffer, IN ULONG BufferLength);

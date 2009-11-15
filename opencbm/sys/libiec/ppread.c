@@ -5,14 +5,14 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2004 Spiro Trikaliotis
+ *  Copyright 2001-2004,2008-2009 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libiec/ppread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ppread.c,v 1.5 2006-06-21 10:11:55 strik Exp $ \n
+** \version $Id: ppread.c,v 1.6 2009-11-15 20:55:41 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -39,8 +39,6 @@
 LONG
 cbmiec_i_pp_read_debounced(IN PDEVICE_EXTENSION Pdx)
 {
-    static int oldValue = -1;
-
     int returnValue=-1, returnValue2, returnValue3, timeoutCount=0;
 
     FUNC_ENTER();
@@ -51,17 +49,14 @@ cbmiec_i_pp_read_debounced(IN PDEVICE_EXTENSION Pdx)
     do {
         if (++timeoutCount >= 8)
         {
-            DBG_PRINT((DBG_PREFIX "Triple-Debounce TIMEOUT: 0x%02x, 0x%02x, 0x%02x (%d, 0x%02x)",
-                returnValue, returnValue2, returnValue3, timeoutCount, oldValue));
+            DBG_PRINT((DBG_PREFIX "Triple-Debounce TIMEOUT: 0x%02x, 0x%02x, 0x%02x (%d)",
+                returnValue, returnValue2, returnValue3, timeoutCount));
             break;
         }
         returnValue  = returnValue2;
         returnValue2 = returnValue3;
         returnValue3 = READ_PORT_UCHAR(PAR_PORT);
     } while ((returnValue != returnValue2) || (returnValue != returnValue3));
-
-    oldValue = returnValue3;
- //   ntStatus = STATUS_SUCCESS;
 
     FUNC_LEAVE_LONG(returnValue);
 }

@@ -4,15 +4,16 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005,2007,2008 Spiro Trikaliotis
+ *  Copyright 1999-2005           Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright 2001-2005,2007-2009 Spiro Trikaliotis
+ *  Copyright 2009                Arnd <arnd(at)jonnz(dot)de>
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.27 2009-02-21 22:48:08 cnvogelg Exp $ \n
+** \version $Id: cbm.c,v 1.28 2009-11-15 20:55:41 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -153,6 +154,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         Plugin_information->Plugin.cbm_plugin_parallel_burst_read        = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_write       = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track  = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read_track");
+        Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track_var = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read_track_var");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write_track");
 
         Plugin_information->Plugin.cbm_plugin_iec_dbg_read               = plugin_get_address(Plugin_information->Library, "cbmarch_iec_dbg_read");
@@ -1490,6 +1492,40 @@ cbm_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned 
 
     if (Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track)
         ret = Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track(HandleDevice, Buffer, Length);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief PARBURST: Read a variable length track
+
+ This function is a helper function for parallel burst:
+ It reads a variable length track from the disk
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which will hold the bytes read.
+
+ \param Length
+   The length of the Buffer.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+int CBMAPIDECL
+cbm_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track)
+        ret = Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track_var(HandleDevice, Buffer, Length);
 
     FUNC_LEAVE_INT(ret);
 }

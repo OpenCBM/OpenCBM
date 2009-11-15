@@ -4,14 +4,15 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2008 Spiro Trikaliotis
+ *  Copyright 2004-2009 Spiro Trikaliotis
+ *  Copyright 2009 Arnd <arnd(at)jonnz(dot)de>
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
-** \author Spiro Trikaliotis \n
-** \version $Id: ioctl.c,v 1.20 2008-06-16 19:24:28 strik Exp $ \n
+** \author Spiro Trikaliotis, Arnd \n
+** \version $Id: ioctl.c,v 1.21 2009-11-15 20:55:41 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **
@@ -244,6 +245,11 @@ cbm_devicecontrol(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
 
         case CBMCTRL_PARBURST_READ_TRACK:
             DBG_IRP(CBMCTRL_PARBURST_READ_TRACK);
+            ntStatus = cbm_checkoutputbuffer(irpSp, 1, STATUS_SUCCESS);
+            break;
+
+        case CBMCTRL_PARBURST_READ_TRACK_VAR:
+            DBG_IRP(CBMCTRL_PARBURST_READ_TRACK_VAR);
             ntStatus = cbm_checkoutputbuffer(irpSp, 1, STATUS_SUCCESS);
             break;
 
@@ -493,6 +499,13 @@ cbm_execute_devicecontrol(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
             DBG_IRP(CBMCTRL_PARBURST_READ_TRACK);
             returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
             ntStatus = cbmiec_parallel_burst_read_track(Pdx, 
+                Irp->AssociatedIrp.SystemBuffer, (ULONG) returnLength);
+            break;
+
+        case CBMCTRL_PARBURST_READ_TRACK_VAR:
+            DBG_IRP(CBMCTRL_PARBURST_READ_TRACK_VAR);
+            returnLength = irpSp->Parameters.DeviceIoControl.OutputBufferLength;
+            ntStatus = cbmiec_parallel_burst_read_track_var(Pdx, 
                 Irp->AssociatedIrp.SystemBuffer, (ULONG) returnLength);
             break;
 

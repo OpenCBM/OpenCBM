@@ -4,7 +4,7 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005-2008 Spiro Trikaliotis
+ *  Copyright 2005-2009 Spiro Trikaliotis
  */
 
 #ifndef ARCHLIB_H
@@ -57,6 +57,7 @@ EXTERN cbm_plugin_iec_wait_t                   cbmarch_iec_wait;
 EXTERN cbm_plugin_parallel_burst_read_t        cbmarch_parallel_burst_read;
 EXTERN cbm_plugin_parallel_burst_write_t       cbmarch_parallel_burst_write;
 EXTERN cbm_plugin_parallel_burst_read_track_t  cbmarch_parallel_burst_read_track;
+EXTERN cbm_plugin_parallel_burst_read_track_var_t cbmarch_parallel_burst_read_track_var;
 EXTERN cbm_plugin_parallel_burst_write_track_t cbmarch_parallel_burst_write_track;
 
 
