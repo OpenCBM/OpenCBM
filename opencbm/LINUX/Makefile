@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6.2.3 2007-11-04 11:05:39 strik Exp $
+# $Id: Makefile,v 1.6.2.4 2009-11-15 16:14:53 strik Exp $
 
 include LINUX/config.make
 
@@ -40,7 +40,7 @@ mrproper:
 
 dist: all clean
 	-rm -f build-stamp configure-stamp
-	tar czvf ../`basename \`pwd\``.tar.gz --exclude=CVS --exclude=debian -C .. `basename \`pwd\``
+	tar czvf ../`basename \`pwd\``.tar.gz --exclude=CVS --exclude=debian --exclude=.cvsignore --exclude=.tmp_versions --exclude=modules.order --exclude=Module.symvers -C .. `basename \`pwd\``
 
 install-files: all
 	mkdir -p -m 755 $(BINDIR) $(LIBDIR) $(MANDIR) $(INCDIR) $(MODDIR) $(INFODIR)
