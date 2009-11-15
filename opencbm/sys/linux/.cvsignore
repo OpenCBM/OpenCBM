@@ -6,3 +6,4 @@
 cbm.ko
 cbm.mod.c
 Module.symvers
+modules.order
