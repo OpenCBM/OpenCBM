@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.18 2009-11-21 23:34:29 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.19 2009-11-27 17:46:50 fbriere Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -598,8 +598,13 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
                 RELEASE(ATN_OUT);
 
                 RELEASE(CLK_OUT);
-                while (!GET(CLK_IN))
-                      ;
+                for(i = 0; (i < 10) && !GET(CLK_IN); i++) {
+                        udelay(10);
+                }
+                if(!GET(CLK_IN)) {
+                        printk("cbm_write: device not present\n");
+                        rv = -ENODEV;
+                }
 
                 local_irq_restore(flags);
         } else {
