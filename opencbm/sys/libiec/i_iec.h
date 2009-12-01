@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.9 2006-04-28 10:48:16 strik Exp $ \n
+** \version $Id: i_iec.h,v 1.9.2.1 2009-12-01 19:44:28 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **
@@ -164,6 +164,12 @@ struct IEC_TIMEOUTS
 
     //! = 300ms, timeout for writing one handshaked byte with parallel burst
     ULONG T_PARALLEL_BURST_WRITE_BYTE_HANDSHAKED;
+
+    //! x T_9a, is 100: On send, how long to wait for driver to set DATA
+    ULONG T_TALKER_WAIT_FOR_CLOCK_TIMES;
+
+    //! = 10 us: Granularity: On send, how long to wait for driver to set DATA
+    ULONG T_TALKER_WAIT_FOR_CLOCK;
 
 } IEC_TIMEOUTS;
 

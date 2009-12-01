@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: init.c,v 1.8.2.1 2009-10-04 15:49:19 strik Exp $ \n
+** \version $Id: init.c,v 1.8.2.2 2009-12-01 19:44:28 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -93,6 +93,9 @@ cbmiec_timeouts_init(IN PHANDLE HKey)
     READ_TIMEOUT_VALUE(T_16_SEND_BIT_TIME_T_V,                      20); // us
     READ_TIMEOUT_VALUE(T_17_Times,                                  20); // x T_17
     READ_TIMEOUT_VALUE(T_17_SEND_FRAME_HANDSHAKE_T_F,              100); // us
+
+    READ_TIMEOUT_VALUE(T_TALKER_WAIT_FOR_CLOCK_TIMES,               10); // x T_TALKER_WAIT_FOR_CLOCK
+    READ_TIMEOUT_VALUE(T_TALKER_WAIT_FOR_CLOCK,                     10); // us
 
     // parallel burst related
 

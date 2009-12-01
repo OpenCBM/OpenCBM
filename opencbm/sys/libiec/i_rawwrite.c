@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file sys/libiec/i_rawwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_rawwrite.c,v 1.9.2.1 2007-11-03 18:35:31 strik Exp $ \n
+** \version $Id: i_rawwrite.c,v 1.9.2.2 2009-12-01 19:44:28 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -214,8 +214,18 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, ULONG Count, ULON
 
         PERF_EVENT_VERBOSE(0x1032, 0);
 
-        while (!CBMIEC_GET(PP_CLK_IN) && !QueueShouldCancelCurrentIrp(&Pdx->IrpQueue))
-              ;
+        /* wait at most 100 us for the talker to set CLOCK. */
+        for (i = 0; (i < libiec_global_timeouts.T_TALKER_WAIT_FOR_CLOCK_TIMES) && !CBMIEC_GET(PP_CLK_IN); i++)
+        {
+           cbmiec_udelay(libiec_global_timeouts.T_TALKER_WAIT_FOR_CLOCK);
+        }
+
+        /* no CLOCK set by talker? Then, we failed. */
+        if(!CBMIEC_GET(PP_CLK_IN))
+        {
+            DBG_ERROR((DBG_PREFIX "talk-listener-turnaround: device not present. SHOULD NOT HAPPEN!"));
+            ntStatus = STATUS_NO_SUCH_DEVICE;
+        }
 
         PERF_EVENT_VERBOSE(0x1034, 0);
 
