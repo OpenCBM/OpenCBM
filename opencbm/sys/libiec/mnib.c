@@ -8,14 +8,14 @@
  *  Copyright 2000-2005 Pete Rittwage
  *  Copyright 2005      Tim Schürmann
  *  Copyright 2005      Spiro Trikaliotis
- *  Copyright 2009      Arnd M.
+ *  Copyright 2009      Arnd Menge <arnd(at)jonnz(dot)de>
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
-** \author Tim Schürmann, Spiro Trikaliotis, Arnd M. \n
-** \version $Id: mnib.c,v 1.16.2.1 2009-10-04 15:49:19 strik Exp $ \n
+** \author Tim Schürmann, Spiro Trikaliotis, Arnd Menge \n
+** \version $Id: mnib.c,v 1.16.2.2 2009-12-03 18:09:49 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n

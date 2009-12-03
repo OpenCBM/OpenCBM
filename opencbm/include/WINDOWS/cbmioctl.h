@@ -1,7 +1,7 @@
 /*! ************************************************************** 
 ** \file include/WINDOWS/cbmioctl.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmioctl.h,v 1.11.2.1 2009-10-04 15:49:19 strik Exp $ \n
+** \version $Id: cbmioctl.h,v 1.11.2.2 2009-12-03 18:09:49 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -17,7 +17,7 @@
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2004 Spiro Trikaliotis
- *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
+ *  Copyright 2009      Arnd Menge <arnd(at)jonnz(dot)de>
 */
 
 #ifndef CBM_IOCTL_H

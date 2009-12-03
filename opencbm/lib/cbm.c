@@ -6,14 +6,14 @@
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005 Spiro Trikaliotis
- *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
+ *  Copyright 2009      Arnd Menge <arnd(at)jonnz(dot)de>
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.17.4.1 2009-10-04 15:49:19 strik Exp $ \n
+** \version $Id: cbm.c,v 1.17.4.2 2009-12-03 18:09:49 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **

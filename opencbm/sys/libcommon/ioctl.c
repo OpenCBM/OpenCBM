@@ -5,14 +5,14 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 2004 Spiro Trikaliotis
- *  Copyright 2009 Arnd <arnd(at)jonnz(dot)de>
+ *  Copyright 2009 Arnd Menge <arnd(at)jonnz(dot)de>
  *
  */
 
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
-** \author Spiro Trikaliotis, Arnd \n
-** \version $Id: ioctl.c,v 1.14.2.1 2009-10-04 15:49:19 strik Exp $ \n
+** \author Spiro Trikaliotis, Arnd Menge \n
+** \version $Id: ioctl.c,v 1.14.2.2 2009-12-03 18:09:49 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **

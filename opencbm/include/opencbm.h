@@ -6,16 +6,16 @@
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005 Spiro Trikaliotis
- *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
+ *  Copyright 2009      Arnd Menge <arnd(at)jonnz(dot)de>
  */
 
 /*! ************************************************************** 
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.16.2.1 2009-10-04 15:49:19 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.16.2.2 2009-12-03 18:09:49 strik Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
-** \authors With additions from Arnd \n
+** \authors With additions from Arnd Menge \n
 ** \n
 ** \brief DLL interface for accessing the driver
 **
