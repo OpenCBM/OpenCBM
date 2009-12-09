@@ -10,17 +10,18 @@
 /*! **************************************************************
 ** \file include/packon.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: packon.h,v 1.2 2009-05-09 17:42:21 strik Exp $ \n
+** \version $Id: packon.h,v 1.3 2009-12-09 00:38:53 natelawson Exp $ \n
 ** \n
 ** \brief Make sure that struct definitions are packed
-**
-** \comment The WDK compiler warns that this header changes
-**          the packing after it ends. This is intentional,
-**          and the whole purpose of this file!
 ****************************************************************/
 
 #if (_MSC_VER >= 1200) // MSVC 6 or newer
 
+ /*
+  * Disable warnings about included file changing packing level (C4103).
+  * That is the whole point of this file.
+  */
+ #pragma warning(disable: 4103)
  #pragma pack(push, packonoff, 1)
 
 #elif (__GNUC__ >= 3)
