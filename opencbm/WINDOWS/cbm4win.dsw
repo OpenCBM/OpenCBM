@@ -125,6 +125,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libmisc
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbmxum1541
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -451,6 +454,18 @@ Package=<4>
 ###############################################################################
 
 Project: "opencbmxu1541"=..\lib\plugin\xu1541\WINDOWS\opencbmxu1541.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "opencbmxum1541"=..\lib\plugin\xum1541\WINDOWS\opencbmxum1541.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

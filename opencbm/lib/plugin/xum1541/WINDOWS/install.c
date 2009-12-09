@@ -8,9 +8,9 @@
 */
 
 /*! ************************************************************** 
-** \file lib/plugin/xu1541/WINDOWS/install.c \n
+** \file lib/plugin/xum1541/WINDOWS/install.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: install.c,v 1.1 2009-12-09 05:39:00 natelawson Exp $ \n
+** \version $Id: install.c,v 1.2 2009-12-09 19:52:00 strik Exp $ \n
 ** \n
 ** \brief Helper functions for installing the plugin
 **        on a Windows machine
@@ -65,7 +65,7 @@ static const struct option longopts[] =
 static const char shortopts[] = "-hV";
 
 static const char usagetext[] =
-            "\n\nUsage: instcbm [options] xu1541 [plugin-options]\n"
+            "\n\nUsage: instcbm [options] xum1541 [plugin-options]\n"
             "Install the XUM1541 plugin and driver on the system, or remove it.\n"
             "\n"
             "plugin-options is one of:\n"
@@ -85,7 +85,7 @@ static opencbm_plugin_install_neededfiles_t NeededFilesXUM1541[] =
 static void
 hint(void)
 {
-    fprintf(stderr, "Try \"instcbm xu1541 --help\" for more information.\n");
+    fprintf(stderr, "Try \"instcbm xum1541 --help\" for more information.\n");
 }
 
 
@@ -94,7 +94,7 @@ hint(void)
 static VOID
 version(VOID)
 {
-    printf("opencbm xu1541 plugin version " /* OPENCBM_VERSION */ ", built on " __DATE__ " at " __TIME__ "\n");
+    printf("opencbm xum1541 plugin version " /* OPENCBM_VERSION */ ", built on " __DATE__ " at " __TIME__ "\n");
 }
 
 /*! \brief \internal Print out the help screen */
@@ -305,7 +305,7 @@ cbm_plugin_install_do_install(void * Context)
 
     FUNC_ENTER();
 
-    DBG_PRINT((DBG_PREFIX "-- xu1541.install" ));
+    DBG_PRINT((DBG_PREFIX "-- xum1541.install" ));
 
     do {
         error = FALSE;
@@ -327,7 +327,7 @@ cbm_plugin_install_do_uninstall(void * Context)
 
     FUNC_ENTER();
 
-    DBG_PRINT((DBG_PREFIX "-- xu1541.uninstall" ));
+    DBG_PRINT((DBG_PREFIX "-- xum1541.uninstall" ));
 
     do {
         error = FALSE;

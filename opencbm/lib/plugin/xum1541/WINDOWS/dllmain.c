@@ -5,13 +5,14 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 2007      Spiro Trikaliotis
+ *  Copyright 2009      Nate Lawson
  *
 */
 
 /*! ************************************************************** 
-** \file lib/plugin/xu1541/WINDOWS/dllmain.c \n
+** \file lib/plugin/xum1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: dllmain.c,v 1.1 2009-12-09 05:39:00 natelawson Exp $ \n
+** \version $Id: dllmain.c,v 1.2 2009-12-09 19:52:00 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
