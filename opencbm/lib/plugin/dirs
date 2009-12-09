@@ -2,4 +2,5 @@ DIRS= \
 	xa1541
 
 OPTIONAL_DIRS= \
-	xu1541
+	xu1541 \
+	xum1541
