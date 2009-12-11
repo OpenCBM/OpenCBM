@@ -5,12 +5,9 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: pp.c,v 1.1 2009-12-09 06:10:23 natelawson Exp $
+ * This Revision: $Id: pp.c,v 1.2 2009-12-11 20:28:17 natelawson Exp $
  *
- * $Log: pp.c,v $
- * Revision 1.1  2009-12-09 06:10:23  natelawson
- * Initial revision
- *
+ * $Log $
  * Revision 1.3  2008/10/09 18:55:45  strik
  * Removed spaces and tabs before LF.
  *
