@@ -87,8 +87,8 @@ iec_set_release(uint8_t s, uint8_t r)
 uint8_t
 iec_get(uint8_t line)
 {
-  DELAY_US(IEC_DELAY);
-  return ((CBM_PIN >> 1) & line) == 0 ? 1 : 0;
+    DELAY_US(IEC_DELAY);
+    return ((CBM_PIN >> 1) & line) == 0 ? 1 : 0;
 }
 
 uint8_t
