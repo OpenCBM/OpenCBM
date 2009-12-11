@@ -11,6 +11,9 @@
 #include <LUFA/Drivers/USB/USB.h>
 #include "xum1541.h"
 
+// Convert a string to its Unicode literal
+#define UNISTR(x)   L ## x
+
 // Device descriptor
 USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 {
@@ -111,9 +114,14 @@ USB_Descriptor_String_t PROGMEM ManufacturerString = {
     UnicodeString: L"Nate Lawson and OpenCBM team",
 };
 
+#define PRODSTRING(m)  L"xum1541 floppy adapter (" UNISTR(m) L")"
+
 USB_Descriptor_String_t PROGMEM ProductString = {
-    Header:        { Size: USB_STRING_LEN(22), Type: DTYPE_String },
-    UnicodeString: L"xum1541 floppy adapter",
+    Header: {
+        Size: USB_STRING_LEN((sizeof(PRODSTRING(MODELNAME)) - 1)),
+        Type: DTYPE_String,
+    },
+    UnicodeString: PRODSTRING(MODELNAME),
 };
 
 uint16_t

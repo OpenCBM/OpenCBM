@@ -35,7 +35,7 @@ endif
 # Final name for firmware hex file
 MODELVERSION= xum1541-$(MODEL)-v$(XUMFW_VERSION)
 
-CFLAGS+= -DMODEL=$(MODEL) -DBOARD=$(BOARD) \
+CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
 	-DF_CPU=$(CPURATE)UL -DF_CLOCK=F_CPU -mmcu=$(CPUMODEL) \
 	-O -Werror -Wall -Wstrict-prototypes -Wundef -std=gnu99 -I . \
 	-DUSB_DEVICE_ONLY -DUSE_NONSTANDARD_DESCRIPTOR_NAMES \
