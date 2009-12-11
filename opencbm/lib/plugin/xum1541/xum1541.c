@@ -14,12 +14,13 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.1 2009-12-09 05:39:00 natelawson Exp $ \n
+** \version $Id: xum1541.c,v 1.2 2009-12-11 20:33:04 natelawson Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -48,15 +49,13 @@ xu1541_dbg(int level, char *msg, ...)
     va_list argp;
 
     /* determine debug mode if not yet known */
-    if(debug_level == -10000)
-    {
-       char *val = getenv("XUM1541_DEBUG");
-       if(val)
-           debug_level = atoi(val);
+    if (debug_level == -10000) {
+        char *val = getenv("XUM1541_DEBUG");
+        if (val)
+            debug_level = atoi(val);
     }
 
-    if(level <= debug_level)
-    {
+    if (level <= debug_level) {
         fprintf(stderr, "[XUM1541] ");
         va_start(argp, msg);
         vfprintf(stderr, msg, argp);
@@ -111,6 +110,46 @@ usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
     return i - 1;
 }
 
+// Cleanup after a failure
+static void
+xum1541_cleanup(char *msg, ...)
+{
+    va_list args;
+
+    if (msg != NULL) {
+        va_start(args, msg);
+        fprintf(stderr, msg, args);
+        va_end(args);
+    }
+    if (xu1541_handle != NULL)
+        usb_close(xu1541_handle);
+    xu1541_handle = NULL;
+}
+
+static int
+xum1541_check_version(int major, int minor)
+{
+    xu1541_dbg(0, "firmware version %x.%02x", major, minor);
+    if (major != XUM1541_VERSION_MAJOR) {
+        fprintf(stderr, "xum1541 firmware major version wrong (%d != %d)\n",
+            major, XUM1541_VERSION_MAJOR);
+        return -1;
+    }
+    if (minor < XUM1541_VERSION_MINOR) {
+        fprintf(stderr, "xum1541 firmware version too low (%d < %d)\n",
+            minor, XUM1541_VERSION_MINOR);
+        fprintf(stderr, "please update your xum1541 firmware\n");
+        return -1;
+    }
+    if (minor > XUM1541_VERSION_MINOR) {
+        fprintf(stderr, "xum1541 firmware version too high (%d > %d)\n",
+            minor, XUM1541_VERSION_MINOR);
+        fprintf(stderr, "please update your OpenCBM plugin\n");
+        return -1;
+    }
+    return 0;
+}
+
 /*! \brief initialise the xu1541 device
 
   This function tries to find and identify the xu1541 device.
@@ -132,96 +171,104 @@ usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
 int
 xu1541_init(void)
 {
-  struct usb_bus      *bus;
-  struct usb_device   *dev;
-  unsigned char ret[2];
-  int len;
+    static char xumProduct[] = "xum1541"; // Start of USB product string id
+    static int prodLen = sizeof(xumProduct) - 1;
+    struct usb_bus *bus;
+    struct usb_device *dev;
+    char string[256];
+    unsigned char ret[2];
+    int len;
 
-  xu1541_dbg(0, "Scanning usb ...");
+    xu1541_dbg(0, "scanning usb ...");
 
-  usb_init();
+    usb_init();
+    usb_find_busses();
+    usb_find_devices();
 
-  usb_find_busses();
-  usb_find_devices();
+    /* usb_find_devices sets errno if some devices don't reply 100% correct. */
+    /* make lib ignore this as this has nothing to do with our device */
+    errno = 0;
 
-  /* usb_find_devices sets errno if some devices don't reply 100% correct. */
-  /* make lib ignore this as this has nothing to do with our device */
-  errno = 0;
+    for (bus = usb_get_busses(); !xu1541_handle && bus; bus = bus->next) {
+        xu1541_dbg(1, "scanning bus %s", bus->dirname);
+        for (dev = bus->devices; !xu1541_handle && dev; dev = dev->next) {
+            xu1541_dbg(1, "device %04x:%04x at %s",
+                dev->descriptor.idVendor, dev->descriptor.idProduct,
+                dev->filename);
 
-  for(bus = usb_get_busses(); !xu1541_handle && bus; bus = bus->next) {
-    xu1541_dbg(1, "Scanning bus %s", bus->dirname);
+            // First, find our vendor and product id
+            if ((dev->descriptor.idVendor != XUM1541_VID) &&
+                (dev->descriptor.idProduct != XUM1541_PID))
+                continue;
 
-    for(dev = bus->devices; !xu1541_handle && dev; dev = dev->next) {
-      xu1541_dbg(1, "Device %04x:%04x at %s",
-                 dev->descriptor.idVendor, dev->descriptor.idProduct,
-                 dev->filename);
+            xu1541_dbg(0, "found xu/xum1541 version %04x on bus %s, device %s",
+                dev->descriptor.bcdDevice, bus->dirname, dev->filename);
+            if ((xu1541_handle = usb_open(dev)) == NULL) {
+                fprintf(stderr, "error: Cannot open USB device: %s\n",
+                    usb_strerror());
+                continue;
+            }
 
-      if((dev->descriptor.idVendor == XUM1541_VID) &&
-         (dev->descriptor.idProduct == XUM1541_PID)) {
-        char    string[256];
-        int     len;
-
-        xu1541_dbg(0, "Found xum1541 device version %d on bus %s device %s.",
-               dev->descriptor.bcdDevice, bus->dirname, dev->filename);
-
-        /* open device */
-        if(!(xu1541_handle = usb_open(dev)))
-          fprintf(stderr, "Error: Cannot open USB device: %s\n",
-                  usb_strerror());
-
-        /* get device name */
-        len = usbGetStringAscii(xu1541_handle, dev->descriptor.iProduct,
-                                0x0409, string, sizeof(string));
-        if(len < 0){
-          fprintf(stderr, "warning: cannot query product "
-                  "name for device: %s\n", usb_strerror());
-          if(xu1541_handle) usb_close(xu1541_handle);
-          xu1541_handle = NULL;
+            // Get device product name and try to match against "xum1541".
+            // If no match, it could be an xu1541 so don't report an error.
+            len = usbGetStringAscii(xu1541_handle, dev->descriptor.iProduct,
+                0x0409, string, sizeof(string) - 1);
+            if (len < 0) {
+                xum1541_cleanup("error: cannot query product name: %s\n",
+                    usb_strerror());
+                continue;
+            }
+            string[len] = '\0';
+            if (len < prodLen || strstr(string, xumProduct) == NULL) {
+                xum1541_cleanup(NULL);
+                continue;
+            }
+            xu1541_dbg(0, "xum1541 name: %s\n", string);
+            goto done;
         }
-        xu1541_dbg(0, "xum1541 name: %.*s\n", len, string);
-      }
     }
-  }
 
-  if(!xu1541_handle) {
-      fprintf(stderr, "ERROR: No xum1541 device found\n");
-      return -1;
-  }
+done:
+    if (xu1541_handle == NULL) {
+        fprintf(stderr, "error: no xum1541 device found\n");
+        return -1;
+    }
 
-  if (usb_set_configuration(xu1541_handle, 1) != 0) {
-      fprintf(stderr, "USB error: %s\n", usb_strerror());
-      return -1;
-  }
+    // Select first and only device configuration.
+    if (usb_set_configuration(xu1541_handle, 1) != 0) {
+        xum1541_cleanup("USB error: %s\n", usb_strerror());
+        return -1;
+    }
 
-  /* Get exclusive access to interface 0. */
-  if (usb_claim_interface(xu1541_handle, 0) != 0) {
-      fprintf(stderr, "USB error: %s\n", usb_strerror());
-      return -1;
-  }
+    /*
+     * Get exclusive access to interface 0.
+     * After this point, do cleanup using xu1541_close() instead of
+     * xu1541_cleanup().
+     */
+    if (usb_claim_interface(xu1541_handle, 0) != 0) {
+        xum1541_cleanup("USB error: %s\n", usb_strerror());
+        return -1;
+    }
 
-  /* check the basic device info message */
-  len = usb_control_msg(xu1541_handle,
-           USB_TYPE_CLASS | USB_ENDPOINT_IN,
-           XUM1541_INFO, 0, 0, (char*)ret, sizeof(ret), 1000);
-  if (len < 0) {
-    fprintf(stderr, "USB request for XUM1541 info failed: %s!\n",
+    // Check the basic device info message for major/minor version
+    len = usb_control_msg(xu1541_handle, USB_TYPE_CLASS | USB_ENDPOINT_IN,
+        XUM1541_INFO, 0, 0, (char*)ret, sizeof(ret), 1000);
+    if (len < 0) {
+        fprintf(stderr, "USB request for XUM1541 info failed: %s\n",
             usb_strerror());
-    return -1;
-  }
+        xu1541_close();
+        return -1;
+    } else if (len != sizeof(ret)) {
+        fprintf(stderr, "Unexpected number of bytes (%d) returned\n", len);
+        xu1541_close();
+        return -1;
+    }
+    if (xum1541_check_version(ret[0], ret[1]) != 0) {
+        xu1541_close();
+        return -1;
+    }
 
-  if(len != sizeof(ret)) {
-    fprintf(stderr, "Unexpected number of bytes (%d) returned\n", len);
-    return -1;
-  }
-
-  xu1541_dbg(0, "firmware version %x.%02x", ret[0], ret[1]);
-  if (ret[0] < 4) {
-    fprintf(stderr, "xum1541 version too low (%x < 4)\n", ret[0]);
-    xu1541_close();
-    return -1;
-  }
-
-  return 0;
+    return 0;
 }
 
 /*! \brief close the xu1541 device
