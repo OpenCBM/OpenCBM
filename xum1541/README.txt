@@ -7,7 +7,7 @@ and is provided under the GPL license.
 
 For more information, see the xum1541 web page at:
 
-    http://www.root.org/~nate/xum1541/
+    http://www.root.org/~nate/c64/xum1541/
 
 
 Installation
