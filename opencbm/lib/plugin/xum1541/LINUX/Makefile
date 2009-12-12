@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2009-12-09 05:39:00 natelawson Exp $
+# $Id: Makefile,v 1.2 2009-12-12 18:27:04 cnvogelg Exp $
 
 RELATIVEPATH=../../../
 include ${RELATIVEPATH}LINUX/config.make
@@ -8,11 +8,11 @@ include ${RELATIVEPATH}LINUX/config.make
 PLUGIN_NAME = xum1541
 LIBNAME = libopencbm-${PLUGIN_NAME}
 SRCS    = archlib.c xum1541.c s1_s2_pp.c
-LIBS    = -lusb -ldl
+LIBS    = -ldl
 
-CFLAGS += -I$(LIBUSBDIR)/include
+CFLAGS += $(LIBUSB_CFLAGS)
 CFLAGS += -I../../../include/LINUX/ -I../../../include/ -I../../ -I $(XUM1541DIR)
-LDFLAGS += -L$(LIBUSBDIR)/lib
+LDFLAGS += $(LIBUSB_LDFLAGS)
 
 all: build-lib
 

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.17 2009-02-22 09:58:34 cnvogelg Exp $
+# $Id: Makefile,v 1.18 2009-12-12 18:27:04 cnvogelg Exp $
 
 RELATIVEPATH=./
 include ${RELATIVEPATH}LINUX/config.make
@@ -20,6 +20,8 @@ SUBDIRS_DOC = docs
 
 SUBDIRS_PLUGIN_XU1541 = lib/plugin/xu1541
 
+SUBDIRS_PLUGIN_XUM1541 = lib/plugin/xum1541
+
 SUBDIRS_PLUGIN_XA1541 = lib/plugin/xa1541 sys/linux/
 
 SUBDIRS_OPTIONAL = addon nibtools mnib36 cbmrpm41
@@ -30,8 +32,8 @@ SUBDIRS_PLUGIN          = $(SUBDIRS_PLUGIN_XU1541) $(SUBDIRS_PLUGIN_XA1541)
 SUBDIRS_ALL_NON_OPTIONAL= $(SUBDIRS) $(SUBDIRS_DOC) $(SUBDIRS_PLUGIN)
 
 ifeq "$(OS)" "Darwin"
-PLUGINS=plugin-xu1541
-INSTALL_PLUGINS=install-plugin-xu1541
+PLUGINS=plugin-xu1541 plugin-xum1541
+INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xum1541
 else
 PLUGINS=plugin-xu1541 plugin-xa1541
 INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xa1541
@@ -100,6 +102,11 @@ install-plugin-xu1541: plugin-xu1541
 	  $(MAKE) -C $$subdir -f LINUX/Makefile install || exit 1; \
 	done
 
+install-plugin-xu1541: plugin-xum1541
+	@for subdir in $(SUBDIRS_PLUGIN_XUM1541); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile install || exit 1; \
+	done
+
 install-plugin-xa1541: plugin-xa1541
 	@for subdir in $(SUBDIRS_PLUGIN_XA1541); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile install || exit 1; \
@@ -119,6 +126,11 @@ install-doc: install-files-doc install
 
 plugin-xu1541:
 	@for subdir in $(SUBDIRS_PLUGIN_XU1541); do \
+	  $(MAKE) -C $$subdir -f LINUX/Makefile || exit 1; \
+	done
+
+plugin-xum1541:
+	@for subdir in $(SUBDIRS_PLUGIN_XUM1541); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile || exit 1; \
 	done
 

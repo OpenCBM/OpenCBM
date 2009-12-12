@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.24 2009-02-21 09:18:20 cnvogelg Exp $
+# $Id: config.make,v 1.25 2009-12-12 18:27:04 cnvogelg Exp $
 #
 
 # get package version (major.minor.release).
@@ -43,12 +43,14 @@ UDEV_RULES  = /etc/udev/rules.d/
 #
 # Where to find the xu1541 firmware
 #
-XU1541DIR   = $(HOME)/xu1541/include/
+XU1541DIR   = $(HOME)/xu1541
+XUM1541DIR  = $(HOME)/xum1541
 
 #
 # Where to find libusb (libusb.sf.net)
 #
-LIBUSBDIR   = /usr
+LIBUSB_CFLAGS  = -I/usr/include
+LIBUSB_LDFLAGS = -L/usr/lib -lusb
 
 #
 # define os name
@@ -111,8 +113,13 @@ ifeq "$(OS)" "Darwin"
 
 PREFIX = /opt/opencbm
 OPENCBM_CONFIG_PATH = $(PREFIX)/etc
-XU1541DIR   = $(PWD)/xu1541/include
-LIBUSBDIR = $(shell libusb-config --prefix)
+XU1541DIR   = $(PWD)/xu1541
+XUM1541DIR  = $(PWD)/xum1541
+
+# use MacPort's libusb-legacy for now
+LIBUSB_CONFIG  = /opt/local/bin/libusb-legacy-config
+LIBUSB_CFLAGS  = $(shell $(LIBUSB_CONFIG) --cflags)
+LIBUSB_LDFLAGS = $(shell $(LIBUSB_CONFIG) --libs)
 
 OD_FLAGS  = -txC -v -An
 CFLAGS   += -DOPENCBM_MAC
