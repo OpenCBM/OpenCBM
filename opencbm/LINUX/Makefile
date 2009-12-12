@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.18 2009-12-12 18:27:04 cnvogelg Exp $
+# $Id: Makefile,v 1.19 2009-12-12 18:35:19 cnvogelg Exp $
 
 RELATIVEPATH=./
 include ${RELATIVEPATH}LINUX/config.make
@@ -102,7 +102,7 @@ install-plugin-xu1541: plugin-xu1541
 	  $(MAKE) -C $$subdir -f LINUX/Makefile install || exit 1; \
 	done
 
-install-plugin-xu1541: plugin-xum1541
+install-plugin-xum1541: plugin-xum1541
 	@for subdir in $(SUBDIRS_PLUGIN_XUM1541); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile install || exit 1; \
 	done
