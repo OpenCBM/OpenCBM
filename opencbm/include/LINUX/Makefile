@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2007-04-29 10:46:23 strik Exp $
+# $Id: Makefile,v 1.4 2009-12-13 12:04:18 cnvogelg Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
@@ -14,9 +14,9 @@ clean:
 mrproper: clean
 
 install-files:
-	install -m 644 $(INSTHDRS) $(INCDIR)
+	install -m 644 $(INSTHDRS) $(DESTDIR)$(INCDIR)
 
 install: install-files
 
 uninstall:
-	-cd $(INCDIR) && rm -d $(INSTHDRS)
+	-cd $(DESTDIR)$(INCDIR) && rm -d $(INSTHDRS)

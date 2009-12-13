@@ -1,4 +1,4 @@
-# $Id: librules.make,v 1.2 2008-10-10 19:05:37 strik Exp $
+# $Id: librules.make,v 1.3 2009-12-13 12:04:17 cnvogelg Exp $
 # common rules for shared lib creation
 #
 
@@ -38,13 +38,13 @@ clean-lib:
 
 # install lib
 install-lib:
-	install -d $(LIBDIR)
-	install -m 755 $(SHLIBV3) $(LIBDIR)
-	install -m 644 $(LIB) $(LIBDIR)
-	cd $(LIBDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
+	install -d $(DESTDIR)$(LIBDIR)
+	install -m 755 $(SHLIBV3) $(DESTDIR)$(LIBDIR)
+	install -m 644 $(LIB) $(DESTDIR)$(LIBDIR)
+	cd $(DESTDIR)$(LIBDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
 
 	# mark that there is no default plugin yet.
-	${RELATIVEPATH}/LINUX/plugin_helper_tools setdefaultplugin "${OPENCBM_CONFIG_PATH}" 00opencbm.conf ""
+	${RELATIVEPATH}/LINUX/plugin_helper_tools setdefaultplugin "$(DESTDIR)${OPENCBM_CONFIG_PATH}" 00opencbm.conf ""
 	
 # update lib
 update-libcache:
@@ -55,30 +55,30 @@ endif
 
 # uninstall lib
 uninstall-lib:
-	cd $(LIBDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
+	cd $(DESTDIR)$(LIBDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
 
-	${RELATIVEPATH}/LINUX/plugin_helper_tools uninstall "${OPENCBM_CONFIG_PATH}" 00opencbm.conf
+	${RELATIVEPATH}/LINUX/plugin_helper_tools uninstall "$(DESTDIR)${OPENCBM_CONFIG_PATH}" 00opencbm.conf
 
 # install plugin
 install-plugin:
-	install -d $(PLUGINDIR)
-	install -m 755 $(SHLIBV3) $(PLUGINDIR)
-	install -m 644 $(LIB) $(PLUGINDIR)
-	cd $(PLUGINDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
+	install -d $(DESTDIR)$(PLUGINDIR)
+	install -m 755 $(SHLIBV3) $(DESTDIR)$(PLUGINDIR)
+	install -m 644 $(LIB) $(DESTDIR)$(PLUGINDIR)
+	cd $(DESTDIR)$(PLUGINDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
 
 	@echo "[${PLUGIN_NAME}]\nlocation=$(PLUGINDIR)$(SHLIB)\n" > ${TMPFILE}
-	${RELATIVEPATH}/LINUX/plugin_helper_tools install "${OPENCBM_CONFIG_PATH}" 10${PLUGIN_NAME}.conf ${TMPFILE}
+	${RELATIVEPATH}/LINUX/plugin_helper_tools install "$(DESTDIR)${OPENCBM_CONFIG_PATH}" 10${PLUGIN_NAME}.conf ${TMPFILE}
 	@rm ${TMPFILE}
 
 	# set this plugin as default plugin, if there is none yet.
-	${RELATIVEPATH}/LINUX/plugin_helper_tools setdefaultplugin "${OPENCBM_CONFIG_PATH}" 00opencbm.conf ${PLUGIN_NAME}
+	${RELATIVEPATH}/LINUX/plugin_helper_tools setdefaultplugin "$(DESTDIR)${OPENCBM_CONFIG_PATH}" 00opencbm.conf ${PLUGIN_NAME}
 
 # uninstall plugin
 uninstall-plugin:
-	-cd $(PLUGINDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
-	-rmdir -p $(PLUGINDIR)
+	-cd $(DESTDIR)$(PLUGINDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
+	-rmdir -p $(DESTDIR)$(PLUGINDIR)
 
-	${RELATIVEPATH}/LINUX/plugin_helper_tools uninstall "${OPENCBM_CONFIG_PATH}" 10${PLUGIN_NAME}.conf
+	${RELATIVEPATH}/LINUX/plugin_helper_tools uninstall "$(DESTDIR)${OPENCBM_CONFIG_PATH}" 10${PLUGIN_NAME}.conf
 
 
 # compile rule

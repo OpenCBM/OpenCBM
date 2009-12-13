@@ -1,32 +1,14 @@
-# $Id: Makefile,v 1.5 2008-10-10 16:44:38 strik Exp $
+# $Id: Makefile,v 1.6 2009-12-13 12:04:18 cnvogelg Exp $
 
 RELATIVEPATH=../../
 include ${RELATIVEPATH}LINUX/config.make
 CFLAGS     := $(subst ../,../../,$(CFLAGS))
 LINK_FLAGS := $(subst ../,../../,$(LINK_FLAGS))
 
-.PHONY: all mrproper clean install uninstall install-files
+CFLAGS     += -I../../libd64copy
 
 OBJS = main.o
 PROG = weaktest
+MAN1 =
 
-.c.o:
-	$(CC) $(CFLAGS) -I../../libd64copy -c $< -o $@
-
-all: $(PROG)
-
-mrproper: clean
-
-clean:
-	rm -f $(PROG) $(OBJS)
-
-$(PROG): $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LINK_FLAGS)
-
-install-files: $(PROG)
-	install -m 755 -s $(PROG) $(BINDIR)
-
-install: install-files
-
-uninstall:
-	rm -f $(BINDIR)/$(PROG)
+include ${RELATIVEPATH}LINUX/prgrules.make

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2007-04-29 10:46:23 strik Exp $
+# $Id: Makefile,v 1.3 2009-12-13 12:04:18 cnvogelg Exp $
 
 RELATIVEPATH=../../
 include ${RELATIVEPATH}LINUX/config.make
@@ -27,7 +27,7 @@ $(PROG): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LINK_FLAGS)
 
 install-files: $(PROG)
-	install -m 755 -s $(PROG) $(BINDIR)
+	install -m 755 -s $(PROG) $(DESTDIR)$(BINDIR)
 #	install -m 644 $(MAN1) $(MANDIR)
 
 install: install-files

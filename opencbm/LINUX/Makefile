@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.19 2009-12-12 18:35:19 cnvogelg Exp $
+# $Id: Makefile,v 1.20 2009-12-13 12:04:14 cnvogelg Exp $
 
 RELATIVEPATH=./
 include ${RELATIVEPATH}LINUX/config.make
@@ -50,7 +50,7 @@ opencbm:
 	  $(MAKE) -C $$subdir -f LINUX/Makefile all || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile all; ) || true; \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile all || exit 1) || true; \
 	done
 
 doc:
@@ -63,7 +63,7 @@ clean:
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1) || true; \
 	done
 
 mrproper:
@@ -71,7 +71,7 @@ mrproper:
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1) || true; \
 	done
 
 dist: all-doc clean
@@ -79,12 +79,15 @@ dist: all-doc clean
 	tar czvf ../`basename \`pwd\``.tar.gz --exclude=CVS --exclude=debian -C .. `basename \`pwd\``
 
 install-files: all
-	mkdir -p -m 755 $(BINDIR) $(LIBDIR) $(MANDIR) $(INCDIR) $(MODDIR) $(INFODIR)
+	mkdir -p -m 755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(MANDIR) $(DESTDIR)$(INCDIR) $(DESTDIR)$(INFODIR)
+ifeq "$(OS)" "Linux"
+	mkdir -p -m 755 $(DESTDIR)$(MODDIR)
+endif 
 	@for subdir in $(SUBDIRS); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1 ) || true; \
 	done
 
 install: install-files
@@ -92,7 +95,7 @@ install: install-files
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
+	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1 ) || true; \
 	done
 
 install-all: install install-plugin

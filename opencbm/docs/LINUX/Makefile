@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2008-08-21 19:44:54 strik Exp $
+# $Id: Makefile,v 1.10 2009-12-13 12:04:18 cnvogelg Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
@@ -52,10 +52,10 @@ mrproper: clean
 	([ -d html/ ] && rmdir html/) || true
 
 install-files:
-	gzip -c9 $(INFO) > $(INFODIR)/$(INFO).gz
+	gzip -c9 $(INFO) > $(DESTDIR)$(INFODIR)/$(INFO).gz
 
 install: install-files
 	test -z `type -p mkinfodir` || mkinfodir || /bin/true
 
 uninstall:
-	rm -f $(INFODIR)/$(INFO).gz
+	rm -f $(DESTDIR)$(INFODIR)/$(INFO).gz

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2008-01-13 17:52:45 strik Exp $
+# $Id: Makefile,v 1.9 2009-12-13 12:04:19 cnvogelg Exp $
 
 ifneq ($(KERNELRELEASE),)
 EXTRA_CFLAGS := $(CBM4LINUX_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
@@ -26,9 +26,9 @@ clean:
 mrproper: clean
 
 install-files: all
-	install -m 644 `[ -f cbm.ko ] && echo cbm.ko || echo cbm.o` $(MODDIR)
+	install -m 644 `[ -f cbm.ko ] && echo cbm.ko || echo cbm.o` $(DESTDIR)$(MODDIR)
 ifneq ($(UDEV_RULES),)
-	install -m 644 45-opencbm-parallel.rules $(UDEV_RULES)
+	install -m 644 45-opencbm-parallel.rules $(DESTDIR)$(UDEV_RULES)
 endif
 
 install: install-files
@@ -36,9 +36,9 @@ install: install-files
 
 uninstall:
 	if [ ! -z "`lsmod|grep '^cbm '`" ]; then rmmod cbm; fi
-	rm -f $(MODDIR)/cbm.o $(MODDIR)/cbm.ko
+	rm -f $(DESTDIR)$(MODDIR)/cbm.o $(DESTDIR)$(MODDIR)/cbm.ko
 ifneq ($(UDEV_RULES),)
-	rm -f $(UDEV_RULES)/45-opencbm-parallel.rules
+	rm -f $(DESTDIR)$(UDEV_RULES)/45-opencbm-parallel.rules
 endif
 
 cbm.o: checksources cbm_module.c
