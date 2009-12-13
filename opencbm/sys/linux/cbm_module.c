@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.13.2.20 2009-12-03 18:09:49 strik Exp $";
+    "@(#) $Id: cbm_module.c,v 1.13.2.21 2009-12-13 20:40:32 strik Exp $";
 #endif
 
 #ifdef KERNEL_INCLUDE_OLD_CONFIG_H
@@ -598,7 +598,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
                 RELEASE(ATN_OUT);
 
                 RELEASE(CLK_OUT);
-                for(i = 0; (i < 10) && !GET(CLK_IN); i++) {
+                for(i = 0; (i < 100) && !GET(CLK_IN); i++) {
                         udelay(10);
                 }
                 if(!GET(CLK_IN)) {
