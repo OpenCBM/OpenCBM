@@ -14,7 +14,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.2 2009-12-11 20:33:04 natelawson Exp $ \n
+** \version $Id: xum1541.c,v 1.3 2009-12-22 21:30:43 natelawson Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -309,7 +309,7 @@ xu1541_close(void)
 int
 xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
-  int nBytes;
+  int nBytes = 0;
   char ret[4], cmdBuf[XUM_CMDBUF_SIZE];
 
   xu1541_dbg(1, "ioctl %d for device %d, sub %d", cmd, addr, secaddr);
@@ -402,7 +402,8 @@ xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
           }
       }
       else if (cmd == XUM1541_GET_EOI || cmd == XUM1541_IEC_WAIT ||
-               cmd == XUM1541_IEC_POLL || cmd == XUM1541_PP_READ)
+               cmd == XUM1541_IEC_POLL || cmd == XUM1541_PP_READ ||
+               cmd == XUM1541_PARBURST_READ)
       {
         int retries = 5;
         do {
@@ -774,8 +775,6 @@ xu1541_special_write(__u_char mode, const __u_char *data, size_t size)
         int bytes2write;
 
         bytes2write = size - bytesWritten;
-        if (bytes2write > XUM_ENDPOINT_BULK_SIZE)
-            bytes2write = XUM_ENDPOINT_BULK_SIZE;
         if((wr = usb_bulk_write(xu1541_handle,
                                 XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                 (char *)data, bytes2write, 1000)) < 0)
@@ -850,8 +849,6 @@ xu1541_special_read(__u_char mode, __u_char *data, size_t size)
         int bytes2read;
 
         bytes2read = size - bytesRead;
-        if (bytes2read > XUM_ENDPOINT_BULK_SIZE)
-            bytes2read = XUM_ENDPOINT_BULK_SIZE;
         if((rd = usb_bulk_read(xu1541_handle,
                                XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
                                (char *)data, bytes2read, 1000)) < 0)
