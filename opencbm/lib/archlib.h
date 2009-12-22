@@ -56,6 +56,8 @@ EXTERN cbm_plugin_iec_wait_t                   cbmarch_iec_wait;
 
 EXTERN cbm_plugin_parallel_burst_read_t        cbmarch_parallel_burst_read;
 EXTERN cbm_plugin_parallel_burst_write_t       cbmarch_parallel_burst_write;
+EXTERN cbm_plugin_parallel_burst_read_n_t      cbmarch_parallel_burst_read_n;
+EXTERN cbm_plugin_parallel_burst_write_n_t     cbmarch_parallel_burst_write_n;
 EXTERN cbm_plugin_parallel_burst_read_track_t  cbmarch_parallel_burst_read_track;
 EXTERN cbm_plugin_parallel_burst_read_track_var_t cbmarch_parallel_burst_read_track_var;
 EXTERN cbm_plugin_parallel_burst_write_track_t cbmarch_parallel_burst_write_track;

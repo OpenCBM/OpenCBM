@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.28 2009-11-15 20:55:41 strik Exp $ \n
+** \version $Id: cbm.c,v 1.29 2009-12-22 21:26:09 natelawson Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -153,6 +153,8 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         Plugin_information->Plugin.cbm_plugin_iec_wait                   = plugin_get_address(Plugin_information->Library, "cbmarch_iec_wait");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_read        = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_write       = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write");
+        Plugin_information->Plugin.cbm_plugin_parallel_burst_read_n      = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read_n");
+        Plugin_information->Plugin.cbm_plugin_parallel_burst_write_n      = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write_n");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track  = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read_track");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track_var = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read_track_var");
         Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write_track");
@@ -1457,6 +1459,52 @@ cbm_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
         Plugin_information.Plugin.cbm_plugin_parallel_burst_write(HandleDevice, Value);
 
     FUNC_LEAVE();
+}
+
+int CBMAPIDECL
+cbm_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
+    unsigned int Length)
+{
+    unsigned int i;
+    int rv;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_read_n) {
+        rv = Plugin_information.Plugin.cbm_plugin_parallel_burst_read_n(
+            HandleDevice, Buffer, Length);
+    } else {
+        for (i = 0; i < Length; i++) {
+            Buffer[i] = Plugin_information.Plugin
+                .cbm_plugin_parallel_burst_read(HandleDevice);
+        }
+        rv = Length;
+    }
+
+    FUNC_LEAVE_INT(rv);
+}
+
+int CBMAPIDECL
+cbm_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
+    unsigned int Length)
+{
+    unsigned int i;
+    int rv;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_write_n) {
+        rv = Plugin_information.Plugin.cbm_plugin_parallel_burst_write_n(
+            HandleDevice, Buffer, Length);
+    } else {
+        for (i = 0; i < Length; i++) {
+            Plugin_information.Plugin.cbm_plugin_parallel_burst_write(
+                HandleDevice, Buffer[i]);
+        }
+        rv = Length;
+    }
+
+    FUNC_LEAVE_INT(rv);
 }
 
 /*! \brief PARBURST: Read a complete track

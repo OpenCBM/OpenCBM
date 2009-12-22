@@ -10,7 +10,7 @@
 /*! **************************************************************
 ** \file include/opencbm-plugin.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm-plugin.h,v 1.6 2009-11-15 20:55:40 strik Exp $ \n
+** \version $Id: opencbm-plugin.h,v 1.7 2009-12-22 21:26:11 natelawson Exp $ \n
 ** \n
 ** \brief Plugin DLL interface
 **
@@ -245,6 +245,30 @@ typedef __u_char CBMAPIDECL cbm_plugin_parallel_burst_read_t(CBM_FILE HandleDevi
  \param Value
 */
 typedef void CBMAPIDECL cbm_plugin_parallel_burst_write_t(CBM_FILE HandleDevice, __u_char Value);
+
+/*! \brief @@@@@ \todo document
+
+ \param HandleDevice
+
+ \param Buffer
+
+ \param Length
+
+ \return
+*/
+typedef int CBMAPIDECL cbm_plugin_parallel_burst_read_n_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+
+/*! \brief @@@@@ \todo document
+
+ \param HandleDevice
+
+ \param Buffer
+
+ \param Length
+
+ \return
+*/
+typedef int CBMAPIDECL cbm_plugin_parallel_burst_write_n_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -686,6 +710,8 @@ struct opencbm_plugin_s {
 
     cbm_plugin_parallel_burst_read_t        * cbm_plugin_parallel_burst_read;        /*!< pointer to a cbm_plugin_parallel_burst_read_t() function */
     cbm_plugin_parallel_burst_write_t       * cbm_plugin_parallel_burst_write;       /*!< pointer to a cbm_plugin_parallel_burst_write_t() function */
+    cbm_plugin_parallel_burst_read_n_t      * cbm_plugin_parallel_burst_read_n;      /*!< pointer to a cbm_plugin_parallel_burst_read_n_t() function */
+    cbm_plugin_parallel_burst_write_n_t     * cbm_plugin_parallel_burst_write_n;     /*!< pointer to a cbm_plugin_parallel_burst_write_n_t() function */
     cbm_plugin_parallel_burst_read_track_t  * cbm_plugin_parallel_burst_read_track;  /*!< pointer to a cbm_plugin_parallel_burst_read_track_t() function */
     cbm_plugin_parallel_burst_read_track_var_t  * cbm_plugin_parallel_burst_read_track_var;  /*!< pointer to a cbm_plugin_parallel_burst_read_track_var_t() function */
     cbm_plugin_parallel_burst_write_track_t * cbm_plugin_parallel_burst_write_track; /*!< pointer to a cbm_plugin_parallel_burst_write_track_t() function */

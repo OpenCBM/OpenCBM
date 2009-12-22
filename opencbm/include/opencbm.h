@@ -13,7 +13,7 @@
 /*! **************************************************************
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.26 2009-11-15 20:55:40 strik Exp $ \n
+** \version $Id: opencbm.h,v 1.27 2009-12-22 21:26:11 natelawson Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \authors With additions from Wolfgang Moser and Arnd \n
@@ -188,6 +188,8 @@ EXTERN int CBMAPIDECL cbm_iec_dbg_write(CBM_FILE HandleDevice, unsigned char Val
 
 EXTERN __u_char CBMAPIDECL cbm_parallel_burst_read(CBM_FILE f);
 EXTERN void CBMAPIDECL cbm_parallel_burst_write(CBM_FILE f, __u_char c);
+EXTERN int CBMAPIDECL cbm_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+EXTERN int CBMAPIDECL cbm_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 EXTERN int CBMAPIDECL  cbm_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int length);
 EXTERN int CBMAPIDECL  cbm_parallel_burst_read_track_var(CBM_FILE f, __u_char *buffer, unsigned int length);
 EXTERN int CBMAPIDECL cbm_parallel_burst_write_track(CBM_FILE f, __u_char *buffer, unsigned int length);
