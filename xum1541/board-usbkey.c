@@ -66,35 +66,30 @@ board_init(void)
 void
 iec_set(uint8_t line)
 {
-    DELAY_US(IEC_DELAY);
     CBM_PORT |= line;
 }
 
 void
 iec_release(uint8_t line)
 {
-    DELAY_US(IEC_DELAY);
     CBM_PORT &= ~line;
 }
 
 void
 iec_set_release(uint8_t s, uint8_t r)
 {
-    DELAY_US(IEC_DELAY);
     CBM_PORT = (CBM_PORT & ~r) | s;
 }
 
 uint8_t
 iec_get(uint8_t line)
 {
-    DELAY_US(IEC_DELAY);
     return ((CBM_PIN >> 1) & line) == 0 ? 1 : 0;
 }
 
 uint8_t
 iec_poll(void)
 {
-    DELAY_US(IEC_DELAY);
     return CBM_PIN >> 1;
 }
 
@@ -123,6 +118,12 @@ xu1541_pp_write(uint8_t val)
 static uint8_t statusValue;
 static uint8_t statusMask;
 static uint16_t statusCount;
+
+uint8_t
+board_get_status()
+{
+    return statusValue;
+}
 
 // Status indicators (LEDs for this board)
 void

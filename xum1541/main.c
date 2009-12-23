@@ -84,7 +84,11 @@ EVENT_USB_ConfigurationChanged(void)
     // Clear out any old configuration before allocating
     USB_ResetConfig();
 
-    // Setup and enable the two bulk endpoints
+    /*
+     * Setup and enable the two bulk endpoints. This must be done in
+     * increasing order of endpoints (3, 4) to avoid fragmentation of
+     * the USB RAM.
+     */
     Endpoint_ConfigureEndpoint(XUM_BULK_IN_ENDPOINT, EP_TYPE_BULK,
         ENDPOINT_DIR_IN, XUM_ENDPOINT_BULK_SIZE, ENDPOINT_BANK_DOUBLE);
     Endpoint_ConfigureEndpoint(XUM_BULK_OUT_ENDPOINT, EP_TYPE_BULK,
@@ -176,7 +180,7 @@ USB_BulkWorker()
      * it immediately and we return the response inline.
      *
      * We use the input buffer to store the output as well. So no direct
-     * command response can be >8 bytes.
+     * command response can be >4 bytes.
      */
     status = usbHandleBulk(cmdBuf, cmdBuf);
     if (status > 0) {

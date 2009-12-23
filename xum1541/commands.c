@@ -26,6 +26,10 @@ typedef void (*Write2Fn_t)(uint8_t *data);
 static uint16_t usbDataLen;
 static uint8_t usbDataDir = XUM_DATA_DIR_NONE;
 
+// Nibtools command state. See nib_parburst_read/write_checked()
+static uint8_t suppressNibCmd;
+static uint8_t savedAlign;
+
 static void
 usbInitIo(uint16_t len, uint8_t dir)
 {
@@ -46,7 +50,12 @@ usbInitIo(uint16_t len, uint8_t dir)
     usbDataLen = len;
     usbDataDir = dir;
 
-    // Wait until endpoint is ready before continuing
+    /*
+     * Wait until endpoint is ready before continuing. It is critical
+     * that we do this so that the transfer routines have somewhat
+     * minimal latency when accessing the endpoint buffers. Otherwise
+     * timing could be violated.
+     */
     while (!Endpoint_IsReadWriteAllowed())
         ;
 }
@@ -66,7 +75,9 @@ usbIoDone(void)
             Endpoint_ClearIN();
         }
     } else if (usbDataDir == ENDPOINT_DIR_OUT) {
-
+        if (!Endpoint_IsReadWriteAllowed()) {
+            Endpoint_ClearOUT();
+        }
     } else {
         DEBUGF("done: bad io dir %d\n", usbDataDir);
     }
@@ -84,17 +95,6 @@ usbSendByte(uint8_t data)
     }
 #endif
 
-    /*
-     * Check if the endpoint is currently full.
-     * If so, clear the endpoint bank to send it to the host and
-     * wait until the buffer is free again.
-     */
-    if (!Endpoint_IsReadWriteAllowed()) {
-        Endpoint_ClearIN();
-        while (!Endpoint_IsReadWriteAllowed())
-            ;
-    }
-
     // Write data back to the host buffer for USB transfer
     Endpoint_Write_Byte(data);
     usbDataLen--;
@@ -102,7 +102,9 @@ usbSendByte(uint8_t data)
     // If the endpoint is now full, flush the block to the host
     if (!Endpoint_IsReadWriteAllowed()) {
         Endpoint_ClearIN();
-        }
+        while (!Endpoint_IsReadWriteAllowed())
+            ;
+    }
 
     // Check if the current command is being aborted by the host
     if (doDeviceReset) {
@@ -138,11 +140,6 @@ usbRecvByte(uint8_t *data)
     // Read data from the host buffer, received via USB
     *data = Endpoint_Read_Byte();
     usbDataLen--;
-
-    // If the endpoint is now empty, pre-fetch the next data
-    if (!Endpoint_IsReadWriteAllowed()) {
-        Endpoint_ClearOUT();
-    }
 
     // Check if the current command is being aborted by the host
     if (doDeviceReset) {
@@ -217,26 +214,39 @@ static uint8_t
 ioReadNibLoop(uint16_t len)
 {
     uint16_t i;
-    int8_t ret;
     uint8_t data;
 
+    // Probably an error, but handle it anyway.
+    if (len == 0)
+        return 0;
+
     usbInitIo(len, ENDPOINT_DIR_IN);
+    iec_release(IO_DATA);
+
+    /*
+     * Wait until the host has gotten to generating an IN transaction
+     * before doing the handshake that leads to data beginning to stream
+     * out. Not sure the exact value for this, but 5 ms appears to fail.
+     */
+    DELAY_MS(10);
+
+    // We're ready to go, kick off the actual data transfer
+    nib_parburst_read();
+
     for (i = 0; i < len; i++) {
         // Read a byte from the parport
-        ret = nib_read_handshaked(&data, i & 1);
-        if (ret < 0) {
+        if (nib_read_handshaked(&data, i & 1) < 0) {
             DEBUGF("nbrdth1 to %d\n", i);
-            break;
+            return -1;
         }
+
         // Send the byte via USB
         usbSendByte(data);
     }
+    usbIoDone();
 
     // All bytes read ok so read the final dummy byte
-    if (i == len)
-        data = nib_parburst_read();
-
-    usbIoDone();
+    nib_parburst_read();
     return 0;
 }
 
@@ -244,31 +254,107 @@ static uint8_t
 ioWriteNibLoop(uint16_t len)
 {
     uint16_t i;
-    int8_t ret;
     uint8_t data;
 
+    // Probably an error, but handle it anyway.
+    if (len == 0)
+        return 0;
+
     usbInitIo(len, ENDPOINT_DIR_OUT);
+    iec_release(IO_DATA);
+
+    // We're ready to go, kick off the actual data transfer
+    nib_parburst_write(savedAlign);
+
     for (i = 0; i < len; i++) {
         // Get the byte via USB
         usbRecvByte(&data);
 
         // Write a byte to the parport
-        ret = nib_write_handshaked(data, i & 1);
-        if (ret < 0) {
+        if (nib_write_handshaked(data, i & 1) < 0) {
             DEBUGF("nbwrh1 to\n");
-            break;
+            return -1;
         }
     }
-    // All bytes read ok so read the final dummy byte
-    if (i == len) {
-        nib_write_handshaked(0, i & 1);
-        data = nib_parburst_read();
-    }
+
+    /*
+     * All bytes written ok, so write a final zero byte and read back the
+     * dummy result.
+     */
+    nib_write_handshaked(0, i & 1);
+    nib_parburst_read();
 
     usbIoDone();
-    return i;
+    return 0;
 }
 
+/*
+ * Set a flag to suppress the next nib_parburst_read(). We do this if
+ * the current mnib command is to read or write a track-at-once.
+ *
+ * Since timing is critical for the toggled read/write, we need to be
+ * ready to poll in a tight loop before starting it. However, nibtools
+ * expects to write the 00,55,aa,ff command, then read a handshaked byte
+ * to ack that it is ready, then finally do the polled loop itself.
+ *
+ * With USB, the transition from the handshake to the actual polled loop
+ * can be tens of milliseconds. So we suppress the handshaked read that
+ * is initiated by nibtools, then do it ourselves when we really are ready
+ * (in ioReadNibLoop(), above). This ensures that there is minimal delay
+ * between the handshake and the polling loop.
+ *
+ * For write track, this is similar except that final ack writes a single
+ * byte that indicates how to align tracks, if at all. We cache that for
+ * ioWriteNibLoop().
+ */
+static void
+nib_parburst_write_checked(uint8_t data)
+{
+    static uint8_t mnibCmd[] = { 0x00, 0x55, 0xaa, 0xff };
+    static uint8_t cmdIdx;
+
+    /*
+     * If cmd is a write track, save the alignment value for later but
+     * suppress the handshaked write itself.
+     */
+    if (suppressNibCmd) {
+        suppressNibCmd = 0;
+        savedAlign = data;
+        return;
+    }
+
+    // State machine to match 00,55,aa,ff,XX where XX is read/write track.
+    if (cmdIdx == sizeof(mnibCmd)) {
+        if (data == 0x03 || data == 0x04 || data == 0x05 ||
+            data == 0x0b || data == 0x0c) {
+            suppressNibCmd = 1;
+        }
+        cmdIdx = 0;
+    } else if (mnibCmd[cmdIdx] == data) {
+        cmdIdx++;
+    } else {
+        cmdIdx = 0;
+        if (mnibCmd[0] == data)
+            cmdIdx++;
+    }
+
+    nib_parburst_write(data);
+}
+
+/*
+ * Delay the handshaked read until read/write track, if that's the
+ * next function to run. nib_parburst_write_checked() sets this flag.
+ */
+static uint8_t
+nib_parburst_read_checked(void)
+{
+    if (!suppressNibCmd)
+        return nib_parburst_read();
+    else {
+        suppressNibCmd = 0;
+        return 0x88;
+    }
+}
 /*
  * Process the given USB control command, storing the result in replyBuf
  * and returning the number of output bytes. Returns -1 if command is
@@ -289,10 +375,12 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
     case XUM1541_INFO:
         replyBuf[0] = XUM1541_VERSION_MAJOR;
         replyBuf[1] = XUM1541_VERSION_MINOR;
-        return 2;
+        replyBuf[2] = XUM1541_CAPABILITIES;
+        replyBuf[3] = board_get_status();
+        return 4;
     case XUM1541_RESET:
-        // Clear any USB state, reset the IEC bus
-        USB_ResetConfig();
+        // XXX do Mac/Linux need us to clear USB also?
+        // USB_ResetConfig();
         xu1541_reset();
         board_set_status(STATUS_READY);
         return 0;
@@ -341,6 +429,9 @@ usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
             case XUM1541_NIB:
                 ioReadNibLoop(len);
                 break;
+            case XUM1541_NIB_READ_N:
+                ioReadLoop(nib_parburst_read_checked, len);
+                break;
             default:
                 DEBUGF("badproto %d\n", proto);
             }
@@ -368,6 +459,9 @@ usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
                 break;
             case XUM1541_NIB:
                 ioWriteNibLoop(len);
+                break;
+            case XUM1541_NIB_WRITE_N:
+                ioWriteLoop(nib_parburst_write_checked, len);
                 break;
             default:
                 DEBUGF("badproto %d\n", proto);
@@ -420,6 +514,13 @@ usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
         return 1;
     case XUM1541_PP_WRITE:
         xu1541_pp_write(request[1]);
+        return 0;
+    case XUM1541_PARBURST_READ:
+        replyBuf[0] = nib_parburst_read_checked();
+        return 1;
+    case XUM1541_PARBURST_WRITE:
+        // Sets suppressNibCmd if we're doing a read/write track.
+        nib_parburst_write_checked(request[1]);
         return 0;
     default:
         DEBUGF("ERR: bulk cmd %d not impl.\n", request[0]);

@@ -10,6 +10,14 @@ For more information, see the xum1541 web page at:
     http://www.root.org/~nate/c64/xum1541/
 
 
+Revisions
+=========
+0.3 (2009/12/23) - Add nibbler (mnib/nibtools) support and misc stability
+    fixes. Protocol version 1.
+0.2 (2009/12/11) - Initial beta release for AT90USBKEY board.
+    Protocol version 0.
+
+
 Installation
 ============
 To install or upgrade the firmware on a device, you just need to flash it
@@ -95,10 +103,11 @@ The xu1541 uses only control transfers, and thus has to implement IO in
 two stages. First it transfers data to the microcontroller in a 128-byte
 buffer, then it transfers it to the PC or drive. We still use this model
 for the CBM protocol since it also gives an easy way to decouple the PC
-from the IEC bus. However, for data transfers for s1, s2, pp, p2, etc.,
+from the IEC bus. However, for data transfers for s1, s2, pp, p2, nib, etc.,
 it can stream the data all at once as we have some guarantee that the
 drive is waiting for us and we won't be holding the bus for too long.
-This increases performance.
+This increases performance and allows support for the nibtools protocol
+for copying protected disks.
 
 The firmware is organized in a logical way to support multiple device
 models being based off the same firmware. The first model is the AT90USBKEY,

@@ -38,10 +38,6 @@
 #endif
 
 // USB parameters for descriptor configuration
-#define XUM_ENDPOINT_0_SIZE     8
-#define XUM_ENDPOINT_BULK_SIZE  64
-#define XUM_BULK_IN_ENDPOINT    3
-#define XUM_BULK_OUT_ENDPOINT   4
 #define XUM_DATA_DIR_NONE       0x0f
 
 // Status levels to notify the user (e.g. LEDS)

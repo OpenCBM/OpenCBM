@@ -39,6 +39,7 @@ uint8_t xu1541_pp_read(void);
 void xu1541_pp_write(uint8_t val);
 
 // Status indicators (LEDs)
+uint8_t board_get_status(void);
 void board_set_status(uint8_t status);
 void board_update_display(void);
 
