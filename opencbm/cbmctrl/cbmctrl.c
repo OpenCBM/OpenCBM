@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.45 2009-01-26 18:27:24 strik Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.46 2009-12-29 01:55:46 natelawson Exp $";
 #endif
 
 #include "opencbm.h"
@@ -1298,6 +1298,7 @@ static int do_change(CBM_FILE fd, OPTIONS * const options)
          * Release ATN again
          */
         cbm_iec_release(fd, IEC_ATN);
+        rv = 0;
 
     } while (0);
 
