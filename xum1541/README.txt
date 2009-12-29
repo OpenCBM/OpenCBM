@@ -183,19 +183,19 @@ firmware.
 Tasks
 =====
 Bugs:
-- "cbmctrl change 8" times out instead of waiting forever
 - Drive does not answer again after aborting "cbmread 8 file" with ^C
-- Driver error for command: cbmforng -e 41 -v -c -s 9 disk,id
-  Does not occur for normal formatting.
 - cbmctrl status after ^C aborting a cbmrpm41 returns bad byte for index 0
+- Figure out why hw reset doesn't break out of some states
 
 Improvements:
-- LEDs don't look cool enough  :-)
+- test delay timing loops with scope to optimize
+- combine OUT cmd and data usb xfers
 - remove GET_RESULT command
 - add handling of USB stalls in error case
 - Readability: xu1541_ioctl needs to be split up in plugin for 3 types of IO
 - enable WDT in order to avoid need for manual reset of AVR in cases where
   it is hung up
+- Consider adding IEEE-488 or 1571 burst most (SRQ) support
 
 General opencbm issues not in xum1541 code:
 - cbmcopy only does byte at a time, does not use read_n() API from plugin
