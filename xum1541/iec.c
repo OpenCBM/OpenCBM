@@ -59,7 +59,7 @@ iec2hw(uint8_t iec)
     return pgm_read_byte(iec2hw_table + iec);
 }
 
-// Prepare the drive for commands
+// Initialize our command buffer and all IEC lines to idle
 void
 cbm_init(void)
 {
@@ -70,8 +70,6 @@ cbm_init(void)
 
     iec_release(IO_ATN | IO_CLK | IO_DATA | IO_RESET);
     DELAY_US(100);
-
-    xu1541_reset();
 }
 
 static uint8_t
@@ -110,7 +108,7 @@ check_if_bus_free(void)
 static void
 wait_for_free_bus(void)
 {
-    uint16_t i = 2000;
+    uint16_t i = XUM1541_RESET_TIMEOUT * 1000;
 
     while (1) {
         wdt_reset();
@@ -197,19 +195,15 @@ send_byte(uint8_t b)
 static uint8_t
 wait_for_listener(void)
 {
-    uint16_t a, b;
-
     /* release the clock line to indicate that we are ready */
     iec_release(IO_CLK);
 
     /* wait for client to do the same with the DATA line */
-    for (a = 0; iec_get(IO_DATA) && a < XUM1541_W4L_TIMEOUT * 100; a++) {
-        for (b = 0; iec_get(IO_DATA) && b < 1000; b++) {
-            DELAY_US(10);
-        }
+    while (iec_get(IO_DATA)) {
+        DELAY_US(10);
     }
 
-    return iec_get(IO_DATA) == 0;
+    return 1;
 }
 
 /* return number of successful written bytes or 0 on error */
@@ -269,6 +263,7 @@ cbm_raw_write(const uint8_t *buf, uint8_t len, uint8_t atn, uint8_t talk)
 
             if (send_byte(*buf++)) {
                 len--;
+                board_update_display();
                 DELAY_US(100);
             } else {
                 DEBUGF("write: io err\n");
@@ -370,6 +365,7 @@ cbm_raw_read(uint8_t *buf, uint8_t len)
         if (ok) {
             *buf++ = b;
             count++;
+            board_update_display();
             DELAY_US(50);
         }
 
@@ -491,30 +487,20 @@ xu1541_request_async(const uint8_t *buf, uint8_t len,
     io_buffer[1] = talk;
 }
 
-/* wait while a specific line to reach a certain state */
+/* wait forever for a specific line to reach a certain state */
 uint8_t
 xu1541_wait(uint8_t line, uint8_t state)
 {
     uint8_t hw_mask, hw_state;
-    uint16_t i,j;
 
     /* calculate hw mask and expected state */
     hw_mask = iec2hw(line);
     hw_state = state ? hw_mask : 0;
 
-    j = i = 0;
     while ((iec_poll() & hw_mask) == hw_state) {
-        if (i >= 1000) {
-            if (j++ > XUM1541_W4L_TIMEOUT * 100) {
-                DEBUGF("iec_wait to\n");
-                return 0xff;
-            }
-            i = 0;
-        } else {
-            i++;
-            DELAY_US(10);
-        }
+        DELAY_US(10);
     }
+
     return 0;
 }
 

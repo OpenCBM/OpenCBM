@@ -169,20 +169,18 @@ board_update_display()
 {
     uint8_t leds;
 
-    if (statusMask != 0) {
-        // Every ~30 ms, flash the LEDs
-        if ((TIFR0 & (1 << TOV0)) != 0) {
-            // Clear overflow bit
-            TIFR0 |= (1 << TOV0);
-            statusCount++;
-            leds = LEDs_GetLEDs();
-            LEDs_SetAllLEDs(leds ^ statusMask);
+    // Every ~30 ms, flash the LEDs
+    if (statusMask == 0 || (TIFR0 & (1 << TOV0)) == 0)
+        return;
 
-            // Go back to idle after ~300 ms.
-            if (statusValue == STATUS_ACTIVE && statusCount == 10) {
+    // Clear overflow bit
+    TIFR0 |= (1 << TOV0);
+    statusCount++;
+    leds = LEDs_GetLEDs();
+    LEDs_SetAllLEDs(leds ^ statusMask);
+
+    // Go back to idle after ~300 ms.
+    if (statusValue == STATUS_ACTIVE && statusCount == 10) {
                 board_set_status(STATUS_READY);
-            }
-        }
-
     }
 }

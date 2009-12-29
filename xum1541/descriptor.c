@@ -31,7 +31,8 @@ USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
     VendorID:               0x0403,
     ProductID:              0xc632,
-    ReleaseNumber:          0x0400,
+    ReleaseNumber:          ((XUM1541_VERSION_MAJOR << 8) |
+                             XUM1541_VERSION_MINOR),
 
     ManufacturerStrIndex:   0x01,
     ProductStrIndex:        0x02,
@@ -118,7 +119,7 @@ USB_Descriptor_String_t PROGMEM ManufacturerString = {
 
 USB_Descriptor_String_t PROGMEM ProductString = {
     Header: {
-        Size: USB_STRING_LEN((sizeof(PRODSTRING(MODELNAME)) - 1)),
+        Size: USB_STRING_LEN(((sizeof(PRODSTRING(MODELNAME)) / 2) - 1)),
         Type: DTYPE_String,
     },
     UnicodeString: PRODSTRING(MODELNAME),

@@ -36,6 +36,7 @@ main(void)
     // Indicate device not ready and try to reset the drive
     board_set_status(STATUS_INIT);
     cbm_init();
+    xu1541_reset();
 
     /*
      * Process bulk transactions as they appear. Control requests are

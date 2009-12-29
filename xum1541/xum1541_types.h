@@ -24,7 +24,6 @@
 #define XUM1541_ECHO                0xff
 #define XUM1541_INFO                0
 #define XUM1541_RESET               1
-// XUM1541_RESET is a control cmd too but numbering kept same as xu1541
 
 // Capabilities bits
 #define XU1541_CAP_CBM              0x0001 // supports CBM commands
@@ -52,7 +51,7 @@
 #define XUM1541_IO_BUFFER_SIZE      128
 
 // Time to wait for device in seconds (60 max possible)
-#define XUM1541_W4L_TIMEOUT         20
+#define XUM1541_RESET_TIMEOUT       2
 
 // Basic ioctls
 #define XUM1541_READ                2

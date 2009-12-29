@@ -26,6 +26,9 @@ typedef void (*Write2Fn_t)(uint8_t *data);
 static uint16_t usbDataLen;
 static uint8_t usbDataDir = XUM_DATA_DIR_NONE;
 
+// Last command byte seen, returned by XUM1541_INFO
+static uint8_t runningCmd;
+
 // Nibtools command state. See nib_parburst_read/write_checked()
 static uint8_t suppressNibCmd;
 static uint8_t savedAlign;
@@ -106,6 +109,9 @@ usbSendByte(uint8_t data)
             ;
     }
 
+    // Update LEDs
+    board_update_display();
+
     // Check if the current command is being aborted by the host
     if (doDeviceReset) {
         DEBUGF("sndrst\n");
@@ -140,6 +146,9 @@ usbRecvByte(uint8_t *data)
     // Read data from the host buffer, received via USB
     *data = Endpoint_Read_Byte();
     usbDataLen--;
+
+    // Update LEDs
+    board_update_display();
 
     // Check if the current command is being aborted by the host
     if (doDeviceReset) {
@@ -376,11 +385,9 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
         replyBuf[0] = XUM1541_VERSION_MAJOR;
         replyBuf[1] = XUM1541_VERSION_MINOR;
         replyBuf[2] = XUM1541_CAPABILITIES;
-        replyBuf[3] = board_get_status();
+        replyBuf[3] = runningCmd;
         return 4;
     case XUM1541_RESET:
-        // XXX do Mac/Linux need us to clear USB also?
-        // USB_ResetConfig();
         xu1541_reset();
         board_set_status(STATUS_READY);
         return 0;
@@ -393,19 +400,23 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
 int8_t
 usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
 {
-    uint8_t talk;
+    uint8_t proto, talk, ret;
     uint16_t len = (request[3] << 8) | request[2];
-    uint8_t proto;
 
+    // Track current command for XUM1541_INFO request
+    runningCmd = request[0];
+    // Default is to return no data
+    ret = 0;
     board_set_status(STATUS_ACTIVE);
-    switch (request[0]) {
+    switch (runningCmd) {
     case XUM1541_GET_RESULT:
         xu1541_get_result(replyBuf);
-        return 2;
+        ret = 2;
+        break;
     case XUM1541_REQUEST_READ:
         DEBUGF("req rd %d\n", len);
         xu1541_request_read((uint8_t)len);
-        return 0;
+        break;
     case XUM1541_READ:
         proto = request[1];
         DEBUGF("rd:%d %d\n", proto, len);
@@ -436,7 +447,7 @@ usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
                 DEBUGF("badproto %d\n", proto);
             }
         }
-        return 0;
+        break;
     case XUM1541_WRITE:
         proto = request[1];
         DEBUGF("wr:%d %d\n", proto, len);
@@ -467,65 +478,70 @@ usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
                 DEBUGF("badproto %d\n", proto);
             }
         }
-        return 0;
+        break;
 
     /* Async commands for the control channel */
     case XUM1541_TALK:
     case XUM1541_LISTEN:
         DEBUGF("tlk/lst(%d,%d)\n", request[1], request[2]);
-        talk = (request[0] == XUM1541_TALK);
+        talk = (runningCmd == XUM1541_TALK);
         request[1] |= talk ? 0x40 : 0x20;
         request[2] |= 0x60;
         xu1541_request_async(request + 1, 2, /*atn*/1, talk);
-        return 0;
+        break;
     case XUM1541_UNTALK:
     case XUM1541_UNLISTEN:
         DEBUGF("untlk/unlst\n");
-        request[1] = (request[0] == XUM1541_UNTALK) ? 0x5f : 0x3f;
+        request[1] = (runningCmd == XUM1541_UNTALK) ? 0x5f : 0x3f;
         xu1541_request_async(request + 1, 1, /*atn*/1, /*talk*/0);
-        return 0;
+        break;
     case XUM1541_OPEN:
     case XUM1541_CLOSE:
         DEBUGF("open/close(%d,%d)\n", request[1], request[2]);
         request[1] |= 0x20;
-        request[2] |= (request[0] == XUM1541_OPEN) ? 0xf0 : 0xe0;
+        request[2] |= (runningCmd == XUM1541_OPEN) ? 0xf0 : 0xe0;
         xu1541_request_async(request + 1, 2, /*atn*/1, /*talk*/0);
-        return 0;
+        break;
 
     /* Low-level port access */
     case XUM1541_GET_EOI:
         replyBuf[0] = eoi ? 1 : 0;
-        return 1;
+        ret = 1;
+        break;
     case XUM1541_CLEAR_EOI:
         eoi = 0;
-        return 0;
+        break;
     case XUM1541_IEC_WAIT:
         xu1541_wait(/*line*/request[1], /*state*/request[2]);
         /* FALLTHROUGH */
     case XUM1541_IEC_POLL:
         replyBuf[0] = xu1541_poll();
         DEBUGF("poll=%x\n", replyBuf[0]);
-        return 1;
+        ret = 1;
+        break;
     case XUM1541_IEC_SETRELEASE:
         xu1541_setrelease(/*set*/request[1], /*release*/request[2]);
-        return 0;
+        break;
     case XUM1541_PP_READ:
         replyBuf[0] = xu1541_pp_read();
-        return 1;
+        ret = 1;
+        break;
     case XUM1541_PP_WRITE:
         xu1541_pp_write(request[1]);
-        return 0;
+        break;
     case XUM1541_PARBURST_READ:
         replyBuf[0] = nib_parburst_read_checked();
-        return 1;
+        ret = 1;
+        break;
     case XUM1541_PARBURST_WRITE:
         // Sets suppressNibCmd if we're doing a read/write track.
         nib_parburst_write_checked(request[1]);
-        return 0;
+        break;
     default:
-        DEBUGF("ERR: bulk cmd %d not impl.\n", request[0]);
-        return -1;
+        DEBUGF("ERR: bulk cmd %d not impl.\n", runningCmd);
+        ret = -1;
     }
 
-    return 0;
+    runningCmd = 0;
+    return ret;
 }
