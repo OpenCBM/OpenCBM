@@ -16,7 +16,7 @@
 
 /* time out 10% after device itself times out */
 /* so make sure we should normally never time out on usb */
-#define USB_TIMEOUT (XUM1541_W4L_TIMEOUT * 1100)
+#define USB_RESET_TIMEOUT (XUM1541_RESET_TIMEOUT * 1100)
 
 // libusb value for "wait forever"
 #define LIBUSB_NO_TIMEOUT   -1

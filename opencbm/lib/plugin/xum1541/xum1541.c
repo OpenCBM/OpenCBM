@@ -14,7 +14,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.3 2009-12-22 21:30:43 natelawson Exp $ \n
+** \version $Id: xum1541.c,v 1.4 2009-12-29 02:00:48 natelawson Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -129,7 +129,7 @@ xum1541_cleanup(char *msg, ...)
 static int
 xum1541_check_version(int major, int minor)
 {
-    xu1541_dbg(0, "firmware version %x.%02x", major, minor);
+    xu1541_dbg(0, "firmware version %d.%d", major, minor);
     if (major != XUM1541_VERSION_MAJOR) {
         fprintf(stderr, "xum1541 firmware major version wrong (%d != %d)\n",
             major, XUM1541_VERSION_MAJOR);
@@ -176,7 +176,7 @@ xu1541_init(void)
     struct usb_bus *bus;
     struct usb_device *dev;
     char string[256];
-    unsigned char ret[2];
+    unsigned char devInfo[4];
     int len;
 
     xu1541_dbg(0, "scanning usb ...");
@@ -223,7 +223,7 @@ xu1541_init(void)
                 xum1541_cleanup(NULL);
                 continue;
             }
-            xu1541_dbg(0, "xum1541 name: %s\n", string);
+            xu1541_dbg(0, "xum1541 name: %s", string);
             goto done;
         }
     }
@@ -251,21 +251,22 @@ done:
     }
 
     // Check the basic device info message for major/minor version
+    memset(devInfo, 0, sizeof(devInfo));
     len = usb_control_msg(xu1541_handle, USB_TYPE_CLASS | USB_ENDPOINT_IN,
-        XUM1541_INFO, 0, 0, (char*)ret, sizeof(ret), 1000);
-    if (len < 0) {
+        XUM1541_INFO, 0, 0, (char*)devInfo, sizeof(devInfo), 1000);
+    if (len < 2) {
         fprintf(stderr, "USB request for XUM1541 info failed: %s\n",
             usb_strerror());
         xu1541_close();
         return -1;
-    } else if (len != sizeof(ret)) {
-        fprintf(stderr, "Unexpected number of bytes (%d) returned\n", len);
+    }
+    if (xum1541_check_version(devInfo[0], devInfo[1]) != 0) {
         xu1541_close();
         return -1;
     }
-    if (xum1541_check_version(ret[0], ret[1]) != 0) {
-        xu1541_close();
-        return -1;
+    if (len >= 4) {
+        xu1541_dbg(0, "device capabilities %02x status %d",
+            devInfo[2], devInfo[3]);
     }
 
     return 0;
@@ -324,12 +325,12 @@ xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
   if (cmd == XUM1541_RESET)
   {
       /* sync transfer, read result directly */
-      /* USB_TIMEOUT msec timeout required for reset */
+      /* USB_RESET_TIMEOUT msec timeout required for reset */
       if((nBytes = usb_control_msg(xu1541_handle,
                    USB_TYPE_CLASS | USB_ENDPOINT_IN,
                    cmd, (secaddr << 8) + addr, 0,
                    NULL, 0,
-                   USB_TIMEOUT)) < 0)
+                   USB_RESET_TIMEOUT)) < 0)
       {
           fprintf(stderr, "USB error in xu1541_ioctl(control): %s\n",
                   usb_strerror());
@@ -409,7 +410,7 @@ xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
         do {
             if((nBytes = usb_bulk_read(xu1541_handle,
                                XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
-                               ret, 1, 1000)) == 1)
+                               ret, 1, LIBUSB_NO_TIMEOUT)) == 1)
             {
                 break;
             } else {
@@ -492,7 +493,7 @@ xu1541_write(const __u_char *data, size_t len)
             if((wr = usb_bulk_write(xu1541_handle,
                                     XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                     (char *)data, chunkSize,
-                                    USB_TIMEOUT)) < 0)
+                                    1000)) < 0)
             {
                 fprintf(stderr, "USB error in xu1541_write data: %s\n",
                     usb_strerror());
@@ -531,7 +532,7 @@ xu1541_write(const __u_char *data, size_t len)
         while (!link_ok) {
             if((wr = usb_bulk_read(xu1541_handle,
                                XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
-                               (char*)rv, sizeof(rv), 1000)) == sizeof(rv))
+                               (char*)rv, sizeof(rv), LIBUSB_NO_TIMEOUT)) == sizeof(rv))
             {
                 xu1541_dbg(2, "got result %d/%d", rv[0], rv[1]);
 
@@ -641,7 +642,7 @@ xu1541_read(__u_char *data, size_t len)
         while (!link_ok) {
             if((rd = usb_bulk_read(xu1541_handle,
                                XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
-                               (char*)rv, sizeof(rv), 1000)) == sizeof(rv))
+                               (char*)rv, sizeof(rv), LIBUSB_NO_TIMEOUT)) == sizeof(rv))
             {
                 xu1541_dbg(2, "got result %d/%d", rv[0], rv[1]);
 
