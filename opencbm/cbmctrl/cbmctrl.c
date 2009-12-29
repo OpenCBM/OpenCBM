@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.46 2009-12-29 01:55:46 natelawson Exp $";
+    "@(#) $Id: cbmctrl.c,v 1.47 2009-12-29 22:37:10 wmsr Exp $";
 #endif
 
 #include "opencbm.h"
@@ -1262,10 +1262,11 @@ static int do_change(CBM_FILE fd, OPTIONS * const options)
             break;
         }
 
-        rv = cbm_upload(fd, unit, 0x500, prog_tdchange, sizeof(prog_tdchange));
-    
-        if (rv != sizeof(prog_tdchange))
+        if (cbm_upload(fd, unit, 0x500, prog_tdchange, sizeof(prog_tdchange)) != sizeof(prog_tdchange))
         {
+            /*
+             * The drive code wasn't uploaded fully, thus quit.
+             */
             rv = 1;
             break;
         }
@@ -1298,7 +1299,6 @@ static int do_change(CBM_FILE fd, OPTIONS * const options)
          * Release ATN again
          */
         cbm_iec_release(fd, IEC_ATN);
-        rv = 0;
 
     } while (0);
 

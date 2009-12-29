@@ -2,7 +2,7 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.23 2008-09-15 18:24:31 strik Exp $
+rem $Id: ddkbuild_start.bat,v 1.24 2009-12-29 22:37:08 wmsr Exp $
 
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
@@ -56,6 +56,7 @@ if not defined DDKBUILD_COMMAND_OSR    set DDKBUILD_COMMAND_OSR=ddkbuild_osr.cmd
 
 
 if not defined XU1541DIR set XU1541DIR=.
+if not defined XUM1541DIR set XUM1541DIR=.
 
 rem --------------------------------------------------------------------------
 
@@ -87,7 +88,7 @@ if /I "%0" EQU "-hollis" (
 )
 
 set DDKBUILD_PLATFORM=i386
-set OPTIONAL_DIRS=vdd nt4 win98 xu1541
+set OPTIONAL_DIRS=vdd nt4 win98 xu1541 xum1541
 
 if %DDKBUILD_HOLLIS% EQU 1 (
 	set DDKBUILD_PLATFORM_OPTION=W2K
@@ -110,7 +111,7 @@ if /I "%0" EQU "-i386" (
 	) else (
 		set DDKBUILD_PLATFORM_OPTION=A64
 	)
-	set OPTIONAL_DIRS=xu1541
+	set OPTIONAL_DIRS=xu1541 xum1541
 	shift
 )
 
