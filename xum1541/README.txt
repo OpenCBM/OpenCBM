@@ -199,3 +199,22 @@ Improvements:
 
 General opencbm issues not in xum1541 code:
 - cbmcopy only does byte at a time, does not use read_n() API from plugin
+
+General opencbm issues for a 0.5.x release:
+- instcbm (Windows):
+  * add and debug plugin functionality (partly there, but not in CVS yet)
+  * --nocopy support (partly in local sandbox, but not in CVS yet)
+    . works for all but opencbm.conf, which still resides in
+      WINDOWS\System32 dir
+    . Partial remove (only one or more plugins)
+    . if the default plugin is removed, make another one the default
+    . remove the plugin from the configuration file
+    . only remove OpenCBM if all plugins are removed
+    . Remove opencbm.conf if OpenCBM is removed completely
+  * re-add --update, --check and --debug
+  * change defaults only if plugin install was successfull
+  * add --purge option for --remove to completely remove OpenCBM from machine
+
+- Document new instcbm functionality
+- Document changes
+- Remove \todo doxygen comments and replace it with "correct" comments.
