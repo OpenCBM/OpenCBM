@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $Id: cbmcopy_fill.sh,v 1.2 2006-04-18 15:21:23 wmsr Exp $
+# $Id: cbmcopy_fill.sh,v 1.3 2010-01-02 13:26:14 wmsr Exp $
 
 function error_info {
 	echo "cbmcopy_fill.sh <testfileset> <drivetype> [<cbmcopy parameters>]" 1>&2
@@ -19,7 +19,7 @@ fi
 
 case $1 in
 	mass)
-		checkNcreateMassData.sh
+		./checkNcreateMassData.sh
 		;;
 	file)
 		./checkNcreateTestData.sh
