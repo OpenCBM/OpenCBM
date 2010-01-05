@@ -9,7 +9,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.20 2006-06-18 13:34:55 wmsr Exp $";
+    "@(#) $Id: cbmcopy.c,v 1.21 2010-01-05 07:45:03 natelawson Exp $";
 #endif
 
 #include <stdio.h>
@@ -207,7 +207,6 @@ static int cbmcopy_read(CBM_FILE fd,
     if(rv)
     {
         msg_cb( sev_fatal, "could not open file for reading: %s", buf );
-        cbm_driver_close(fd);
         return rv;
     }
 
@@ -533,7 +532,6 @@ int cbmcopy_write_file(CBM_FILE fd,
     if(rv)
     {
         msg_cb( sev_fatal, "could not open file for writing: %s", buf );
-        cbm_driver_close(fd);
         return rv;
     }
 
