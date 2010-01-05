@@ -14,7 +14,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.4 2009-12-29 02:00:48 natelawson Exp $ \n
+** \version $Id: xum1541.c,v 1.5 2010-01-05 07:42:56 natelawson Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -253,7 +253,8 @@ done:
     // Check the basic device info message for major/minor version
     memset(devInfo, 0, sizeof(devInfo));
     len = usb_control_msg(xu1541_handle, USB_TYPE_CLASS | USB_ENDPOINT_IN,
-        XUM1541_INFO, 0, 0, (char*)devInfo, sizeof(devInfo), 1000);
+        XUM1541_INIT, 0, 0, (char*)devInfo, sizeof(devInfo),
+        USB_RESET_TIMEOUT);
     if (len < 2) {
         fprintf(stderr, "USB request for XUM1541 info failed: %s\n",
             usb_strerror());
@@ -280,8 +281,17 @@ done:
 void
 xu1541_close(void)
 {
+    int ret;
+
     xu1541_dbg(0, "Closing USB link");
 
+    ret = usb_control_msg(xu1541_handle, USB_TYPE_CLASS | USB_ENDPOINT_OUT,
+        XUM1541_SHUTDOWN, 0, 0, NULL, 0, 1000);
+    if (ret < 0) {
+        fprintf(stderr,
+            "USB request for XUM1541 close failed, continuing: %s\n",
+            usb_strerror());
+    }
     if (usb_release_interface(xu1541_handle, 0) != 0)
         fprintf(stderr, "USB release intf error: %s\n", usb_strerror());
 
@@ -327,7 +337,7 @@ xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
       /* sync transfer, read result directly */
       /* USB_RESET_TIMEOUT msec timeout required for reset */
       if((nBytes = usb_control_msg(xu1541_handle,
-                   USB_TYPE_CLASS | USB_ENDPOINT_IN,
+                   USB_TYPE_CLASS | USB_ENDPOINT_OUT,
                    cmd, (secaddr << 8) + addr, 0,
                    NULL, 0,
                    USB_RESET_TIMEOUT)) < 0)
@@ -523,7 +533,7 @@ xu1541_write(const __u_char *data, size_t len)
                                  XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                  cmdBuf, sizeof(cmdBuf), 1000)) < 0)
         {
-            fprintf(stderr, "USB error in xu1541_ioctl(async): %s\n",
+            fprintf(stderr, "USB error in xu1541_write(async): %s\n",
                   usb_strerror());
             exit(-1);
         }
@@ -632,7 +642,7 @@ xu1541_read(__u_char *data, size_t len)
                                 XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                 cmdBuf, sizeof(cmdBuf), 1000)) < 0)
         {
-            fprintf(stderr, "USB error in xu1541_ioctl(async): %s\n",
+            fprintf(stderr, "USB error in xu1541_read(async): %s\n",
                   usb_strerror());
             exit(-1);
         }
