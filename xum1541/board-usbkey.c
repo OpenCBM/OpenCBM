@@ -159,7 +159,7 @@ board_set_status(uint8_t status)
         LEDs_SetAllLEDs(statusMask);
         break;
     default:
-        DEBUGF("badstsval %d\n", status);
+        DEBUGF(DBG_ERROR, "badstsval %d\n", status);
     }
 }
 
@@ -181,6 +181,6 @@ board_update_display()
 
     // Go back to idle after ~300 ms.
     if (statusValue == STATUS_ACTIVE && statusCount == 10) {
-                board_set_status(STATUS_READY);
+        board_set_status(STATUS_READY);
     }
 }

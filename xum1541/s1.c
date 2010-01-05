@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s1.c,v 1.2 2009-12-11 20:28:17 natelawson Exp $
+ * This Revision: $Id: s1.c,v 1.3 2010-01-05 07:42:01 natelawson Exp $
  *
  * $Log $
  * Revision 1.5  2007/03/17 19:31:34  harbaum
@@ -34,8 +34,6 @@ s1_write_byte(uint8_t c)
 {
     uint8_t i;
 
-    wdt_reset();
-
     for (i = 0; i < 8; i++, c <<= 1) {
         if ((c & 0x80) != 0)
             iec_set(IO_DATA);
@@ -61,8 +59,6 @@ s1_read_byte(void)
 {
     int8_t i;
     uint8_t b, c;
-
-    wdt_reset();
 
     c = 0;
     for (i = 7; i >= 0; i--) {

@@ -36,7 +36,7 @@ main(void)
     // Indicate device not ready and try to reset the drive
     board_set_status(STATUS_INIT);
     cbm_init();
-    xu1541_reset();
+    cbm_reset();
 
     /*
      * Process bulk transactions as they appear. Control requests are
@@ -44,15 +44,18 @@ main(void)
      */
     USB_Init();
     for (;;) {
+        wdt_reset();
+
         while (device_running) {
             // If we have a command to run, call the worker function
             if (USB_BulkWorker()) {
-                DEBUGF("runcmd\n");
+                DEBUGF(DBG_INFO, "runcmd\n");
                 xu1541_handle();
             }
 
             // Toggle LEDs each command
             board_update_display();
+            wdt_reset();
         }
 
         // TODO: save power here when device is not running
@@ -62,7 +65,7 @@ main(void)
 void
 EVENT_USB_Connect(void)
 {
-    DEBUGF("usbcon\n");
+    DEBUGF(DBG_ALL, "usbcon\n");
     board_set_status(STATUS_CONNECTING);
     doDeviceReset = false;
 }
@@ -70,7 +73,7 @@ EVENT_USB_Connect(void)
 void
 EVENT_USB_Disconnect(void)
 {
-    DEBUGF("usbdiscon\n");
+    DEBUGF(DBG_ALL, "usbdiscon\n");
 
     // Halt the main() command loop and indicate we are not configured
     device_running = false;
@@ -80,10 +83,10 @@ EVENT_USB_Disconnect(void)
 void
 EVENT_USB_ConfigurationChanged(void)
 {
-    DEBUGF("usbconfchg\n");
+    DEBUGF(DBG_ALL, "usbconfchg\n");
 
     // Clear out any old configuration before allocating
-    USB_ResetConfig();
+    USB_ResetConfig(true);
 
     /*
      * Setup and enable the two bulk endpoints. This must be done in
@@ -112,14 +115,15 @@ EVENT_USB_UnhandledControlPacket(void)
      */
     if ((USB_ControlRequest.bmRequestType & CONTROL_REQTYPE_TYPE) !=
         REQTYPE_CLASS) {
-        DEBUGF("bad ctrl req %x\n", USB_ControlRequest.bmRequestType);
+        DEBUGF(DBG_ERROR, "bad ctrl req %x\n",
+            USB_ControlRequest.bmRequestType);
         return;
     }
 
     // Process the command and get any returned data
     len = usbHandleControl(USB_ControlRequest.bRequest, replyBuf);
     if (len == -1) {
-        DEBUGF("ctrl req err\n");
+        DEBUGF(DBG_ERROR, "ctrl req err\n");
         board_set_status(STATUS_ERROR);
         return;
     }
@@ -133,7 +137,8 @@ EVENT_USB_UnhandledControlPacket(void)
         Endpoint_Write_Control_Stream_LE(replyBuf, len);
         Endpoint_ClearOUT();
     } else {
-        while (!Endpoint_IsINReady());
+        while (!Endpoint_IsINReady())
+            ;
         Endpoint_ClearIN();
     }
 }
@@ -157,12 +162,14 @@ USB_BulkWorker()
 #ifdef DEBUG
     // Dump the status of both endpoints before getting the command
     Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT);
-    DEBUGF("bsti %x %x %x %x %x %x %x %x %x\n", Endpoint_GetCurrentEndpoint(),
+    DEBUGF(DBG_INFO, "bsti %x %x %x %x %x %x %x %x\n",
+        Endpoint_GetCurrentEndpoint(),
         Endpoint_BytesInEndpoint(), Endpoint_IsEnabled(),
         Endpoint_IsReadWriteAllowed(), Endpoint_IsConfigured(),
         Endpoint_IsINReady(), Endpoint_IsOUTReceived(), Endpoint_IsStalled());
     Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
-    DEBUGF("bsto %x %x %x %x %x %x %x %x %x\n", Endpoint_GetCurrentEndpoint(),
+    DEBUGF(DBG_INFO, "bsto %x %x %x %x %x %x %x %x\n",
+        Endpoint_GetCurrentEndpoint(),
         Endpoint_BytesInEndpoint(), Endpoint_IsEnabled(),
         Endpoint_IsReadWriteAllowed(), Endpoint_IsConfigured(),
         Endpoint_IsINReady(), Endpoint_IsOUTReceived(), Endpoint_IsStalled());
@@ -187,7 +194,7 @@ USB_BulkWorker()
     if (status > 0) {
         USB_WriteBlock(cmdBuf, status);
     } else if (status == -1) {
-        DEBUGF("usbblk err\n");
+        DEBUGF(DBG_ERROR, "usbblk err\n");
         board_set_status(STATUS_ERROR);
         Endpoint_StallTransaction();
         return false;
@@ -202,21 +209,35 @@ USB_BulkWorker()
  * The Linux and OSX call the configuration changed entry each time
  * a transaction is started (e.g., multiple runs of cbmctrl status).
  * We need to reset the endpoints before reconfiguring them, otherwise
- * we get a hang the second time through.
+ * we get a hang the second time through (fullReset case).
+ *
+ * Also, when we are doing an IEC reset, we were possibly interrupted
+ * during a previous command. In that case (!fullReset), we do not
+ * reset the data toggles or the OUT endpoint. This is a lighter
+ * weight reset that preserves any incoming commands on the OUT endpoint
+ * so that we keep running without losing track of them.
  *
  * We keep the original endpoint selected after returning.
  */
 void
-USB_ResetConfig()
+USB_ResetConfig(bool fullReset)
 {
     uint8_t lastEndpoint = Endpoint_GetCurrentEndpoint();
 
-    Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT);
     Endpoint_ResetFIFO(XUM_BULK_IN_ENDPOINT);
-    Endpoint_ResetDataToggle();
+    Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT);
+    if (fullReset)
+        Endpoint_ResetDataToggle();
+    if (Endpoint_IsStalled())
+        Endpoint_ClearStall();
+
     Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
-    Endpoint_ResetFIFO(XUM_BULK_OUT_ENDPOINT);
-    Endpoint_ResetDataToggle();
+    if (fullReset) {
+        Endpoint_ResetFIFO(XUM_BULK_OUT_ENDPOINT);
+        Endpoint_ResetDataToggle();
+    }
+    if (Endpoint_IsStalled())
+        Endpoint_ClearStall();
 
     Endpoint_SelectEndpoint(lastEndpoint);
 }

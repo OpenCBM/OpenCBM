@@ -26,11 +26,11 @@ typedef void (*Write2Fn_t)(uint8_t *data);
 static uint16_t usbDataLen;
 static uint8_t usbDataDir = XUM_DATA_DIR_NONE;
 
-// Last command byte seen, returned by XUM1541_INFO
-static uint8_t runningCmd;
+// Are we in the middle of a command sequence (XUM1541_INIT .. SHUTDOWN)?
+static bool iecBusBusy;
 
 // Nibtools command state. See nib_parburst_read/write_checked()
-static uint8_t suppressNibCmd;
+static bool suppressNibCmd;
 static uint8_t savedAlign;
 
 static void
@@ -38,7 +38,7 @@ usbInitIo(uint16_t len, uint8_t dir)
 {
 #ifdef DEBUG
     if (usbDataDir != XUM_DATA_DIR_NONE)
-        DEBUGF("ERR: usbInitIo left in bad state %d\n", usbDataDir);
+        DEBUGF(DBG_ERROR, "ERR: usbInitIo left in bad state %d\n", usbDataDir);
 #endif
 
     // Select the proper endpoint for this direction
@@ -47,7 +47,7 @@ usbInitIo(uint16_t len, uint8_t dir)
     } else if (dir == ENDPOINT_DIR_OUT) {
         Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
     } else {
-        DEBUGF("ERR: usbInitIo bad dir %d\n");
+        DEBUGF(DBG_ERROR, "ERR: usbInitIo bad dir %d\n");
     }
 
     usbDataLen = len;
@@ -68,7 +68,7 @@ usbIoDone(void)
 {
     // Clear any leftover state
     if (usbDataLen != 0) {
-        DEBUGF("incomplete io %d: %d\n", usbDataDir, usbDataLen);
+        DEBUGF(DBG_ERROR, "incomplete io %d: %d\n", usbDataDir, usbDataLen);
         usbDataLen = 0;
     }
 
@@ -82,7 +82,7 @@ usbIoDone(void)
             Endpoint_ClearOUT();
         }
     } else {
-        DEBUGF("done: bad io dir %d\n", usbDataDir);
+        DEBUGF(DBG_ERROR, "done: bad io dir %d\n", usbDataDir);
     }
     usbDataDir = XUM_DATA_DIR_NONE;
 }
@@ -93,7 +93,7 @@ usbSendByte(uint8_t data)
 
 #ifdef DEBUG
     if (usbDataDir != ENDPOINT_DIR_IN) {
-        DEBUGF("ERR: usbSendByte when dir was %d\n", usbDataDir);
+        DEBUGF(DBG_ERROR, "ERR: usbSendByte when dir was %d\n", usbDataDir);
         return -1;
     }
 #endif
@@ -110,11 +110,12 @@ usbSendByte(uint8_t data)
     }
 
     // Update LEDs
+    wdt_reset();
     board_update_display();
 
     // Check if the current command is being aborted by the host
     if (doDeviceReset) {
-        DEBUGF("sndrst\n");
+        DEBUGF(DBG_ERROR, "sndrst\n");
         return -1;
     }
 
@@ -127,7 +128,7 @@ usbRecvByte(uint8_t *data)
 
 #ifdef DEBUG
     if (usbDataDir != ENDPOINT_DIR_OUT) {
-        DEBUGF("ERR: usbRecvByte when dir was %d\n", usbDataDir);
+        DEBUGF(DBG_ERROR, "ERR: usbRecvByte when dir was %d\n", usbDataDir);
         return -1;
     }
 #endif
@@ -148,11 +149,12 @@ usbRecvByte(uint8_t *data)
     usbDataLen--;
 
     // Update LEDs
+    wdt_reset();
     board_update_display();
 
     // Check if the current command is being aborted by the host
     if (doDeviceReset) {
-        DEBUGF("rcvrst\n");
+        DEBUGF(DBG_ERROR, "rcvrst\n");
         return -1;
     }
 
@@ -245,7 +247,7 @@ ioReadNibLoop(uint16_t len)
     for (i = 0; i < len; i++) {
         // Read a byte from the parport
         if (nib_read_handshaked(&data, i & 1) < 0) {
-            DEBUGF("nbrdth1 to %d\n", i);
+            DEBUGF(DBG_ERROR, "nbrdth1 to %d\n", i);
             return -1;
         }
 
@@ -281,7 +283,7 @@ ioWriteNibLoop(uint16_t len)
 
         // Write a byte to the parport
         if (nib_write_handshaked(data, i & 1) < 0) {
-            DEBUGF("nbwrh1 to\n");
+            DEBUGF(DBG_ERROR, "nbwrh1 to\n");
             return -1;
         }
     }
@@ -327,7 +329,7 @@ nib_parburst_write_checked(uint8_t data)
      * suppress the handshaked write itself.
      */
     if (suppressNibCmd) {
-        suppressNibCmd = 0;
+        suppressNibCmd = false;
         savedAlign = data;
         return;
     }
@@ -336,7 +338,7 @@ nib_parburst_write_checked(uint8_t data)
     if (cmdIdx == sizeof(mnibCmd)) {
         if (data == 0x03 || data == 0x04 || data == 0x05 ||
             data == 0x0b || data == 0x0c) {
-            suppressNibCmd = 1;
+            suppressNibCmd = true;
         }
         cmdIdx = 0;
     } else if (mnibCmd[cmdIdx] == data) {
@@ -360,10 +362,25 @@ nib_parburst_read_checked(void)
     if (!suppressNibCmd)
         return nib_parburst_read();
     else {
-        suppressNibCmd = 0;
+        suppressNibCmd = false;
         return 0x88;
     }
 }
+
+/*
+ * Do a soft USB reset and then reset the IEC bus as well.
+ * This can be called at any time while we are active and it will not
+ * lose track of incoming commands.
+ */
+static void
+xum1541_reset(void)
+{
+    board_set_status(STATUS_INIT);
+    USB_ResetConfig(false);
+    cbm_reset();
+    board_set_status(STATUS_READY);
+}
+
 /*
  * Process the given USB control command, storing the result in replyBuf
  * and returning the number of output bytes. Returns -1 if command is
@@ -374,25 +391,32 @@ nib_parburst_read_checked(void)
 int8_t
 usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
 {
-    DEBUGF("cmd %d (%d)\n", cmd, cmd - XUM1541_IOCTL);
+    DEBUGF(DBG_INFO, "cmd %d (%d)\n", cmd, cmd - XUM1541_IOCTL);
 
     board_set_status(STATUS_ACTIVE);
     switch (cmd) {
     case XUM1541_ECHO:
         replyBuf[0] = cmd;
         return 1;
-    case XUM1541_INFO:
+    case XUM1541_INIT:
+        if (iecBusBusy)
+            xum1541_reset();
         replyBuf[0] = XUM1541_VERSION_MAJOR;
         replyBuf[1] = XUM1541_VERSION_MINOR;
         replyBuf[2] = XUM1541_CAPABILITIES;
-        replyBuf[3] = runningCmd;
+        replyBuf[3] = iecBusBusy;
+        iecBusBusy = true;
         return 4;
     case XUM1541_RESET:
-        xu1541_reset();
+        xum1541_reset();
+        board_set_status(STATUS_READY);
+        return 0;
+    case XUM1541_SHUTDOWN:
+        iecBusBusy = false;
         board_set_status(STATUS_READY);
         return 0;
     default:
-        DEBUGF("ERR: control cmd %d not impl\n", cmd);
+        DEBUGF(DBG_ERROR, "ERR: control cmd %d not impl\n", cmd);
         return -1;
     }
 }
@@ -400,26 +424,25 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
 int8_t
 usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
 {
-    uint8_t proto, talk, ret;
+    uint8_t cmd, proto, talk, ret;
     uint16_t len = (request[3] << 8) | request[2];
 
-    // Track current command for XUM1541_INFO request
-    runningCmd = request[0];
     // Default is to return no data
     ret = 0;
+    cmd = request[0];
     board_set_status(STATUS_ACTIVE);
-    switch (runningCmd) {
+    switch (cmd) {
     case XUM1541_GET_RESULT:
         xu1541_get_result(replyBuf);
         ret = 2;
         break;
     case XUM1541_REQUEST_READ:
-        DEBUGF("req rd %d\n", len);
+        DEBUGF(DBG_INFO, "req rd %d\n", len);
         xu1541_request_read((uint8_t)len);
         break;
     case XUM1541_READ:
         proto = request[1];
-        DEBUGF("rd:%d %d\n", proto, len);
+        DEBUGF(DBG_INFO, "rd:%d %d\n", proto, len);
         if (proto == XUM1541_CBM) {
             xu1541_read((uint8_t)len);
         } else {
@@ -444,13 +467,13 @@ usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
                 ioReadLoop(nib_parburst_read_checked, len);
                 break;
             default:
-                DEBUGF("badproto %d\n", proto);
+                DEBUGF(DBG_ERROR, "badproto %d\n", proto);
             }
         }
         break;
     case XUM1541_WRITE:
         proto = request[1];
-        DEBUGF("wr:%d %d\n", proto, len);
+        DEBUGF(DBG_INFO, "wr:%d %d\n", proto, len);
         if (proto == XUM1541_CBM) {
             xu1541_write((uint8_t)len);
         } else {
@@ -475,7 +498,7 @@ usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
                 ioWriteLoop(nib_parburst_write_checked, len);
                 break;
             default:
-                DEBUGF("badproto %d\n", proto);
+                DEBUGF(DBG_ERROR, "badproto %d\n", proto);
             }
         }
         break;
@@ -483,23 +506,23 @@ usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
     /* Async commands for the control channel */
     case XUM1541_TALK:
     case XUM1541_LISTEN:
-        DEBUGF("tlk/lst(%d,%d)\n", request[1], request[2]);
-        talk = (runningCmd == XUM1541_TALK);
+        DEBUGF(DBG_INFO, "tlk/lst(%d,%d)\n", request[1], request[2]);
+        talk = (cmd == XUM1541_TALK);
         request[1] |= talk ? 0x40 : 0x20;
         request[2] |= 0x60;
         xu1541_request_async(request + 1, 2, /*atn*/1, talk);
         break;
     case XUM1541_UNTALK:
     case XUM1541_UNLISTEN:
-        DEBUGF("untlk/unlst\n");
-        request[1] = (runningCmd == XUM1541_UNTALK) ? 0x5f : 0x3f;
+        DEBUGF(DBG_INFO, "untlk/unlst\n");
+        request[1] = (cmd == XUM1541_UNTALK) ? 0x5f : 0x3f;
         xu1541_request_async(request + 1, 1, /*atn*/1, /*talk*/0);
         break;
     case XUM1541_OPEN:
     case XUM1541_CLOSE:
-        DEBUGF("open/close(%d,%d)\n", request[1], request[2]);
+        DEBUGF(DBG_INFO, "open/close(%d,%d)\n", request[1], request[2]);
         request[1] |= 0x20;
-        request[2] |= (runningCmd == XUM1541_OPEN) ? 0xf0 : 0xe0;
+        request[2] |= (cmd == XUM1541_OPEN) ? 0xf0 : 0xe0;
         xu1541_request_async(request + 1, 2, /*atn*/1, /*talk*/0);
         break;
 
@@ -516,7 +539,7 @@ usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
         /* FALLTHROUGH */
     case XUM1541_IEC_POLL:
         replyBuf[0] = xu1541_poll();
-        DEBUGF("poll=%x\n", replyBuf[0]);
+        DEBUGF(DBG_INFO, "poll=%x\n", replyBuf[0]);
         ret = 1;
         break;
     case XUM1541_IEC_SETRELEASE:
@@ -538,10 +561,9 @@ usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
         nib_parburst_write_checked(request[1]);
         break;
     default:
-        DEBUGF("ERR: bulk cmd %d not impl.\n", runningCmd);
+        DEBUGF(DBG_ERROR, "ERR: bulk cmd %d not impl.\n", cmd);
         ret = -1;
     }
 
-    runningCmd = 0;
     return ret;
 }

@@ -14,12 +14,11 @@
 static inline void
 cpu_init(void)
 {
-    // Disable watchdog if enabled by bootloader/fuses
-    MCUSR &= ~(1 << WDRF);
-    wdt_disable();
-
     // Disable clock division. This takes us from 1 MHz -> 8 MHz.
     clock_prescale_set(clock_div_1);
+
+    // Enable watchdog timer and set for 4 seconds.
+    wdt_enable(WDTO_4S);
 }
 
 // Timer and delay functions

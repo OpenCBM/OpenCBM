@@ -16,12 +16,12 @@
 MODEL=      AT90USBKEY
 
 # Enable to get debug printing via the UART (port D)
-#CFLAGS=    -DDEBUG
+#CFLAGS=    -DDEBUG -DDEBUG_LEVEL=DBG_INFO
 
 ### Nothing user-configurable beyond this point ###
 
 # Firmware version. Bump when changing the firmware code.
-XUMFW_VERSION= 02
+XUMFW_VERSION= 04
 
 ifeq ($(MODEL),AT90USBKEY)
 CPUMODEL=	at90usb1287
@@ -37,7 +37,7 @@ MODELVERSION= xum1541-$(MODEL)-v$(XUMFW_VERSION)
 
 CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
 	-DF_CPU=$(CPURATE)UL -DF_CLOCK=F_CPU -mmcu=$(CPUMODEL) \
-	-O -Werror -Wall -Wstrict-prototypes -Wundef -std=gnu99 -I . \
+	-O -g -Werror -Wall -Wstrict-prototypes -Wundef -std=gnu99 -I . \
 	-DUSB_DEVICE_ONLY -DUSE_NONSTANDARD_DESCRIPTOR_NAMES \
 	-DINTERRUPT_CONTROL_ENDPOINT \
         -DFIXED_CONTROL_ENDPOINT_SIZE=8 \

@@ -10,9 +10,9 @@
 #ifndef _XUM1541_TYPES_H
 #define _XUM1541_TYPES_H
 
-// XUM1541_INFO reports these versions
+// XUM1541_INIT reports these versions
 #define XUM1541_VERSION_MAJOR       5 // Same for all xum1541 models
-#define XUM1541_VERSION_MINOR       1 // Bump if incompatible protocol change
+#define XUM1541_VERSION_MINOR       2 // Bump if incompatible protocol change
 
 // USB parameters for descriptor configuration
 #define XUM_ENDPOINT_0_SIZE         8
@@ -21,9 +21,10 @@
 #define XUM_BULK_OUT_ENDPOINT       4
 
 // control transactions
-#define XUM1541_ECHO                0xff
-#define XUM1541_INFO                0
-#define XUM1541_RESET               1
+#define XUM1541_ECHO                0
+#define XUM1541_INIT                (XUM1541_ECHO + 1)
+#define XUM1541_RESET               (XUM1541_ECHO + 2)
+#define XUM1541_SHUTDOWN            (XUM1541_ECHO + 3)
 
 // Capabilities bits
 #define XU1541_CAP_CBM              0x0001 // supports CBM commands
@@ -54,11 +55,11 @@
 #define XUM1541_RESET_TIMEOUT       2
 
 // Basic ioctls
-#define XUM1541_READ                2
-#define XUM1541_WRITE               3
-#define XUM1541_IOCTL               16
+#define XUM1541_READ                8
+#define XUM1541_WRITE               (XUM1541_READ + 1)
 
 /* constants for valid ioctl commands */
+#define XUM1541_IOCTL               16
 #define XUM1541_TALK                (XUM1541_IOCTL + 0)
 #define XUM1541_LISTEN              (XUM1541_IOCTL + 1)
 #define XUM1541_UNTALK              (XUM1541_IOCTL + 2)

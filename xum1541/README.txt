@@ -12,6 +12,8 @@ For more information, see the xum1541 web page at:
 
 Revisions
 =========
+0.4 (2010/1/4) - Bugfixes for reset handling, both for IEC and USB.
+    Protocol version 2.
 0.3 (2009/12/23) - Add nibbler (mnib/nibtools) support and misc stability
     fixes. Protocol version 1.
 0.2 (2009/12/11) - Initial beta release for AT90USBKEY board.
@@ -183,18 +185,23 @@ firmware.
 Tasks
 =====
 Bugs:
-- Drive does not answer again after aborting "cbmread 8 file" with ^C
-- cbmctrl status after ^C aborting a cbmrpm41 returns bad byte for index 0
-- Figure out why hw reset doesn't break out of some states
+- Fix need for hard reset after aborting "cbmctrl change 8"
+- Investigate minor glitches in ATN-out line during set/release CLK and DATA
 
 Improvements:
-- test delay timing loops with scope to optimize
-- combine OUT cmd and data usb xfers
-- remove GET_RESULT command
-- add handling of USB stalls in error case
+- Cleanup all xu1541* names in msgs, functions, etc.
+- Test IEC delay timing loops with scope to optimize
+- Combine OUT cmd and data usb xfers
+- Remove GET_RESULT command
+- Add handling of USB stalls in error case
+- Find a way to detect brownout so that we don't run when the drive is
+  powered on but we aren't.
+- Upgrade LUFA and WinAVR for builds
+- Fix .inf file for libusb so that it is not reported as an xu1541
 - Readability: xu1541_ioctl needs to be split up in plugin for 3 types of IO
 - enable WDT in order to avoid need for manual reset of AVR in cases where
   it is hung up
+- Test various cable lengths and USB hubs to be sure it is reliable
 - Consider adding IEEE-488 or 1571 burst most (SRQ) support
 
 General opencbm issues not in xum1541 code:

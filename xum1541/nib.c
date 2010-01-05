@@ -9,21 +9,28 @@
  */
 #include "xum1541.h"
 
-// At 8 Mhz, we have about 192 clocks per byte
-
-// Timeout for read/write (XXX was 3300000 us or 3.3 seconds originally)
-// At 8 Mhz, this is ~48 milliseconds, depending on how tight the loop is.
+/*
+ * Timeout count for a burst read/write.
+ *
+ * At 8 Mhz, this is ~48 milliseconds, depending on how tight the loop is.
+ * This should be more than enough to transfer a byte, given that we only
+ * have about 25 us/byte at 40 KB/s.
+ */
 #define TO_HANDSHAKED_READ    0xffff
 
-// TODO: verify timing values with scope
+/*
+ * ATN/DATA handshaked read from the drive.
+ *
+ * It takes about 2 us for the drive to pull DATA once we set ATN.
+ * Then it takes about 13 us for it to release DATA once a byte is ready.
+ * Once we release ATN, it takes another 2 us to release DATA.
+ */
 uint8_t
 nib_parburst_read()
 {
     uint8_t data;
 
-    iec_release(IO_DATA|IO_CLK);
-    iec_set(IO_ATN);
-
+    iec_set_release(IO_ATN, IO_DATA|IO_CLK);
     DELAY_US(5);
     while (iec_get(IO_DATA) != 0)
         ;
@@ -47,7 +54,7 @@ nib_read_handshaked(uint8_t *data, uint8_t toggle)
     to = TO_HANDSHAKED_READ;
     while (iec_get(IO_DATA) != toggle) {
         if (to-- == 0) {
-            DEBUGF("nbrdh1 to\n");
+            DEBUGF(DBG_ERROR, "nbrdh1 to\n");
             return -1;
         }
     }
@@ -57,14 +64,19 @@ nib_read_handshaked(uint8_t *data, uint8_t toggle)
     return 0;
 }
 
-// TODO: verify timing values with scope
+/*
+ * ATN/DATA handshaked write to the drive.
+ *
+ * It takes about 13 us for the drive to release DATA once we set ATN.
+ * Once we release ATN, it takes the drive 2-5 us to set DATA.
+ * However, we need to keep the data valid for a while after releasing
+ * ATN so the drive can register it. 5 us always fails but 10 us works.
+ */
 void
 nib_parburst_write(uint8_t data)
 {
 
-    iec_release(IO_DATA|IO_CLK);
-    iec_set(IO_ATN);
-
+    iec_set_release(IO_ATN, IO_DATA|IO_CLK);
     DELAY_US(5);
     while (iec_get(IO_DATA) != 0)
         ;
@@ -73,12 +85,18 @@ nib_parburst_write(uint8_t data)
     DELAY_US(1);
     iec_release(IO_ATN);
 
-    // Wait before checking for drive handshake (critical)
-    DELAY_US(20);
+    /*
+     * Hold parallel data ready until the drive can read it. Even though
+     * the drive is supposed to grab DATA after it has gotten the byte ok,
+     * it seems to do so prematurely. Thus we have to add this idle loop
+     * to keep the data valid, and by that point, DATA has been set for
+     * a while.
+     */
+    DELAY_US(10);
     while (iec_get(IO_DATA) == 0)
         ;
 
-    // Read from parallel port (critical)
+    // Read from parallel port, making the outputs inputs. (critical)
     data = xu1541_pp_read();
 }
 
@@ -92,7 +110,7 @@ nib_write_handshaked(uint8_t data, uint8_t toggle)
     to = TO_HANDSHAKED_READ;
     while (iec_get(IO_DATA) != toggle) {
         if (to-- == 0) {
-            DEBUGF("nbwrh to\n");
+            DEBUGF(DBG_ERROR, "nbwrh to\n");
             return -1;
         }
     }

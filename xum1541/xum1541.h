@@ -32,9 +32,19 @@
 
 #ifdef DEBUG
 #include <stdio.h>
-#define DEBUGF(format, args...)  printf_P(PSTR(format), ##args)
+#define DBG_ERROR   0
+#define DBG_INFO    1
+#define DBG_ALL     DBG_ERROR
+#ifndef DEBUG_LEVEL
+#define DEBUG_LEVEL DBG_ALL
+#endif
+#define DEBUGF(level, format, args...)      \
+    do {                                    \
+        if (DEBUG_LEVEL >= level)           \
+            printf_P(PSTR(format), ##args); \
+    } while (0)
 #else
-#define DEBUGF(format, args...)
+#define DEBUGF(level, format, args...)
 #endif
 
 // USB parameters for descriptor configuration
@@ -50,7 +60,7 @@
 // USB IO functions and command handlers
 int8_t usbHandleControl(uint8_t cmd, uint8_t *replyBuf);
 int8_t usbHandleBulk(uint8_t *request, uint8_t *replyBuf);
-void USB_ResetConfig(void);
+void USB_ResetConfig(bool fullReset);
 bool USB_ReadBlock(uint8_t *buf, uint8_t len);
 bool USB_WriteBlock(uint8_t *buf, uint8_t len);
 void xu1541_handle(void);
@@ -60,7 +70,7 @@ void xu1541_handle(void);
 extern uint8_t eoi;
 extern volatile bool doDeviceReset;
 void cbm_init(void);
-void xu1541_reset(void);
+void cbm_reset(void);
 void xu1541_get_result(uint8_t *data);
 uint8_t xu1541_wait(uint8_t line, uint8_t state);
 uint8_t xu1541_poll(void);
