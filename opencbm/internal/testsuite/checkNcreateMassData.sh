@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $Id: checkNcreateMassData.sh,v 1.2 2006-04-23 15:22:10 wmsr Exp $
+# $Id: checkNcreateMassData.sh,v 1.4 2010-10-31 17:17:53 wmsr Exp $
 
 # omitting char that may disturb CVS
 # ELIMCHARS="\000\a\b\n\r\\$"
@@ -9,7 +9,7 @@
 # ELIMCHARS="[:cntrl:]\\$"
 
 ELIMCHARS='""'
-TESTFILEDIR=cbmcopy_files
+TESTFILEDIR=cbmcopy_files_mass
 
 
 function createXblocksFile {
