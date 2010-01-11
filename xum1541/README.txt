@@ -54,6 +54,10 @@ Verify.
 8. Click the Run button
 9. If all goes well, the lower left status area will say "Verify PASS".
 
+If you are on Windows, now you need to install the libusb driver. If you
+installed it for the xu1541, you don't need to reinstall it. Follow the
+steps to install the library in the xu1541/windrv directory.
+
 You're done! Now unplug and replug in the xum1541 and verify it is present
 by running "cbmctrl detect". You should see something like:
 "8: 1540 or 1541 (XP1541)".
@@ -71,6 +75,9 @@ Cygwin for the shell environment. Try just typing "make" and it should
 build the firmware. To enable the debug build, uncomment the appropriate
 line in the Makefile. If the build fails, check your path to be sure
 the AVR bin directory is present.
+
+Currently I am building releases using WinAVR-20080610. The LUFA version
+included in this distribution is 090605.
 
 
 Developer notes

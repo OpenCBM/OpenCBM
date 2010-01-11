@@ -17,8 +17,10 @@ cpu_init(void)
     // Disable clock division. This takes us from 1 MHz -> 8 MHz.
     clock_prescale_set(clock_div_1);
 
+#if 0 // Don't use the watchdog until we handle it properly
     // Enable watchdog timer and set for 4 seconds.
     wdt_enable(WDTO_4S);
+#endif
 }
 
 // Timer and delay functions

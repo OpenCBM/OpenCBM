@@ -35,16 +35,28 @@ endif
 # Final name for firmware hex file
 MODELVERSION= xum1541-$(MODEL)-v$(XUMFW_VERSION)
 
+# If we wanted to reduce inlining to save size, these flags might be a
+# good start: -fno-default-inline -fno-implement-inlines
+#   --param inline-call-cost=2 -finline-limit=3 -fno-inline-small-functions
 CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
 	-DF_CPU=$(CPURATE)UL -DF_CLOCK=F_CPU -mmcu=$(CPUMODEL) \
-	-O -g -Werror -Wall -Wstrict-prototypes -Wundef -std=gnu99 -I . \
+	-Os -g -Werror -Wall -Wstrict-prototypes -Wundef -std=gnu99 -I . \
 	-DUSB_DEVICE_ONLY -DUSE_NONSTANDARD_DESCRIPTOR_NAMES \
 	-DINTERRUPT_CONTROL_ENDPOINT \
         -DFIXED_CONTROL_ENDPOINT_SIZE=8 \
         -DUSE_SINGLE_DEVICE_CONFIGURATION \
 	-DUSE_STATIC_OPTIONS="(USB_DEVICE_OPT_FULLSPEED | USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)" \
-        -funsigned-char -funsigned-bitfields -ffunction-sections \
-        -fpack-struct -fshort-enums -finline-limit=20
+        -funsigned-char -funsigned-bitfields \
+        -ffunction-sections -fdata-sections \
+        -fpack-struct -fshort-enums \
+        -finline-limit=20
+
+# --gc-sections: We store each function and each variable in its 
+# own section so that the linker can do dead-code/data elimination.
+# Used in combo with -ffunction-sections -fdata-sections (above).
+#
+# --relax: use relative calls when functions are nearby
+LDFLAGS+= --gc-sections --relax
 
 MYUSB_OBJS= \
 	LUFA/Drivers/USB/LowLevel/DevChapter9.o \
