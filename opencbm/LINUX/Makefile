@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.21 2009-12-24 09:12:23 cnvogelg Exp $
+# $Id: Makefile,v 1.22 2010-01-17 16:21:36 strik Exp $
 
 RELATIVEPATH=./
 include ${RELATIVEPATH}LINUX/config.make
@@ -35,8 +35,8 @@ ifeq "$(OS)" "Darwin"
 PLUGINS=plugin-xu1541 plugin-xum1541
 INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xum1541
 else
-PLUGINS=plugin-xu1541 plugin-xa1541
-INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xa1541
+PLUGINS=plugin-xu1541 plugin-xum1541 plugin-xa1541
+INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xum1541 install-plugin-xa1541
 endif
 
 .PHONY: all opencbm clean mrproper dist doc install install-doc uninstall dev install-files install-files-doc all-doc plugin-xu1541 plugin-xa1541 plugin install-plugin install-plugin-xu1541 install-plugin-xa1541
