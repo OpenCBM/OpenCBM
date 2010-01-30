@@ -95,6 +95,10 @@ SOURCE=.\getpluginaddress.c
 
 SOURCE=..\libstring.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\perfeval.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

@@ -10,7 +10,7 @@
 /*! **************************************************************
 ** \file include/WINDOWS/perfeval.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.h,v 1.7 2009-05-09 17:42:21 strik Exp $ \n
+** \version $Id: perfeval.h,v 1.8 2010-01-30 21:06:41 strik Exp $ \n
 ** \n
 ** \brief Functions and macros for performance evaluation purposes
 **
@@ -22,6 +22,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* #ifdef _CPLUSPLUS */
+
+#ifdef DBG_USERMODE
+        typedef HANDLE PETHREAD;
+#endif
 
 #include "debug.h"
 
