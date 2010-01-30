@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.13 2008-09-01 18:37:16 strik Exp $
+# $Id: Makefile,v 1.14 2010-01-30 20:48:48 strik Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
@@ -18,7 +18,6 @@ LIBMISC    = ../libmisc
 LIBNAME = libopencbm
 SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c \
 	  LINUX/configuration_name.c \
-	  LINUX/getpluginaddress.c \
 	  $(foreach t,cbmcopy pp s1 s2, $(LIBCBMCOPY)/$(t).c) \
 	  $(foreach t,d64copy fs gcr pp s1 s2 std, $(LIBD64COPY)/$(t).c)
 LIBS = $(LIBARCH)/libarch.a $(LIBMISC)/libmisc.a -ldl

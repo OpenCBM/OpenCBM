@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/iec.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: iec.c,v 1.5 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: iec.c,v 1.6 2010-01-30 20:48:48 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -104,6 +104,104 @@ fastschedule_stop(void)
 }
 
 
+static BOOL bPluginIsInitialized = FALSE;
+
+int CBMAPIDECL
+cbm_plugin_init(void)
+{
+    BOOLEAN Status = TRUE;
+
+    FUNC_ENTER();
+
+#if DBG
+
+    // Read the debugging flags from the registry
+
+    cbm_get_debugging_flags();
+
+#endif
+
+    /* make sure the definitions in opencbm.h and cbmioctl.h
+     * match each other! 
+     * Since we are the only instance which includes both files,
+     * we are the only one which can ensure this.
+     */
+
+    DBG_ASSERT(IEC_LINE_CLOCK == IEC_CLOCK);
+    DBG_ASSERT(IEC_LINE_RESET == IEC_RESET);
+    DBG_ASSERT(IEC_LINE_DATA == IEC_DATA);
+    DBG_ASSERT(IEC_LINE_ATN == IEC_ATN);
+
+    if (IsDriverStartedAutomatically())
+    {
+        // the driver is started automatically, do not try
+        // to start it
+
+        Status = TRUE;
+    }
+    else
+    {
+        if (bPluginIsInitialized)
+        {
+            DBG_ERROR((DBG_PREFIX "No multiple instances are allowed!"));
+            Status = FALSE;
+        }
+        else
+        {
+            Status  = TRUE;
+            bPluginIsInitialized = cbm_driver_start();
+        }
+    }
+
+    WaitForIoCompletionInit();
+
+    /* If the DLL loaded successfully, ask for fast scheduling */
+    if (Status)
+    {
+        fastschedule_start();
+    }
+
+    return 0;
+}
+
+void CBMAPIDECL
+cbm_plugin_uninit(void)
+{
+    BOOLEAN Status = TRUE;
+
+    if (IsDriverStartedAutomatically())
+    {
+        // the driver is started automatically, do not try
+        // to stop it
+
+        Status = TRUE;
+    }
+    else
+    {
+        if (!bPluginIsInitialized)
+        {
+            DBG_ERROR((DBG_PREFIX "Driver is not running!"));
+            Status = FALSE;
+        }
+        else
+        {
+            // it is arguable if the driver should be stopped
+            // whenever the DLL is unloaded.
+
+            cbm_driver_stop();
+            bPluginIsInitialized = FALSE;
+        }
+    }
+
+    /* If the DLL unloaded successfully, we do not need fast scheduling anymore. */
+    if (Status)
+    {
+        fastschedule_stop();
+    }
+
+    WaitForIoCompletionDeinit();
+}
+
 /*! \brief DLL initialization und unloading
 
  This function is called whenever the DLL is loaded or unloaded.
@@ -131,108 +229,9 @@ fastschedule_stop(void)
 BOOL WINAPI
 DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
-    static BOOL bIsOpen = FALSE;
-    BOOLEAN Status = TRUE;
-
     FUNC_ENTER();
 
-#if DBG
-
-    if (Reason == DLL_PROCESS_ATTACH)
-    {
-        // Read the debugging flags from the registry
-
-        cbm_get_debugging_flags();
-    }
-
-#endif
-
-    /* make sure the definitions in opencbm.h and cbmioctl.h
-     * match each other! 
-     * Since we are the only instance which includes both files,
-     * we are the only one which can ensure this.
-     */
-
-    DBG_ASSERT(IEC_LINE_CLOCK == IEC_CLOCK);
-    DBG_ASSERT(IEC_LINE_RESET == IEC_RESET);
-    DBG_ASSERT(IEC_LINE_DATA == IEC_DATA);
-    DBG_ASSERT(IEC_LINE_ATN == IEC_ATN);
-
-    switch (Reason) 
-    {
-        case DLL_PROCESS_ATTACH:
-
-            if (IsDriverStartedAutomatically())
-            {
-                // the driver is started automatically, do not try
-                // to start it
-
-                Status = TRUE;
-            }
-            else
-            {
-                if (bIsOpen)
-                {
-                    DBG_ERROR((DBG_PREFIX "No multiple instances are allowed!"));
-                    Status = FALSE;
-                }
-                else
-                {
-                    Status  = TRUE;
-                    bIsOpen = cbm_driver_start();
-                }
-            }
-
-            WaitForIoCompletionInit();
-
-            /* If the DLL loaded successfully, ask for fast scheduling */
-            if (Status)
-            {
-                fastschedule_start();
-            }
-            break;
-
-        case DLL_PROCESS_DETACH:
-
-            if (IsDriverStartedAutomatically())
-            {
-                // the driver is started automatically, do not try
-                // to stop it
-
-                Status = TRUE;
-            }
-            else
-            {
-                if (!bIsOpen)
-                {
-                    DBG_ERROR((DBG_PREFIX "Driver is not running!"));
-                    Status = FALSE;
-                }
-                else
-                {
-                    // it is arguable if the driver should be stopped
-                    // whenever the DLL is unloaded.
-
-                    cbm_driver_stop();
-                    bIsOpen = FALSE;
-                }
-            }
-
-            /* If the DLL unloaded successfully, we do not need fast scheduling anymore. */
-            if (Status)
-            {
-                fastschedule_stop();
-            }
-
-            WaitForIoCompletionDeinit();
-            break;
-
-        default:
-            break;
-
-    }
-
-    FUNC_LEAVE_BOOL(Status);
+    FUNC_LEAVE_BOOL(TRUE);
 }
 
 /*! \brief Lock the parallel port for the driver

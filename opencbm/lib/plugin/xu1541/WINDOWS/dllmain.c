@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: dllmain.c,v 1.4 2008-06-16 19:24:27 strik Exp $ \n
+** \version $Id: dllmain.c,v 1.5 2010-01-30 20:48:48 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -65,4 +65,15 @@ BOOL WINAPI
 DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
     return TRUE;
+}
+
+int CBMAPIDECL
+cbm_plugin_init(void)
+{
+    return 0;
+}
+
+void CBMAPIDECL
+cbm_plugin_uninit(void)
+{
 }

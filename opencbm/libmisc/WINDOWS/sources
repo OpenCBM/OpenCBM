@@ -3,10 +3,11 @@ TARGETNAME=libmisc
 TARGETPATH=../../bin
 TARGETTYPE=LIBRARY
 
-INCLUDES=../../include;../../include/WINDOWS
+INCLUDES=../;../../include;../../include/WINDOWS
 
 SOURCES= \
 	../configuration.c \
+	getpluginaddress.c \
 	../libstring.c
 
 UMTYPE=console

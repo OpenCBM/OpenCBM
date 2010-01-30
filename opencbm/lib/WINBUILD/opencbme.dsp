@@ -115,10 +115,6 @@ SOURCE=..\gcr_4b5b.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\getpluginaddress.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\petscii.c
 # End Source File
 # Begin Source File

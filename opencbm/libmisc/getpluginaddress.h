@@ -9,9 +9,9 @@
 */
 
 /*! **************************************************************
-** \file lib/getpluginaddress.h \n
+** \file libmisc/getpluginaddress.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: getpluginaddress.h,v 1.5 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: getpluginaddress.h,v 1.1 2010-01-30 20:48:48 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Functions for obtaining the addresses of plugin functions

@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.29 2009-12-22 21:26:09 natelawson Exp $ \n
+** \version $Id: cbm.c,v 1.30 2010-01-30 20:48:48 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -128,6 +128,8 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         if (!Plugin_information->Library)
             break;
 
+        Plugin_information->Plugin.cbm_plugin_init                       = plugin_get_address(Plugin_information->Library, "cbmarch_init");
+        Plugin_information->Plugin.cbm_plugin_uninit                     = plugin_get_address(Plugin_information->Library, "cbmarch_uninit");
         Plugin_information->Plugin.cbm_plugin_get_driver_name            = plugin_get_address(Plugin_information->Library, "cbmarch_get_driver_name");
         Plugin_information->Plugin.cbm_plugin_driver_open                = plugin_get_address(Plugin_information->Library, "cbmarch_driver_open");
         Plugin_information->Plugin.cbm_plugin_driver_close               = plugin_get_address(Plugin_information->Library, "cbmarch_driver_close");
@@ -244,6 +246,16 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         if (error)
             break;
 
+        if (Plugin_information->Plugin.cbm_plugin_init) {
+            error = Plugin_information->Plugin.cbm_plugin_init();
+            if (error) {
+                if (Plugin_information->Plugin.cbm_plugin_uninit) {
+                    Plugin_information->Plugin.cbm_plugin_uninit();
+                }
+                break;
+            }
+        }
+
     } while (0);
 
     cbmlibmisc_strfree(plugin_name);
@@ -258,6 +270,10 @@ uninitialize_plugin(void)
 {
     if (Plugin_information.Library != NULL)
     {
+        if (Plugin_information.Plugin.cbm_plugin_uninit) {
+            Plugin_information.Plugin.cbm_plugin_uninit();
+        }
+
         plugin_unload(Plugin_information.Library);
 
         Plugin_information.Library = NULL;

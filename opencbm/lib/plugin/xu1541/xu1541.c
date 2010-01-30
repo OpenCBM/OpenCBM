@@ -5,13 +5,14 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 2007 Till Harbaum <till@harbaum.org>
+ *  Copyright 2009 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.4 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: xu1541.c,v 1.5 2010-01-30 20:48:48 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -23,14 +24,124 @@
 #include <stdarg.h>
 
 #include "opencbm.h"
-#include "xu1541.h"
+
 #include "arch.h"
+#include "getpluginaddress.h"
+#include "xu1541.h"
 
 static int debug_level = -10000; /*!< \internal \brief the debugging level for debugging output */
 static usb_dev_handle *xu1541_handle = NULL; /*!< \internal \brief handle to the xu1541 device */
 
 /*! \brief timeout value, used mainly after errors \todo What is the exact purpose of this? */
 #define TIMEOUT_DELAY  25000   // 25ms
+
+/* Windows specific */
+#define APIDECL __cdecl
+
+typedef
+struct usb_dll_s {
+    SHARED_OBJECT_HANDLE shared_object_handle;
+
+    /*
+     * these definitions are taken directly from libusb.h. 
+     * commented out entries are not currently unused.
+     */
+
+    usb_dev_handle * (APIDECL *open)(struct usb_device *dev);
+    int (APIDECL *close)(usb_dev_handle *dev);
+//    int (APIDECL *get_string)(usb_dev_handle *dev, int index, int langid, char *buf, size_t buflen);
+//    int (APIDECL *get_string_simple)(usb_dev_handle *dev, int index, char *buf, size_t buflen);
+
+//    int (APIDECL *get_descriptor_by_endpoint)(usb_dev_handle *udev, int ep, unsigned char type, unsigned char index, void *buf, int size);
+//    int (APIDECL *get_descriptor)(usb_dev_handle *udev, unsigned char type, unsigned char index, void *buf, int size);
+
+//    int (APIDECL *bulk_write)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
+//    int (APIDECL *bulk_read)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
+//    int (APIDECL *interrupt_write)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
+//    int (APIDECL *interrupt_read)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
+    int (APIDECL *control_msg)(usb_dev_handle *dev, int requesttype, int request, int value, int index, char *bytes, int size, int timeout);
+    int (APIDECL *set_configuration)(usb_dev_handle *dev, int configuration);
+    int (APIDECL *claim_interface)(usb_dev_handle *dev, int interface);
+    int (APIDECL *release_interface)(usb_dev_handle *dev, int interface);
+//    int (APIDECL *set_altinterface)(usb_dev_handle *dev, int alternate);
+//    int (APIDECL *resetep)(usb_dev_handle *dev, unsigned int ep);
+//    int (APIDECL *clear_halt)(usb_dev_handle *dev, unsigned int ep);
+//    int (APIDECL *reset)(usb_dev_handle *dev);
+
+    char * (APIDECL *strerror)(void);
+
+    void (APIDECL *init)(void);
+//    void (APIDECL *set_debug)(int level);
+    int (APIDECL *find_busses)(void);
+    int (APIDECL *find_devices)(void);
+//    struct usb_device * (APIDECL *device)(usb_dev_handle *dev);
+    struct usb_bus * (APIDECL *get_busses)(void);
+} usb_dll_t;
+
+static usb_dll_t usb = { NULL };
+
+int xu1541_init_dll(void) {
+    int error = 1;
+
+    do {
+        usb.shared_object_handle = plugin_load("libusb.dll");
+
+#define READ(_x) \
+    usb._x = plugin_get_address(usb.shared_object_handle, "usb_" ## #_x); \
+    if (usb._x == NULL) { \
+        break; \
+    }
+
+        READ(open);
+        READ(close);
+//        READ(get_string);
+//        READ(get_string_simple);
+//        READ(get_descriptor_by_endpoint);
+//        READ(get_descriptor);
+//        READ(bulk_write);
+//        READ(bulk_read);
+//        READ(interrupt_write);
+//        READ(interrupt_read);
+        READ(control_msg);
+        READ(set_configuration);
+        READ(claim_interface);
+        READ(release_interface);
+//        READ(set_altinterface);
+//        READ(resetep);
+//        READ(clear_halt);
+//        READ(reset);
+        READ(strerror);
+        READ(init);
+//        READ(set_debug);
+        READ(find_busses);
+        READ(find_devices);
+//        READ(device);
+        READ(get_busses);
+
+        error = 0;
+    } while (0);
+
+    return error;
+}
+
+int xu1541_uninit_dll(void) {
+    int error = 1;
+
+    do {
+        if (usb.shared_object_handle == NULL) {
+            break;
+        }
+
+        plugin_unload(usb.shared_object_handle);
+
+        memset(&usb, 0, sizeof usb);
+
+        error = 0;
+
+    } while (0);
+
+    return error;
+}
 
 /*! \internal \brief Output debugging information for the xu1541
 
@@ -82,7 +193,7 @@ static int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
     char    buffer[256];
     int     rval, i;
 
-    if((rval = usb_control_msg(dev, USB_ENDPOINT_IN, 
+    if((rval = usb.control_msg(dev, USB_ENDPOINT_IN, 
 			       USB_REQ_GET_DESCRIPTOR, 
 			       (USB_DT_STRING << 8) + index, 
 			       langid, buffer, sizeof(buffer), 1000)) < 0)
@@ -133,16 +244,16 @@ int xu1541_init(void) {
 
   xu1541_dbg(0, "Scanning usb ...");
 
-  usb_init();
+  usb.init();
   
-  usb_find_busses();
-  usb_find_devices();
+  usb.find_busses();
+  usb.find_devices();
 
   /* usb_find_devices sets errno if some devices don't reply 100% correct. */
   /* make lib ignore this as this has nothing to do with our device */
   errno = 0;
 
-  for(bus = usb_get_busses(); !xu1541_handle && bus; bus = bus->next) {
+  for(bus = usb.get_busses(); !xu1541_handle && bus; bus = bus->next) {
     xu1541_dbg(1, "Scanning bus %s", bus->dirname);
 
     for(dev = bus->devices; !xu1541_handle && dev; dev = dev->next) {
@@ -159,9 +270,9 @@ int xu1541_init(void) {
                bus->dirname, dev->filename);
 
         /* open device */
-        if(!(xu1541_handle = usb_open(dev)))
+        if(!(xu1541_handle = usb.open(dev)))
           fprintf(stderr, "Error: Cannot open USB device: %s\n",
-                  usb_strerror());
+                  usb.strerror());
 	
 	/* get device name and make sure the name is "xu1541" meaning */
 	/* that the device is not in boot loader mode */
@@ -169,8 +280,8 @@ int xu1541_init(void) {
 				0x0409, string, sizeof(string));
 	if(len < 0){
 	  fprintf(stderr, "warning: cannot query product "
-		  "name for device: %s\n", usb_strerror());
-	  if(xu1541_handle) usb_close(xu1541_handle);
+		  "name for device: %s\n", usb.strerror());
+	  if(xu1541_handle) usb.close(xu1541_handle);
 	  xu1541_handle = NULL;
 	}
 
@@ -179,7 +290,7 @@ int xu1541_init(void) {
 	  fprintf(stderr, "Error: Found xu1541 in unexpected state,"
 		  " please make sure device is _not_ in bootloader mode!\n");
 	  
-	  if(xu1541_handle) usb_close(xu1541_handle);
+	  if(xu1541_handle) usb.close(xu1541_handle);
 	  xu1541_handle = NULL;
 	}
       }
@@ -191,25 +302,25 @@ int xu1541_init(void) {
       return -1;
   }
 
-  if (usb_set_configuration(xu1541_handle, 1) != 0) {
-      fprintf(stderr, "USB error: %s\n", usb_strerror());
+  if (usb.set_configuration(xu1541_handle, 1) != 0) {
+      fprintf(stderr, "USB error: %s\n", usb.strerror());
       return -1;
   }
       
   /* Get exclusive access to interface 0. */
-  if (usb_claim_interface(xu1541_handle, 0) != 0) {
-      fprintf(stderr, "USB error: %s\n", usb_strerror());
+  if (usb.claim_interface(xu1541_handle, 0) != 0) {
+      fprintf(stderr, "USB error: %s\n", usb.strerror());
       return -1;
   }
 
   /* check the devices version number as firmware x.06 changed everything */
-  len = usb_control_msg(xu1541_handle, 
+  len = usb.control_msg(xu1541_handle, 
 	   USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 	   XU1541_INFO, 0, 0, (char*)ret, sizeof(ret), 1000);
 
   if(len < 0) {
     fprintf(stderr, "USB request for XU1541 info failed: %s!\n", 
-	    usb_strerror());
+	    usb.strerror());
     return -1;
   }
 
@@ -240,10 +351,10 @@ void xu1541_close(void)
 {
     xu1541_dbg(0, "Closing USB link");
 
-    if(usb_release_interface(xu1541_handle, 0))
-      fprintf(stderr, "USB error: %s\n", usb_strerror());
+    if(usb.release_interface(xu1541_handle, 0))
+      fprintf(stderr, "USB error: %s\n", usb.strerror());
 
-    usb_close(xu1541_handle);
+    usb.close(xu1541_handle);
 }
 
 /*! \brief perform an ioctl on the xu1541
@@ -280,14 +391,14 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
       int link_ok = 0, err = 0;
 
       /* USB_TIMEOUT msec timeout required for reset */
-      if((nBytes = usb_control_msg(xu1541_handle, 
+      if((nBytes = usb.control_msg(xu1541_handle, 
 				   USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				   cmd, (secaddr << 8) + addr, 0, 
 				   NULL, 0, 
 				   1000)) < 0) 
       {
 	  fprintf(stderr, "USB error in xu1541_ioctl(async): %s\n", 
-		  usb_strerror());
+		  usb.strerror());
 	  exit(-1);
 	  return -1;
       }
@@ -298,7 +409,7 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 	  unsigned char rv[2];
 	  
 	  /* request async result code */
-	  if(usb_control_msg(xu1541_handle, 
+	  if(usb.control_msg(xu1541_handle, 
 			     USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 			     XU1541_GET_RESULT, 0, 0, 
 			     (char*)rv, sizeof(rv), 
@@ -338,14 +449,14 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
   {
 
       /* sync transfer, read result directly */
-      if((nBytes = usb_control_msg(xu1541_handle, 
+      if((nBytes = usb.control_msg(xu1541_handle, 
 		   USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 		   cmd, (secaddr << 8) + addr, 0, 
 		   ret, sizeof(ret), 
 		   USB_TIMEOUT)) < 0) 
       {
 	  fprintf(stderr, "USB error in xu1541_ioctl(sync): %s\n", 
-		  usb_strerror());
+		  usb.strerror());
 	  exit(-1);
 	  return -1;
       }
@@ -386,13 +497,13 @@ int xu1541_write(const __u_char *data, size_t len)
 	
 	/* the write itself moved the data into the buffer, the actual */
 	/* iec write is triggered _after_ this USB write is done */
-	if((wr = usb_control_msg(xu1541_handle, 
+	if((wr = usb.control_msg(xu1541_handle, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_OUT, 
 				 XU1541_WRITE, bytes2write, 0, 
 				 (char*)data, bytes2write, 
 				 USB_TIMEOUT)) < 0) 
 	{
-	    fprintf(stderr, "USB error xu1541_write(): %s\n", usb_strerror());
+	    fprintf(stderr, "USB error xu1541_write(): %s\n", usb.strerror());
 	    exit(-1);
 	    return -1;
 	}
@@ -410,7 +521,7 @@ int xu1541_write(const __u_char *data, size_t len)
 	    unsigned char rv[2];
 
 	    /* request async result */
-	    if(usb_control_msg(xu1541_handle, 
+	    if(usb.control_msg(xu1541_handle, 
 			       USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 			       XU1541_GET_RESULT, 0, 0, 
 			       (char*)rv, sizeof(rv), 
@@ -471,7 +582,7 @@ int xu1541_read(__u_char *data, size_t len)
 
 	/* request async read, ignore errors as they happen due to */
 	/* link being disabled */
-	rd = usb_control_msg(xu1541_handle, 
+	rd = usb.control_msg(xu1541_handle, 
 			USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 			XU1541_REQUEST_READ, bytes2read, 0, 
 			NULL, 0,
@@ -479,7 +590,7 @@ int xu1541_read(__u_char *data, size_t len)
 	
 	if(rd < 0) {
 	    fprintf(stderr, "USB error in xu1541_request_read(): %s\n", 
-		    usb_strerror());
+		    usb.strerror());
 	    exit(-1);
 	    return -1;
 	}
@@ -499,7 +610,7 @@ int xu1541_read(__u_char *data, size_t len)
 	{
 	    /* get the result code which also contains the current state */
 	    /* the xu1541 is in so we know when it's done reading on IEC */
-	    if((rd = usb_control_msg(xu1541_handle, 
+	    if((rd = usb.control_msg(xu1541_handle, 
 				     USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				     XU1541_GET_RESULT, 0, 0, 
 				     (char*)rv, sizeof(rv), 
@@ -535,13 +646,13 @@ int xu1541_read(__u_char *data, size_t len)
 	while(!link_ok);
 	
 	/* finally read data itself */
-	if((rd = usb_control_msg(xu1541_handle, 
+	if((rd = usb.control_msg(xu1541_handle, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				 XU1541_READ, bytes2read, 0, 
 				 (char*)data, bytes2read, 1000)) < 0) 
 	{
 	    fprintf(stderr, "USB error in xu1541_read(): %s\n", 
-		    usb_strerror());
+		    usb.strerror());
 	    return -1;
 	}
 	
@@ -592,13 +703,13 @@ int xu1541_special_write(int mode, const __u_char *data, size_t size)
     {
 	int wr, bytes2write = (size>128)?128:size;
 
-	if((wr = usb_control_msg(xu1541_handle, 
+	if((wr = usb.control_msg(xu1541_handle, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_OUT, 
 				 mode, XU1541_WRITE, bytes2write, 
 				 (char*)data, bytes2write, 1000)) < 0) 
 	{
 	    fprintf(stderr, "USB error in xu1541_special_write(): %s\n", 
-		    usb_strerror());
+		    usb.strerror());
 	    return -1;
 	}
 	
@@ -640,14 +751,14 @@ int xu1541_special_read(int mode, __u_char *data, size_t size)
     {
 	int rd, bytes2read = (size>128)?128:size;
 	
-	if((rd = usb_control_msg(xu1541_handle, 
+	if((rd = usb.control_msg(xu1541_handle, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				 mode, XU1541_READ, bytes2read, 
 				 (char*)data, bytes2read, 
 				 USB_TIMEOUT)) < 0) 
 	{
 	    fprintf(stderr, "USB error in xu1541_special_read(): %s\n", 
-		    usb_strerror());
+		    usb.strerror());
 	    return -1;
 	}
 	

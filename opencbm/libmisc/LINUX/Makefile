@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2008-09-01 18:37:16 strik Exp $
+# $Id: Makefile,v 1.3 2010-01-30 20:48:48 strik Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
@@ -8,7 +8,7 @@ include ${RELATIVEPATH}LINUX/config.make
 CFLAGS += -I../include
 
 LIB     = libmisc.a
-SRCS    = libstring.c configuration.c
+SRCS    = libstring.c configuration.c getpluginaddress.c
 
 OBJS    = $(SRCS:.c=.lo)
 

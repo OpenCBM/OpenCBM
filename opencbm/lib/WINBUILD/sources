@@ -12,7 +12,7 @@ USE_MSVCRT = 1
 
 DLLBASE=0x70000000
 
-INCLUDES=../../include;../../include/WINDOWS;../../lib/plugin/xa1541/WINDOWS/;../
+INCLUDES=../../include;../../include/WINDOWS;../../lib/plugin/xa1541/WINDOWS/;../;../../libmisc/
 
 C_DEFINES = $(C_DEFINES)
 
@@ -24,5 +24,4 @@ SOURCES=../cbm.c \
 	../upload.c \
 	configuration_name.c \
 	archlib.c \
-	getpluginaddress.c \
 	opencbm.rc

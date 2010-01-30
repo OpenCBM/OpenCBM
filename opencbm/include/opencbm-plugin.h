@@ -10,7 +10,7 @@
 /*! **************************************************************
 ** \file include/opencbm-plugin.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm-plugin.h,v 1.7 2009-12-22 21:26:11 natelawson Exp $ \n
+** \version $Id: opencbm-plugin.h,v 1.8 2010-01-30 20:48:48 strik Exp $ \n
 ** \n
 ** \brief Plugin DLL interface
 **
@@ -554,6 +554,19 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
     /*! \brief @@@@@ \todo document
 
+     \return
+    */
+    typedef int CBMAPIDECL cbm_plugin_init_t(void); 
+
+    /*! \brief @@@@@ \todo document
+
+     \return
+    */
+    typedef void CBMAPIDECL cbm_plugin_uninit_t(void); 
+
+    
+    /*! \brief @@@@@ \todo document
+
      \param ProcessCommandlineData
 
      \return
@@ -684,6 +697,8 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 */
 typedef
 struct opencbm_plugin_s {
+    cbm_plugin_init_t                       * cbm_plugin_init;                       /*!< pointer to a cbm_plugin_init_t() function */
+    cbm_plugin_uninit_t                     * cbm_plugin_uninit;                     /*!< pointer to a cbm_plugin_uninit() function */
     cbm_plugin_get_driver_name_t            * cbm_plugin_get_driver_name;            /*!< pointer to a cbm_plugin_get_driver_name_t() function */
     cbm_plugin_driver_open_t                * cbm_plugin_driver_open;                /*!< pointer to a cbm_plugin_driver_open_t() function */
     cbm_plugin_driver_close_t               * cbm_plugin_driver_close;               /*!< pointer to a cbm_plugin_driver_close_t() function */

@@ -10,9 +10,9 @@
 */
 
 /*! ************************************************************** 
-** \file lib/LINUX/getpluginaddress.c \n
+** \file libmisc/WINDOWS/getpluginaddress.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: getpluginaddress.c,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: getpluginaddress.c,v 1.1 2010-01-30 20:48:48 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -20,18 +20,16 @@
 
 #include "getpluginaddress.h"
 
-#include <dlfcn.h>
-
 /*! \brief @@@@@ \todo document
 
  \param name
 
  \return
 */
-SHARED_OBJECT_HANDLE 
+SHARED_OBJECT_HANDLE
 plugin_load(const char * name)
 {
-    return dlopen(name, RTLD_NOW);
+    return LoadLibrary(name);
 }
 
 /*! \brief @@@@@ \todo document
@@ -45,7 +43,7 @@ plugin_load(const char * name)
 void *
 plugin_get_address(SHARED_OBJECT_HANDLE handle, const char * name)
 {
-    return dlsym(handle, name);
+    return GetProcAddress(handle, name);
 }
 
 /*! \brief @@@@@ \todo document
@@ -57,5 +55,5 @@ plugin_get_address(SHARED_OBJECT_HANDLE handle, const char * name)
 void
 plugin_unload(SHARED_OBJECT_HANDLE handle)
 {
-    dlclose(handle);
+    FreeLibrary(handle);
 }
