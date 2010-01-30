@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.5 2010-01-30 20:48:48 strik Exp $ \n
+** \version $Id: xu1541.c,v 1.6 2010-01-30 21:09:42 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -35,8 +35,9 @@ static usb_dev_handle *xu1541_handle = NULL; /*!< \internal \brief handle to the
 /*! \brief timeout value, used mainly after errors \todo What is the exact purpose of this? */
 #define TIMEOUT_DELAY  25000   // 25ms
 
-/* Windows specific */
-#define APIDECL __cdecl
+#ifndef LIBUSB_APIDECL
+# define LIBUSB_APIDECL
+#endif
 
 typedef
 struct usb_dll_s {
@@ -47,35 +48,38 @@ struct usb_dll_s {
      * commented out entries are not currently unused.
      */
 
-    usb_dev_handle * (APIDECL *open)(struct usb_device *dev);
-    int (APIDECL *close)(usb_dev_handle *dev);
-//    int (APIDECL *get_string)(usb_dev_handle *dev, int index, int langid, char *buf, size_t buflen);
-//    int (APIDECL *get_string_simple)(usb_dev_handle *dev, int index, char *buf, size_t buflen);
+    usb_dev_handle * (LIBUSB_APIDECL *open)(struct usb_device *dev);
+    int (LIBUSB_APIDECL *close)(usb_dev_handle *dev);
+//    int (LIBUSB_APIDECL *get_string)(usb_dev_handle *dev, int index, int langid, char *buf, size_t buflen);
+//    int (LIBUSB_APIDECL *get_string_simple)(usb_dev_handle *dev, int index, char *buf, size_t buflen);
 
-//    int (APIDECL *get_descriptor_by_endpoint)(usb_dev_handle *udev, int ep, unsigned char type, unsigned char index, void *buf, int size);
-//    int (APIDECL *get_descriptor)(usb_dev_handle *udev, unsigned char type, unsigned char index, void *buf, int size);
+//    int (LIBUSB_APIDECL *get_descriptor_by_endpoint)(usb_dev_handle *udev, int ep, unsigned char type, unsigned char index, void *buf, int size);
+//    int (LIBUSB_APIDECL *get_descriptor)(usb_dev_handle *udev, unsigned char type, unsigned char index, void *buf, int size);
 
-//    int (APIDECL *bulk_write)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
-//    int (APIDECL *bulk_read)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
-//    int (APIDECL *interrupt_write)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
-//    int (APIDECL *interrupt_read)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
-    int (APIDECL *control_msg)(usb_dev_handle *dev, int requesttype, int request, int value, int index, char *bytes, int size, int timeout);
-    int (APIDECL *set_configuration)(usb_dev_handle *dev, int configuration);
-    int (APIDECL *claim_interface)(usb_dev_handle *dev, int interface);
-    int (APIDECL *release_interface)(usb_dev_handle *dev, int interface);
-//    int (APIDECL *set_altinterface)(usb_dev_handle *dev, int alternate);
-//    int (APIDECL *resetep)(usb_dev_handle *dev, unsigned int ep);
-//    int (APIDECL *clear_halt)(usb_dev_handle *dev, unsigned int ep);
-//    int (APIDECL *reset)(usb_dev_handle *dev);
+//    int (LIBUSB_APIDECL *bulk_write)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
+//    int (LIBUSB_APIDECL *bulk_read)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
+//    int (LIBUSB_APIDECL *interrupt_write)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
+//    int (LIBUSB_APIDECL *interrupt_read)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
+    int (LIBUSB_APIDECL *control_msg)(usb_dev_handle *dev, int requesttype, int request, int value, int index, char *bytes, int size, int timeout);
+    int (LIBUSB_APIDECL *set_configuration)(usb_dev_handle *dev, int configuration);
+    int (LIBUSB_APIDECL *claim_interface)(usb_dev_handle *dev, int interface);
+    int (LIBUSB_APIDECL *release_interface)(usb_dev_handle *dev, int interface);
+//    int (LIBUSB_APIDECL *set_altinterface)(usb_dev_handle *dev, int alternate);
+//    int (LIBUSB_APIDECL *resetep)(usb_dev_handle *dev, unsigned int ep);
+//    int (LIBUSB_APIDECL *clear_halt)(usb_dev_handle *dev, unsigned int ep);
+//    int (LIBUSB_APIDECL *reset)(usb_dev_handle *dev);
 
-    char * (APIDECL *strerror)(void);
+    char * (LIBUSB_APIDECL *strerror)(void);
 
-    void (APIDECL *init)(void);
-//    void (APIDECL *set_debug)(int level);
-    int (APIDECL *find_busses)(void);
-    int (APIDECL *find_devices)(void);
-//    struct usb_device * (APIDECL *device)(usb_dev_handle *dev);
-    struct usb_bus * (APIDECL *get_busses)(void);
+    void (LIBUSB_APIDECL *init)(void);
+//    void (LIBUSB_APIDECL *set_debug)(int level);
+    int (LIBUSB_APIDECL *find_busses)(void);
+    int (LIBUSB_APIDECL *find_devices)(void);
+//    struct usb_device * (LIBUSB_APIDECL *device)(usb_dev_handle *dev);
+    struct usb_bus * (LIBUSB_APIDECL *get_busses)(void);
+
+    int usage_counter;
+
 } usb_dll_t;
 
 static usb_dll_t usb = { NULL };
@@ -83,8 +87,15 @@ static usb_dll_t usb = { NULL };
 int xu1541_init_dll(void) {
     int error = 1;
 
+    if ( usb.usage_counter++ > 0 ) {
+        return 0;
+    }
+
     do {
-        usb.shared_object_handle = plugin_load("libusb.dll");
+        usb.shared_object_handle = plugin_load("libusb0.dll");
+        if ( ! usb.shared_object_handle ) {
+            break;
+        }
 
 #define READ(_x) \
     usb._x = plugin_get_address(usb.shared_object_handle, "usb_" ## #_x); \
@@ -126,6 +137,10 @@ int xu1541_init_dll(void) {
 
 int xu1541_uninit_dll(void) {
     int error = 1;
+
+    if ( --usb.usage_counter > 0 ) {
+        return 0;
+    }
 
     do {
         if (usb.shared_object_handle == NULL) {
@@ -244,6 +259,8 @@ int xu1541_init(void) {
 
   xu1541_dbg(0, "Scanning usb ...");
 
+  xu1541_init_dll();
+
   usb.init();
   
   usb.find_busses();
@@ -355,6 +372,8 @@ void xu1541_close(void)
       fprintf(stderr, "USB error: %s\n", usb.strerror());
 
     usb.close(xu1541_handle);
+
+    xu1541_uninit_dll();
 }
 
 /*! \brief perform an ioctl on the xu1541

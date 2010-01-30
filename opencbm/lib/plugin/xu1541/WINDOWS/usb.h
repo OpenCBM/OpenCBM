@@ -6,7 +6,7 @@
 
 #undef EXTERN
 #define EXTERN __declspec(dllimport) /*!< we are importing the functions */
-#define APIDECL __cdecl /*!< On Windows, we need c-type function declarations */
+#define LIBUSB_APIDECL __cdecl /*!< On Windows, we need c-type function declarations */
 
 /*
  * 'interface' is defined somewhere in the Windows header files. This macro
@@ -306,131 +306,131 @@ extern "C" {
 
   /* usb.c */
   EXTERN
-  usb_dev_handle * APIDECL usb_open(struct usb_device *dev);
+  usb_dev_handle * LIBUSB_APIDECL usb_open(struct usb_device *dev);
   EXTERN
-  int APIDECL usb_close(usb_dev_handle *dev);
+  int LIBUSB_APIDECL usb_close(usb_dev_handle *dev);
   EXTERN
-  int APIDECL usb_get_string(usb_dev_handle *dev, int index, int langid, char *buf,
+  int LIBUSB_APIDECL usb_get_string(usb_dev_handle *dev, int index, int langid, char *buf,
                      size_t buflen);
   EXTERN
-  int APIDECL usb_get_string_simple(usb_dev_handle *dev, int index, char *buf,
+  int LIBUSB_APIDECL usb_get_string_simple(usb_dev_handle *dev, int index, char *buf,
                             size_t buflen);
 
   /* descriptors.c */
   EXTERN
-  int APIDECL usb_get_descriptor_by_endpoint(usb_dev_handle *udev, int ep,
+  int LIBUSB_APIDECL usb_get_descriptor_by_endpoint(usb_dev_handle *udev, int ep,
                                      unsigned char type, unsigned char index,
                                      void *buf, int size);
   EXTERN
-  int APIDECL usb_get_descriptor(usb_dev_handle *udev, unsigned char type,
+  int LIBUSB_APIDECL usb_get_descriptor(usb_dev_handle *udev, unsigned char type,
                          unsigned char index, void *buf, int size);
 
   /* <arch>.c */
   EXTERN
-  int APIDECL usb_bulk_write(usb_dev_handle *dev, int ep, char *bytes, int size,
+  int LIBUSB_APIDECL usb_bulk_write(usb_dev_handle *dev, int ep, char *bytes, int size,
                      int timeout);
   EXTERN
-  int APIDECL usb_bulk_read(usb_dev_handle *dev, int ep, char *bytes, int size,
+  int LIBUSB_APIDECL usb_bulk_read(usb_dev_handle *dev, int ep, char *bytes, int size,
                     int timeout);
   EXTERN
-  int APIDECL usb_interrupt_write(usb_dev_handle *dev, int ep, char *bytes, int size,
+  int LIBUSB_APIDECL usb_interrupt_write(usb_dev_handle *dev, int ep, char *bytes, int size,
                           int timeout);
   EXTERN
-  int APIDECL usb_interrupt_read(usb_dev_handle *dev, int ep, char *bytes, int size,
+  int LIBUSB_APIDECL usb_interrupt_read(usb_dev_handle *dev, int ep, char *bytes, int size,
                          int timeout);
   EXTERN
-  int APIDECL usb_control_msg(usb_dev_handle *dev, int requesttype, int request,
+  int LIBUSB_APIDECL usb_control_msg(usb_dev_handle *dev, int requesttype, int request,
                       int value, int index, char *bytes, int size,
                       int timeout);
   EXTERN
-  int APIDECL usb_set_configuration(usb_dev_handle *dev, int configuration);
+  int LIBUSB_APIDECL usb_set_configuration(usb_dev_handle *dev, int configuration);
   EXTERN
-  int APIDECL usb_claim_interface(usb_dev_handle *dev, int interface);
+  int LIBUSB_APIDECL usb_claim_interface(usb_dev_handle *dev, int interface);
   EXTERN
-  int APIDECL usb_release_interface(usb_dev_handle *dev, int interface);
+  int LIBUSB_APIDECL usb_release_interface(usb_dev_handle *dev, int interface);
   EXTERN
-  int APIDECL usb_set_altinterface(usb_dev_handle *dev, int alternate);
+  int LIBUSB_APIDECL usb_set_altinterface(usb_dev_handle *dev, int alternate);
   EXTERN
-  int APIDECL usb_resetep(usb_dev_handle *dev, unsigned int ep);
+  int LIBUSB_APIDECL usb_resetep(usb_dev_handle *dev, unsigned int ep);
   EXTERN
-  int APIDECL usb_clear_halt(usb_dev_handle *dev, unsigned int ep);
+  int LIBUSB_APIDECL usb_clear_halt(usb_dev_handle *dev, unsigned int ep);
   EXTERN
-  int APIDECL usb_reset(usb_dev_handle *dev);
+  int LIBUSB_APIDECL usb_reset(usb_dev_handle *dev);
 
   EXTERN
-  char * APIDECL usb_strerror(void);
+  char * LIBUSB_APIDECL usb_strerror(void);
 
   EXTERN
-  void APIDECL usb_init(void);
+  void LIBUSB_APIDECL usb_init(void);
   EXTERN
-  void APIDECL usb_set_debug(int level);
+  void LIBUSB_APIDECL usb_set_debug(int level);
   EXTERN
-  int APIDECL usb_find_busses(void);
+  int LIBUSB_APIDECL usb_find_busses(void);
   EXTERN
-  int APIDECL usb_find_devices(void);
+  int LIBUSB_APIDECL usb_find_devices(void);
   EXTERN
-  struct usb_device * APIDECL usb_device(usb_dev_handle *dev);
+  struct usb_device * LIBUSB_APIDECL usb_device(usb_dev_handle *dev);
   EXTERN
-  struct usb_bus * APIDECL usb_get_busses(void);
+  struct usb_bus * LIBUSB_APIDECL usb_get_busses(void);
 
 
   /* Windows specific functions */
 
   #define LIBUSB_HAS_INSTALL_SERVICE_NP 1
   EXTERN
-  int APIDECL usb_install_service_np(void);
+  int LIBUSB_APIDECL usb_install_service_np(void);
   EXTERN
   void CALLBACK usb_install_service_np_rundll(HWND wnd, HINSTANCE instance,
                                               LPSTR cmd_line, int cmd_show);
 
   #define LIBUSB_HAS_UNINSTALL_SERVICE_NP 1
   EXTERN
-  int APIDECL usb_uninstall_service_np(void);
+  int LIBUSB_APIDECL usb_uninstall_service_np(void);
   EXTERN
   void CALLBACK usb_uninstall_service_np_rundll(HWND wnd, HINSTANCE instance,
                                                 LPSTR cmd_line, int cmd_show);
 
   #define LIBUSB_HAS_INSTALL_DRIVER_NP 1
   EXTERN
-  int APIDECL usb_install_driver_np(const char *inf_file);
+  int LIBUSB_APIDECL usb_install_driver_np(const char *inf_file);
   EXTERN
   void CALLBACK usb_install_driver_np_rundll(HWND wnd, HINSTANCE instance,
                                              LPSTR cmd_line, int cmd_show);
 
   #define LIBUSB_HAS_TOUCH_INF_FILE_NP 1
   EXTERN
-  int APIDECL usb_touch_inf_file_np(const char *inf_file);
+  int LIBUSB_APIDECL usb_touch_inf_file_np(const char *inf_file);
   EXTERN
   void CALLBACK usb_touch_inf_file_np_rundll(HWND wnd, HINSTANCE instance,
                                              LPSTR cmd_line, int cmd_show);
 
   #define LIBUSB_HAS_INSTALL_NEEDS_RESTART_NP 1
   EXTERN
-  int APIDECL usb_install_needs_restart_np(void);
+  int LIBUSB_APIDECL usb_install_needs_restart_np(void);
 
   EXTERN
-  const struct usb_version * APIDECL usb_get_version(void);
+  const struct usb_version * LIBUSB_APIDECL usb_get_version(void);
 
   EXTERN
-  int APIDECL usb_isochronous_setup_async(usb_dev_handle *dev, void **context,
+  int LIBUSB_APIDECL usb_isochronous_setup_async(usb_dev_handle *dev, void **context,
                                   unsigned char ep, int pktsize);
   EXTERN
-  int APIDECL usb_bulk_setup_async(usb_dev_handle *dev, void **context,
+  int LIBUSB_APIDECL usb_bulk_setup_async(usb_dev_handle *dev, void **context,
                            unsigned char ep);
   EXTERN
-  int APIDECL usb_interrupt_setup_async(usb_dev_handle *dev, void **context,
+  int LIBUSB_APIDECL usb_interrupt_setup_async(usb_dev_handle *dev, void **context,
                                 unsigned char ep);
 
   EXTERN
-  int APIDECL usb_submit_async(void *context, char *bytes, int size);
+  int LIBUSB_APIDECL usb_submit_async(void *context, char *bytes, int size);
   EXTERN
-  int APIDECL usb_reap_async(void *context, int timeout);
+  int LIBUSB_APIDECL usb_reap_async(void *context, int timeout);
   EXTERN
-  int APIDECL usb_reap_async_nocancel(void *context, int timeout);
+  int LIBUSB_APIDECL usb_reap_async_nocancel(void *context, int timeout);
   EXTERN
-  int APIDECL usb_cancel_async(void *context);
+  int LIBUSB_APIDECL usb_cancel_async(void *context);
   EXTERN
-  int APIDECL usb_free_async(void **context);
+  int LIBUSB_APIDECL usb_free_async(void **context);
 
 
 #ifdef __cplusplus
