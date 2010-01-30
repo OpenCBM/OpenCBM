@@ -7,11 +7,13 @@
  *  Copyright 2005 Spiro Trikaliotis
 */
 
-/* $Id: o65_int.h,v 1.3 2007-07-25 16:37:52 strik Exp $ */
+/* $Id: o65_int.h,v 1.4 2010-01-30 21:29:01 strik Exp $ */
 
 #ifndef O65_INT_H
 #define O65_INT_H
 
+#pragma warning( push )
+#pragma warning( disable: 4103 )
 #include "packon.h"
 
 /*
@@ -129,6 +131,8 @@ struct o65_file_header_oheader_s
 #define O65_FILE_RELOC_SEGMTYPEBYTE_TYPE_SEG    0xa0
 
 
+#pragma warning( disable: 4103 )
 #include "packoff.h"
+#pragma warning( pop )
 
 #endif /* #ifndef O65_INT_H */

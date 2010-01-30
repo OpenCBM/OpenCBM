@@ -4,12 +4,12 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005 Spiro Trikaliotis
+ *  Copyright 2006, 2009 Spiro Trikaliotis
 */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: o65.c,v 1.3 2006-06-02 22:51:55 wmsr Exp $";
+    "@(#) $Id: o65.c,v 1.4 2010-01-30 21:29:01 strik Exp $";
 #endif
 
 /*! Mark: We are in user-space (for debug.h) */
@@ -1269,7 +1269,7 @@ o65_file_process(char *Buffer, unsigned Length, o65_file_t **PO65file)
 {
     o65_file_t *o65file = NULL;
     unsigned ptr = 0;
-    int error = O65ERR_NO_ERROR;
+    int error = O65ERR_UNSPECIFIED;
 
     FUNC_ENTER();
 
@@ -1277,60 +1277,88 @@ o65_file_process(char *Buffer, unsigned Length, o65_file_t **PO65file)
     DBG_ASSERT(Buffer != NULL);
     DBG_ASSERT(Length > 0);
 
-    if (!Buffer || Length == 0)
-    {
-        error = O65ERR_NO_DATA;
-    }
+    do {
+        if (!Buffer || Length == 0) {
+            error = O65ERR_NO_DATA;
+            break;
+        }
 
-    o65file = o65_file_alloc(Buffer);
-    if (!o65file)
-    {
-        free(Buffer);
-        error = O65ERR_OUT_OF_MEMORY;
-    }
+        o65file = o65_file_alloc(Buffer);
+        if (!o65file) {
+            error = O65ERR_OUT_OF_MEMORY;
+            break;
+        }
 
-    if (!error) error = o65_file_load_header(Buffer, Length, &ptr, o65file);
-    if (!error) error = o65_file_load_header_dump(o65file);
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_header(Buffer, Length, &ptr, o65file) ) ) {
+            break;
+        }
 
-    if (!error) error = o65_file_load_header32(Buffer, Length, &ptr, o65file);
-    if (!error) error = o65_file_load_header_32_dump(o65file);
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_header_dump(o65file) ) ) {
+            break;
+        }
 
-    if (!error) error = o65_file_load_oheader(Buffer, Length, &ptr, o65file);
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_header32(Buffer, Length, &ptr, o65file) ) ) {
+            break;
+        }
 
-    /* read the text segment */
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_header_32_dump(o65file) ) ) {
+            break;
+        }
 
-    if (!error) error = o65_file_load_readtext(Buffer, Length, &ptr,
-                            o65file, "text segment",
-                            &o65file->ptext, o65file->header_32.tlen);
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_oheader(Buffer, Length, &ptr, o65file) ) ) {
+            break;
+        }
 
-    /* read the data segment */
+        /* read the text segment */
 
-    if (!error) error = o65_file_load_readtext(Buffer, Length, &ptr,
-                            o65file, "data segment",
-                            &o65file->pdata, o65file->header_32.dlen);
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_readtext(Buffer, Length, &ptr,
+                                o65file, "text segment",
+                                &o65file->ptext, o65file->header_32.tlen) ) ) {
+            break;
+        }
 
-    if (!error) error = o65_file_load_references(Buffer, Length, &ptr,
-                            o65file);
+        /* read the data segment */
 
-    if (!error) error = o65_file_load_reloc(Buffer, Length, &ptr,
-                            o65file, "text relocation",
-                            &o65file->text_relocation_list);
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_readtext(Buffer, Length, &ptr,
+                                o65file, "data segment",
+                                &o65file->pdata, o65file->header_32.dlen) ) ) {
+            break;
+        }
 
-    if (!error) error = o65_file_load_reloc(Buffer, Length, &ptr,
-                            o65file, "data relocation",
-                            &o65file->data_relocation_list);
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_references(Buffer, Length, &ptr, o65file) ) ) {
+            break;
+        }
 
-    if (!error) error = o65_file_load_globals(Buffer, Length, &ptr,
-                            o65file);
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_reloc(Buffer, Length, &ptr,
+                                o65file, "text relocation",
+                                &o65file->text_relocation_list) ) ) {
+            break;
+        }
 
-    if (!error)
-    {
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_reloc(Buffer, Length, &ptr,
+                                o65file, "data relocation",
+                                &o65file->data_relocation_list) ) ) {
+            break;
+        }
+
+        if ( O65ERR_NO_ERROR != (error = o65_file_load_globals(Buffer, Length, &ptr,
+                                o65file) ) ) {
+            break;
+        }
+
         DBG_O65_SHOW((DBG_PREFIX "This O65 file is a version %u.%u file.",
            O65VERSION_MAJOR(o65file->o65version),
            O65VERSION_MINOR(o65file->o65version)));
-    }
 
-    *PO65file = o65file;
+
+        *PO65file = o65file;
+        error = O65ERR_NO_ERROR; /* redundant, but we do it anyway */
+
+    } while (0);
+
+    if ( error ) {
+        o65_file_delete(o65file);
+    }
 
     FUNC_LEAVE_INT(error);
 }
@@ -1340,7 +1368,7 @@ o65_file_load(const char * const Filename, o65_file_t **PO65file)
 {
     FILE *f = NULL;
     char *buffer = NULL;
-    int error = O65ERR_NO_ERROR;
+    int error = O65ERR_UNSPECIFIED;
     int fileSize;
     int fileSizeSeek;
 
@@ -1351,70 +1379,59 @@ o65_file_load(const char * const Filename, o65_file_t **PO65file)
 
     DBG_O65_SHOW((DBG_PREFIX "Reading O65 file '%s'", Filename));
 
-    if (!error)
-    {
+    do {
         f = fopen(Filename, "rb");
-
-        if (!f)
-        {
+        if (!f) {
             DBG_ERROR((DBG_PREFIX "could not open file '%s'", Filename));
             error = O65ERR_NO_FILE;
-        }
-    }
-
-    if (!error && fseek(f, 0, SEEK_END) != 0)
-    {
-        error = O65ERR_FILE_HANDLING_ERROR;
-    }
-
-    if (!error)
-    {
-        fileSizeSeek = ftell(f);
-
-        if (fileSizeSeek == 0)
-        {
-            error = O65ERR_FILE_EMPTY;
-        }
-    }
-
-    if (!error && fseek(f, 0, SEEK_SET) != 0)
-    {
-        error = O65ERR_FILE_HANDLING_ERROR;
-    }
-
-    if (!error)
-    {
-        buffer = malloc(fileSizeSeek);
-
-        if (!buffer)
-        {
-            error = O65ERR_OUT_OF_MEMORY;
-        }
-    }
-
-    if (!error)
-    {
-        fileSize = fread(buffer, 1, fileSizeSeek + 1, f);
-
-        if (fileSize == 0)
-        {
-            error = O65ERR_FILE_EMPTY;
+            break;
         }
 
-        if (fileSize == fileSizeSeek && !feof(f))
-        {
+        if (fseek(f, 0, SEEK_END) != 0) {
             error = O65ERR_FILE_HANDLING_ERROR;
+            break;
         }
 
+        fileSizeSeek = ftell(f);
+        if (fileSizeSeek == 0) {
+            error = O65ERR_FILE_EMPTY;
+            break;
+        }
+
+        if (fseek(f, 0, SEEK_SET) != 0) {
+            error = O65ERR_FILE_HANDLING_ERROR;
+            break;
+        }
+
+        buffer = malloc(fileSizeSeek);
+        if (!buffer) {
+            error = O65ERR_OUT_OF_MEMORY;
+            break;
+        }
+
+        fileSize = fread(buffer, 1, fileSizeSeek + 1, f);
+        if (fileSize == 0) {
+            error = O65ERR_FILE_EMPTY;
+            break;
+        }
+
+        if (fileSize == fileSizeSeek && !feof(f)) {
+            error = O65ERR_FILE_HANDLING_ERROR;
+            break;
+        }
+
+        error = o65_file_process(buffer, fileSize, PO65file);
+        if (error) {
+            break;
+        }
+
+    } while (0);
+
+    if (f != NULL) {
         fclose(f);
     }
 
-    if (!error)
-    {
-        error = o65_file_process(buffer, fileSize, PO65file);
-    }
-    else
-    {
+    if (error) {
         free(buffer);
     }
 
