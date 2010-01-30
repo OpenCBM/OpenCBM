@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/install.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: install.c,v 1.3 2009-03-22 14:09:20 strik Exp $ \n
+** \version $Id: install.c,v 1.4 2010-01-30 21:33:15 strik Exp $ \n
 ** \n
 ** \brief Helper functions for installing the plugin
 **        on a Windows machine
@@ -290,7 +290,7 @@ processNumber(const PCHAR Argument, PCHAR *NextChar, PBOOL ParameterGiven, PULON
  \return
 */
 unsigned int CBMAPIDECL
-cbm_plugin_install_process_commandline(CbmPluginInstallProcessCommandlineData_t * Data)
+opencbm_plugin_install_process_commandline(CbmPluginInstallProcessCommandlineData_t * Data)
 {
     int error = 0;
     char **localOptarg = Data->OptArg;
@@ -468,7 +468,7 @@ cbm_plugin_install_process_commandline(CbmPluginInstallProcessCommandlineData_t 
  \return
 */
 BOOL CBMAPIDECL
-cbm_plugin_install_do_install(void * Context)
+opencbm_plugin_install_do_install(void * Context)
 {
     BOOL error = TRUE;
     char * driverLocation = NULL;
@@ -537,7 +537,7 @@ cbm_plugin_install_do_install(void * Context)
  \return
 */
 BOOL CBMAPIDECL
-cbm_plugin_install_do_uninstall(void * Context)
+opencbm_plugin_install_do_uninstall(void * Context)
 {
     BOOL error = TRUE;
 
@@ -559,13 +559,13 @@ cbm_plugin_install_do_uninstall(void * Context)
         if (!CbmCheckPresence(OPENCBM_DRIVERNAME))
         {
             printf("No driver installed, cannot remove.\n");
+            error = FALSE;
             break;
         }
 
         printf("REMOVING driver...\n");
 
         CbmRemove(OPENCBM_DRIVERNAME);
-
 
         error = FALSE;
 
@@ -583,7 +583,7 @@ cbm_plugin_install_do_uninstall(void * Context)
  \return
 */
 unsigned int CBMAPIDECL
-cbm_plugin_install_get_needed_files(CbmPluginInstallProcessCommandlineData_t * Data, opencbm_plugin_install_neededfiles_t * Destination)
+opencbm_plugin_install_get_needed_files(CbmPluginInstallProcessCommandlineData_t * Data, opencbm_plugin_install_neededfiles_t * Destination)
 {
     unsigned int size = sizeof(NeededFilesXA1541);
     xa1541_parameter_t *parameter = Data->OptionMemory;

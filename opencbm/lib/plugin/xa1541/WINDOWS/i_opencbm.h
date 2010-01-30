@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.6 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: i_opencbm.h,v 1.7 2010-01-30 21:33:15 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **
@@ -20,6 +20,7 @@
 #ifndef I_OPENCBM_H
 #define I_OPENCBM_H
 
+#include "configuration.h"
 #include "opencbm.h"
 
 extern BOOL cbm_ioctl(IN CBM_FILE HandleDevice, IN DWORD ControlCode,
@@ -46,10 +47,6 @@ extern BOOL cbm_driver_install(OUT PULONG Buffer, IN ULONG BufferLen);
 
 extern LONG RegGetDWORD(IN HKEY RegKey, IN char *SubKey, OUT LPDWORD Value);
 extern BOOL IsDriverStartedAutomatically(VOID);
-
-#if DBG
-    extern VOID cbm_get_debugging_flags(VOID);
-#endif
 
 extern VOID WaitForIoCompletionInit(VOID);
 extern VOID WaitForIoCompletionDeinit(VOID);

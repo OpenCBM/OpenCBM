@@ -31,4 +31,9 @@ extern int xu1541_read(__u_char *data, size_t len);
 extern int xu1541_special_write(int mode, const __u_char *data, size_t size);
 extern int xu1541_special_read(int mode, __u_char *data, size_t size);
 
+#ifdef WIN32
+    extern int xu1541_dll_init(void);
+    extern void xu1541_dll_uninit(void);
+#endif
+
 #endif // XU1541_H

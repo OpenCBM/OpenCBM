@@ -10,7 +10,7 @@
 /*! **************************************************************
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.20 2009-05-09 17:42:21 strik Exp $ \n
+** \version $Id: debug.h,v 1.21 2010-01-30 21:33:09 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **
@@ -399,6 +399,9 @@ int __cdecl main(int argc, char *argv[])
               /*! Output if DBGF_CABLE is defined */
               #define DBG_CABLE(   _xxx ) { if (ISDBG_CABLE()) { DBGO( _xxx ); } }
        #endif
+
+       extern void cbm_get_debugging_flags(const char * ModuleName);
+
 
 #else  // #if DBG
 

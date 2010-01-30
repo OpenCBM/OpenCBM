@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.6 2010-01-30 21:09:42 strik Exp $ \n
+** \version $Id: xu1541.c,v 1.7 2010-01-30 21:33:15 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
@@ -78,18 +78,14 @@ struct usb_dll_s {
 //    struct usb_device * (LIBUSB_APIDECL *device)(usb_dev_handle *dev);
     struct usb_bus * (LIBUSB_APIDECL *get_busses)(void);
 
-    int usage_counter;
-
 } usb_dll_t;
+
+#ifdef WIN32
 
 static usb_dll_t usb = { NULL };
 
-int xu1541_init_dll(void) {
+int xu1541_dll_init(void) {
     int error = 1;
-
-    if ( usb.usage_counter++ > 0 ) {
-        return 0;
-    }
 
     do {
         usb.shared_object_handle = plugin_load("libusb0.dll");
@@ -135,12 +131,7 @@ int xu1541_init_dll(void) {
     return error;
 }
 
-int xu1541_uninit_dll(void) {
-    int error = 1;
-
-    if ( --usb.usage_counter > 0 ) {
-        return 0;
-    }
+void xu1541_dll_uninit(void) {
 
     do {
         if (usb.shared_object_handle == NULL) {
@@ -151,12 +142,18 @@ int xu1541_uninit_dll(void) {
 
         memset(&usb, 0, sizeof usb);
 
-        error = 0;
-
     } while (0);
 
-    return error;
 }
+
+#else
+
+static usb_dll_t usb = { 
+    usb_open, usb_close, usb_control_msg, usb_set_configuration, usb_claim_interface, usb_release_interface,
+    usb_strerror, usb_init, usb_find_busses, usb_find_devices, usb_get_busses
+};
+
+#endif /* #ifdef WIN32 */
 
 /*! \internal \brief Output debugging information for the xu1541
 
@@ -258,8 +255,6 @@ int xu1541_init(void) {
   int len;
 
   xu1541_dbg(0, "Scanning usb ...");
-
-  xu1541_init_dll();
 
   usb.init();
   
@@ -372,8 +367,6 @@ void xu1541_close(void)
       fprintf(stderr, "USB error: %s\n", usb.strerror());
 
     usb.close(xu1541_handle);
-
-    xu1541_uninit_dll();
 }
 
 /*! \brief perform an ioctl on the xu1541

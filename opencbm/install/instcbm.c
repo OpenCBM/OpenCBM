@@ -4,14 +4,14 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004, 2008 Spiro Trikaliotis
+ *  Copyright 2004, 2008, 2009 Spiro Trikaliotis
  *
  */
 
 /*! ************************************************************** 
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.c,v 1.29 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: instcbm.c,v 1.30 2010-01-30 21:33:12 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver
 **
@@ -44,6 +44,9 @@
 #include "debug.h"
 
 #include "instcbm.h"
+
+static BOOL
+SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname);
 
 /*! \internal \brief Check if we have the needed access rights
 
@@ -154,8 +157,17 @@ GetOsVersion(VOID)
                 break;
 
             case 6:
-                retValue = WINVISTA;
-                break;
+                if (ovi.dwMinorVersion == 0) {
+                    retValue = WINVISTA;
+                    break;
+                }
+                else if (ovi.dwMinorVersion == 1) {
+                    /* Who the heck had to the idea to name NT 6.1 as "Windows 7"? */
+                    retValue = WIN7;
+                    break;
+                }
+                /* else */
+                /* FALL THROUGH */
 
             default:
                 // This is a version of Windows we do not know; anyway, since
@@ -337,13 +349,26 @@ processNumber(const PCHAR Argument, PCHAR *NextChar, PBOOL ParameterGiven, PULON
     FUNC_LEAVE_BOOL(error);
 }
 
-/*! \brief @@@@@ \todo document
+/*! \brief Make sure that only one parameter is given that results in command execution
 
  \param Parameter
+    The outcome of the parsing of the command-line parameters so far
 
  \param ExecutableName
+    The name of the executable (for an error message, if this function returns TRUE)
 
  \return
+    TRUE if there is already an executing command in Parameter,
+    else FALSE.
+
+  Running the program with colliding parameters (for example, install und remove)
+  is not possible. When processing this parameters, this function is called.
+  
+  This function ensures that it can be called only once without an error
+  (returning FALSE).
+
+  For the second (or any subsequent) call, this function gives an error message,
+  and returns TRUE.
 */
 static BOOL
 enforceOnlyOneExecutingCommand(cbm_install_parameter_t *Parameter, const char *ExecutableName)
@@ -393,9 +418,11 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
         { "help",       no_argument,       NULL, 'h' },
         { "version",    no_argument,       NULL, 'V' },
         { "remove",     no_argument,       NULL, 'r' },
+        { "purge",      no_argument,       NULL, 'p' },
         { "update",     no_argument,       NULL, 'u' },
         { "check",      no_argument,       NULL, 'c' },
         { "nocopy",     no_argument,       NULL, 'n' },
+        { "adapter",    required_argument, NULL, '@' },
 #if DBG
         { "debugflags", required_argument, NULL, 'D' },
         { "buffer",     no_argument,       NULL, 'B' },
@@ -403,7 +430,7 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
         { NULL,         0,                 NULL, 0   }
     };
 
-    const char shortopts[] = "-hVrucn"
+    const char shortopts[] = "-hVrpucn@:"
 
 #if DBG
                              "D:B"
@@ -443,6 +470,17 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
             Parameter->Install = FALSE;
             break;
 
+        case 'p':
+            if (Parameter->Remove) {
+                Parameter->Purge = TRUE;
+            }
+            else {
+                error = TRUE;
+                printf("--purge only allowed after --remove, aborting!");
+                hint(Argv[0]);
+            }
+            break;
+
         case 'u':
             Parameter->Update = TRUE;
             Parameter->Install = FALSE;
@@ -457,6 +495,16 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
             Parameter->NoCopy = TRUE;
             break;
 
+        case '@': /* choose adapter */
+            if (Parameter->DefaultAdapter == NULL) {
+                Parameter->DefaultAdapter = cbmlibmisc_strdup(optarg);
+            }
+            else {
+                printf("--adapter/-@ given more than once.");
+                hint(Argv[0]);
+                exit(1);
+            }
+            break;
 #if DBG
         case 'D':
             {
@@ -526,11 +574,23 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
         }
     }
 
+    if (Parameter->DefaultAdapter && ! Parameter->Update && ! Parameter->Install ) {
+        printf("--adapter/-@ only allowed when installing or updating, aborting!");
+        hint(Argv[0]);
+        exit(1);
+    }
+
+    if (Parameter->Install && ! Parameter->DefaultAdapter && Parameter->PluginList->Name) {
+        /* generate a default adapter: The first one given */
+        Parameter->DefaultAdapter = cbmlibmisc_strdup(Parameter->PluginList->Name);
+    }
+
 /*! \todo is this needed anymore?
     if (Parameter->Install && Parameter->PluginList == NULL) {
         error = TRUE;
     }
 */
+
     FUNC_LEAVE_BOOL(error);
 }
 
@@ -561,7 +621,7 @@ CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *File
     int error = 0;
 
     FUNC_ENTER();
-
+    
     sourceFile = cbmlibmisc_strcat(SourcePath, Filename);
     destFile = cbmlibmisc_strcat(DestPath, Filename);
 
@@ -587,18 +647,26 @@ CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *File
         fprintf(stderr, "Error allocating memory buffers for copying '%s'.\n", Filename);
     }
 
-    if (sourceFile)
-        free(sourceFile);
+    if (sourceFile) {
+        cbmlibmisc_strfree(sourceFile);
+    }
 
-    if (destFile)
-        free(destFile);
+    if (destFile) {
+        cbmlibmisc_strfree(destFile);
+    }
 
     FUNC_LEAVE_INT(error);
 }
 
-/*! \brief @@@@@ \todo document
+/*! \brief Get the current (working) directory
 
  \return
+    Pointer to an allocated memory buffer that contains
+    the working directory, or NULL if an error occurred.
+    The directory has a trailing backslash at its end.
+
+ \remark
+   The string must be freed with cbmlibmisc_strfree().
 */
 static char *
 GetWorkingDirectory(void)
@@ -621,7 +689,7 @@ GetWorkingDirectory(void)
         // Allocate memory for the working directory
         //
 
-        tmpPathString = malloc(stringLength + 1);
+        tmpPathString = cbmlibmisc_stralloc(stringLength + 1);
 
         if (tmpPathString == NULL)
         {
@@ -649,16 +717,22 @@ GetWorkingDirectory(void)
 
     if (error)
     {
-        free(tmpPathString);
+        cbmlibmisc_strfree(tmpPathString);
         tmpPathString = NULL;
     }
 
     FUNC_LEAVE_STRING(tmpPathString);
 }
 
-/*! \brief @@@@@ \todo document
+/*! \brief Get the Windows system directory
 
  \return
+    Pointer to an allocated memory buffer that contains
+    the Windows system directory, or NULL if an error occurred.
+    The directory has a trailing backslash at its end.
+
+ \remark
+   The string must be freed with cbmlibmisc_strfree().
 */
 static char *
 GetWindowsSystemDirectory(void)
@@ -684,7 +758,7 @@ GetWindowsSystemDirectory(void)
         // Allocate memory for the system directory
         //
 
-        tmpPathString = malloc(stringLength + 1);
+        tmpPathString = cbmlibmisc_stralloc(stringLength + 1);
 
         if (tmpPathString == NULL)
         {
@@ -692,7 +766,7 @@ GetWindowsSystemDirectory(void)
         }
 
         //
-        // determine the working directory
+        // determine the system directory
         //
 
         if (GetSystemDirectory(tmpPathString, stringLength) == 0)
@@ -712,7 +786,7 @@ GetWindowsSystemDirectory(void)
 
     if (error)
     {
-        free(tmpPathString);
+        cbmlibmisc_strfree(tmpPathString);
         tmpPathString = NULL;
     }
 
@@ -720,25 +794,34 @@ GetWindowsSystemDirectory(void)
 #endif
 }
 
-/*! \brief @@@@@ \todo document
+/*! \brief Get the Windows driver directory
 
  \return
+    Pointer to an allocated memory buffer that contains
+    the Windows driver directory, or NULL if an error occurred.
+    The directory has a trailing backslash at its end.
+
+ \remark
+   The string must be freed with cbmlibmisc_strfree().
 */
 static char *
 GetWindowsDriverDirectory(void)
 {
-    char * tmpPathString;
+    char * tmpPathString = NULL;
     char * driverPathString = NULL;
 
     FUNC_ENTER();
 
-    tmpPathString = GetWindowsSystemDirectory();
+    do {
+        tmpPathString = GetWindowsSystemDirectory();
+        if (tmpPathString == NULL) {
+            break;
+        }
 
-    if (NULL != tmpPathString) {
         driverPathString = cbmlibmisc_strcat(tmpPathString, "DRIVERS\\");
-    }
+    } while (0);
 
-    free(tmpPathString);
+    cbmlibmisc_strfree(tmpPathString);
 
     FUNC_LEAVE_STRING(driverPathString);
 }
@@ -758,13 +841,31 @@ GetWindowsDriverDirectory(void)
 static int
 UpdateOpenCBM(cbm_install_parameter_t *Parameter)
 {
-    int success = 0;
+    int error = 0;
+    HMODULE openCbmDllHandle = NULL;
 
     FUNC_ENTER();
 
-    // @@@
+    do {
+        openCbmDllHandle = LoadLocalOpenCBMDll();
+        if (openCbmDllHandle  == NULL) {
+            DBG_PRINT((DBG_PREFIX "Could not open the OpenCBM DLL."));
+            fprintf(stderr, "Could not open the OpenCBM DLL.");
+            break;
+        }
 
-    FUNC_LEAVE_INT(success);
+        error = SelfInitGenericOpenCBM(openCbmDllHandle, Parameter->DefaultAdapter);
+        if (error) {
+            break;
+        }
+
+    } while (0);
+
+    if (openCbmDllHandle) {
+        FreeLibrary(openCbmDllHandle);
+    }
+
+   FUNC_LEAVE_INT(error);
 }
 
 /*! \brief @@@@@ \todo document */
@@ -777,19 +878,30 @@ static opencbm_plugin_install_neededfiles_t NeededFilesGeneric[] =
     { LIST_END,   "" }
 };
 
-/*! \brief @@@@@ \todo document
+/*! \brief Determine in which directory to copy a needed file
 
  \param NeededFile
+   Structure that describes the needed file
 
  \param PluginName
+   The name of the plugin
 
  \param WorkingDirectory
+   A string containing the current directory
 
  \param SystemDirectory
+   A string containing the system directory
 
  \param DriverDirectory
+   A string containing the driver directory
 
  \return
+   Pointer to an allocated buffer that contains the
+   destination directory of this needed file.
+   The directory ends with a trailing backslash.
+
+ \remark
+   The string must be freed with cbmlibmisc_strfree().
 */
 static char *
 GetPathForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, const char * PluginName, const char * WorkingDirectory, const char * SystemDirectory, const char * DriverDirectory)
@@ -799,7 +911,6 @@ GetPathForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, const ch
     FUNC_ENTER();
 
     do {
-
         /* if we already have a copy of the path, use that */
 
         if (NeededFile->FileLocationString != NULL) {
@@ -816,15 +927,15 @@ GetPathForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, const ch
             break;
 
         case LOCAL_DIR:
-            filepath = cbmlibmisc_strcat(WorkingDirectory, "");
+            filepath = cbmlibmisc_strdup(WorkingDirectory);
             break;
 
         case SYSTEM_DIR:
-            filepath = cbmlibmisc_strcat(SystemDirectory, "");
+            filepath = cbmlibmisc_strdup(SystemDirectory);
             break;
 
         case DRIVER_DIR:
-            filepath = cbmlibmisc_strcat(DriverDirectory, "");
+            filepath = cbmlibmisc_strdup(DriverDirectory);
             break;
 
         default:
@@ -846,19 +957,29 @@ GetPathForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, const ch
     FUNC_LEAVE_STRING(filepath);
 }
 
-/*! \brief @@@@@ \todo document
+/*! \brief Determine the destination filename of a needed file
 
  \param NeededFile
+   Structure that describes the needed file
 
  \param PluginName
+   The name of the plugin
 
  \param WorkingDirectory
+   A string containing the current directory
 
  \param SystemDirectory
+   A string containing the system directory
 
  \param DriverDirectory
+   A string containing the driver directory
 
  \return
+   Pointer to an allocated buffer that contains the
+   file name with full destination directory of this needed file.
+
+ \remark
+   The string must be freed with cbmlibmisc_strfree().
 */
 static char *
 GetFilenameForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, const char * PluginName, const char * WorkingDirectory, const char * SystemDirectory, const char * DriverDirectory)
@@ -873,7 +994,7 @@ GetFilenameForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, cons
     if (NULL != path) 
     {
         filename = cbmlibmisc_strcat(path, NeededFile->Filename);
-        free(path);
+        cbmlibmisc_strfree(path);
     }
 
     if (filename == NULL)
@@ -884,22 +1005,24 @@ GetFilenameForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, cons
     FUNC_LEAVE_STRING(filename);
 }
 
-/*! \brief @@@@@ \todo document
+/*! \brief Check if a set of files is currently installed
 
  \param NeededFiles
+   Pointer to an array of needed files. This function
+   will return TRUE only if *all* files are available.
 
  \return
+   TRUE if all the files are installed, else FALSE.
+
 */
 static BOOL
-IsPresentOpenCBM(opencbm_plugin_install_neededfiles_t NeededFiles[])
+AreNeededFilesPresent(opencbm_plugin_install_neededfiles_t NeededFiles[])
 {
     BOOL isPresent = FALSE;
 
     char * workingDirectory = NULL;
     char * systemDirectory = NULL;
     char * driverDirectory = NULL;
-
-    char * filename = NULL;
 
     opencbm_plugin_install_neededfiles_t * neededfiles;
 
@@ -928,66 +1051,82 @@ IsPresentOpenCBM(opencbm_plugin_install_neededfiles_t NeededFiles[])
 
         for (neededfiles = NeededFiles; neededfiles->FileLocation != LIST_END; neededfiles++)
         {
+            char * filename;
+            
             filename = GetFilenameForNeededFile(neededfiles, NULL, workingDirectory, systemDirectory, driverDirectory);
 
             fileattributes = GetFileAttributes(filename);
 
+            cbmlibmisc_strfree(filename);
+
             /*
              * Yes, this constant 0xFFFFFFFF is defined for the function failing,
              * not ((DWORD)-1) as one might expect.
-             * Thus, this most hold even for 64 bit platforms
+             * Thus, this most probably holds even for 64 bit platforms
              */
             if (fileattributes == 0xFFFFFFFF)
             {
                 DBG_PRINT((DBG_PREFIX "File '%s' not found.", filename));
                 isPresent = FALSE;
             }
-
-            free(filename);
-            filename = NULL;
         }
     } while (0);
 
-    free(workingDirectory);
-    free(systemDirectory);
-    free(driverDirectory);
+    cbmlibmisc_strfree(workingDirectory);
+    cbmlibmisc_strfree(systemDirectory);
+    cbmlibmisc_strfree(driverDirectory);
 
     FUNC_LEAVE_BOOL(isPresent);
 }
 
-/*! \brief @@@@@ \todo document
+/*! \brief Determine if generic OpenCBM framework is installed
 
  \return
+    TRUE if all needed files from the OpenCBM framework are installed,
+    else FALSE.
 */
 static BOOL
 IsPresentGenericOpenCBM(void)
 {
     FUNC_ENTER();
-    FUNC_LEAVE_BOOL(IsPresentOpenCBM(NeededFilesGeneric));
+    FUNC_LEAVE_BOOL(AreNeededFilesPresent(NeededFilesGeneric));
 }
 
-/*! \brief @@@@@ \todo document
+/*! \brief Type of the callback function for HandleNeededFiles()
 
- \param Path
+ \param DestinationPath
+   The destination path of the installed file
 
  \param File
+   The name of the destination file.
 
  \return
+   TRUE on error, else FALSE.
 */
-typedef BOOL HandleOpenCbmFilesCallback_t(const char * Path, const char * File);
+typedef BOOL HandleNeededFilesCallback_t(const char * DestinationPath, const char * File);
 
-/*! \brief @@@@@ \todo document
+/*! \brief Iterate through all the needed files and call a callback function for each of it
 
  \param NeededFiles
+   Pointer to an array describing the needed files
 
  \param PathToInstalledPluginFile
+   On return, gets the path to the copied plugin DLL file.
+   This can be used to open that version of the DLL in the sequel.
 
  \param Callback
+   Pointer to the callback function to call for each file
 
  \return
+   TRUE on error, else FALSE
+
+ \remark
+   The returned PathToInstalledPluginFile is determined from
+   NeededFiles[0]
+
 */
 static BOOL
-HandleOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const char ** PathToInstalledPluginFile, HandleOpenCbmFilesCallback_t * Callback)
+HandleNeededFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const char ** PathToInstalledPluginFile, HandleNeededFilesCallback_t * Callback)
 {
     char * workingDirectory = NULL;
     char * systemDirectory = NULL;
@@ -1022,7 +1161,7 @@ HandleOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const cha
                 *PathToInstalledPluginFile = cbmlibmisc_strcat(destinationPath, neededfiles->Filename);
             }
 
-            free(destinationPath);
+            cbmlibmisc_strfree(destinationPath);
 
             destinationPath = NULL;
 
@@ -1036,46 +1175,54 @@ HandleOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const cha
     } while (0);
 
 
-    free(workingDirectory);
-    free(systemDirectory);
-    free(driverDirectory);
+    cbmlibmisc_strfree(workingDirectory);
+    cbmlibmisc_strfree(systemDirectory);
+    cbmlibmisc_strfree(driverDirectory);
 
     FUNC_LEAVE_BOOL(error);
 }
 
-/*! \brief @@@@@ \todo document */
-static HandleOpenCbmFilesCallback_t CopyOpenCbmFilesCallback;
+/*! \brief Callback for CopyNeededFiles: Copy one file to its destination
 
-/*! \brief @@@@@ \todo document
-
- \param Path
+ \param DestinationPath
+    Destination path of the file
 
  \param File
+   The name of the destination file.
 
  \return
+   TRUE on error, else FALSE.
 */
 static BOOL
-CopyOpenCbmFilesCallback(const char * Path, const char * File)
+CopyNeededFilesCallback(const char * DestinationPath, const char * File)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_BOOL(CopyFileToNewPath(".\\", Path, File));
+    FUNC_LEAVE_BOOL(CopyFileToNewPath(".\\", DestinationPath, File));
 }
 
-/*! \brief @@@@@ \todo document
+/*! \brief Copy all needed files to their destination
 
  \param NeededFiles
+   Pointer to an array describing the needed files
 
  \param PathToInstalledPluginFile
+   On return, gets the path to the copied plugin DLL file.
+   This can be used to open that version of the DLL in the sequel.
 
  \return
+   TRUE on error, else FALSE
+
+ \remark
+   The returned PathToInstalledPluginFile is determined from
+   NeededFiles[0]
 */
 static BOOL
-CopyOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const char ** PathToInstalledPluginFile)
+CopyNeededFiles(opencbm_plugin_install_neededfiles_t NeededFiles[], const char ** PathToInstalledPluginFile)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_BOOL(HandleOpenCbmFiles(NeededFiles, PathToInstalledPluginFile, CopyOpenCbmFilesCallback));
+    FUNC_LEAVE_BOOL(HandleNeededFiles(NeededFiles, PathToInstalledPluginFile, CopyNeededFilesCallback));
 }
 
 /*! \brief @@@@@ \todo document
@@ -1127,11 +1274,11 @@ LoadOpenCBMDll(BOOL AtSystemDirectory)
     } while (0);
 
     if (dllPath != NULL) {
-        free(dllPath);
+        cbmlibmisc_strfree(dllPath);
     }
 
     if (systemDirectory != NULL) {
-        free(systemDirectory);
+        cbmlibmisc_strfree(systemDirectory);
     }
 
     FUNC_LEAVE_HMODULE(dll);
@@ -1173,26 +1320,26 @@ static BOOL
 SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
 {
     BOOL error = TRUE;
-    cbm_plugin_install_generic_t * cbm_plugin_install_generic = NULL;
+    opencbm_plugin_install_generic_t * opencbm_plugin_install_generic = NULL;
 
     FUNC_ENTER();
 
     do {
-        /* ... get the address of cbm_plugin_install_generic() ... */
+        /* ... get the address of opencbm_plugin_install_generic() ... */
 
-        cbm_plugin_install_generic = (void *) GetProcAddress(OpenCbmDllHandle, 
-            "cbm_plugin_install_generic");
+        opencbm_plugin_install_generic = (void *) GetProcAddress(OpenCbmDllHandle, 
+            "opencbm_plugin_install_generic");
 
-        if (cbm_plugin_install_generic == NULL) {
+        if (opencbm_plugin_install_generic == NULL) {
             DBG_PRINT((DBG_PREFIX "Could not get address of "
-                "opencbm.dll::cbm_plugin_install_generic()."));
+                "opencbm.dll::opencbm_plugin_install_generic()."));
             fprintf(stderr, "Could not get address of "
-                "opencbm.dll::cbm_plugin_install_generic().\n");
+                "opencbm.dll::opencbm_plugin_install_generic().\n");
             break;
         }
 
         /* ... and execute it */
-        error = cbm_plugin_install_generic(DefaultPluginname);
+        error = opencbm_plugin_install_generic(DefaultPluginname);
 
     } while (0);
 
@@ -1208,19 +1355,19 @@ SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
  \return
 */
 static BOOL
-CopyGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
+CopyGenericOpenCBM(HMODULE OpenCbmDllHandle)
 {
     BOOL error = TRUE;
 
     FUNC_ENTER();
 
     do {
-        error = CopyOpenCbmFiles(NeededFilesGeneric, NULL);
+        error = CopyNeededFiles(NeededFilesGeneric, NULL);
         if (error) {
             break;
         }
 
-        error = SelfInitGenericOpenCBM(OpenCbmDllHandle, DefaultPluginname);
+        error = SelfInitGenericOpenCBM(OpenCbmDllHandle, NULL);
         if (error) {
             break;
         }
@@ -1359,20 +1506,20 @@ PluginExecuteFunction(const char * PluginName,
  \return
 */
 static BOOL
-perform_cbm_plugin_install_do_install(const char * PluginName, void * FunctionPointer, void * Context)
+perform_opencbm_plugin_install_do_install(const char * PluginName, void * FunctionPointer, void * Context)
 {
-    cbm_plugin_install_do_install_t * cbm_plugin_install_do_install = FunctionPointer;
+    opencbm_plugin_install_do_install_t * opencbm_plugin_install_do_install = FunctionPointer;
 
     BOOL error = TRUE;
 
     FUNC_ENTER();
 
     do {
-        if (cbm_plugin_install_do_install == NULL) {
+        if (opencbm_plugin_install_do_install == NULL) {
             break;
         }
 
-        error = cbm_plugin_install_do_install(Context);
+        error = opencbm_plugin_install_do_install(Context);
 
         if (error) {
             DBG_ERROR((DBG_PREFIX "Installation of plugin '%s' failed!", PluginName));
@@ -1388,7 +1535,8 @@ perform_cbm_plugin_install_do_install(const char * PluginName, void * FunctionPo
 /*! \brief @@@@@ \todo document */
 typedef
 struct InstallPluginCallback_context_s {
-    HMODULE OpenCbmDllHandle; /*!< @@@@@ \todo document */
+    HMODULE OpenCbmDllHandle;           /*!< @@@@@ \todo document */
+    cbm_install_parameter_t *Parameter; /*!< @@@@@ \todo document */
 } InstallPluginCallback_context_t;
 
 /*! \brief @@@@@ \todo document
@@ -1406,7 +1554,7 @@ InstallPluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, v
 
     BOOL error = TRUE;
 
-    cbm_plugin_install_plugin_data_t * cbm_plugin_install_plugin_data = NULL;
+    opencbm_plugin_install_plugin_data_t * opencbm_plugin_install_plugin_data = NULL;
 
     const char * pathToInstalledPluginFile = NULL;
 
@@ -1416,26 +1564,34 @@ InstallPluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, v
     do {
         printf("++++ Install: '%s' with filename '%s'.\n", PluginInstallParameter->Name, PluginInstallParameter->FileName);
 
-        if ( CopyOpenCbmFiles(PluginInstallParameter->NeededFiles, &pathToInstalledPluginFile) ) {
-            break;
+        if ( context->Parameter->NoCopy) {
+            char * workingDirectory = GetWorkingDirectory();
+
+            pathToInstalledPluginFile = cbmlibmisc_strcat(workingDirectory, PluginInstallParameter->FileName);
+            cbmlibmisc_strfree(workingDirectory);
+        }
+        else {
+            if ( CopyNeededFiles(PluginInstallParameter->NeededFiles, &pathToInstalledPluginFile) ) {
+                break;
+            }
         }
 
         if ( pathToInstalledPluginFile == NULL ) {
             break;
         }
 
-        cbm_plugin_install_plugin_data = (void *) GetProcAddress(context->OpenCbmDllHandle, 
-            "cbm_plugin_install_plugin_data");
+        opencbm_plugin_install_plugin_data = (void *) GetProcAddress(context->OpenCbmDllHandle, 
+            "opencbm_plugin_install_plugin_data");
 
-        if (cbm_plugin_install_plugin_data == NULL) {
+        if (opencbm_plugin_install_plugin_data == NULL) {
             DBG_PRINT((DBG_PREFIX "Could not get address of "
-                "opencbm.dll::cbm_plugin_install_plugin_data()"));
+                "opencbm.dll::opencbm_plugin_install_plugin_data()"));
             fprintf(stderr, "Could not get address of "
-                "opencbm.dll::cbm_plugin_install_plugin_data()");
+                "opencbm.dll::opencbm_plugin_install_plugin_data()");
             break;
         }
 
-        error = cbm_plugin_install_plugin_data(PluginInstallParameter->Name, pathToInstalledPluginFile, PluginInstallParameter->OptionMemory);
+        error = opencbm_plugin_install_plugin_data(PluginInstallParameter->Name, pathToInstalledPluginFile, PluginInstallParameter->OptionMemory);
 
         if (error) {
             break;
@@ -1447,8 +1603,8 @@ InstallPluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, v
 
         error = PluginExecuteFunction(PluginInstallParameter->Name,
             pathToInstalledPluginFile, 
-            "cbm_plugin_install_do_install",
-            perform_cbm_plugin_install_do_install,
+            "opencbm_plugin_install_do_install",
+            perform_opencbm_plugin_install_do_install,
             PluginInstallParameter);
 
     } while (0);
@@ -1493,16 +1649,20 @@ InstallOpenCBM(cbm_install_parameter_t *Parameter)
             break;
         }
 
-        if ( ! IsPresentGenericOpenCBM())
+        if ( Parameter->NoCopy ) {
+            error = SelfInitGenericOpenCBM(openCbmDllHandle, NULL);
+        }
+        else if ( ! IsPresentGenericOpenCBM() )
         {
             // install generic OpenCBM files
 
-            if ( CopyGenericOpenCBM(openCbmDllHandle, Parameter->PluginList->Name) ) {
+            if ( CopyGenericOpenCBM(openCbmDllHandle) ) {
                 break;
             }
         }
 
         callbackContext.OpenCbmDllHandle = openCbmDllHandle;
+        callbackContext.Parameter        = Parameter;
 
         error = PluginForAll(Parameter, InstallPluginCallback, &callbackContext);
 
@@ -1521,7 +1681,7 @@ InstallOpenCBM(cbm_install_parameter_t *Parameter)
 
  This function deletes a file at a specified path.
 
- \param Path
+ \param DestinationPath
    The path from where to delete the file.
    The path has to be terminated with a backslash ("\").
 
@@ -1530,7 +1690,7 @@ InstallOpenCBM(cbm_install_parameter_t *Parameter)
 */
 
 static BOOL
-RemoveOpenCbmFilesCallback(const char * Path, const char * Filename)
+RemoveOpenCbmFilesCallback(const char * DestinationPath, const char * Filename)
 {
     char * fileToDelete = NULL;
     BOOL error = TRUE;
@@ -1539,7 +1699,7 @@ RemoveOpenCbmFilesCallback(const char * Path, const char * Filename)
 
     do
     {
-        fileToDelete = cbmlibmisc_strcat(Path, Filename);
+        fileToDelete = cbmlibmisc_strcat(DestinationPath, Filename);
 
         if (fileToDelete)
         {
@@ -1552,7 +1712,7 @@ RemoveOpenCbmFilesCallback(const char * Path, const char * Filename)
 
     } while (0);
 
-    free(fileToDelete);
+    cbmlibmisc_strfree(fileToDelete);
 
     FUNC_LEAVE_BOOL(error);
 }
@@ -1568,7 +1728,7 @@ RemoveOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[])
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_BOOL(HandleOpenCbmFiles(NeededFiles, NULL, RemoveOpenCbmFilesCallback));
+    FUNC_LEAVE_BOOL(HandleNeededFiles(NeededFiles, NULL, RemoveOpenCbmFilesCallback));
 }
 
 /*! \brief @@@@@ \todo document
@@ -1582,20 +1742,20 @@ RemoveOpenCbmFiles(opencbm_plugin_install_neededfiles_t NeededFiles[])
  \return
 */
 static BOOL
-perform_cbm_plugin_install_do_uninstall(const char * PluginName, void * FunctionPointer, void * Context)
+perform_opencbm_plugin_install_do_uninstall(const char * PluginName, void * FunctionPointer, void * Context)
 {
-    cbm_plugin_install_do_uninstall_t * cbm_plugin_install_do_uninstall = FunctionPointer;
+    opencbm_plugin_install_do_uninstall_t * opencbm_plugin_install_do_uninstall = FunctionPointer;
 
     BOOL error = TRUE;
 
     FUNC_ENTER();
 
     do {
-        if (cbm_plugin_install_do_uninstall == NULL) {
+        if (opencbm_plugin_install_do_uninstall == NULL) {
             break;
         }
 
-        error = cbm_plugin_install_do_uninstall(Context);
+        error = opencbm_plugin_install_do_uninstall(Context);
 
         if (error) {
             DBG_ERROR((DBG_PREFIX "Uninstallation of plugin '%s' failed!", PluginName));
@@ -1628,8 +1788,8 @@ RemovePluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, vo
     do {
         error = PluginExecuteFunction(PluginInstallParameter->Name,
             PluginInstallParameter->FileName,
-            "cbm_plugin_install_do_uninstall",
-            perform_cbm_plugin_install_do_uninstall,
+            "opencbm_plugin_install_do_uninstall",
+            perform_opencbm_plugin_install_do_uninstall,
             PluginInstallParameter);
 
         if (error) {
@@ -1696,7 +1856,7 @@ RemoveOpenCBM(cbm_install_parameter_t *Parameter)
       2. if the default plugin is removed, make another one the default
       3. remove the plugin from the configuration file
       4. only remove OpenCBM if all plugins are removed
-      5. Remove opencbm.conf is OpenCBM is removed completely
+      5. Remove opencbm.conf if OpenCBM is removed completely
     */
 
     do {
@@ -1712,12 +1872,14 @@ RemoveOpenCBM(cbm_install_parameter_t *Parameter)
         }
 
         if ( ! IsPresentGenericOpenCBM() )  {
+            DBG_PRINT((DBG_PREFIX "trying to remove OpenCBM, but it is not installed!"));
             fprintf(stderr, "trying to remove OpenCBM, but it is not installed!\n");
             error = 0;
             break;
         }
 
         callbackContext.OpenCbmDllHandle = openCbmDllHandle;
+        callbackContext.Parameter        = Parameter;
 
         // Remove all plugins first
 
@@ -1745,7 +1907,7 @@ RemoveOpenCBM(cbm_install_parameter_t *Parameter)
 }
 
 /*
- This function checks if the driver was corretly installed.
+ This function checks if the driver was correctly installed.
 
  \param Parameter
    Pointer to parameter_t struct which contains the
@@ -1768,7 +1930,7 @@ CheckOpenCBM(cbm_install_parameter_t *Parameter)
 
     do {
 
-        // @@@
+        //! \todo @@@
 
     } while (0);
 

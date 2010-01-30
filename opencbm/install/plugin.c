@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file plugin.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: plugin.c,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: plugin.c,v 1.4 2010-01-30 21:33:13 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver; handling of plugins
 **
@@ -288,8 +288,8 @@ GetPluginData(const char * const PluginName, cbm_install_parameter_t * InstallPa
     do {
         unsigned int option_memory_size = 0;
 
-        cbm_plugin_install_process_commandline_t * cbm_plugin_install_process_commandline;
-        cbm_plugin_install_get_needed_files_t * cbm_plugin_install_get_needed_files;
+        opencbm_plugin_install_process_commandline_t * opencbm_plugin_install_process_commandline;
+        opencbm_plugin_install_get_needed_files_t * opencbm_plugin_install_get_needed_files;
 
         cbm_install_parameter_plugin_t * pluginData;
 
@@ -332,13 +332,13 @@ GetPluginData(const char * const PluginName, cbm_install_parameter_t * InstallPa
             break;
         }
 
-        cbm_plugin_install_process_commandline = (void *) GetProcAddress(library, "cbm_plugin_install_process_commandline");
-        cbm_plugin_install_get_needed_files = (void *) GetProcAddress(library, "cbm_plugin_install_get_needed_files");
+        opencbm_plugin_install_process_commandline = (void *) GetProcAddress(library, "opencbm_plugin_install_process_commandline");
+        opencbm_plugin_install_get_needed_files = (void *) GetProcAddress(library, "opencbm_plugin_install_get_needed_files");
 
-        if (0 == (cbm_plugin_install_process_commandline && cbm_plugin_install_get_needed_files))
+        if (0 == (opencbm_plugin_install_process_commandline && opencbm_plugin_install_get_needed_files))
             break;
 
-        option_memory_size = cbm_plugin_install_process_commandline(&commandLineData);
+        option_memory_size = opencbm_plugin_install_process_commandline(&commandLineData);
 
         /* make sure option_memory_size is at least 1,
          * because malloc(0) can return either NULL or a valid memory block.
@@ -364,7 +364,7 @@ GetPluginData(const char * const PluginName, cbm_install_parameter_t * InstallPa
         commandLineData.GetoptLongCallback = &getopt_long_callback;
         commandLineData.InstallParameter   = InstallParameter;
 
-        error = cbm_plugin_install_process_commandline(&commandLineData);
+        error = opencbm_plugin_install_process_commandline(&commandLineData);
 
         if ( ! error && pluginData) {
             pluginData->Name = cbmlibmisc_strdup(PluginName);
@@ -390,14 +390,14 @@ GetPluginData(const char * const PluginName, cbm_install_parameter_t * InstallPa
         error = TRUE; // assume error unless proven otherwise
 
         {
-            int needed_files_length = cbm_plugin_install_get_needed_files(&commandLineData, NULL);
+            int needed_files_length = opencbm_plugin_install_get_needed_files(&commandLineData, NULL);
 
             pluginData->NeededFiles = malloc(needed_files_length);
 
             if (NULL == pluginData->NeededFiles)
                 break;
 
-            cbm_plugin_install_get_needed_files(&commandLineData, pluginData->NeededFiles);
+            opencbm_plugin_install_get_needed_files(&commandLineData, pluginData->NeededFiles);
 
             error = FALSE;
         }
@@ -568,7 +568,7 @@ get_all_plugins(cbm_install_parameter_t * InstallParameter)
 
  \remark
     This function is called for every installed plugin
-    from the call to cbm_plugin_get_all_plugin_names() 
+    from the call to opencbm_plugin_get_all_plugin_names() 
     in get_all_installed_plugins().
 */
 static BOOL CBMAPIDECL
@@ -602,8 +602,8 @@ get_all_installed_plugins(cbm_install_parameter_t * InstallParameter)
     FUNC_ENTER();
 
     do {
-        cbm_plugin_get_all_plugin_names_context_t cbm_plugin_get_all_plugin_names_context;
-        cbm_plugin_get_all_plugin_names_t * cbm_plugin_get_all_plugin_names;
+        opencbm_plugin_get_all_plugin_names_context_t opencbm_plugin_get_all_plugin_names_context;
+        opencbm_plugin_get_all_plugin_names_t * opencbm_plugin_get_all_plugin_names;
 
         openCbmDllHandle = LoadLocalOpenCBMDll();
         if (openCbmDllHandle  == NULL) {
@@ -612,17 +612,17 @@ get_all_installed_plugins(cbm_install_parameter_t * InstallParameter)
             break;
         }
 
-        cbm_plugin_get_all_plugin_names = (cbm_plugin_get_all_plugin_names_t *) 
-            GetProcAddress(openCbmDllHandle, "cbm_plugin_get_all_plugin_names");
+        opencbm_plugin_get_all_plugin_names = (opencbm_plugin_get_all_plugin_names_t *) 
+            GetProcAddress(openCbmDllHandle, "opencbm_plugin_get_all_plugin_names");
 
-        if ( ! cbm_plugin_get_all_plugin_names ) {
+        if ( ! opencbm_plugin_get_all_plugin_names ) {
             break;
         }
 
-        cbm_plugin_get_all_plugin_names_context.Callback = get_all_installed_plugins_callback;
-        cbm_plugin_get_all_plugin_names_context.InstallParameter = InstallParameter;
+        opencbm_plugin_get_all_plugin_names_context.Callback = get_all_installed_plugins_callback;
+        opencbm_plugin_get_all_plugin_names_context.InstallParameter = InstallParameter;
 
-        if ( cbm_plugin_get_all_plugin_names(&cbm_plugin_get_all_plugin_names_context) ) {
+        if ( opencbm_plugin_get_all_plugin_names(&opencbm_plugin_get_all_plugin_names_context) ) {
             break;
         }
 

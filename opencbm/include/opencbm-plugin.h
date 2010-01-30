@@ -10,7 +10,7 @@
 /*! **************************************************************
 ** \file include/opencbm-plugin.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm-plugin.h,v 1.8 2010-01-30 20:48:48 strik Exp $ \n
+** \version $Id: opencbm-plugin.h,v 1.9 2010-01-30 21:33:09 strik Exp $ \n
 ** \n
 ** \brief Plugin DLL interface
 **
@@ -27,7 +27,7 @@
 
  \return
 */
-typedef const char * CBMAPIDECL cbm_plugin_get_driver_name_t(int PortNumber);
+typedef const char * CBMAPIDECL opencbm_plugin_get_driver_name_t(int PortNumber);
 
 /*! \brief @@@@@ \todo document
 
@@ -37,37 +37,25 @@ typedef const char * CBMAPIDECL cbm_plugin_get_driver_name_t(int PortNumber);
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_driver_open_t(CBM_FILE *HandleDevice, int PortNumber);
+typedef int CBMAPIDECL opencbm_plugin_driver_open_t(CBM_FILE *HandleDevice, int PortNumber);
 
 /*! \brief @@@@@ \todo document
 
  \param HandleDevice
 */
-typedef void CBMAPIDECL cbm_plugin_driver_close_t(CBM_FILE HandleDevice);
+typedef void CBMAPIDECL opencbm_plugin_driver_close_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
  \param HandleDevice
 */
-typedef void CBMAPIDECL cbm_plugin_lock_t(CBM_FILE HandleDevice);
+typedef void CBMAPIDECL opencbm_plugin_lock_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
  \param HandleDevice
 */
-typedef void CBMAPIDECL cbm_plugin_unlock_t(CBM_FILE HandleDevice);
-
-/*! \brief @@@@@ \todo document
-
- \param HandleDevice
-
- \param Buffer
-
- \param Count
-
- \return
-*/
-typedef int CBMAPIDECL cbm_plugin_raw_write_t(CBM_FILE HandleDevice, const void *Buffer, size_t Count);
+typedef void CBMAPIDECL opencbm_plugin_unlock_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -79,7 +67,19 @@ typedef int CBMAPIDECL cbm_plugin_raw_write_t(CBM_FILE HandleDevice, const void 
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_raw_read_t(CBM_FILE HandleDevice, void *Buffer, size_t Count);
+typedef int CBMAPIDECL opencbm_plugin_raw_write_t(CBM_FILE HandleDevice, const void *Buffer, size_t Count);
+
+/*! \brief @@@@@ \todo document
+
+ \param HandleDevice
+
+ \param Buffer
+
+ \param Count
+
+ \return
+*/
+typedef int CBMAPIDECL opencbm_plugin_raw_read_t(CBM_FILE HandleDevice, void *Buffer, size_t Count);
 
 /*! \brief @@@@@ \todo document
 
@@ -91,7 +91,7 @@ typedef int CBMAPIDECL cbm_plugin_raw_read_t(CBM_FILE HandleDevice, void *Buffer
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_open_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+typedef int CBMAPIDECL opencbm_plugin_open_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
 
 /*! \brief @@@@@ \todo document
 
@@ -103,7 +103,7 @@ typedef int CBMAPIDECL cbm_plugin_open_t(CBM_FILE HandleDevice, __u_char DeviceA
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_close_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+typedef int CBMAPIDECL opencbm_plugin_close_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
 
 /*! \brief @@@@@ \todo document
 
@@ -115,7 +115,7 @@ typedef int CBMAPIDECL cbm_plugin_close_t(CBM_FILE HandleDevice, __u_char Device
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_listen_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+typedef int CBMAPIDECL opencbm_plugin_listen_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
 
 /*! \brief @@@@@ \todo document
 
@@ -127,7 +127,7 @@ typedef int CBMAPIDECL cbm_plugin_listen_t(CBM_FILE HandleDevice, __u_char Devic
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_talk_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+typedef int CBMAPIDECL opencbm_plugin_talk_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
 
 /*! \brief @@@@@ \todo document
 
@@ -135,7 +135,7 @@ typedef int CBMAPIDECL cbm_plugin_talk_t(CBM_FILE HandleDevice, __u_char DeviceA
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_unlisten_t(CBM_FILE HandleDevice);
+typedef int CBMAPIDECL opencbm_plugin_unlisten_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -143,7 +143,7 @@ typedef int CBMAPIDECL cbm_plugin_unlisten_t(CBM_FILE HandleDevice);
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_untalk_t(CBM_FILE HandleDevice);
+typedef int CBMAPIDECL opencbm_plugin_untalk_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -151,7 +151,7 @@ typedef int CBMAPIDECL cbm_plugin_untalk_t(CBM_FILE HandleDevice);
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_get_eoi_t(CBM_FILE HandleDevice);
+typedef int CBMAPIDECL opencbm_plugin_get_eoi_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -159,7 +159,7 @@ typedef int CBMAPIDECL cbm_plugin_get_eoi_t(CBM_FILE HandleDevice);
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_clear_eoi_t(CBM_FILE HandleDevice);
+typedef int CBMAPIDECL opencbm_plugin_clear_eoi_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -167,7 +167,7 @@ typedef int CBMAPIDECL cbm_plugin_clear_eoi_t(CBM_FILE HandleDevice);
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_reset_t(CBM_FILE HandleDevice);
+typedef int CBMAPIDECL opencbm_plugin_reset_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -175,7 +175,7 @@ typedef int CBMAPIDECL cbm_plugin_reset_t(CBM_FILE HandleDevice);
 
  \return
 */
-typedef __u_char CBMAPIDECL cbm_plugin_pp_read_t(CBM_FILE HandleDevice);
+typedef __u_char CBMAPIDECL opencbm_plugin_pp_read_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -183,7 +183,7 @@ typedef __u_char CBMAPIDECL cbm_plugin_pp_read_t(CBM_FILE HandleDevice);
 
  \param Byte
 */
-typedef void CBMAPIDECL cbm_plugin_pp_write_t(CBM_FILE HandleDevice, __u_char Byte);
+typedef void CBMAPIDECL opencbm_plugin_pp_write_t(CBM_FILE HandleDevice, __u_char Byte);
 
 /*! \brief @@@@@ \todo document
 
@@ -191,7 +191,7 @@ typedef void CBMAPIDECL cbm_plugin_pp_write_t(CBM_FILE HandleDevice, __u_char By
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_iec_poll_t(CBM_FILE HandleDevice);
+typedef int CBMAPIDECL opencbm_plugin_iec_poll_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -200,7 +200,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_poll_t(CBM_FILE HandleDevice);
  \param Line
 
 */
-typedef void CBMAPIDECL cbm_plugin_iec_set_t(CBM_FILE HandleDevice, int Line);
+typedef void CBMAPIDECL opencbm_plugin_iec_set_t(CBM_FILE HandleDevice, int Line);
 
 /*! \brief @@@@@ \todo document
 
@@ -208,7 +208,7 @@ typedef void CBMAPIDECL cbm_plugin_iec_set_t(CBM_FILE HandleDevice, int Line);
 
  \param Line
 */
-typedef void CBMAPIDECL cbm_plugin_iec_release_t(CBM_FILE HandleDevice, int Line);
+typedef void CBMAPIDECL opencbm_plugin_iec_release_t(CBM_FILE HandleDevice, int Line);
 
 /*! \brief @@@@@ \todo document
 
@@ -216,7 +216,7 @@ typedef void CBMAPIDECL cbm_plugin_iec_release_t(CBM_FILE HandleDevice, int Line
 
  \param Line
 */
-typedef void CBMAPIDECL cbm_plugin_iec_setrelease_t(CBM_FILE HandleDevice, int Set, int Release);
+typedef void CBMAPIDECL opencbm_plugin_iec_setrelease_t(CBM_FILE HandleDevice, int Set, int Release);
 
 /*! \brief @@@@@ \todo document
 
@@ -228,7 +228,7 @@ typedef void CBMAPIDECL cbm_plugin_iec_setrelease_t(CBM_FILE HandleDevice, int S
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_iec_wait_t(CBM_FILE HandleDevice, int Line, int State);
+typedef int CBMAPIDECL opencbm_plugin_iec_wait_t(CBM_FILE HandleDevice, int Line, int State);
 
 /*! \brief @@@@@ \todo document
 
@@ -236,7 +236,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_wait_t(CBM_FILE HandleDevice, int Line, in
 
  \return
 */
-typedef __u_char CBMAPIDECL cbm_plugin_parallel_burst_read_t(CBM_FILE HandleDevice);
+typedef __u_char CBMAPIDECL opencbm_plugin_parallel_burst_read_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -244,7 +244,7 @@ typedef __u_char CBMAPIDECL cbm_plugin_parallel_burst_read_t(CBM_FILE HandleDevi
 
  \param Value
 */
-typedef void CBMAPIDECL cbm_plugin_parallel_burst_write_t(CBM_FILE HandleDevice, __u_char Value);
+typedef void CBMAPIDECL opencbm_plugin_parallel_burst_write_t(CBM_FILE HandleDevice, __u_char Value);
 
 /*! \brief @@@@@ \todo document
 
@@ -256,7 +256,7 @@ typedef void CBMAPIDECL cbm_plugin_parallel_burst_write_t(CBM_FILE HandleDevice,
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_parallel_burst_read_n_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_n_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -268,7 +268,7 @@ typedef int CBMAPIDECL cbm_plugin_parallel_burst_read_n_t(CBM_FILE HandleDevice,
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_parallel_burst_write_n_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+typedef int CBMAPIDECL opencbm_plugin_parallel_burst_write_n_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -280,7 +280,7 @@ typedef int CBMAPIDECL cbm_plugin_parallel_burst_write_n_t(CBM_FILE HandleDevice
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_parallel_burst_read_track_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_track_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -292,7 +292,7 @@ typedef int CBMAPIDECL cbm_plugin_parallel_burst_read_track_t(CBM_FILE HandleDev
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_parallel_burst_read_track_var_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_track_var_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -304,7 +304,7 @@ typedef int CBMAPIDECL cbm_plugin_parallel_burst_read_track_var_t(CBM_FILE Handl
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_parallel_burst_write_track_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+typedef int CBMAPIDECL opencbm_plugin_parallel_burst_write_track_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -314,7 +314,7 @@ typedef int CBMAPIDECL cbm_plugin_parallel_burst_write_track_t(CBM_FILE HandleDe
 
  \param size
 */
-typedef void CBMAPIDECL cbm_plugin_s1_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+typedef void CBMAPIDECL opencbm_plugin_s1_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
 
 /*! \brief @@@@@ \todo document
 
@@ -324,7 +324,7 @@ typedef void CBMAPIDECL cbm_plugin_s1_read_n_t (CBM_FILE HandleDevice,       uns
 
  \param size
 */
-typedef void CBMAPIDECL cbm_plugin_s1_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+typedef void CBMAPIDECL opencbm_plugin_s1_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
 
 /*! \brief @@@@@ \todo document
 
@@ -335,7 +335,7 @@ typedef void CBMAPIDECL cbm_plugin_s1_write_n_t(CBM_FILE HandleDevice, const uns
  \param size
 */
 
-typedef void CBMAPIDECL cbm_plugin_s2_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+typedef void CBMAPIDECL opencbm_plugin_s2_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
 
 /*! \brief @@@@@ \todo document
 
@@ -345,7 +345,7 @@ typedef void CBMAPIDECL cbm_plugin_s2_read_n_t (CBM_FILE HandleDevice,       uns
 
  \param size
 */
-typedef void CBMAPIDECL cbm_plugin_s2_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+typedef void CBMAPIDECL opencbm_plugin_s2_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
 
 /*! \brief @@@@@ \todo document
 
@@ -355,7 +355,7 @@ typedef void CBMAPIDECL cbm_plugin_s2_write_n_t(CBM_FILE HandleDevice, const uns
 
  \param size
 */
-typedef void CBMAPIDECL cbm_plugin_pp_dc_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+typedef void CBMAPIDECL opencbm_plugin_pp_dc_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
 
 /*! \brief @@@@@ \todo document
 
@@ -365,7 +365,7 @@ typedef void CBMAPIDECL cbm_plugin_pp_dc_read_n_t (CBM_FILE HandleDevice,       
 
  \param size
 */
-typedef void CBMAPIDECL cbm_plugin_pp_dc_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+typedef void CBMAPIDECL opencbm_plugin_pp_dc_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
 
 /*! \brief @@@@@ \todo document
 
@@ -375,7 +375,7 @@ typedef void CBMAPIDECL cbm_plugin_pp_dc_write_n_t(CBM_FILE HandleDevice, const 
 
  \param size
 */
-typedef void CBMAPIDECL cbm_plugin_pp_cc_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+typedef void CBMAPIDECL opencbm_plugin_pp_cc_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
 
 /*! \brief @@@@@ \todo document
 
@@ -385,7 +385,7 @@ typedef void CBMAPIDECL cbm_plugin_pp_cc_read_n_t (CBM_FILE HandleDevice,       
 
  \param size
 */
-typedef void CBMAPIDECL cbm_plugin_pp_cc_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+typedef void CBMAPIDECL opencbm_plugin_pp_cc_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
 
 
 /*! \brief @@@@@ \todo document
@@ -394,7 +394,7 @@ typedef void CBMAPIDECL cbm_plugin_pp_cc_write_n_t(CBM_FILE HandleDevice, const 
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_iec_dbg_read_t(CBM_FILE HandleDevice);
+typedef int CBMAPIDECL opencbm_plugin_iec_dbg_read_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -404,7 +404,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_read_t(CBM_FILE HandleDevice);
 
  \return
 */
-typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigned char Value);
+typedef int CBMAPIDECL opencbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigned char Value);
 
 #ifdef WIN32
     /*
@@ -429,7 +429,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
      \return
     */
-    typedef int CBMAPIDECL cbm_plugin_install_getopt_long_callback_t(int Argc, char * const Argv[], const char *Optstring, const struct option *Longopts);
+    typedef int CBMAPIDECL opencbm_plugin_install_getopt_long_callback_t(int Argc, char * const Argv[], const char *Optstring, const struct option *Longopts);
 
     /*! \brief remember the operating system version */
     typedef
@@ -441,6 +441,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
         WIN2000,        //!< Windows 2000 (NT 5.0)
         WINXP,          //!< Windows XP (NT 5.1)
         WINVISTA,       //!< Windows Vista (NT 6.0)
+        WIN7,           //!< Windows 7 (NT 6.1)
         WINNEWER        //!< newer than Windows Vista
     } osversion_t;
 
@@ -479,6 +480,9 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
         /*! --remove was given */
         BOOL Remove;
+
+        /*! --purge was given. This has to go after --remote */
+        BOOL Purge;
 
         /*! --nocopy was given */
         BOOL NoCopy;
@@ -527,7 +531,10 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
         /*! if set, there was no explicit plugin name given, but the list is a default one */
         BOOL NoExplicitPluginGiven;
 
-    } cbm_install_parameter_t;
+        /*! adapter to be set as default adapter, or NULL if none was given */
+        char * DefaultAdapter;
+
+    } opencbm_install_parameter_t;
 
     /*! \brief describe necessary information to process command line in a plugin
 
@@ -547,8 +554,8 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
         int  * OptErr;        /*!< pointer to the int opterr used in getopt_long() */
         int  * OptOpt;        /*!< pointer to the int optopt used in getopt_long() */
 
-        cbm_plugin_install_getopt_long_callback_t * GetoptLongCallback; /*!< pointer to a getopt_long() function */
-        cbm_install_parameter_t                   * InstallParameter;   /*!< some generic install parameters */
+        opencbm_plugin_install_getopt_long_callback_t * GetoptLongCallback; /*!< pointer to a getopt_long() function */
+        opencbm_install_parameter_t                   * InstallParameter;   /*!< some generic install parameters */
 
     } CbmPluginInstallProcessCommandlineData_t;
 
@@ -556,13 +563,13 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
      \return
     */
-    typedef int CBMAPIDECL cbm_plugin_init_t(void); 
+    typedef int CBMAPIDECL opencbm_plugin_init_t(void); 
 
     /*! \brief @@@@@ \todo document
 
      \return
     */
-    typedef void CBMAPIDECL cbm_plugin_uninit_t(void); 
+    typedef void CBMAPIDECL opencbm_plugin_uninit_t(void); 
 
     
     /*! \brief @@@@@ \todo document
@@ -571,7 +578,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
      \return
     */
-    typedef unsigned int CBMAPIDECL cbm_plugin_install_process_commandline_t(CbmPluginInstallProcessCommandlineData_t * ProcessCommandlineData); 
+    typedef unsigned int CBMAPIDECL opencbm_plugin_install_process_commandline_t(CbmPluginInstallProcessCommandlineData_t * ProcessCommandlineData); 
 
     
     /*! \brief @@@@@ \todo document
@@ -580,7 +587,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
      \return
     */
-    typedef BOOL CBMAPIDECL cbm_plugin_install_do_install_t(void * OptionMemory);
+    typedef BOOL CBMAPIDECL opencbm_plugin_install_do_install_t(void * OptionMemory);
 
     /*! \brief @@@@@ \todo document
 
@@ -588,7 +595,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
      \return
     */
-    typedef BOOL CBMAPIDECL cbm_plugin_install_do_uninstall_t(void * OptionMemory);
+    typedef BOOL CBMAPIDECL opencbm_plugin_install_do_uninstall_t(void * OptionMemory);
 
     /*! \brief Where to install the files
 
@@ -628,7 +635,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
      \return
     */
-    typedef unsigned int CBMAPIDECL cbm_plugin_install_get_needed_files_t(CbmPluginInstallProcessCommandlineData_t * Data, opencbm_plugin_install_neededfiles_t * Destination);
+    typedef unsigned int CBMAPIDECL opencbm_plugin_install_get_needed_files_t(CbmPluginInstallProcessCommandlineData_t * Data, opencbm_plugin_install_neededfiles_t * Destination);
 
 
     /*! \brief @@@@@ \todo document
@@ -637,7 +644,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
      \return
     */
-    typedef BOOL CBMAPIDECL cbm_plugin_install_generic_t(const char * DefaultPluginname);
+    typedef BOOL CBMAPIDECL opencbm_plugin_install_generic_t(const char * DefaultPluginname);
 
     /*! \brief @@@@@ \todo document
 
@@ -649,7 +656,7 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
      \return
     */
-    typedef BOOL CBMAPIDECL cbm_plugin_install_plugin_data_t(const char * Pluginname, const char * Filepath, const CbmPluginInstallProcessCommandlineData_t * CommandlineData);
+    typedef BOOL CBMAPIDECL opencbm_plugin_install_plugin_data_t(const char * Pluginname, const char * Filepath, const CbmPluginInstallProcessCommandlineData_t * CommandlineData);
 
 
     /*! \brief @@@@@ \todo document
@@ -660,16 +667,16 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
      \return
     */
-    typedef BOOL CBMAPIDECL cbm_plugin_get_all_plugin_names_callback_t(cbm_install_parameter_t * InstallParameter, const char * Pluginname);
+    typedef BOOL CBMAPIDECL opencbm_plugin_get_all_plugin_names_callback_t(opencbm_install_parameter_t * InstallParameter, const char * Pluginname);
 
-    /*! \brief context for cbm_plugin_get_all_plugin_names_t()
+    /*! \brief context for opencbm_plugin_get_all_plugin_names_t()
 
-      This structure describe the callback to be used with cbm_plugin_get_all_plugin_names_t().
+      This structure describe the callback to be used with opencbm_plugin_get_all_plugin_names_t().
     */
-    typedef struct cbm_plugin_get_all_plugin_names_context_s {
-        cbm_plugin_get_all_plugin_names_callback_t * Callback;         /*!< pointer to the callback function */
-        cbm_install_parameter_t                    * InstallParameter; /*!< additional data to be passed to the callback function */
-    } cbm_plugin_get_all_plugin_names_context_t;
+    typedef struct opencbm_plugin_get_all_plugin_names_context_s {
+        opencbm_plugin_get_all_plugin_names_callback_t * Callback;         /*!< pointer to the callback function */
+        opencbm_install_parameter_t                    * InstallParameter; /*!< additional data to be passed to the callback function */
+    } opencbm_plugin_get_all_plugin_names_context_t;
 
     /*! \brief @@@@@ \todo document
 
@@ -677,13 +684,19 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 
      \return
     */
-    typedef BOOL CBMAPIDECL cbm_plugin_get_all_plugin_names_t(cbm_plugin_get_all_plugin_names_context_t * Callback);
+    typedef BOOL CBMAPIDECL opencbm_plugin_get_all_plugin_names_t(opencbm_plugin_get_all_plugin_names_context_t * Callback);
 
     /*! \brief @@@@@ \todo document
 
      \return
     */
-    typedef int CBMAPIDECL cbm_plugin_self_init_plugin_t(void);
+    typedef int CBMAPIDECL opencbm_plugin_self_init_plugin_t(void);
+
+    /*! \brief @@@@@ \todo document
+
+     \return
+    */
+    typedef int CBMAPIDECL opencbm_plugin_self_uninit_plugin_t(void);
 
 #endif
 
@@ -697,42 +710,43 @@ typedef int CBMAPIDECL cbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigne
 */
 typedef
 struct opencbm_plugin_s {
-    cbm_plugin_init_t                       * cbm_plugin_init;                       /*!< pointer to a cbm_plugin_init_t() function */
-    cbm_plugin_uninit_t                     * cbm_plugin_uninit;                     /*!< pointer to a cbm_plugin_uninit() function */
-    cbm_plugin_get_driver_name_t            * cbm_plugin_get_driver_name;            /*!< pointer to a cbm_plugin_get_driver_name_t() function */
-    cbm_plugin_driver_open_t                * cbm_plugin_driver_open;                /*!< pointer to a cbm_plugin_driver_open_t() function */
-    cbm_plugin_driver_close_t               * cbm_plugin_driver_close;               /*!< pointer to a cbm_plugin_driver_close_t() function */
-    cbm_plugin_lock_t                       * cbm_plugin_lock;                       /*!< pointer to a cbm_plugin_lock_t() function */
-    cbm_plugin_unlock_t                     * cbm_plugin_unlock;                     /*!< pointer to a cbm_plugin_unlock_t() function */
-    cbm_plugin_raw_write_t                  * cbm_plugin_raw_write;                  /*!< pointer to a cbm_plugin_raw_write_t() function */
-    cbm_plugin_raw_read_t                   * cbm_plugin_raw_read;                   /*!< pointer to a cbm_plugin_raw_read_t() function */
-    cbm_plugin_open_t                       * cbm_plugin_open;                       /*!< pointer to a cbm_plugin_open_t() function */
-    cbm_plugin_close_t                      * cbm_plugin_close;                      /*!< pointer to a cbm_plugin_close_t() function */
-    cbm_plugin_listen_t                     * cbm_plugin_listen;                     /*!< pointer to a cbm_plugin_listen_t() function */
-    cbm_plugin_talk_t                       * cbm_plugin_talk;                       /*!< pointer to a cbm_plugin_talk_t() function */
-    cbm_plugin_unlisten_t                   * cbm_plugin_unlisten;                   /*!< pointer to a cbm_plugin_unlisten_t() function */
-    cbm_plugin_untalk_t                     * cbm_plugin_untalk;                     /*!< pointer to a cbm_plugin_untalk_t() function */
-    cbm_plugin_get_eoi_t                    * cbm_plugin_get_eoi;                    /*!< pointer to a cbm_plugin_get_eoi_t() function */
-    cbm_plugin_clear_eoi_t                  * cbm_plugin_clear_eoi;                  /*!< pointer to a cbm_plugin_clear_eoi_t() function */
-    cbm_plugin_reset_t                      * cbm_plugin_reset;                      /*!< pointer to a cbm_plugin_reset_t() function */
-    cbm_plugin_pp_read_t                    * cbm_plugin_pp_read;                    /*!< pointer to a cbm_plugin_pp_read_t() function */
-    cbm_plugin_pp_write_t                   * cbm_plugin_pp_write;                   /*!< pointer to a cbm_plugin_write_t() function */
-    cbm_plugin_iec_poll_t                   * cbm_plugin_iec_poll;                   /*!< pointer to a cbm_plugin_iec_poll_t() function */
-    cbm_plugin_iec_set_t                    * cbm_plugin_iec_set;                    /*!< pointer to a cbm_plugin_iec_set_t() function */
-    cbm_plugin_iec_release_t                * cbm_plugin_iec_release;                /*!< pointer to a cbm_plugin_iec_release_t() function */
-    cbm_plugin_iec_setrelease_t             * cbm_plugin_iec_setrelease;             /*!< pointer to a cbm_plugin_iec_setrelease_t() function */
-    cbm_plugin_iec_wait_t                   * cbm_plugin_iec_wait;                   /*!< pointer to a cbm_plugin_iec_wait_t() function */
+    opencbm_plugin_init_t                       * opencbm_plugin_init;                       /*!< pointer to a opencbm_plugin_init_t() function */
+    opencbm_plugin_uninit_t                     * opencbm_plugin_uninit;                     /*!< pointer to a opencbm_plugin_uninit() function */
+    opencbm_plugin_get_driver_name_t            * opencbm_plugin_get_driver_name;            /*!< pointer to a opencbm_plugin_get_driver_name_t() function */
+    opencbm_plugin_driver_open_t                * opencbm_plugin_driver_open;                /*!< pointer to a opencbm_plugin_driver_open_t() function */
+    opencbm_plugin_driver_close_t               * opencbm_plugin_driver_close;               /*!< pointer to a opencbm_plugin_driver_close_t() function */
+    opencbm_plugin_lock_t                       * opencbm_plugin_lock;                       /*!< pointer to a opencbm_plugin_lock_t() function */
+    opencbm_plugin_unlock_t                     * opencbm_plugin_unlock;                     /*!< pointer to a opencbm_plugin_unlock_t() function */
+    opencbm_plugin_raw_write_t                  * opencbm_plugin_raw_write;                  /*!< pointer to a opencbm_plugin_raw_write_t() function */
+    opencbm_plugin_raw_read_t                   * opencbm_plugin_raw_read;                   /*!< pointer to a opencbm_plugin_raw_read_t() function */
+    opencbm_plugin_open_t                       * opencbm_plugin_open;                       /*!< pointer to a opencbm_plugin_open_t() function */
+    opencbm_plugin_close_t                      * opencbm_plugin_close;                      /*!< pointer to a opencbm_plugin_close_t() function */
+    opencbm_plugin_listen_t                     * opencbm_plugin_listen;                     /*!< pointer to a opencbm_plugin_listen_t() function */
+    opencbm_plugin_talk_t                       * opencbm_plugin_talk;                       /*!< pointer to a opencbm_plugin_talk_t() function */
+    opencbm_plugin_unlisten_t                   * opencbm_plugin_unlisten;                   /*!< pointer to a opencbm_plugin_unlisten_t() function */
+    opencbm_plugin_untalk_t                     * opencbm_plugin_untalk;                     /*!< pointer to a opencbm_plugin_untalk_t() function */
+    opencbm_plugin_get_eoi_t                    * opencbm_plugin_get_eoi;                    /*!< pointer to a opencbm_plugin_get_eoi_t() function */
+    opencbm_plugin_clear_eoi_t                  * opencbm_plugin_clear_eoi;                  /*!< pointer to a opencbm_plugin_clear_eoi_t() function */
+    opencbm_plugin_reset_t                      * opencbm_plugin_reset;                      /*!< pointer to a opencbm_plugin_reset_t() function */
+    opencbm_plugin_pp_read_t                    * opencbm_plugin_pp_read;                    /*!< pointer to a opencbm_plugin_pp_read_t() function */
+    opencbm_plugin_pp_write_t                   * opencbm_plugin_pp_write;                   /*!< pointer to a opencbm_plugin_write_t() function */
+    opencbm_plugin_iec_poll_t                   * opencbm_plugin_iec_poll;                   /*!< pointer to a opencbm_plugin_iec_poll_t() function */
+    opencbm_plugin_iec_set_t                    * opencbm_plugin_iec_set;                    /*!< pointer to a opencbm_plugin_iec_set_t() function */
+    opencbm_plugin_iec_release_t                * opencbm_plugin_iec_release;                /*!< pointer to a opencbm_plugin_iec_release_t() function */
+    opencbm_plugin_iec_setrelease_t             * opencbm_plugin_iec_setrelease;             /*!< pointer to a opencbm_plugin_iec_setrelease_t() function */
+    opencbm_plugin_iec_wait_t                   * opencbm_plugin_iec_wait;                   /*!< pointer to a opencbm_plugin_iec_wait_t() function */
 
-    cbm_plugin_parallel_burst_read_t        * cbm_plugin_parallel_burst_read;        /*!< pointer to a cbm_plugin_parallel_burst_read_t() function */
-    cbm_plugin_parallel_burst_write_t       * cbm_plugin_parallel_burst_write;       /*!< pointer to a cbm_plugin_parallel_burst_write_t() function */
-    cbm_plugin_parallel_burst_read_n_t      * cbm_plugin_parallel_burst_read_n;      /*!< pointer to a cbm_plugin_parallel_burst_read_n_t() function */
-    cbm_plugin_parallel_burst_write_n_t     * cbm_plugin_parallel_burst_write_n;     /*!< pointer to a cbm_plugin_parallel_burst_write_n_t() function */
-    cbm_plugin_parallel_burst_read_track_t  * cbm_plugin_parallel_burst_read_track;  /*!< pointer to a cbm_plugin_parallel_burst_read_track_t() function */
-    cbm_plugin_parallel_burst_read_track_var_t  * cbm_plugin_parallel_burst_read_track_var;  /*!< pointer to a cbm_plugin_parallel_burst_read_track_var_t() function */
-    cbm_plugin_parallel_burst_write_track_t * cbm_plugin_parallel_burst_write_track; /*!< pointer to a cbm_plugin_parallel_burst_write_track_t() function */
+    opencbm_plugin_parallel_burst_read_t        * opencbm_plugin_parallel_burst_read;        /*!< pointer to a opencbm_plugin_parallel_burst_read_t() function */
+    opencbm_plugin_parallel_burst_write_t       * opencbm_plugin_parallel_burst_write;       /*!< pointer to a opencbm_plugin_parallel_burst_write_t() function */
+    opencbm_plugin_parallel_burst_read_n_t      * opencbm_plugin_parallel_burst_read_n;      /*!< pointer to a opencbm_plugin_parallel_burst_read_n_t() function */
+    opencbm_plugin_parallel_burst_write_n_t     * opencbm_plugin_parallel_burst_write_n;     /*!< pointer to a opencbm_plugin_parallel_burst_write_n_t() function */
+    opencbm_plugin_parallel_burst_read_track_t  * opencbm_plugin_parallel_burst_read_track;  /*!< pointer to a opencbm_plugin_parallel_burst_read_track_t() function */
+    opencbm_plugin_parallel_burst_write_track_t * opencbm_plugin_parallel_burst_write_track; /*!< pointer to a opencbm_plugin_parallel_burst_write_track_t() function */
+    opencbm_plugin_parallel_burst_read_track_var_t * opencbm_plugin_parallel_burst_read_track_var;  /*!< pointer to a opencbm_plugin_parallel_burst_read_track_var_t() function */
 
-    cbm_plugin_iec_dbg_read_t               * cbm_plugin_iec_dbg_read;               /*!< pointer to a cbm_plugin_iec_dbg_read_t() function */
-    cbm_plugin_iec_dbg_write_t              * cbm_plugin_iec_dbg_write;              /*!< pointer to a cbm_plugin_iec_dbg_write_t() function */
+    opencbm_plugin_iec_dbg_read_t               * opencbm_plugin_iec_dbg_read;               /*!< pointer to a opencbm_plugin_iec_dbg_read_t() function */
+    opencbm_plugin_iec_dbg_write_t              * opencbm_plugin_iec_dbg_write;              /*!< pointer to a opencbm_plugin_iec_dbg_write_t() function */
+
 } opencbm_plugin_t;
 
 #endif // #ifndef OPENCBM_PLUGIN_H

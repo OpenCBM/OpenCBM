@@ -99,6 +99,10 @@ SOURCE=..\libstring.c
 
 SOURCE=.\perfeval.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\registry.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

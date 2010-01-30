@@ -4,14 +4,14 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2007      Spiro Trikaliotis
+ *  Copyright 2007, 2009 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: dllmain.c,v 1.5 2010-01-30 20:48:48 strik Exp $ \n
+** \version $Id: dllmain.c,v 1.6 2010-01-30 21:33:15 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -39,6 +39,7 @@
 #define OPENCBM_PLUGIN
 #include "archlib.h"
 
+#include "xu1541.h"
 
 /*! \brief Dummy DllMain
 
@@ -68,12 +69,21 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 }
 
 int CBMAPIDECL
-cbm_plugin_init(void)
+opencbm_plugin_init(void)
 {
-    return 0;
+#if DBG
+
+    // Read the debugging flags from the registry
+
+    cbm_get_debugging_flags("xu1541");
+
+#endif
+
+    return xu1541_dll_init();
 }
 
 void CBMAPIDECL
-cbm_plugin_uninit(void)
+opencbm_plugin_uninit(void)
 {
+    xu1541_dll_uninit();
 }

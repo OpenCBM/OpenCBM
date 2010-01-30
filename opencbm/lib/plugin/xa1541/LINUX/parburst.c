@@ -11,7 +11,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: parburst.c,v 1.3 2009-11-15 20:55:41 strik Exp $";
+    "@(#) $Id: parburst.c,v 1.4 2010-01-30 21:33:15 strik Exp $";
 #endif
 
 #include <fcntl.h>
@@ -29,17 +29,17 @@ static char *rcsid =
 
 /*linux functions needed by parallel burst */
 
-__u_char cbmarch_parallel_burst_read(CBM_FILE f)
+__u_char opencbm_plugin_parallel_burst_read(CBM_FILE f)
 {
     return ioctl(f, CBMCTRL_PARBURST_READ);
 }
 
-void cbmarch_parallel_burst_write(CBM_FILE f, __u_char c)
+void opencbm_plugin_parallel_burst_write(CBM_FILE f, __u_char c)
 {
     ioctl(f, CBMCTRL_PARBURST_WRITE, c);
 }
 
-int cbmarch_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int length)
+int opencbm_plugin_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int length)
 {
     int retval;
 
@@ -51,7 +51,7 @@ int cbmarch_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int
     return retval;
 }
 
-int cbmarch_parallel_burst_read_track_var(CBM_FILE f, __u_char *buffer, unsigned int length)
+int opencbm_plugin_parallel_burst_read_track_var(CBM_FILE f, __u_char *buffer, unsigned int length)
 {
     int retval;
 
@@ -63,7 +63,7 @@ int cbmarch_parallel_burst_read_track_var(CBM_FILE f, __u_char *buffer, unsigned
     return retval;
 }
 
-int cbmarch_parallel_burst_write_track(CBM_FILE f,  __u_char *buffer, unsigned int length)
+int opencbm_plugin_parallel_burst_write_track(CBM_FILE f,  __u_char *buffer, unsigned int length)
 {
     int retval;
 

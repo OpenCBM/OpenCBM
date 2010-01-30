@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.11 2008-06-16 19:24:27 strik Exp $";
+    "@(#) $Id: s1.c,v 1.12 2010-01-30 21:33:18 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -20,9 +20,9 @@ static char *rcsid =
 
 #include "opencbm-plugin.h"
 
-static cbm_plugin_s1_read_n_t * cbm_plugin_s1_read_n = NULL;
+static opencbm_plugin_s1_read_n_t * opencbm_plugin_s1_read_n = NULL;
 
-static cbm_plugin_s1_write_n_t * cbm_plugin_s1_write_n = NULL;
+static opencbm_plugin_s1_write_n_t * opencbm_plugin_s1_write_n = NULL;
 
 static const unsigned char s1r15x1[] = {
 #include "s1r.inc"
@@ -56,9 +56,9 @@ static int write_byte(CBM_FILE fd, unsigned char c)
 {
     int b, i;
 
-    if(cbm_plugin_s1_write_n)
+    if(opencbm_plugin_s1_write_n)
     {
-        cbm_plugin_s1_write_n(fd, &c, 1);
+        opencbm_plugin_s1_write_n(fd, &c, 1);
         return 0;
     }
 
@@ -102,9 +102,9 @@ static unsigned char read_byte(CBM_FILE fd)
     int b=0, i;
     unsigned char c;
 
-    if(cbm_plugin_s1_read_n)
+    if(opencbm_plugin_s1_read_n)
     {
-        cbm_plugin_s1_read_n(fd, &c, 1);
+        opencbm_plugin_s1_read_n(fd, &c, 1);
         return c;
     }
 
@@ -188,8 +188,8 @@ static int upload_turbo(CBM_FILE fd, unsigned char drive,
     const struct drive_prog *p;
     int dt;
 
-    cbm_plugin_s1_read_n = cbm_get_plugin_function_address("cbmarch_s1_read_n");
-    cbm_plugin_s1_write_n = cbm_get_plugin_function_address("cbmarch_s1_write_n");
+    opencbm_plugin_s1_read_n = cbm_get_plugin_function_address("opencbm_plugin_s1_read_n");
+    opencbm_plugin_s1_write_n = cbm_get_plugin_function_address("opencbm_plugin_s1_write_n");
 
     dt = (drive_type == cbm_dt_cbm1581);
     p = &drive_progs[dt * 2 + (write != 0)];
@@ -226,9 +226,9 @@ static void exit_turbo(CBM_FILE fd, int write)
 //    cbm_iec_wait(fd, IEC_DATA, 0);
                                                                         SETSTATEDEBUG((void)0);
 
-    cbm_plugin_s1_read_n = NULL;
+    opencbm_plugin_s1_read_n = NULL;
 
-    cbm_plugin_s1_write_n = NULL;
+    opencbm_plugin_s1_write_n = NULL;
 }
 
 DECLARE_TRANSFER_FUNCS(s1_transfer);

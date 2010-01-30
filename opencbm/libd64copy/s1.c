@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.13 2008-06-16 19:24:28 strik Exp $";
+    "@(#) $Id: s1.c,v 1.14 2010-01-30 21:33:18 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -22,9 +22,9 @@ static char *rcsid =
 
 #include "opencbm-plugin.h"
 
-static cbm_plugin_s1_read_n_t * cbm_plugin_s1_read_n = NULL;
+static opencbm_plugin_s1_read_n_t * opencbm_plugin_s1_read_n = NULL;
 
-static cbm_plugin_s1_write_n_t * cbm_plugin_s1_write_n = NULL;
+static opencbm_plugin_s1_write_n_t * opencbm_plugin_s1_write_n = NULL;
 
 static const unsigned char s1_drive_prog[] = {
 #include "s1.inc"
@@ -94,9 +94,9 @@ static void write_n(const unsigned char *data, int size)
 {
     int i;
 
-    if (cbm_plugin_s1_write_n)
+    if (opencbm_plugin_s1_write_n)
     {
-        cbm_plugin_s1_write_n(fd_cbm, data, size);
+        opencbm_plugin_s1_write_n(fd_cbm, data, size);
         return;
     }
 
@@ -148,9 +148,9 @@ static void read_n(unsigned char *data, int size)
 {
     int i;
 
-    if (cbm_plugin_s1_read_n)
+    if (opencbm_plugin_s1_read_n)
     {
-        cbm_plugin_s1_read_n(fd_cbm, data, size);
+        opencbm_plugin_s1_read_n(fd_cbm, data, size);
         return;
     }
 
@@ -217,9 +217,9 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
     fd_cbm = fd;
     two_sided = settings->two_sided;
 
-    cbm_plugin_s1_read_n = cbm_get_plugin_function_address("cbmarch_s1_read_n");
+    opencbm_plugin_s1_read_n = cbm_get_plugin_function_address("openopencbm_plugin_s1_read_n");
 
-    cbm_plugin_s1_write_n = cbm_get_plugin_function_address("cbmarch_s1_write_n");
+    opencbm_plugin_s1_write_n = cbm_get_plugin_function_address("openopencbm_plugin_s1_write_n");
 
                                                                         SETSTATEDEBUG((void)0);
     cbm_upload(fd_cbm, d, 0x700, s1_drive_prog, sizeof(s1_drive_prog));
@@ -241,9 +241,9 @@ static void close_disk(void)
     arch_usleep(100);
                                                                         SETSTATEDEBUG(debugLibD64BitCount=-1);
 
-    cbm_plugin_s1_read_n = NULL;
+    opencbm_plugin_s1_read_n = NULL;
 
-    cbm_plugin_s1_write_n = NULL;
+    opencbm_plugin_s1_write_n = NULL;
 }
 
 static int send_track_map(unsigned char tr, const char *trackmap, unsigned char count)

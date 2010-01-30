@@ -5,7 +5,7 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2004,2007 Spiro Trikaliotis
+ *  Copyright 2001-2004, 2007-2009 Spiro Trikaliotis
  *
  *  Parts are Copyright
  *      Jouko Valta <jopi(at)stekt(dot)oulu(dot)fi>
@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.5 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: i_opencbm.c,v 1.6 2010-01-30 21:33:15 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n
@@ -54,60 +54,6 @@
 
 /*-------------------------------------------------------------------*/
 /*--------- REGISTRY FUNCTIONS --------------------------------------*/
-
-/*! \brief Get a DWORD value from the registry
-
- This function gets a DWORD value in the registry. It is a simple
- wrapper for convenience.
-
- \param RegKey
-   A handle to an already opened registry key.
-
- \param SubKey
-   Pointer to a null-terminiated string which holds the name
-   of the value to be created or changed.
-
- \param Value
-   Pointer to a variable which will contain the value from the registry
-
- \return
-   ERROR_SUCCESS on success, -1 otherwise
-
- If this function returns -1, the given Value will not be changed at all!
-*/
-
-LONG
-RegGetDWORD(IN HKEY RegKey, IN char *SubKey, OUT LPDWORD Value)
-{
-    DWORD valueLen;
-    DWORD lpType;
-    DWORD value;
-    DWORD rc;
-
-    FUNC_ENTER();
-
-    FUNC_PARAM((DBG_PREFIX "Subkey = '%s'", SubKey));
-
-    valueLen = sizeof(value);
-
-    rc = RegQueryValueEx(RegKey, SubKey, NULL, &lpType, (LPBYTE)&value, &valueLen);
-
-    DBG_ASSERT(valueLen == 4);
-
-    if ((rc == ERROR_SUCCESS) && (valueLen == 4))
-    {
-        DBG_SUCCESS((DBG_PREFIX "RegGetDWORD"));
-        *Value = value;
-    }
-    else
-    {
-        DBG_ERROR((DBG_PREFIX "RegGetDWORD failed, returning -1"));
-        rc = -1;
-    }
-
-    FUNC_LEAVE_INT(rc);
-}
-
 
 /*! \internal \brief Get the number of the parallel port to open
 
@@ -162,56 +108,6 @@ cbm_get_default_port(VOID)
 
     FUNC_LEAVE_INT(ret);
 }
-
-#if DBG
-
-/*! \brief Set the debugging flags
-
- This function gets the debugging flags from the registry. If there
- are any, it sets the flags to that value.
-*/
-
-VOID
-cbm_get_debugging_flags(VOID)
-{
-    DWORD ret;
-    HKEY RegKey;
-
-    FUNC_ENTER();
-
-    // Open a registry key to HKLM\<%REGKEY_SERVICE%>
-
-    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-                     CBM_REGKEY_SERVICE,
-                     0,
-                     KEY_QUERY_VALUE,
-                     &RegKey)
-       )
-    {
-        DBG_WARN((DBG_PREFIX "RegOpenKeyEx() failed!"));
-        FUNC_LEAVE();
-    }
-
-    // now, get the number of the port to use
-
-    if (RegGetDWORD(RegKey, CBM_REGKEY_SERVICE_DLL_DEBUGFLAGS, &ret) != ERROR_SUCCESS)
-    {
-        DBG_WARN((DBG_PREFIX "No " CBM_REGKEY_SERVICE "\\" CBM_REGKEY_SERVICE_DLL_DEBUGFLAGS
-            " value, leaving default."));
-    }
-    else
-    {
-        DbgFlags = ret;
-    }
-
-    // We're done, close the registry handle.
-
-    RegCloseKey(RegKey);
-
-    FUNC_LEAVE();
-}
-
-#endif // #if DBG
 
 /*-------------------------------------------------------------------*/
 /*--------- ASYNCHRONOUS IO FUNCTIONS -------------------------------*/
@@ -449,7 +345,7 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
 */
 
 const char * CBMAPIDECL
-cbmarch_get_driver_name(int PortNumber)
+opencbm_plugin_get_driver_name(int PortNumber)
 {
     //! \todo do not hard-code the driver name
     static char driverName[] = "\\\\.\\opencbm0";
@@ -500,7 +396,7 @@ cbmarch_get_driver_name(int PortNumber)
 */
 
 int CBMAPIDECL
-cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber)
+opencbm_plugin_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 {
     const char *driverName;
 
@@ -508,7 +404,7 @@ cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 
     // Get the name of the driver to be opened
 
-    driverName = cbmarch_get_driver_name(PortNumber);
+    driverName = opencbm_plugin_get_driver_name(PortNumber);
 
     if (driverName == NULL)
     {
@@ -549,7 +445,7 @@ cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 */
 
 void CBMAPIDECL
-cbmarch_driver_close(CBM_FILE HandleDevice)
+opencbm_plugin_driver_close(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
@@ -813,11 +709,11 @@ cbm_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
 
     DBG_ASSERT(outBuffer != NULL);
 
-    if (cbmarch_driver_open(&HandleDevice, 0) == 0)
+    if (opencbm_plugin_driver_open(&HandleDevice, 0) == 0)
     {
         outBuffer->ErrorFlags = CBM_I_DRIVER_INSTALL_0_IOCTL_FAILED;
         cbm_ioctl(HandleDevice, CBMCTRL(I_INSTALL), NULL, 0, Buffer, BufferLen);
-        cbmarch_driver_close(HandleDevice);
+        opencbm_plugin_driver_close(HandleDevice);
     }
     else
     {

@@ -12,7 +12,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/s1_s2_pp.c \n
 ** \author Till Harbaum, Spiro Trikaliotis \n
-** \version $Id: s1_s2_pp.c,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: s1_s2_pp.c,v 1.4 2010-01-30 21:33:15 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver: Code for accessing fast protocols of xu1541
 **
@@ -62,7 +62,7 @@
     The size of the data buffer the read bytes will be written to.
 */
 void CBMAPIDECL
-cbmarch_s1_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
+opencbm_plugin_s1_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
 	xu1541_special_read(XU1541_S1, data, size); 
 }
@@ -79,7 +79,7 @@ cbmarch_s1_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
     The size of the data buffer to be written
 */
 void CBMAPIDECL
-cbmarch_s1_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
+opencbm_plugin_s1_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
 	xu1541_special_write(XU1541_S1, data, size); 
 }
@@ -96,7 +96,7 @@ cbmarch_s1_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned in
     The size of the data buffer the read bytes will be written to.
 */
 void CBMAPIDECL
-cbmarch_s2_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
+opencbm_plugin_s2_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
 	xu1541_special_read(XU1541_S2, data, size); 
 }
@@ -113,7 +113,7 @@ cbmarch_s2_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
     The size of the data buffer to be written
 */
 void CBMAPIDECL
-cbmarch_s2_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
+opencbm_plugin_s2_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
 	xu1541_special_write(XU1541_S2, data, size); 
 }
@@ -130,7 +130,7 @@ cbmarch_s2_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned in
     The size of the data buffer the read bytes will be written to.
 */
 void CBMAPIDECL
-cbmarch_pp_dc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
+opencbm_plugin_pp_dc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
 	xu1541_special_read(XU1541_PP, data, size); 
 }
@@ -147,7 +147,7 @@ cbmarch_pp_dc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int si
     The size of the data buffer to be written
 */
 void CBMAPIDECL
-cbmarch_pp_dc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
+opencbm_plugin_pp_dc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
 	xu1541_special_write(XU1541_PP, data, size); 
 }
@@ -164,7 +164,7 @@ cbmarch_pp_dc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned
     The size of the data buffer the read bytes will be written to.
 */
 void CBMAPIDECL
-cbmarch_pp_cc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
+opencbm_plugin_pp_cc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
 	xu1541_special_read(XU1541_P2, data, size); 
 }
@@ -181,7 +181,7 @@ cbmarch_pp_cc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int si
     The size of the data buffer to be written
 */
 void CBMAPIDECL
-cbmarch_pp_cc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
+opencbm_plugin_pp_cc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
 	xu1541_special_write(XU1541_P2, data, size); 
 }

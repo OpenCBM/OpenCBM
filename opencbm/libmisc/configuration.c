@@ -4,14 +4,14 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2007-2008 Spiro Trikaliotis
+ *  Copyright 2007-2009 Spiro Trikaliotis
  *
-*/
+ */
 
 /*! ************************************************************** 
 ** \file libmisc/configuration.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration.c,v 1.4 2008-10-10 15:24:58 strik Exp $ \n
+** \version $Id: configuration.c,v 1.5 2010-01-30 21:33:18 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Process configuration file
@@ -162,6 +162,34 @@ entry_alloc_new(opencbm_configuration_section_t * CurrentSection,
     return newEntry;
 }
 
+/*! \brief \internal free the memory of a configuration entry
+
+ \param Entry
+   Pointer to the entry to be removed
+
+ \return
+   Pointer to the entry that was next after the entry just removed.
+*/
+static opencbm_configuration_entry_t *
+configuration_entry_free(opencbm_configuration_entry_t * Entry)
+{
+    opencbm_configuration_entry_t * next_entry = NULL;
+
+    assert(Entry != NULL);
+
+    if (Entry != NULL) {
+        next_entry = Entry->Next;
+
+        cbmlibmisc_strfree(Entry->Comment);
+        cbmlibmisc_strfree(Entry->Name);
+        cbmlibmisc_strfree(Entry->Value);
+
+        free(Entry);
+    }
+
+    return next_entry;
+}
+
 /*! \brief \internal allocate memory for a new configuration section
 
  \param Configuration
@@ -231,6 +259,41 @@ section_alloc_new(opencbm_configuration_t * Configuration,
     } while (0);
 
     return newSection;
+}
+
+/*! \brief \internal free the memory of a complete configuration section
+
+ \param Section
+   Pointer to the section to be removed
+
+ \return
+   Pointer to the section that was next after the entry just removed.
+*/
+static opencbm_configuration_section_t *
+configuration_section_free(opencbm_configuration_section_t * Section)
+{
+    opencbm_configuration_section_t * next_section = NULL;
+
+    assert(Section != NULL);
+
+    if (Section != NULL) {
+        opencbm_configuration_entry_t * entry;
+
+        next_section = Section->Next;
+
+        entry = Section->Entries;
+
+        while (entry) {
+            entry = configuration_entry_free(entry);
+        }
+
+        cbmlibmisc_strfree(Section->Comment);
+        cbmlibmisc_strfree(Section->Name);
+
+        free(Section);
+    }
+
+    return next_section;
 }
 
 /*! \brief \internal handle the comment when reading a line of the configuration file
@@ -846,28 +909,7 @@ opencbm_configuration_free_all(opencbm_configuration_handle Handle)
 
     while (section != NULL)
     {
-        opencbm_configuration_section_t * lastsection = section;
-
-        opencbm_configuration_entry_t * entry = lastsection->Entries;
-
-        section = section->Next;
-
-        while (entry != NULL)
-        {
-            opencbm_configuration_entry_t * lastentry = entry;
-
-            entry = entry->Next;
-
-            cbmlibmisc_strfree(lastentry->Comment);
-            cbmlibmisc_strfree(lastentry->Name);
-            cbmlibmisc_strfree(lastentry->Value);
-            free(lastentry);
-        }
-
-        cbmlibmisc_strfree(lastsection->Comment);
-        cbmlibmisc_strfree(lastsection->Name);
-
-        free(lastsection);
+        section = configuration_section_free(section);
     }
 
     cbmlibmisc_strfree(Handle->FileName);
@@ -1032,14 +1074,24 @@ opencbm_configuration_find_section(opencbm_configuration_handle Handle,
    with NULL.
    If 1, we create a new entry if no entry exists.
 
+ \param LastEntry
+   Pointer to a pointer. Upon successfull return, the pointed to pointer
+   will have the address last entry before the entry that was just found.
+   This is useful for list manipulations.
+
+   If this entry is the first one in this section, the pointed to pointer
+   will be NULL.
+
  \return
    Returns a pointer to the data entry. If it cannot be found, this
    function returns NULL.
 */
 static opencbm_configuration_entry_t *
-opencbm_configuration_find_data(opencbm_configuration_handle Handle,
-                                const char Section[], const char Entry[],
-                                unsigned int Create)
+opencbm_configuration_find_data_ex(opencbm_configuration_handle Handle,
+                                   const char Section[], const char Entry[],
+                                   unsigned int Create,
+                                   opencbm_configuration_entry_t ** LastEntry,
+                                   opencbm_configuration_section_t ** LastSection)
 {
     opencbm_configuration_section_t *currentSection = NULL;
     opencbm_configuration_section_t *lastSection = NULL;
@@ -1047,7 +1099,13 @@ opencbm_configuration_find_data(opencbm_configuration_handle Handle,
 
     opencbm_configuration_entry_t * currentEntry = NULL;
 
+    assert(LastEntry != NULL);
+    assert(LastSection != NULL);
+
     do {
+        *LastEntry = NULL;
+        *LastSection = NULL;
+
         /* Check if there is a section and an entry given */
 
         if (Section == NULL || Entry == NULL) {
@@ -1059,6 +1117,8 @@ opencbm_configuration_find_data(opencbm_configuration_handle Handle,
         if (currentSection == NULL) {
             break;
         }
+
+        *LastSection = currentSection;
 
         {
             for (currentEntry = currentSection->Entries;
@@ -1075,6 +1135,7 @@ opencbm_configuration_find_data(opencbm_configuration_handle Handle,
                  */
                 if (currentEntry->Name != NULL) {
                     lastEntry = currentEntry;
+                    *LastEntry = currentEntry;
                 }
             }
         }
@@ -1095,6 +1156,41 @@ opencbm_configuration_find_data(opencbm_configuration_handle Handle,
     } while(0);
 
     return currentEntry;
+}
+
+/*! \internal \brief Find data from the configuration file
+
+ This function searches for a specific entry in the configuration
+ file and returns the value found there.
+
+ \param Handle
+   Handle to the opened configuration file, as obtained from
+   opencbm_configuration_open().
+ 
+ \param Section
+   A string which holds the name of the section from where to get the data.
+
+ \param Entry
+   A string which holds the name of the entry to get.
+
+ \param Create
+   If 0, we only try to find an existing entry. If none exists, we return
+   with NULL.
+   If 1, we create a new entry if no entry exists.
+
+ \return
+   Returns a pointer to the data entry. If it cannot be found, this
+   function returns NULL.
+*/
+static opencbm_configuration_entry_t *
+opencbm_configuration_find_data(opencbm_configuration_handle Handle,
+                                const char Section[], const char Entry[],
+                                unsigned int Create)
+{
+    opencbm_configuration_entry_t * last_entry;
+    opencbm_configuration_section_t * section;
+
+    return opencbm_configuration_find_data_ex(Handle, Section, Entry, Create, &last_entry, &section);
 }
 
 /*! \brief Read data from the configuration file
@@ -1326,6 +1422,118 @@ opencbm_configuration_set_data(opencbm_configuration_handle Handle,
     return error;
 }
 
+/*! \brief Remove a complete section from the configuration file
+
+ This function searches for a specific section in the configuration
+ file and completely removes it if it exists.
+
+ \param Handle
+   Handle to the opened configuration file, as obtained from
+   opencbm_configuration_open().
+ 
+ \param Section
+   A string which holds the name of the section to remove.
+
+ \return
+   0 if the data was removed.
+   1 otherwise. This means the section did not exist in the first place.
+
+ \todo
+   Test opencbm_configuration_section_remove()
+*/
+int
+opencbm_configuration_section_remove(opencbm_configuration_handle Handle,
+                                     const char Section[])
+{
+    opencbm_configuration_section_t * section = NULL;
+    opencbm_configuration_section_t * previous_section = NULL;
+
+    int error = 1;
+
+    do {
+        section = opencbm_configuration_find_section(Handle, Section, 0, &previous_section);
+
+        if ( ! section ) {
+            break;
+        }
+
+        if (previous_section == NULL) {
+            Handle->Sections = configuration_section_free(section);
+        }
+        else {
+            assert( previous_section->Next == section );
+
+            previous_section->Next = configuration_section_free(section);
+        }
+
+        error = 0;
+
+    } while (0);
+
+    return error;
+}
+
+/*! \brief Remove an entry from the configuration file
+
+ This function searches for a specific entry in a given section
+ in the configuration file and removes it if it exists.
+
+ \param Handle
+   Handle to the opened configuration file, as obtained from
+   opencbm_configuration_open().
+ 
+ \param Section
+   A string which holds the name of the section from which to remove.
+
+ \param EntryName
+   A string which holds the name of the entry to remove.
+
+ \return
+   0 if the data was removed.
+   1 otherwise. This means the entry did not exist in the first place.
+
+ \todo
+   Test opencbm_configuration_entry_remove()
+*/
+int
+opencbm_configuration_entry_remove(opencbm_configuration_handle Handle,
+                               const char Section[], const char EntryName[])
+{
+    int error = 1;
+
+    do {
+        opencbm_configuration_entry_t * entry;
+        opencbm_configuration_entry_t * last_entry;
+        opencbm_configuration_section_t * section;
+
+        entry = opencbm_configuration_find_data_ex(Handle, Section, EntryName, 0,
+                                                   &last_entry, &section);
+
+        if ( ! entry ) {
+            break;
+        }
+
+        assert(section->Entries == entry);
+
+        if (last_entry == NULL) {
+            /*
+             * this entry is the first one in this section.
+             * Thus, update the section structure
+             */
+            section->Entries = configuration_entry_free(entry);
+        }
+        else {
+            /* remove the entry from the list, and free its memory */
+            last_entry->Next = configuration_entry_free(entry);
+        }
+
+        error = 0;
+
+    } while (0);
+
+    return error;
+}
+
 /* #define OPENCBM_STANDALONE_TEST 1 */
 
 #ifdef OPENCBM_STANDALONE_TEST
@@ -1394,22 +1602,30 @@ OpStart(const char * const Operation)
     fflush(stderr);
 }
 
-static void enum_data_callback(opencbm_configuration_handle Handle,
-                               const char Section[],
-                               const char Entry[],
-                               void * Data)
+static int enum_data_callback(opencbm_configuration_handle Handle,
+                              const char Section[],
+                              const char Entry[],
+                              void * Data)
 {
-      fprintf(stderr, "\n    enum_data_callback(Handle, %s, %s, 0x%p\n", Section, Entry, Data);
-      fflush(stderr);
+    int error = 0;
+
+    fprintf(stderr, "\n    enum_data_callback(Handle, %s, %s, 0x%p\n", Section, Entry, Data);
+    fflush(stderr);
+
+    return error;
 }
 
-static void enum_sections_callback(opencbm_configuration_handle Handle,
-                                   const char Section[],
-                                   void * Data)
+static int enum_sections_callback(opencbm_configuration_handle Handle,
+                                  const char Section[],
+                                  void * Data)
 {
+    int error = 0;
+
     fprintf(stderr, "\n  enum_sections_callback(Handle, %s, 0x%p\n", Section, Data);
     fflush(stderr);
     opencbm_configuration_enum_data(Handle, Section, enum_data_callback, Data);
+
+    return error;
 }
 
 /*! \brief Simple test case for configuration
@@ -1493,7 +1709,7 @@ int ARCH_MAINDECL main(void)
 #if 0
 
 
-        int
+int
 opencbm_configuration_enum_sections(opencbm_configuration_handle Handle,
                                     opencbm_configuration_enum_sections_callback_t Callback,
                                     void * Data)

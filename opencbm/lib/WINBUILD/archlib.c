@@ -12,13 +12,14 @@
 /*! ************************************************************** 
 ** \file lib/WINBUILD/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.21 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: archlib.c,v 1.22 2010-01-30 21:33:14 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
 ****************************************************************/
 
 #include <windows.h>
+#include <stdlib.h>
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
@@ -36,10 +37,6 @@
 #include "debug.h"
 #include "getpluginaddress.h"
 
-
-/*! mark: We are building the DLL */
-#define DLL
-#include "i_opencbm.h"
 
 #define OPENCBM_PLUGIN 1 /*!< \brief mark: we are exporting plugin functions */
 #include "archlib.h"
@@ -82,7 +79,7 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
     {
         // Read the debugging flags from the registry
 
-//        cbm_get_debugging_flags();
+        cbm_get_debugging_flags(NULL);
     }
 
 #endif
@@ -97,7 +94,7 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 
  \return
 */
-BOOL CBMAPIDECL cbm_plugin_install_generic(const char * DefaultPluginname)
+BOOL CBMAPIDECL opencbm_plugin_install_generic(const char * DefaultPluginname)
 {
     BOOL error = TRUE;
 
@@ -125,6 +122,9 @@ BOOL CBMAPIDECL cbm_plugin_install_generic(const char * DefaultPluginname)
             error = opencbm_configuration_set_data(configuration_handle, 
                        "plugins", "default", DefaultPluginname);
         }
+        else {
+            error = FALSE;
+        }
 
         error = opencbm_configuration_close(configuration_handle) || error;
 
@@ -144,7 +144,7 @@ cbm_plugin_call_self_init_plugin(const char * Pluginname, const char * Filepath,
     FUNC_ENTER();
 
     do {
-        cbm_plugin_self_init_plugin_t * cbm_plugin_self_init_plugin = NULL;
+        opencbm_plugin_self_init_plugin_t * opencbm_plugin_self_init_plugin = NULL;
 
         pluginHandle = plugin_load(Filepath);
         if (pluginHandle == SHARED_OBJECT_HANDLE_INVALID) {
@@ -152,13 +152,18 @@ cbm_plugin_call_self_init_plugin(const char * Pluginname, const char * Filepath,
             break;
         }
 
-        cbm_plugin_self_init_plugin = plugin_get_address(pluginHandle, "cbm_plugin_self_init_plugin");
-        if ( ! cbm_plugin_self_init_plugin ) {
+        opencbm_plugin_self_init_plugin = plugin_get_address(pluginHandle, "opencbm_plugin_self_init_plugin");
+        if ( ! opencbm_plugin_self_init_plugin ) {
             error = FALSE;
             break;
         }
 
-        error = cbm_plugin_self_init_plugin();
+        error = opencbm_plugin_self_init_plugin();
+        if (error) {
+            break;
+        }
+
+        error = plugin_set_active(Pluginname);
 
     } while (0);
 
@@ -179,7 +184,7 @@ cbm_plugin_call_self_init_plugin(const char * Pluginname, const char * Filepath,
 
  \return
 */
-BOOL CBMAPIDECL cbm_plugin_install_plugin_data(const char * Pluginname, const char * Filepath, const CbmPluginInstallProcessCommandlineData_t * CommandlineData)
+BOOL CBMAPIDECL opencbm_plugin_install_plugin_data(const char * Pluginname, const char * Filepath, const CbmPluginInstallProcessCommandlineData_t * CommandlineData)
 {
     BOOL error = TRUE;
 
@@ -233,11 +238,11 @@ opencbm_configuration_enum_sections_callback_t callback;
 
  \return
 */
-static int cbm_plugin_get_all_plugin_names_callback(opencbm_configuration_handle Handle,
+static int opencbm_plugin_get_all_plugin_names_callback(opencbm_configuration_handle Handle,
                                                     const char Section[],
                                                     void * Data)
 {
-    cbm_plugin_get_all_plugin_names_context_t * Context = Data;
+    opencbm_plugin_get_all_plugin_names_context_t * Context = Data;
 
     BOOL error = 0;
 
@@ -248,9 +253,19 @@ static int cbm_plugin_get_all_plugin_names_callback(opencbm_configuration_handle
             break;
         }
 
-        error = error || Context->Callback(Context->InstallParameter, Section);
+        /*
+         * check if the plugin is marked as active.
+         * Only active plugins are reported back,
+         */
+
+        if ( ! plugin_is_active(Handle, Section) ) {
+            break;
+        }
+
+       error = Context->Callback(Context->InstallParameter, Section);
 
     } while (0);
+
     FUNC_LEAVE_BOOL(error);
 }
 
@@ -260,7 +275,7 @@ static int cbm_plugin_get_all_plugin_names_callback(opencbm_configuration_handle
 
  \return
 */
-EXTERN BOOL CBMAPIDECL cbm_plugin_get_all_plugin_names(cbm_plugin_get_all_plugin_names_context_t * Context)
+EXTERN BOOL CBMAPIDECL opencbm_plugin_get_all_plugin_names(opencbm_plugin_get_all_plugin_names_context_t * Context)
 {
     BOOL error = TRUE;
     opencbm_configuration_handle configuration_handle = NULL;
@@ -281,7 +296,7 @@ EXTERN BOOL CBMAPIDECL cbm_plugin_get_all_plugin_names(cbm_plugin_get_all_plugin
         }
 
         error = opencbm_configuration_enum_sections(configuration_handle,
-            cbm_plugin_get_all_plugin_names_callback, Context);
+            opencbm_plugin_get_all_plugin_names_callback, Context);
 
     } while (0);
 

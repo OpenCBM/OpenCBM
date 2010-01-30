@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.30 2010-01-30 20:48:48 strik Exp $ \n
+** \version $Id: cbm.c,v 1.31 2010-01-30 21:33:13 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -42,6 +42,74 @@
 #include "getpluginaddress.h"
 
 #include "configuration.h"
+
+/*! \brief @@@@@ \todo document
+
+ \param Handle
+
+ \param PluginName
+
+ \return
+*/
+int plugin_is_active(opencbm_configuration_handle Handle, const char PluginName[])
+{
+    char * active = NULL;
+    unsigned int active_number = 1;
+
+    FUNC_ENTER();
+
+    do {
+        char * next;
+
+        opencbm_configuration_get_data(Handle, PluginName, "Active", &active);
+
+        if ( ! active ) {
+            break;
+        }
+
+        active_number = strtoul(active, &next, 10);
+        if (next && (next[0] != 0) ) {
+            DBG_WARN((DBG_PREFIX "Entry 'Active' for plugin '%' "
+                "is set to the non-numerical value '%s'",
+                PluginName, active));
+            active_number = 1;
+            break;
+        }
+
+    } while (0);
+
+    cbmlibmisc_strfree(active);
+
+    FUNC_LEAVE_INT(active_number);
+}
+
+/*! \brief @@@@@ \todo document
+
+ \param PluginName
+
+ \return
+*/
+int plugin_set_active(const char PluginName[])
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
+}
+
+
+/*! \brief @@@@@ \todo document
+
+ \param PluginName
+
+ \return
+*/
+int plugin_set_inactive(const char PluginName[])
+{
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
+}
+
 
 /*! \brief @@@@@ \todo document */
 struct plugin_information_s {
@@ -98,6 +166,15 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
             }
 
             //
+            // check if the plugin has been disabled
+            //
+
+            if ( ! plugin_is_active(handle_configuration, plugin_name) ) {
+                error = 1;
+                break;
+            }
+
+            //
             // get the location of the plugin
             //
             if (!error)
@@ -128,61 +205,61 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         if (!Plugin_information->Library)
             break;
 
-        Plugin_information->Plugin.cbm_plugin_init                       = plugin_get_address(Plugin_information->Library, "cbmarch_init");
-        Plugin_information->Plugin.cbm_plugin_uninit                     = plugin_get_address(Plugin_information->Library, "cbmarch_uninit");
-        Plugin_information->Plugin.cbm_plugin_get_driver_name            = plugin_get_address(Plugin_information->Library, "cbmarch_get_driver_name");
-        Plugin_information->Plugin.cbm_plugin_driver_open                = plugin_get_address(Plugin_information->Library, "cbmarch_driver_open");
-        Plugin_information->Plugin.cbm_plugin_driver_close               = plugin_get_address(Plugin_information->Library, "cbmarch_driver_close");
-        Plugin_information->Plugin.cbm_plugin_lock                       = plugin_get_address(Plugin_information->Library, "cbmarch_lock");
-        Plugin_information->Plugin.cbm_plugin_unlock                     = plugin_get_address(Plugin_information->Library, "cbmarch_unlock");
-        Plugin_information->Plugin.cbm_plugin_raw_write                  = plugin_get_address(Plugin_information->Library, "cbmarch_raw_write");
-        Plugin_information->Plugin.cbm_plugin_raw_read                   = plugin_get_address(Plugin_information->Library, "cbmarch_raw_read");
-        Plugin_information->Plugin.cbm_plugin_open                       = plugin_get_address(Plugin_information->Library, "cbmarch_open");
-        Plugin_information->Plugin.cbm_plugin_close                      = plugin_get_address(Plugin_information->Library, "cbmarch_close");
-        Plugin_information->Plugin.cbm_plugin_listen                     = plugin_get_address(Plugin_information->Library, "cbmarch_listen");
-        Plugin_information->Plugin.cbm_plugin_talk                       = plugin_get_address(Plugin_information->Library, "cbmarch_talk");
-        Plugin_information->Plugin.cbm_plugin_unlisten                   = plugin_get_address(Plugin_information->Library, "cbmarch_unlisten");
-        Plugin_information->Plugin.cbm_plugin_untalk                     = plugin_get_address(Plugin_information->Library, "cbmarch_untalk");
-        Plugin_information->Plugin.cbm_plugin_get_eoi                    = plugin_get_address(Plugin_information->Library, "cbmarch_get_eoi");
-        Plugin_information->Plugin.cbm_plugin_clear_eoi                  = plugin_get_address(Plugin_information->Library, "cbmarch_clear_eoi");
-        Plugin_information->Plugin.cbm_plugin_reset                      = plugin_get_address(Plugin_information->Library, "cbmarch_reset");
-        Plugin_information->Plugin.cbm_plugin_pp_read                    = plugin_get_address(Plugin_information->Library, "cbmarch_pp_read");
-        Plugin_information->Plugin.cbm_plugin_pp_write                   = plugin_get_address(Plugin_information->Library, "cbmarch_pp_write");
-        Plugin_information->Plugin.cbm_plugin_iec_poll                   = plugin_get_address(Plugin_information->Library, "cbmarch_iec_poll");
-        Plugin_information->Plugin.cbm_plugin_iec_set                    = plugin_get_address(Plugin_information->Library, "cbmarch_iec_set");
-        Plugin_information->Plugin.cbm_plugin_iec_release                = plugin_get_address(Plugin_information->Library, "cbmarch_iec_release");
-        Plugin_information->Plugin.cbm_plugin_iec_setrelease             = plugin_get_address(Plugin_information->Library, "cbmarch_iec_setrelease");
-        Plugin_information->Plugin.cbm_plugin_iec_wait                   = plugin_get_address(Plugin_information->Library, "cbmarch_iec_wait");
-        Plugin_information->Plugin.cbm_plugin_parallel_burst_read        = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read");
-        Plugin_information->Plugin.cbm_plugin_parallel_burst_write       = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write");
-        Plugin_information->Plugin.cbm_plugin_parallel_burst_read_n      = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read_n");
-        Plugin_information->Plugin.cbm_plugin_parallel_burst_write_n      = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write_n");
-        Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track  = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read_track");
-        Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track_var = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_read_track_var");
-        Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track = plugin_get_address(Plugin_information->Library, "cbmarch_parallel_burst_write_track");
+        Plugin_information->Plugin.opencbm_plugin_init                       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_init");
+        Plugin_information->Plugin.opencbm_plugin_uninit                     = plugin_get_address(Plugin_information->Library, "opencbm_plugin_uninit");
+        Plugin_information->Plugin.opencbm_plugin_get_driver_name            = plugin_get_address(Plugin_information->Library, "opencbm_plugin_get_driver_name");
+        Plugin_information->Plugin.opencbm_plugin_driver_open                = plugin_get_address(Plugin_information->Library, "opencbm_plugin_driver_open");
+        Plugin_information->Plugin.opencbm_plugin_driver_close               = plugin_get_address(Plugin_information->Library, "opencbm_plugin_driver_close");
+        Plugin_information->Plugin.opencbm_plugin_lock                       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_lock");
+        Plugin_information->Plugin.opencbm_plugin_unlock                     = plugin_get_address(Plugin_information->Library, "opencbm_plugin_unlock");
+        Plugin_information->Plugin.opencbm_plugin_raw_write                  = plugin_get_address(Plugin_information->Library, "opencbm_plugin_raw_write");
+        Plugin_information->Plugin.opencbm_plugin_raw_read                   = plugin_get_address(Plugin_information->Library, "opencbm_plugin_raw_read");
+        Plugin_information->Plugin.opencbm_plugin_open                       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_open");
+        Plugin_information->Plugin.opencbm_plugin_close                      = plugin_get_address(Plugin_information->Library, "opencbm_plugin_close");
+        Plugin_information->Plugin.opencbm_plugin_listen                     = plugin_get_address(Plugin_information->Library, "opencbm_plugin_listen");
+        Plugin_information->Plugin.opencbm_plugin_talk                       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_talk");
+        Plugin_information->Plugin.opencbm_plugin_unlisten                   = plugin_get_address(Plugin_information->Library, "opencbm_plugin_unlisten");
+        Plugin_information->Plugin.opencbm_plugin_untalk                     = plugin_get_address(Plugin_information->Library, "opencbm_plugin_untalk");
+        Plugin_information->Plugin.opencbm_plugin_get_eoi                    = plugin_get_address(Plugin_information->Library, "opencbm_plugin_get_eoi");
+        Plugin_information->Plugin.opencbm_plugin_clear_eoi                  = plugin_get_address(Plugin_information->Library, "opencbm_plugin_clear_eoi");
+        Plugin_information->Plugin.opencbm_plugin_reset                      = plugin_get_address(Plugin_information->Library, "opencbm_plugin_reset");
+        Plugin_information->Plugin.opencbm_plugin_pp_read                    = plugin_get_address(Plugin_information->Library, "opencbm_plugin_pp_read");
+        Plugin_information->Plugin.opencbm_plugin_pp_write                   = plugin_get_address(Plugin_information->Library, "opencbm_plugin_pp_write");
+        Plugin_information->Plugin.opencbm_plugin_iec_poll                   = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_poll");
+        Plugin_information->Plugin.opencbm_plugin_iec_set                    = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_set");
+        Plugin_information->Plugin.opencbm_plugin_iec_release                = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_release");
+        Plugin_information->Plugin.opencbm_plugin_iec_setrelease             = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_setrelease");
+        Plugin_information->Plugin.opencbm_plugin_iec_wait                   = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_wait");
+        Plugin_information->Plugin.opencbm_plugin_parallel_burst_read        = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_read");
+        Plugin_information->Plugin.opencbm_plugin_parallel_burst_write       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_write");
+        Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_n      = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_read_n");
+        Plugin_information->Plugin.opencbm_plugin_parallel_burst_write_n      = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_write_n");
+        Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_track  = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_read_track");
+        Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_track_var = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_read_track_var");
+        Plugin_information->Plugin.opencbm_plugin_parallel_burst_write_track = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_write_track");
 
-        Plugin_information->Plugin.cbm_plugin_iec_dbg_read               = plugin_get_address(Plugin_information->Library, "cbmarch_iec_dbg_read");
-        Plugin_information->Plugin.cbm_plugin_iec_dbg_write              = plugin_get_address(Plugin_information->Library, "cbmarch_iec_dbg_write");
+        Plugin_information->Plugin.opencbm_plugin_iec_dbg_read               = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_dbg_read");
+        Plugin_information->Plugin.opencbm_plugin_iec_dbg_write              = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_dbg_write");
 
         /* Make sure that all required functions are available: */
 
-        error = (NULL == Plugin_information->Plugin.cbm_plugin_get_driver_name
-              || NULL == Plugin_information->Plugin.cbm_plugin_driver_open
-              || NULL == Plugin_information->Plugin.cbm_plugin_driver_close
-              || NULL == Plugin_information->Plugin.cbm_plugin_raw_write
-              || NULL == Plugin_information->Plugin.cbm_plugin_raw_read
-              || NULL == Plugin_information->Plugin.cbm_plugin_open
-              || NULL == Plugin_information->Plugin.cbm_plugin_close
-              || NULL == Plugin_information->Plugin.cbm_plugin_listen
-              || NULL == Plugin_information->Plugin.cbm_plugin_talk
-              || NULL == Plugin_information->Plugin.cbm_plugin_unlisten
-              || NULL == Plugin_information->Plugin.cbm_plugin_untalk
-              || NULL == Plugin_information->Plugin.cbm_plugin_get_eoi
-              || NULL == Plugin_information->Plugin.cbm_plugin_clear_eoi
-              || NULL == Plugin_information->Plugin.cbm_plugin_reset
-              || NULL == Plugin_information->Plugin.cbm_plugin_iec_poll
-              || NULL == Plugin_information->Plugin.cbm_plugin_iec_setrelease
-              || NULL == Plugin_information->Plugin.cbm_plugin_iec_wait
+        error = (NULL == Plugin_information->Plugin.opencbm_plugin_get_driver_name
+              || NULL == Plugin_information->Plugin.opencbm_plugin_driver_open
+              || NULL == Plugin_information->Plugin.opencbm_plugin_driver_close
+              || NULL == Plugin_information->Plugin.opencbm_plugin_raw_write
+              || NULL == Plugin_information->Plugin.opencbm_plugin_raw_read
+              || NULL == Plugin_information->Plugin.opencbm_plugin_open
+              || NULL == Plugin_information->Plugin.opencbm_plugin_close
+              || NULL == Plugin_information->Plugin.opencbm_plugin_listen
+              || NULL == Plugin_information->Plugin.opencbm_plugin_talk
+              || NULL == Plugin_information->Plugin.opencbm_plugin_unlisten
+              || NULL == Plugin_information->Plugin.opencbm_plugin_untalk
+              || NULL == Plugin_information->Plugin.opencbm_plugin_get_eoi
+              || NULL == Plugin_information->Plugin.opencbm_plugin_clear_eoi
+              || NULL == Plugin_information->Plugin.opencbm_plugin_reset
+              || NULL == Plugin_information->Plugin.opencbm_plugin_iec_poll
+              || NULL == Plugin_information->Plugin.opencbm_plugin_iec_setrelease
+              || NULL == Plugin_information->Plugin.opencbm_plugin_iec_wait
 
               ) ? 1 : 0;
 
@@ -190,16 +267,16 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
             break;
 
         /* the following functions are optional:
-         *  - Plugin_information->Plugin.cbm_plugin_lock
-         *  - Plugin_information->Plugin.cbm_plugin_unlock
-         *  - Plugin_information->Plugin.cbm_plugin_iec_set
-         *  - Plugin_information->Plugin.cbm_plugin_iec_release
-         *  - Plugin_information->Plugin.cbm_plugin_parallel_burst_read
-         *  - Plugin_information->Plugin.cbm_plugin_parallel_burst_write
-         *  - Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track
-         *  - Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track)
-         *  - Plugin_information->Plugin.cbm_plugin_pp_read
-         *  - Plugin_information->Plugin.cbm_plugin_pp_write
+         *  - Plugin_information->Plugin.opencbm_plugin_lock
+         *  - Plugin_information->Plugin.opencbm_plugin_unlock
+         *  - Plugin_information->Plugin.opencbm_plugin_iec_set
+         *  - Plugin_information->Plugin.opencbm_plugin_iec_release
+         *  - Plugin_information->Plugin.opencbm_plugin_parallel_burst_read
+         *  - Plugin_information->Plugin.opencbm_plugin_parallel_burst_write
+         *  - Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_track
+         *  - Plugin_information->Plugin.opencbm_plugin_parallel_burst_write_track)
+         *  - Plugin_information->Plugin.opencbm_plugin_pp_read
+         *  - Plugin_information->Plugin.opencbm_plugin_pp_write
          */
 
 
@@ -207,18 +284,18 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
 
         error = 1;
 
-        if (Plugin_information->Plugin.cbm_plugin_parallel_burst_read 
-         && Plugin_information->Plugin.cbm_plugin_parallel_burst_write
-         && Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track
-         && Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track
+        if (Plugin_information->Plugin.opencbm_plugin_parallel_burst_read 
+         && Plugin_information->Plugin.opencbm_plugin_parallel_burst_write
+         && Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_track
+         && Plugin_information->Plugin.opencbm_plugin_parallel_burst_write_track
            )
 
            error = 0;
 
-        if (NULL == Plugin_information->Plugin.cbm_plugin_parallel_burst_read 
-         && NULL == Plugin_information->Plugin.cbm_plugin_parallel_burst_write
-         && NULL == Plugin_information->Plugin.cbm_plugin_parallel_burst_read_track
-         && NULL == Plugin_information->Plugin.cbm_plugin_parallel_burst_write_track
+        if (NULL == Plugin_information->Plugin.opencbm_plugin_parallel_burst_read 
+         && NULL == Plugin_information->Plugin.opencbm_plugin_parallel_burst_write
+         && NULL == Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_track
+         && NULL == Plugin_information->Plugin.opencbm_plugin_parallel_burst_write_track
            )
 
             error = 0;
@@ -231,14 +308,14 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
 
         /* the same for the pp_read() and pp_write() functions */
 
-        if (Plugin_information->Plugin.cbm_plugin_pp_read
-         && Plugin_information->Plugin.cbm_plugin_pp_write
+        if (Plugin_information->Plugin.opencbm_plugin_pp_read
+         && Plugin_information->Plugin.opencbm_plugin_pp_write
            )
 
             error = 0;
 
-        if (NULL == Plugin_information->Plugin.cbm_plugin_pp_read
-         && NULL == Plugin_information->Plugin.cbm_plugin_pp_write
+        if (NULL == Plugin_information->Plugin.opencbm_plugin_pp_read
+         && NULL == Plugin_information->Plugin.opencbm_plugin_pp_write
            )
 
             error = 0;
@@ -246,11 +323,11 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         if (error)
             break;
 
-        if (Plugin_information->Plugin.cbm_plugin_init) {
-            error = Plugin_information->Plugin.cbm_plugin_init();
+        if (Plugin_information->Plugin.opencbm_plugin_init) {
+            error = Plugin_information->Plugin.opencbm_plugin_init();
             if (error) {
-                if (Plugin_information->Plugin.cbm_plugin_uninit) {
-                    Plugin_information->Plugin.cbm_plugin_uninit();
+                if (Plugin_information->Plugin.opencbm_plugin_uninit) {
+                    Plugin_information->Plugin.opencbm_plugin_uninit();
                 }
                 break;
             }
@@ -270,8 +347,8 @@ uninitialize_plugin(void)
 {
     if (Plugin_information.Library != NULL)
     {
-        if (Plugin_information.Plugin.cbm_plugin_uninit) {
-            Plugin_information.Plugin.cbm_plugin_uninit();
+        if (Plugin_information.Plugin.opencbm_plugin_uninit) {
+            Plugin_information.Plugin.opencbm_plugin_uninit();
         }
 
         plugin_unload(Plugin_information.Library);
@@ -420,7 +497,7 @@ cbm_get_driver_name_ex(char * Adapter)
     error = initialize_plugin(adapter_stripped);
 
     if (error == 0) {
-        ret = Plugin_information.Plugin.cbm_plugin_get_driver_name(portNumber);
+        ret = Plugin_information.Plugin.opencbm_plugin_get_driver_name(portNumber);
     }
     else {
         ret = "NO PLUGIN DRIVER!";
@@ -510,8 +587,9 @@ cbm_driver_open_ex(CBM_FILE *HandleDevice, char * Adapter)
 
     cbmlibmisc_strfree(adapter_stripped);
 
-    if (error == 0)
-        error = Plugin_information.Plugin.cbm_plugin_driver_open(HandleDevice, portNumber);
+    if (error == 0) {
+        error = Plugin_information.Plugin.opencbm_plugin_driver_open(HandleDevice, portNumber);
+    }
 
     FUNC_LEAVE_INT(error);
 }
@@ -574,7 +652,7 @@ cbm_driver_close(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    Plugin_information.Plugin.cbm_plugin_driver_close(HandleDevice);
+    Plugin_information.Plugin.opencbm_plugin_driver_close(HandleDevice);
 
     uninitialize_plugin();
 
@@ -610,8 +688,8 @@ cbm_lock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_lock)
-        Plugin_information.Plugin.cbm_plugin_lock(HandleDevice);
+    if (Plugin_information.Plugin.opencbm_plugin_lock)
+        Plugin_information.Plugin.opencbm_plugin_lock(HandleDevice);
 
     FUNC_LEAVE();
 }
@@ -638,8 +716,8 @@ cbm_unlock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_unlock)
-        Plugin_information.Plugin.cbm_plugin_unlock(HandleDevice);
+    if (Plugin_information.Plugin.opencbm_plugin_unlock)
+        Plugin_information.Plugin.opencbm_plugin_unlock(HandleDevice);
 
     FUNC_LEAVE();
 }
@@ -680,7 +758,7 @@ cbm_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
     DBG_MEMDUMP("cbm_raw_write", Buffer, Count);
 #endif
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_raw_write(HandleDevice,Buffer, Count));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_raw_write(HandleDevice,Buffer, Count));
 }
 
 
@@ -714,7 +792,7 @@ cbm_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 
     FUNC_ENTER();
 
-    bytesRead = Plugin_information.Plugin.cbm_plugin_raw_read(HandleDevice, Buffer, Count);
+    bytesRead = Plugin_information.Plugin.opencbm_plugin_raw_read(HandleDevice, Buffer, Count);
 
 #ifdef DBG_DUMP_RAW_READ
     DBG_MEMDUMP("cbm_raw_read", Buffer, bytesRead);
@@ -751,7 +829,7 @@ cbm_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddr
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_listen(HandleDevice, DeviceAddress, SecondaryAddress));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_listen(HandleDevice, DeviceAddress, SecondaryAddress));
 }
 
 /*! \brief Send a TALK on the IEC serial bus
@@ -782,7 +860,7 @@ cbm_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_talk(HandleDevice, DeviceAddress, SecondaryAddress));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_talk(HandleDevice, DeviceAddress, SecondaryAddress));
 }
 
 /*! \brief Open a file on the IEC serial bus
@@ -821,7 +899,7 @@ cbm_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
 
     FUNC_ENTER();
 
-    returnValue = Plugin_information.Plugin.cbm_plugin_open(HandleDevice, DeviceAddress, SecondaryAddress);
+    returnValue = Plugin_information.Plugin.opencbm_plugin_open(HandleDevice, DeviceAddress, SecondaryAddress);
 
     if (returnValue == 0)
     {
@@ -878,7 +956,7 @@ cbm_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddre
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_close(HandleDevice, DeviceAddress, SecondaryAddress));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_close(HandleDevice, DeviceAddress, SecondaryAddress));
 }
 
 /*! \brief Send an UNLISTEN on the IEC serial bus
@@ -906,7 +984,7 @@ cbm_unlisten(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_unlisten(HandleDevice));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_unlisten(HandleDevice));
 }
 
 /*! \brief Send an UNTALK on the IEC serial bus
@@ -934,7 +1012,7 @@ cbm_untalk(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_untalk(HandleDevice));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_untalk(HandleDevice));
 }
 
 
@@ -963,7 +1041,7 @@ cbm_get_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_get_eoi(HandleDevice));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_get_eoi(HandleDevice));
 }
 
 /*! \brief Reset the EOI flag
@@ -986,7 +1064,7 @@ cbm_clear_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_clear_eoi(HandleDevice));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_clear_eoi(HandleDevice));
 }
 
 /*! \brief RESET all devices
@@ -1015,7 +1093,7 @@ cbm_reset(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_reset(HandleDevice));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_reset(HandleDevice));
 }
 
 
@@ -1052,8 +1130,8 @@ cbm_pp_read(CBM_FILE HandleDevice)
 
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_pp_read)
-        ret = Plugin_information.Plugin.cbm_plugin_pp_read(HandleDevice);
+    if (Plugin_information.Plugin.opencbm_plugin_pp_read)
+        ret = Plugin_information.Plugin.opencbm_plugin_pp_read(HandleDevice);
 
     FUNC_LEAVE_UCHAR(ret);
 }
@@ -1088,8 +1166,8 @@ cbm_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 {
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_pp_write)
-        Plugin_information.Plugin.cbm_plugin_pp_write(HandleDevice, Byte);
+    if (Plugin_information.Plugin.opencbm_plugin_pp_write)
+        Plugin_information.Plugin.opencbm_plugin_pp_write(HandleDevice, Byte);
 
     FUNC_LEAVE();
 }
@@ -1120,7 +1198,7 @@ cbm_iec_poll(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_iec_poll(HandleDevice));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_iec_poll(HandleDevice));
 }
 
 
@@ -1147,10 +1225,10 @@ cbm_iec_set(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_iec_set)
-        Plugin_information.Plugin.cbm_plugin_iec_set(HandleDevice, Line);
+    if (Plugin_information.Plugin.opencbm_plugin_iec_set)
+        Plugin_information.Plugin.opencbm_plugin_iec_set(HandleDevice, Line);
     else
-        Plugin_information.Plugin.cbm_plugin_iec_setrelease(HandleDevice, Line, 0);
+        Plugin_information.Plugin.opencbm_plugin_iec_setrelease(HandleDevice, Line, 0);
 
     FUNC_LEAVE();
 }
@@ -1178,10 +1256,10 @@ cbm_iec_release(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_iec_release)
-        Plugin_information.Plugin.cbm_plugin_iec_release(HandleDevice, Line);
+    if (Plugin_information.Plugin.opencbm_plugin_iec_release)
+        Plugin_information.Plugin.opencbm_plugin_iec_release(HandleDevice, Line);
     else
-        Plugin_information.Plugin.cbm_plugin_iec_setrelease(HandleDevice, 0, Line);
+        Plugin_information.Plugin.opencbm_plugin_iec_setrelease(HandleDevice, 0, Line);
 
     FUNC_LEAVE();
 }
@@ -1218,7 +1296,7 @@ cbm_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     FUNC_ENTER();
 
-    Plugin_information.Plugin.cbm_plugin_iec_setrelease(HandleDevice, Set, Release);
+    Plugin_information.Plugin.opencbm_plugin_iec_setrelease(HandleDevice, Set, Release);
 
     FUNC_LEAVE();
 }
@@ -1254,7 +1332,7 @@ cbm_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT(Plugin_information.Plugin.cbm_plugin_iec_wait(HandleDevice, Line, State));
+    FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_iec_wait(HandleDevice, Line, State));
 }
 
 /*! \brief Get the (logical) state of a line on the IEC serial bus
@@ -1283,7 +1361,7 @@ cbm_iec_get(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
 
-    FUNC_LEAVE_INT((Plugin_information.Plugin.cbm_plugin_iec_poll(HandleDevice)&Line) != 0 ? 1 : 0);
+    FUNC_LEAVE_INT((Plugin_information.Plugin.opencbm_plugin_iec_poll(HandleDevice)&Line) != 0 ? 1 : 0);
 }
 
 
@@ -1443,8 +1521,8 @@ cbm_parallel_burst_read(CBM_FILE HandleDevice)
 
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_read)
-        ret = Plugin_information.Plugin.cbm_plugin_parallel_burst_read(HandleDevice);
+    if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_read)
+        ret = Plugin_information.Plugin.opencbm_plugin_parallel_burst_read(HandleDevice);
 
     FUNC_LEAVE_UCHAR(ret);
 }
@@ -1471,8 +1549,8 @@ cbm_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_write)
-        Plugin_information.Plugin.cbm_plugin_parallel_burst_write(HandleDevice, Value);
+    if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_write)
+        Plugin_information.Plugin.opencbm_plugin_parallel_burst_write(HandleDevice, Value);
 
     FUNC_LEAVE();
 }
@@ -1486,13 +1564,13 @@ cbm_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
 
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_read_n) {
-        rv = Plugin_information.Plugin.cbm_plugin_parallel_burst_read_n(
+    if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_n) {
+        rv = Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_n(
             HandleDevice, Buffer, Length);
     } else {
         for (i = 0; i < Length; i++) {
             Buffer[i] = Plugin_information.Plugin
-                .cbm_plugin_parallel_burst_read(HandleDevice);
+                .opencbm_plugin_parallel_burst_read(HandleDevice);
         }
         rv = Length;
     }
@@ -1509,12 +1587,12 @@ cbm_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
 
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_write_n) {
-        rv = Plugin_information.Plugin.cbm_plugin_parallel_burst_write_n(
+    if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_write_n) {
+        rv = Plugin_information.Plugin.opencbm_plugin_parallel_burst_write_n(
             HandleDevice, Buffer, Length);
     } else {
         for (i = 0; i < Length; i++) {
-            Plugin_information.Plugin.cbm_plugin_parallel_burst_write(
+            Plugin_information.Plugin.opencbm_plugin_parallel_burst_write(
                 HandleDevice, Buffer[i]);
         }
         rv = Length;
@@ -1554,8 +1632,8 @@ cbm_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned 
 
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track)
-        ret = Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track(HandleDevice, Buffer, Length);
+    if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_track)
+        ret = Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_track(HandleDevice, Buffer, Length);
 
     FUNC_LEAVE_INT(ret);
 }
@@ -1588,8 +1666,8 @@ cbm_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsig
 
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track)
-        ret = Plugin_information.Plugin.cbm_plugin_parallel_burst_read_track_var(HandleDevice, Buffer, Length);
+    if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_track)
+        ret = Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_track_var(HandleDevice, Buffer, Length);
 
     FUNC_LEAVE_INT(ret);
 }
@@ -1625,8 +1703,8 @@ cbm_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned
 
     FUNC_ENTER();
 
-    if (Plugin_information.Plugin.cbm_plugin_parallel_burst_write_track)
-        ret = Plugin_information.Plugin.cbm_plugin_parallel_burst_write_track(HandleDevice, Buffer, Length);
+    if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_write_track)
+        ret = Plugin_information.Plugin.opencbm_plugin_parallel_burst_write_track(HandleDevice, Buffer, Length);
 
     FUNC_LEAVE_INT(ret);
 }
@@ -1690,8 +1768,8 @@ cbm_iec_dbg_read(CBM_FILE HandleDevice)
 
     FUNC_ENTER();
 
-    if ( Plugin_information.Plugin.cbm_plugin_iec_dbg_read ) {
-        returnValue = Plugin_information.Plugin.cbm_plugin_iec_dbg_read(HandleDevice);
+    if ( Plugin_information.Plugin.opencbm_plugin_iec_dbg_read ) {
+        returnValue = Plugin_information.Plugin.opencbm_plugin_iec_dbg_read(HandleDevice);
     }
 
     FUNC_LEAVE_INT(returnValue);
@@ -1733,8 +1811,8 @@ cbm_iec_dbg_write(CBM_FILE HandleDevice, unsigned char Value)
 
     FUNC_ENTER();
 
-    if ( Plugin_information.Plugin.cbm_plugin_iec_dbg_write ) {
-        returnValue = Plugin_information.Plugin.cbm_plugin_iec_dbg_write(HandleDevice, Value);
+    if ( Plugin_information.Plugin.opencbm_plugin_iec_dbg_write ) {
+        returnValue = Plugin_information.Plugin.opencbm_plugin_iec_dbg_write(HandleDevice, Value);
     }
 
     FUNC_LEAVE_INT(returnValue);

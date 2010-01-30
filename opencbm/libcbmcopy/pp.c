@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.12 2008-06-16 19:24:27 strik Exp $";
+    "@(#) $Id: pp.c,v 1.13 2010-01-30 21:33:18 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -22,9 +22,9 @@ static char *rcsid =
 
 #include "opencbm-plugin.h"
 
-static cbm_plugin_pp_cc_read_n_t * cbm_plugin_pp_cc_read_n = NULL;
+static opencbm_plugin_pp_cc_read_n_t * opencbm_plugin_pp_cc_read_n = NULL;
 
-static cbm_plugin_pp_cc_write_n_t * cbm_plugin_pp_cc_write_n = NULL;
+static opencbm_plugin_pp_cc_write_n_t * opencbm_plugin_pp_cc_write_n = NULL;
 
 static const unsigned char ppr1541[] = {
 #include "ppr-1541.inc"
@@ -58,9 +58,9 @@ static struct drive_prog
 
 static int write_byte(CBM_FILE fd, unsigned char c)
 {
-    if (cbm_plugin_pp_cc_write_n)
+    if (opencbm_plugin_pp_cc_write_n)
     {
-        cbm_plugin_pp_cc_write_n(fd, &c, 1);
+        opencbm_plugin_pp_cc_write_n(fd, &c, 1);
         return 0;
     }
                                                                         SETSTATEDEBUG((void)0);
@@ -91,9 +91,9 @@ static unsigned char read_byte(CBM_FILE fd)
 {
     unsigned char c;
 
-    if (cbm_plugin_pp_cc_read_n)
+    if (opencbm_plugin_pp_cc_read_n)
     {
-        cbm_plugin_pp_cc_read_n(fd, &c, 1);
+        opencbm_plugin_pp_cc_read_n(fd, &c, 1);
         return c;
     }
                                                                         SETSTATEDEBUG((void)0);
@@ -153,9 +153,9 @@ static int upload_turbo(CBM_FILE fd, unsigned char drive,
     const struct drive_prog *p;
     int dt;
 
-    cbm_plugin_pp_cc_read_n = cbm_get_plugin_function_address("cbmarch_pp_cc_read_n");
+    opencbm_plugin_pp_cc_read_n = cbm_get_plugin_function_address("opencbm_plugin_pp_cc_read_n");
 
-    cbm_plugin_pp_cc_write_n = cbm_get_plugin_function_address("cbmarch_pp_cc_write_n");
+    opencbm_plugin_pp_cc_write_n = cbm_get_plugin_function_address("opencbm_plugin_pp_cc_write_n");
     
     switch(drive_type)
     {
@@ -194,9 +194,9 @@ static void exit_turbo(CBM_FILE fd, int write)
 //    cbm_iec_wait(fd, IEC_DATA, 0);
                                                                         SETSTATEDEBUG((void)0);
 
-    cbm_plugin_pp_cc_read_n = NULL;
+    opencbm_plugin_pp_cc_read_n = NULL;
 
-    cbm_plugin_pp_cc_write_n = NULL;
+    opencbm_plugin_pp_cc_write_n = NULL;
 }
 
 DECLARE_TRANSFER_FUNCS(pp_transfer);

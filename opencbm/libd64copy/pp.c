@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: pp.c,v 1.19 2008-06-16 19:24:28 strik Exp $";
+    "@(#) $Id: pp.c,v 1.20 2010-01-30 21:33:18 strik Exp $";
 #endif
 
 #include "opencbm.h"
@@ -22,9 +22,9 @@ static char *rcsid =
 
 #include "opencbm-plugin.h"
 
-static cbm_plugin_pp_dc_read_n_t * cbm_plugin_pp_dc_read_n = NULL;
+static opencbm_plugin_pp_dc_read_n_t * opencbm_plugin_pp_dc_read_n = NULL;
 
-static cbm_plugin_pp_dc_write_n_t * cbm_plugin_pp_dc_write_n = NULL;
+static opencbm_plugin_pp_dc_write_n_t * opencbm_plugin_pp_dc_write_n = NULL;
 
 enum pp_direction_e
 {
@@ -87,9 +87,9 @@ static void write_n(const unsigned char *data, int size)
 {
     int i;
 
-    if (cbm_plugin_pp_dc_write_n)
+    if (opencbm_plugin_pp_dc_write_n)
     {
-        cbm_plugin_pp_dc_write_n(fd_cbm, data, size);
+        opencbm_plugin_pp_dc_write_n(fd_cbm, data, size);
         return;
     }
 
@@ -132,9 +132,9 @@ static void read_n(unsigned char *data, int size)
 {
     int i;
 
-    if (cbm_plugin_pp_dc_read_n)
+    if (opencbm_plugin_pp_dc_read_n)
     {
-        cbm_plugin_pp_dc_read_n(fd_cbm, data, size);
+        opencbm_plugin_pp_dc_read_n(fd_cbm, data, size);
         return;
     }
 
@@ -207,9 +207,9 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
     fd_cbm    = fd;
     two_sided = settings->two_sided;
 
-    cbm_plugin_pp_dc_read_n = cbm_get_plugin_function_address("cbmarch_pp_dc_read_n");
+    opencbm_plugin_pp_dc_read_n = cbm_get_plugin_function_address("opencbm_plugin_pp_dc_read_n");
 
-    cbm_plugin_pp_dc_write_n = cbm_get_plugin_function_address("cbmarch_pp_dc_write_n");
+    opencbm_plugin_pp_dc_write_n = cbm_get_plugin_function_address("opencbm_plugin_pp_dc_write_n");
 
     if(settings->drive_type != cbm_dt_cbm1541)
     {
@@ -253,9 +253,9 @@ static void close_disk(void)
     cbm_pp_read(fd_cbm);
                                                                         SETSTATEDEBUG((void)0);
 
-    cbm_plugin_pp_dc_read_n = NULL;
+    opencbm_plugin_pp_dc_read_n = NULL;
 
-    cbm_plugin_pp_dc_write_n = NULL;
+    opencbm_plugin_pp_dc_write_n = NULL;
 }
 
 static int send_track_map(unsigned char tr, const char *trackmap, unsigned char count)

@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/parburst.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis, Arnd \n
-** \version $Id: parburst.c,v 1.3 2009-11-15 20:55:41 strik Exp $ \n
+** \version $Id: parburst.c,v 1.4 2010-01-30 21:33:15 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **
@@ -61,7 +61,7 @@
 */
 
 __u_char CBMAPIDECL
-cbmarch_parallel_burst_read(CBM_FILE HandleDevice)
+opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
 {
     CBMT_PARBURST_PREAD_OUT result;
 
@@ -88,7 +88,7 @@ cbmarch_parallel_burst_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
+opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     CBMT_PARBURST_PWRITE_IN parameter;
 
@@ -123,7 +123,7 @@ cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 */
 
 int CBMAPIDECL
-cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     int retval = 0;
 
@@ -163,7 +163,7 @@ cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsig
 */
 
 int CBMAPIDECL
-cbmarch_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     int retval = 0;
 
@@ -203,7 +203,7 @@ cbmarch_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, u
 */
 
 int CBMAPIDECL
-cbmarch_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     int retval = 0;
 

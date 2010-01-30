@@ -5,14 +5,14 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005,2007,2008 Spiro Trikaliotis
+ *  Copyright 2001-2005,2007-2009 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/iec.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: iec.c,v 1.6 2010-01-30 20:48:48 strik Exp $ \n
+** \version $Id: iec.c,v 1.7 2010-01-30 21:33:15 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -107,7 +107,7 @@ fastschedule_stop(void)
 static BOOL bPluginIsInitialized = FALSE;
 
 int CBMAPIDECL
-cbm_plugin_init(void)
+opencbm_plugin_(void)
 {
     BOOLEAN Status = TRUE;
 
@@ -117,7 +117,7 @@ cbm_plugin_init(void)
 
     // Read the debugging flags from the registry
 
-    cbm_get_debugging_flags();
+    cbm_get_debugging_flags("xa1541");
 
 #endif
 
@@ -165,7 +165,7 @@ cbm_plugin_init(void)
 }
 
 void CBMAPIDECL
-cbm_plugin_uninit(void)
+opencbm_plugin_uninit(void)
 {
     BOOLEAN Status = TRUE;
 
@@ -259,7 +259,7 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 */
 
 void CBMAPIDECL
-cbmarch_lock(CBM_FILE HandleDevice)
+opencbm_plugin_lock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
@@ -286,7 +286,7 @@ cbmarch_lock(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbmarch_unlock(CBM_FILE HandleDevice)
+opencbm_plugin_unlock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
@@ -320,7 +320,7 @@ cbmarch_unlock(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
+opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
     DWORD BytesWritten;
     OVERLAPPED overlapped;
@@ -367,7 +367,7 @@ cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 */
 
 int CBMAPIDECL
-cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
+opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
     DWORD bytesToRead = Count;
     DWORD bytesRead;
@@ -418,7 +418,7 @@ cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 */
 
 int CBMAPIDECL
-cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     CBMT_LISTEN_IN parameter;
     int returnValue;
@@ -458,7 +458,7 @@ cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Secondary
 */
 
 int CBMAPIDECL
-cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     CBMT_TALK_IN parameter;
     int returnValue;
@@ -496,7 +496,7 @@ cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAd
 */
 
 int CBMAPIDECL
-cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     CBMT_OPEN_IN parameter;
     int returnValue;
@@ -540,7 +540,7 @@ cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAd
 */
 
 int CBMAPIDECL
-cbmarch_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     CBMT_CLOSE_IN parameter;
     int returnValue;
@@ -578,7 +578,7 @@ cbmarch_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryA
 */
 
 int CBMAPIDECL
-cbmarch_unlisten(CBM_FILE HandleDevice)
+opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 {
     int returnValue;
 
@@ -610,7 +610,7 @@ cbmarch_unlisten(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbmarch_untalk(CBM_FILE HandleDevice)
+opencbm_plugin_untalk(CBM_FILE HandleDevice)
 {
     int returnValue;
 
@@ -643,7 +643,7 @@ cbmarch_untalk(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbmarch_get_eoi(CBM_FILE HandleDevice)
+opencbm_plugin_get_eoi(CBM_FILE HandleDevice)
 {
     CBMT_GET_EOI_OUT result;
 
@@ -670,7 +670,7 @@ cbmarch_get_eoi(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbmarch_clear_eoi(CBM_FILE HandleDevice)
+opencbm_plugin_clear_eoi(CBM_FILE HandleDevice)
 {
     int returnValue;
 
@@ -703,7 +703,7 @@ cbmarch_clear_eoi(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbmarch_reset(CBM_FILE HandleDevice)
+opencbm_plugin_reset(CBM_FILE HandleDevice)
 {
     USHORT returnValue;
 
@@ -745,7 +745,7 @@ cbmarch_reset(CBM_FILE HandleDevice)
 */
 
 __u_char CBMAPIDECL
-cbmarch_pp_read(CBM_FILE HandleDevice)
+opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 {
     CBMT_PP_READ_OUT result;
 
@@ -780,7 +780,7 @@ cbmarch_pp_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte)
+opencbm_plugin_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 {
     CBMT_PP_WRITE_IN parameter;
 
@@ -815,7 +815,7 @@ cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 */
 
 int CBMAPIDECL
-cbmarch_iec_poll(CBM_FILE HandleDevice)
+opencbm_plugin_iec_poll(CBM_FILE HandleDevice)
 {
     CBMT_IEC_POLL_OUT result;
 
@@ -846,7 +846,7 @@ cbmarch_iec_poll(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
+opencbm_plugin_iec_set(CBM_FILE HandleDevice, int Line)
 {
     CBMT_IEC_SET_IN parameter;
 
@@ -878,7 +878,7 @@ cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
 */
 
 void CBMAPIDECL
-cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
+opencbm_plugin_iec_release(CBM_FILE HandleDevice, int Line)
 {
     CBMT_IEC_RELEASE_IN parameter;
 
@@ -919,7 +919,7 @@ cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
 */
 
 void CBMAPIDECL
-cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
+opencbm_plugin_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     CBMT_IEC_SETRELEASE_IN parameter;
 
@@ -960,7 +960,7 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 */
 
 int CBMAPIDECL
-cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
+opencbm_plugin_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
     CBMT_IEC_WAIT_IN parameter;
     CBMT_IEC_WAIT_OUT result;
@@ -1023,7 +1023,7 @@ cbm_get_debugging_buffer(CBM_FILE HandleDevice, char *buffer, size_t len)
    off are defined in PARALLEL_STATUS_PORT_MASK_VALUES.
 */
 int CBMAPIDECL
-cbmarch_iec_dbg_read(CBM_FILE HandleDevice)
+opencbm_plugin_iec_dbg_read(CBM_FILE HandleDevice)
 {
     CBMT_IEC_DBG_READ result;
     int returnValue = -1;
@@ -1067,7 +1067,7 @@ cbmarch_iec_dbg_read(CBM_FILE HandleDevice)
    off are defined in PARALLEL_CONTROL_PORT_MASK_VALUES.
 */
 int CBMAPIDECL
-cbmarch_iec_dbg_write(CBM_FILE HandleDevice, unsigned char Value)
+opencbm_plugin_iec_dbg_write(CBM_FILE HandleDevice, unsigned char Value)
 {
     CBMT_IEC_DBG_WRITE parameter;
     int returnValue = -1;
