@@ -1,4 +1,4 @@
-rem $Id: ddkbuild_local.bat.sample,v 1.10 2009-12-09 19:52:00 strik Exp $
+rem $Id: ddkbuild_local.bat.sample,v 1.11 2010-01-30 21:45:36 strik Exp $
 rem
 rem THIS IS A SAMPLE FILE FOR DDKBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
@@ -96,4 +96,4 @@ rem if not defined CA65_FLAGS set CA65_FLAGS=%CA65_FLAGS% --listing
 
 rem Adjust for XU1541/XUM1541 compilation
 rem set XU1541DIR=\xu1541\include
-rem set XUM1541DIR=xum1541\include
+rem set XUM1541DIR=xum1541
