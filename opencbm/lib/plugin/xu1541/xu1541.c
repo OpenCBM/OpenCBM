@@ -12,20 +12,21 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.7 2010-01-30 21:33:15 strik Exp $ \n
+** \version $Id: xu1541.c,v 1.8 2010-02-20 20:50:26 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **
 ****************************************************************/
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <stdarg.h>
 
 #include "opencbm.h"
 
 #include "arch.h"
+#include "dynlibusb.h"
 #include "getpluginaddress.h"
 #include "xu1541.h"
 
@@ -34,126 +35,6 @@ static usb_dev_handle *xu1541_handle = NULL; /*!< \internal \brief handle to the
 
 /*! \brief timeout value, used mainly after errors \todo What is the exact purpose of this? */
 #define TIMEOUT_DELAY  25000   // 25ms
-
-#ifndef LIBUSB_APIDECL
-# define LIBUSB_APIDECL
-#endif
-
-typedef
-struct usb_dll_s {
-    SHARED_OBJECT_HANDLE shared_object_handle;
-
-    /*
-     * these definitions are taken directly from libusb.h. 
-     * commented out entries are not currently unused.
-     */
-
-    usb_dev_handle * (LIBUSB_APIDECL *open)(struct usb_device *dev);
-    int (LIBUSB_APIDECL *close)(usb_dev_handle *dev);
-//    int (LIBUSB_APIDECL *get_string)(usb_dev_handle *dev, int index, int langid, char *buf, size_t buflen);
-//    int (LIBUSB_APIDECL *get_string_simple)(usb_dev_handle *dev, int index, char *buf, size_t buflen);
-
-//    int (LIBUSB_APIDECL *get_descriptor_by_endpoint)(usb_dev_handle *udev, int ep, unsigned char type, unsigned char index, void *buf, int size);
-//    int (LIBUSB_APIDECL *get_descriptor)(usb_dev_handle *udev, unsigned char type, unsigned char index, void *buf, int size);
-
-//    int (LIBUSB_APIDECL *bulk_write)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
-//    int (LIBUSB_APIDECL *bulk_read)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
-//    int (LIBUSB_APIDECL *interrupt_write)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
-//    int (LIBUSB_APIDECL *interrupt_read)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
-    int (LIBUSB_APIDECL *control_msg)(usb_dev_handle *dev, int requesttype, int request, int value, int index, char *bytes, int size, int timeout);
-    int (LIBUSB_APIDECL *set_configuration)(usb_dev_handle *dev, int configuration);
-    int (LIBUSB_APIDECL *claim_interface)(usb_dev_handle *dev, int interface);
-    int (LIBUSB_APIDECL *release_interface)(usb_dev_handle *dev, int interface);
-//    int (LIBUSB_APIDECL *set_altinterface)(usb_dev_handle *dev, int alternate);
-//    int (LIBUSB_APIDECL *resetep)(usb_dev_handle *dev, unsigned int ep);
-//    int (LIBUSB_APIDECL *clear_halt)(usb_dev_handle *dev, unsigned int ep);
-//    int (LIBUSB_APIDECL *reset)(usb_dev_handle *dev);
-
-    char * (LIBUSB_APIDECL *strerror)(void);
-
-    void (LIBUSB_APIDECL *init)(void);
-//    void (LIBUSB_APIDECL *set_debug)(int level);
-    int (LIBUSB_APIDECL *find_busses)(void);
-    int (LIBUSB_APIDECL *find_devices)(void);
-//    struct usb_device * (LIBUSB_APIDECL *device)(usb_dev_handle *dev);
-    struct usb_bus * (LIBUSB_APIDECL *get_busses)(void);
-
-} usb_dll_t;
-
-#ifdef WIN32
-
-static usb_dll_t usb = { NULL };
-
-int xu1541_dll_init(void) {
-    int error = 1;
-
-    do {
-        usb.shared_object_handle = plugin_load("libusb0.dll");
-        if ( ! usb.shared_object_handle ) {
-            break;
-        }
-
-#define READ(_x) \
-    usb._x = plugin_get_address(usb.shared_object_handle, "usb_" ## #_x); \
-    if (usb._x == NULL) { \
-        break; \
-    }
-
-        READ(open);
-        READ(close);
-//        READ(get_string);
-//        READ(get_string_simple);
-//        READ(get_descriptor_by_endpoint);
-//        READ(get_descriptor);
-//        READ(bulk_write);
-//        READ(bulk_read);
-//        READ(interrupt_write);
-//        READ(interrupt_read);
-        READ(control_msg);
-        READ(set_configuration);
-        READ(claim_interface);
-        READ(release_interface);
-//        READ(set_altinterface);
-//        READ(resetep);
-//        READ(clear_halt);
-//        READ(reset);
-        READ(strerror);
-        READ(init);
-//        READ(set_debug);
-        READ(find_busses);
-        READ(find_devices);
-//        READ(device);
-        READ(get_busses);
-
-        error = 0;
-    } while (0);
-
-    return error;
-}
-
-void xu1541_dll_uninit(void) {
-
-    do {
-        if (usb.shared_object_handle == NULL) {
-            break;
-        }
-
-        plugin_unload(usb.shared_object_handle);
-
-        memset(&usb, 0, sizeof usb);
-
-    } while (0);
-
-}
-
-#else
-
-static usb_dll_t usb = { 
-    usb_open, usb_close, usb_control_msg, usb_set_configuration, usb_claim_interface, usb_release_interface,
-    usb_strerror, usb_init, usb_find_busses, usb_find_devices, usb_get_busses
-};
-
-#endif /* #ifdef WIN32 */
 
 /*! \internal \brief Output debugging information for the xu1541
 

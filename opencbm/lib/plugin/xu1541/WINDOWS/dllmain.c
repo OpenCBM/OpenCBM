@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: dllmain.c,v 1.6 2010-01-30 21:33:15 strik Exp $ \n
+** \version $Id: dllmain.c,v 1.7 2010-02-20 20:50:32 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -19,6 +19,8 @@
 
 #include <windows.h>
 #include <windowsx.h>
+
+#include "dynlibusb.h"
 
 
 /*! Mark: We are in user-space (for debug.h) */
@@ -79,11 +81,11 @@ opencbm_plugin_init(void)
 
 #endif
 
-    return xu1541_dll_init();
+    return dynlibusb_init();
 }
 
 void CBMAPIDECL
 opencbm_plugin_uninit(void)
 {
-    xu1541_dll_uninit();
+    dynlibusb_uninit();
 }

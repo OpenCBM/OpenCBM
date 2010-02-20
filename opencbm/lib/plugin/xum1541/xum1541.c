@@ -1,6 +1,7 @@
 /*
  * xum1541 driver for bulk and control messages
  * Copyright 2009 Nate Lawson <nate@root.org>
+ * Copyright 2010 Spiro Trikaliotis
  *
  * Incorporates some code from the xu1541 driver by:
  * Copyright 2007 Till Harbaum <till@harbaum.org>
@@ -14,20 +15,22 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.5 2010-01-05 07:42:56 natelawson Exp $ \n
+** \version $Id: xum1541.c,v 1.6 2010-02-20 20:50:36 strik Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <stdarg.h>
 
 #include "opencbm.h"
-#include "xum1541.h"
+
 #include "arch.h"
+#include "dynlibusb.h"
+#include "getpluginaddress.h"
+#include "xum1541.h"
 
 static int debug_level = -10000; /*!< \internal \brief the debugging level for debugging output */
 static usb_dev_handle *xu1541_handle = NULL; /*!< \internal \brief handle to the xu1541 device */
@@ -85,7 +88,7 @@ usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
     char buffer[256];
     int rval, i;
 
-    if ((rval = usb_control_msg(dev, USB_ENDPOINT_IN,
+    if ((rval = usb.control_msg(dev, USB_ENDPOINT_IN,
                                 USB_REQ_GET_DESCRIPTOR,
                                 (USB_DT_STRING << 8) + index,
                                 langid, buffer, sizeof(buffer), 1000)) < 0)
@@ -122,7 +125,7 @@ xum1541_cleanup(char *msg, ...)
         va_end(args);
     }
     if (xu1541_handle != NULL)
-        usb_close(xu1541_handle);
+        usb.close(xu1541_handle);
     xu1541_handle = NULL;
 }
 
@@ -181,15 +184,15 @@ xu1541_init(void)
 
     xu1541_dbg(0, "scanning usb ...");
 
-    usb_init();
-    usb_find_busses();
-    usb_find_devices();
+    usb.init();
+    usb.find_busses();
+    usb.find_devices();
 
-    /* usb_find_devices sets errno if some devices don't reply 100% correct. */
+    /* usb.find_devices sets errno if some devices don't reply 100% correct. */
     /* make lib ignore this as this has nothing to do with our device */
     errno = 0;
 
-    for (bus = usb_get_busses(); !xu1541_handle && bus; bus = bus->next) {
+    for (bus = usb.get_busses(); !xu1541_handle && bus; bus = bus->next) {
         xu1541_dbg(1, "scanning bus %s", bus->dirname);
         for (dev = bus->devices; !xu1541_handle && dev; dev = dev->next) {
             xu1541_dbg(1, "device %04x:%04x at %s",
@@ -203,9 +206,9 @@ xu1541_init(void)
 
             xu1541_dbg(0, "found xu/xum1541 version %04x on bus %s, device %s",
                 dev->descriptor.bcdDevice, bus->dirname, dev->filename);
-            if ((xu1541_handle = usb_open(dev)) == NULL) {
+            if ((xu1541_handle = usb.open(dev)) == NULL) {
                 fprintf(stderr, "error: Cannot open USB device: %s\n",
-                    usb_strerror());
+                    usb.strerror());
                 continue;
             }
 
@@ -215,7 +218,7 @@ xu1541_init(void)
                 0x0409, string, sizeof(string) - 1);
             if (len < 0) {
                 xum1541_cleanup("error: cannot query product name: %s\n",
-                    usb_strerror());
+                    usb.strerror());
                 continue;
             }
             string[len] = '\0';
@@ -235,8 +238,8 @@ done:
     }
 
     // Select first and only device configuration.
-    if (usb_set_configuration(xu1541_handle, 1) != 0) {
-        xum1541_cleanup("USB error: %s\n", usb_strerror());
+    if (usb.set_configuration(xu1541_handle, 1) != 0) {
+        xum1541_cleanup("USB error: %s\n", usb.strerror());
         return -1;
     }
 
@@ -245,19 +248,19 @@ done:
      * After this point, do cleanup using xu1541_close() instead of
      * xu1541_cleanup().
      */
-    if (usb_claim_interface(xu1541_handle, 0) != 0) {
-        xum1541_cleanup("USB error: %s\n", usb_strerror());
+    if (usb.claim_interface(xu1541_handle, 0) != 0) {
+        xum1541_cleanup("USB error: %s\n", usb.strerror());
         return -1;
     }
 
     // Check the basic device info message for major/minor version
     memset(devInfo, 0, sizeof(devInfo));
-    len = usb_control_msg(xu1541_handle, USB_TYPE_CLASS | USB_ENDPOINT_IN,
+    len = usb.control_msg(xu1541_handle, USB_TYPE_CLASS | USB_ENDPOINT_IN,
         XUM1541_INIT, 0, 0, (char*)devInfo, sizeof(devInfo),
         USB_RESET_TIMEOUT);
     if (len < 2) {
         fprintf(stderr, "USB request for XUM1541 info failed: %s\n",
-            usb_strerror());
+            usb.strerror());
         xu1541_close();
         return -1;
     }
@@ -285,18 +288,18 @@ xu1541_close(void)
 
     xu1541_dbg(0, "Closing USB link");
 
-    ret = usb_control_msg(xu1541_handle, USB_TYPE_CLASS | USB_ENDPOINT_OUT,
+    ret = usb.control_msg(xu1541_handle, USB_TYPE_CLASS | USB_ENDPOINT_OUT,
         XUM1541_SHUTDOWN, 0, 0, NULL, 0, 1000);
     if (ret < 0) {
         fprintf(stderr,
             "USB request for XUM1541 close failed, continuing: %s\n",
-            usb_strerror());
+            usb.strerror());
     }
-    if (usb_release_interface(xu1541_handle, 0) != 0)
-        fprintf(stderr, "USB release intf error: %s\n", usb_strerror());
+    if (usb.release_interface(xu1541_handle, 0) != 0)
+        fprintf(stderr, "USB release intf error: %s\n", usb.strerror());
 
-    if (usb_close(xu1541_handle) != 0)
-        fprintf(stderr, "USB close error: %s\n", usb_strerror());
+    if (usb.close(xu1541_handle) != 0)
+        fprintf(stderr, "USB close error: %s\n", usb.strerror());
     xu1541_handle = NULL;
 }
 
@@ -336,14 +339,14 @@ xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
   {
       /* sync transfer, read result directly */
       /* USB_RESET_TIMEOUT msec timeout required for reset */
-      if((nBytes = usb_control_msg(xu1541_handle,
+      if((nBytes = usb.control_msg(xu1541_handle,
                    USB_TYPE_CLASS | USB_ENDPOINT_OUT,
                    cmd, (secaddr << 8) + addr, 0,
                    NULL, 0,
                    USB_RESET_TIMEOUT)) < 0)
       {
           fprintf(stderr, "USB error in xu1541_ioctl(control): %s\n",
-                  usb_strerror());
+                  usb.strerror());
           exit(-1);
       }
   }
@@ -352,12 +355,12 @@ xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
       int link_ok, err = 0;
       unsigned char rv[2];
 
-      if((nBytes = usb_bulk_write(xu1541_handle,
+      if((nBytes = usb.bulk_write(xu1541_handle,
                                   XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                   cmdBuf, sizeof(cmdBuf), 1000)) < 0)
       {
           fprintf(stderr, "USB error in xu1541_ioctl(async) cmd: %s\n",
-                  usb_strerror());
+                  usb.strerror());
           exit(-1);
           return -1;
       }
@@ -371,19 +374,19 @@ xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
           cmdBuf[1] = 0;
           cmdBuf[2] = sizeof(rv);
           cmdBuf[3] = 0;
-          if((nBytes = usb_bulk_write(xu1541_handle,
+          if((nBytes = usb.bulk_write(xu1541_handle,
                                   XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                   cmdBuf, sizeof(cmdBuf), 1000)) < 0)
           {
               fprintf(stderr, "USB error in xu1541_ioctl(async) result: %s\n",
-                      usb_strerror());
+                      usb.strerror());
               exit(-1);
           }
 
           link_ok = 0;
           while (!link_ok)
           {
-              if((nBytes = usb_bulk_read(xu1541_handle,
+              if((nBytes = usb.bulk_read(xu1541_handle,
                   XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
                   (char*)rv, sizeof(rv), LIBUSB_NO_TIMEOUT)) == sizeof(rv))
               {
@@ -418,14 +421,14 @@ xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
       {
         int retries = 5;
         do {
-            if((nBytes = usb_bulk_read(xu1541_handle,
+            if((nBytes = usb.bulk_read(xu1541_handle,
                                XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
                                ret, 1, LIBUSB_NO_TIMEOUT)) == 1)
             {
                 break;
             } else {
                 xu1541_dbg(3, "usb timeout in get retval: %s",
-                    usb_strerror());
+                    usb.strerror());
             }
         } while (retries-- != 0);
         if (retries == 0) {
@@ -483,11 +486,11 @@ xu1541_write(const __u_char *data, size_t len)
 
         /* the write itself moved the data into the buffer, the actual */
         /* iec write is triggered _after_ this USB write is done */
-        if((wr = usb_bulk_write(xu1541_handle,
+        if((wr = usb.bulk_write(xu1541_handle,
                                 XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                 cmdBuf, sizeof(cmdBuf), 1000)) < 0)
         {
-            fprintf(stderr, "USB error xu1541_write cmd: %s\n", usb_strerror());
+            fprintf(stderr, "USB error xu1541_write cmd: %s\n", usb.strerror());
             return -1;
         }
 
@@ -500,13 +503,13 @@ xu1541_write(const __u_char *data, size_t len)
             chunkSize = bytes2write - bytesWrittenChunk;
             chunkSize = (chunkSize > XUM_ENDPOINT_BULK_SIZE) ?
                 XUM_ENDPOINT_BULK_SIZE : chunkSize;
-            if((wr = usb_bulk_write(xu1541_handle,
+            if((wr = usb.bulk_write(xu1541_handle,
                                     XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                     (char *)data, chunkSize,
                                     1000)) < 0)
             {
                 fprintf(stderr, "USB error in xu1541_write data: %s\n",
-                    usb_strerror());
+                    usb.strerror());
                 if (retries-- == 0) {
                     fprintf(stderr, "retry count exceeded, exiting\n");
                     return -1;
@@ -529,18 +532,18 @@ xu1541_write(const __u_char *data, size_t len)
         cmdBuf[1] = 0;
         cmdBuf[2] = sizeof(rv);
         cmdBuf[3] = 0;
-        if ((wr = usb_bulk_write(xu1541_handle,
+        if ((wr = usb.bulk_write(xu1541_handle,
                                  XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                  cmdBuf, sizeof(cmdBuf), 1000)) < 0)
         {
             fprintf(stderr, "USB error in xu1541_write(async): %s\n",
-                  usb_strerror());
+                  usb.strerror());
             exit(-1);
         }
 
         link_ok = 0;
         while (!link_ok) {
-            if((wr = usb_bulk_read(xu1541_handle,
+            if((wr = usb.bulk_read(xu1541_handle,
                                XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
                                (char*)rv, sizeof(rv), LIBUSB_NO_TIMEOUT)) == sizeof(rv))
             {
@@ -612,12 +615,12 @@ xu1541_read(__u_char *data, size_t len)
 
         /* request async read, ignore errors as they happen due to */
         /* link being disabled */
-        if ((rd = usb_bulk_write(xu1541_handle,
+        if ((rd = usb.bulk_write(xu1541_handle,
                                  XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                  cmdBuf, sizeof(cmdBuf), 1000)) < 0)
         if (rd < 0) {
             fprintf(stderr, "USB error in xu1541_request_read(): %s\n",
-                    usb_strerror());
+                    usb.strerror());
             exit(-1);
         }
 
@@ -638,19 +641,19 @@ xu1541_read(__u_char *data, size_t len)
         cmdBuf[1] = 0;
         cmdBuf[2] = sizeof(rv);
         cmdBuf[3] = 0;
-        if((rd = usb_bulk_write(xu1541_handle,
+        if((rd = usb.bulk_write(xu1541_handle,
                                 XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                 cmdBuf, sizeof(cmdBuf), 1000)) < 0)
         {
             fprintf(stderr, "USB error in xu1541_read(async): %s\n",
-                  usb_strerror());
+                  usb.strerror());
             exit(-1);
         }
 
         // Loop to wait for the result
         link_ok = 0;
         while (!link_ok) {
-            if((rd = usb_bulk_read(xu1541_handle,
+            if((rd = usb.bulk_read(xu1541_handle,
                                XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
                                (char*)rv, sizeof(rv), LIBUSB_NO_TIMEOUT)) == sizeof(rv))
             {
@@ -685,12 +688,12 @@ xu1541_read(__u_char *data, size_t len)
         cmdBuf[1] = XUM1541_CBM;
         cmdBuf[2] = bytes2read & 0xff;
         cmdBuf[3] = (bytes2read >> 8) & 0xff;
-        if((rd = usb_bulk_write(xu1541_handle,
+        if((rd = usb.bulk_write(xu1541_handle,
                                 XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                 cmdBuf, sizeof(cmdBuf), 1000)) < 0)
         {
             fprintf(stderr, "USB error in xu1541_read data: %s\n",
-                    usb_strerror());
+                    usb.strerror());
             return -1;
         }
 
@@ -703,12 +706,12 @@ xu1541_read(__u_char *data, size_t len)
             chunkSize = bytes2read - bytesReadChunk;
             chunkSize = (chunkSize > XUM_ENDPOINT_BULK_SIZE) ?
                 XUM_ENDPOINT_BULK_SIZE : chunkSize;
-            if ((rd = usb_bulk_read(xu1541_handle,
+            if ((rd = usb.bulk_read(xu1541_handle,
                                     XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
                                     (char *)data, chunkSize, 1000)) < 0)
             {
                 fprintf(stderr, "USB error in xu1541_read(): %s\n",
-                    usb_strerror());
+                    usb.strerror());
                 if (retries-- == 0) {
                     fprintf(stderr, "retry count exceeded, exiting\n");
                     return -1;
@@ -770,12 +773,12 @@ xu1541_special_write(__u_char mode, const __u_char *data, size_t size)
     cmdBuf[1] = mode;
     cmdBuf[2] = size & 0xff;
     cmdBuf[3] = (size >> 8) & 0xff;
-    if((wr = usb_bulk_write(xu1541_handle,
+    if((wr = usb.bulk_write(xu1541_handle,
                             XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                             cmdBuf, sizeof(cmdBuf), 1000)) < 0)
     {
         fprintf(stderr, "USB error in special_write cmd: %s\n",
-                usb_strerror());
+                usb.strerror());
         return -1;
     }
 
@@ -786,13 +789,13 @@ xu1541_special_write(__u_char mode, const __u_char *data, size_t size)
         int bytes2write;
 
         bytes2write = size - bytesWritten;
-        if((wr = usb_bulk_write(xu1541_handle,
+        if((wr = usb.bulk_write(xu1541_handle,
                                 XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                                 (char *)data, bytes2write, 1000)) < 0)
         {
             if (retries-- == 0) {
                 fprintf(stderr, "USB error in special_write data: %s\n",
-                        usb_strerror());
+                        usb.strerror());
                 return -1;
             }
             continue;
@@ -844,12 +847,12 @@ xu1541_special_read(__u_char mode, __u_char *data, size_t size)
     cmdBuf[1] = mode;
     cmdBuf[2] = size & 0xff;
     cmdBuf[3] = (size >> 8) & 0xff;
-    if((rd = usb_bulk_write(xu1541_handle,
+    if((rd = usb.bulk_write(xu1541_handle,
                             XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
                             cmdBuf, sizeof(cmdBuf), 1000)) < 0)
     {
         fprintf(stderr, "USB error in special_read cmd: %s\n",
-                usb_strerror());
+                usb.strerror());
         return -1;
     }
 
@@ -860,13 +863,13 @@ xu1541_special_read(__u_char mode, __u_char *data, size_t size)
         int bytes2read;
 
         bytes2read = size - bytesRead;
-        if((rd = usb_bulk_read(xu1541_handle,
+        if((rd = usb.bulk_read(xu1541_handle,
                                XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
                                (char *)data, bytes2read, 1000)) < 0)
         {
             if (retries-- == 0) {
                 fprintf(stderr, "USB error in special_read data: %s\n",
-                        usb_strerror());
+                        usb.strerror());
                 return -1;
             }
             continue;

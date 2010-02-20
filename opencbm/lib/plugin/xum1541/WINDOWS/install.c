@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/WINDOWS/install.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: install.c,v 1.2 2009-12-09 19:52:00 strik Exp $ \n
+** \version $Id: install.c,v 1.3 2010-02-20 20:50:37 strik Exp $ \n
 ** \n
 ** \brief Helper functions for installing the plugin
 **        on a Windows machine
@@ -225,7 +225,7 @@ processNumber(const PCHAR Argument, PCHAR *NextChar, PBOOL ParameterGiven, PULON
  \return
 */
 unsigned int CBMAPIDECL
-cbm_plugin_install_process_commandline(CbmPluginInstallProcessCommandlineData_t * Data)
+opencbm_plugin_install_process_commandline(CbmPluginInstallProcessCommandlineData_t * Data)
 {
     int error = 0;
     char **localOptarg = Data->OptArg;
@@ -299,7 +299,7 @@ cbm_plugin_install_process_commandline(CbmPluginInstallProcessCommandlineData_t 
  \return
 */
 BOOL CBMAPIDECL
-cbm_plugin_install_do_install(void * Context)
+opencbm_plugin_install_do_install(void * Context)
 {
     BOOL error = TRUE;
 
@@ -321,7 +321,7 @@ cbm_plugin_install_do_install(void * Context)
  \return
 */
 BOOL CBMAPIDECL
-cbm_plugin_install_do_uninstall(void * Context)
+opencbm_plugin_install_do_uninstall(void * Context)
 {
     BOOL error = TRUE;
 
@@ -345,7 +345,7 @@ cbm_plugin_install_do_uninstall(void * Context)
  \return
 */
 unsigned int CBMAPIDECL
-cbm_plugin_install_get_needed_files(CbmPluginInstallProcessCommandlineData_t * Data, opencbm_plugin_install_neededfiles_t * Destination)
+opencbm_plugin_install_get_needed_files(CbmPluginInstallProcessCommandlineData_t * Data, opencbm_plugin_install_neededfiles_t * Destination)
 {
     unsigned int size = sizeof(NeededFilesXUM1541);
     xu1541_parameter_t *parameter = Data->OptionMemory;

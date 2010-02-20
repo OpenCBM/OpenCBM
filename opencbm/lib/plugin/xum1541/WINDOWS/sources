@@ -5,14 +5,14 @@ TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib \
            $(SDK_LIB_PATH)/winmm.lib    \
-           */libusb.lib                 \
+           ../../../../bin/*/libmisc.lib\
            ../../../../bin/*/arch.lib         
 
 USE_MSVCRT = 1
 
 DLLBASE=0x71000000
 
-INCLUDES=../../../../include;../../../../include/WINDOWS;../../..;../../../../arch/windows;$(XUM1541DIR)
+INCLUDES=../../../../libmisc/WINDOWS;../;../../../../include;../../../../include/WINDOWS;../../..;../../../../arch/windows;../../../../libmisc;$(XUM1541DIR)
 
 SOURCES=../archlib.c \
 	../xum1541.c \

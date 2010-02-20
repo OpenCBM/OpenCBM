@@ -4,15 +4,15 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2007      Spiro Trikaliotis
- *  Copyright 2009      Nate Lawson
+ *  Copyright 2007, 2010 Spiro Trikaliotis
+ *  Copyright 2009       Nate Lawson
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: dllmain.c,v 1.2 2009-12-09 19:52:00 strik Exp $ \n
+** \version $Id: dllmain.c,v 1.3 2010-02-20 20:50:37 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -20,6 +20,8 @@
 
 #include <windows.h>
 #include <windowsx.h>
+
+#include "dynlibusb.h"
 
 
 /*! Mark: We are in user-space (for debug.h) */
@@ -40,6 +42,7 @@
 #define OPENCBM_PLUGIN
 #include "archlib.h"
 
+#include "xum1541.h"
 
 /*! \brief Dummy DllMain
 
@@ -66,4 +69,24 @@ BOOL WINAPI
 DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 {
     return TRUE;
+}
+
+int CBMAPIDECL
+opencbm_plugin_init(void)
+{
+#if DBG
+
+    // Read the debugging flags from the registry
+
+    cbm_get_debugging_flags("xum1541");
+
+#endif
+
+    return dynlibusb_init();
+}
+
+void CBMAPIDECL
+opencbm_plugin_uninit(void)
+{
+    dynlibusb_uninit();
 }

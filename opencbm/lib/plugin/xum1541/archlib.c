@@ -7,14 +7,14 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005,2007 Spiro Trikaliotis
+ *  Copyright 2001-2005, 2007, 2010 Spiro Trikaliotis
  *
 */
 
 /*! ************************************************************** 
-** \file lib/plugin/xu1541/archlib.c \n
+** \file lib/plugin/xum1541/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.1 2009-12-09 05:38:59 natelawson Exp $ \n
+** \version $Id: archlib.c,v 1.2 2010-02-20 20:50:35 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -69,7 +69,7 @@
 */
 
 const char * CBMAPIDECL
-cbmarch_get_driver_name(int PortNumber)
+opencbm_plugin_get_driver_name(int PortNumber)
 {
     return "libusb/xum1541"; 
 }
@@ -95,7 +95,7 @@ cbmarch_get_driver_name(int PortNumber)
 */
 
 int CBMAPIDECL
-cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber)
+opencbm_plugin_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 {
     return xu1541_init();
 }
@@ -115,7 +115,7 @@ cbmarch_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 */
 
 void CBMAPIDECL
-cbmarch_driver_close(CBM_FILE HandleDevice)
+opencbm_plugin_driver_close(CBM_FILE HandleDevice)
 {
     xu1541_close();
 }
@@ -146,7 +146,7 @@ cbmarch_driver_close(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbmarch_lock(CBM_FILE HandleDevice)
+opencbm_plugin_lock(CBM_FILE HandleDevice)
 {
 }
 
@@ -168,7 +168,7 @@ cbmarch_lock(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbmarch_unlock(CBM_FILE HandleDevice)
+opencbm_plugin_unlock(CBM_FILE HandleDevice)
 {
 }
 
@@ -197,7 +197,7 @@ cbmarch_unlock(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
+opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
     return xu1541_write(Buffer, Count);
 }
@@ -226,7 +226,7 @@ cbmarch_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 */
 
 int CBMAPIDECL
-cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
+opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
     return xu1541_read(Buffer, Count);
 }
@@ -257,7 +257,7 @@ cbmarch_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 */
 
 int CBMAPIDECL
-cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     return xu1541_ioctl(XUM1541_LISTEN, DeviceAddress, SecondaryAddress);
 }
@@ -286,7 +286,7 @@ cbmarch_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Secondary
 */
 
 int CBMAPIDECL
-cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     return xu1541_ioctl(XUM1541_TALK, DeviceAddress, SecondaryAddress);
 }
@@ -313,7 +313,7 @@ cbmarch_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAd
 */
 
 int CBMAPIDECL
-cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     return xu1541_ioctl(XUM1541_OPEN, DeviceAddress, SecondaryAddress);
 }
@@ -340,7 +340,7 @@ cbmarch_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAd
 */
 
 int CBMAPIDECL
-cbmarch_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
     return xu1541_ioctl(XUM1541_CLOSE, DeviceAddress, SecondaryAddress);
 }
@@ -366,7 +366,7 @@ cbmarch_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryA
 */
 
 int CBMAPIDECL
-cbmarch_unlisten(CBM_FILE HandleDevice)
+opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 {
     return xu1541_ioctl(XUM1541_UNLISTEN, 0, 0);
 }
@@ -392,7 +392,7 @@ cbmarch_unlisten(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbmarch_untalk(CBM_FILE HandleDevice)
+opencbm_plugin_untalk(CBM_FILE HandleDevice)
 {
     return xu1541_ioctl(XUM1541_UNTALK, 0, 0);
 }
@@ -419,7 +419,7 @@ cbmarch_untalk(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbmarch_get_eoi(CBM_FILE HandleDevice)
+opencbm_plugin_get_eoi(CBM_FILE HandleDevice)
 {
     return xu1541_ioctl(XUM1541_GET_EOI, 0, 0);
 }
@@ -440,7 +440,7 @@ cbmarch_get_eoi(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbmarch_clear_eoi(CBM_FILE HandleDevice)
+opencbm_plugin_clear_eoi(CBM_FILE HandleDevice)
 {
     return xu1541_ioctl(XUM1541_CLEAR_EOI, 0, 0);
 }
@@ -467,7 +467,7 @@ cbmarch_clear_eoi(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbmarch_reset(CBM_FILE HandleDevice)
+opencbm_plugin_reset(CBM_FILE HandleDevice)
 {
     return xu1541_ioctl(XUM1541_RESET, 0, 0);
 }
@@ -498,7 +498,7 @@ cbmarch_reset(CBM_FILE HandleDevice)
 */
 
 __u_char CBMAPIDECL
-cbmarch_pp_read(CBM_FILE HandleDevice)
+opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 {
     return (__u_char) xu1541_ioctl(XUM1541_PP_READ, 0, 0);
 }
@@ -527,7 +527,7 @@ cbmarch_pp_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte)
+opencbm_plugin_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 {
     xu1541_ioctl(XUM1541_PP_WRITE, Byte, 0);
 }
@@ -554,7 +554,7 @@ cbmarch_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 */
 
 int CBMAPIDECL
-cbmarch_iec_poll(CBM_FILE HandleDevice)
+opencbm_plugin_iec_poll(CBM_FILE HandleDevice)
 {
     return xu1541_ioctl(XUM1541_IEC_POLL, 0, 0);
 }
@@ -579,7 +579,7 @@ cbmarch_iec_poll(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
+opencbm_plugin_iec_set(CBM_FILE HandleDevice, int Line)
 {
     xu1541_ioctl(XUM1541_IEC_SETRELEASE, Line, 0);
 }
@@ -603,7 +603,7 @@ cbmarch_iec_set(CBM_FILE HandleDevice, int Line)
 */
 
 void CBMAPIDECL
-cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
+opencbm_plugin_iec_release(CBM_FILE HandleDevice, int Line)
 {
     xu1541_ioctl(XUM1541_IEC_SETRELEASE, 0, Line);
 }
@@ -636,7 +636,7 @@ cbmarch_iec_release(CBM_FILE HandleDevice, int Line)
 */
 
 void CBMAPIDECL
-cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
+opencbm_plugin_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     xu1541_ioctl(XUM1541_IEC_SETRELEASE, Set, Release);
 }
@@ -668,7 +668,7 @@ cbmarch_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 */
 
 int CBMAPIDECL
-cbmarch_iec_wait(CBM_FILE HandleDevice, int Line, int State)
+opencbm_plugin_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
     return xu1541_ioctl(XUM1541_IEC_WAIT, Line, State);
 }
