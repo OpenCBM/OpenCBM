@@ -119,13 +119,28 @@ ServiceBinary  = %12%\libusb0.sys
 ;--------------------------------------------------------------------------
 
 [Devices]
-"XU1541"=LIBUSB_DEV, USB\VID_0403&PID_c632
+"OpenCBM USB (generic)"                = LIBUSB_DEV, USB\VID_0403&PID_c632
+"XU1541 BIOS (V-USB)"                  = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0100
+"XU1541 BIOS (USBtiny)"                = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0200
+"XUM1541 (AT90USBKey, initial)"        = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0500
+"XUM1541 (AT90USBKey, parallel burst)" = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0501
+"XUM1541 (AT90USBKey, new IOCTL)"      = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0502
 
 [Devices.NT]
-"XU1541"=LIBUSB_DEV, USB\VID_0403&PID_c632
+"OpenCBM USB (generic)"                = LIBUSB_DEV, USB\VID_0403&PID_c632
+"XU1541 BIOS (V-USB)"                  = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0100
+"XU1541 BIOS (USBtiny)"                = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0200
+"XUM1541 (AT90USBKey, initial)"        = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0500
+"XUM1541 (AT90USBKey, parallel burst)" = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0501
+"XUM1541 (AT90USBKey, new IOCTL)"      = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0502
 
 [Devices.NTAMD64]
-"XU1541"=LIBUSB_DEV, USB\VID_0403&PID_c632
+"OpenCBM USB (generic)"                = LIBUSB_DEV, USB\VID_0403&PID_c632
+"XU1541 BIOS (V-USB)"                  = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0100
+"XU1541 BIOS (USBtiny)"                = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0200
+"XUM1541 (AT90USBKey, initial)"        = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0500
+"XUM1541 (AT90USBKey, parallel burst)" = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0501
+"XUM1541 (AT90USBKey, new IOCTL)"      = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0502
 
 
 ;--------------------------------------------------------------------------
@@ -133,4 +148,4 @@ ServiceBinary  = %12%\libusb0.sys
 ;--------------------------------------------------------------------------
 
 [Strings]
-manufacturer = "Till Harbaum"
+manufacturer = "OpenCBM development team"
