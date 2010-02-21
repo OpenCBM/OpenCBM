@@ -11,12 +11,15 @@
 /*! **************************************************************
 ** \file libmisc/getpluginaddress.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: getpluginaddress.h,v 1.1 2010-01-30 20:48:48 strik Exp $ \n
+** \version $Id: getpluginaddress.h,v 1.2 2010-02-21 09:47:15 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Functions for obtaining the addresses of plugin functions
 **
 ****************************************************************/
+
+#ifndef OPENCBM_LIBMISC_GETPLUGINADDRESS_H
+#define OPENCBM_LIBMISC_GETPLUGINADDRESS_H
 
 #ifdef WIN32
 
@@ -43,3 +46,5 @@ extern SHARED_OBJECT_HANDLE plugin_load(const char * name);
 extern void * plugin_get_address(SHARED_OBJECT_HANDLE handle, const char * name);
 
 extern void plugin_unload(SHARED_OBJECT_HANDLE handle);
+
+#endif /* #ifndef OPENCBM_LIBMISC_GETPLUGINADDRESS_H */

@@ -11,12 +11,15 @@
 /*! **************************************************************
 ** \file libmisc/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dynlibusb.h,v 1.1 2010-02-20 20:50:38 strik Exp $ \n
+** \version $Id: dynlibusb.h,v 1.2 2010-02-21 09:47:13 strik Exp $ \n
 ** \n
 ** \brief Allow for libusb (0.1) to be loaded dynamically
 **        (Currently, this is used on Windows only)
 **
 ****************************************************************/
+
+#ifndef OPENCBM_LIBMISC_DYNLIBUSB_H
+#define OPENCBM_LIBMISC_DYNLIBUSB_H
 
 #include <usb.h>
 
@@ -71,3 +74,5 @@ extern usb_dll_t usb;
 
 extern int dynlibusb_init(void);
 extern void dynlibusb_uninit(void);
+
+#endif /* #ifndef OPENCBM_LIBMISC_DYNLIBUSB_H */
