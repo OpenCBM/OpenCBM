@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.31 2010-01-30 21:33:13 strik Exp $ \n
+** \version $Id: cbm.c,v 1.32 2010-02-21 09:53:54 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -205,8 +205,10 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         if (!Plugin_information->Library)
             break;
 
+#ifdef WIN32
         Plugin_information->Plugin.opencbm_plugin_init                       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_init");
         Plugin_information->Plugin.opencbm_plugin_uninit                     = plugin_get_address(Plugin_information->Library, "opencbm_plugin_uninit");
+#endif
         Plugin_information->Plugin.opencbm_plugin_get_driver_name            = plugin_get_address(Plugin_information->Library, "opencbm_plugin_get_driver_name");
         Plugin_information->Plugin.opencbm_plugin_driver_open                = plugin_get_address(Plugin_information->Library, "opencbm_plugin_driver_open");
         Plugin_information->Plugin.opencbm_plugin_driver_close               = plugin_get_address(Plugin_information->Library, "opencbm_plugin_driver_close");
@@ -323,6 +325,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         if (error)
             break;
 
+#ifdef WIN32
         if (Plugin_information->Plugin.opencbm_plugin_init) {
             error = Plugin_information->Plugin.opencbm_plugin_init();
             if (error) {
@@ -332,6 +335,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
                 break;
             }
         }
+#endif
 
     } while (0);
 
@@ -347,9 +351,11 @@ uninitialize_plugin(void)
 {
     if (Plugin_information.Library != NULL)
     {
+#ifdef WIN32
         if (Plugin_information.Plugin.opencbm_plugin_uninit) {
             Plugin_information.Plugin.opencbm_plugin_uninit();
         }
+#endif
 
         plugin_unload(Plugin_information.Library);
 

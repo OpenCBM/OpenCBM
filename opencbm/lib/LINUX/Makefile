@@ -1,11 +1,11 @@
-# $Id: Makefile,v 1.14 2010-01-30 20:48:48 strik Exp $
+# $Id: Makefile,v 1.15 2010-02-21 09:54:01 strik Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
 
 CA65_FLAGS += --asm-include-dir ../libd64copy/
 
-CFLAGS += -I ./
+CFLAGS += -I ./ -I ../libmisc/
 
 .PHONY: all clean mrproper install uninstall install-files
 

@@ -10,7 +10,7 @@
 /*! **************************************************************
 ** \file include/opencbm-plugin.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm-plugin.h,v 1.9 2010-01-30 21:33:09 strik Exp $ \n
+** \version $Id: opencbm-plugin.h,v 1.10 2010-02-21 09:53:46 strik Exp $ \n
 ** \n
 ** \brief Plugin DLL interface
 **
@@ -710,8 +710,11 @@ typedef int CBMAPIDECL opencbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, uns
 */
 typedef
 struct opencbm_plugin_s {
+#ifdef WIN32
     opencbm_plugin_init_t                       * opencbm_plugin_init;                       /*!< pointer to a opencbm_plugin_init_t() function */
     opencbm_plugin_uninit_t                     * opencbm_plugin_uninit;                     /*!< pointer to a opencbm_plugin_uninit() function */
+#endif
+
     opencbm_plugin_get_driver_name_t            * opencbm_plugin_get_driver_name;            /*!< pointer to a opencbm_plugin_get_driver_name_t() function */
     opencbm_plugin_driver_open_t                * opencbm_plugin_driver_open;                /*!< pointer to a opencbm_plugin_driver_open_t() function */
     opencbm_plugin_driver_close_t               * opencbm_plugin_driver_close;               /*!< pointer to a opencbm_plugin_driver_close_t() function */

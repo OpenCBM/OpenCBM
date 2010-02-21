@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2009-12-12 18:27:04 cnvogelg Exp $
+# $Id: Makefile,v 1.9 2010-02-21 09:54:01 strik Exp $
 
 RELATIVEPATH=../../../
 include ${RELATIVEPATH}LINUX/config.make
@@ -11,7 +11,7 @@ SRCS    = archlib.c xu1541.c s1_s2_pp.c
 LIBS    = -ldl
 
 CFLAGS += $(LIBUSB_CFLAGS)
-CFLAGS += -I../../../include/LINUX/ -I../../../include/ -I../../ -I $(XU1541DIR)/include
+CFLAGS += -I$(RELATIVEPATH)/include/LINUX/ -I$(RELATIVEPATH)/include/ -I../../ -I $(XU1541DIR)/include -I$(RELATIVEPATH)/libmisc
 LDFLAGS += $(LIBUSB_LDFLAGS)
 
 all: build-lib
