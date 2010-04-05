@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/s1_s2_pp.c \n
 ** \author Till Harbaum, Spiro Trikaliotis \n
-** \version $Id: s1_s2_pp.c,v 1.2 2010-02-20 20:50:36 strik Exp $ \n
+** \version $Id: s1_s2_pp.c,v 1.3 2010-04-05 02:45:26 natelawson Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver: Code for accessing fast protocols of xu1541
 **
@@ -201,7 +201,7 @@ opencbm_plugin_pp_cc_write_n(CBM_FILE HandleDevice, const unsigned char *data, u
     The size of the data buffer the read bytes will be written to.
 */
 void CBMAPIDECL
-cbmarch_nib_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
+opencbm_plugin_nib_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
 	xu1541_special_read(XUM1541_NIB, data, size); 
 }
@@ -218,7 +218,7 @@ cbmarch_nib_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size
     The size of the data buffer to be written
 */
 void CBMAPIDECL
-cbmarch_nib_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
+opencbm_plugin_nib_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
 	xu1541_special_write(XUM1541_NIB, data, size); 
 }
