@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/WINDOWS/parburst.c \n
 ** \author Nate Lawson \n
-** \version $Id: parburst.c,v 1.1 2009-12-22 21:30:43 natelawson Exp $ \n
+** \version $Id: parburst.c,v 1.2 2010-04-05 02:37:03 natelawson Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **
@@ -46,7 +46,7 @@
 */
 
 __u_char CBMAPIDECL
-cbmarch_parallel_burst_read(CBM_FILE HandleDevice)
+opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
 {
     __u_char result;
 
@@ -71,7 +71,7 @@ cbmarch_parallel_burst_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
+opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     int result;
 
@@ -80,7 +80,7 @@ cbmarch_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 }
 
 int CBMAPIDECL
-cbmarch_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
+opencbm_plugin_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
     unsigned int Length)
 {
     int result;
@@ -94,7 +94,7 @@ cbmarch_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
 }
 
 int CBMAPIDECL
-cbmarch_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
+opencbm_plugin_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
     unsigned int Length)
 {
     int result;
@@ -129,7 +129,7 @@ cbmarch_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
 */
 
 int CBMAPIDECL
-cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     int result;
 
@@ -163,7 +163,7 @@ cbmarch_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsig
 */
 
 int CBMAPIDECL
-cbmarch_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     int result;
 
