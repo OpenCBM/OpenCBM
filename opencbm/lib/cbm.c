@@ -13,7 +13,7 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.32 2010-02-21 09:53:54 strik Exp $ \n
+** \version $Id: cbm.c,v 1.33 2010-04-07 19:20:20 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
@@ -205,43 +205,51 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         if (!Plugin_information->Library)
             break;
 
-#ifdef WIN32
-        Plugin_information->Plugin.opencbm_plugin_init                       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_init");
-        Plugin_information->Plugin.opencbm_plugin_uninit                     = plugin_get_address(Plugin_information->Library, "opencbm_plugin_uninit");
-#endif
-        Plugin_information->Plugin.opencbm_plugin_get_driver_name            = plugin_get_address(Plugin_information->Library, "opencbm_plugin_get_driver_name");
-        Plugin_information->Plugin.opencbm_plugin_driver_open                = plugin_get_address(Plugin_information->Library, "opencbm_plugin_driver_open");
-        Plugin_information->Plugin.opencbm_plugin_driver_close               = plugin_get_address(Plugin_information->Library, "opencbm_plugin_driver_close");
-        Plugin_information->Plugin.opencbm_plugin_lock                       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_lock");
-        Plugin_information->Plugin.opencbm_plugin_unlock                     = plugin_get_address(Plugin_information->Library, "opencbm_plugin_unlock");
-        Plugin_information->Plugin.opencbm_plugin_raw_write                  = plugin_get_address(Plugin_information->Library, "opencbm_plugin_raw_write");
-        Plugin_information->Plugin.opencbm_plugin_raw_read                   = plugin_get_address(Plugin_information->Library, "opencbm_plugin_raw_read");
-        Plugin_information->Plugin.opencbm_plugin_open                       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_open");
-        Plugin_information->Plugin.opencbm_plugin_close                      = plugin_get_address(Plugin_information->Library, "opencbm_plugin_close");
-        Plugin_information->Plugin.opencbm_plugin_listen                     = plugin_get_address(Plugin_information->Library, "opencbm_plugin_listen");
-        Plugin_information->Plugin.opencbm_plugin_talk                       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_talk");
-        Plugin_information->Plugin.opencbm_plugin_unlisten                   = plugin_get_address(Plugin_information->Library, "opencbm_plugin_unlisten");
-        Plugin_information->Plugin.opencbm_plugin_untalk                     = plugin_get_address(Plugin_information->Library, "opencbm_plugin_untalk");
-        Plugin_information->Plugin.opencbm_plugin_get_eoi                    = plugin_get_address(Plugin_information->Library, "opencbm_plugin_get_eoi");
-        Plugin_information->Plugin.opencbm_plugin_clear_eoi                  = plugin_get_address(Plugin_information->Library, "opencbm_plugin_clear_eoi");
-        Plugin_information->Plugin.opencbm_plugin_reset                      = plugin_get_address(Plugin_information->Library, "opencbm_plugin_reset");
-        Plugin_information->Plugin.opencbm_plugin_pp_read                    = plugin_get_address(Plugin_information->Library, "opencbm_plugin_pp_read");
-        Plugin_information->Plugin.opencbm_plugin_pp_write                   = plugin_get_address(Plugin_information->Library, "opencbm_plugin_pp_write");
-        Plugin_information->Plugin.opencbm_plugin_iec_poll                   = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_poll");
-        Plugin_information->Plugin.opencbm_plugin_iec_set                    = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_set");
-        Plugin_information->Plugin.opencbm_plugin_iec_release                = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_release");
-        Plugin_information->Plugin.opencbm_plugin_iec_setrelease             = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_setrelease");
-        Plugin_information->Plugin.opencbm_plugin_iec_wait                   = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_wait");
-        Plugin_information->Plugin.opencbm_plugin_parallel_burst_read        = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_read");
-        Plugin_information->Plugin.opencbm_plugin_parallel_burst_write       = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_write");
-        Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_n      = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_read_n");
-        Plugin_information->Plugin.opencbm_plugin_parallel_burst_write_n      = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_write_n");
-        Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_track  = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_read_track");
-        Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_track_var = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_read_track_var");
-        Plugin_information->Plugin.opencbm_plugin_parallel_burst_write_track = plugin_get_address(Plugin_information->Library, "opencbm_plugin_parallel_burst_write_track");
+#define PLUGIN_GET_ADDRESS(_xxx) \
+        Plugin_information->Plugin._xxx = plugin_get_address(Plugin_information->Library, #_xxx); \
+        DBGDO( \
+            if (Plugin_information->Plugin._xxx == NULL) { \
+               DBG_PRINT((DBG_PREFIX "Plugin entry point %s not found!", #_xxx)); \
+            } \
+        )
 
-        Plugin_information->Plugin.opencbm_plugin_iec_dbg_read               = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_dbg_read");
-        Plugin_information->Plugin.opencbm_plugin_iec_dbg_write              = plugin_get_address(Plugin_information->Library, "opencbm_plugin_iec_dbg_write");
+#ifdef WIN32
+        PLUGIN_GET_ADDRESS(opencbm_plugin_init);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_uninit);
+#endif
+        PLUGIN_GET_ADDRESS(opencbm_plugin_get_driver_name);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_driver_open);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_driver_close);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_lock);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_unlock);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_raw_write);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_raw_read);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_open);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_close);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_listen);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_talk);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_unlisten);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_untalk);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_get_eoi);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_clear_eoi);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_reset);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_pp_read);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_pp_write);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_poll);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_set);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_release);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_setrelease);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_wait);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_read);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_write);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_read_n);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_write_n);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_read_track);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_read_track_var);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_write_track);
+
+        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_dbg_read);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_dbg_write);
 
         /* Make sure that all required functions are available: */
 
