@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/WINDOWS/parburst.c \n
 ** \author Nate Lawson \n
-** \version $Id: parburst.c,v 1.2 2010-04-05 02:37:03 natelawson Exp $ \n
+** \version $Id: parburst.c,v 1.3 2010-04-26 04:10:40 natelawson Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **
@@ -50,7 +50,7 @@ opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
 {
     __u_char result;
 
-    result = (__u_char)xu1541_ioctl(XUM1541_PARBURST_READ, 0, 0);
+    result = (__u_char)xum1541_ioctl(XUM1541_PARBURST_READ, 0, 0);
     //printf("parburst read: %x\n", result);
     return result;
 }
@@ -75,7 +75,7 @@ opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 {
     int result;
 
-    result = xu1541_ioctl(XUM1541_PARBURST_WRITE, Value, 0);
+    result = xum1541_ioctl(XUM1541_PARBURST_WRITE, Value, 0);
     //printf("parburst write: %x, res %x\n", Value, result);
 }
 
@@ -85,7 +85,7 @@ opencbm_plugin_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
 {
     int result;
 
-    result = xu1541_special_read(XUM1541_NIB_READ_N, Buffer, Length);
+    result = xum1541_special_read(XUM1541_NIB_READ_N, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_read_n: returned with error %d", result));
     }
@@ -99,7 +99,7 @@ opencbm_plugin_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
 {
     int result;
 
-    result = xu1541_special_write(XUM1541_NIB_WRITE_N, Buffer, Length);
+    result = xum1541_special_write(XUM1541_NIB_WRITE_N, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_write_n: returned with error %d", result));
     }
@@ -133,7 +133,7 @@ opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer
 {
     int result;
 
-    result = xu1541_special_read(XUM1541_NIB, Buffer, Length);
+    result = xum1541_special_read(XUM1541_NIB, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_read_track: returned with error %d", result));
     }
@@ -167,7 +167,7 @@ opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffe
 {
     int result;
 
-    result = xu1541_special_write(XUM1541_NIB, Buffer, Length);
+    result = xum1541_special_write(XUM1541_NIB, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_write_track: returned with error %d", result));
     }

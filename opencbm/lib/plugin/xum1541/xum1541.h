@@ -26,14 +26,14 @@
 #define XUM1541_PID  0xc632
 
 /* calls required for standard io */
-extern int xu1541_init(void);
-extern void xu1541_close(void);
-extern int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr);
-extern int xu1541_write(const __u_char *data, size_t len);
-extern int xu1541_read(__u_char *data, size_t len);
+extern int xum1541_init(void);
+extern void xum1541_close(void);
+extern int xum1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr);
+extern int xum1541_write(const __u_char *data, size_t len);
+extern int xum1541_read(__u_char *data, size_t len);
 
 /* calls for speeder supported modes */
-extern int xu1541_special_write(__u_char mode, const __u_char *data, size_t size);
-extern int xu1541_special_read(__u_char mode, __u_char *data, size_t size);
+extern int xum1541_special_write(__u_char mode, const __u_char *data, size_t size);
+extern int xum1541_special_read(__u_char mode, __u_char *data, size_t size);
 
 #endif // XUM1541_H
