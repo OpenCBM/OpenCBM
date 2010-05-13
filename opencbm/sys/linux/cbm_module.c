@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.48 2010-05-13 22:11:36 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.49 2010-05-13 22:11:41 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -326,18 +326,16 @@ static int send_byte(int b)
 	local_irq_save(flags);
 	for (i = 0; i < 8; i++) {
 		udelay(70);
-		if (!((b >> i) & 1)) {
+		if (!((b >> i) & 1))
 			SET(DATA_OUT);
-		}
 		RELEASE(CLK_OUT);
 		udelay(20);
 		SET_RELEASE(CLK_OUT, DATA_OUT);
 	}
 	local_irq_restore(flags);
 
-	for (i = 0; (i < 20) && !(ack = GET(DATA_IN)); i++) {
+	for (i = 0; (i < 20) && !(ack = GET(DATA_IN)); i++)
 		udelay(100);
-	}
 
 	DPRINTK("ack=%d\n", ack);
 
@@ -359,9 +357,8 @@ static void wait_for_listener(void)
 	add_wait_queue(&cbm_wait_q, &wait);
 	current->state = TASK_INTERRUPTIBLE;
 	RELEASE(CLK_OUT);
-	while (cbm_irq_count && !signal_pending(current)) {
+	while (cbm_irq_count && !signal_pending(current))
 		schedule();
-	}
 	remove_wait_queue(&cbm_wait_q, &wait);
 #ifdef FOUR_BIT_CONTROL
 	parport_disable_irq(cbm_device->port);
@@ -379,9 +376,8 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
 
 	DPRINTK("cbm_read: %d bytes\n", count);
 
-	if (eoi) {
+	if (eoi)
 		return 0;
-	}
 
 	do {
 		i = 0;
@@ -389,9 +385,8 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
 			if (i >= 50) {
 				current->state = TASK_INTERRUPTIBLE;
 				schedule_timeout(HZ / 50);
-				if (signal_pending(current)) {
+				if (signal_pending(current))
 					return -EINTR;
-				}
 			} else {
 				i++;
 				udelay(20);
@@ -399,9 +394,8 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
 		}
 		local_irq_save(flags);
 		RELEASE(DATA_OUT);
-		for (i = 0; (i < 40) && !(ok = GET(CLK_IN)); i++) {
+		for (i = 0; (i < 40) && !(ok = GET(CLK_IN)); i++)
 			udelay(10);
-		}
 		if (!ok) {
 			/* device signals eoi */
 			eoi = 1;
@@ -409,37 +403,31 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
 			udelay(70);
 			RELEASE(DATA_OUT);
 		}
-		for (i = 0; i < 100 && !(ok = GET(CLK_IN)); i++) {
+		for (i = 0; i < 100 && !(ok = GET(CLK_IN)); i++)
 			udelay(20);
-		}
 		for (bit = b = 0; (bit < 8) && ok; bit++) {
 			for (i = 0; (i < 200) && !(ok = (GET(CLK_IN) == 0));
-			     i++) {
+			     i++)
 				udelay(10);
-			}
 			if (ok) {
 				b >>= 1;
-				if (GET(DATA_IN) == 0) {
+				if (GET(DATA_IN) == 0)
 					b |= 0x80;
-				}
-				for (i = 0; i < 100 && !(ok = GET(CLK_IN)); i++) {
+				for (i = 0; i < 100 && !(ok = GET(CLK_IN)); i++)
 					udelay(20);
-				}
 			}
 		}
-		if (ok) {
+		if (ok)
 			SET(DATA_OUT);
-		}
 		local_irq_restore(flags);
 		if (ok) {
 			received++;
 			put_user((char)b, buf++);
 
-			if (received % 256) {
+			if (received % 256)
 				udelay(50);
-			} else {
+			else
 				schedule();
-			}
 		}
 
 	} while (received < count && ok && !eoi);
@@ -470,9 +458,8 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
 	RELEASE(DATA_OUT);
 	SET(CLK_OUT | (atn ? ATN_OUT : 0));
 
-	for (i = 0; (i < 100) && !GET(DATA_IN); i++) {
+	for (i = 0; (i < 100) && !GET(DATA_IN); i++)
 		udelay(10);
-	}
 
 	if (!GET(DATA_IN)) {
 		printk("cbm_write: no devices found\n");
@@ -484,11 +471,10 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
 	schedule_timeout(HZ / 50);	/* 20ms */
 
 	while (cnt > sent && rv == 0) {
-		if (atn == 0) {
+		if (atn == 0)
 			get_user(c, buf++);
-		} else {
+		else
 			c = *buf++;
-		}
 		udelay(50);
 		if (GET(DATA_IN)) {
 			cbm_irq_count = ((sent == (cnt - 1))
@@ -519,9 +505,8 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
 		RELEASE(ATN_OUT);
 
 		RELEASE(CLK_OUT);
-		for (i = 0; (i < 100) && !GET(CLK_IN); i++) {
+		for (i = 0; (i < 100) && !GET(CLK_IN); i++)
 			udelay(10);
-		}
 		if (!GET(CLK_IN)) {
 			printk("cbm_write: device not present\n");
 			rv = -ENODEV;
@@ -615,9 +600,8 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 			if (i >= 20) {
 				current->state = TASK_INTERRUPTIBLE;
 				schedule_timeout(HZ / 50);	/* 20ms */
-				if (signal_pending(current)) {
+				if (signal_pending(current))
 					return -EINTR;
-				}
 			} else {
 				i++;
 				udelay(10);
@@ -716,9 +700,8 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 		return XP_READ();
 
 	case CBMCTRL_PP_WRITE:
-		if (data_reverse) {
+		if (data_reverse)
 			set_data_forward();
-		}
 		XP_WRITE(arg);
 		return 0;
 
@@ -799,9 +782,8 @@ static irqreturn_t cbm_interrupt(int irq, void *dev_id)
 {
 	POLL();			/* acknowledge interrupt */
 
-	if (cbm_irq_count == 0) {
+	if (cbm_irq_count == 0)
 		return IRQ_NONE;
-	}
 	if (--cbm_irq_count == 0) {
 		DPRINTK("continue to send (no EOI)\n");
 		SET(CLK_OUT);
@@ -1057,9 +1039,8 @@ int cbm_parallel_burst_write(unsigned char c)
 	msleep(20);
 	while (GET(DATA_IN)) ;
 	/*linux PARWRITE(); */
-	if (data_reverse) {
+	if (data_reverse)
 		set_data_forward();
-	}
 	XP_WRITE(c);
 	/*linux outportb(parport, arg); */
 	msleep(5);
@@ -1142,9 +1123,8 @@ int cbm_handshaked_write(char data, int toggle)
 				return 1;
 	}
 	/*linux outportb(parport, data); */
-	if (data_reverse) {
+	if (data_reverse)
 		set_data_forward();
-	}
 	XP_WRITE(data);
 	return 1;
 }
