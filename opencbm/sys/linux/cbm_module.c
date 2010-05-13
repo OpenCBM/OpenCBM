@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.28 2010-05-13 22:00:53 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.29 2010-05-13 22:01:27 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -601,8 +601,13 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
                 RELEASE(ATN_OUT);
 
                 RELEASE(CLK_OUT);
-                while (!GET(CLK_IN))
-                      ;
+                for(i = 0; (i < 10) && !GET(CLK_IN); i++) {
+                        udelay(10);
+                }
+                if(!GET(CLK_IN)) {
+                        printk("cbm_write: device not present\n");
+                        rv = -ENODEV;
+                }
 
                 local_irq_restore(flags);
         } else {
