@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.56 2010-05-13 22:12:13 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.57 2010-05-13 22:12:17 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -810,7 +810,7 @@ static void cbm_interrupt_pp(void *dev_id)
 }
 #endif /* DIRECT_PORT_ACCESS */
 
-static struct file_operations cbm_fops = {
+static const struct file_operations cbm_fops = {
 	.owner		= THIS_MODULE,
 	.read		= cbm_read,
 	.write		= cbm_write,
