@@ -8,7 +8,7 @@
  *  Copyright 2009 Arnd Menge <arnd(at)jonnz(dot)de>
 */
 
-/* $Id: cbm_module.h,v 1.9 2010-05-13 22:11:32 fbriere Exp $ */
+/* $Id: cbm_module.h,v 1.10 2010-05-13 22:11:51 fbriere Exp $ */
 
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H
@@ -36,14 +36,15 @@
 #define CBMCTRL_IEC_WAIT    _IO(CBMCTRL_BASE, 15)
 #define CBMCTRL_IEC_SETRELEASE _IO(CBMCTRL_BASE, 16)
 
-/*linux constants needed by parallel burst */
+/* linux constants needed by parallel burst */
 #define CBMCTRL_PARBURST_READ    _IO(CBMCTRL_BASE, 17)
 #define CBMCTRL_PARBURST_WRITE   _IO(CBMCTRL_BASE, 18)
 #define CBMCTRL_PARBURST_READ_TRACK        _IO(CBMCTRL_BASE, 19)
 #define CBMCTRL_PARBURST_WRITE_TRACK _IO(CBMCTRL_BASE, 20)
 #define CBMCTRL_PARBURST_READ_TRACK_VAR    _IO(CBMCTRL_BASE, 21)
 
-typedef struct PARBURST_RW_VALUE {	// all values needed by PARBURST_READ_TRACK and PARBURST_WRITE_TRACK
+/* all values needed by PARBURST_READ_TRACK and PARBURST_WRITE_TRACK */
+typedef struct PARBURST_RW_VALUE {
 	unsigned char *buffer;
 	int length;
 } PARBURST_RW_VALUE;

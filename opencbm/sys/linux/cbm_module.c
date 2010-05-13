@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.50 2010-05-13 22:11:46 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.51 2010-05-13 22:11:51 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -247,20 +247,20 @@ static int check_if_bus_free(void)
 	do {
 		RELEASE(ATN_OUT | CLK_OUT | DATA_OUT | RESET);
 
-		// wait for the drive to have time to react
+		/* wait for the drive to have time to react */
 		timeout_us(100);
 
-		// assert ATN
+		/* assert ATN */
 		SET(ATN_OUT);
 
-		// now, wait for the drive to have time to react
+		/* now, wait for the drive to have time to react */
 		timeout_us(100);
 
-		// if DATA is still unset, we have a problem.
+		/* if DATA is still unset, we have a problem. */
 		if (!GET(DATA_IN))
 			break;
 
-		// ok, at least one drive reacted. Now, test releasing ATN:
+		/* ok, at least one drive reacted. Now, test releasing ATN: */
 
 		RELEASE(ATN_OUT);
 		timeout_us(100);
@@ -531,10 +531,10 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 		     unsigned int cmd, unsigned long arg)
 {
 
-	/*linux parallel burst */
+	/* linux parallel burst */
 	PARBURST_RW_VALUE *user_val;
 	PARBURST_RW_VALUE kernel_val;
-	/*linux parallel burst end */
+	/* linux parallel burst end */
 
 	unsigned char buf[2], c, talk, mask, state, i;
 	int rv = 0;
@@ -621,8 +621,10 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 
 	case CBMCTRL_IEC_SET:
 		if (arg & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)) {
-			// there was some bit set that is not recognized, return
-			// with an error
+			/*
+			 * there was some bit set that is not recognized, return
+			 * with an error
+			 */
 			return -EINVAL;
 		} else {
 			if (arg & IEC_DATA)
@@ -638,8 +640,10 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 
 	case CBMCTRL_IEC_RELEASE:
 		if (arg & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)) {
-			// there was some bit set that is not recognized, return
-			// with an error
+			/*
+			 * there was some bit set that is not recognized, return
+			 * with an error
+			 */
 			return -EINVAL;
 		} else {
 			if (arg & IEC_DATA)
@@ -665,8 +669,10 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 			    || (release &
 				~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)))
 			{
-				// there was some bit set that is not recognized, return
-				// with an error
+				/*
+				 * there was some bit set that is not recognized, return
+				 * with an error
+				 */
 				return -EINVAL;
 			} else {
 				if (set & IEC_DATA)
@@ -714,10 +720,11 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 		return cbm_parallel_burst_write(arg);
 
 	case CBMCTRL_PARBURST_READ_TRACK:
-		user_val = (PARBURST_RW_VALUE *) arg;	// cast arg to structure pointer
+		/* cast arg to structure pointer */
+		user_val = (PARBURST_RW_VALUE *) arg;
 		/* copy the data to the kernel: */
-		if (copy_from_user(&kernel_val,	// kernel buffer
-				   user_val,	// user buffer
+		if (copy_from_user(&kernel_val,	/* kernel buffer */
+				   user_val,	/* user buffer */
 				   sizeof(PARBURST_RW_VALUE)))
 			return -EFAULT;
 		/* verify if it's ok to write into the buffer */
@@ -727,10 +734,11 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 		return cbm_parallel_burst_read_track(kernel_val.buffer);
 
 	case CBMCTRL_PARBURST_READ_TRACK_VAR:
-		user_val = (PARBURST_RW_VALUE *) arg;	// cast arg to structure pointer
+		/* cast arg to structure pointer */
+		user_val = (PARBURST_RW_VALUE *) arg;
 		/* copy the data to the kernel: */
-		if (copy_from_user(&kernel_val,	// kernel buffer
-				   user_val,	// user buffer
+		if (copy_from_user(&kernel_val,	/* kernel buffer */
+				   user_val,	/* user buffer */
 				   sizeof(PARBURST_RW_VALUE)))
 			return -EFAULT;
 		/* verify if it's ok to write into the buffer */
@@ -740,10 +748,11 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 		return cbm_parallel_burst_read_track_var(kernel_val.buffer);
 
 	case CBMCTRL_PARBURST_WRITE_TRACK:
-		user_val = (PARBURST_RW_VALUE *) arg;	// cast arg to structure pointer
+		/* cast arg to structure pointer */
+		user_val = (PARBURST_RW_VALUE *) arg;
 		/* copy the data to the kernel: */
-		if (copy_from_user(&kernel_val,	// kernel buffer
-				   user_val,	// user buffer
+		if (copy_from_user(&kernel_val,	/* kernel buffer */
+				   user_val,	/* user buffer */
 				   sizeof(PARBURST_RW_VALUE)))
 			return -EFAULT;
 		/* verify if it's ok to read from the buffer */
@@ -1000,7 +1009,7 @@ int cbm_parallel_burst_write_track(unsigned char *buffer, int length)
 
 	for (i = 0; i < length; i++) {
 		if (cbm_handshaked_write(buffer[i], i & 1)) {
-			// timeout
+			/* timeout */
 			enable();
 			return 0;
 		}
@@ -1019,7 +1028,7 @@ unsigned char cbm_parallel_burst_read(void)
 	SET(ATN_OUT);
 	msleep(20);		/* 200? */
 	while (GET(DATA_IN)) ;
-	/*linux rv = inportb(parport); */
+	/* linux rv = inportb(parport); */
 	if (!data_reverse) {
 		XP_WRITE(0xff);
 		set_data_reverse();
@@ -1038,16 +1047,16 @@ int cbm_parallel_burst_write(unsigned char c)
 	SET(ATN_OUT);
 	msleep(20);
 	while (GET(DATA_IN)) ;
-	/*linux PARWRITE(); */
+	/* linux PARWRITE(); */
 	if (data_reverse)
 		set_data_forward();
 	XP_WRITE(c);
-	/*linux outportb(parport, arg); */
+	/* linux outportb(parport, arg); */
 	msleep(5);
 	RELEASE(ATN_OUT);
 	msleep(20);
 	while (!GET(DATA_IN)) ;
-	/*linux PARREAD(); */
+	/* linux PARREAD(); */
 	if (!data_reverse) {
 		XP_WRITE(0xff);
 		set_data_reverse();
@@ -1066,9 +1075,9 @@ int cbm_handshaked_read(int toggle)
 	int returnvalue2, returnvalue3, timeoutcount;
 	int to = 0;
 
-	RELEASE(DATA_IN);	// not really needed?
+	RELEASE(DATA_IN);	/* not really needed? */
 
-	/*linux
+	/* linux
 	   RELEASE(DATA_OUT);
 	   msleep(2);
 	   GET(DATA_IN); */
@@ -1086,7 +1095,7 @@ int cbm_handshaked_read(int toggle)
 	timeoutcount = 0;
 
 	returnvalue3 = XP_READ();
-	returnvalue2 = ~returnvalue3;	// ensure to read once more
+	returnvalue2 = ~returnvalue3;	/* ensure to read once more */
 
 	do {
 		if (++timeoutcount >= 8) {
@@ -1122,7 +1131,7 @@ int cbm_handshaked_write(char data, int toggle)
 			if (to++ > TO_HANDSHAKED_WRITE)
 				return 1;
 	}
-	/*linux outportb(parport, data); */
+	/* linux outportb(parport, data); */
 	if (data_reverse)
 		set_data_forward();
 	XP_WRITE(data);
