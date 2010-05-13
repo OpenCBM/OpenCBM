@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.31 2010-05-13 22:05:07 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.32 2010-05-13 22:05:37 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -257,7 +257,7 @@ static struct wait_queue *cbm_wait_q;
 static wait_queue_head_t cbm_wait_q;
 #endif
 volatile static int eoi;
-volatile static int irq_count;
+volatile static int cbm_irq_count;
 
 #ifndef KERNEL_VERSION
 # define signal_pending(p) (p->signal & ~p->blocked)
@@ -425,7 +425,7 @@ static void wait_for_listener(void)
         add_wait_queue(&cbm_wait_q, &wait);
         current->state = TASK_INTERRUPTIBLE;
         RELEASE(CLK_OUT);
-        while(irq_count && !signal_pending(current)) {
+        while(cbm_irq_count && !signal_pending(current)) {
             schedule();
         }
         remove_wait_queue(&cbm_wait_q, &wait);
@@ -537,7 +537,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
         size_t sent = 0;
         unsigned long flags;
 
-        eoi = irq_count = 0;
+        eoi = cbm_irq_count = 0;
 
         DPRINTK("cbm_write: %d bytes, atn=%d\n", cnt, atn);
 
@@ -574,7 +574,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
                 }
                 udelay(50);
                 if(GET(DATA_IN)) {
-                        irq_count = ((sent == (cnt-1)) && (atn == 0)) ? 2 : 1;
+                        cbm_irq_count = ((sent == (cnt-1)) && (atn == 0)) ? 2 : 1;
                         wait_for_listener();
 
                         if(signal_pending(current)) {
@@ -886,10 +886,10 @@ static irqreturn_t cbm_interrupt(int irq, void *dev_id)
 {
         POLL();         /* acknowledge interrupt */
 
-        if(irq_count == 0) {
+        if(cbm_irq_count == 0) {
                 return IRQ_NONE;
         }
-        if(--irq_count == 0) {
+        if(--cbm_irq_count == 0) {
                 DPRINTK("continue to send (no EOI)\n");
                 SET(CLK_OUT);
                 wake_up_interruptible(&cbm_wait_q);
@@ -1031,7 +1031,7 @@ int cbm_init(void)
 #endif
                         );
 
-        irq_count = 0;
+        cbm_irq_count = 0;
 
         out_bits  = (CTRL_READ() ^ out_eor) &
                     (DATA_OUT|CLK_OUT|ATN_OUT|RESET);
