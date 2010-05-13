@@ -12,14 +12,14 @@
  *  Copyright 2005      Tim Schürmann                    (Parallel Burst Routines)
  *  Copyright 2005-2006,2009 Spiro Trikaliotis           (Parallel Burst Routines)
  *  Copyright 2007-2009 Frédéric Brière                  (Adjustments on newer Linux kernels, abstraction from real hardware)
- *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>      (Parallel Burst Routines)
+ *  Copyright 2009      Arnd Menge <arnd(at)jonnz(dot)de> (Parallel Burst Routines)
  *
  *
  */
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.29 2010-05-13 22:01:27 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.30 2010-05-13 22:04:08 fbriere Exp $";
 #endif
 
 #include <linux/version.h>

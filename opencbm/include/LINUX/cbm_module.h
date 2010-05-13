@@ -5,10 +5,10 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2009 Arnd <arnd(at)jonnz(dot)de>
+ *  Copyright 2009 Arnd Menge <arnd(at)jonnz(dot)de>
 */
 
-/* $Id: cbm_module.h,v 1.7 2009-11-15 20:55:40 strik Exp $ */
+/* $Id: cbm_module.h,v 1.8 2010-05-13 22:04:08 fbriere Exp $ */
 
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H
