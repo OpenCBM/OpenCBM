@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.37 2010-05-13 22:10:43 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.38 2010-05-13 22:10:48 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -379,11 +379,7 @@ static int send_byte(int b)
  */
 static void wait_for_listener(void)
 {
-#ifdef DECLARE_WAITQUEUE
         DECLARE_WAITQUEUE(wait, current);
-#else
-        struct wait_queue wait = { current, NULL };
-#endif
 
 #ifdef FOUR_BIT_CONTROL
         parport_enable_irq(cbm_device->port);
@@ -793,9 +789,7 @@ static int cbm_open(struct inode *inode, struct file *f)
 {
         if(busy) return -EBUSY;
 
-#ifdef DECLARE_WAITQUEUE
         init_waitqueue_head(&cbm_wait_q);
-#endif
         busy = 1;
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0))
         MOD_INC_USE_COUNT;
