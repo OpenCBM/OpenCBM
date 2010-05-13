@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.27 2010-05-13 22:00:28 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.28 2010-05-13 22:00:53 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -591,17 +591,11 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
                 } else {
                      printk("cbm_write: device not present\n");
                      rv = -ENODEV;
-
-                     /*
-                      *  if there is no device, we cannot about the talk-listener-turnaround!
-                      *  (We would block if we would wait!)
-                      */
-                     talk = 0;
                 }
         }
         DPRINTK("%d bytes sent, rv=%d\n", sent, rv);
 
-        if(talk) {
+        if(talk && (rv == 0)) {
                 local_irq_save(flags);
                 SET(DATA_OUT);
                 RELEASE(ATN_OUT);
