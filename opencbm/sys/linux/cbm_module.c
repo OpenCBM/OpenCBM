@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.41 2010-05-13 22:11:03 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.42 2010-05-13 22:11:08 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -104,33 +104,21 @@ int reset            =  1;              /* >1 => force reset            */
 int hold_clk         =  1;              /* >0 => strict C64 behaviour   */
                                         /* =0 => release CLK when idle  */
 
-/* if module_param() is defined as a macro, use that. If not, use the old,
- * deprecated MODULE_PARM() implementation. */
-
-#ifdef module_param
-        #define CBM_MODULE_PARAM(_var, _type, _perm, _oldtype) \
-                      module_param(_var, _type, _perm);
-#else
-        #define CBM_MODULE_PARAM(_var, _type, _perm, _oldtype) \
-                      MODULE_PARM(_var, _oldtype);
-#endif
-
-
 #ifdef DIRECT_PORT_ACCESS
-CBM_MODULE_PARAM(port,int,0444,"i");
+module_param(port,int,0444);
 MODULE_PARM_DESC(port, "IO portnumber of parallel port. (default 0x378)");
 
-CBM_MODULE_PARAM(irq,int,0444,"i");
+module_param(irq,int,0444);
 MODULE_PARM_DESC(irq, "IRQ number of parallel port. (default 7)");
 #else
-CBM_MODULE_PARAM(lp,int,0444,"i");
+module_param(lp,int,0444);
 MODULE_PARM_DESC(lp, "parallel port number. (default 0)");
 #endif  /* DIRECT_PORT_ACCESS */
 
-CBM_MODULE_PARAM(cable,int,0444,"i");
+module_param(cable,int,0444);
 MODULE_PARM_DESC(cable, "cable type: <0=autodetect, 0=non-inverted (XM1541), >0=inverted (XA1541). (default -1)");
 
-CBM_MODULE_PARAM(reset,int,0444,"i");
+module_param(reset,int,0444);
 MODULE_PARM_DESC(reset, "reset at module load: <0=smart reset, 0=no reset, >0 force reset (default: "
 #ifdef DIRECT_PORT_ACCESS
                 "-1"
@@ -138,7 +126,7 @@ MODULE_PARM_DESC(reset, "reset at module load: <0=smart reset, 0=no reset, >0 fo
                 "1"
 #endif
                 ")");
-CBM_MODULE_PARAM(hold_clk,int,0444,"i");
+module_param(hold_clk,int,0444);
 MODULE_PARM_DESC(hold_clk, "0=release CLK when idle, >0=strict C64 behaviour. (default 1)");
 
 MODULE_AUTHOR("Michael Klein");
