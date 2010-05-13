@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.35 2010-05-13 22:10:34 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.36 2010-05-13 22:10:39 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -38,7 +38,7 @@ static char *rcsid =
  * Starting with 2.3.10, the IRQ and bi-directional bits are uncoupled from
  * the control byte.
  */
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,10)) && !defined(DIRECT_PORT_ACCESS)
+#ifndef DIRECT_PORT_ACCESS
 # define FOUR_BIT_CONTROL
 #endif
 
@@ -238,11 +238,7 @@ static struct pardevice *cbm_device;
 # define SHOW(str)
 #endif
 
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,3,0))
-static struct wait_queue *cbm_wait_q;
-#else
 static wait_queue_head_t cbm_wait_q;
-#endif
 volatile static int eoi;
 volatile static int cbm_irq_count;
 
@@ -862,9 +858,7 @@ static void cbm_interrupt_pp(void *dev_id)
 
 static struct file_operations cbm_fops =
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,3,0))
         .owner   = THIS_MODULE,    /* owner */
-#endif
         .read    = cbm_read,       /* read */
         .write   = cbm_write,      /* write */
         .ioctl   = cbm_ioctl,      /* ioctl */
