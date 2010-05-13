@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.43 2010-05-13 22:11:13 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.44 2010-05-13 22:11:18 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -136,13 +136,9 @@ MODULE_LICENSE("GPL");
 #define NAME      "cbm"
 #define CBM_MINOR 177
 
-#ifdef MODULE_ALIAS
 MODULE_ALIAS("opencbm");
-#endif
 
-#ifdef MODULE_ALIAS_MISCDEV
 MODULE_ALIAS_MISCDEV(CBM_MINOR);
-#endif
 
 #define IEC_DATA   1
 #define IEC_CLOCK  2
