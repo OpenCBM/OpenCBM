@@ -8,7 +8,7 @@
  *  Copyright 2009 Arnd Menge <arnd(at)jonnz(dot)de>
 */
 
-/* $Id: cbm_module.h,v 1.8 2010-05-13 22:04:08 fbriere Exp $ */
+/* $Id: cbm_module.h,v 1.9 2010-05-13 22:11:32 fbriere Exp $ */
 
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H
@@ -43,9 +43,9 @@
 #define CBMCTRL_PARBURST_WRITE_TRACK _IO(CBMCTRL_BASE, 20)
 #define CBMCTRL_PARBURST_READ_TRACK_VAR    _IO(CBMCTRL_BASE, 21)
 
-typedef struct PARBURST_RW_VALUE {     // all values needed by PARBURST_READ_TRACK and PARBURST_WRITE_TRACK
-       unsigned char *buffer;
-       int length;
+typedef struct PARBURST_RW_VALUE {	// all values needed by PARBURST_READ_TRACK and PARBURST_WRITE_TRACK
+	unsigned char *buffer;
+	int length;
 } PARBURST_RW_VALUE;
 
 #endif
