@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.51 2010-05-13 22:11:51 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.52 2010-05-13 22:11:55 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -66,8 +66,6 @@ static char *rcsid =
 #define IRQSTOPVARS     unsigned long flags; spinlock_t parallel_burst_lock = SPIN_LOCK_UNLOCKED;
 #define disable()       spin_lock_irqsave(&parallel_burst_lock, flags)
 #define enable()        spin_unlock_irqrestore(&parallel_burst_lock, flags)
-#define printf(x)       printk(x)
-#define msleep(x)       udelay(x)	/* delay for x microseconds */
 
 /* forward references for parallel burst routines */
 int cbm_parallel_burst_read_track(unsigned char *buffer);
@@ -1026,7 +1024,7 @@ unsigned char cbm_parallel_burst_read(void)
 
 	RELEASE(DATA_OUT | CLK_OUT);
 	SET(ATN_OUT);
-	msleep(20);		/* 200? */
+	udelay(20);		/* 200? */
 	while (GET(DATA_IN)) ;
 	/* linux rv = inportb(parport); */
 	if (!data_reverse) {
@@ -1034,9 +1032,9 @@ unsigned char cbm_parallel_burst_read(void)
 		set_data_reverse();
 	}
 	rv = XP_READ();
-	msleep(5);
+	udelay(5);
 	RELEASE(ATN_OUT);
-	msleep(10);
+	udelay(10);
 	while (!GET(DATA_IN)) ;
 	return rv;
 }
@@ -1045,16 +1043,16 @@ int cbm_parallel_burst_write(unsigned char c)
 {
 	RELEASE(DATA_OUT | CLK_OUT);
 	SET(ATN_OUT);
-	msleep(20);
+	udelay(20);
 	while (GET(DATA_IN)) ;
 	/* linux PARWRITE(); */
 	if (data_reverse)
 		set_data_forward();
 	XP_WRITE(c);
 	/* linux outportb(parport, arg); */
-	msleep(5);
+	udelay(5);
 	RELEASE(ATN_OUT);
-	msleep(20);
+	udelay(20);
 	while (!GET(DATA_IN)) ;
 	/* linux PARREAD(); */
 	if (!data_reverse) {
@@ -1079,7 +1077,7 @@ int cbm_handshaked_read(int toggle)
 
 	/* linux
 	   RELEASE(DATA_OUT);
-	   msleep(2);
+	   udelay(2);
 	   GET(DATA_IN); */
 
 	if (!toggle) {
