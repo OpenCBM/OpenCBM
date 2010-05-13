@@ -19,12 +19,12 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.44 2010-05-13 22:11:18 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.45 2010-05-13 22:11:22 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
 
-#ifdef KERNEL_INCLUDE_OLD_CONFIG_H
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)
  #include <linux/config.h>
 #elif LINUX_VERSION_CODE < KERNEL_VERSION(2,6,33)
  #include <linux/autoconf.h>
