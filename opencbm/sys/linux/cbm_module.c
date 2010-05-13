@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.33 2010-05-13 22:10:24 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.34 2010-05-13 22:10:29 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -61,9 +61,7 @@ static char *rcsid =
 #include <linux/miscdevice.h>
 #include <linux/sched.h>
 
-#ifdef KERNEL_VERSION                   /* kernel > 2.0.x */
-# include <asm/uaccess.h>
-#endif
+#include <asm/uaccess.h>
 
 #include "cbm_module.h"
 
@@ -123,17 +121,16 @@ int hold_clk         =  1;              /* >0 => strict C64 behaviour   */
 #endif
 
 
-#ifdef KERNEL_VERSION
-# ifdef DIRECT_PORT_ACCESS
+#ifdef DIRECT_PORT_ACCESS
 CBM_MODULE_PARAM(port,int,0444,"i");
 MODULE_PARM_DESC(port, "IO portnumber of parallel port. (default 0x378)");
 
 CBM_MODULE_PARAM(irq,int,0444,"i");
 MODULE_PARM_DESC(irq, "IRQ number of parallel port. (default 7)");
-# else
+#else
 CBM_MODULE_PARAM(lp,int,0444,"i");
 MODULE_PARM_DESC(lp, "parallel port number. (default 0)");
-# endif  /* DIRECT_PORT_ACCESS */
+#endif  /* DIRECT_PORT_ACCESS */
 
 CBM_MODULE_PARAM(cable,int,0444,"i");
 MODULE_PARM_DESC(cable, "cable type: <0=autodetect, 0=non-inverted (XM1541), >0=inverted (XA1541). (default -1)");
@@ -151,10 +148,9 @@ MODULE_PARM_DESC(hold_clk, "0=release CLK when idle, >0=strict C64 behaviour. (d
 
 MODULE_AUTHOR("Michael Klein");
 MODULE_DESCRIPTION("Serial CBM bus driver module");
-# ifdef MODULE_LICENSE
+#ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
-# endif  /* MODULE_LICENSE */
-#endif  /* KERNEL_VERSION */
+#endif  /* MODULE_LICENSE */
 
 #define NAME      "cbm"
 #define CBM_MINOR 177
@@ -253,10 +249,6 @@ static wait_queue_head_t cbm_wait_q;
 #endif
 volatile static int eoi;
 volatile static int cbm_irq_count;
-
-#ifndef KERNEL_VERSION
-# define signal_pending(p) (p->signal & ~p->blocked)
-#endif
 
 #ifndef local_irq_save
 # define local_irq_save(flags)    { save_flags(flags); cli(); }
@@ -358,12 +350,7 @@ static void do_reset( void )
         data_reverse = 0;
         SET(RESET);
         current->state = TASK_INTERRUPTIBLE;
-#ifdef KERNEL_VERSION
         schedule_timeout(HZ/10); /* 100ms */
-#else
-        current->timeout = jiffies + 10;
-        schedule();
-#endif
         RELEASE(RESET);
 
         printk("cbm: waiting for free bus...\n");
@@ -431,11 +418,7 @@ static void wait_for_listener(void)
 #endif
 }
 
-#ifdef KERNEL_VERSION
 static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
-#else
-static int cbm_read(struct inode *inode, struct file *f, char *buf, int count)
-#endif
 {
         size_t received = 0;
         int i, b, bit;
@@ -453,12 +436,7 @@ static int cbm_read(struct inode *inode, struct file *f, char *buf, int count)
                 while(GET(CLK_IN)) {
                         if( i >= 50 ) {
                                 current->state = TASK_INTERRUPTIBLE;
-#ifdef KERNEL_VERSION
                                 schedule_timeout(HZ/50);
-#else
-                                current->timeout = jiffies+4;
-                                schedule();
-#endif
                                 if(signal_pending(current)) {
                                         return -EINTR;
                                 }
@@ -550,20 +528,11 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
         }
 
         current->state = TASK_INTERRUPTIBLE;
-#ifdef KERNEL_VERSION
         schedule_timeout(HZ/50);   /* 20ms */
-#else
-        current->timeout = jiffies + 2;
-        schedule();
-#endif
 
         while(cnt > sent && rv == 0) {
                 if(atn == 0) {
-#ifdef KERNEL_VERSION
                     get_user(c, buf++);
-#else
-                    c = get_user(buf++);
-#endif
                 } else {
                     c = *buf++;
                 }
@@ -613,11 +582,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
         return (rv < 0) ? rv : (int)sent;
 }
 
-#ifdef KERNEL_VERSION
 static ssize_t cbm_write(struct file *f, const char *buf, size_t cnt, loff_t *ppos)
-#else
-static int cbm_write(struct inode *inode, struct file *f, const char *buf, int cnt)
-#endif
 {
         return cbm_raw_write(buf, cnt, 0, 0);
 }
@@ -695,12 +660,7 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
                         while((POLL() & mask) == state) {
                                 if(i >= 20) {
                                     current->state = TASK_INTERRUPTIBLE;
-#ifdef KERNEL_VERSION
                                     schedule_timeout(HZ/50);   /* 20ms */
-#else
-                                    current->timeout = jiffies + 2;
-                                    schedule();
-#endif
                                     if(signal_pending(current)) {
                                             return -EINTR;
                                     }
@@ -859,22 +819,14 @@ static int cbm_open(struct inode *inode, struct file *f)
         return 0;
 }
 
-static
-#ifdef KERNEL_VERSION
-int
-#else
-void
-#endif
-cbm_release(struct inode *inode, struct file *f)
+static int cbm_release(struct inode *inode, struct file *f)
 {
         if(!hold_clk) RELEASE(CLK_OUT);
         busy = 0;
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0))
         MOD_DEC_USE_COUNT;
 #endif
-#ifdef KERNEL_VERSION
         return 0;
-#endif
 }
 
 static irqreturn_t cbm_interrupt(int irq, void *dev_id)
@@ -1045,12 +997,7 @@ int cbm_init(void)
         data_reverse = 0;
 
         current->state = TASK_INTERRUPTIBLE;
-#ifdef KERNEL_VERSION
         schedule_timeout(HZ/20); /* 50ms */
-#else
-        current->timeout = jiffies + 5;
-        schedule();
-#endif
 
 #ifndef DIRECT_PORT_ACCESS
 #endif
