@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.45 2010-05-13 22:11:22 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.46 2010-05-13 22:11:27 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -960,7 +960,7 @@ int cbm_parallel_burst_read_track(unsigned char *buffer)
 
         disable();
 
-        for (i = 0; i < 0x2000; i += 1)//2)
+        for (i = 0; i < 0x2000; i += 1)
         {
                 byte = cbm_handshaked_read(i&1);
                 if (byte == -1)
@@ -985,7 +985,7 @@ int cbm_parallel_burst_read_track_var(unsigned char *buffer)
 
 	disable();
 
-	for (i = 0; i < 0x2000; i += 1)//2)
+	for (i = 0; i < 0x2000; i += 1)
 	{
 		byte = cbm_handshaked_read(i&1);
 		if (byte == -1)
@@ -1045,26 +1045,6 @@ unsigned char cbm_parallel_burst_read(void)
         msleep(10);
         while(!GET(DATA_IN));
         return rv;
-
-        
-/* previous version: */                 
-/**                     RELEASE(DATA_OUT|CLK_OUT);
-                        SET(ATN_OUT);
-                        for (j=0; j < 20; j++) GET(DATA_IN);
-                        while(GET(DATA_IN));
-                        // rv = inportb(parport);
-                        // rv=XP_READ();
-                                if(!(out_bits & LP_BIDIR)) {
-                                        XP_WRITE(0xff);
-                                        SET(LP_BIDIR);
-                                }
-                                rv=XP_READ();   
-                        for (j=0; j < 5; j++) GET(DATA_IN); // extra
-                        RELEASE(ATN_OUT);
-                        for (j=0; j < 20; j++) GET(DATA_IN);
-                        while(!GET(DATA_IN));
-                        return rv;
-**/
 }
 
 int cbm_parallel_burst_write(unsigned char c)
@@ -1090,32 +1070,6 @@ int cbm_parallel_burst_write(unsigned char c)
                 }
                 XP_READ();
         return 0;
-
-
-/* previous version: */
-/**
-                        RELEASE(DATA_OUT|CLK_OUT);
-                        SET(ATN_OUT);
-                        for (j=0; j < 20; j++) GET(DATA_IN);
-                        while(GET(DATA_IN));
-                        // outportb(parport, arg);
-                        // XP_WRITE(arg);
-                                if(out_bits & LP_BIDIR) {
-                                        RELEASE(LP_BIDIR);
-                                }
-                                XP_WRITE(c);
-                        for (j=0; j < 5; j++) GET(DATA_IN);
-                        RELEASE(ATN_OUT);
-                        for (j=0; j < 20; j++) GET(DATA_IN);
-                        while(!GET(DATA_IN));
-                        // XP_READ();
-                                if(!(out_bits & LP_BIDIR)) {
-                                        XP_WRITE(0xff);
-                                        SET(LP_BIDIR);
-                                }
-                                XP_READ();
-                        return 0;
-**/
 }
 
 #define TO_HANDSHAKED_READ  3300000
