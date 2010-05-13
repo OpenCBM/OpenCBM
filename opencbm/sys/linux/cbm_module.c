@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.53 2010-05-13 22:11:59 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.54 2010-05-13 22:12:04 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -565,7 +565,7 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 		buf[1] |= (cmd == CBMCTRL_OPEN) ? 0xf0 : 0xe0;
 		rv = cbm_raw_write(buf, 2, 1, 0);
 		if ((cmd == CBMCTRL_CLOSE) && (rv == 0)) {
-			/* issue a unlisten */
+			/* issue an unlisten */
 			buf[0] = 0x3f;
 			cbm_raw_write(buf, 1, 1, 0);
 		}
@@ -865,7 +865,7 @@ int cbm_init(void)
 	pp = parport_find_number(lp);
 
 	if (pp == NULL) {
-		printk("cbm_init: non-existant port: %d\n", lp);
+		printk("cbm_init: non-existent port: %d\n", lp);
 		return -ENODEV;
 	}
 	if (pp->irq <= 0) {
