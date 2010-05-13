@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.38 2010-05-13 22:10:48 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.39 2010-05-13 22:10:53 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -183,9 +183,6 @@ MODULE_ALIAS_MISCDEV(CBM_MINOR);
 #define CLK_IN     0x20
 #define DATA_IN    0x40
 
-
-#define cbm_init    init_module
-#define cbm_cleanup cleanup_module
 
 static unsigned char out_bits, out_eor;
 static int busy;
@@ -985,6 +982,8 @@ int cbm_init(void)
 
 
 
+module_init(cbm_init);
+module_exit(cbm_cleanup);
 
 /* 
         And here are the functions, used by parallel burst 
