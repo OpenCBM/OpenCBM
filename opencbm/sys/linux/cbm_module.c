@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.54 2010-05-13 22:12:04 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.55 2010-05-13 22:12:08 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -59,13 +59,6 @@ static char *rcsid =
 #include <asm/uaccess.h>
 
 #include "cbm_module.h"
-
-/* Defines needed by parallel burst-routines: */
-#include <linux/spinlock.h>	/* the spinlock-system, used for parallel burst */
-
-#define IRQSTOPVARS     unsigned long flags; spinlock_t parallel_burst_lock = SPIN_LOCK_UNLOCKED;
-#define disable()       spin_lock_irqsave(&parallel_burst_lock, flags)
-#define enable()        spin_unlock_irqrestore(&parallel_burst_lock, flags)
 
 /* forward references for parallel burst routines */
 int cbm_parallel_burst_read_track(unsigned char *buffer);
@@ -954,37 +947,35 @@ module_exit(cbm_cleanup);
 int cbm_parallel_burst_read_track(unsigned char *buffer)
 {
 	int i, byte;
+	unsigned long flags;
 
-	IRQSTOPVARS;
-
-	disable();
+	local_irq_save(flags);
 
 	for (i = 0; i < 0x2000; i += 1) {
 		byte = cbm_handshaked_read(i & 1);
 		if (byte == -1) {
-			enable();
+			local_irq_restore(flags);
 			return 0;
 		}
 		buffer[i] = byte;
 	}
 
 	cbm_parallel_burst_read();
-	enable();
+	local_irq_restore(flags);
 	return 1;
 }
 
 int cbm_parallel_burst_read_track_var(unsigned char *buffer)
 {
 	int i, byte;
+	unsigned long flags;
 
-	IRQSTOPVARS;
-
-	disable();
+	local_irq_save(flags);
 
 	for (i = 0; i < 0x2000; i += 1) {
 		byte = cbm_handshaked_read(i & 1);
 		if (byte == -1) {
-			enable();
+			local_irq_restore(flags);
 			return 0;
 		}
 		buffer[i] = byte;
@@ -993,28 +984,27 @@ int cbm_parallel_burst_read_track_var(unsigned char *buffer)
 	}
 
 	cbm_parallel_burst_read();
-	enable();
+	local_irq_restore(flags);
 	return 1;
 }
 
 int cbm_parallel_burst_write_track(unsigned char *buffer, int length)
 {
 	int i;
+	unsigned long flags;
 
-	IRQSTOPVARS;
-
-	disable();
+	local_irq_save(flags);
 
 	for (i = 0; i < length; i++) {
 		if (cbm_handshaked_write(buffer[i], i & 1)) {
 			/* timeout */
-			enable();
+			local_irq_restore(flags);
 			return 0;
 		}
 	}
 	cbm_handshaked_write(0, i & 1);
 	cbm_parallel_burst_read();
-	enable();
+	local_irq_restore(flags);
 	return 1;
 }
 
