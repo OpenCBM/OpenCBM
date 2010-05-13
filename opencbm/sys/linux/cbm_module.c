@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.34 2010-05-13 22:10:29 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.35 2010-05-13 22:10:34 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -33,10 +33,6 @@ static char *rcsid =
 #endif
 
 #include <linux/module.h>
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,1,47)
-# define DIRECT_PORT_ACCESS
-#endif
 
 /*
  * Starting with 2.3.10, the IRQ and bi-directional bits are uncoupled from
