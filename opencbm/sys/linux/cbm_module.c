@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.52 2010-05-13 22:11:55 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.53 2010-05-13 22:11:59 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -372,7 +372,7 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
 	int ok = 0;
 	unsigned long flags;
 
-	DPRINTK("cbm_read: %d bytes\n", count);
+	DPRINTK("cbm_read: %zu bytes\n", count);
 
 	if (eoi)
 		return 0;
@@ -435,7 +435,7 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
 		return -EIO;
 	}
 
-	DPRINTK("received=%d, count=%d, ok=%d, eoi=%d\n",
+	DPRINTK("received=%zu, count=%zu, ok=%d, eoi=%d\n",
 		received, count, ok, eoi);
 
 	return received;
@@ -451,7 +451,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
 
 	eoi = cbm_irq_count = 0;
 
-	DPRINTK("cbm_write: %d bytes, atn=%d\n", cnt, atn);
+	DPRINTK("cbm_write: %zu bytes, atn=%d\n", cnt, atn);
 
 	RELEASE(DATA_OUT);
 	SET(CLK_OUT | (atn ? ATN_OUT : 0));
@@ -495,7 +495,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
 			rv = -ENODEV;
 		}
 	}
-	DPRINTK("%d bytes sent, rv=%d\n", sent, rv);
+	DPRINTK("%zu bytes sent, rv=%d\n", sent, rv);
 
 	if (talk && (rv == 0)) {
 		local_irq_save(flags);
