@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.36 2010-05-13 22:10:39 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.37 2010-05-13 22:10:43 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -52,7 +52,6 @@ static char *rcsid =
 #include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/fs.h>
-#include <linux/interrupt.h> /* cli() */
 #include <linux/kernel.h>
 #include <linux/miscdevice.h>
 #include <linux/sched.h>
@@ -241,11 +240,6 @@ static struct pardevice *cbm_device;
 static wait_queue_head_t cbm_wait_q;
 volatile static int eoi;
 volatile static int cbm_irq_count;
-
-#ifndef local_irq_save
-# define local_irq_save(flags)    { save_flags(flags); cli(); }
-# define local_irq_restore(flags) { restore_flags(flags); }
-#endif
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0)) || defined(DIRECT_PORT_ACCESS)
 # ifndef IRQ_NONE
