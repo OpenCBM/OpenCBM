@@ -19,7 +19,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.42 2010-05-13 22:11:08 fbriere Exp $";
+    "@(#) $Id: cbm_module.c,v 1.43 2010-05-13 22:11:13 fbriere Exp $";
 #endif
 
 #include <linux/version.h>
@@ -766,9 +766,6 @@ static int cbm_open(struct inode *inode, struct file *f)
 
         init_waitqueue_head(&cbm_wait_q);
         busy = 1;
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0))
-        MOD_INC_USE_COUNT;
-#endif
         if(hold_clk) SET(CLK_OUT);
 
         return 0;
@@ -778,9 +775,6 @@ static int cbm_release(struct inode *inode, struct file *f)
 {
         if(!hold_clk) RELEASE(CLK_OUT);
         busy = 0;
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,5,0))
-        MOD_DEC_USE_COUNT;
-#endif
         return 0;
 }
 
@@ -867,13 +861,7 @@ int cbm_init(void)
         request_region(port, 3, NAME);
 #else
         struct parport *pp;
-# if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0)
         pp = parport_find_number(lp);
-# else
-        int i;
-        for(i = lp, pp = parport_enumerate(); pp && i; i--, pp = pp->next)
-                ;       /* nothing */
-# endif
 
         if(pp == NULL)
         {
