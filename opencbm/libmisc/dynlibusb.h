@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file libmisc/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dynlibusb.h,v 1.2 2010-02-21 09:47:13 strik Exp $ \n
+** \version $Id: dynlibusb.h,v 1.3 2010-06-10 19:53:27 strik Exp $ \n
 ** \n
 ** \brief Allow for libusb (0.1) to be loaded dynamically
 **        (Currently, this is used on Windows only)
@@ -46,7 +46,7 @@ struct usb_dll_s {
 //    int (LIBUSB_APIDECL *get_descriptor_by_endpoint)(usb_dev_handle *udev, int ep, unsigned char type, unsigned char index, void *buf, int size);
 //    int (LIBUSB_APIDECL *get_descriptor)(usb_dev_handle *udev, unsigned char type, unsigned char index, void *buf, int size);
 
-    int (LIBUSB_APIDECL *bulk_write)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
+    int (LIBUSB_APIDECL *bulk_write)(usb_dev_handle *dev, int ep, const char *bytes, int size, int timeout);
     int (LIBUSB_APIDECL *bulk_read)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
 //    int (LIBUSB_APIDECL *interrupt_write)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);
 //    int (LIBUSB_APIDECL *interrupt_read)(usb_dev_handle *dev, int ep, char *bytes, int size, int timeout);

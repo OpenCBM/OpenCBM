@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file libmisc/LINUX/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dynlibusb.c,v 1.1 2010-02-20 20:50:38 strik Exp $ \n
+** \version $Id: dynlibusb.c,v 1.2 2010-06-10 19:53:27 strik Exp $ \n
 ** \n
 ** \brief Allow for libusb (0.1) to be loaded dynamically
 **        (Currently, this is used on Windows only)
@@ -29,7 +29,8 @@
 #include "dynlibusb.h"
 #include "getpluginaddress.h"
 
-usb_dll_t usb = { 
+usb_dll_t usb = {
+    NULL,
     usb_open, usb_close, usb_bulk_write, usb_bulk_read, usb_control_msg, usb_set_configuration, usb_claim_interface, usb_release_interface,
     usb_strerror, usb_init, usb_find_busses, usb_find_devices, usb_get_busses
 };
