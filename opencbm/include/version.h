@@ -10,7 +10,7 @@
 /*! **************************************************************
 ** \file include/version.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: version.h,v 1.188 2010-04-06 07:17:32 strik Exp $ \n
+** \version $Id: version.h,v 1.189 2010-06-10 20:40:35 strik Exp $ \n
 ** \n
 ** \brief Defining OpenCBM version
 **
@@ -23,13 +23,13 @@
 #define OPENCBM_VERSION_MINOR       4
 #define OPENCBM_VERSION_SUBMINOR    99
 #define OPENCBM_VERSION_PATCHLEVEL  0
-#define OPENCBM_VERSION_DEVEL       86
+#define OPENCBM_VERSION_DEVEL       87
 
 #define OPENCBM_BUILD_VERSION_HELP(          _a        ) #_a
 #define OPENCBM_BUILD_VERSION_STRING_PART(   _a        ) OPENCBM_BUILD_VERSION_HELP(_a)
 #define OPENCBM_BUILD_VERSION_STRING_RELEASE(_a, _b, _c) OPENCBM_BUILD_VERSION_HELP(_a) "." OPENCBM_BUILD_VERSION_HELP(_b) "." OPENCBM_BUILD_VERSION_HELP(_c)
 
-#define OPENCBM_BUILD_VERSION_STRING_CVS "$Id: version.h,v 1.188 2010-04-06 07:17:32 strik Exp $"
+#define OPENCBM_BUILD_VERSION_STRING_CVS "$Id: version.h,v 1.189 2010-06-10 20:40:35 strik Exp $"
 
 
 #if OPENCBM_VERSION_DEVEL == 0
