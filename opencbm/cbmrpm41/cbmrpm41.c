@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.18 2007-05-01 17:51:38 strik Exp $";
+    "@(#) $Id: cbmrpm41.c,v 1.19 2010-06-10 19:47:08 strik Exp $";
 #endif
 
 #include "cbmrpm41.h"
@@ -210,7 +210,8 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
                     GroupOfMeasurements *pDeltaGroup,
                     int printDeltas)
 {
-    unsigned char cmd[10], insts[40];
+    char cmd[10];
+    unsigned char insts[40];
     unsigned int mNo, timerValue, lastTvalue;
 #if _MINMAX_VALUES_PRINTOUT
     unsigned int dMin=~0, dMax=0;
@@ -552,7 +553,8 @@ int ARCH_MAINDECL
 main(int argc, char *argv[])
 {
     int status = 0;
-    __u_char cmd[40], job = 1, begintrack = 1, endtrack = 35, retries = 5;
+    char cmd[40];
+    __u_char job = 1, begintrack = 1, endtrack = 35, retries = 5;
     char c, *arg;
     char *adapter = NULL;
     int sector = 0, berror = 0;
