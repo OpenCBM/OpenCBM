@@ -1,23 +1,18 @@
 /*
- * Board interface routines for the USBKEY development kit
- * Copyright (c) 2009-2010 Nate Lawson <nate@root.org>
+ * Board interface routines for the ZoomFloppy
+ * Copyright (c) 2010 Nate Lawson <nate@root.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version
  * 2 of the License, or (at your option) any later version.
  */
-#include <LUFA/Drivers/Board/LEDs.h>
 #include "xum1541.h"
 
 // IEC and parallel port accessors
-#define CBM_PORT  PORTA
-#define CBM_DDR   DDRA
-#define CBM_PIN   PINA
-
-#define PAR_PORT_PORT   PORTC
-#define PAR_PORT_DDR    DDRC
-#define PAR_PORT_PIN    PINC
+#define PAR_PORT_PORT   PORTB
+#define PAR_PORT_DDR    DDRB
+#define PAR_PORT_PIN    PINB
 
 #ifdef DEBUG
 // Send a byte to the UART for debugging printf()
@@ -37,16 +32,10 @@ static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
 void
 board_init(void)
 {
-    /*
-     * Configure the IEC port for 4 inputs, 4 outputs.
-     *
-     * Add pull-ups on all the inputs since we're running at 3.3V while
-     * the 1541 is at 5V.  This causes current to flow into our Vcc
-     * through the 1541's 1K ohm pull-ups but with our pull-ups also,
-     * the current is only ~50 uA (versus 1.7 mA with just the 1K pull-ups).
-     */
-    CBM_DDR = IO_OUTPUT_MASK;
-    CBM_PORT = ~IO_OUTPUT_MASK;
+    // IO port initiailization. CBM is on D and C, parallel B.
+    DDRC = IO_MASK_C;
+    DDRD = IO_MASK_D;
+    PAR_PORT_DDR = 0;
 
 #ifdef DEBUG
     /*
@@ -59,8 +48,6 @@ board_init(void)
     stdout = &mystdout;
 #endif
 
-    LEDs_Init();
-
     // Setup 16 bit timer as normal counter with prescaler F_CPU/1024.
     // We use this to create a repeating 100 ms (10 hz) clock.
     OCR1A = (F_CPU / 1024) / 10;
@@ -68,38 +55,58 @@ board_init(void)
 }
 
 /*
- * Routines for getting/setting individual IEC lines. Note that we add
- * a short delay after changing line(s) state because it takes about 0.5 us
- * for the line to stabilize (measured with scope).
+ * Routines for getting/setting individual IEC lines.
+ *
+ * We no longer add a short delay after changing line(s) state, even though
+ * it takes about 0.5 us for the line to stabilize (measured with scope).
+ * This is because we need to toggle SRQ quickly to send data to the 1571
+ * and the delay was breaking our deadline.
  */
 void
 iec_set(uint8_t line)
 {
-    CBM_PORT |= line;
+    if ((line & IO_ATN)) {
+        PORTC |= IO_ATN;
+        line &= ~IO_ATN;
+    }
+    if (line != 0)
+        PORTD |= line;
 }
 
 void
 iec_release(uint8_t line)
 {
-    CBM_PORT &= ~line;
+    if ((line & IO_ATN)) {
+        PORTC &= ~IO_ATN;
+        line &= ~IO_ATN;
+    }
+    if (line != 0)
+        PORTD &= ~line;
 }
 
 void
 iec_set_release(uint8_t s, uint8_t r)
 {
-    CBM_PORT = (CBM_PORT & ~r) | s;
+    iec_set(s);
+    iec_release(r);
 }
 
+// TODO: this could be compile-time optimized with a different macro API
+// This would help in adding access for RST/ATN inputs.
 uint8_t
 iec_get(uint8_t line)
 {
-    return ((CBM_PIN >> 1) & line) == 0 ? 1 : 0;
+    return ((((PIND & IO_SRQ_IN) >> 1) |
+             ((PIND & IO_CLK_IN) >> 1) |
+             ((PIND & IO_DATA_IN) << 1)) & line) == 0 ? 1 : 0;
 }
 
 uint8_t
 iec_poll(void)
 {
-    return CBM_PIN >> 1;
+    return ((PIND & IO_SRQ_IN)  >> 1) |
+           ((PIND & IO_CLK_IN)  >> 1) |
+           ((PIND & IO_DATA_IN) << 1);
 }
 
 // Make 8-bit port all inputs and read value
@@ -119,13 +126,7 @@ xu1541_pp_write(uint8_t val)
     PAR_PORT_PORT = val;
 }
 
-#define LED_UPPER_RED   LEDS_LED3
-#define LED_UPPER_GREEN LEDS_LED4
-#define LED_LOWER_RED   LEDS_LED1
-#define LED_LOWER_GREEN LEDS_LED2
-
 static uint8_t statusValue;
-static uint8_t statusMask;
 
 uint8_t
 board_get_status()
@@ -141,23 +142,21 @@ board_set_status(uint8_t status)
 
     switch (status) {
     case STATUS_INIT:
-        LEDs_SetAllLEDs(LED_UPPER_RED);
+        PORTC |= LED_MASK;
         break;
     case STATUS_CONNECTING:
-        LEDs_SetAllLEDs(LED_UPPER_GREEN);
         break;
     case STATUS_READY:
-        LEDs_SetAllLEDs(LED_LOWER_GREEN);
+        // Turn off LED
+        PORTC &= ~LED_MASK;
         break;
     case STATUS_ACTIVE:
-        // Toggle both green LEDs while busy
-        statusMask = LED_UPPER_GREEN | LED_LOWER_GREEN;
-        LEDs_SetAllLEDs(statusMask);
+        // Turn on LED. The update routine will toggle it.
+        PORTC |= LED_MASK;
         break;
     case STATUS_ERROR:
-        // Set both red on error
-        statusMask = LED_UPPER_RED | LED_LOWER_RED;
-        LEDs_SetAllLEDs(statusMask);
+        // Set red on error
+        PORTC |= LED_MASK;
         break;
     default:
         DEBUGF(DBG_ERROR, "badstsval %d\n", status);
@@ -172,7 +171,7 @@ void
 board_update_display()
 {
     if (statusValue == STATUS_ACTIVE || statusValue == STATUS_ERROR)
-        LEDs_SetAllLEDs(LEDs_GetLEDs() ^ statusMask);
+        PORTC ^= LED_MASK;
 }
 
 /* 

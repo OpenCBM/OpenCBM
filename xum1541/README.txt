@@ -1,7 +1,7 @@
 xum1541 firmware
 ================
 
-The xum1541 is firmware for USB device(s) that connect a 15x1 drive to
+The xum1541 is firmware for USB devices that connect a 15x1 drive to
 your PC. It is based on the Atmel AT90USB family of microcontrollers
 and is provided under the GPL license.
 
@@ -12,6 +12,9 @@ For more information, see the xum1541 web page at:
 
 Revisions
 =========
+0.6 (2010/7/5) - New protocol (version 6) with reduced latency and
+    support for indefinite waiting, better reset when the previous command
+    is aborted with ^C, new ZoomFloppy board design, updated to LUFA 091223
 0.4 (2010/1/4) - Bugfixes for reset handling, both for IEC and USB.
     Protocol version 2.
 0.3 (2009/12/23) - Add nibbler (mnib/nibtools) support and misc stability
@@ -22,41 +25,53 @@ Revisions
 
 Installation
 ============
+First, install OpenCBM.
+
+If you are on Windows, now you need to install the libusb driver.
+Follow the steps to install the library in the xu1541/windrv directory.
+
+If you purchased a ZoomFloppy, the device comes with the latest firmware
+and you do not need to change it. Only do the following if you are upgrading
+the firmware.
+
 To install or upgrade the firmware on a device, you just need to flash it
-with the .hex file from this distribution. The debug files log additional
-information over the AVR's UART and may run slower, so they should only
-be used if you're trying to fix a problem.
+with the .hex file from this distribution.  All AT90USB CPUs come with a
+USB bootloader builtin. This means that you don't need any special cables
+to flash the device. Simply plug it into your USB port and program it. I
+recommend the free Atmel Flip or avrdude programming software.
 
-All at90usb CPUs come with a USB bootloader builtin. This means that you
-don't need any special cables to flash the device. Simply plug it into
-your USB port and program it. I recommend the free Atmel Flip programming
-software.
-
-With the AT90USBKEY board, the steps to program it with Flip are as follows.
+The steps to program the firmware with Flip are:
 
 1. Start up Atmel Flip
-2. Plug in the device via USB
-3. Press and hold both the RST and HWB buttons at the same time. Now,
-release the RST button and then the HWB button. This puts the device
+2. Select the appropriate device type (Device->Select). Choose one of
+the following:
+   - USBKEY development board: AT90USB1287
+   - ZoomFloppy: ATMEGA32U2
+   - Original Bumble-B: AT90USB162
+3. Plug in the device via USB
+4a. For most boards, run the included firmware update utility to put the
+device in bootloader mode.
+4b. For the USBKEY, press and hold both the RST and HWB buttons at the same
+time. Now, release the RST button and then the HWB button. This puts the device
 in upgrade mode. There's no need to hurry, just make sure both buttons
 are held down at the same time and then released in the right order.
-4. Click on the USB cable icon and select "USB" then "open". If all goes
+5. Click on the USB cable icon and select "USB" then "open". If all goes
 well, the lower right corner will say "USB ON". If it can't connect to
 the device, you'll see "Could not open USB device". In this case, repeat
 the steps above in #3. Be sure you're releasing the buttons in the right
 order.
-5. File->Load Hex File and choose the firmware .hex file named
-xum1541-AT90USBKEY-(version).hex. It should say "HEX file parsed" in the
-lower left of the window status area.
-6. Device->Select and be sure the AT90USB1287 cpu is selected
+6. File->Load Hex File and choose the firmware .hex file named
+xum1541-(board)-(version).hex. Be sure to pick the right board type:
+   - USBKEY
+   - ZOOMFLOPPY
+   - BUMBLEB
+Flip should say "HEX file parsed" in the lower left of the window status area.
 7. Be sure the "Operations Flow" checkboxes are set to Erase, Program, and
 Verify.
 8. Click the Run button
 9. If all goes well, the lower left status area will say "Verify PASS".
-
-If you are on Windows, now you need to install the libusb driver. If you
-installed it for the xu1541, you don't need to reinstall it. Follow the
-steps to install the library in the xu1541/windrv directory.
+If there were any problems, do not unplug the device. Select the appropriate
+firmware and settings and click "Run" again.
 
 You're done! Now unplug and replug in the xum1541 and verify it is present
 by running "cbmctrl detect". You should see something like:
@@ -77,7 +92,7 @@ line in the Makefile. If the build fails, check your path to be sure
 the AVR bin directory is present.
 
 Currently I am building releases using WinAVR-20080610. The LUFA version
-included in this distribution is 090605.
+included in this distribution is 091223.
 
 
 Developer notes
@@ -99,30 +114,28 @@ data from the drive is:
 1. Write 4-byte command descriptor to bulk out pipe
 2. Wait indefinitely on bulk in pipe for data to be transferred.
    Once it is ready, keep reading until all has been retrieved.
-3. Write 4-byte command descriptor for GET_RESULT to bulk out pipe
-4. Wait indefinitely on bulk in pipe for 2-byte status to be transferred.
+3. Wait indefinitely on bulk in pipe for 3-byte status to be transferred.
+   The status phase is optional for some commands.
 
 The procedure for a command that transfers data to the drive is:
 1. Write 4-byte command descriptor to bulk out pipe
 2. Write data to the bulk out pipe until all has been transferred.
-3. Write 4-byte command descriptor for GET_RESULT to bulk out pipe
-4. Wait indefinitely on bulk in pipe for 2-byte status to be transferred.
+3. Wait indefinitely on bulk in pipe for 3-byte status to be transferred.
+   The status phase is optional for some commands.
 
 The xu1541 uses only control transfers, and thus has to implement IO in
 two stages. First it transfers data to the microcontroller in a 128-byte
-buffer, then it transfers it to the PC or drive. We still use this model
-for the CBM protocol since it also gives an easy way to decouple the PC
-from the IEC bus. However, for data transfers for s1, s2, pp, p2, nib, etc.,
-it can stream the data all at once as we have some guarantee that the
-drive is waiting for us and we won't be holding the bus for too long.
-This increases performance and allows support for the nibtools protocol
-for copying protected disks.
+buffer, then it transfers it to the PC or drive. We do not use this model.
+Since the AT90USB can stream the data all at once, we transfer each byte
+as it is ready (e.g., usbSendByte() and usbRecvByte()). This increases
+performance and allows support for the nibtools protocol for copying
+protected disks.
 
 The firmware is organized in a logical way to support multiple device
-models being based off the same firmware. The first model is the AT90USBKEY,
+models being based off the same firmware. The first model is the USBKEY,
 which is based on the Atmel development board of the same name. The CPU
 files (e.g., cpu-usbkey.h) define routines that are unique to the CPU, in
-this case the at90usb1287. This includes timers and initialization. The
+this case the AT90USB1287. This includes timers and initialization. The
 board files (e.g., board-usbkey.[ch]) define the methods for setting up
 and interacting with the IO pins on the board. Each device is composed of
 a combination of board/cpu in the Makefile.
@@ -130,13 +143,13 @@ a combination of board/cpu in the Makefile.
 This approach allows reuse. Adding a new design is simply a matter of
 making a copy of the board and cpu files and adding your own interface
 routines. However, you should avoid doing this whenever possible.
-For example, if you changed to an at90usb16 cpu from the at90usb1287, there
+For example, if you changed to an AT90USB16 CPU from the AT90USB1287, there
 is not any need yet to change CPU files as both use the same IO ports and
 same basic timer routines.
 
 
-AT90USBKEY model
-================
+USBKEY model
+============
 This is the first generation board and is based on the Atmel AT90USBKEY
 developer's kit. The ports are allocated as follows (see board-usbkey.c):
 
@@ -183,6 +196,24 @@ Port C (parallel):
 10 data0
 
 
+ZoomFloppy model
+================
+The ZoomFloppy is a simpler version of the original design, intended for
+low-cost manufacturing with high-speed performance. It should be available
+commercially soon, which should make it the best choice for most users.
+
+If you want to build it yourself, it can also be based on the Bumble-B
+daughterboard. However, the easiest option for DIY is the USBKEY board
+(above) since that only requires soldering a single connector (DB25) to
+the development board.
+
+This device uses an ATMEGA32U2 microcontroller (AT90USB162 if you use the
+original Bumble-B). It has a 7406N hex inverter for better control of the
+pins. It runs at 5V with the board supplying power for the inverter.
+
+For build info, see the included schematic, zoomfloppy-schem-*.png.
+
+
 Other models
 ============
 I expect others will offer custom or prepackaged boards based on this
@@ -192,27 +223,26 @@ firmware.
 Tasks
 =====
 Bugs:
-- Fix need for hard reset after aborting "cbmctrl change 8"
-- Investigate minor glitches in ATN-out line during set/release CLK and DATA
+- The USBKEY firmware fails to enter bootloader mode from software.
+  This will eventually be fixed but is not a big deal since that board
+  has hardware buttons to do the same function. The ZoomFloppy works fine.
+- Debug printing via the UART is not supported on ZoomFloppy since it has
+  to use this pin for the IEC DATA connection. Another route for debugging
+  should be found for it.
 
 Improvements:
-- Cleanup all xu1541* names in msgs, functions, etc.
-- Test IEC delay timing loops with scope to optimize
-- Combine OUT cmd and data usb xfers
-- Remove GET_RESULT command
-- Add handling of USB stalls in error case
-- Find a way to detect brownout so that we don't run when the drive is
-  powered on but we aren't.
-- Upgrade LUFA and WinAVR for builds
-- Fix .inf file for libusb so that it is not reported as an xu1541
-- Readability: xu1541_ioctl needs to be split up in plugin for 3 types of IO
-- enable WDT in order to avoid need for manual reset of AVR in cases where
-  it is hung up
+- Add utility to enter DFU mode (sw upgrade)
+- Add SRQ nibbling support
+- Add IEEE-488 support
+- Upgrade WinAVR for builds
+- Fix .inf file for libusb with new VID/PID
 - Test various cable lengths and USB hubs to be sure it is reliable
-- Consider adding IEEE-488 or 1571 burst most (SRQ) support
 
 General opencbm issues not in xum1541 code:
-- cbmcopy only does byte at a time, does not use read_n() API from plugin
+- cbmcopy only does byte at a time, does not use read_n() API from plugin.
+  Thus, reading/writing files from a disk with cbmcopy will be slow and not
+  take advantage of the speed of the xum1541. However, d64copy and nibtools
+  can perform at full speed since they use a separate IO route.
 
 General opencbm issues for a 0.5.x release:
 - instcbm (Windows):

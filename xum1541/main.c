@@ -1,6 +1,6 @@
 /*
  * Main loop for at90usb-based devices
- * Copyright (c) 2009 Nate Lawson <nate@root.org>
+ * Copyright (c) 2009-2010 Nate Lawson <nate@root.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,10 +17,13 @@
 // Flag indicating we should abort any in-progress data transfers
 volatile bool doDeviceReset;
 
-static uint8_t AbortOnReset(void);
-static bool USB_BulkWorker(void);
+// Flag for whether we are in EOI state
+volatile uint8_t eoi;
 
+// Are we in a connected state? If so, run the command loop.
 static volatile bool device_running;
+
+static bool USB_BulkWorker(void);
 
 int
 main(void)
@@ -47,15 +50,15 @@ main(void)
         wdt_reset();
 
         while (device_running) {
-            // If we have a command to run, call the worker function
-            if (USB_BulkWorker()) {
-                DEBUGF(DBG_INFO, "runcmd\n");
-                xu1541_handle();
-            }
+            // Check for and process any commands coming in on the bulk pipe.
+            USB_BulkWorker();
 
-            // Toggle LEDs each command
-            board_update_display();
-            wdt_reset();
+            /*
+             * Do periodic tasks each command. If we found the device was in
+             * a stalled state, reset it before the next command.
+             */
+            if (!TimerWorker())
+                doDeviceReset = false;
         }
 
         // TODO: save power here when device is not running
@@ -63,7 +66,7 @@ main(void)
 }
 
 void
-EVENT_USB_Connect(void)
+EVENT_USB_Device_Connect(void)
 {
     DEBUGF(DBG_ALL, "usbcon\n");
     board_set_status(STATUS_CONNECTING);
@@ -71,7 +74,7 @@ EVENT_USB_Connect(void)
 }
 
 void
-EVENT_USB_Disconnect(void)
+EVENT_USB_Device_Disconnect(void)
 {
     DEBUGF(DBG_ALL, "usbdiscon\n");
 
@@ -81,12 +84,12 @@ EVENT_USB_Disconnect(void)
 }
 
 void
-EVENT_USB_ConfigurationChanged(void)
+EVENT_USB_Device_ConfigurationChanged(void)
 {
     DEBUGF(DBG_ALL, "usbconfchg\n");
 
     // Clear out any old configuration before allocating
-    USB_ResetConfig(true);
+    USB_ResetConfig();
 
     /*
      * Setup and enable the two bulk endpoints. This must be done in
@@ -104,9 +107,9 @@ EVENT_USB_ConfigurationChanged(void)
 }
 
 void
-EVENT_USB_UnhandledControlPacket(void)
+EVENT_USB_Device_UnhandledControlRequest(void)
 {
-    uint8_t replyBuf[4];
+    uint8_t replyBuf[XUM_DEVINFO_SIZE];
     int8_t len;
 
     /*
@@ -121,6 +124,7 @@ EVENT_USB_UnhandledControlPacket(void)
     }
 
     // Process the command and get any returned data
+    memset(replyBuf, 0, sizeof(replyBuf));
     len = usbHandleControl(USB_ControlRequest.bRequest, replyBuf);
     if (len == -1) {
         DEBUGF(DBG_ERROR, "ctrl req err\n");
@@ -146,14 +150,14 @@ EVENT_USB_UnhandledControlPacket(void)
 static bool
 USB_BulkWorker()
 {
-    uint8_t cmdBuf[XUM_CMDBUF_SIZE];
+    uint8_t cmdBuf[XUM_CMDBUF_SIZE], statusBuf[XUM_STATUSBUF_SIZE];
     int8_t status;
 
     /*
      * If we are not connected to the host or a command has not yet
      * been sent, no more processing is required.
      */
-    if (!USB_IsConnected)
+    if (USB_DeviceState != DEVICE_STATE_Configured)
         return false;
     Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
     if (!Endpoint_IsReadWriteAllowed())
@@ -181,27 +185,70 @@ USB_BulkWorker()
         return false;
     }
 
+    // Allow commands to only set the low 8-bits of the extended status
+    statusBuf[2] = 0;
+
     /*
-     * Decode and process the command. For long running commands, this
-     * may only queue it for xu1541_handle() since we have to get off
-     * the USB bus within 1 second. For shorter commands, this processes
-     * it immediately and we return the response inline.
+     * Decode and process the command. 
+     * usbHandleBulk() stores its extended result in the output buffer,
+     * up to XUM_STATUSBUF_SIZE.
      *
-     * We use the input buffer to store the output as well. So no direct
-     * command response can be >4 bytes.
+     * Return values:
+     *   >0: completed ok, send the return value and extended status
+     *    0: completed ok, don't send any status
+     *   -1: error, no status
      */
-    status = usbHandleBulk(cmdBuf, cmdBuf);
+    status = usbHandleBulk(cmdBuf, statusBuf);
     if (status > 0) {
-        USB_WriteBlock(cmdBuf, status);
-    } else if (status == -1) {
+        statusBuf[0] = status;
+        USB_WriteBlock(statusBuf, sizeof(statusBuf));
+    } else if (status < 0) {
         DEBUGF(DBG_ERROR, "usbblk err\n");
         board_set_status(STATUS_ERROR);
         Endpoint_StallTransaction();
         return false;
     }
 
-    // TODO: stall pipes in the error case here
+    return true;
+}
 
+/*
+ * Stall all endpoints and set a flag indicating any current transfers
+ * should be aborted. IO loops will see this flag in TimerWorker().
+ */
+void
+SetAbortState()
+{
+    uint8_t origEndpoint = Endpoint_GetCurrentEndpoint();
+
+    doDeviceReset = true;
+    Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
+    Endpoint_StallTransaction();
+    Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT);
+    Endpoint_StallTransaction();
+
+    Endpoint_SelectEndpoint(origEndpoint);
+}
+
+/*
+ * Periodic maintenance task. This code can be called at any point, but
+ * at least needs to be called enough to reset the watchdog.
+ *
+ * If the board's timer has triggered, we also update the board's display
+ * or any other functions it does when the timer expires.
+ */
+bool
+TimerWorker()
+{
+    wdt_reset();
+
+    // Inform the caller to quit the current transfer if we're resetting.
+    if (doDeviceReset)
+        return false;
+
+    // If the timer has fired, update the board display
+    if (board_timer_fired()) 
+        board_update_display();
     return true;
 }
 
@@ -209,39 +256,34 @@ USB_BulkWorker()
  * The Linux and OSX call the configuration changed entry each time
  * a transaction is started (e.g., multiple runs of cbmctrl status).
  * We need to reset the endpoints before reconfiguring them, otherwise
- * we get a hang the second time through (fullReset case).
- *
- * Also, when we are doing an IEC reset, we were possibly interrupted
- * during a previous command. In that case (!fullReset), we do not
- * reset the data toggles or the OUT endpoint. This is a lighter
- * weight reset that preserves any incoming commands on the OUT endpoint
- * so that we keep running without losing track of them.
+ * we get a hang the second time through.
  *
  * We keep the original endpoint selected after returning.
  */
 void
-USB_ResetConfig(bool fullReset)
+USB_ResetConfig()
 {
-    uint8_t lastEndpoint = Endpoint_GetCurrentEndpoint();
+    static uint8_t endpoints[] = {
+        XUM_BULK_IN_ENDPOINT, XUM_BULK_OUT_ENDPOINT, 0,
+    };
+    uint8_t lastEndpoint, *endp;
 
-    Endpoint_ResetFIFO(XUM_BULK_IN_ENDPOINT);
-    Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT);
-    if (fullReset)
-        Endpoint_ResetDataToggle();
-    if (Endpoint_IsStalled())
-        Endpoint_ClearStall();
+    lastEndpoint = Endpoint_GetCurrentEndpoint();
 
-    Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
-    if (fullReset) {
-        Endpoint_ResetFIFO(XUM_BULK_OUT_ENDPOINT);
+    for (endp = endpoints; *endp != 0; endp++) {
+        Endpoint_SelectEndpoint(*endp);
+        Endpoint_ResetFIFO(*endp);
         Endpoint_ResetDataToggle();
+        if (Endpoint_IsStalled())
+            Endpoint_ClearStall();
     }
-    if (Endpoint_IsStalled())
-        Endpoint_ClearStall();
 
     Endpoint_SelectEndpoint(lastEndpoint);
 }
 
+/*
+ * Read a block from the host's OUT endpoint, handling aborts.
+ */
 bool
 USB_ReadBlock(uint8_t *buf, uint8_t len)
 {
@@ -257,6 +299,9 @@ USB_ReadBlock(uint8_t *buf, uint8_t len)
     return true;
 }
 
+/*
+ * Send a block to the host's IN endpoint, handling aborts.
+ */
 bool
 USB_WriteBlock(uint8_t *buf, uint8_t len)
 {
@@ -277,7 +322,7 @@ USB_WriteBlock(uint8_t *buf, uint8_t len)
  * current stream transfer if the user sent a reset message to the
  * control endpoint.
  */
-static uint8_t
+uint8_t
 AbortOnReset()
 {
     return doDeviceReset ? STREAMCALLBACK_Abort : STREAMCALLBACK_Continue;

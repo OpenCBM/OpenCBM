@@ -1,6 +1,6 @@
 /*
  * xum1541 IEC routines
- * Copyright (c) 2009 Nate Lawson <nate@root.org>
+ * Copyright (c) 2009-2010 Nate Lawson <nate@root.org>
  *
  * Based on: firmware/xu1541.c
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
@@ -22,16 +22,6 @@
 #define IEC_CLOCK   0x02
 #define IEC_ATN     0x04
 #define IEC_RESET   0x08
-
-/* global variable to keep track of eoi state */
-uint8_t eoi = 0;
-
-/*
- * Commands are temporarily stored here to be processed while the host
- * is off the USB bus. We then report the status when completed.
- */
-static uint8_t io_buffer[XUM1541_IO_BUFFER_SIZE];
-static uint8_t io_buffer_len, io_request, io_result;
 
 /* fast conversion between logical and physical mapping */
 static const uint8_t iec2hw_table[] PROGMEM = {
@@ -59,15 +49,11 @@ iec2hw(uint8_t iec)
     return pgm_read_byte(iec2hw_table + iec);
 }
 
-// Initialize our command buffer and all IEC lines to idle
+// Initialize all IEC lines to idle
 void
 cbm_init(void)
 {
     DEBUGF(DBG_ALL, "init\n");
-
-    io_buffer_len = 0;
-    io_request = XUM1541_IO_IDLE;
-    io_result = 0;
 
     iec_release(IO_ATN | IO_CLK | IO_DATA | IO_RESET);
     DELAY_US(100);
@@ -118,18 +104,20 @@ check_if_bus_free(void)
     return (iec_get(IO_DATA) == 0) ? 1 : 0;
 }
 
-// Wait up to 2 secs to see if drive answers ATN toggle.
+// Wait up to 1.5 secs to see if drive answers ATN toggle.
 static void
 wait_for_free_bus(void)
 {
     uint16_t i;
 
-    for (i = XUM1541_RESET_TIMEOUT * 10000; i != 0; i--) {
+    for (i = (uint16_t)(XUM1541_TIMEOUT * 10000); i != 0; i--) {
         if (check_if_bus_free())
             return;
 
+        // Bail out early if host signalled an abort.
         DELAY_US(100);
-        wdt_reset();
+        if (!TimerWorker())
+            return;
     }
     DEBUGF(DBG_ERROR, "wait4free bus to\n");
 }
@@ -181,27 +169,47 @@ iec_wait_clk(void)
         DELAY_US(2);
 }
 
+/*
+ * Send a byte, one bit at a time via the IEC protocol.
+ *
+ * The minimum spec setup (Ts) and hold times (Tv) are both 20 us. However,
+ * Nate found that the 16 Mhz AT90USB162 was not recognized by his
+ * 1541 when using these intervals.
+ *
+ * It appears the spec is much too optimistic. The typical setup time (Ts)
+ * of 70 us is also not quite long enough. Increasing the setup time to
+ * 72 us appears to work consistently, but he chose the value 75 us to
+ * give more margin. The 1541 consistently takes 120 us for Ts and
+ * 70 us for Tv, which is why no one probably noticed this before.
+ *
+ * The hold time did not appear to have any effect. In fact, reducing the
+ * hold time to 15 us still worked fine.
+ */
 static uint8_t
 send_byte(uint8_t b)
 {
     uint8_t i, ack = 0;
 
     for (i = 0; i < 8; i++) {
-        /* each _bit_ takes a total of 90us to send ... */
-        DELAY_US(70);
+        // Wait for Ts (setup) with additional padding
+        DELAY_US(75);
 
+        // Set the bit value on the DATA line.
         if ((b & 1) == 0)
             iec_set(IO_DATA);
 
+        // Trigger clock edge and hold valid for spec minimum time (Tv).
         iec_release(IO_CLK);
         DELAY_US(20);
 
         iec_set_release(IO_CLK, IO_DATA);
-
         b >>= 1;
     }
 
-    /* wait 2ms for data to be driven */
+    /*
+     * Wait up to 2 ms for DATA to be driven by device.
+     * It takes around 70-80 us on Nate's 1541.
+     */
     ack = iec_wait_timeout_2ms(IO_DATA, IO_DATA);
     if (!ack) {
         DEBUGF(DBG_ERROR, "sndbyte nak\n");
@@ -211,77 +219,98 @@ send_byte(uint8_t b)
 }
 
 /*
- * Wait for listener to release DATA line. We wait until the watchdog
- * resets us. This is not perfect since the listener hold-off time (Th)
- * is allowed to be infinite (e.g., for printers or other slow equipment).
+ * Wait for listener to release DATA line. We wait forever.
+ * This is because the listener hold-off time (Th) is allowed to be
+ * infinite (e.g., for printers or other slow equipment).
+ *
+ * Nate's 1541 responds in about 670 us for an OPEN from idle.
+ * It responds in about 65 us between bytes of a transaction.
  */
-static void
+static bool
 wait_for_listener(void)
 {
     /* release the clock line to indicate that we are ready */
     iec_release(IO_CLK);
 
-    /* wait for client to do the same with the DATA line */
-    while (iec_get(IO_DATA) != 0)
-        ;
+    /* wait forever for client to do the same with the DATA line */
+    while (iec_get(IO_DATA) != 0) {
+        // If we got an abort, bail out of this loop.
+        if (!TimerWorker())
+            return false;
+    }
+    return true;
 }
 
-/* return number of successful written bytes or 0 on error */
-uint8_t
-cbm_raw_write(const uint8_t *buf, uint8_t len, uint8_t atn, uint8_t talk)
+/* 
+ * Write bytes to the drive via the CBM default protocol.
+ * Returns number of successful written bytes or 0 on error.
+ */
+uint16_t
+cbm_raw_write(uint16_t len, uint8_t flags)
 {
-    uint8_t rv = len;
+    uint8_t atn, talk, data;
+    uint16_t rv;
 
+    rv = len;
+    atn = flags & XUM_WRITE_ATN;
+    talk = flags & XUM_WRITE_TALK;
     eoi = 0;
 
     DEBUGF(DBG_INFO, "cwr %d, atn %d, talk %d\n", len, atn, talk);
 
+    usbInitIo(len, ENDPOINT_DIR_OUT);
     iec_release(IO_DATA);
     iec_set(IO_CLK | (atn ? IO_ATN : 0));
 
-    /* wait for any device to pull data */
+    // Wait for any device to pull data after we set CLK.
     if (!iec_wait_timeout_2ms(IO_DATA, IO_DATA)) {
         DEBUGF(DBG_ERROR, "write: no devs\n");
         iec_release(IO_CLK | IO_ATN);
+        usbIoDone();
         return 0;
     }
 
     while (len && rv) {
-        /* wait 50 us */
+        // Wait 50 us before starting.
         DELAY_US(50);
 
-        /* data line must be pulled by device */
+        // Be sure DATA line has been pulled by device
         if (iec_get(IO_DATA)) {
-            /* release clock and wait for listener to release data */
-            wait_for_listener();
-
-            /* this is timing critical and if we are not sending an eoi */
-            /* the iec_set(CLK) must be reached in less than ~150us. The USB */
-            /* at 1.5MBit/s transfers 160 bits (20 bytes) in ~100us, this */
-            /* should not interfere */
-
-            if (len == 1 && !atn) {
-                /* signal eoi by waiting so long (>200us) that listener */
-                /* pulls data */
-
-                /* wait 2ms for data to be pulled */
-                iec_wait_timeout_2ms(IO_DATA, IO_DATA);
-
-                /* wait 2ms for data to be release */
-                iec_wait_timeout_2ms(IO_DATA, 0);
+            // Release clock and wait forever for listener to release data
+            if (!wait_for_listener()) {
+                DEBUGF(DBG_ERROR, "write: w4l abrt\n");
+                rv = 0;
+                break;
             }
 
+            /*
+             * This is timing critical and if we are not sending an eoi
+             * the iec_set(CLK) must be reached in less than ~150us.
+             */
+            if (len == 1 && !atn) {
+                /*
+                 * Signal eoi by waiting so long (>200us) that listener
+                 * pulls DATA, then wait for it to be released.
+                 */
+                iec_wait_timeout_2ms(IO_DATA, IO_DATA);
+                iec_wait_timeout_2ms(IO_DATA, 0);
+            }
             iec_set(IO_CLK);
 
-            if (send_byte(*buf++)) {
+            // Get a data byte from host, quitting if it signalled an abort.
+            if (usbRecvByte(&data) != 0) {
+                rv = 0;
+                break;
+            }
+            if (send_byte(data)) {
                 len--;
-                board_update_display();
                 DELAY_US(100);
             } else {
                 DEBUGF(DBG_ERROR, "write: io err\n");
                 rv = 0;
             }
         } else {
+            // Occurs if there is no device addressed by this command
             DEBUGF(DBG_ERROR, "write: dev not pres\n");
             rv = 0;
         }
@@ -289,28 +318,40 @@ cbm_raw_write(const uint8_t *buf, uint8_t len, uint8_t atn, uint8_t talk)
         wdt_reset();
     }
 
-    if (talk) {
-        iec_set(IO_DATA);
-        iec_release(IO_CLK | IO_ATN);
-        while (iec_get(IO_CLK) == 0)
-            ;
+    usbIoDone();
+    if (rv != 0) {
+        // If we're asking the device to talk, wait for it to grab CLK.
+        if (talk) {
+            iec_set(IO_DATA);
+            iec_release(IO_CLK | IO_ATN);
+            while (iec_get(IO_CLK) == 0) {
+                if (!TimerWorker()) {
+                    rv = 0;
+                    break;
+                }
+            }
+        } else
+            iec_release(IO_ATN);
+
+        // Wait 100 us before the next request.
+        DELAY_US(100);
     } else {
-        iec_release(IO_ATN);
+        // If there was an error, just release all lines before returning.
+        iec_release(IO_CLK | IO_ATN);
     }
-    DELAY_US(100);
 
     DEBUGF(DBG_INFO, "wrv=%d\n", rv);
     return rv;
 }
 
-/* return number of successful written bytes or 0 on error */
-uint8_t
-cbm_raw_read(uint8_t *buf, uint8_t len)
+uint16_t
+cbm_raw_read(uint16_t len)
 {
-    uint8_t ok, bit, b, count;
-    uint16_t to;
+    uint8_t ok, bit, b;
+    uint16_t to, count;
 
     DEBUGF(DBG_INFO, "crd %d\n", len);
+    usbInitIo(len, ENDPOINT_DIR_IN);
     count = 0;
     do {
         to = 0;
@@ -318,26 +359,21 @@ cbm_raw_read(uint8_t *buf, uint8_t len)
         /* wait for clock to be released. typically times out during: */
         /* directory read */
         while (iec_get(IO_CLK)) {
-            if (to >= 50000) {
+            if (to >= 50000 || !TimerWorker()) {
                 /* 1.0 (50000 * 20us) sec timeout */
                 DEBUGF(DBG_ERROR, "rd to\n");
+                usbIoDone();
                 return 0;
-            } else {
-                to++;
-                DELAY_US(20);
             }
-            wdt_reset();
+            to++;
+            DELAY_US(20);
         }
 
+        // XXX is this right? why treat EOI differently here?
         if (eoi) {
-            /* re-enable interrupts and return */
-            // XXX is this right?
-            io_request = XUM1541_IO_READ_DONE;
-            io_buffer_len = 0;
+            usbIoDone();
             return 0;
         }
-
-        /* disable IRQs to make sure IEC transfer goes uninterrupted */
 
         /* release DATA line */
         iec_release(IO_DATA);
@@ -345,43 +381,48 @@ cbm_raw_read(uint8_t *buf, uint8_t len)
         /* use special "timer with wait for clock" */
         iec_wait_clk();
 
+        // Is the talking device signalling EOI?
         if (iec_get(IO_CLK) == 0) {
-            /* device signals eoi */
             eoi = 1;
             iec_set(IO_DATA);
             DELAY_US(70);
             iec_release(IO_DATA);
         }
 
+        /*
+         * Disable IRQs to make sure the byte transfer goes uninterrupted.
+         * This isn't strictly needed since the only interrupt we use is the
+         * one for USB control transfers.
+         */
         cli();
 
-        /* wait 2ms for clock to be asserted */
+        // Wait up to 2 ms for CLK to be asserted
         ok = iec_wait_timeout_2ms(IO_CLK, IO_CLK);
 
-        /* read all bits of byte */
+        // Read all 8 bits of a byte
         for (bit = b = 0; bit < 8 && ok; bit++) {
-            /* wait 2ms for clock to be released */
+            // Wait up to 2 ms for CLK to be released
             ok = iec_wait_timeout_2ms(IO_CLK, 0);
             if (ok) {
                 b >>= 1;
                 if (iec_get(IO_DATA) == 0)
                     b |= 0x80;
 
-                /* wait 2ms for clock to be asserted */
+                // Wait up to 2 ms for CLK to be asserted
                 ok = iec_wait_timeout_2ms(IO_CLK, IO_CLK);
             }
         }
 
         sei();
 
-        /* acknowledge byte */
-        if (ok)
+        if (ok) {
+            // Acknowledge byte received ok
             iec_set(IO_DATA);
 
-        if (ok) {
-            *buf++ = b;
+            // Send the data byte to host, quitting if it signalled an abort.
+            if (usbSendByte(b))
+                break;
             count++;
-            board_update_display();
             DELAY_US(50);
         }
 
@@ -394,118 +435,12 @@ cbm_raw_read(uint8_t *buf, uint8_t len)
     }
 
     DEBUGF(DBG_INFO, "rv=%d\n", count);
+    usbIoDone();
     return count;
 }
 
-/*
- * Main worker task for processing buffered commands.
- * This should be called after every new command is read in from the
- * host.
- */
-void
-xu1541_handle(void)
-{
-
-    if (io_request == XUM1541_IO_ASYNC) {
-        DEBUGF(DBG_INFO, "h-as\n");
-        // write async cmd byte(s) used for (un)talk/(un)listen, open and close
-        io_result = !cbm_raw_write(io_buffer+2, io_buffer_len,
-            /*atn*/io_buffer[0], io_buffer[1]/*talk*/);
-
-        io_request = XUM1541_IO_RESULT;
-    }
-
-    if (io_request == XUM1541_IO_WRITE) {
-        DEBUGF(DBG_INFO, "h-wr %d\n", io_buffer_len);
-        io_result = cbm_raw_write(io_buffer, io_buffer_len,
-            /*atn*/0, /*talk*/0);
-
-        io_request = XUM1541_IO_RESULT;
-    }
-
-    if (io_request == XUM1541_IO_READ) {
-        DEBUGF(DBG_INFO, "h-rd %d\n", io_buffer_len);
-        io_result = cbm_raw_read(io_buffer, io_buffer_len);
-
-        io_request = XUM1541_IO_READ_DONE;
-        io_buffer_len = io_result;
-    }
-}
-
-void
-xu1541_request_read(uint8_t len)
-{
-
-    io_request = XUM1541_IO_READ;
-    io_buffer_len = len;
-}
-
-uint8_t
-xu1541_read(uint8_t len)
-{
-    if (io_request != XUM1541_IO_READ_DONE) {
-        DEBUGF(DBG_ERROR, "no rd (%d)\n", io_request);
-        return 0;
-    }
-#if 0
-    if (len != io_buffer_len) {
-        DEBUGF("bad rd len (%d != %d)\n", len, io_buffer_len);
-        return 0;
-    }
-#endif
-    if (len > io_buffer_len)
-        len = io_buffer_len;
-
-    if (!USB_WriteBlock(io_buffer, len)) {
-        DEBUGF(DBG_ERROR, "rd abrt\n");
-        return 0;
-    }
-
-    io_buffer_len = 0;
-    io_request = XUM1541_IO_IDLE;
-
-    return len;
-}
-
-/* write to buffer */
-uint8_t
-xu1541_write(uint8_t len)
-{
-    DEBUGF(DBG_INFO, "st %d\n", len);
-    if (!USB_ReadBlock(io_buffer, len)) {
-        DEBUGF(DBG_ERROR, "st err\n");
-        return 0;
-    }
-    io_buffer_len = len;
-    io_request = XUM1541_IO_WRITE;
-
-    return len;
-}
-
-/* return result code from async operations */
-void
-xu1541_get_result(uint8_t *data)
-{
-
-    DEBUGF(DBG_INFO, "r %d/%d\n", io_request, io_result);
-    data[0] = io_request;
-    data[1] = io_result;
-}
-
-void
-xu1541_request_async(const uint8_t *buf, uint8_t len,
-    uint8_t atn, uint8_t talk)
-{
-
-    io_request = XUM1541_IO_ASYNC;
-    memcpy(io_buffer+2, buf, len);
-    io_buffer_len = len;
-    io_buffer[0] = atn;
-    io_buffer[1] = talk;
-}
-
 /* wait forever for a specific line to reach a certain state */
-uint8_t
+bool
 xu1541_wait(uint8_t line, uint8_t state)
 {
     uint8_t hw_mask, hw_state;
@@ -515,11 +450,12 @@ xu1541_wait(uint8_t line, uint8_t state)
     hw_state = state ? hw_mask : 0;
 
     while ((iec_poll() & hw_mask) == hw_state) {
-        wdt_reset();
+        if (!TimerWorker())
+            return false;
         DELAY_US(10);
     }
 
-    return 0;
+    return true;
 }
 
 uint8_t

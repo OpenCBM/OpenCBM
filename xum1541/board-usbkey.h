@@ -1,6 +1,6 @@
 /*
  * Board interface for the USBKEY development kit
- * Copyright (c) 2009 Nate Lawson <nate@root.org>
+ * Copyright (c) 2009-2010 Nate Lawson <nate@root.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -42,5 +42,6 @@ void xu1541_pp_write(uint8_t val);
 uint8_t board_get_status(void);
 void board_set_status(uint8_t status);
 void board_update_display(void);
+bool board_timer_fired(void);
 
 #endif // _BOARD_USBKEY_H

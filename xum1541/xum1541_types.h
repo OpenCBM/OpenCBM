@@ -1,6 +1,6 @@
 /*
  * xum1541 external message types and defines
- * Copyright (c) 2009 Nate Lawson <nate@root.org>
+ * Copyright (c) 2009-2010 Nate Lawson <nate@root.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -10,97 +10,105 @@
 #ifndef _XUM1541_TYPES_H
 #define _XUM1541_TYPES_H
 
-// XUM1541_INIT reports these versions
-#define XUM1541_VERSION_MAJOR       5 // Same for all xum1541 models
-#define XUM1541_VERSION_MINOR       2 // Bump if incompatible protocol change
+// Vendor and product ID. These are owned by Nate Lawson, do not reuse.
+#define XUM1541_VID                 0x16d0
+#define XUM1541_PID                 0x0504
+
+// XUM1541_INIT reports this versions
+#define XUM1541_VERSION             6
 
 // USB parameters for descriptor configuration
-#define XUM_ENDPOINT_0_SIZE         8
-#define XUM_ENDPOINT_BULK_SIZE      64
 #define XUM_BULK_IN_ENDPOINT        3
 #define XUM_BULK_OUT_ENDPOINT       4
+#define XUM_ENDPOINT_0_SIZE         8
 
 // control transactions
 #define XUM1541_ECHO                0
 #define XUM1541_INIT                (XUM1541_ECHO + 1)
 #define XUM1541_RESET               (XUM1541_ECHO + 2)
 #define XUM1541_SHUTDOWN            (XUM1541_ECHO + 3)
+#define XUM1541_ENTER_BOOTLOADER    (XUM1541_ECHO + 4)
 
-// Capabilities bits
-#define XU1541_CAP_CBM              0x0001 // supports CBM commands
-#define XU1541_CAP_LL               0x0002 // supports low level io
-#define XU1541_CAP_PP               0x0004 // supports 8 bit port
-#define XU1541_CAP_NIB              0x0008 // supports nibbler
-#define XU1541_CAP_PROTO_S1         0x0010 // supports serial1 protocol
-#define XU1541_CAP_PROTO_S2         0x0020 // supports serial2 protocol
-#define XU1541_CAP_PROTO_PP         0x0040 // supports parallel protocol
-#define XU1541_CAP_PROTO_P2         0x0080 // supports parallel2 protocol
+// Adapter capabilities, but device may not support them
+#define XUM1541_CAP_CBM             0x01 // supports CBM commands
+#define XUM1541_CAP_NIB             0x02 // parallel nibbler
+#define XUM1541_CAP_NIB_SRQ         0x04 // 1571 serial nibbler
+#define XUM1541_CAP_IEEE488         0x08 // GPIB (PET) parallel bus
 
-#define XUM1541_CAPABILITIES       (XU1541_CAP_CBM |       \
-                                    XU1541_CAP_LL |        \
-                                    XU1541_CAP_PP |        \
-                                    XU1541_CAP_PROTO_S1 |  \
-                                    XU1541_CAP_PROTO_S2 |  \
-                                    XU1541_CAP_PROTO_PP |  \
-                                    XU1541_CAP_PROTO_P2 |  \
-                                    XU1541_CAP_NIB)
+#define XUM1541_CAPABILITIES        (XUM1541_CAP_CBM |      \
+                                     XUM1541_CAP_NIB)
 
-// Size of each command block sent to the device (bytes)
-#define XUM_CMDBUF_SIZE             4
+// Actual auto-detected status
+#define XUM1541_DOING_RESET         0x01 // no clean shutdown, will reset now
+#define XUM1541_IEEE488_PRESENT     0x10 // IEEE-488 device connected
 
-// Size of the internal buffer for split read/write commands
-#define XUM1541_IO_BUFFER_SIZE      128
+// Sizes for commands and responses in bytes
+#define XUM_CMDBUF_SIZE             4 // Command block (out)
+#define XUM_STATUSBUF_SIZE          3 // Waiting status value (in)
+#define XUM_DEVINFO_SIZE            8 // Response to XUM1541_INIT msg (in)
 
-// Time to wait for device in seconds (60 max possible)
-#define XUM1541_RESET_TIMEOUT       2
+/*
+ * Control msg command timeout. Since the longest command we run in this
+ * mode is XUM1541_RESET (or INIT if it has to run RESET), we chose a
+ * time greater than the maximum a device has to respond after ATN
+ * goes active. The IEC spec lists Tat as 1 ms assuming the device is
+ * alive, so we're being very generous.
+ */
+#define XUM1541_TIMEOUT             1.5
 
-// Basic ioctls
+// Read/write commands, protocol type defined below
 #define XUM1541_READ                8
 #define XUM1541_WRITE               (XUM1541_READ + 1)
 
-/* constants for valid ioctl commands */
+/*
+ * Individual control commands. Those that can take a while and thus
+ * report async status are marked with "async".
+ */
 #define XUM1541_IOCTL               16
-#define XUM1541_TALK                (XUM1541_IOCTL + 0)
-#define XUM1541_LISTEN              (XUM1541_IOCTL + 1)
-#define XUM1541_UNTALK              (XUM1541_IOCTL + 2)
-#define XUM1541_UNLISTEN            (XUM1541_IOCTL + 3)
-#define XUM1541_OPEN                (XUM1541_IOCTL + 4)
-#define XUM1541_CLOSE               (XUM1541_IOCTL + 5)
 #define XUM1541_GET_EOI             (XUM1541_IOCTL + 7)
 #define XUM1541_CLEAR_EOI           (XUM1541_IOCTL + 8)
+#define XUM1541_PP_READ             (XUM1541_IOCTL + 9)
+#define XUM1541_PP_WRITE            (XUM1541_IOCTL + 10)
+#define XUM1541_IEC_POLL            (XUM1541_IOCTL + 11)
+#define XUM1541_IEC_WAIT            (XUM1541_IOCTL + 12)
+#define XUM1541_IEC_SETRELEASE      (XUM1541_IOCTL + 13)
+#define XUM1541_PARBURST_READ       (XUM1541_IOCTL + 14)
+#define XUM1541_PARBURST_WRITE      (XUM1541_IOCTL + 15)
 
-/* support commands for async read/write */
-#define XUM1541_REQUEST_READ        (XUM1541_IOCTL + 9)
-#define XUM1541_GET_RESULT          (XUM1541_IOCTL + 10)
+#define IS_CMD_ASYNC(x)             ((x) == XUM1541_IEC_WAIT)
 
-// States for the async command handler
-#define XUM1541_IO_IDLE             0
-#define XUM1541_IO_READ             1
-#define XUM1541_IO_READ_DONE        2
-#define XUM1541_IO_WRITE_PREPARED   3
-#define XUM1541_IO_WRITE            4
-#define XUM1541_IO_IRQ_PAUSE        5
-#define XUM1541_IO_RESULT           6
-#define XUM1541_IO_ASYNC            7
+/*
+ * Status return values for async commands.
+ * Status response also contains a second data word, 16-bits little-endian.
+ * This value, accessed via XUM_GET_STATUS_VAL(), usually gives a length
+ * but is command-specific.
+ */
+#define XUM1541_IO_BUSY             1
+#define XUM1541_IO_READY            2
+#define XUM1541_IO_ERROR            3
 
-#define XUM1541_PP_READ             (XUM1541_IOCTL + 11)
-#define XUM1541_PP_WRITE            (XUM1541_IOCTL + 12)
-#define XUM1541_IEC_POLL            (XUM1541_IOCTL + 13)
-#define XUM1541_IEC_WAIT            (XUM1541_IOCTL + 14)
-#define XUM1541_IEC_SETRELEASE      (XUM1541_IOCTL + 15)
+// Macros to retrive the status and extended value (usually a length).
+#define XUM_GET_STATUS(buf)         (buf[0])
+#define XUM_GET_STATUS_VAL(buf)     (((buf[2]) << 8) | (buf[1]))
 
-/* constants needed by parallel burst (nibbler) */
-#define XUM1541_PARBURST_READ       (XUM1541_IOCTL + 16)
-#define XUM1541_PARBURST_WRITE      (XUM1541_IOCTL + 17)
+/*
+ * Basic CBM and special protocols for use with XUM1541_READ/WRITE
+ * We use the upper nibble for the protocol type so we can use the
+ * lower nibble for additional protocol-specific flags.
+ */
+#define XUM_RW_PROTO(x)             ((x) & 0xf0)
+#define XUM_RW_FLAGS(x)             ((x) & 0x0f)
+#define XUM1541_CBM                 (1 << 4) // Standard CBM protocol
+#define XUM1541_S1                  (2 << 4) // serial1
+#define XUM1541_S2                  (3 << 4) // serial2
+#define XUM1541_PP                  (4 << 4) // Parallel
+#define XUM1541_P2                  (5 << 4) // 2-byte parallel
+#define XUM1541_NIB                 (6 << 4) // burst nibbler parallel
+#define XUM1541_NIB_COMMAND         (7 << 4) // BN parallel commands
+#define XUM1541_NIB_SRQ             (8 << 4) // 1571 serial nibbler
 
-/* basic and special protocol codes begin at 64 */
-#define XUM1541_CBM                  64
-#define XUM1541_S1                   (XUM1541_CBM + 1)
-#define XUM1541_S2                   (XUM1541_CBM + 2)
-#define XUM1541_PP                   (XUM1541_CBM + 3)
-#define XUM1541_P2                   (XUM1541_CBM + 4)
-#define XUM1541_NIB                  (XUM1541_CBM + 5)
-#define XUM1541_NIB_READ_N           (XUM1541_CBM + 6)
-#define XUM1541_NIB_WRITE_N          (XUM1541_CBM + 7)
+// Flags for use with write and XUM1541_CBM protocol
+#define XUM_WRITE_TALK              (1 << 0)
+#define XUM_WRITE_ATN               (1 << 1)
 
 #endif // _XUM1541_TYPES_H

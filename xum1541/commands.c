@@ -1,6 +1,6 @@
 /*
  * Handle USB bulk and control transactions from the host
- * Copyright (c) 2009 Nate Lawson <nate@root.org>
+ * Copyright (c) 2009-2010 Nate Lawson <nate@root.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -11,29 +11,26 @@
 
 /*
  * Basic inline IO functions where each byte is processed as it is
- * received. It is not necessary to buffer these because once we are in
- * the special protocol handlers, the drive is transferring data quickly
- * enough that we can do it inline. This decreases latency, especially for
- * protocols like nibbler.
- *
- * Do not use inline IO for slow transfers like IEC open/close/listen.
+ * received. This decreases latency, especially for protocols like
+ * nibbler.
  */
 typedef uint8_t (*ReadFn_t)(void);
 typedef void (*WriteFn_t)(uint8_t data);
 typedef void (*Read2Fn_t)(uint8_t *data);
 typedef void (*Write2Fn_t)(uint8_t *data);
 
+// Track a transfer between usbInitIo()/usbIoDone().
 static uint16_t usbDataLen;
 static uint8_t usbDataDir = XUM_DATA_DIR_NONE;
 
 // Are we in the middle of a command sequence (XUM1541_INIT .. SHUTDOWN)?
-static bool iecBusBusy;
+static bool cmdSeqInProgress;
 
 // Nibtools command state. See nib_parburst_read/write_checked()
 static bool suppressNibCmd;
 static uint8_t savedAlign;
 
-static void
+void
 usbInitIo(uint16_t len, uint8_t dir)
 {
 #ifdef DEBUG
@@ -48,6 +45,7 @@ usbInitIo(uint16_t len, uint8_t dir)
         Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
     } else {
         DEBUGF(DBG_ERROR, "ERR: usbInitIo bad dir %d\n");
+        return;
     }
 
     usbDataLen = len;
@@ -56,38 +54,50 @@ usbInitIo(uint16_t len, uint8_t dir)
     /*
      * Wait until endpoint is ready before continuing. It is critical
      * that we do this so that the transfer routines have somewhat
-     * minimal latency when accessing the endpoint buffers. Otherwise
+     * minimal latency when accessing the endpoint buffers. Otherwise,
      * timing could be violated.
      */
     while (!Endpoint_IsReadWriteAllowed())
         ;
 }
 
-static void
+void
 usbIoDone(void)
 {
-    // Clear any leftover state
-    if (usbDataLen != 0) {
-        DEBUGF(DBG_ERROR, "incomplete io %d: %d\n", usbDataDir, usbDataLen);
-        usbDataLen = 0;
-    }
-
     // Finalize any outstanding transactions
     if (usbDataDir == ENDPOINT_DIR_IN) {
-        if (Endpoint_BytesInEndpoint() != 0) {
+        /*
+         * If the transfer left an incomplete endpoint (mod endpoint size)
+         * or possibly never transferred any data (error or timeout case),
+         * flush the buffer back to the host.
+         */
+        if (Endpoint_BytesInEndpoint() != 0 || usbDataLen != 0) {
             Endpoint_ClearIN();
         }
     } else if (usbDataDir == ENDPOINT_DIR_OUT) {
-        if (!Endpoint_IsReadWriteAllowed()) {
+        /*
+         * If we didn't consume all data from the host, then discard it now.
+         * Just clearing the endpoint (below) works fine if the remaining
+         * data is less than the endpoint size, but would leave data in
+         * the buffer if there was more.
+         */
+        if (usbDataLen != 0)
+            Endpoint_Discard_Stream(usbDataLen, AbortOnReset);
+
+        /*
+         * Request another buffer from the host. If it has one, it will
+         * be ready when we start the next transfer.
+         */
+        if (!Endpoint_IsReadWriteAllowed())
             Endpoint_ClearOUT();
-        }
     } else {
         DEBUGF(DBG_ERROR, "done: bad io dir %d\n", usbDataDir);
     }
     usbDataDir = XUM_DATA_DIR_NONE;
+    usbDataLen = 0;
 }
 
-static uint8_t
+int8_t
 usbSendByte(uint8_t data)
 {
 
@@ -109,10 +119,6 @@ usbSendByte(uint8_t data)
             ;
     }
 
-    // Update LEDs
-    wdt_reset();
-    board_update_display();
-
     // Check if the current command is being aborted by the host
     if (doDeviceReset) {
         DEBUGF(DBG_ERROR, "sndrst\n");
@@ -122,7 +128,7 @@ usbSendByte(uint8_t data)
     return 0;
 }
 
-static uint8_t
+int8_t
 usbRecvByte(uint8_t *data)
 {
 
@@ -148,10 +154,6 @@ usbRecvByte(uint8_t *data)
     *data = Endpoint_Read_Byte();
     usbDataLen--;
 
-    // Update LEDs
-    wdt_reset();
-    board_update_display();
-
     // Check if the current command is being aborted by the host
     if (doDeviceReset) {
         DEBUGF(DBG_ERROR, "rcvrst\n");
@@ -169,7 +171,8 @@ ioReadLoop(ReadFn_t readFn, uint16_t len)
     usbInitIo(len, ENDPOINT_DIR_IN);
     while (len-- != 0) {
         data = readFn();
-        usbSendByte(data);
+        if (usbSendByte(data) != 0)
+            break;
     }
     usbIoDone();
     return 0;
@@ -182,7 +185,8 @@ ioWriteLoop(WriteFn_t writeFn, uint16_t len)
 
     usbInitIo(len, ENDPOINT_DIR_OUT);
     while (len-- != 0) {
-        usbRecvByte(&data);
+        if (usbRecvByte(&data) != 0)
+            break;
         writeFn(data);
     }
     usbIoDone();
@@ -197,8 +201,8 @@ ioRead2Loop(Read2Fn_t readFn, uint16_t len)
     usbInitIo(len, ENDPOINT_DIR_IN);
     while (len != 0) {
         readFn(data);
-        usbSendByte(data[0]);
-        usbSendByte(data[1]);
+        if (usbSendByte(data[0]) != 0 || usbSendByte(data[1]) != 0)
+            break;
         len -= 2;
     }
     usbIoDone();
@@ -212,8 +216,8 @@ ioWrite2Loop(Write2Fn_t writeFn, uint16_t len)
 
     usbInitIo(len, ENDPOINT_DIR_OUT);
     while (len != 0) {
-        usbRecvByte(&data[0]);
-        usbRecvByte(&data[1]);
+        if (usbRecvByte(&data[0]) != 0 || usbRecvByte(&data[1]) != 0)
+            break;
         writeFn(data);
         len -= 2;
     }
@@ -252,7 +256,8 @@ ioReadNibLoop(uint16_t len)
         }
 
         // Send the byte via USB
-        usbSendByte(data);
+        if (usbSendByte(data) != 0)
+            break;
     }
     usbIoDone();
 
@@ -279,7 +284,8 @@ ioWriteNibLoop(uint16_t len)
 
     for (i = 0; i < len; i++) {
         // Get the byte via USB
-        usbRecvByte(&data);
+        if (usbRecvByte(&data) != 0)
+            break;
 
         // Write a byte to the parport
         if (nib_write_handshaked(data, i & 1) < 0) {
@@ -368,17 +374,24 @@ nib_parburst_read_checked(void)
 }
 
 /*
- * Do a soft USB reset and then reset the IEC bus as well.
- * This can be called at any time while we are active and it will not
- * lose track of incoming commands.
+ * Delay a little (required), shutdown USB, disable watchdog and interrupts,
+ * and jump to the bootloader.
  */
 static void
-xum1541_reset(void)
+enterBootLoader(void)
 {
-    board_set_status(STATUS_INIT);
-    USB_ResetConfig(false);
-    cbm_reset();
-    board_set_status(STATUS_READY);
+    // Control request was handled, so ack it
+    Endpoint_ClearSETUP();
+    while (!Endpoint_IsINReady())
+        ;
+    Endpoint_ClearIN();
+
+    // Now shut things down and jump to the bootloader.
+    DELAY_MS(100);
+    wdt_disable();
+    USB_ShutDown();
+    cli();
+    cpu_bootloader_start();
 }
 
 /*
@@ -387,33 +400,45 @@ xum1541_reset(void)
  * invalid. All control processing has to happen until completion (no
  * delayed execution) and it may not take additional input from the host
  * (data direction set as host to device).
+ *
+ * The replyBuf is 8 bytes long.
  */
 int8_t
 usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
 {
     DEBUGF(DBG_INFO, "cmd %d (%d)\n", cmd, cmd - XUM1541_IOCTL);
 
-    board_set_status(STATUS_ACTIVE);
     switch (cmd) {
+    case XUM1541_ENTER_BOOTLOADER:
+        enterBootLoader();
+        return 0;
     case XUM1541_ECHO:
         replyBuf[0] = cmd;
         return 1;
     case XUM1541_INIT:
-        if (iecBusBusy)
-            xum1541_reset();
-        replyBuf[0] = XUM1541_VERSION_MAJOR;
-        replyBuf[1] = XUM1541_VERSION_MINOR;
-        replyBuf[2] = XUM1541_CAPABILITIES;
-        replyBuf[3] = iecBusBusy;
-        iecBusBusy = true;
-        return 4;
-    case XUM1541_RESET:
-        xum1541_reset();
+        board_set_status(STATUS_ACTIVE);
+        replyBuf[0] = XUM1541_VERSION;
+        replyBuf[1] = XUM1541_CAPABILITIES;
+
+        /*
+         * Our previous transaction was interrupted in the middle, say by
+         * the user pressing ^C. Reset the IEC bus and then enter the
+         * stalled state. The host will clear the stall and continue
+         * their new transaction.
+         */
+        if (cmdSeqInProgress) {
+            replyBuf[2] |= XUM1541_DOING_RESET;
+            cbm_reset();
+            SetAbortState();
+        }
+        cmdSeqInProgress = true;
+        return 8;
+    case XUM1541_SHUTDOWN:
+        cmdSeqInProgress = false;
         board_set_status(STATUS_READY);
         return 0;
-    case XUM1541_SHUTDOWN:
-        iecBusBusy = false;
-        board_set_status(STATUS_READY);
+    case XUM1541_RESET:
+        cbm_reset();
         return 0;
     default:
         DEBUGF(DBG_ERROR, "ERR: control cmd %d not impl\n", cmd);
@@ -421,140 +446,127 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
     }
 }
 
+// Store the 16-bit response to a bulk command in a status buffer.
+#define XUM_SET_STATUS_VAL(buf, v)  *(uint16_t *)&((buf)[1]) = (v)
+
 int8_t
-usbHandleBulk(uint8_t *request, uint8_t *replyBuf)
+usbHandleBulk(uint8_t *request, uint8_t *status)
 {
-    uint8_t cmd, proto, talk, ret;
-    uint16_t len = (request[3] << 8) | request[2];
+    uint8_t cmd, proto;
+    int8_t ret;
+    uint16_t len;
 
     // Default is to return no data
-    ret = 0;
+    ret = XUM1541_IO_READY;
     cmd = request[0];
+    len = *(uint16_t *)&request[2];
     board_set_status(STATUS_ACTIVE);
     switch (cmd) {
-    case XUM1541_GET_RESULT:
-        xu1541_get_result(replyBuf);
-        ret = 2;
-        break;
-    case XUM1541_REQUEST_READ:
-        DEBUGF(DBG_INFO, "req rd %d\n", len);
-        xu1541_request_read((uint8_t)len);
-        break;
     case XUM1541_READ:
-        proto = request[1];
+        proto = XUM_RW_PROTO(request[1]);
         DEBUGF(DBG_INFO, "rd:%d %d\n", proto, len);
-        if (proto == XUM1541_CBM) {
-            xu1541_read((uint8_t)len);
-        } else {
-            // loop to read all the bytes now, sending back each as we get it
-            switch (proto) {
-            case XUM1541_S1:
-                ioReadLoop(s1_read_byte, len);
-                break;
-            case XUM1541_S2:
-                ioReadLoop(s2_read_byte, len);
-                break;
-            case XUM1541_PP:
-                ioRead2Loop(pp_read_2_bytes, len);
-                break;
-            case XUM1541_P2:
-                ioReadLoop(p2_read_byte, len);
-                break;
-            case XUM1541_NIB:
-                ioReadNibLoop(len);
-                break;
-            case XUM1541_NIB_READ_N:
-                ioReadLoop(nib_parburst_read_checked, len);
-                break;
-            default:
-                DEBUGF(DBG_ERROR, "badproto %d\n", proto);
-            }
+        // loop to read all the bytes now, sending back each as we get it
+        switch (proto) {
+        case XUM1541_CBM:
+            cbm_raw_read(len);
+            ret = 0;
+            break;
+        case XUM1541_S1:
+            ioReadLoop(s1_read_byte, len);
+            ret = 0;
+            break;
+        case XUM1541_S2:
+            ioReadLoop(s2_read_byte, len);
+            ret = 0;
+            break;
+        case XUM1541_PP:
+            ioRead2Loop(pp_read_2_bytes, len);
+            ret = 0;
+            break;
+        case XUM1541_P2:
+            ioReadLoop(p2_read_byte, len);
+            ret = 0;
+            break;
+        case XUM1541_NIB:
+            ioReadNibLoop(len);
+            ret = 0;
+            break;
+        case XUM1541_NIB_COMMAND:
+            ioReadLoop(nib_parburst_read_checked, len);
+            ret = 0;
+            break;
+        default:
+            DEBUGF(DBG_ERROR, "badproto %d\n", proto);
+            ret = -1;
         }
         break;
     case XUM1541_WRITE:
-        proto = request[1];
+        proto = XUM_RW_PROTO(request[1]);
         DEBUGF(DBG_INFO, "wr:%d %d\n", proto, len);
-        if (proto == XUM1541_CBM) {
-            xu1541_write((uint8_t)len);
-        } else {
-            // loop to fetch each byte and write it as we get it
-            switch (proto) {
-            case XUM1541_S1:
-                ioWriteLoop(s1_write_byte, len);
-                break;
-            case XUM1541_S2:
-                ioWriteLoop(s2_write_byte, len);
-                break;
-            case XUM1541_PP:
-                ioWrite2Loop(pp_write_2_bytes, len);
-                break;
-            case XUM1541_P2:
-                ioWriteLoop(p2_write_byte, len);
-                break;
-            case XUM1541_NIB:
-                ioWriteNibLoop(len);
-                break;
-            case XUM1541_NIB_WRITE_N:
-                ioWriteLoop(nib_parburst_write_checked, len);
-                break;
-            default:
-                DEBUGF(DBG_ERROR, "badproto %d\n", proto);
-            }
+        // loop to fetch each byte and write it as we get it
+        switch (proto) {
+        case XUM1541_CBM:
+            len = cbm_raw_write(len, XUM_RW_FLAGS(request[1]));
+            XUM_SET_STATUS_VAL(status, len);
+            break;
+        case XUM1541_S1:
+            ioWriteLoop(s1_write_byte, len);
+            ret = 0;
+            break;
+        case XUM1541_S2:
+            ioWriteLoop(s2_write_byte, len);
+            ret = 0;
+            break;
+        case XUM1541_PP:
+            ioWrite2Loop(pp_write_2_bytes, len);
+            ret = 0;
+            break;
+        case XUM1541_P2:
+            ioWriteLoop(p2_write_byte, len);
+            ret = 0;
+            break;
+        case XUM1541_NIB:
+            ioWriteNibLoop(len);
+            ret = 0;
+            break;
+        case XUM1541_NIB_COMMAND:
+            ioWriteLoop(nib_parburst_write_checked, len);
+            ret = 0;
+            break;
+        default:
+            DEBUGF(DBG_ERROR, "badproto %d\n", proto);
+            ret = -1;
         }
-        break;
-
-    /* Async commands for the control channel */
-    case XUM1541_TALK:
-    case XUM1541_LISTEN:
-        DEBUGF(DBG_INFO, "tlk/lst(%d,%d)\n", request[1], request[2]);
-        talk = (cmd == XUM1541_TALK);
-        request[1] |= talk ? 0x40 : 0x20;
-        request[2] |= 0x60;
-        xu1541_request_async(request + 1, 2, /*atn*/1, talk);
-        break;
-    case XUM1541_UNTALK:
-    case XUM1541_UNLISTEN:
-        DEBUGF(DBG_INFO, "untlk/unlst\n");
-        request[1] = (cmd == XUM1541_UNTALK) ? 0x5f : 0x3f;
-        xu1541_request_async(request + 1, 1, /*atn*/1, /*talk*/0);
-        break;
-    case XUM1541_OPEN:
-    case XUM1541_CLOSE:
-        DEBUGF(DBG_INFO, "open/close(%d,%d)\n", request[1], request[2]);
-        request[1] |= 0x20;
-        request[2] |= (cmd == XUM1541_OPEN) ? 0xf0 : 0xe0;
-        xu1541_request_async(request + 1, 2, /*atn*/1, /*talk*/0);
         break;
 
     /* Low-level port access */
     case XUM1541_GET_EOI:
-        replyBuf[0] = eoi ? 1 : 0;
-        ret = 1;
+        XUM_SET_STATUS_VAL(status, eoi ? 1 : 0);
         break;
     case XUM1541_CLEAR_EOI:
         eoi = 0;
         break;
     case XUM1541_IEC_WAIT:
-        xu1541_wait(/*line*/request[1], /*state*/request[2]);
+        if (!xu1541_wait(/*line*/request[1], /*state*/request[2])) {
+            ret = 0;
+            break;
+        }
         /* FALLTHROUGH */
     case XUM1541_IEC_POLL:
-        replyBuf[0] = xu1541_poll();
-        DEBUGF(DBG_INFO, "poll=%x\n", replyBuf[0]);
-        ret = 1;
+        XUM_SET_STATUS_VAL(status, xu1541_poll());
+        DEBUGF(DBG_INFO, "poll=%x\n", XUM_GET_STATUS_VAL(status));
         break;
     case XUM1541_IEC_SETRELEASE:
         xu1541_setrelease(/*set*/request[1], /*release*/request[2]);
         break;
     case XUM1541_PP_READ:
-        replyBuf[0] = xu1541_pp_read();
-        ret = 1;
+        XUM_SET_STATUS_VAL(status, xu1541_pp_read());
         break;
     case XUM1541_PP_WRITE:
         xu1541_pp_write(request[1]);
         break;
     case XUM1541_PARBURST_READ:
-        replyBuf[0] = nib_parburst_read_checked();
-        ret = 1;
+        XUM_SET_STATUS_VAL(status, nib_parburst_read_checked());
         break;
     case XUM1541_PARBURST_WRITE:
         // Sets suppressNibCmd if we're doing a read/write track.

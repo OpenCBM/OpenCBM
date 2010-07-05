@@ -1,20 +1,20 @@
 /*
- * CPU initialization and timer routines for the USBKEY devkit (at90usb1287)
- * Copyright (c) 2009-2010 Nate Lawson <nate@root.org>
+ * CPU initialization and timer routines for the Bumble-B devkit (at90usb162)
+ * Copyright (c) 2010 Nate Lawson <nate@root.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version
  * 2 of the License, or (at your option) any later version.
  */
-#ifndef _CPU_USBKEY_H
-#define _CPU_USBKEY_H
+#ifndef _CPU_BUMBLEB_H
+#define _CPU_BUMBLEB_H
 
 // Initialize the CPU (clock rate, UART)
 static inline void
 cpu_init(void)
 {
-    // Disable clock division. This takes us from 1 MHz -> 8 MHz.
+    // Disable clock division.
     clock_prescale_set(clock_div_1);
 
     // Enable watchdog timer and set for 1 second.
@@ -24,15 +24,14 @@ cpu_init(void)
 static inline void
 cpu_bootloader_start(void)
 {
-    // XXX This does not work yet, use the hardware buttons
-    clock_prescale_set(clock_div_8);
+    // Disable timer and then jump to bootloader address
     TCCR1B = 0;
     OCR1A = 0;
-    __asm__ __volatile__ ("jmp 0xf000" "\n\t");
+    __asm__ __volatile__ ("jmp 0x3000" "\n\t");
 }
 
 // Timer and delay functions
 #define DELAY_MS(x) _delay_ms(x)
 #define DELAY_US(x) _delay_us(x)
 
-#endif // _CPU_USBKEY_H
+#endif // _CPU_BUMBLEB_H

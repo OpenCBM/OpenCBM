@@ -29,10 +29,9 @@ USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
     Endpoint0Size:          XUM_ENDPOINT_0_SIZE,
 
-    VendorID:               0x0403,
-    ProductID:              0xc632,
-    ReleaseNumber:          ((XUM1541_VERSION_MAJOR << 8) |
-                             XUM1541_VERSION_MINOR),
+    VendorID:               XUM1541_VID,
+    ProductID:              XUM1541_PID,
+                            XUM1541_VERSION,
 
     ManufacturerStrIndex:   0x01,
     ProductStrIndex:        0x02,

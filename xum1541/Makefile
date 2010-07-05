@@ -1,6 +1,6 @@
 #
 # Build the firmware for the xum1541
-# Copyright (c) 2009 Nate Lawson <nate@root.org>
+# Copyright (c) 2009-2010 Nate Lawson <nate@root.org>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -8,12 +8,15 @@
 # 2 of the License, or (at your option) any later version.
 #
 
-# You must select a model of xum1541 here. Each model indicates the CPU
+# You must list all models of xum1541 here. Each model indicates the CPU
 # and board type (i.e., IO port/pin layout, peripherals, etc.)
 #
 # Currently, valid models are:
-# AT90USBKEY: Atmel USB key development board with 8 MHz AT90USB1287 cpu
-MODEL=      AT90USBKEY
+# USBKEY: Atmel USB key development board with 8 MHz AT90USB1287 cpu
+# ZOOMFLOPPY: commercial board with 16 MHz ATMEGA32U2 cpu
+# BUMBLEB: Bumble-B with 16 MHz AT90USB162 cpu and IEC daughtercard
+MODELS= USBKEY BUMBLEB
+.PHONY: $(MODELS)
 
 # Enable to get debug printing via the UART (port D)
 #CFLAGS=    -DDEBUG -DDEBUG_LEVEL=DBG_INFO
@@ -21,15 +24,32 @@ MODEL=      AT90USBKEY
 ### Nothing user-configurable beyond this point ###
 
 # Firmware version. Bump when changing the firmware code.
-XUMFW_VERSION= 04
+XUMFW_VERSION= 06
 
-ifeq ($(MODEL),AT90USBKEY)
+all: $(MODELS)
+
+define MAKE_model
+$1:
+	$(MAKE) MODEL=$1 clean-one build
+endef
+
+$(foreach model,$(MODELS),$(eval $(call MAKE_model,$(model))))
+
+ifeq ($(MODEL),USBKEY)
 CPUMODEL=	at90usb1287
 CPURATE=	8000000
 BOARD=		BOARD_USBKEY
 BOARD_OBJS=	board-usbkey.o
-else
-$(error Must define a MODEL so we know what to build)
+else ifeq ($(MODEL),ZOOMFLOPPY)
+CPUMODEL=	atmega32u2
+CPURATE=	16000000
+BOARD=		BOARD_ZOOMFLOPPY
+BOARD_OBJS=	board-zoomfloppy.o
+else ifeq ($(MODEL),BUMBLEB)
+CPUMODEL=	at90usb162
+CPURATE=	16000000
+BOARD=		BOARD_ZOOMFLOPPY
+BOARD_OBJS=	board-zoomfloppy.o
 endif
 
 # Final name for firmware hex file
@@ -41,8 +61,8 @@ MODELVERSION= xum1541-$(MODEL)-v$(XUMFW_VERSION)
 CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
 	-DF_CPU=$(CPURATE)UL -DF_CLOCK=F_CPU -mmcu=$(CPUMODEL) \
 	-Os -g -Werror -Wall -Wstrict-prototypes -Wundef -std=gnu99 -I . \
-	-DUSB_DEVICE_ONLY -DUSE_NONSTANDARD_DESCRIPTOR_NAMES \
-	-DINTERRUPT_CONTROL_ENDPOINT \
+	-DUSB_DEVICE_ONLY \
+	-DINTERRUPT_CONTROL_ENDPOINT -DUSE_FLASH_DESCRIPTORS \
         -DFIXED_CONTROL_ENDPOINT_SIZE=8 \
         -DUSE_SINGLE_DEVICE_CONFIGURATION \
 	-DUSE_STATIC_OPTIONS="(USB_DEVICE_OPT_FULLSPEED | USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)" \
@@ -71,12 +91,18 @@ IEC_OBJS= iec.o s1.o s2.o pp.o p2.o nib.o
 OBJS=     main.o commands.o descriptor.o \
           $(BOARD_OBJS) $(MYUSB_OBJS) $(IEC_OBJS)
 
-.c.o:
-	avr-gcc $(CFLAGS) -c -o $@ $< 
+CC=      avr-gcc
+OBJCOPY= avr-objcopy
 
-all: $(OBJS)
-	avr-gcc $(CFLAGS) -o $(MODELVERSION).bin $(OBJS) $(LDFLAGS)
-	avr-objcopy -O ihex $(MODELVERSION).bin $(MODELVERSION).hex
+.c.o:
+	${CC} $(CFLAGS) -c -o $@ $< 
+
+build: $(OBJS)
+	${CC} $(CFLAGS) -o $(MODELVERSION).bin $(OBJS) $(LDFLAGS)
+	${OBJCOPY} -O ihex $(MODELVERSION).bin $(MODELVERSION).hex
+
+clean-one:
+	rm -f $(OBJS) $(MODELVERSION).bin
 
 clean:
-	rm -f $(OBJS) $(MODELVERSION).bin
+	rm -f $(OBJS) board-*.o xum1541-*-v*.bin
