@@ -6,6 +6,7 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
+ *  Copyright 2009-2010 Nate Lawson
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005, 2007, 2010 Spiro Trikaliotis
  *
@@ -14,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.3 2010-04-26 04:10:40 natelawson Exp $ \n
+** \version $Id: archlib.c,v 1.4 2010-07-05 20:25:42 natelawson Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -199,7 +200,7 @@ opencbm_plugin_unlock(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
-    return xum1541_write(Buffer, Count);
+    return xum1541_write(XUM1541_CBM, Buffer, Count);
 }
 
 /*! \brief Read data from the IEC serial bus
@@ -228,7 +229,7 @@ opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count
 int CBMAPIDECL
 opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
-    return xum1541_read(Buffer, Count);
+    return xum1541_read(XUM1541_CBM, Buffer, Count);
 }
 
 
@@ -259,7 +260,12 @@ opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 int CBMAPIDECL
 opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
-    return xum1541_ioctl(XUM1541_LISTEN, DeviceAddress, SecondaryAddress);
+    __u_char proto, dataBuf[2];
+
+    proto = XUM1541_CBM | XUM_WRITE_ATN;
+    dataBuf[0] = 0x20 | DeviceAddress;
+    dataBuf[1] = 0x60 | SecondaryAddress;
+    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
 }
 
 /*! \brief Send a TALK on the IEC serial bus
@@ -288,7 +294,12 @@ opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Se
 int CBMAPIDECL
 opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
-    return xum1541_ioctl(XUM1541_TALK, DeviceAddress, SecondaryAddress);
+    __u_char proto, dataBuf[2];
+
+    proto = XUM1541_CBM | XUM_WRITE_ATN | XUM_WRITE_TALK;
+    dataBuf[0] = 0x40 | DeviceAddress;
+    dataBuf[1] = 0x60 | SecondaryAddress;
+    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
 }
 
 /*! \brief Open a file on the IEC serial bus
@@ -315,7 +326,12 @@ opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Seco
 int CBMAPIDECL
 opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
-    return xum1541_ioctl(XUM1541_OPEN, DeviceAddress, SecondaryAddress);
+    __u_char proto, dataBuf[2];
+
+    proto = XUM1541_CBM | XUM_WRITE_ATN;
+    dataBuf[0] = 0x20 | DeviceAddress;
+    dataBuf[1] = 0xf0 | SecondaryAddress;
+    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
 }
 
 /*! \brief Close a file on the IEC serial bus
@@ -342,7 +358,12 @@ opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Seco
 int CBMAPIDECL
 opencbm_plugin_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
 {
-    return xum1541_ioctl(XUM1541_CLOSE, DeviceAddress, SecondaryAddress);
+    __u_char proto, dataBuf[2];
+
+    proto = XUM1541_CBM | XUM_WRITE_ATN;
+    dataBuf[0] = 0x20 | DeviceAddress;
+    dataBuf[1] = 0xe0 | SecondaryAddress;
+    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
 }
 
 /*! \brief Send an UNLISTEN on the IEC serial bus
@@ -368,7 +389,11 @@ opencbm_plugin_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Sec
 int CBMAPIDECL
 opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 {
-    return xum1541_ioctl(XUM1541_UNLISTEN, 0, 0);
+    __u_char proto, dataBuf[1];
+
+    proto = XUM1541_CBM | XUM_WRITE_ATN;
+    dataBuf[0] = 0x3f;
+    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
 }
 
 /*! \brief Send an UNTALK on the IEC serial bus
@@ -394,7 +419,11 @@ opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_untalk(CBM_FILE HandleDevice)
 {
-    return xum1541_ioctl(XUM1541_UNTALK, 0, 0);
+    __u_char proto, dataBuf[1];
+
+    proto = XUM1541_CBM | XUM_WRITE_ATN;
+    dataBuf[0] = 0x5f;
+    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
 }
 
 
@@ -469,7 +498,7 @@ opencbm_plugin_clear_eoi(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_reset(CBM_FILE HandleDevice)
 {
-    return xum1541_ioctl(XUM1541_RESET, 0, 0);
+    return xum1541_control_msg(XUM1541_RESET);
 }
 
 

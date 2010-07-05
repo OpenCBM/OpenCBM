@@ -4,14 +4,14 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2009      Nate Lawson
+ *  Copyright 2009-2010 Nate Lawson
  *
  */
 
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/WINDOWS/parburst.c \n
 ** \author Nate Lawson \n
-** \version $Id: parburst.c,v 1.3 2010-04-26 04:10:40 natelawson Exp $ \n
+** \version $Id: parburst.c,v 1.4 2010-07-05 20:25:42 natelawson Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **
@@ -85,7 +85,7 @@ opencbm_plugin_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
 {
     int result;
 
-    result = xum1541_special_read(XUM1541_NIB_READ_N, Buffer, Length);
+    result = xum1541_read(XUM1541_NIB_COMMAND, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_read_n: returned with error %d", result));
     }
@@ -99,7 +99,7 @@ opencbm_plugin_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
 {
     int result;
 
-    result = xum1541_special_write(XUM1541_NIB_WRITE_N, Buffer, Length);
+    result = xum1541_write(XUM1541_NIB_COMMAND, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_write_n: returned with error %d", result));
     }
@@ -133,7 +133,7 @@ opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer
 {
     int result;
 
-    result = xum1541_special_read(XUM1541_NIB, Buffer, Length);
+    result = xum1541_read(XUM1541_NIB, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_read_track: returned with error %d", result));
     }
@@ -167,9 +167,77 @@ opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffe
 {
     int result;
 
-    result = xum1541_special_write(XUM1541_NIB, Buffer, Length);
+    result = xum1541_write(XUM1541_NIB, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_write_track: returned with error %d", result));
+    }
+
+    return result;
+}
+
+/*! \brief SRQ: Read a complete track
+
+ This function is a helper function for parallel burst:
+ It reads a complete track from the disk
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which will hold the bytes read.
+
+ \param Length
+   The length of the Buffer.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_srq_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+{
+    int result;
+
+    result = xum1541_read(XUM1541_NIB_SRQ, Buffer, Length);
+    if (result != Length) {
+        DBG_WARN((DBG_PREFIX "srq_read_track: returned with error %d", result));
+    }
+
+    return result;
+}
+
+/*! \brief SRQ: Write a complete track
+
+ This function is a helper function for parallel burst:
+ It writes a complete track to the disk
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which hold the bytes to be written.
+
+ \param Length
+   The length of the Buffer.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_srq_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+{
+    int result;
+
+    result = xum1541_write(XUM1541_NIB_SRQ, Buffer, Length);
+    if (result != Length) {
+        DBG_WARN((DBG_PREFIX "srq_write_track: returned with error %d", result));
     }
 
     return result;

@@ -15,7 +15,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.7 2010-04-26 04:10:40 natelawson Exp $ \n
+** \version $Id: xum1541.c,v 1.8 2010-07-05 20:25:42 natelawson Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -34,9 +34,6 @@
 
 static int debug_level = -1; /*!< \internal \brief the debugging level for debugging output */
 static usb_dev_handle *xum1541_handle = NULL; /*!< \internal \brief handle to the xum1541 device */
-
-/*! \brief timeout value, used mainly after errors \todo What is the exact purpose of this? */
-#define TIMEOUT_DELAY  25000   // 25ms
 
 /*! \internal \brief Output debugging information for the xum1541
 
@@ -67,36 +64,42 @@ xum1541_dbg(int level, char *msg, ...)
     }
 }
 
-/*! \internal \brief @@@@@ \todo document
+/*! \internal \brief Get a char* string from the device's Unicode descriptors
+    Some data will be lost in this conversion, but we are ok with that.
 
  \param dev
+    libusb device handle
 
  \param index
+    Descriptor string index
 
  \param langid
+    Language code
 
  \param buf
+    Where to store the string. The result is nul-terminated.
 
  \param buflen
+    Length of the output buffer.
 
  \return
+    Returns the length of the string read or 0 on error.
 */
 static int
 usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
-                  char *buf, int buflen)
+    char *buf, int buflen)
 {
     char buffer[256];
     int rval, i;
 
-    if ((rval = usb.control_msg(dev, USB_ENDPOINT_IN,
-                                USB_REQ_GET_DESCRIPTOR,
-                                (USB_DT_STRING << 8) + index,
-                                langid, buffer, sizeof(buffer), 1000)) < 0)
+    rval = usb.control_msg(dev, USB_ENDPOINT_IN, USB_REQ_GET_DESCRIPTOR,
+        (USB_DT_STRING << 8) + index, langid,
+        buffer, sizeof(buffer), 1000);
+    if (rval < 0)
         return rval;
 
     if (buffer[1] != USB_DT_STRING)
         return 0;
-
     if ((unsigned char)buffer[0] < rval)
         rval = (unsigned char)buffer[0];
 
@@ -129,48 +132,39 @@ xum1541_cleanup(char *msg, ...)
     xum1541_handle = NULL;
 }
 
+// Check for a firmware version compatible with this plugin
 static int
-xum1541_check_version(int major, int minor)
+xum1541_check_version(int version)
 {
-    xum1541_dbg(0, "firmware version %d.%d", major, minor);
-    if (major != XUM1541_VERSION_MAJOR) {
-        fprintf(stderr, "xum1541 firmware major version wrong (%d != %d)\n",
-            major, XUM1541_VERSION_MAJOR);
-        return -1;
-    }
-    if (minor < XUM1541_VERSION_MINOR) {
+    xum1541_dbg(0, "firmware version %d, library version %d", version,
+        XUM1541_VERSION);
+    if (version < XUM1541_VERSION) {
         fprintf(stderr, "xum1541 firmware version too low (%d < %d)\n",
-            minor, XUM1541_VERSION_MINOR);
+            version, XUM1541_VERSION);
         fprintf(stderr, "please update your xum1541 firmware\n");
         return -1;
-    }
-    if (minor > XUM1541_VERSION_MINOR) {
+    } else if (version > XUM1541_VERSION) {
         fprintf(stderr, "xum1541 firmware version too high (%d > %d)\n",
-            minor, XUM1541_VERSION_MINOR);
+            version, XUM1541_VERSION);
         fprintf(stderr, "please update your OpenCBM plugin\n");
         return -1;
     }
     return 0;
 }
 
-/*! \brief initialise the xum1541 device
-
+/*! \brief Initialize the xum1541 device
   This function tries to find and identify the xum1541 device.
 
   \return
-    0 on success, -1 on error.
+    0 on success, -1 on error. On error, the handle is cleaned up if it
+    was already active.
 
   \remark
     On success, xum1541_handle contains a valid handle to the xum1541 device.
     In this case, the device configuration has been set and the interface
-    been claimed.
-
-  \bug
-    On some error types, this function might return error, but might
-    has opened the xum1541_handle. In this case, the handle is leaked, as
-    xum1541_close() is not to be called.
+    been claimed. xum1541_close() should be called when the user is done
+    with it.
 */
-/* try to find a xum1541 cable */
 int
 xum1541_init(void)
 {
@@ -179,7 +173,7 @@ xum1541_init(void)
     struct usb_bus *bus;
     struct usb_device *dev;
     char string[256];
-    unsigned char devInfo[4];
+    unsigned char devInfo[XUM_DEVINFO_SIZE], devStatus;
     int len;
 
     xum1541_dbg(0, "scanning usb ...");
@@ -200,8 +194,8 @@ xum1541_init(void)
                 dev->filename);
 
             // First, find our vendor and product id
-            if ((dev->descriptor.idVendor != XUM1541_VID) &&
-                (dev->descriptor.idProduct != XUM1541_PID))
+            if (dev->descriptor.idVendor != XUM1541_VID &&
+                dev->descriptor.idProduct != XUM1541_PID)
                 continue;
 
             xum1541_dbg(0, "found xu/xum1541 version %04x on bus %s, device %s",
@@ -253,24 +247,31 @@ done:
         return -1;
     }
 
-    // Check the basic device info message for major/minor version
+    // Check the basic device info message for firmware version
     memset(devInfo, 0, sizeof(devInfo));
     len = usb.control_msg(xum1541_handle, USB_TYPE_CLASS | USB_ENDPOINT_IN,
-        XUM1541_INIT, 0, 0, (char*)devInfo, sizeof(devInfo),
-        USB_RESET_TIMEOUT);
+        XUM1541_INIT, 0, 0, (char*)devInfo, sizeof(devInfo), USB_TIMEOUT);
     if (len < 2) {
         fprintf(stderr, "USB request for XUM1541 info failed: %s\n",
             usb.strerror());
         xum1541_close();
         return -1;
     }
-    if (xum1541_check_version(devInfo[0], devInfo[1]) != 0) {
+    if (xum1541_check_version(devInfo[0]) != 0) {
         xum1541_close();
         return -1;
     }
     if (len >= 4) {
-        xum1541_dbg(0, "device capabilities %02x status %d",
-            devInfo[2], devInfo[3]);
+        xum1541_dbg(0, "device capabilities %02x status %02x",
+            devInfo[1], devInfo[2]);
+    }
+
+    // Check for the xum1541's current status. (Not the drive.)
+    devStatus = devInfo[2];
+    if ((devStatus & XUM1541_DOING_RESET) != 0) {
+        fprintf(stderr, "previous command was interrupted, resetting\n");
+        usb.clear_halt(xum1541_handle, XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN);
+        usb.clear_halt(xum1541_handle, XUM_BULK_OUT_ENDPOINT);
     }
 
     return 0;
@@ -303,520 +304,207 @@ xum1541_close(void)
     xum1541_handle = NULL;
 }
 
-/*! \brief perform an ioctl on the xum1541
+/*! \brief  Handle synchronous USB control messages, e.g. for RESET.
+    xum1541_ioctl() is used for bulk messages.
 
  \param cmd
-   The IOCTL number
-
- \param addr
-   The (IEC) device to use
-
- \param secaddr
-   The (IEC) secondary address to use
+   The command to run.
 
  \return
-   Depends upon the IOCTL.
+   Returns the value the USB device sent back.
+*/
+int
+xum1541_control_msg(unsigned int cmd)
+{
+    int nBytes;
 
- \todo
-   Rework for cleaner structure. Currently, this is a mess!
+    xum1541_dbg(1, "control msg %d", cmd);
+
+    nBytes = usb.control_msg(xum1541_handle, USB_TYPE_CLASS | USB_ENDPOINT_OUT,
+        cmd, 0, 0, NULL, 0, USB_TIMEOUT);
+    if (nBytes < 0) {
+        fprintf(stderr, "USB error in xum1541_control_msg: %s\n",
+            usb.strerror());
+        exit(-1);
+    }
+
+    return nBytes;
+}
+
+static int
+xum1541_wait_status()
+{
+    int nBytes, deviceBusy, ret;
+    unsigned char statusBuf[XUM_STATUSBUF_SIZE];
+
+    xum1541_dbg(2, "xum1541_wait_status checking for status");
+    deviceBusy = 1;
+    while (deviceBusy) {
+        nBytes = usb.bulk_read(xum1541_handle,
+            XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
+            (char*)statusBuf, XUM_STATUSBUF_SIZE, LIBUSB_NO_TIMEOUT);
+        if (nBytes == XUM_STATUSBUF_SIZE) {
+            switch (XUM_GET_STATUS(statusBuf)) {
+            case XUM1541_IO_BUSY:
+                xum1541_dbg(2, "device busy, waiting");
+                break;
+            case XUM1541_IO_ERROR:
+                fprintf(stderr, "device reports error\n");
+                /* FALLTHROUGH */
+            case XUM1541_IO_READY:
+                deviceBusy = 0;
+                break;
+            default:
+                fprintf(stderr, "unknown status value: %d\n",
+                    XUM_GET_STATUS(statusBuf));
+                exit(-1);
+            }
+        } else {
+            fprintf(stderr, "USB error in xum1541_wait_status: %s\n",
+                usb.strerror());
+            exit(-1);
+        }
+    }
+
+    // Once we have a valid response (done ok), get extended status
+    if (XUM_GET_STATUS(statusBuf) == XUM1541_IO_READY)
+        ret = XUM_GET_STATUS_VAL(statusBuf);
+    else
+        ret = -1;
+
+    xum1541_dbg(2, "return val = %x", ret);
+    return ret;
+}
+
+/*! \brief Perform an ioctl on the xum1541, which is any command other than
+    read/write or special device management commands such as INIT and RESET.
+
+ \param cmd
+   The command to run.
+
+ \param addr
+   The IEC device to use or 0 if not needed.
+
+ \param secaddr
+   The IEC secondary address to use or 0 if not needed.
+
+ \return
+   Returns the device status byte, which is 0 if the command does not
+   have a return value. For some commands, the status byte gives
+   info from the device such as the active IEC lines.
 */
 int
 xum1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
-  int nBytes = 0;
-  char ret[4], cmdBuf[XUM_CMDBUF_SIZE];
+    int nBytes, ret;
+    unsigned char cmdBuf[XUM_CMDBUF_SIZE];
 
-  xum1541_dbg(1, "ioctl %d for device %d, sub %d", cmd, addr, secaddr);
-  cmdBuf[0] = (char)cmd;
-  cmdBuf[1] = (char)addr;
-  cmdBuf[2] = (char)secaddr;
-  cmdBuf[3] = 0;
+    xum1541_dbg(1, "ioctl %d for device %d, sub %d", cmd, addr, secaddr);
+    cmdBuf[0] = (unsigned char)cmd;
+    cmdBuf[1] = (unsigned char)addr;
+    cmdBuf[2] = (unsigned char)secaddr;
+    cmdBuf[3] = 0;
 
-  /* some commands are being handled asynchronously, namely the ones that */
-  /* send a iec byte. These need to ask for the result with a seperate */
-  /* command */
-  if (cmd == XUM1541_RESET)
-  {
-      /* sync transfer, read result directly */
-      /* USB_RESET_TIMEOUT msec timeout required for reset */
-      if((nBytes = usb.control_msg(xum1541_handle,
-                   USB_TYPE_CLASS | USB_ENDPOINT_OUT,
-                   cmd, (secaddr << 8) + addr, 0,
-                   NULL, 0,
-                   USB_RESET_TIMEOUT)) < 0)
-      {
-          fprintf(stderr, "USB error in xum1541_ioctl(control): %s\n",
-                  usb.strerror());
-          exit(-1);
-      }
-  }
-  else
-  {
-      int link_ok, err = 0;
-      unsigned char rv[2];
-
-      if((nBytes = usb.bulk_write(xum1541_handle,
-                                  XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                                  cmdBuf, sizeof(cmdBuf), 1000)) < 0)
-      {
-          fprintf(stderr, "USB error in xum1541_ioctl(async) cmd: %s\n",
-                  usb.strerror());
-          exit(-1);
-          return -1;
-      }
-
-      if((cmd == XUM1541_TALK)   || (cmd == XUM1541_UNTALK) ||
-         (cmd == XUM1541_LISTEN) || (cmd == XUM1541_UNLISTEN) ||
-         (cmd == XUM1541_OPEN)   || (cmd == XUM1541_CLOSE))
-      {
-          /* wait for USB to become available again by requesting the result */
-          cmdBuf[0] = XUM1541_GET_RESULT;
-          cmdBuf[1] = 0;
-          cmdBuf[2] = sizeof(rv);
-          cmdBuf[3] = 0;
-          if((nBytes = usb.bulk_write(xum1541_handle,
-                                  XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                                  cmdBuf, sizeof(cmdBuf), 1000)) < 0)
-          {
-              fprintf(stderr, "USB error in xum1541_ioctl(async) result: %s\n",
-                      usb.strerror());
-              exit(-1);
-          }
-
-          link_ok = 0;
-          while (!link_ok)
-          {
-              if((nBytes = usb.bulk_read(xum1541_handle,
-                  XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
-                  (char*)rv, sizeof(rv), LIBUSB_NO_TIMEOUT)) == sizeof(rv))
-              {
-                  /* we got a valid result */
-                  if (rv[0] == XUM1541_IO_RESULT)
-                  {
-                      /* use that result */
-                      nBytes = sizeof(rv) - 1;
-                      ret[0] = rv[1];
-                      /* a returned byte means that the USB link is fine */
-                      link_ok = 1;
-                      errno = 0;
-                  }
-                  else
-                  {
-                      xum1541_dbg(3, "unexpected result (%d/%d)", rv[0], rv[1]);
-                      return -1;
-                  }
-              }
-              else
-              {
-                  /* count the error states (just out of couriosity) */
-                  xum1541_dbg(3, "usb timeout in async");
-                  err++;
-                  arch_usleep(TIMEOUT_DELAY);
-              }
-          }
-      }
-      else if (cmd == XUM1541_GET_EOI || cmd == XUM1541_IEC_WAIT ||
-               cmd == XUM1541_IEC_POLL || cmd == XUM1541_PP_READ ||
-               cmd == XUM1541_PARBURST_READ)
-      {
-        int retries = 5;
-        do {
-            if((nBytes = usb.bulk_read(xum1541_handle,
-                               XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
-                               ret, 1, LIBUSB_NO_TIMEOUT)) == 1)
-            {
-                break;
-            } else {
-                xum1541_dbg(3, "usb timeout in get retval: %s",
-                    usb.strerror());
-            }
-        } while (retries-- != 0);
-        if (retries == 0) {
-            fprintf(stderr, "ERROR: get retval retries exhausted\n");
-            return -1;
-        }
-      }
-  }
-
-  xum1541_dbg(2, "returned %d bytes", nBytes);
-
-  /* return ok(0) if command does not have a return value */
-  if (nBytes == 0)
-      return 0;
-
-  xum1541_dbg(2, "return val = %x", ret[0]);
-  return ret[0];
-}
-
-/*! \brief write data to the xum1541 device
-
- \param data
-    Pointer to buffer which contains the data to be written to the xum1541
-
- \param len
-    The length of the data buffer to be written to the xum1541
-
- \return
-    The number of bytes written
-*/
-int
-xum1541_write(const __u_char *data, size_t len)
-{
-    size_t bytesWritten;
-    char cmdBuf[XUM_CMDBUF_SIZE];
-
-    xum1541_dbg(1, "write %d bytes from address %p", len, data);
-
-    bytesWritten = 0;
-    while (bytesWritten < len)
-    {
-        int wr, bytes2write, bytesWrittenChunk;
-        int link_ok, retries, err = 0;
-        unsigned char rv[2];
-
-        bytes2write = len - bytesWritten;
-        bytes2write = (bytes2write > XUM1541_IO_BUFFER_SIZE) ?
-            XUM1541_IO_BUFFER_SIZE : bytes2write;
-
-        // Setup our command descriptor
-        cmdBuf[0] = XUM1541_WRITE;
-        cmdBuf[1] = XUM1541_CBM;
-        cmdBuf[2] = bytes2write & 0xff;
-        cmdBuf[3] = (bytes2write >> 8) & 0xff;
-
-        /* the write itself moved the data into the buffer, the actual */
-        /* iec write is triggered _after_ this USB write is done */
-        if((wr = usb.bulk_write(xum1541_handle,
-                                XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                                cmdBuf, sizeof(cmdBuf), 1000)) < 0)
-        {
-            fprintf(stderr, "USB error xum1541_write cmd: %s\n", usb.strerror());
-            return -1;
-        }
-
-        // Move the data itself now in chunks of the endpoint size
-        bytesWrittenChunk = 0;
-        retries = 5;
-        while (bytesWrittenChunk < bytes2write) {
-            int chunkSize;
-
-            chunkSize = bytes2write - bytesWrittenChunk;
-            if((wr = usb.bulk_write(xum1541_handle,
-                                    XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                                    (char *)data, chunkSize,
-                                    1000)) < 0)
-            {
-                fprintf(stderr, "USB error in xum1541_write data: %s\n",
-                    usb.strerror());
-                if (retries-- == 0) {
-                    fprintf(stderr, "retry count exceeded, exiting\n");
-                    return -1;
-                }
-            }
-
-            // Stop if nothing left to write
-            if (wr == 0)
-                break;
-
-            data += wr;
-            bytesWrittenChunk += wr;
-            bytesWritten += wr;
-            xum1541_dbg(2, "wrote chunk of %d bytes, total %d, left %d",
-                       wr, bytesWritten, len - bytesWritten);
-        }
-
-        /* wait for USB to become available again by requesting the result */
-        cmdBuf[0] = XUM1541_GET_RESULT;
-        cmdBuf[1] = 0;
-        cmdBuf[2] = sizeof(rv);
-        cmdBuf[3] = 0;
-        if ((wr = usb.bulk_write(xum1541_handle,
-                                 XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                                 cmdBuf, sizeof(cmdBuf), 1000)) < 0)
-        {
-            fprintf(stderr, "USB error in xum1541_write(async): %s\n",
-                  usb.strerror());
-            exit(-1);
-        }
-
-        link_ok = 0;
-        while (!link_ok) {
-            if((wr = usb.bulk_read(xum1541_handle,
-                               XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
-                               (char*)rv, sizeof(rv), LIBUSB_NO_TIMEOUT)) == sizeof(rv))
-            {
-                xum1541_dbg(2, "got result %d/%d", rv[0], rv[1]);
-
-                /* the USB link is available again if we got a valid result */
-                if (rv[0] == XUM1541_IO_RESULT) {
-                    link_ok = 1;
-                    errno = 0;
-
-                    /* device reports failure, stop writing */
-                    if (rv[1] == 0)
-                        return bytesWritten;
-                }
-                else
-                {
-                    xum1541_dbg(3, "unexpected result (%d/%d)", rv[0], rv[1]);
-                    arch_usleep(TIMEOUT_DELAY);
-                }
-            }
-            else
-            {
-                xum1541_dbg(3, "usb timeout");
-                /* count the error states (just out of couriosity) */
-                err++;
-            }
-        }
-    }
-    xum1541_dbg(2, "xum1541_write done, got %d bytes", bytesWritten);
-    return bytesWritten;
-}
-
-/*! \brief read data from the xum1541 device
-
- \param data
-    Pointer to a buffer which will contain the data read from the xum1541
-
- \param len
-    The number of bytes to read from the xum1541
-
- \return
-    The number of bytes read
-*/
-int
-xum1541_read(__u_char *data, size_t len)
-{
-    size_t bytesRead;
-    char cmdBuf[XUM_CMDBUF_SIZE];
-
-    xum1541_dbg(1, "read %d bytes to address %p", len, data);
-
-    bytesRead = 0;
-    while (bytesRead < len)
-    {
-        int rd, bytes2read, bytesReadChunk;
-        int link_ok, retries, err = 0;
-        unsigned char rv[2];
-
-        /* limit transfer size to xum1541 internal buffer */
-        bytes2read = len - bytesRead;
-        bytes2read = (bytes2read > XUM1541_IO_BUFFER_SIZE) ?
-            XUM1541_IO_BUFFER_SIZE : bytes2read;
-
-        // Setup our command descriptor
-        cmdBuf[0] = XUM1541_REQUEST_READ;
-        cmdBuf[1] = XUM1541_CBM;
-        cmdBuf[2] = bytes2read & 0xff;
-        cmdBuf[3] = (bytes2read >> 8) & 0xff;
-
-        /* request async read, ignore errors as they happen due to */
-        /* link being disabled */
-        if ((rd = usb.bulk_write(xum1541_handle,
-                                 XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                                 cmdBuf, sizeof(cmdBuf), 1000)) < 0)
-        if (rd < 0) {
-            fprintf(stderr, "USB error in xum1541_request_read(): %s\n",
-                    usb.strerror());
-            exit(-1);
-        }
-
-        /* since the xum1541 may disable interrupts and wouldn't be able */
-        /* to do proper USB communication we'd have to expect USB errors */
-
-        /* try to get result, to make sure usb link is working again */
-        /* we can't do this in the read itself since windows returns */
-        /* just 0 bytes while the USB link is down which we can't */
-        /* distinguish from a real 0 byte read event */
-
-        xum1541_dbg(2, "sent request for %d bytes, waiting for result",
-                   bytes2read);
-
-        /* get the result code which also contains the current state */
-        /* the xum1541 is in so we know when it's done reading on IEC */
-        cmdBuf[0] = XUM1541_GET_RESULT;
-        cmdBuf[1] = 0;
-        cmdBuf[2] = sizeof(rv);
-        cmdBuf[3] = 0;
-        if((rd = usb.bulk_write(xum1541_handle,
-                                XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                                cmdBuf, sizeof(cmdBuf), 1000)) < 0)
-        {
-            fprintf(stderr, "USB error in xum1541_read(async): %s\n",
-                  usb.strerror());
-            exit(-1);
-        }
-
-        // Loop to wait for the result
-        link_ok = 0;
-        while (!link_ok) {
-            if((rd = usb.bulk_read(xum1541_handle,
-                               XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
-                               (char*)rv, sizeof(rv), LIBUSB_NO_TIMEOUT)) == sizeof(rv))
-            {
-                xum1541_dbg(2, "got result %d/%d", rv[0], rv[1]);
-
-                // if the first byte is still not XUM1541_IO_READ_DONE,
-                // then the device hasn't even entered the copy routine yet,
-                // so sleep to not slow it down by overloading it with USB
-                // requests
-                if (rv[0] != XUM1541_IO_READ_DONE)
-                {
-                    xum1541_dbg(3, "unexpected result");
-                    arch_usleep(TIMEOUT_DELAY);
-                }
-                else
-                {
-                    xum1541_dbg(3, "link ok");
-                    link_ok = 1;
-                    errno = 0;
-                }
-            }
-            else
-            {
-                /* count the error states (just out of couriosity) */
-                xum1541_dbg(3, "usb timeout");
-                err++;
-            }
-        }
-
-        // Now that it's ready, send the read command for the data itself
-        cmdBuf[0] = XUM1541_READ;
-        cmdBuf[1] = XUM1541_CBM;
-        cmdBuf[2] = bytes2read & 0xff;
-        cmdBuf[3] = (bytes2read >> 8) & 0xff;
-        if((rd = usb.bulk_write(xum1541_handle,
-                                XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                                cmdBuf, sizeof(cmdBuf), 1000)) < 0)
-        {
-            fprintf(stderr, "USB error in xum1541_read data: %s\n",
-                    usb.strerror());
-            return -1;
-        }
-
-        // Pull in the data in chunks of the endpoint size
-        bytesReadChunk = 0;
-        retries = 5;
-        while (bytesReadChunk < bytes2read) {
-            int chunkSize;
-
-            chunkSize = bytes2read - bytesReadChunk;
-            if ((rd = usb.bulk_read(xum1541_handle,
-                                    XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
-                                    (char *)data, chunkSize, 1000)) < 0)
-            {
-                fprintf(stderr, "USB error in xum1541_read(): %s\n",
-                    usb.strerror());
-                if (retries-- == 0) {
-                    fprintf(stderr, "retry count exceeded, exiting\n");
-                    return -1;
-                }
-            }
-
-            data += rd;
-            bytesReadChunk += rd;
-            bytesRead += rd;
-            xum1541_dbg(2, "received chunk of %d bytes, total %d, left %d",
-                       rd, bytesRead, len - bytesRead);
-
-            // Stop if nothing left to read
-            if (rd < chunkSize)
-                goto out;
-        }
+    // Send the 4-byte command block
+    nBytes = usb.bulk_write(xum1541_handle,
+        XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
+        cmdBuf, sizeof(cmdBuf), LIBUSB_NO_TIMEOUT);
+    if (nBytes < 0) {
+        fprintf(stderr, "USB error in xum1541_ioctl cmd: %s\n",
+            usb.strerror());
+        exit(-1);
     }
 
-out:
-    xum1541_dbg(2, "xum1541_read done, got %d bytes", bytesRead);
-    return bytesRead;
+    // If we have a valid response, return extended status
+    ret = xum1541_wait_status();
+    xum1541_dbg(2, "return val = %x", ret);
+    return ret;
 }
 
-/*! \brief "special" write data to the xum1541 device
-
- \todo
-    What is so special?
+/*! \brief Write data to the xum1541 device
 
  \param mode
-    \todo ???
+    Drive protocol to use to read the data from the device (e.g,
+    XUM1541_CBM is normal IEC wire protocol).
 
  \param data
     Pointer to buffer which contains the data to be written to the xum1541
 
  \param size
-    The length of the data buffer to be written to the xum1541
+    The number of bytes to write to the xum1541
 
  \return
-    The number of bytes written
-
- \remark
-     current all special mode are able to work asynchronously. this means
-     that we can just handle them in the device at the same time as the USB
-     transfers.
+    The number of bytes actually written, 0 on device error. If there is a
+    fatal error, returns -1.
 */
 int
-xum1541_special_write(__u_char mode, const __u_char *data, size_t size)
+xum1541_write(__u_char modeFlags, const __u_char *data, size_t size)
 {
-    int wr;
-    size_t bytesWritten;
-    char cmdBuf[XUM_CMDBUF_SIZE];
-    int retries;
+    int wr, mode, ret;
+    size_t bytesWritten, bytes2write;
+    __u_char cmdBuf[XUM_CMDBUF_SIZE];
 
-    xum1541_dbg(1, "special write %d %d bytes from address %p",
-               mode, size, data);
+    mode = modeFlags & 0xf0;
+    xum1541_dbg(1, "write %d %d bytes from address %p flags %x",
+        mode, size, data, modeFlags & 0x0f);
 
     // Send the write command
     cmdBuf[0] = XUM1541_WRITE;
-    cmdBuf[1] = mode;
+    cmdBuf[1] = modeFlags;
     cmdBuf[2] = size & 0xff;
     cmdBuf[3] = (size >> 8) & 0xff;
-    if((wr = usb.bulk_write(xum1541_handle,
-                            XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                            cmdBuf, sizeof(cmdBuf), 1000)) < 0)
-    {
-        fprintf(stderr, "USB error in special_write cmd: %s\n",
-                usb.strerror());
+    wr = usb.bulk_write(xum1541_handle,
+        XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
+        cmdBuf, sizeof(cmdBuf), LIBUSB_NO_TIMEOUT);
+    if (wr < 0) {
+        fprintf(stderr, "USB error in write cmd: %s\n",
+            usb.strerror());
         return -1;
     }
 
     bytesWritten = 0;
-    retries = 5;
-    while (bytesWritten < size)
-    {
-        int bytes2write;
-
+    while (bytesWritten < size) {
         bytes2write = size - bytesWritten;
-        if((wr = usb.bulk_write(xum1541_handle,
-                                XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                                (char *)data, bytes2write, 1000)) < 0)
-        {
-            if (retries-- == 0) {
-                fprintf(stderr, "USB error in special_write data: %s\n",
-                        usb.strerror());
-                return -1;
-            }
-            continue;
-        }
+        wr = usb.bulk_write(xum1541_handle,
+            XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
+            (char *)data, bytes2write, LIBUSB_NO_TIMEOUT);
+        if (wr < 0) {
+            fprintf(stderr, "USB error in write data: %s\n",
+                usb.strerror());
+            return -1;
+        } else if (wr > 0)
+            xum1541_dbg(2, "wrote %d bytes", wr);
 
-        /* stop if there's nothing more to write */
-        if (wr == 0)
-            break;
-
-        xum1541_dbg(2, "special wrote %d bytes", wr);
         data += wr;
         bytesWritten += wr;
+
+        /*
+         * If we wrote less than we requested (or 0), the transfer is done
+         * even if we had more data to write still.
+         */
+        if (wr < (int)bytes2write)
+            break;
     }
 
-    xum1541_dbg(2, "special write done, got %d bytes", bytesWritten);
+    // If this is the CBM protocol, wait for the status message.
+    if (mode == XUM1541_CBM) {
+        ret = xum1541_wait_status();
+        if (ret >= 0)
+            xum1541_dbg(2, "wait done, extended status %d", ret);
+        else
+            xum1541_dbg(2, "wait done with error");
+        bytesWritten = ret;
+    }
+
+    xum1541_dbg(2, "write done, got %d bytes", bytesWritten);
     return bytesWritten;
 }
 
-/*! \brief "special" read data from the xum1541 device
-
- \todo
-    What is so special?
+/*! \brief Read data from the xum1541 device
 
  \param mode
-    \todo ???
+    Drive protocol to use to read the data from the device (e.g,
+    XUM1541_CBM is normal IEC wire protocol).
 
  \param data
     Pointer to a buffer which will contain the data read from the xum1541
@@ -825,17 +513,18 @@ xum1541_special_write(__u_char mode, const __u_char *data, size_t size)
     The number of bytes to read from the xum1541
 
  \return
-    The number of bytes read
+    The number of bytes actually read, 0 on device error. If there is a
+    fatal error, returns -1.
 */
 int
-xum1541_special_read(__u_char mode, __u_char *data, size_t size)
+xum1541_read(__u_char mode, __u_char *data, size_t size)
 {
-    int rd;
-    size_t bytesRead;
-    char cmdBuf[XUM_CMDBUF_SIZE];
-    int retries;
+    int rd, ret;
+    size_t bytesRead, bytes2read;
+    unsigned char cmdBuf[XUM_CMDBUF_SIZE];
+    unsigned char statusBuf[XUM_STATUSBUF_SIZE];
 
-    xum1541_dbg(1, "special read %d %d bytes to address %p",
+    xum1541_dbg(1, "read %d %d bytes to address %p",
                mode, size, data);
 
     // Send the read command
@@ -843,43 +532,40 @@ xum1541_special_read(__u_char mode, __u_char *data, size_t size)
     cmdBuf[1] = mode;
     cmdBuf[2] = size & 0xff;
     cmdBuf[3] = (size >> 8) & 0xff;
-    if((rd = usb.bulk_write(xum1541_handle,
-                            XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-                            cmdBuf, sizeof(cmdBuf), 1000)) < 0)
-    {
-        fprintf(stderr, "USB error in special_read cmd: %s\n",
-                usb.strerror());
+    rd = usb.bulk_write(xum1541_handle,
+        XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
+        cmdBuf, sizeof(cmdBuf), LIBUSB_NO_TIMEOUT);
+    if (rd < 0) {
+        fprintf(stderr, "USB error in read cmd: %s\n",
+            usb.strerror());
         return -1;
     }
 
+    // Read the actual data now that it's ready.
     bytesRead = 0;
-    retries = 5;
-    while (bytesRead < size)
-    {
-        int bytes2read;
-
+    while (bytesRead < size) {
         bytes2read = size - bytesRead;
-        if((rd = usb.bulk_read(xum1541_handle,
-                               XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
-                               (char *)data, bytes2read, 1000)) < 0)
-        {
-            if (retries-- == 0) {
-                fprintf(stderr, "USB error in special_read data: %s\n",
-                        usb.strerror());
-                return -1;
-            }
-            continue;
-        }
+        rd = usb.bulk_read(xum1541_handle,
+            XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
+            (char *)data, bytes2read, LIBUSB_NO_TIMEOUT);
+        if (rd < 0) {
+            fprintf(stderr, "USB error in read data(%p, %d): %s\n",
+               data, size, usb.strerror());
+            return -1;
+        } else if (rd > 0)
+            xum1541_dbg(2, "read %d bytes", rd);
 
-        /* stop if there's nothing more to read */
-        if (rd == 0)
-            break;
-
-        xum1541_dbg(2, "special read %d bytes", rd);
         data += rd;
         bytesRead += rd;
+
+        /*
+         * If we read less than we requested (or 0), the transfer is done
+         * even if we had more data to read still.
+         */
+        if (rd < (int)bytes2read)
+            break;
     }
 
-    xum1541_dbg(2, "special read done, got %d bytes", bytesRead);
+    xum1541_dbg(2, "read done, got %d bytes", bytesRead);
     return bytesRead;
 }
