@@ -33,7 +33,7 @@
  *
  *  Functions, macros and enums related to endpoint management when in USB Device mode. This
  *  module contains the endpoint management macros, as well as endpoint interrupt and data
- *  send/recieve functions for various data types.
+ *  send/receive functions for various data types.
  *
  *  @{
  */
@@ -43,6 +43,20 @@
  *  Functions, macros, variables, enums and types related to data reading and writing from and to endpoints.
  */
  
+/** \ingroup Group_EndpointRW  
+ *  @defgroup Group_EndpointPrimitiveRW Read/Write of Primitive Data Types
+ *
+ *  Functions, macros, variables, enums and types related to data reading and writing of primitive data types
+ *  from and to endpoints.
+ */ 
+
+/** \ingroup Group_EndpointRW  
+ *  @defgroup Group_EndpointStreamRW Read/Write of Multi-Byte Streams
+ *
+ *  Functions, macros, variables, enums and types related to data reading and writing of data streams from
+ *  and to endpoints.
+ */ 
+
 /** @defgroup Group_EndpointPacketManagement Endpoint Packet Management
  *
  *  Functions, macros, variables, enums and types related to packet management of endpoints.
@@ -53,6 +67,8 @@
 
 	/* Includes: */
 		#include <avr/io.h>
+		#include <avr/pgmspace.h>
+		#include <avr/eeprom.h>
 		#include <stdbool.h>
 
 		#include "../../../Common/Common.h"
@@ -117,18 +133,18 @@
 			
 			/** Maximum size in bytes of a given endpoint.
 			 *
-			 *  \param n  Endpoint number, a value between 0 and (ENDPOINT_TOTAL_ENDPOINTS - 1)
+			 *  \param[in] n  Endpoint number, a value between 0 and (ENDPOINT_TOTAL_ENDPOINTS - 1)
 			 */				
 			#define ENDPOINT_MAX_SIZE(n)                  _ENDPOINT_GET_MAXSIZE(n)
 
 			/** Indicates if the given endpoint supports double banking.
 			 *
-			 *  \param n  Endpoint number, a value between 0 and (ENDPOINT_TOTAL_ENDPOINTS - 1)
+			 *  \param[in] n  Endpoint number, a value between 0 and (ENDPOINT_TOTAL_ENDPOINTS - 1)
 			 */				
 			#define ENDPOINT_DOUBLEBANK_SUPPORTED(n)      _ENDPOINT_GET_DOUBLEBANK(n)
 
 			#if !defined(CONTROL_ONLY_DEVICE)
-				#if defined(USB_FULL_CONTROLLER) || defined(USB_MODIFIED_FULL_CONTROLLER) || defined(__DOXYGEN__)
+				#if defined(USB_SERIES_4_AVR) || defined(USB_SERIES_6_AVR) || defined(USB_SERIES_7_AVR) || defined(__DOXYGEN__)
 					/** Total number of endpoints (including the default control endpoint at address 0) which may
 					 *  be used in the device. Different USB AVR models support different amounts of endpoints,
 					 *  this value reflects the maximum number of endpoints for the currently selected AVR model.
@@ -169,14 +185,14 @@
 				 *  Any endpoint operations which do not require the endpoint number to be indicated will operate on
 				 *  the currently selected endpoint.
 				 *
-				 *  \param EndpointNumber Endpoint number to select
+				 *  \param[in] EndpointNumber Endpoint number to select
 				 */
 				static inline void Endpoint_SelectEndpoint(uint8_t EndpointNumber);
 				
 				/** Resets the endpoint bank FIFO. This clears all the endpoint banks and resets the USB controller's
 				 *  In and Out pointers to the bank's contents.
 				 *
-				 *  \param EndpointNumber Endpoint number whose FIFO buffers are to be reset
+				 *  \param[in] EndpointNumber Endpoint number whose FIFO buffers are to be reset
 				 */
 				static inline void Endpoint_ResetFIFO(uint8_t EndpointNumber);
 				
@@ -227,7 +243,7 @@
 				/** Determines if the specified endpoint number has interrupted (valid only for INTERRUPT type
 				 *  endpoints).
 				 *
-				 *  \param EndpointNumber  Index of the endpoint whose interrupt flag should be tested
+				 *  \param[in] EndpointNumber  Index of the endpoint whose interrupt flag should be tested
 				 *
 				 *  \return Boolean true if the specified endpoint has interrupted, false otherwise
 				 */
@@ -315,10 +331,18 @@
 				 *  \return The currently selected endpoint's direction, as a ENDPOINT_DIR_* mask.
 				 */
 				static inline uint8_t Endpoint_GetEndpointDirection(void);
+
+				/** Sets the direction of the currently selected endpoint.
+				 *
+				 *  \param[in] DirectionMask  New endpoint direction, as a ENDPOINT_DIR_* mask.
+				 */
+				static inline void Endpoint_SetEndpointDirection(uint8_t DirectionMask);
 			#else
-				#if defined(USB_FULL_CONTROLLER) || defined(USB_MODIFIED_FULL_CONTROLLER) || defined(__DOXYGEN__)
+				#if defined(USB_SERIES_6_AVR) || defined(USB_SERIES_7_AVR)
 					#define Endpoint_BytesInEndpoint()        UEBCX
-				#else
+				#elif defined(USB_SERIES_4_AVR)
+					#define Endpoint_BytesInEndpoint()        (((uint16_t)UEBCHX << 8) | UEBCLX)				
+				#elif defined(USB_SERIES_2_AVR)
 					#define Endpoint_BytesInEndpoint()        UEBCLX
 				#endif
 				
@@ -329,12 +353,12 @@
 				#endif
 				
 				#if !defined(CONTROL_ONLY_DEVICE)
-					#define Endpoint_SelectEndpoint(epnum)    MACROS{ UENUM = epnum; }MACROE
+					#define Endpoint_SelectEndpoint(epnum)    MACROS{ UENUM = (epnum); }MACROE
 				#else
-					#define Endpoint_SelectEndpoint(epnum)    (void)epnum
+					#define Endpoint_SelectEndpoint(epnum)    (void)(epnum)
 				#endif
 
-				#define Endpoint_ResetFIFO(epnum)             MACROS{ UERST = (1 << epnum); UERST = 0; }MACROE
+				#define Endpoint_ResetFIFO(epnum)             MACROS{ UERST = (1 << (epnum)); UERST = 0; }MACROE
 
 				#define Endpoint_EnableEndpoint()             MACROS{ UECONX |= (1 << EPEN); }MACROE
 
@@ -350,7 +374,7 @@
 
 				#define Endpoint_GetEndpointInterrupts()      UEINT
 
-				#define Endpoint_HasEndpointInterrupted(n)    ((UEINT & (1 << n)) ? true : false)
+				#define Endpoint_HasEndpointInterrupted(n)    ((UEINT & (1 << (n))) ? true : false)
 				
 				#define Endpoint_IsINReady()                  ((UEINTX & (1 << TXINI))  ? true : false)
 				
@@ -383,6 +407,8 @@
 				#define Endpoint_ResetDataToggle()            MACROS{ UECONX |= (1 << RSTDT); }MACROE
 				
 				#define Endpoint_GetEndpointDirection()       (UECFG0X & ENDPOINT_DIR_IN)
+				
+				#define Endpoint_SetEndpointDirection(dir)    MACROS{ UECFG0X = ((UECFG0X & ~ENDPOINT_DIR_IN) | (dir)); }MACROE
 			#endif
 
 		/* Enums: */
@@ -407,7 +433,7 @@
 		
 			/** Enum for the possible error return codes of the Endpoint_*_Stream_* functions.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 */
 			enum Endpoint_Stream_RW_ErrorCodes_t
 			{
@@ -415,32 +441,35 @@
 				ENDPOINT_RWSTREAM_EndpointStalled    = 1, /**< The endpoint was stalled during the stream
 				                                           *   transfer by the host or device.
 				                                           */
-				ENDPOINT_RWSTREAM_DeviceDisconnected = 1, /**< Device was disconnected from the host during
+				ENDPOINT_RWSTREAM_DeviceDisconnected = 2, /**< Device was disconnected from the host during
 				                                           *   the transfer.
 				                                           */
-				ENDPOINT_RWSTREAM_Timeout            = 2, /**< The host failed to accept or send the next packet
+				ENDPOINT_RWSTREAM_Timeout            = 3, /**< The host failed to accept or send the next packet
 				                                           *   within the software timeout period set by the
 				                                           *   \ref USB_STREAM_TIMEOUT_MS macro.
 				                                           */
-				ENDPOINT_RWSTREAM_CallbackAborted    = 3, /**< Indicates that the stream's callback function
+				ENDPOINT_RWSTREAM_CallbackAborted    = 4, /**< Indicates that the stream's callback function
 			                                               *   aborted the transfer early.
 				                                           */
 			};
 			
 			/** Enum for the possible error return codes of the Endpoint_*_Control_Stream_* functions..
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 */
 			enum Endpoint_ControlStream_RW_ErrorCodes_t
 			{
 				ENDPOINT_RWCSTREAM_NoError            = 0, /**< Command completed successfully, no error. */
 				ENDPOINT_RWCSTREAM_HostAborted        = 1, /**< The aborted the transfer prematurely. */
+				ENDPOINT_RWCSTREAM_DeviceDisconnected = 2, /**< Device was disconnected from the host during
+				                                            *   the transfer.
+				                                            */
 			};
 
 		/* Inline Functions: */
 			/** Reads one byte from the currently selected endpoint's bank, for OUT direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 *
 			 *  \return Next byte in the currently selected endpoint's FIFO buffer
 			 */
@@ -452,9 +481,9 @@
 
 			/** Writes one byte from the currently selected endpoint's bank, for IN direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 *
-			 *  \param Byte  Next byte to write into the the currently selected endpoint's FIFO buffer
+			 *  \param[in] Byte  Next byte to write into the the currently selected endpoint's FIFO buffer
 			 */
 			static inline void Endpoint_Write_Byte(const uint8_t Byte) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Write_Byte(const uint8_t Byte)
@@ -464,7 +493,7 @@
 
 			/** Discards one byte from the currently selected endpoint's bank, for OUT direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 */
 			static inline void Endpoint_Discard_Byte(void) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Discard_Byte(void)
@@ -477,45 +506,53 @@
 			/** Reads two bytes from the currently selected endpoint's bank in little endian format, for OUT
 			 *  direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 *
 			 *  \return Next word in the currently selected endpoint's FIFO buffer
 			 */
 			static inline uint16_t Endpoint_Read_Word_LE(void) ATTR_WARN_UNUSED_RESULT ATTR_ALWAYS_INLINE;
 			static inline uint16_t Endpoint_Read_Word_LE(void)
 			{
-				uint16_t Data;
+				union
+				{
+					uint16_t Word;
+					uint8_t  Bytes[2];
+				} Data;
 				
-				Data  = UEDATX;
-				Data |= (((uint16_t)UEDATX) << 8);
+				Data.Bytes[0] = UEDATX;
+				Data.Bytes[1] = UEDATX;
 			
-				return Data;
+				return Data.Word;
 			}
 
 			/** Reads two bytes from the currently selected endpoint's bank in big endian format, for OUT
 			 *  direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 *
 			 *  \return Next word in the currently selected endpoint's FIFO buffer
 			 */
 			static inline uint16_t Endpoint_Read_Word_BE(void) ATTR_WARN_UNUSED_RESULT ATTR_ALWAYS_INLINE;
 			static inline uint16_t Endpoint_Read_Word_BE(void)
 			{
-				uint16_t Data;
+				union
+				{
+					uint16_t Word;
+					uint8_t  Bytes[2];
+				} Data;
 				
-				Data  = (((uint16_t)UEDATX) << 8);
-				Data |= UEDATX;
+				Data.Bytes[1] = UEDATX;
+				Data.Bytes[0] = UEDATX;
 			
-				return Data;
+				return Data.Word;
 			}
 
 			/** Writes two bytes to the currently selected endpoint's bank in little endian format, for IN
 			 *  direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 *
-			 *  \param Word  Next word to write to the currently selected endpoint's FIFO buffer
+			 *  \param[in] Word  Next word to write to the currently selected endpoint's FIFO buffer
 			 */
 			static inline void Endpoint_Write_Word_LE(const uint16_t Word) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Write_Word_LE(const uint16_t Word)
@@ -527,9 +564,9 @@
 			/** Writes two bytes to the currently selected endpoint's bank in big endian format, for IN
 			 *  direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 *
-			 *  \param Word  Next word to write to the currently selected endpoint's FIFO buffer
+			 *  \param[in] Word  Next word to write to the currently selected endpoint's FIFO buffer
 			 */
 			static inline void Endpoint_Write_Word_BE(const uint16_t Word) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Write_Word_BE(const uint16_t Word)
@@ -540,7 +577,7 @@
 
 			/** Discards two bytes from the currently selected endpoint's bank, for OUT direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 */
 			static inline void Endpoint_Discard_Word(void) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Discard_Word(void)
@@ -554,7 +591,7 @@
 			/** Reads four bytes from the currently selected endpoint's bank in little endian format, for OUT
 			 *  direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 *
 			 *  \return Next double word in the currently selected endpoint's FIFO buffer
 			 */
@@ -578,7 +615,7 @@
 			/** Reads four bytes from the currently selected endpoint's bank in big endian format, for OUT
 			 *  direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 *
 			 *  \return Next double word in the currently selected endpoint's FIFO buffer
 			 */
@@ -602,9 +639,9 @@
 			/** Writes four bytes to the currently selected endpoint's bank in little endian format, for IN
 			 *  direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 *
-			 *  \param DWord  Next double word to write to the currently selected endpoint's FIFO buffer
+			 *  \param[in] DWord  Next double word to write to the currently selected endpoint's FIFO buffer
 			 */
 			static inline void Endpoint_Write_DWord_LE(const uint32_t DWord) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Write_DWord_LE(const uint32_t DWord)
@@ -618,9 +655,9 @@
 			/** Writes four bytes to the currently selected endpoint's bank in big endian format, for IN
 			 *  direction endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 *
-			 *  \param DWord  Next double word to write to the currently selected endpoint's FIFO buffer
+			 *  \param[in] DWord  Next double word to write to the currently selected endpoint's FIFO buffer
 			 */
 			static inline void Endpoint_Write_DWord_BE(const uint32_t DWord) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Write_DWord_BE(const uint32_t DWord)
@@ -633,7 +670,7 @@
 
 			/** Discards four bytes from the currently selected endpoint's bank, for OUT direction endpoints.	
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointPrimitiveRW
 			 */
 			static inline void Endpoint_Discard_DWord(void) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Discard_DWord(void)
@@ -669,6 +706,12 @@
 			#endif
 
 		/* Function Prototypes: */
+			#if !defined(NO_STREAM_CALLBACKS) || defined(__DOXYGEN__)
+				#define __CALLBACK_PARAM     , StreamCallbackPtr_t Callback
+			#else
+				#define __CALLBACK_PARAM			
+			#endif
+		
 			/** Configures the specified endpoint number with the given endpoint type, direction, bank size
 			 *  and banking mode. Endpoints should be allocated in ascending order by their address in the
 			 *  device (i.e. endpoint 1 should be configured before endpoint 2 and so on) to prevent fragmentation
@@ -694,9 +737,7 @@
 			bool Endpoint_ConfigureEndpoint(const uint8_t  Number, const uint8_t Type, const uint8_t Direction,
 			                                const uint16_t Size, const uint8_t Banks);
 
-			#if !defined(CONTROL_ONLY_DEVICE)
-
-			/** Spinloops until the currently selected non-control endpoint is ready for the next packet of data
+			/** Spin-loops until the currently selected non-control endpoint is ready for the next packet of data
 			 *  to be read or written to it.
 			 *
 			 *  \note This routine should not be called on CONTROL type endpoints.
@@ -706,6 +747,12 @@
 			 *  \return A value from the \ref Endpoint_WaitUntilReady_ErrorCodes_t enum.
 			 */
 			uint8_t Endpoint_WaitUntilReady(void);
+			
+			/** Completes the status stage of a control transfer on a CONTROL type endpoint automatically,
+			 *  with respect to the data direction. This is a convenience function which can be used to
+			 *  simplify user control request handling.
+			 */
+			void Endpoint_ClearStatusStage(void);
 
 			/** Reads and discards the given number of bytes from the endpoint from the given buffer,
 			 *  discarding fully read packets from the host as needed. The last packet is not automatically
@@ -720,18 +767,14 @@
 			 *
 			 *  \note This routine should not be used on CONTROL type endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 *
-			 *  \param Length    Number of bytes to send via the currently selected endpoint.
-			 *  \param Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *  \param[in] Length    Number of bytes to send via the currently selected endpoint.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
 			 *
 			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
 			 */
-			uint8_t Endpoint_Discard_Stream(uint16_t Length
-			#if !defined(NO_STREAM_CALLBACKS) || defined(__DOXYGEN__)
-			                                , StreamCallbackPtr_t Callback
-			#endif
-			                                );
+			uint8_t Endpoint_Discard_Stream(uint16_t Length __CALLBACK_PARAM);
 
 			/** Writes the given number of bytes to the endpoint from the given buffer in little endian,
 			 *  sending full packets to the host as needed. The last packet filled is not automatically sent;
@@ -746,19 +789,41 @@
 			 *
 			 *  \note This routine should not be used on CONTROL type endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 *
-			 *  \param Buffer    Pointer to the source data buffer to read from.
-			 *  \param Length    Number of bytes to read for the currently selected endpoint into the buffer.
-			 *  \param Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *  \param[in] Buffer    Pointer to the source data buffer to read from.
+			 *  \param[in] Length    Number of bytes to read for the currently selected endpoint into the buffer.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
 			 *
 			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
 			 */
-			uint8_t Endpoint_Write_Stream_LE(const void* Buffer, uint16_t Length
-			#if !defined(NO_STREAM_CALLBACKS) || defined(__DOXYGEN__)
-			                                 , StreamCallbackPtr_t Callback
-			#endif
-			                                 ) ATTR_NON_NULL_PTR_ARG(1);
+			uint8_t Endpoint_Write_Stream_LE(const void* Buffer, uint16_t Length __CALLBACK_PARAM) ATTR_NON_NULL_PTR_ARG(1);
+
+			/** EEPROM buffer source version of \ref Endpoint_Write_Stream_LE().
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[in] Buffer    Pointer to the source data buffer to read from.
+			 *  \param[in] Length    Number of bytes to read for the currently selected endpoint into the buffer.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *
+			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Write_EStream_LE(const void* Buffer, uint16_t Length __CALLBACK_PARAM) ATTR_NON_NULL_PTR_ARG(1);
+
+			/** FLASH buffer source version of \ref Endpoint_Write_Stream_LE().
+			 *
+			 *  \note The FLASH data must be located in the first 64KB of FLASH for this function to work correctly.
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[in] Buffer    Pointer to the source data buffer to read from.
+			 *  \param[in] Length    Number of bytes to read for the currently selected endpoint into the buffer.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *
+			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Write_PStream_LE(const void* Buffer, uint16_t Length __CALLBACK_PARAM) ATTR_NON_NULL_PTR_ARG(1);
 
 			/** Writes the given number of bytes to the endpoint from the given buffer in big endian,
 			 *  sending full packets to the host as needed. The last packet filled is not automatically sent;
@@ -773,19 +838,41 @@
 			 *
 			 *  \note This routine should not be used on CONTROL type endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 *
-			 *  \param Buffer    Pointer to the source data buffer to read from.
-			 *  \param Length    Number of bytes to read for the currently selected endpoint into the buffer.
-			 *  \param Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *  \param[in] Buffer    Pointer to the source data buffer to read from.
+			 *  \param[in] Length    Number of bytes to read for the currently selected endpoint into the buffer.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
 			 *
 			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
 			 */
-			uint8_t Endpoint_Write_Stream_BE(const void* Buffer, uint16_t Length
-			#if !defined(NO_STREAM_CALLBACKS) || defined(__DOXYGEN__)
-			                                 , StreamCallbackPtr_t Callback
-			#endif
-			                                 ) ATTR_NON_NULL_PTR_ARG(1);
+			uint8_t Endpoint_Write_Stream_BE(const void* Buffer, uint16_t Length __CALLBACK_PARAM) ATTR_NON_NULL_PTR_ARG(1);
+
+			/** EEPROM buffer source version of \ref Endpoint_Write_Stream_BE().
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[in] Buffer    Pointer to the source data buffer to read from.
+			 *  \param[in] Length    Number of bytes to read for the currently selected endpoint into the buffer.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *
+			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Write_EStream_BE(const void* Buffer, uint16_t Length __CALLBACK_PARAM) ATTR_NON_NULL_PTR_ARG(1);
+
+			/** FLASH buffer source version of \ref Endpoint_Write_Stream_BE().
+			 *
+			 *  \note The FLASH data must be located in the first 64KB of FLASH for this function to work correctly.
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[in] Buffer    Pointer to the source data buffer to read from.
+			 *  \param[in] Length    Number of bytes to read for the currently selected endpoint into the buffer.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *
+			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Write_PStream_BE(const void* Buffer, uint16_t Length __CALLBACK_PARAM) ATTR_NON_NULL_PTR_ARG(1);
 
 			/** Reads the given number of bytes from the endpoint from the given buffer in little endian,
 			 *  discarding fully read packets from the host as needed. The last packet is not automatically
@@ -800,20 +887,28 @@
 			 *
 			 *  \note This routine should not be used on CONTROL type endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 *
-			 *  \param Buffer    Pointer to the destination data buffer to write to.
-			 *  \param Length    Number of bytes to send via the currently selected endpoint.
-			 *  \param Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *  \param[out] Buffer   Pointer to the destination data buffer to write to.
+			 *  \param[in] Length    Number of bytes to send via the currently selected endpoint.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
 			 *
 			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
 			 */
-			uint8_t Endpoint_Read_Stream_LE(void* Buffer, uint16_t Length
-			#if !defined(NO_STREAM_CALLBACKS) || defined(__DOXYGEN__)
-			                                , StreamCallbackPtr_t Callback
-			#endif
-			                                ) ATTR_NON_NULL_PTR_ARG(1);
+			uint8_t Endpoint_Read_Stream_LE(void* Buffer, uint16_t Length __CALLBACK_PARAM) ATTR_NON_NULL_PTR_ARG(1);
 
+			/** EEPROM buffer source version of \ref Endpoint_Read_Stream_LE().
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[out] Buffer   Pointer to the destination data buffer to write to, located in EEPROM memory space.
+			 *  \param[in] Length    Number of bytes to send via the currently selected endpoint.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *
+			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Read_EStream_LE(void* Buffer, uint16_t Length __CALLBACK_PARAM) ATTR_NON_NULL_PTR_ARG(1);
+			
 			/** Reads the given number of bytes from the endpoint from the given buffer in big endian,
 			 *  discarding fully read packets from the host as needed. The last packet is not automatically
 			 *  discarded once the remaining bytes has been read; the user is responsible for manually
@@ -827,98 +922,234 @@
 			 *
 			 *  \note This routine should not be used on CONTROL type endpoints.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 *
-			 *  \param Buffer    Pointer to the destination data buffer to write to.
-			 *  \param Length    Number of bytes to send via the currently selected endpoint.
-			 *  \param Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *  \param[out] Buffer    Pointer to the destination data buffer to write to.
+			 *  \param[in] Length    Number of bytes to send via the currently selected endpoint.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
 			 *
 			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
 			 */
-			uint8_t Endpoint_Read_Stream_BE(void* Buffer, uint16_t Length
-			#if !defined(NO_STREAM_CALLBACKS) || defined(__DOXYGEN__)
-			                                , StreamCallbackPtr_t Callback
-			#endif
-			                                ) ATTR_NON_NULL_PTR_ARG(1);
+			uint8_t Endpoint_Read_Stream_BE(void* Buffer, uint16_t Length __CALLBACK_PARAM) ATTR_NON_NULL_PTR_ARG(1);
 
-			#endif
+			/** EEPROM buffer source version of \ref Endpoint_Read_Stream_BE().
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[out] Buffer   Pointer to the destination data buffer to write to, located in EEPROM memory space.
+			 *  \param[in] Length    Number of bytes to send via the currently selected endpoint.
+			 *  \param[in] Callback  Name of a callback routine to call between successive USB packet transfers, NULL if no callback
+			 *
+			 *  \return A value from the \ref Endpoint_Stream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Read_EStream_BE(void* Buffer, uint16_t Length __CALLBACK_PARAM) ATTR_NON_NULL_PTR_ARG(1);
 
 			/** Writes the given number of bytes to the CONTROL type endpoint from the given buffer in little endian,
 			 *  sending full packets to the host as needed. The host OUT acknowledgement is not automatically cleared
 			 *  in both failure and success states; the user is responsible for manually clearing the setup OUT to
 			 *  finalize the transfer via the \ref Endpoint_ClearOUT() macro.
 			 *
+			 *  \note This function automatically clears the control transfer's status stage. Do not manually attempt
+			 *        to clear the status stage when using this routine in a control transaction.
+			 *
 			 *  \note This routine should only be used on CONTROL type endpoints.
 			 *
 			 *  \warning Unlike the standard stream read/write commands, the control stream commands cannot be chained
 			 *           together; i.e. the entire stream data must be read or written at the one time.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 *
-			 *  \param Buffer  Pointer to the source data buffer to read from.
-			 *  \param Length  Number of bytes to read for the currently selected endpoint into the buffer.
+			 *  \param[in] Buffer  Pointer to the source data buffer to read from.
+			 *  \param[in] Length  Number of bytes to read for the currently selected endpoint into the buffer.
 			 *
 			 *  \return A value from the \ref Endpoint_ControlStream_RW_ErrorCodes_t enum.
 			 */
 			uint8_t Endpoint_Write_Control_Stream_LE(const void* Buffer, uint16_t Length) ATTR_NON_NULL_PTR_ARG(1);
+
+			/** EEPROM buffer source version of Endpoint_Write_Control_Stream_LE.
+			 *
+			 *  \note This function automatically clears the control transfer's status stage. Do not manually attempt
+			 *        to clear the status stage when using this routine in a control transaction.
+			 *
+			 *  \note This routine should only be used on CONTROL type endpoints.
+			 *
+			 *  \warning Unlike the standard stream read/write commands, the control stream commands cannot be chained
+			 *           together; i.e. the entire stream data must be read or written at the one time.
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[in] Buffer  Pointer to the source data buffer to read from.
+			 *  \param[in] Length  Number of bytes to read for the currently selected endpoint into the buffer.
+			 *
+			 *  \return A value from the \ref Endpoint_ControlStream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Write_Control_EStream_LE(const void* Buffer, uint16_t Length) ATTR_NON_NULL_PTR_ARG(1);
+
+			/** FLASH buffer source version of \ref Endpoint_Write_Control_Stream_LE().
+			 *
+			 *  \note This function automatically clears the control transfer's status stage. Do not manually attempt
+			 *        to clear the status stage when using this routine in a control transaction.
+			 *
+			 *  \note The FLASH data must be located in the first 64KB of FLASH for this function to work correctly.
+			 *
+			 *  \note This routine should only be used on CONTROL type endpoints.
+			 *
+			 *  \warning Unlike the standard stream read/write commands, the control stream commands cannot be chained
+			 *           together; i.e. the entire stream data must be read or written at the one time.
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[in] Buffer  Pointer to the source data buffer to read from.
+			 *  \param[in] Length  Number of bytes to read for the currently selected endpoint into the buffer.
+			 *
+			 *  \return A value from the \ref Endpoint_ControlStream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Write_Control_PStream_LE(const void* Buffer, uint16_t Length) ATTR_NON_NULL_PTR_ARG(1);
 
 			/** Writes the given number of bytes to the CONTROL type endpoint from the given buffer in big endian,
 			 *  sending full packets to the host as needed. The host OUT acknowledgement is not automatically cleared
 			 *  in both failure and success states; the user is responsible for manually clearing the setup OUT to
 			 *  finalize the transfer via the \ref Endpoint_ClearOUT() macro.
 			 *
+			 *  \note This function automatically clears the control transfer's status stage. Do not manually attempt
+			 *        to clear the status stage when using this routine in a control transaction.
+			 *
 			 *  \note This routine should only be used on CONTROL type endpoints.
 			 *
 			 *  \warning Unlike the standard stream read/write commands, the control stream commands cannot be chained
 			 *           together; i.e. the entire stream data must be read or written at the one time.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 *
-			 *  \param Buffer  Pointer to the source data buffer to read from.
-			 *  \param Length  Number of bytes to read for the currently selected endpoint into the buffer.
+			 *  \param[in] Buffer  Pointer to the source data buffer to read from.
+			 *  \param[in] Length  Number of bytes to read for the currently selected endpoint into the buffer.
 			 *
 			 *  \return A value from the \ref Endpoint_ControlStream_RW_ErrorCodes_t enum.
 			 */
 			uint8_t Endpoint_Write_Control_Stream_BE(const void* Buffer, uint16_t Length) ATTR_NON_NULL_PTR_ARG(1);
+
+			/** EEPROM buffer source version of \ref Endpoint_Write_Control_Stream_BE().
+			 *
+			 *  \note This function automatically clears the control transfer's status stage. Do not manually attempt
+			 *        to clear the status stage when using this routine in a control transaction.
+			 *
+			 *  \note This routine should only be used on CONTROL type endpoints.
+			 *
+			 *  \warning Unlike the standard stream read/write commands, the control stream commands cannot be chained
+			 *           together; i.e. the entire stream data must be read or written at the one time.
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[in] Buffer  Pointer to the source data buffer to read from.
+			 *  \param[in] Length  Number of bytes to read for the currently selected endpoint into the buffer.
+			 *
+			 *  \return A value from the \ref Endpoint_ControlStream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Write_Control_EStream_BE(const void* Buffer, uint16_t Length) ATTR_NON_NULL_PTR_ARG(1);
+
+			/** FLASH buffer source version of \ref Endpoint_Write_Control_Stream_BE().
+			 *
+			 *  \note This function automatically clears the control transfer's status stage. Do not manually attempt
+			 *        to clear the status stage when using this routine in a control transaction.
+			 *
+			 *  \note The FLASH data must be located in the first 64KB of FLASH for this function to work correctly.
+			 *
+			 *  \note This routine should only be used on CONTROL type endpoints.
+			 *
+			 *  \warning Unlike the standard stream read/write commands, the control stream commands cannot be chained
+			 *           together; i.e. the entire stream data must be read or written at the one time.
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[in] Buffer  Pointer to the source data buffer to read from.
+			 *  \param[in] Length  Number of bytes to read for the currently selected endpoint into the buffer.
+			 *
+			 *  \return A value from the \ref Endpoint_ControlStream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Write_Control_PStream_BE(const void* Buffer, uint16_t Length) ATTR_NON_NULL_PTR_ARG(1);
 
 			/** Reads the given number of bytes from the CONTROL endpoint from the given buffer in little endian,
 			 *  discarding fully read packets from the host as needed. The device IN acknowledgement is not
 			 *  automatically sent after success or failure states; the user is responsible for manually sending the
 			 *  setup IN to finalize the transfer via the \ref Endpoint_ClearIN() macro.
 			 *
+			 *  \note This function automatically clears the control transfer's status stage. Do not manually attempt
+			 *        to clear the status stage when using this routine in a control transaction.
+			 *
 			 *  \note This routine should only be used on CONTROL type endpoints.
 			 *
 			 *  \warning Unlike the standard stream read/write commands, the control stream commands cannot be chained
 			 *           together; i.e. the entire stream data must be read or written at the one time.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 *
-			 *  \param Buffer  Pointer to the destination data buffer to write to.
-			 *  \param Length  Number of bytes to send via the currently selected endpoint.
+			 *  \param[out] Buffer  Pointer to the destination data buffer to write to.
+			 *  \param[in] Length  Number of bytes to send via the currently selected endpoint.
 			 *
 			 *  \return A value from the \ref Endpoint_ControlStream_RW_ErrorCodes_t enum.
 			 */
 			uint8_t Endpoint_Read_Control_Stream_LE(void* Buffer, uint16_t Length) ATTR_NON_NULL_PTR_ARG(1);
+
+			/** EEPROM buffer source version of \ref Endpoint_Read_Control_Stream_LE().
+			 *
+			 *  \note This function automatically clears the control transfer's status stage. Do not manually attempt
+			 *        to clear the status stage when using this routine in a control transaction.
+			 *
+			 *  \note This routine should only be used on CONTROL type endpoints.
+			 *
+			 *  \warning Unlike the standard stream read/write commands, the control stream commands cannot be chained
+			 *           together; i.e. the entire stream data must be read or written at the one time.
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[out] Buffer  Pointer to the destination data buffer to write to.
+			 *  \param[in] Length  Number of bytes to send via the currently selected endpoint.
+			 *
+			 *  \return A value from the \ref Endpoint_ControlStream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Read_Control_EStream_LE(void* Buffer, uint16_t Length) ATTR_NON_NULL_PTR_ARG(1);
 
 			/** Reads the given number of bytes from the CONTROL endpoint from the given buffer in big endian,
 			 *  discarding fully read packets from the host as needed. The device IN acknowledgement is not
 			 *  automatically sent after success or failure states; the user is responsible for manually sending the
 			 *  setup IN to finalize the transfer via the \ref Endpoint_ClearIN() macro.
 			 *
+			 *  \note This function automatically clears the control transfer's status stage. Do not manually attempt
+			 *        to clear the status stage when using this routine in a control transaction.
+			 *
 			 *  \note This routine should only be used on CONTROL type endpoints.
 			 *
 			 *  \warning Unlike the standard stream read/write commands, the control stream commands cannot be chained
 			 *           together; i.e. the entire stream data must be read or written at the one time.
 			 *
-			 *  \ingroup Group_EndpointRW
+			 *  \ingroup Group_EndpointStreamRW
 			 *
-			 *  \param Buffer  Pointer to the destination data buffer to write to.
-			 *  \param Length  Number of bytes to send via the currently selected endpoint.
+			 *  \param[out] Buffer  Pointer to the destination data buffer to write to.
+			 *  \param[in] Length  Number of bytes to send via the currently selected endpoint.
 			 *
 			 *  \return A value from the \ref Endpoint_ControlStream_RW_ErrorCodes_t enum.
 			 */
 			uint8_t Endpoint_Read_Control_Stream_BE(void* Buffer, uint16_t Length) ATTR_NON_NULL_PTR_ARG(1);		
 			
+			/** EEPROM buffer source version of \ref Endpoint_Read_Control_Stream_BE().
+			 *
+			 *  \note This function automatically clears the control transfer's status stage. Do not manually attempt
+			 *        to clear the status stage when using this routine in a control transaction.
+			 *
+			 *  \note This routine should only be used on CONTROL type endpoints.
+			 *
+			 *  \warning Unlike the standard stream read/write commands, the control stream commands cannot be chained
+			 *           together; i.e. the entire stream data must be read or written at the one time.
+			 *
+			 *  \ingroup Group_EndpointStreamRW
+			 *
+			 *  \param[out] Buffer  Pointer to the destination data buffer to write to.
+			 *  \param[in] Length  Number of bytes to send via the currently selected endpoint.
+			 *
+			 *  \return A value from the \ref Endpoint_ControlStream_RW_ErrorCodes_t enum.
+			 */
+			uint8_t Endpoint_Read_Control_EStream_BE(void* Buffer, uint16_t Length) ATTR_NON_NULL_PTR_ARG(1);		
+
 	/* Private Interface - For use in library only: */
 	#if !defined(__DOXYGEN__)
 		/* Macros: */
@@ -933,7 +1164,7 @@
 			#define _ENDPOINT_GET_DOUBLEBANK2(details)     _ENDPOINT_GET_DOUBLEBANK3(details)
 			#define _ENDPOINT_GET_DOUBLEBANK3(maxsize, db) db
 			
-			#if defined(USB_FULL_CONTROLLER) || defined(USB_MODIFIED_FULL_CONTROLLER)
+			#if defined(USB_SERIES_4_AVR) || defined(USB_SERIES_6_AVR) || defined(USB_SERIES_7_AVR)
 				#define ENDPOINT_DETAILS_EP0               64,  true
 				#define ENDPOINT_DETAILS_EP1               256, true
 				#define ENDPOINT_DETAILS_EP2               64,  true
@@ -950,11 +1181,11 @@
 			#endif
 
 			#define Endpoint_ConfigureEndpoint(Number, Type, Direction, Size, Banks)            \
-			                                    Endpoint_ConfigureEndpoint_Prv(Number,          \
-			                                              ((Type << EPTYPE0) | Direction),      \
-			                                              ((1 << ALLOC) | Banks |               \
+			                                    Endpoint_ConfigureEndpoint_Prv((Number),        \
+			                                              (((Type) << EPTYPE0) | (Direction)),  \
+			                                              ((1 << ALLOC) | (Banks) |             \
 			                                                (__builtin_constant_p(Size) ?       \
-			                                                 Endpoint_BytesToEPSizeMask(Size) :  \
+			                                                 Endpoint_BytesToEPSizeMask(Size) : \
 			                                                 Endpoint_BytesToEPSizeMaskDynamic(Size))))
 													
 		/* Function Prototypes: */
@@ -976,7 +1207,7 @@
 				}
 				
 				return (MaskVal << EPSIZE0);
-			};
+			}
 
 	#endif
 

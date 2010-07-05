@@ -46,8 +46,6 @@
 		#include <avr/io.h>
 		#include <stdbool.h>
 
-		#include "../../../Common/Common.h"
-
 		// TODO: Add any required includes here
 
 	/* Enable C linkage for C++ Compilers: */
@@ -63,7 +61,7 @@
 	/* Public Interface - May be used in end-application: */
 		/* Macros: */
 			/** Button mask for the first button on the board. */
-			#define BUTTONS_BUTTON1          // TODO: Add mask for first board buton here
+			#define BUTTONS_BUTTON1          // TODO: Add mask for first board button here
 	
 		/* Inline Functions: */
 		#if !defined(__DOXYGEN__)

@@ -41,7 +41,8 @@
  *    - LUFA/Drivers/Peripheral/Serial.c
  *
  *  \section Module Description
- *  Functions, macros, variables, enums and types related to the setup of the USART for serial communications.
+ *  Hardware serial USART driver. This module provides an easy to use driver for
+ *  the setup of and transfer of data over the AVR's USART port.
  *
  *  @{
  */
@@ -67,12 +68,12 @@
 			/** Macro for calculating the baud value from a given baud rate when the U2X (double speed) bit is
 			 *  not set.
 			 */
-			#define SERIAL_UBBRVAL(baud)    (((F_CPU / 16) / baud) - 1)
+			#define SERIAL_UBBRVAL(baud)    (((F_CPU / 16) / (baud)) - 1)
 
 			/** Macro for calculating the baud value from a given baud rate when the U2X (double speed) bit is
 			 *  set.
 			 */
-			#define SERIAL_2X_UBBRVAL(baud) (((F_CPU / 8) / baud) - 1)
+			#define SERIAL_2X_UBBRVAL(baud) (((F_CPU / 8) / (baud)) - 1)
 
 		/* Pseudo-Function Macros: */
 			#if defined(__DOXYGEN__)
@@ -88,22 +89,22 @@
 		/* Function Prototypes: */
 			/** Transmits a given string located in program space (FLASH) through the USART.
 			 *
-			 *  \param FlashStringPtr  Pointer to a string located in program space
+			 *  \param[in] FlashStringPtr  Pointer to a string located in program space
 			 */
 			void Serial_TxString_P(const char *FlashStringPtr) ATTR_NON_NULL_PTR_ARG(1);
 
 			/** Transmits a given string located in SRAM memory through the USART.
 			 *
-			 *  \param StringPtr  Pointer to a string located in SRAM space
+			 *  \param[in] StringPtr  Pointer to a string located in SRAM space
 			 */
 			void Serial_TxString(const char *StringPtr) ATTR_NON_NULL_PTR_ARG(1);
 
 		/* Inline Functions: */
-			/** Initializes the USART, ready for serial data transmission and reception. This initialises the interface to
+			/** Initializes the USART, ready for serial data transmission and reception. This initializes the interface to
 			 *  standard 8-bit, no parity, 1 stop bit settings suitable for most applications.
 			 *
-			 *  \param BaudRate     Serial baud rate, in bits per second
-			 *  \param DoubleSpeed  Enables double speed mode when set, halving the sample time to double the baud rate
+			 *  \param[in] BaudRate     Serial baud rate, in bits per second
+			 *  \param[in] DoubleSpeed  Enables double speed mode when set, halving the sample time to double the baud rate
 			 */
 			static inline void Serial_Init(const uint32_t BaudRate, const bool DoubleSpeed)
 			{
@@ -117,9 +118,22 @@
 				UBRR1  = (DoubleSpeed ? SERIAL_2X_UBBRVAL(BaudRate) : SERIAL_UBBRVAL(BaudRate));
 			}
 
+			/** Turns off the USART driver, disabling and returning used hardware to their default configuration. */
+			static inline void Serial_ShutDown(void)
+			{
+				UCSR1A = 0;
+				UCSR1B = 0;
+				UCSR1C = 0;
+				
+				DDRD  &= ~(1 << 3);	
+				PORTD &= ~(1 << 2);
+				
+				UBRR1  = 0;
+			}
+			
 			/** Transmits a given byte through the USART.
 			 *
-			 *  \param DataByte  Byte to transmit through the USART
+			 *  \param[in] DataByte  Byte to transmit through the USART
 			 */
 			static inline void Serial_TxByte(const char DataByte)
 			{

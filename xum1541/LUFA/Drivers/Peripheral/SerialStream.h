@@ -70,8 +70,10 @@
 			extern FILE USARTStream;
 
 		/* Function Prototypes: */
-			int SerialStream_TxByte(char DataByte, FILE *Stream) ATTR_NON_NULL_PTR_ARG(2);
-			int SerialStream_RxByte(FILE *Stream) ATTR_NON_NULL_PTR_ARG(1);
+		#if defined(INCLUDE_FROM_SERIALSTREAM_C)
+			static int SerialStream_TxByte(char DataByte, FILE *Stream) ATTR_NON_NULL_PTR_ARG(2);
+			static int SerialStream_RxByte(FILE *Stream) ATTR_NON_NULL_PTR_ARG(1);
+		#endif
 	#endif
 
 	/* Public Interface - May be used in end-application: */
@@ -79,8 +81,8 @@
 			/** Initializes the serial stream (and regular USART driver) so that both the stream and regular
 			 *  USART driver functions can be used. Must be called before any stream or regular USART functions.
 			 *
-			 *  \param BaudRate     Baud rate to configure the USART to
-			 *  \param DoubleSpeed  Enables double speed mode when set, halving the sample time to double the baud rate
+			 *  \param[in] BaudRate     Baud rate to configure the USART to
+			 *  \param[in] DoubleSpeed  Enables double speed mode when set, halving the sample time to double the baud rate
 			 */
 			static inline void SerialStream_Init(const uint32_t BaudRate, const bool DoubleSpeed)
 			{
@@ -88,6 +90,14 @@
 				
 				stdout = &USARTStream;
 			}
+			
+			/** Turns off the serial stream (and regular USART driver), disabling and returning used hardware to
+			 *  their default configuration.
+			 */
+			static inline void SerialStream_ShutDown(void)
+			{
+				Serial_ShutDown();
+			}			
 
 	/* Disable C linkage for C++ Compilers: */
 		#if defined(__cplusplus)

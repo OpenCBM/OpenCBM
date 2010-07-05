@@ -48,9 +48,14 @@
 		#include "../HighLevel/StdDescriptors.h"
 		#include "Endpoint.h"
 
+	/* Preprocessor Checks: */
+		#if (defined(USE_RAM_DESCRIPTORS) && defined(USE_EEPROM_DESCRIPTORS))
+			#error USE_RAM_DESCRIPTORS and USE_EEPROM_DESCRIPTORS are mutually exclusive.
+		#endif
+			
 	/* Public Interface - May be used in end-application: */
 		/* Macros: */
-			#if defined(USB_FULL_CONTROLLER) || defined(USB_MODIFIED_FULL_CONTROLLER) || defined(__DOXYGEN__)
+			#if defined(USB_SERIES_4_AVR) || defined(USB_SERIES_6_AVR) || defined(USB_SERIES_7_AVR) || defined(__DOXYGEN__)
 				/** Mask for the Options parameter of the \ref USB_Init() function. This indicates that the
 				 *  USB interface should be initialized in low speed (1.5Mb/s) mode.
 				 *
@@ -78,7 +83,8 @@
 				 *  \note This macro should only be used if the device has indicated to the host that it
 				 *        supports the Remote Wakeup feature in the device descriptors, and should only be
 				 *        issued if the host is currently allowing remote wakeup events from the device (i.e.,
-				 *        the \ref USB_RemoteWakeupEnabled flag is set).
+				 *        the \ref USB_RemoteWakeupEnabled flag is set). When the NO_DEVICE_REMOTE_WAKEUP compile
+				 *        time option is used, this macro is unavailable.
 				 *
 				 *  \see \ref Group_Descriptors for more information on the RMWAKEUP feature and device descriptors.
 				 */
@@ -91,7 +97,8 @@
 				 *  a sent RMWAKEUP request was accepted or rejected by the host.
 				 *
 				 *  \note This macro should only be used if the device has indicated to the host that it
-				 *        supports the Remote Wakeup feature in the device descriptors.
+				 *        supports the Remote Wakeup feature in the device descriptors. When the NO_DEVICE_REMOTE_WAKEUP
+				 *        compile time option is used, this macro is unavailable.
 				 *
 				 *  \see \ref Group_Descriptors for more information on the RMWAKEUP feature and device descriptors.
 				 *
@@ -106,28 +113,77 @@
 				 *  \return Boolean true if the USB communications have been suspended by the host, false otherwise.
 				 */
 				static inline bool USB_Device_IsUSBSuspended(void);
+				
+				/** Enables the device mode Start Of Frame events. When enabled, this causes the
+				 *  \ref EVENT_USB_Device_StartOfFrame() event to fire once per millisecond, synchronized to the USB bus,
+				 *  at the start of each USB frame when enumerated in device mode.
+				 */
+				static inline bool USB_Device_EnableSOFEvents(void);
+				
+				/** Disables the device mode Start Of Frame events. When disabled, this stop the firing of the
+				 *  \ref EVENT_USB_Device_StartOfFrame() event when enumerated in device mode.
+				 */
+				static inline bool USB_Device_DisableSOFEvents(void);
 			#else
-				#define USB_Device_SendRemoteWakeup()   MACROS{ UDCON |= (1 << RMWKUP); }MACROE
+				#if !defined(NO_DEVICE_REMOTE_WAKEUP)
+					#define USB_Device_SendRemoteWakeup()   MACROS{ UDCON |= (1 << RMWKUP); }MACROE
 
-				#define USB_Device_IsRemoteWakeupSent()       ((UDCON &  (1 << RMWKUP)) ? false : true)
-
+					#define USB_Device_IsRemoteWakeupSent()       ((UDCON &  (1 << RMWKUP)) ? false : true)
+				#endif
+				
 				#define USB_Device_IsUSBSuspended()           ((UDINT &  (1 << SUSPI)) ? true : false)
-			#endif
+				
+				#define USB_Device_EnableSOFEvents()    MACROS{ USB_INT_Enable(USB_INT_SOFI); }MACROE
 
+				#define USB_Device_DisableSOFEvents()   MACROS{ USB_INT_Disable(USB_INT_SOFI); }MACROE
+			#endif
+			
+		/* Type Defines: */
+			enum USB_Device_States_t
+			{
+				DEVICE_STATE_Unattached                   = 0, /**< Internally implemented by the library. This state indicates
+				                                                *   that the device is not currently connected to a host.
+				                                                */
+				DEVICE_STATE_Powered                      = 1, /**< Internally implemented by the library. This state indicates
+				                                                *   that the device is connected to a host, but enumeration has not
+				                                                *   yet begun.
+				                                                */
+				DEVICE_STATE_Default                      = 2, /**< Internally implemented by the library. This state indicates
+				                                                *   that the device's USB bus has been reset by the host and it is
+				                                                *   now waiting for the host to begin the enumeration process.
+				                                                */
+				DEVICE_STATE_Addressed                    = 3, /**< Internally implemented by the library. This state indicates
+				                                                *   that the device has been addressed by the USB Host, but is not
+				                                                *   yet configured.
+				                                                */
+				DEVICE_STATE_Configured                   = 4, /**< May be implemented by the user project. This state indicates
+				                                                *   that the device has been enumerated by the host and is ready
+				                                                *   for USB communications to begin.
+				                                                */
+				DEVICE_STATE_Suspended                    = 5, /**< May be implemented by the user project. This state indicates
+				                                                *   that the USB bus has been suspended by the host, and the device
+				                                                *   should power down to a minimal power level until the bus is
+				                                                *   resumed.
+				                                                */
+			};
+			
 		/* Function Prototypes: */
 			/** Function to retrieve a given descriptor's size and memory location from the given descriptor type value,
 			 *  index and language ID. This function MUST be overridden in the user application (added with full, identical  
 			 *  prototype and name so that the library can call it to retrieve descriptor data.
 			 *
-			 *  \param wValue             The type of the descriptor to retrieve in the upper byte, and the index in the 
-			 *                            lower byte (when more than one descriptor of the given type exists, such as the
-			 *                            case of string descriptors). The type may be one of the standard types defined
-			 *                            in the DescriptorTypes_t enum, or may be a class-specific descriptor type value.
-			 *  \param wIndex             The language ID of the string to return if the wValue type indicates DTYPE_String,
-			 *                            otherwise zero for standard descriptors, or as defined in a class-specific
-			 *                            standards.
-			 *  \param DescriptorAddress  Pointer to the descriptor in memory. This should be set by the routine to
-			 *                            the address of the descriptor.
+			 *  \param[in] wValue  The type of the descriptor to retrieve in the upper byte, and the index in the 
+			 *                     lower byte (when more than one descriptor of the given type exists, such as the
+			 *                     case of string descriptors). The type may be one of the standard types defined
+			 *                     in the DescriptorTypes_t enum, or may be a class-specific descriptor type value.
+			 *  \param[in] wIndex  The language ID of the string to return if the wValue type indicates DTYPE_String,
+			 *                     otherwise zero for standard descriptors, or as defined in a class-specific
+			 *                     standards.
+			 *  \param[out] DescriptorAddress  Pointer to the descriptor in memory. This should be set by the routine to
+			 *                                 the address of the descriptor.
+			 *  \param[out] MemoryAddressSpace A value from the \ref USB_DescriptorMemorySpaces_t enum to indicate the memory
+			 *                                 space in which the descriptor is stored. This parameter does not exist when one
+			 *                                 of the USE_*_DESCRIPTORS compile time options is used.
 			 *
 			 *  \note By default, the library expects all descriptors to be located in flash memory via the PROGMEM attribute.
 			 *        If descriptors should be located in RAM or EEPROM instead (to speed up access in the case of RAM, or to
@@ -137,14 +193,18 @@
 			 *
 			 *  \return Size in bytes of the descriptor if it exists, zero or \ref NO_DESCRIPTOR otherwise
 			 */
-			uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex, void** const DescriptorAddress)
+			uint16_t CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex, void** const DescriptorAddress
+			#if !defined(USE_FLASH_DESCRIPTORS) && !defined(USE_EEPROM_DESCRIPTORS) && !defined(USE_RAM_DESCRIPTORS)
+			                                    , uint8_t* MemoryAddressSpace
+			#endif			
+			                                    )
 									            ATTR_WARN_UNUSED_RESULT ATTR_NON_NULL_PTR_ARG(3);
 
 	/* Private Interface - For use in library only: */
 	#if !defined(__DOXYGEN__)
 		/* Macros: */		
 			#define USB_Device_SetLowSpeed()        MACROS{ UDCON |=  (1 << LSM);   }MACROE
-			#define USB_Device_SetHighSpeed()       MACROS{ UDCON &= ~(1 << LSM);   }MACROE
+			#define USB_Device_SetFullSpeed()       MACROS{ UDCON &= ~(1 << LSM);   }MACROE
 	#endif
 
 #endif

@@ -44,7 +44,9 @@
  *    - None
  *
  *  \section Module Description
- *  Functions, macros, variables, enums and types related to the setup of a the ADC subsystem.
+ *  Hardware ADC driver. This module provides an easy to use driver for the hardware
+ *  ADC present on many AVR models, for the conversion of analogue signals into the
+ *  digital domain.
  */
  
 #ifndef __ADC_H__
@@ -61,7 +63,7 @@
 		     defined(__AVR_AT90USB1287__) || defined(__AVR_AT90USB647__) || \
 			 defined(__AVR_ATmega16U4__)  || defined(__AVR_ATmega32U4__) || \
 			 defined(__AVR_ATmega32U6__))
-			#include "AT90USBXXX67/ADC.h"
+			#include "AVRU4U6U7/ADC.h"
 		#else
 			#error "ADC is not available for the currently selected AVR model."
 		#endif

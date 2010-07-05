@@ -29,7 +29,7 @@
 */
  
 /** \ingroup Group_USB
- *  @defgroup Group_OTGManagement USB On The Go (OTG) Management
+ *  @defgroup Group_OTG USB On The Go (OTG) Management
  *
  *  This module contains macros for embedded USB hosts with dual role On The Go capabilities, for managing role
  *  exchange. OTG is a way for two USB dual role devices to talk to one another directly without fixed device/host
@@ -102,7 +102,7 @@
 				 *  There are two different methods of sending a SRP - either pulses on the VBUS line, or by
 				 *  pulsing the Data + line via the internal pull-up resistor.
 				 *
-				 *  \param SRPTypeMask  Mask indicating the type of SRP to use, either \ref USB_OTG_SRP_VBUS or \ref USB_OTG_STP_DATA.
+				 *  \param[in] SRPTypeMask  Mask indicating the type of SRP to use, either \ref USB_OTG_SRP_VBUS or \ref USB_OTG_STP_DATA.
 				 */
 				static inline void USB_OTG_Dev_InitiateSRP(uint8_t SRPTypeMask);
 			#else
@@ -118,7 +118,7 @@
 				
 				#define USB_OTG_Host_IsHNPReceived()              ((OTGCON &   (1 << HNPREQ)) ? true : false)
 				
-				#define USB_OTG_Device_InitiateSRP(type)    MACROS{ OTGCON = ((OTGCON & ~(1 << SRPSEL)) | (type | (1 << SRPREQ))); }MACROE
+				#define USB_OTG_Device_InitiateSRP(type)    MACROS{ OTGCON = ((OTGCON & ~(1 << SRPSEL)) | ((type) | (1 << SRPREQ))); }MACROE
 			#endif
 	
 #endif

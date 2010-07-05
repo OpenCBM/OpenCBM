@@ -48,7 +48,9 @@
  *    - None
  *
  *  \section Module Description
- *  Functions, macros, variables, enums and types related to the control of physical board GPIO buttons.
+ *  Hardware buttons driver. This provides an easy to use driver for the hardware buttons present on many boards.
+ *  It provides a way to easily configure and check the status of all the buttons on the board so that appropriate
+ *  actions can be taken.
  *
  *  If the BOARD value is set to BOARD_USER, this will include the /Board/Dataflash.h file in the user project
  *  directory. Otherwise, it will include the appropriate built in board driver header file.
@@ -62,7 +64,6 @@
 	/* Macros: */
 	#if !defined(__DOXYGEN__)
 		#define INCLUDE_FROM_BUTTONS_H
-		#define INCLUDE_FROM_BOARD_DRIVER
 	#endif
 
 	/* Includes: */
@@ -78,8 +79,12 @@
 		#include "STK526/Buttons.h"
 	#elif (BOARD == BOARD_ATAVRUSBRF01)
 		#include "ATAVRUSBRF01/Buttons.h"
+	#elif (BOARD == BOARD_BUMBLEB)
+		#include "BUMBLEB/Buttons.h"
+	#elif (BOARD == BOARD_EVK527)
+		#include "EVK527/Buttons.h"
 	#elif (BOARD == BOARD_USER)
-		#include "Board/Buttons.h"		
+		#include "Board/Buttons.h"
 	#else
 		#error The selected board does not contain any GPIO buttons.
 	#endif

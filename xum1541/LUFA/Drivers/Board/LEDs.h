@@ -48,7 +48,8 @@
  *    - None
  *
  *  \section Module Description
- *  Functions, macros, variables, enums and types related to the control of board LEDs.
+ *  Hardware LEDs driver. This provides an easy to use driver for the hardware LEDs present on many boards. It
+ *  provides an interface to configure, test and change the status of all the board LEDs.
  *
  *  If the BOARD value is set to BOARD_USER, this will include the /Board/Dataflash.h file in the user project
  *  directory. Otherwise, it will include the appropriate built in board driver header file.
@@ -70,7 +71,6 @@
 	/* Macros: */
 	#if !defined(__DOXYGEN__)
 		#define INCLUDE_FROM_LEDS_H
-		#define INCLUDE_FROM_BOARD_DRIVER
 	#endif
 	
 	/* Includes: */
@@ -88,6 +88,14 @@
 		#include "RZUSBSTICK/LEDs.h"
 	#elif (BOARD == BOARD_ATAVRUSBRF01)
 		#include "ATAVRUSBRF01/LEDs.h"
+	#elif (BOARD == BOARD_XPLAIN)
+		#include "XPLAIN/LEDs.h"
+	#elif (BOARD == BOARD_XPLAIN_REV1)
+		#include "XPLAIN/LEDs.h"
+	#elif (BOARD == BOARD_BUMBLEB)
+		#include "BUMBLEB/LEDs.h"
+	#elif (BOARD == BOARD_EVK527)
+		#include "EVK527/LEDs.h"		
 	#elif (BOARD == BOARD_USER)
 		#include "Board/LEDs.h"
 	#endif
@@ -117,30 +125,36 @@
 
 		/** Turns on the LEDs specified in the given LED mask.
 		 *
-		 *  \param LEDMask  Mask of the board LEDs to manipulate (see board-specific LEDs.h driver file)
+		 *  \param[in] LEDMask  Mask of the board LEDs to manipulate (see board-specific LEDs.h driver file)
 		 */
 		static inline void LEDs_TurnOnLEDs(const uint8_t LEDMask);
 
 		/** Turns off the LEDs specified in the given LED mask.
 		 *
-		 *  \param LEDMask  Mask of the board LEDs to manipulate (see board-specific LEDs.h driver file)
+		 *  \param[in] LEDMask  Mask of the board LEDs to manipulate (see board-specific LEDs.h driver file)
 		 */
 		static inline void LEDs_TurnOffLEDs(const uint8_t LEDMask);
 
 		/** Turns off all LEDs not specified in the given LED mask, and turns on all the LEDs in the given LED
 		 *  mask.
 		 *
-		 *  \param LEDMask  Mask of the board LEDs to manipulate (see board-specific LEDs.h driver file)
+		 *  \param[in] LEDMask  Mask of the board LEDs to manipulate (see board-specific LEDs.h driver file)
 		 */
 		static inline void LEDs_SetAllLEDs(const uint8_t LEDMask);
 
 		/** Turns off all LEDs in the LED mask that are not set in the active mask, and turns on all the LEDs
 		 *  specified in both the LED and active masks.
 		 *
-		 *  \param LEDMask     Mask of the board LEDs to manipulate (see board-specific LEDs.h driver file)
-		 *  \param ActiveMask  Mask of whether the LEDs in the LED mask should be turned on or off
+		 *  \param[in] LEDMask     Mask of the board LEDs to manipulate (see board-specific LEDs.h driver file)
+		 *  \param[in] ActiveMask  Mask of whether the LEDs in the LED mask should be turned on or off
 		 */
 		static inline void LEDs_ChangeLEDs(const uint8_t LEDMask, const uint8_t ActiveMask);
+		
+		/** Toggles all LEDs in the LED mask, leaving all others in their current states.
+		 *
+		 *  \param[in] LEDMask Mask of the board LEDs to manipulate (see board-specific LEDs.h driver file)
+		 */
+		static inline void LEDs_ToggleLEDs(const uint8_t LEDMask);
 
 		/** Returns the status of all the board LEDs; set LED masks in the return value indicate that the
 		 *  corresponding LED is on.

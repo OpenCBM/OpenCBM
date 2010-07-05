@@ -60,15 +60,18 @@ void USB_Host_ProcessNextHostState(void)
 			}
 		
 			break;
-		case HOST_STATE_Attached:
+		case HOST_STATE_Powered:
 			WaitMSRemaining = HOST_DEVICE_SETTLE_DELAY_MS;
 		
-			USB_HostState = HOST_STATE_Attached_WaitForDeviceSettle;
+			USB_HostState = HOST_STATE_Powered_WaitForDeviceSettle;
 			break;
-		case HOST_STATE_Attached_WaitForDeviceSettle:
-			_delay_ms(1);
-
-			if (!(WaitMSRemaining--))
+		case HOST_STATE_Powered_WaitForDeviceSettle:
+			if (WaitMSRemaining--)
+			{
+				_delay_ms(1);
+				break;
+			}
+			else
 			{
 				USB_Host_VBUS_Manual_Off();
 
@@ -76,11 +79,11 @@ void USB_Host_ProcessNextHostState(void)
 				USB_Host_VBUS_Auto_Enable();
 				USB_Host_VBUS_Auto_On();
 				
-				USB_HostState = HOST_STATE_Attached_WaitForConnect;
+				USB_HostState = HOST_STATE_Powered_WaitForConnect;
 			}
 			
 			break;
-		case HOST_STATE_Attached_WaitForConnect:		
+		case HOST_STATE_Powered_WaitForConnect:		
 			if (USB_INT_HasOccurred(USB_INT_DCONNI))
 			{	
 				USB_INT_Clear(USB_INT_DCONNI);
@@ -88,23 +91,20 @@ void USB_Host_ProcessNextHostState(void)
 
 				USB_INT_Clear(USB_INT_VBERRI);
 				USB_INT_Enable(USB_INT_VBERRI);
-
-				USB_IsConnected = true;
-				EVENT_USB_Connect();
 					
 				USB_Host_ResumeBus();
 				Pipe_ClearPipes();
 				
-				HOST_TASK_NONBLOCK_WAIT(100, HOST_STATE_Attached_DoReset);
+				HOST_TASK_NONBLOCK_WAIT(100, HOST_STATE_Powered_DoReset);
 			}
 
 			break;
-		case HOST_STATE_Attached_DoReset:
+		case HOST_STATE_Powered_DoReset:
 			USB_Host_ResetDevice();
 
-			HOST_TASK_NONBLOCK_WAIT(200, HOST_STATE_Powered);
+			HOST_TASK_NONBLOCK_WAIT(200, HOST_STATE_Powered_ConfigPipe);
 			break;
-		case HOST_STATE_Powered:
+		case HOST_STATE_Powered_ConfigPipe:
 			Pipe_ConfigurePipe(PIPE_CONTROLPIPE, EP_TYPE_CONTROL,
 							   PIPE_TOKEN_SETUP, ENDPOINT_CONTROLEP,
 							   PIPE_CONTROLPIPE_DEFAULT_SIZE, PIPE_BANK_SINGLE);		
@@ -136,11 +136,7 @@ void USB_Host_ProcessNextHostState(void)
 				break;
 			}
 
-			#if defined(USE_NONSTANDARD_DESCRIPTOR_NAMES)
 			USB_ControlPipeSize = DataBuffer[offsetof(USB_Descriptor_Device_t, Endpoint0Size)];
-			#else
-			USB_ControlPipeSize = DataBuffer[offsetof(USB_Descriptor_Device_t, bMaxPacketSize0)];			
-			#endif
 	
 			USB_Host_ResetDevice();
 			
@@ -162,8 +158,6 @@ void USB_Host_ProcessNextHostState(void)
 				break;
 			}
 
-			Pipe_SetInfiniteINRequests();
-			
 			USB_ControlRequest = (USB_Request_Header_t)
 				{
 					.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_STANDARD | REQREC_DEVICE),
@@ -184,22 +178,18 @@ void USB_Host_ProcessNextHostState(void)
 		case HOST_STATE_Default_PostAddressSet:
 			USB_Host_SetDeviceAddress(USB_HOST_DEVICEADDRESS);
 
-			EVENT_USB_DeviceEnumerationComplete();
+			EVENT_USB_Host_DeviceEnumerationComplete();
 			USB_HostState = HOST_STATE_Addressed;
-
 			break;
 	}
 
 	if ((ErrorCode != HOST_ENUMERROR_NoError) && (USB_HostState != HOST_STATE_Unattached))
 	{
-		EVENT_USB_DeviceEnumerationFailed(ErrorCode, SubErrorCode);
+		EVENT_USB_Host_DeviceEnumerationFailed(ErrorCode, SubErrorCode);
 
 		USB_Host_VBUS_Auto_Off();
 
-		EVENT_USB_DeviceUnattached();
-		
-		if (USB_IsConnected)
-		  EVENT_USB_Disconnect();
+		EVENT_USB_Host_DeviceUnattached();
 
 		USB_ResetInterface();
 	}
@@ -210,7 +200,6 @@ uint8_t USB_Host_WaitMS(uint8_t MS)
 	bool    BusSuspended = USB_Host_IsBusSuspended();
 	uint8_t ErrorCode    = HOST_WAITERROR_Successful;
 	
-	USB_INT_Clear(USB_INT_HSOFI);
 	USB_Host_ResumeBus();
 
 	while (MS)
@@ -221,7 +210,7 @@ uint8_t USB_Host_WaitMS(uint8_t MS)
 			MS--;
 		}
 					
-		if ((USB_IsConnected == false) || (USB_CurrentMode == USB_MODE_DEVICE))
+		if ((USB_HostState == HOST_STATE_Unattached) || (USB_CurrentMode == USB_MODE_DEVICE))
 		{
 			ErrorCode = HOST_WAITERROR_DeviceDisconnect;
 			
@@ -260,9 +249,10 @@ static void USB_Host_ResetDevice(void)
 	USB_Host_ResetBus();
 	while (!(USB_Host_IsBusResetComplete()));
 
+	USB_Host_ResumeBus();
+
 	USB_INT_Clear(USB_INT_HSOFI);
-	USB_Host_ResumeBus();	
-	
+
 	for (uint8_t MSRem = 10; MSRem != 0; MSRem--)
 	{
 		/* Workaround for powerless-pull-up devices. After a USB bus reset,
@@ -272,6 +262,7 @@ static void USB_Host_ResetDevice(void)
 
 		if (USB_INT_HasOccurred(USB_INT_HSOFI))
 		{
+			USB_INT_Clear(USB_INT_HSOFI);
 			USB_INT_Clear(USB_INT_DDISCI);
 			break;
 		}
@@ -284,4 +275,72 @@ static void USB_Host_ResetDevice(void)
 
 	USB_INT_Enable(USB_INT_DDISCI);
 }
+
+uint8_t USB_Host_SetDeviceConfiguration(const uint8_t ConfigNumber)
+{
+	USB_ControlRequest = (USB_Request_Header_t)
+		{
+			.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_STANDARD | REQREC_DEVICE),
+			.bRequest      = REQ_SetConfiguration,
+			.wValue        = ConfigNumber,
+			.wIndex        = 0,
+			.wLength       = 0,
+		};
+
+	Pipe_SelectPipe(PIPE_CONTROLPIPE);
+	
+	return USB_Host_SendControlRequest(NULL);
+}
+
+uint8_t USB_Host_GetDeviceDescriptor(void* const DeviceDescriptorPtr)
+{
+	USB_ControlRequest = (USB_Request_Header_t)
+		{
+			.bmRequestType = (REQDIR_DEVICETOHOST | REQTYPE_STANDARD | REQREC_DEVICE),
+			.bRequest      = REQ_GetDescriptor,
+			.wValue        = (DTYPE_Device << 8),
+			.wIndex        = 0,
+			.wLength       = sizeof(USB_Descriptor_Device_t),
+		};
+
+	Pipe_SelectPipe(PIPE_CONTROLPIPE);
+	
+	return USB_Host_SendControlRequest(DeviceDescriptorPtr);
+}
+
+uint8_t USB_Host_GetDeviceStringDescriptor(uint8_t Index, void* const Buffer, uint8_t BufferLength)
+{
+	USB_ControlRequest = (USB_Request_Header_t)
+		{
+			.bmRequestType = (REQDIR_DEVICETOHOST | REQTYPE_STANDARD | REQREC_DEVICE),
+			.bRequest      = REQ_GetDescriptor,
+			.wValue        = (DTYPE_String << 8) | Index,
+			.wIndex        = 0,
+			.wLength       = BufferLength,
+		};
+
+	Pipe_SelectPipe(PIPE_CONTROLPIPE);
+	
+	return USB_Host_SendControlRequest(Buffer);
+}
+
+uint8_t USB_Host_ClearPipeStall(uint8_t EndpointNum)
+{
+	if (Pipe_GetPipeToken() == PIPE_TOKEN_IN)
+	  EndpointNum |= ENDPOINT_DESCRIPTOR_DIR_IN;
+
+	USB_ControlRequest = (USB_Request_Header_t)
+		{
+			.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_STANDARD | REQREC_ENDPOINT),
+			.bRequest      = REQ_ClearFeature,
+			.wValue        = FEATURE_ENDPOINT_HALT,
+			.wIndex        = EndpointNum,
+			.wLength       = 0,
+		};
+
+	Pipe_SelectPipe(PIPE_CONTROLPIPE);
+	
+	return USB_Host_SendControlRequest(NULL);
+}
+
 #endif

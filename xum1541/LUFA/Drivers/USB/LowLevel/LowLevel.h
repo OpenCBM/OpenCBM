@@ -71,28 +71,30 @@
 
 	/* Preprocessor Checks and Defines: */
 		#if !defined(F_CLOCK)
-			#error F_CLOCK is not defined. You must device F_CLOCK to the frequency of the unprescaled input clock in your project makefile.
+			#error F_CLOCK is not defined. You must define F_CLOCK to the frequency of the unprescaled input clock in your project makefile.
 		#endif
 	
 		#if (F_CLOCK == 8000000)
-			#if (defined(__AVR_AT90USB82__) || defined(__AVR_AT90USB162__))
+			#if (defined(__AVR_AT90USB82__) || defined(__AVR_AT90USB162__) || \
+			     defined(__AVR_ATMEGA8U2__) || defined(__AVR_ATMEGA16U2__))
 				#define USB_PLL_PSC                0
-			#elif (defined(__AVR_AT90USB646__)  || defined(__AVR_AT90USB647__)  || \
-			       defined(__AVR_AT90USB1286__) || defined(__AVR_AT90USB1287__) || \
-				   defined(__AVR_ATmega32U6__))
-				#define USB_PLL_PSC                ((1 << PLLP1) | (1 << PLLP0))
 			#elif (defined(__AVR_ATmega16U4__) || defined(__AVR_ATmega32U4__))
 				#define USB_PLL_PSC                0
+			#elif (defined(__AVR_AT90USB646__)  || defined(__AVR_AT90USB1286__) || defined(__AVR_ATmega32U6__))
+				#define USB_PLL_PSC                ((1 << PLLP1) | (1 << PLLP0))
+			#elif (defined(__AVR_AT90USB647__)  || defined(__AVR_AT90USB1287__))
+				#define USB_PLL_PSC                ((1 << PLLP1) | (1 << PLLP0))
 			#endif
 		#elif (F_CLOCK == 16000000)
-			#if (defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB647__) || defined(__AVR_ATmega32U6__))
-				#define USB_PLL_PSC                ((1 << PLLP2) | (1 << PLLP1))
-			#elif (defined(__AVR_AT90USB1286__) || defined(__AVR_AT90USB1287__))
-				#define USB_PLL_PSC                ((1 << PLLP2) | (1 << PLLP0))
-			#elif (defined(__AVR_AT90USB82__) || defined(__AVR_AT90USB162__))
+			#if (defined(__AVR_AT90USB82__) || defined(__AVR_AT90USB162__) || \
+			     defined(__AVR_ATMEGA8U2__) || defined(__AVR_ATMEGA16U2__))
 				#define USB_PLL_PSC                (1 << PLLP0)
 			#elif (defined(__AVR_ATmega16U4__) || defined(__AVR_ATmega32U4__))
 				#define USB_PLL_PSC                (1 << PINDIV)
+			#elif (defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB647__) || defined(__AVR_ATmega32U6__))
+				#define USB_PLL_PSC                ((1 << PLLP2) | (1 << PLLP1))
+			#elif (defined(__AVR_AT90USB1286__) || defined(__AVR_AT90USB1287__))
+				#define USB_PLL_PSC                ((1 << PLLP2) | (1 << PLLP0))
 			#endif
 		#endif
 		
@@ -111,15 +113,11 @@
 			 *  USB interface is or should be initialized in the USB device mode.
 			 */
 			#define USB_MODE_DEVICE                    1
-
-			#if defined(USB_CAN_BE_HOST) || defined(__DOXYGEN__)
-				/** Mode mask for the \ref USB_CurrentMode global and the \ref USB_Init() function. This indicates that the
-				 *  USB interface is or should be initialized in the USB host mode.
-				 *
-				 *  \note This token is not available on AVR models which do not support host mode.
-				 */
-				#define USB_MODE_HOST                  2
-			#endif
+			
+			/** Mode mask for the \ref USB_CurrentMode global and the \ref USB_Init() function. This indicates that the
+			 *  USB interface is or should be initialized in the USB host mode.
+			 */
+			#define USB_MODE_HOST                      2
 			
 			#if defined(USB_CAN_BE_BOTH) || defined(__DOXYGEN__)
 				/** Mode mask for the the \ref USB_Init() function. This indicates that the USB interface should be
@@ -181,7 +179,7 @@
 			 */
 			#define EP_TYPE_INTERRUPT                  0x03
 
-			#if defined(USB_FULL_CONTROLLER) || defined(USB_MODIFIED_FULL_CONTROLLER) || defined(__DOXYGEN__)
+			#if defined(USB_SERIES_4_AVR) || defined(USB_SERIES_6_AVR) || defined(USB_SERIES_7_AVR) || defined(__DOXYGEN__)
 				/** Returns boolean true if the VBUS line is currently high (i.e. the USB host is supplying power),
 				 *  otherwise returns false.
 				 *
@@ -191,7 +189,7 @@
 			#endif
 
 			/** Detaches the device from the USB bus. This has the effect of removing the device from any
-			 *  host if, ceasing USB communications. If no host is present, this prevents any host from
+			 *  attached host, ceasing USB communications. If no host is present, this prevents any host from
 			 *  enumerating the device once attached until \ref USB_Attach() is called.
 			 */
 			#define USB_Detach()                    MACROS{ UDCON  |=  (1 << DETACH);  }MACROE
@@ -228,14 +226,14 @@
 			 *  Calling this function when the USB interface is already initialized will cause a complete USB
 			 *  interface reset and re-enumeration.
 			 *
-			 *  \param Mode     This is a mask indicating what mode the USB interface is to be initialized to.
-			 *                  Valid mode masks are \ref USB_MODE_DEVICE, \ref USB_MODE_HOST or \ref USB_MODE_UID.
+			 *  \param[in] Mode     This is a mask indicating what mode the USB interface is to be initialized to.
+			 *                      Valid mode masks are \ref USB_MODE_DEVICE, \ref USB_MODE_HOST or \ref USB_MODE_UID.
 			 *
-			 *  \param Options  Mask indicating the options which should be used when initializing the USB
-			 *                  interface to control the USB interface's behaviour. This should be comprised of
-			 *                  a USB_OPT_REG_* mask to control the regulator, a USB_OPT_*_PLL mask to control the
-			 *                  PLL, and a USB_DEVICE_OPT_* mask (when the device mode is enabled) to set the device
-			 *                  mode speed.
+			 *  \param[in] Options  Mask indicating the options which should be used when initializing the USB
+			 *                      interface to control the USB interface's behaviour. This should be comprised of
+			 *                      a USB_OPT_REG_* mask to control the regulator, a USB_OPT_*_PLL mask to control the
+			 *                      PLL, and a USB_DEVICE_OPT_* mask (when the device mode is enabled) to set the device
+			 *                      mode speed.
 			 *
 			 *  \note To reduce the FLASH requirements of the library if only device or host mode is required, 
 			 *        this can be statically set via defining the token USB_DEVICE_ONLY for device mode or 
@@ -301,6 +299,10 @@
 				 *        changed in value.
 				 */
 				extern volatile uint8_t USB_CurrentMode;
+			#elif defined(USB_HOST_ONLY)
+				#define USB_CurrentMode USB_MODE_HOST
+			#elif defined(USB_DEVICE_ONLY)
+				#define USB_CurrentMode USB_MODE_DEVICE
 			#endif
 			
 			#if !defined(USE_STATIC_OPTIONS) || defined(__DOXYGEN__)
@@ -311,6 +313,8 @@
 				 *        changed in value.
 				 */
 				extern volatile uint8_t USB_Options;
+			#elif defined(USE_STATIC_OPTIONS)
+				#define USB_Options USE_STATIC_OPTIONS
 			#endif
 
 	/* Private Interface - For use in library only: */
@@ -320,7 +324,7 @@
 			#define USB_PLL_Off()              MACROS{ PLLCSR   =  0;                           }MACROE
 			#define USB_PLL_IsReady()                ((PLLCSR  &   (1 << PLOCK)) ? true : false)
 
-			#if defined(USB_FULL_CONTROLLER) || defined(USB_MODIFIED_FULL_CONTROLLER)		
+			#if defined(USB_SERIES_4_AVR) || defined(USB_SERIES_6_AVR) || defined(USB_SERIES_7_AVR)
 				#define USB_REG_On()           MACROS{ UHWCON  |=  (1 << UVREGE);               }MACROE
 				#define USB_REG_Off()          MACROS{ UHWCON  &= ~(1 << UVREGE);               }MACROE
 			#else
@@ -334,9 +338,9 @@
 			#define USB_CLK_Freeze()           MACROS{ USBCON  |=  (1 << FRZCLK);               }MACROE
 			#define USB_CLK_Unfreeze()         MACROS{ USBCON  &= ~(1 << FRZCLK);               }MACROE
 
-			#define USB_Interface_Enable()     MACROS{ USBCON  |=  (1 << USBE);                 }MACROE
-			#define USB_Interface_Disable()    MACROS{ USBCON  &= ~(1 << USBE);                 }MACROE
-			#define USB_Interface_Reset()      MACROS{ uint8_t Temp = USBCON; USBCON = (Temp & ~(1 << USBE)); \
+			#define USB_Controller_Enable()    MACROS{ USBCON  |=  (1 << USBE);                 }MACROE
+			#define USB_Controller_Disable()   MACROS{ USBCON  &= ~(1 << USBE);                 }MACROE
+			#define USB_Controller_Reset()     MACROS{ const uint8_t Temp = USBCON; USBCON = (Temp & ~(1 << USBE)); \
 			                                           USBCON = (Temp | (1 << USBE));           }MACROE
 	
 		/* Inline Functions: */

@@ -36,6 +36,12 @@
  *        dispatch header located in LUFA/Drivers/Board/Buttons.h.
  */
 
+/** \ingroup Group_Buttons
+ *  @defgroup Group_Buttons_STK526 STK526
+ *
+ *  @{
+ */
+
 #ifndef __BUTTONS_STK526_H__
 #define __BUTTONS_STK526_H__
 
@@ -64,7 +70,7 @@
 	/* Public Interface - May be used in end-application: */
 		/* Macros: */
 			/** Button mask for the first button on the board. */
-			#define BUTTONS_BUTTON1      (1 << 2)
+			#define BUTTONS_BUTTON1      (1 << 7)
 	
 		/* Inline Functions: */
 		#if !defined(__DOXYGEN__)
@@ -87,3 +93,5 @@
 		#endif
 			
 #endif
+
+/** @} */

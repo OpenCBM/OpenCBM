@@ -32,9 +32,13 @@
  *
  *  Simple round-robbin cooperative scheduler for use in basic projects where non real-time tasks need
  *  to be executed. Each task is executed in sequence, and can be enabled or disabled individually or as a group.
+ *
+ *  \deprecated This module is deprecated and will be removed in a future library release.
  */
  
 /** @defgroup Group_Scheduler Simple Task Scheduler - LUFA/Scheduler/Scheduler.h
+ *
+ *  \deprecated This module is deprecated and will be removed in a future library release.
  *
  *  \section Sec_Dependencies Module Source Dependencies
  *  The following files must be built with any user project that uses this module:
@@ -192,7 +196,7 @@
 			/** Resets the delay counter value to the current tick count. This should be called to reset the period
 			 *  for a delay in a task which is dependant on the current tick value.
 			 *
-			 *  \param DelayCounter  Counter which is storing the starting tick count for a given delay.
+			 *  \param[out] DelayCounter  Counter which is storing the starting tick count for a given delay.
 			 */
 			static inline void Scheduler_ResetDelay(SchedulerDelayCounter_t* const DelayCounter)
 			                                        ATTR_NON_NULL_PTR_ARG(1) ATTR_ALWAYS_INLINE;
@@ -207,8 +211,8 @@
 		/* Function Prototypes: */
 			/** Determines if the given tick delay has elapsed, based on the given .
 			 *
-			 *  \param Delay         The delay to test for, measured in ticks
-			 *  \param DelayCounter  The counter which is storing the starting tick value for the delay
+			 *  \param[in] Delay         The delay to test for, measured in ticks
+			 *  \param[in] DelayCounter  The counter which is storing the starting tick value for the delay
 			 *
 			 *  \return Boolean true if the delay has elapsed, false otherwise
 			 *
@@ -229,16 +233,16 @@
 			
 			/** Sets the task mode for a given task.
 			 *
-			 *  \param Task        Name of the task whose status is to be changed
-			 *  \param TaskStatus  New task status for the task (TASK_RUN or TASK_STOP)
+			 *  \param[in] Task        Name of the task whose status is to be changed
+			 *  \param[in] TaskStatus  New task status for the task (TASK_RUN or TASK_STOP)
 			 */
 			void Scheduler_SetTaskMode(const TaskPtr_t Task, const bool TaskStatus);
 			
 			/** Sets the task mode for a given task group ID, allowing for an entire group of tasks to have their
 			 *  statuses changed at once.
 			 *
-			 *  \param GroupID     Value of the task group ID whose status is to be changed
-			 *  \param TaskStatus  New task status for tasks in the specified group (TASK_RUN or TASK_STOP)
+			 *  \param[in] GroupID     Value of the task group ID whose status is to be changed
+			 *  \param[in] TaskStatus  New task status for tasks in the specified group (TASK_RUN or TASK_STOP)
 			 */
 			void Scheduler_SetGroupTaskMode(const uint8_t GroupID, const bool TaskStatus);
 
@@ -255,7 +259,7 @@
 				Scheduler_TotalTasks = TotalTasks;
 			}
 		
-			static inline void Scheduler_GoSchedule(const uint8_t TotalTasks) ATTR_NO_RETURN ATTR_ALWAYS_INLINE;
+			static inline void Scheduler_GoSchedule(const uint8_t TotalTasks) ATTR_NO_RETURN ATTR_ALWAYS_INLINE ATTR_DEPRECATED;
 			static inline void Scheduler_GoSchedule(const uint8_t TotalTasks)
 			{
 				Scheduler_InitScheduler(TotalTasks);

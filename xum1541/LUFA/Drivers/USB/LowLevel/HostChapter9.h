@@ -53,15 +53,15 @@
 			 */
 			enum USB_Host_SendControlErrorCodes_t
 			{
-				HOST_SENDCONTROL_Successful       = 0, /**< No error occurred in the request transfer. */
-				HOST_SENDCONTROL_DeviceDisconnect = 1, /**< The attached device was disconnected during the
+				HOST_SENDCONTROL_Successful         = 0, /**< No error occurred in the request transfer. */
+				HOST_SENDCONTROL_DeviceDisconnected = 1, /**< The attached device was disconnected during the
 				                                        *   request transfer.
 				                                        */
-				HOST_SENDCONTROL_PipeError        = 2, /**< An error occurred in the pipe while sending the request. */
-				HOST_SENDCONTROL_SetupStalled     = 3, /**< The attached device stalled the request, usually
+				HOST_SENDCONTROL_PipeError          = 2, /**< An error occurred in the pipe while sending the request. */
+				HOST_SENDCONTROL_SetupStalled       = 3, /**< The attached device stalled the request, usually
 				                                        *   indicating that the request is unsupported on the device.
 				                                        */
-				HOST_SENDCONTROL_SoftwareTimeOut  = 4, /**< The request or data transfer timed out. */
+				HOST_SENDCONTROL_SoftwareTimeOut    = 4, /**< The request or data transfer timed out. */
 			};
 			
 		/* Function Prototypes: */
@@ -71,8 +71,8 @@
 			 *
 			 *  \ingroup Group_PipeControlReq
 			 *
-			 *  \param BufferPtr  Pointer to the start of the data buffer if the request has a data stage, or
-			 *                    NULL if the request transfers no data to or from the device.
+			 *  \param[in] BufferPtr  Pointer to the start of the data buffer if the request has a data stage, or
+			 *                        NULL if the request transfers no data to or from the device.
 			 *
 			 *  \return A value from the \ref USB_Host_SendControlErrorCodes_t enum to indicate the result.
 			 */
@@ -90,7 +90,7 @@
 	
 		/* Function Prototypes: */
 			#if defined(INCLUDE_FROM_HOSTCHAPTER9_C)
-				static uint8_t USB_Host_Wait_For_Setup_IOS(const uint8_t WaitType);
+				static uint8_t USB_Host_WaitForIOS(const uint8_t WaitType);
 			#endif
 	#endif
 

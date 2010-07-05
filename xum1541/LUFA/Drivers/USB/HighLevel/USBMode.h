@@ -28,26 +28,79 @@
   this software.
 */
 
+/** \ingroup Group_USB
+ *  @defgroup Group_USBMode USB Mode Tokens
+ *
+ *  After the inclusion of the master USB driver header, one or more of the following
+ *  tokens may be defined, to allow the user code to conditionally enable or disable
+ *  code based on the USB controller family and allowable USB modes. These tokens may
+ *  be tested against to eliminate code relating to a USB mode which is not enabled for
+ *  the given compilation.
+ *
+ *  @{
+ */
+
 #ifndef __USBMODE_H__
 #define __USBMODE_H__
 
-	/* Private Interface - For use in library only: */
-	#if !defined(__DOXYGEN__)
-		/* Macros: */
-			#if ((defined(__AVR_AT90USB1286__) || defined(__AVR_AT90USB646__) ||   \
-			      defined(__AVR_AT90USB162__)  || defined(__AVR_AT90USB82__)  ||   \
-				  defined(__AVR_ATmega16U4__)  || defined(__AVR_ATmega32U4__) ||   \
-				  defined(__AVR_ATmega32U6__)) && !defined(USB_DEVICE_ONLY))
-				#define USB_DEVICE_ONLY
-			#endif
-			
-			#if (defined(__AVR_AT90USB162__)  || defined(__AVR_AT90USB82__))
-				#define USB_LIMITED_CONTROLLER
+	/* Public Interface - May be used in end-application: */
+	#if defined(__DOXYGEN__)
+		/** Indicates that the target AVR microcontroller belongs to the Series 2 USB controller
+		 *  (i.e. AT90USBXXX2 or ATMEGAXXU2) when defined.
+		 */
+		#define USB_SERIES_2_AVR
+
+		/** Indicates that the target AVR microcontroller belongs to the Series 4 USB controller
+		 *  (i.e. ATMEGAXXU4) when defined.
+		 */
+		#define USB_SERIES_4_AVR
+
+		/** Indicates that the target AVR microcontroller belongs to the Series 6 USB controller
+		 *  (i.e. AT90USBXXX6) when defined.
+		 */
+		#define USB_SERIES_6_AVR
+
+		/** Indicates that the target AVR microcontroller belongs to the Series 7 USB controller
+		 *  (i.e. AT90USBXXX7) when defined.
+		 */
+		#define USB_SERIES_7_AVR
+
+		/** Indicates that the target AVR microcontroller and compilation settings allow for the
+		 *  target to be configured in USB Device mode when defined.
+		 */
+		#define USB_CAN_BE_DEVICE
+
+		/** Indicates that the target AVR microcontroller and compilation settings allow for the
+		 *  target to be configured in USB Host mode when defined.
+		 */
+		#define USB_CAN_BE_HOST
+
+		/** Indicates that the target AVR microcontroller and compilation settings allow for the
+		 *  target to be configured in either USB Device or Host mode when defined.
+		 */
+		#define USB_CAN_BE_BOTH
+	#else
+		/* Macros: */			
+			#if (defined(__AVR_AT90USB162__) || defined(__AVR_AT90USB82__)  || \
+			     defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__))
+				#define USB_SERIES_2_AVR
 			#elif (defined(__AVR_ATmega16U4__) || defined(__AVR_ATmega32U4__))
-				#define USB_MODIFIED_FULL_CONTROLLER
-			#else
-				#define USB_FULL_CONTROLLER
+				#define USB_SERIES_4_AVR
+			#elif (defined(__AVR_ATmega32U6__) || defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__))
+				#define USB_SERIES_6_AVR
+			#elif (defined(__AVR_AT90USB647__) || defined(__AVR_AT90USB1287__))
+				#define USB_SERIES_7_AVR
 			#endif			
+
+			#if !defined(USB_SERIES_7_AVR)		
+				#if defined(USB_HOST_ONLY)
+					#error USB_HOST_ONLY is not available for the currently selected USB AVR model.
+				#endif
+				
+				#if !defined(USB_DEVICE_ONLY)
+					#define USB_DEVICE_ONLY
+				#endif
+			#endif
 
 			#if (!defined(USB_DEVICE_ONLY) && !defined(USB_HOST_ONLY))
 				#define USB_CAN_BE_BOTH
@@ -55,23 +108,15 @@
 				#define USB_CAN_BE_DEVICE
 			#elif defined(USB_HOST_ONLY)
 				#define USB_CAN_BE_HOST
-				#define USB_CurrentMode USB_MODE_HOST
 			#elif defined(USB_DEVICE_ONLY)
 				#define USB_CAN_BE_DEVICE
-				#define USB_CurrentMode USB_MODE_DEVICE
 			#endif
 			
 			#if (defined(USB_HOST_ONLY) && defined(USB_DEVICE_ONLY))
 				#error USB_HOST_ONLY and USB_DEVICE_ONLY are mutually exclusive.
 			#endif
-
-			#if (defined(USE_RAM_DESCRIPTORS) && defined(USE_EEPROM_DESCRIPTORS))
-				#error USE_RAM_DESCRIPTORS and USE_EEPROM_DESCRIPTORS are mutually exclusive.
-			#endif
-
-			#if defined(USE_STATIC_OPTIONS)
-				#define USB_Options USE_STATIC_OPTIONS
-			#endif
 	#endif
 	
 #endif
+
+/** @} */

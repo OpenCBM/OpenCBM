@@ -30,7 +30,7 @@
 
 /** \file
  *
- *  Board specific Dataflash driver header for the STK525.
+ *  Board specific Dataflash driver header for the USBKEY.
  *
  *  \note This file should not be included directly. It is automatically included as needed by the dataflash driver
  *        dispatch header located in LUFA/Drivers/Board/Dataflash.h.
@@ -88,8 +88,8 @@
 			 *  the total number of pages contained in the boards dataflash ICs, all dataflash ICs
 			 *  are deselected.
 			 *
-			 *  \param PageAddress  Address of the page to manipulate, ranging from
-			 *                      ((DATAFLASH_PAGES * DATAFLASH_TOTALCHIPS) - 1).
+			 *  \param[in] PageAddress  Address of the page to manipulate, ranging from
+			 *                          ((DATAFLASH_PAGES * DATAFLASH_TOTALCHIPS) - 1).
 			 */
 			static inline void Dataflash_SelectChipFromPage(const uint16_t PageAddress)
 			{
@@ -107,8 +107,8 @@
 			/** Sends a set of page and buffer address bytes to the currently selected dataflash IC, for use with
 			 *  dataflash commands which require a complete 24-byte address.
 			 *
-			 *  \param PageAddress  Page address within the selected dataflash IC
-			 *  \param BufferByte   Address within the dataflash's buffer
+			 *  \param[in] PageAddress  Page address within the selected dataflash IC
+			 *  \param[in] BufferByte   Address within the dataflash's buffer
 			 */
 			static inline void Dataflash_SendAddressBytes(uint16_t PageAddress, const uint16_t BufferByte)
 			{	

@@ -56,13 +56,13 @@
 
 	/* Public Interface - May be used in end-application: */
 		/* Macros: */
-			/** Selects the USBKEY specific board drivers, including Dataflash, Joystick and LED drivers. */
+			/** Selects the USBKEY specific board drivers, including Temperature, Button, Dataflash, Joystick and LED drivers. */
 			#define BOARD_USBKEY        0
 
-			/** Selects the STK525 specific board drivers, including Dataflash, Joystick and LED drivers. */
+			/** Selects the STK525 specific board drivers, including Temperature, Button, Dataflash, Joystick and LED drivers. */
 			#define BOARD_STK525        1
 
-			/** Selects the STK526 specific board drivers, including Dataflash, Joystick and LED drivers. */
+			/** Selects the STK526 specific board drivers, including Temperature, Button, Dataflash, Joystick and LED drivers. */
 			#define BOARD_STK526        2
 
 			/** Selects the RZUSBSTICK specific board drivers, including the driver for the boards LEDs. */
@@ -77,6 +77,18 @@
 			 *  can correctly identify it.
 			 */
 			#define BOARD_USER          5
+
+			/** Selects the BUMBLEB specific board drivers, using the officially recommended peripheral layout. */
+			#define BOARD_BUMBLEB       6
+			
+			/** Selects the XPLAIN (Revision 2 or newer) specific board drivers, including LED and Dataflash driver. */
+			#define BOARD_XPLAIN        7
+
+			/** Selects the XPLAIN (Revision 1) specific board drivers, including LED and Dataflash driver. */
+			#define BOARD_XPLAIN_REV1   8
+
+			/** Selects the EVK527 specific board drivers, including Temperature, Button, Dataflash, Joystick and LED drivers. */
+			#define BOARD_EVK527        9
 
 #endif
 

@@ -48,7 +48,8 @@
  *    - None
  *
  *  \section Module Description
- *  Functions, macros, variables, enums and types related to the control of board joystick.
+ *  Hardware Joystick driver. This module provides an easy to use interface to control the hardware digital Joystick
+ *  located on many boards.
  *
  *  If the BOARD value is set to BOARD_USER, this will include the /Board/Dataflash.h file in the user project
  *  directory. Otherwise, it will include the appropriate built in board driver header file.
@@ -62,7 +63,6 @@
 	/* Macros: */
 	#if !defined(__DOXYGEN__)
 		#define INCLUDE_FROM_JOYSTICK_H
-		#define INCLUDE_FROM_BOARD_DRIVER
 	#endif
 
 	/* Includes: */
@@ -76,8 +76,12 @@
 		#include "STK525/Joystick.h"
 	#elif (BOARD == BOARD_STK526)
 		#include "STK526/Joystick.h"
+	#elif (BOARD == BOARD_BUMBLEB)
+		#include "BUMBLEB/Joystick.h"
+	#elif (BOARD == BOARD_EVK527)
+		#include "EVK527/Joystick.h"
 	#elif (BOARD == BOARD_USER)
-		#include "Board/Joystick.h"		
+		#include "Board/Joystick.h"
 	#else
 		#error The selected board does not contain a joystick.
 	#endif

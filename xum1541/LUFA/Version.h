@@ -41,9 +41,9 @@
 	/* Public Interface - May be used in end-application: */
 		/* Macros: */
 			/** Indicates the version number of the library, as an integer. */
-			#define LUFA_VERSION_INTEGER     090605
+			#define LUFA_VERSION_INTEGER     0x091223
 
 			/** Indicates the version number of the library, as a string. */
-			#define LUFA_VERSION_STRING      "090605"
+			#define LUFA_VERSION_STRING      "091223"
 
 #endif
