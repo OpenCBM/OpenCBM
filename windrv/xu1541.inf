@@ -125,6 +125,7 @@ ServiceBinary  = %12%\libusb0.sys
 "XUM1541 (AT90USBKey, initial)"        = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0500
 "XUM1541 (AT90USBKey, parallel burst)" = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0501
 "XUM1541 (AT90USBKey, new IOCTL)"      = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0502
+"XUM1541 USB floppy adapter"           = LIBUSB_DEV, USB\VID_16d0&PID_0504
 
 [Devices.NT]
 "OpenCBM USB (generic)"                = LIBUSB_DEV, USB\VID_0403&PID_c632
@@ -133,6 +134,7 @@ ServiceBinary  = %12%\libusb0.sys
 "XUM1541 (AT90USBKey, initial)"        = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0500
 "XUM1541 (AT90USBKey, parallel burst)" = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0501
 "XUM1541 (AT90USBKey, new IOCTL)"      = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0502
+"XUM1541 USB floppy adapter"           = LIBUSB_DEV, USB\VID_16d0&PID_0504
 
 [Devices.NTAMD64]
 "OpenCBM USB (generic)"                = LIBUSB_DEV, USB\VID_0403&PID_c632
@@ -141,6 +143,7 @@ ServiceBinary  = %12%\libusb0.sys
 "XUM1541 (AT90USBKey, initial)"        = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0500
 "XUM1541 (AT90USBKey, parallel burst)" = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0501
 "XUM1541 (AT90USBKey, new IOCTL)"      = LIBUSB_DEV, USB\VID_0403&PID_c632&REV_0502
+"XUM1541 USB floppy adapter"           = LIBUSB_DEV, USB\VID_16d0&PID_0504
 
 
 ;--------------------------------------------------------------------------
