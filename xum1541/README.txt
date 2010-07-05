@@ -235,7 +235,6 @@ Improvements:
 - Add SRQ nibbling support
 - Add IEEE-488 support
 - Upgrade WinAVR for builds
-- Fix .inf file for libusb with new VID/PID
 - Test various cable lengths and USB hubs to be sure it is reliable
 
 General opencbm issues not in xum1541 code:
