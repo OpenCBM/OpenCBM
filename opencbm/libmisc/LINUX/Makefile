@@ -1,11 +1,12 @@
-# $Id: Makefile,v 1.4 2010-02-21 09:47:37 strik Exp $
+# $Id: Makefile,v 1.5 2010-07-06 18:18:59 cnvogelg Exp $
 
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
 
 .PHONY: all clean mrproper install uninstall install-files
 
-CFLAGS += -I../include -I./
+CFLAGS += -I../include -I./ $(LIBUSB_CFLAGS)
+LDFLAGS += $(LIBUSB_LDFLAGS)
 
 LIB     = libmisc.a
 SRCS    = libstring.c configuration.c LINUX/getpluginaddress.c LINUX/dynlibusb.c
