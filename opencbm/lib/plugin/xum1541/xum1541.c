@@ -15,7 +15,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.8 2010-07-05 20:25:42 natelawson Exp $ \n
+** \version $Id: xum1541.c,v 1.9 2010-07-08 03:03:51 natelawson Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -465,6 +465,8 @@ xum1541_write(__u_char modeFlags, const __u_char *data, size_t size)
     bytesWritten = 0;
     while (bytesWritten < size) {
         bytes2write = size - bytesWritten;
+        if (bytes2write > XUM_MAX_XFER_SIZE)
+            bytes2write = XUM_MAX_XFER_SIZE;
         wr = usb.bulk_write(xum1541_handle,
             XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
             (char *)data, bytes2write, LIBUSB_NO_TIMEOUT);
@@ -545,6 +547,8 @@ xum1541_read(__u_char mode, __u_char *data, size_t size)
     bytesRead = 0;
     while (bytesRead < size) {
         bytes2read = size - bytesRead;
+        if (bytes2read > XUM_MAX_XFER_SIZE)
+            bytes2read = XUM_MAX_XFER_SIZE;
         rd = usb.bulk_read(xum1541_handle,
             XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN,
             (char *)data, bytes2read, LIBUSB_NO_TIMEOUT);

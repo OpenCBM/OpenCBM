@@ -61,6 +61,14 @@
 #define XUM1541_WRITE               (XUM1541_READ + 1)
 
 /*
+ * Maximum size for USB transfers (read/write commands, all protocols).
+ * This should be ok for the raw USB protocol. I haven't tested this much
+ * but at least 8192 works (e.g. for nib protocol reads. For longer
+ * transfers, the usermode code should break it up into chunks this size.
+ */
+#define XUM_MAX_XFER_SIZE           32768
+
+/*
  * Individual control commands. Those that can take a while and thus
  * report async status are marked with "async".
  */
