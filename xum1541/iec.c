@@ -477,5 +477,10 @@ xu1541_poll(void)
 void
 xu1541_setrelease(uint8_t set, uint8_t release)
 {
-    iec_set_release(iec2hw(set), iec2hw(release));
+    if (release == 0)
+        iec_set(iec2hw(set));
+    else if (set == 0)
+        iec_release(iec2hw(release));
+    else
+        iec_set_release(iec2hw(set), iec2hw(release));
 }
