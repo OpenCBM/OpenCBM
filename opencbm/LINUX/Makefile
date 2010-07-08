@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.22 2010-01-17 16:21:36 strik Exp $
+# $Id: Makefile,v 1.23 2010-07-08 20:15:48 cnvogelg Exp $
 
 RELATIVEPATH=./
 include ${RELATIVEPATH}LINUX/config.make
@@ -127,17 +127,17 @@ install-doc: install-files-doc install
 	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
 	done
 
-plugin-xu1541:
+plugin-xu1541: opencbm
 	@for subdir in $(SUBDIRS_PLUGIN_XU1541); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile || exit 1; \
 	done
 
-plugin-xum1541:
+plugin-xum1541: opencbm
 	@for subdir in $(SUBDIRS_PLUGIN_XUM1541); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile || exit 1; \
 	done
 
-plugin-xa1541:
+plugin-xa1541: opencbm
 	@for subdir in $(SUBDIRS_PLUGIN_XA1541); do \
 	  $(MAKE) -C $$subdir -f LINUX/Makefile || exit 1; \
 	done
