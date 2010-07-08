@@ -91,7 +91,7 @@ build the firmware. To enable the debug build, uncomment the appropriate
 line in the Makefile. If the build fails, check your path to be sure
 the AVR bin directory is present.
 
-Currently I am building releases using WinAVR-20080610. The LUFA version
+Currently I am building releases using WinAVR-20100110. The LUFA version
 included in this distribution is 091223.
 
 
@@ -235,6 +235,9 @@ Improvements:
 - Add SRQ nibbling support
 - Add IEEE-488 support
 - Test various cable lengths and USB hubs to be sure it is reliable
+- Heavy system activity can sometimes disrupt transfers, especially timing
+  sensitive operations like nibbling. Make the firmware more resistant to
+  intermittent hangs.
 
 General opencbm issues not in xum1541 code:
 - cbmcopy only does byte at a time, does not use read_n() API from plugin.
