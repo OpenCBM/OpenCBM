@@ -96,9 +96,11 @@ iec_set_release(uint8_t s, uint8_t r)
 uint8_t
 iec_get(uint8_t line)
 {
-    return ((((PIND & IO_SRQ_IN) >> 1) |
-             ((PIND & IO_CLK_IN) >> 1) |
-             ((PIND & IO_DATA_IN) << 1)) & line) == 0 ? 1 : 0;
+    return ((((PIND & IO_SRQ_IN)  >> 1) |
+             ((PIND & IO_CLK_IN)  >> 1) |
+             ((PIND & IO_DATA_IN) << 1) |
+             ((PINC & IO_ATN_IN)  << 1) |
+             ((PINC & IO_RESET_IN) >> 1)) & line) == 0 ? 1 : 0;
 }
 
 uint8_t
@@ -106,7 +108,9 @@ iec_poll(void)
 {
     return ((PIND & IO_SRQ_IN)  >> 1) |
            ((PIND & IO_CLK_IN)  >> 1) |
-           ((PIND & IO_DATA_IN) << 1);
+           ((PIND & IO_DATA_IN) << 1) |
+           ((PINC & IO_ATN_IN)  << 1) |
+           ((PINC & IO_RESET_IN) >> 1);
 }
 
 // Make 8-bit port all inputs and read value
