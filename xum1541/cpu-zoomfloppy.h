@@ -14,9 +14,6 @@
 static inline void
 cpu_init(void)
 {
-    // Disable clock division.
-    clock_prescale_set(clock_div_1);
-
     // Enable watchdog timer and set for 1 second.
     wdt_enable(WDTO_1S);
 }
