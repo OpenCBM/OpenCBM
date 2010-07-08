@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: s1.c,v 1.14 2010-01-30 21:33:18 strik Exp $";
+    "@(#) $Id: s1.c,v 1.15 2010-07-08 02:57:13 natelawson Exp $";
 #endif
 
 #include "opencbm.h"
@@ -217,9 +217,9 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
     fd_cbm = fd;
     two_sided = settings->two_sided;
 
-    opencbm_plugin_s1_read_n = cbm_get_plugin_function_address("openopencbm_plugin_s1_read_n");
+    opencbm_plugin_s1_read_n = cbm_get_plugin_function_address("opencbm_plugin_s1_read_n");
 
-    opencbm_plugin_s1_write_n = cbm_get_plugin_function_address("openopencbm_plugin_s1_write_n");
+    opencbm_plugin_s1_write_n = cbm_get_plugin_function_address("opencbm_plugin_s1_write_n");
 
                                                                         SETSTATEDEBUG((void)0);
     cbm_upload(fd_cbm, d, 0x700, s1_drive_prog, sizeof(s1_drive_prog));
