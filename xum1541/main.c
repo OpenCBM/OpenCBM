@@ -185,8 +185,8 @@ USB_BulkWorker()
         return false;
     }
 
-    // Allow commands to only set the low 8-bits of the extended status
-    statusBuf[2] = 0;
+    // Allow commands to leave the extended status untouched
+    memset(statusBuf, 0, sizeof(statusBuf));
 
     /*
      * Decode and process the command. 
