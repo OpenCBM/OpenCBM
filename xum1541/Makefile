@@ -15,7 +15,7 @@
 # USBKEY: Atmel USB key development board with 8 MHz AT90USB1287 cpu
 # ZOOMFLOPPY: commercial board with 16 MHz ATMEGA32U2 cpu
 # BUMBLEB: Bumble-B with 16 MHz AT90USB162 cpu and IEC daughtercard
-MODELS= USBKEY BUMBLEB
+MODELS= USBKEY ZOOMFLOPPY BUMBLEB
 .PHONY: $(MODELS)
 
 # Enable to get debug printing via the UART (port D)

@@ -234,7 +234,6 @@ Improvements:
 - Add utility to enter DFU mode (sw upgrade)
 - Add SRQ nibbling support
 - Add IEEE-488 support
-- Upgrade WinAVR for builds
 - Test various cable lengths and USB hubs to be sure it is reliable
 
 General opencbm issues not in xum1541 code:
