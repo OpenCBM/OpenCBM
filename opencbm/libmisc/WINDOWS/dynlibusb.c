@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file libmisc/WINDOWS/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dynlibusb.c,v 1.1 2010-02-20 20:50:38 strik Exp $ \n
+** \version $Id: dynlibusb.c,v 1.2 2010-07-08 19:13:06 cnvogelg Exp $ \n
 ** \n
 ** \brief Allow for libusb (0.1) to be loaded dynamically
 **        (Currently, this is used on Windows only)
@@ -62,7 +62,7 @@ int dynlibusb_init(void) {
         READ(release_interface);
 //        READ(set_altinterface);
 //        READ(resetep);
-//        READ(clear_halt);
+        READ(clear_halt);
 //        READ(reset);
         READ(strerror);
         READ(init);

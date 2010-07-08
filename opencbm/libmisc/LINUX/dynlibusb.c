@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file libmisc/LINUX/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dynlibusb.c,v 1.2 2010-06-10 19:53:27 strik Exp $ \n
+** \version $Id: dynlibusb.c,v 1.3 2010-07-08 19:13:06 cnvogelg Exp $ \n
 ** \n
 ** \brief Allow for libusb (0.1) to be loaded dynamically
 **        (Currently, this is used on Windows only)
@@ -30,9 +30,21 @@
 #include "getpluginaddress.h"
 
 usb_dll_t usb = {
-    NULL,
-    usb_open, usb_close, usb_bulk_write, usb_bulk_read, usb_control_msg, usb_set_configuration, usb_claim_interface, usb_release_interface,
-    usb_strerror, usb_init, usb_find_busses, usb_find_devices, usb_get_busses
+    .shared_object_handle = NULL,
+    .open = usb_open, 
+    .close = usb_close, 
+    .bulk_write = usb_bulk_write,
+    .bulk_read = usb_bulk_read,
+    .control_msg = usb_control_msg,
+    .set_configuration = usb_set_configuration,
+    .claim_interface = usb_claim_interface,
+    .release_interface = usb_release_interface,
+    .clear_halt = usb_clear_halt,
+    .strerror = usb_strerror, 
+    .init = usb_init, 
+    .find_busses = usb_find_busses, 
+    .find_devices = usb_find_devices, 
+    .get_busses = usb_get_busses
 };
 
 int dynlibusb_init(void) {

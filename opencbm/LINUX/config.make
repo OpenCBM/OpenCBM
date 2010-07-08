@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.28 2010-05-13 22:11:22 fbriere Exp $
+# $Id: config.make,v 1.29 2010-07-08 19:13:06 cnvogelg Exp $
 #
 
 # get package version (major.minor.release).
@@ -43,8 +43,8 @@ UDEV_RULES  = /etc/udev/rules.d/
 #
 # Where to find the xu1541 firmware
 #
-XU1541DIR   = $(RELATIVEPATH)/../xu1541
-XUM1541DIR  = $(RELATIVEPATH)/../xum1541
+XU1541DIR   = $(RELATIVEPATH)/xu1541
+XUM1541DIR  = $(RELATIVEPATH)/xum1541
 
 #
 # Where to find libusb (libusb.sf.net)
