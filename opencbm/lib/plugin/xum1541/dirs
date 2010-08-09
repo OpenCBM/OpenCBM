@@ -1,1 +1,4 @@
-DIRS=WINDOWS
+DIRS= \
+	WINDOWS \
+	WINDOWS-usbcfg
+

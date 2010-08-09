@@ -25,13 +25,15 @@
 // libusb value for "wait forever"
 #define LIBUSB_NO_TIMEOUT   -1
 
-int xum1541_init(void);
-void xum1541_close(void);
-int xum1541_control_msg(unsigned int cmd);
-int xum1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr);
+typedef usb_dev_handle *XUM1541_HANDLE;
+
+int xum1541_init(XUM1541_HANDLE *HandleXum1541);
+void xum1541_close(XUM1541_HANDLE *HandleXum1541);
+int xum1541_control_msg(XUM1541_HANDLE HandleXum1541, unsigned int cmd);
+int xum1541_ioctl(XUM1541_HANDLE HandleXum1541, unsigned int cmd, unsigned int addr, unsigned int secaddr);
 
 // Read/write data in normal CBM and speeder protocol modes
-int xum1541_write(__u_char mode, const __u_char *data, size_t size);
-int xum1541_read(__u_char mode, __u_char *data, size_t size);
+int xum1541_write(XUM1541_HANDLE HandleXum1541, __u_char mode, const __u_char *data, size_t size);
+int xum1541_read(XUM1541_HANDLE HandleXum1541, __u_char mode, __u_char *data, size_t size);
 
 #endif // XUM1541_H

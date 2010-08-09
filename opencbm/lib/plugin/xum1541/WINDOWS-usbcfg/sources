@@ -1,0 +1,19 @@
+TARGETNAME=xum1541cfg
+TARGETPATH=../../../../bin
+TARGETTYPE=PROGRAM
+
+TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
+           $(SDK_LIB_PATH)/user32.lib   \
+           $(SDK_LIB_PATH)/advapi32.lib \
+           ../../../../bin/*/libmisc.lib\
+           ../../../../bin/*/arch.lib
+
+INCLUDES=../../../../libmisc/WINDOWS;../;../../../../include;../../../../include/WINDOWS;../../..;../../../../arch/windows;../../../../libmisc;$(XUM1541DIR)
+
+SOURCES=../usbcfg.c \
+        $(TARGETNAME).rc
+
+UMTYPE=console
+#UMBASE=0x100000
+
+USE_MSVCRT=1

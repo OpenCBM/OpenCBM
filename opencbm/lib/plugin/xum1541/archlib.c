@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.4 2010-07-05 20:25:42 natelawson Exp $ \n
+** \version $Id: archlib.c,v 1.5 2010-08-09 19:35:34 wmsr Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -98,7 +98,8 @@ opencbm_plugin_get_driver_name(int PortNumber)
 int CBMAPIDECL
 opencbm_plugin_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 {
-    return xum1541_init();
+    *HandleDevice = NULL;
+    return xum1541_init((XUM1541_HANDLE *)HandleDevice);
 }
 
 /*! \brief Closes the driver
@@ -118,7 +119,7 @@ opencbm_plugin_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 void CBMAPIDECL
 opencbm_plugin_driver_close(CBM_FILE HandleDevice)
 {
-    xum1541_close();
+    xum1541_close((XUM1541_HANDLE *)&HandleDevice);
 }
 
 
@@ -200,7 +201,7 @@ opencbm_plugin_unlock(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
-    return xum1541_write(XUM1541_CBM, Buffer, Count);
+    return xum1541_write(HandleDevice, XUM1541_CBM, Buffer, Count);
 }
 
 /*! \brief Read data from the IEC serial bus
@@ -229,7 +230,7 @@ opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count
 int CBMAPIDECL
 opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
-    return xum1541_read(XUM1541_CBM, Buffer, Count);
+    return xum1541_read(HandleDevice, XUM1541_CBM, Buffer, Count);
 }
 
 
@@ -265,7 +266,7 @@ opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Se
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x20 | DeviceAddress;
     dataBuf[1] = 0x60 | SecondaryAddress;
-    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
+    return !xum1541_write(HandleDevice, proto, dataBuf, sizeof(dataBuf));
 }
 
 /*! \brief Send a TALK on the IEC serial bus
@@ -299,7 +300,7 @@ opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Seco
     proto = XUM1541_CBM | XUM_WRITE_ATN | XUM_WRITE_TALK;
     dataBuf[0] = 0x40 | DeviceAddress;
     dataBuf[1] = 0x60 | SecondaryAddress;
-    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
+    return !xum1541_write(HandleDevice, proto, dataBuf, sizeof(dataBuf));
 }
 
 /*! \brief Open a file on the IEC serial bus
@@ -331,7 +332,7 @@ opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Seco
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x20 | DeviceAddress;
     dataBuf[1] = 0xf0 | SecondaryAddress;
-    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
+    return !xum1541_write(HandleDevice, proto, dataBuf, sizeof(dataBuf));
 }
 
 /*! \brief Close a file on the IEC serial bus
@@ -363,7 +364,7 @@ opencbm_plugin_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Sec
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x20 | DeviceAddress;
     dataBuf[1] = 0xe0 | SecondaryAddress;
-    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
+    return !xum1541_write(HandleDevice, proto, dataBuf, sizeof(dataBuf));
 }
 
 /*! \brief Send an UNLISTEN on the IEC serial bus
@@ -393,7 +394,7 @@ opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x3f;
-    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
+    return !xum1541_write(HandleDevice, proto, dataBuf, sizeof(dataBuf));
 }
 
 /*! \brief Send an UNTALK on the IEC serial bus
@@ -423,7 +424,7 @@ opencbm_plugin_untalk(CBM_FILE HandleDevice)
 
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x5f;
-    return !xum1541_write(proto, dataBuf, sizeof(dataBuf));
+    return !xum1541_write(HandleDevice, proto, dataBuf, sizeof(dataBuf));
 }
 
 
@@ -450,7 +451,7 @@ opencbm_plugin_untalk(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_get_eoi(CBM_FILE HandleDevice)
 {
-    return xum1541_ioctl(XUM1541_GET_EOI, 0, 0);
+    return xum1541_ioctl(HandleDevice, XUM1541_GET_EOI, 0, 0);
 }
 
 /*! \brief Reset the EOI flag
@@ -471,7 +472,7 @@ opencbm_plugin_get_eoi(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_clear_eoi(CBM_FILE HandleDevice)
 {
-    return xum1541_ioctl(XUM1541_CLEAR_EOI, 0, 0);
+    return xum1541_ioctl(HandleDevice, XUM1541_CLEAR_EOI, 0, 0);
 }
 
 /*! \brief RESET all devices
@@ -498,7 +499,7 @@ opencbm_plugin_clear_eoi(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_reset(CBM_FILE HandleDevice)
 {
-    return xum1541_control_msg(XUM1541_RESET);
+    return xum1541_control_msg(HandleDevice, XUM1541_RESET);
 }
 
 
@@ -529,7 +530,7 @@ opencbm_plugin_reset(CBM_FILE HandleDevice)
 __u_char CBMAPIDECL
 opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 {
-    return (__u_char) xum1541_ioctl(XUM1541_PP_READ, 0, 0);
+    return (__u_char) xum1541_ioctl(HandleDevice, XUM1541_PP_READ, 0, 0);
 }
 
 /*! \brief Write a byte to a XP1541/XP1571 cable
@@ -558,7 +559,7 @@ opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 void CBMAPIDECL
 opencbm_plugin_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 {
-    xum1541_ioctl(XUM1541_PP_WRITE, Byte, 0);
+    xum1541_ioctl(HandleDevice, XUM1541_PP_WRITE, Byte, 0);
 }
 
 /*! \brief Read status of all bus lines.
@@ -585,7 +586,7 @@ opencbm_plugin_pp_write(CBM_FILE HandleDevice, __u_char Byte)
 int CBMAPIDECL
 opencbm_plugin_iec_poll(CBM_FILE HandleDevice)
 {
-    return xum1541_ioctl(XUM1541_IEC_POLL, 0, 0);
+    return xum1541_ioctl(HandleDevice, XUM1541_IEC_POLL, 0, 0);
 }
 
 
@@ -610,7 +611,7 @@ opencbm_plugin_iec_poll(CBM_FILE HandleDevice)
 void CBMAPIDECL
 opencbm_plugin_iec_set(CBM_FILE HandleDevice, int Line)
 {
-    xum1541_ioctl(XUM1541_IEC_SETRELEASE, Line, 0);
+    xum1541_ioctl(HandleDevice, XUM1541_IEC_SETRELEASE, Line, 0);
 }
 
 /*! \brief Deactivate a line on the IEC serial bus
@@ -634,7 +635,7 @@ opencbm_plugin_iec_set(CBM_FILE HandleDevice, int Line)
 void CBMAPIDECL
 opencbm_plugin_iec_release(CBM_FILE HandleDevice, int Line)
 {
-    xum1541_ioctl(XUM1541_IEC_SETRELEASE, 0, Line);
+    xum1541_ioctl(HandleDevice, XUM1541_IEC_SETRELEASE, 0, Line);
 }
 
 /*! \brief Activate and deactive a line on the IEC serial bus
@@ -667,7 +668,7 @@ opencbm_plugin_iec_release(CBM_FILE HandleDevice, int Line)
 void CBMAPIDECL
 opencbm_plugin_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
-    xum1541_ioctl(XUM1541_IEC_SETRELEASE, Set, Release);
+    xum1541_ioctl(HandleDevice, XUM1541_IEC_SETRELEASE, Set, Release);
 }
 
 /*! \brief Wait for a line to have a specific state
@@ -699,5 +700,5 @@ opencbm_plugin_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 int CBMAPIDECL
 opencbm_plugin_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
-    return xum1541_ioctl(XUM1541_IEC_WAIT, Line, State);
+    return xum1541_ioctl(HandleDevice, XUM1541_IEC_WAIT, Line, State);
 }
