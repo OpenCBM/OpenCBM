@@ -15,7 +15,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.10 2010-08-09 19:35:34 wmsr Exp $ \n
+** \version $Id: xum1541.c,v 1.11 2010-08-09 19:50:19 strik Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -540,10 +540,9 @@ xum1541_write(XUM1541_HANDLE HandleXum1541, __u_char modeFlags, const __u_char *
 int
 xum1541_read(XUM1541_HANDLE HandleXum1541, __u_char mode, __u_char *data, size_t size)
 {
-    int rd, ret;
+    int rd;
     size_t bytesRead, bytes2read;
     unsigned char cmdBuf[XUM_CMDBUF_SIZE];
-    unsigned char statusBuf[XUM_STATUSBUF_SIZE];
 
     xum1541_dbg(1, "read %d %d bytes to address %p",
                mode, size, data);
