@@ -11,6 +11,7 @@ TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
 INCLUDES=../../../../libmisc/WINDOWS;../;../../../../include;../../../../include/WINDOWS;../../..;../../../../arch/windows;../../../../libmisc;$(XUM1541DIR)
 
 SOURCES=../usbcfg.c \
+        ../xum1541.c \
         $(TARGETNAME).rc
 
 UMTYPE=console
