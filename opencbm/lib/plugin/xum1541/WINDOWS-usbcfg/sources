@@ -5,13 +5,13 @@ TARGETTYPE=PROGRAM
 TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib \
+           ../../../../bin/*/opencbm-xum1541.lib \
            ../../../../bin/*/libmisc.lib\
            ../../../../bin/*/arch.lib
 
 INCLUDES=../../../../libmisc/WINDOWS;../;../../../../include;../../../../include/WINDOWS;../../..;../../../../arch/windows;../../../../libmisc;$(XUM1541DIR)
 
 SOURCES=../usbcfg.c \
-        ../xum1541.c \
         $(TARGETNAME).rc
 
 UMTYPE=console

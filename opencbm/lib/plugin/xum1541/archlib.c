@@ -9,13 +9,14 @@
  *  Copyright 2009-2010 Nate Lawson
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005, 2007, 2010 Spiro Trikaliotis
+ *  Copyright 2010 Wolfgang Moser
  *
 */
 
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.5 2010-08-09 19:35:34 wmsr Exp $ \n
+** \version $Id: archlib.c,v 1.6 2010-08-10 21:50:18 wmsr Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -44,8 +45,7 @@
 
 //! mark: We are building the DLL */
 #define OPENCBM_PLUGIN
-//#include "i_opencbm.h"
-#include "archlib.h"
+#include "archlib_ex.h"
 
 #include "xum1541.h"
 
@@ -701,4 +701,24 @@ int CBMAPIDECL
 opencbm_plugin_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
     return xum1541_ioctl(HandleDevice, XUM1541_IEC_WAIT, Line, State);
+}
+
+/*! \brief Sends a command to the xum1541 device
+
+ This function sends a control message respectively a command to the xum1541 device.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param cmd
+   The command to run at the xum1541 device.
+
+ \return
+   Returns the value the USB device sent back.
+*/
+
+int CBMAPIDECL
+xum1541_plugin_control_msg(CBM_FILE HandleDevice, unsigned int cmd)
+{
+    return xum1541_control_msg(HandleDevice, cmd);
 }

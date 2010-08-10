@@ -1,6 +1,7 @@
 /*
  * USB configuration application for the xum1541
  * Copyright 2010 Nate Lawson <nate@root.org>
+ * Copyright 2010 Wolfgang Moser
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -11,7 +12,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/usbcfg.c \n
 ** \author Nate Lawson \n
-** \version $Id: usbcfg.c,v 1.2 2010-08-09 19:35:34 wmsr Exp $ \n
+** \version $Id: usbcfg.c,v 1.3 2010-08-10 21:50:18 wmsr Exp $ \n
 ** \n
 ** \brief USB configuration application for the xum1541
 ****************************************************************/
@@ -24,8 +25,9 @@
 #include "opencbm.h"
 
 #include "arch.h"
-#include "dynlibusb.h"
-#include "xum1541.h"
+#include "archlib_ex.h"
+#include "xum1541_types.h"
+
 
 /*! \brief Initialize the xum1541 device
   This function tries to find and identify the xum1541 device.
@@ -37,25 +39,23 @@ int ARCH_MAINDECL
 main(int argc, char **argv)
 {
     int ret;
-    XUM1541_HANDLE HandleXum1541 = NULL;
+    CBM_FILE HandleXum1541 = NULL;
 
-    ret = dynlibusb_init();
+    ret = opencbm_plugin_init();
     if (ret == 0) {
-        ret = xum1541_init(&HandleXum1541);
+    	ret = opencbm_plugin_driver_open(&HandleXum1541, 0);
     }
     if (ret != 0) {
         fprintf(stderr, "initialization error, aborting\n");
         exit(1);
     }
-
-    if (xum1541_control_msg(HandleXum1541, XUM1541_ENTER_BOOTLOADER) == 0) {
+    if (xum1541_plugin_control_msg(HandleXum1541, XUM1541_ENTER_BOOTLOADER) == 0) {
         fprintf(stderr, "Success. xum1541 now in bootloader mode.\n");
         fprintf(stderr, "Run your firmware update program now.\n");
     } else {
         fprintf(stderr, "error entering bootloader mode, aborting\n");
     }
-
-    xum1541_close(&HandleXum1541);
-    dynlibusb_uninit();
+    opencbm_plugin_driver_close(HandleXum1541);
+    opencbm_plugin_uninit();
     exit(0);
 }
