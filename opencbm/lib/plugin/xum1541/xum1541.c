@@ -15,7 +15,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.11 2010-08-09 19:50:19 strik Exp $ \n
+** \version $Id: xum1541.c,v 1.12 2010-08-10 19:28:49 wmsr Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -33,8 +33,6 @@
 #include "xum1541.h"
 
 static int debug_level = -1; /*!< \internal \brief the debugging level for debugging output */
-/* not static anymore
-static usb_dev_handle *xum1541_handle = NULL; /*!< \internal \brief handle to the xum1541 device */
 
 /*! \internal \brief Output debugging information for the xum1541
 
