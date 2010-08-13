@@ -15,7 +15,8 @@
 # USBKEY: Atmel USB key development board with 8 MHz AT90USB1287 cpu
 # ZOOMFLOPPY: commercial board with 16 MHz ATMEGA32U2 cpu
 # BUMBLEB: Bumble-B with 16 MHz AT90USB162 cpu and IEC daughtercard
-MODELS= USBKEY ZOOMFLOPPY BUMBLEB
+# OLIMEX: Olimex dev board with 8 MHz AT90USB162 cpu and IEC daughtercard
+MODELS= USBKEY ZOOMFLOPPY BUMBLEB OLIMEX
 .PHONY: $(MODELS)
 
 # Enable to get debug printing via the UART (port D)
@@ -48,6 +49,11 @@ BOARD_OBJS=	board-zoomfloppy.o
 else ifeq ($(MODEL),BUMBLEB)
 CPUMODEL=	at90usb162
 CPURATE=	16000000
+BOARD=		BOARD_ZOOMFLOPPY
+BOARD_OBJS=	board-zoomfloppy.o
+else ifeq ($(MODEL),OLIMEX)
+CPUMODEL=	at90usb162
+CPURATE=	8000000
 BOARD=		BOARD_ZOOMFLOPPY
 BOARD_OBJS=	board-zoomfloppy.o
 endif

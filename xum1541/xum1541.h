@@ -26,12 +26,16 @@
 #define USBKEY                  0
 #define BUMBLEB                 1
 #define ZOOMFLOPPY              2
+#define OLIMEX                  3
 
 #if MODEL == USBKEY
 #include "cpu-usbkey.h"
 #include "board-usbkey.h"
 #elif MODEL == BUMBLEB
 #include "cpu-bumbleb.h"
+#include "board-zoomfloppy.h"
+#elif MODEL == OLIMEX
+#include "cpu-zoomfloppy.h"
 #include "board-zoomfloppy.h"
 #elif MODEL == ZOOMFLOPPY
 #include "cpu-zoomfloppy.h"

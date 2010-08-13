@@ -20,23 +20,36 @@ volatile bool doDeviceReset;
 // Flag for whether we are in EOI state
 volatile uint8_t eoi;
 
-// Are we in a connected state? If so, run the command loop.
+// Are we in an active state? If so, run the command loop.
 static volatile bool device_running;
+
+// Is the USB bus connected? If so, wait to enter active state.
+static volatile bool usb_connected;
 
 static bool USB_BulkWorker(void);
 
 int
 main(void)
 {
-
-    doDeviceReset = false;
-    device_running = false;
-
-    // Setup the CPU and board-specific configuration, USB ports
+    /*
+     * Setup the CPU and USB configuration. Wait after power-on for VBUS.
+     * This is to handle the case where we are being powered from the
+     * IEC bus through the IOs without a USB connection. Nate analyzed the
+     * time we run until brownout here and it defaults to 65 ms due to the
+     * CKSEL/SUT fuse.
+     *
+     * Instead of just a delay, we can wait for VBUS to be active and then
+     * be sure USB is connected. This works even when we can't use the
+     * brown-out detector. On the USBKEY, the BOD can only be 2.6V or 3.4V
+     * but it runs at 3.3V.
+     */
     cpu_init();
-    board_init();
+    USB_Init();
+    while (!usb_connected)
+        wdt_reset();
 
     // Indicate device not ready and try to reset the drive
+    board_init();
     board_set_status(STATUS_INIT);
     cbm_init();
     cbm_reset();
@@ -45,7 +58,6 @@ main(void)
      * Process bulk transactions as they appear. Control requests are
      * handled separately via IRQs.
      */
-    USB_Init();
     for (;;) {
         wdt_reset();
 
@@ -62,6 +74,10 @@ main(void)
         }
 
         // TODO: save power here when device is not running
+
+        // Wait for device to be reconnected to USB
+        while (!usb_connected)
+            wdt_reset();
     }
 }
 
@@ -71,6 +87,7 @@ EVENT_USB_Device_Connect(void)
     DEBUGF(DBG_ALL, "usbcon\n");
     board_set_status(STATUS_CONNECTING);
     doDeviceReset = false;
+    usb_connected = true;
 }
 
 void
@@ -79,6 +96,7 @@ EVENT_USB_Device_Disconnect(void)
     DEBUGF(DBG_ALL, "usbdiscon\n");
 
     // Halt the main() command loop and indicate we are not configured
+    usb_connected = false;
     device_running = false;
     board_set_status(STATUS_INIT);
 }
