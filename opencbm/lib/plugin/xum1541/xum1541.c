@@ -15,7 +15,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.13 2010-08-14 22:25:57 wmsr Exp $ \n
+** \version $Id: xum1541.c,v 1.14 2010-08-14 23:01:09 wmsr Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -197,7 +197,7 @@ xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber)
                 dev->filename);
 
             // First, find our vendor and product id
-            if (dev->descriptor.idVendor != XUM1541_VID &&
+            if (dev->descriptor.idVendor != XUM1541_VID ||
                 dev->descriptor.idProduct != XUM1541_PID)
                 continue;
 
