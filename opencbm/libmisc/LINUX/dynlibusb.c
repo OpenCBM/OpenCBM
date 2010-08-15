@@ -11,7 +11,7 @@
 /*! ************************************************************** 
 ** \file libmisc/LINUX/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dynlibusb.c,v 1.3 2010-07-08 19:13:06 cnvogelg Exp $ \n
+** \version $Id: dynlibusb.c,v 1.4 2010-08-15 09:01:54 wmsr Exp $ \n
 ** \n
 ** \brief Allow for libusb (0.1) to be loaded dynamically
 **        (Currently, this is used on Windows only)
@@ -44,6 +44,7 @@ usb_dll_t usb = {
     .init = usb_init, 
     .find_busses = usb_find_busses, 
     .find_devices = usb_find_devices, 
+    .device = usb_device,
     .get_busses = usb_get_busses
 };
 
