@@ -5,7 +5,7 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999 Michael Klein <michael.klein@puffin.lb.shuttle.de>
-*/
+ */
 
 /*
  * patched version: Wolfgang Moser, 20050508-19:24
@@ -13,7 +13,7 @@
  
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: frm_analyzer.c,v 1.3 2007-05-28 14:25:46 wmsr Exp $";
+    "@(#) $Id: frm_analyzer.c,v 1.4 2010-08-15 08:06:57 wmsr Exp $";
 #endif
 
 #include "opencbm.h"

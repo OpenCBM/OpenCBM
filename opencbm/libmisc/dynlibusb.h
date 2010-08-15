@@ -11,7 +11,7 @@
 /*! **************************************************************
 ** \file libmisc/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dynlibusb.h,v 1.4 2010-07-08 19:13:06 cnvogelg Exp $ \n
+** \version $Id: dynlibusb.h,v 1.5 2010-08-15 08:06:57 wmsr Exp $ \n
 ** \n
 ** \brief Allow for libusb (0.1) to be loaded dynamically
 **        (Currently, this is used on Windows only)
@@ -65,7 +65,7 @@ struct usb_dll_s {
 //    void (LIBUSB_APIDECL *set_debug)(int level);
     int (LIBUSB_APIDECL *find_busses)(void);
     int (LIBUSB_APIDECL *find_devices)(void);
-//    struct usb_device * (LIBUSB_APIDECL *device)(usb_dev_handle *dev);
+    struct usb_device * (LIBUSB_APIDECL *device)(usb_dev_handle *dev);
     struct usb_bus * (LIBUSB_APIDECL *get_busses)(void);
 
 } usb_dll_t;

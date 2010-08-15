@@ -15,7 +15,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.14 2010-08-14 23:01:09 wmsr Exp $ \n
+** \version $Id: xum1541.c,v 1.15 2010-08-15 08:06:57 wmsr Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -131,52 +131,16 @@ xum1541_cleanup(usb_dev_handle **HandleXum1541, char *msg, ...)
     *HandleXum1541 = NULL;
 }
 
-// Check for a firmware version compatible with this plugin
-static int
-xum1541_check_version(int version)
-{
-    xum1541_dbg(0, "firmware version %d, library version %d", version,
-        XUM1541_VERSION);
-    if (version < XUM1541_VERSION) {
-        fprintf(stderr, "xum1541 firmware version too low (%d < %d)\n",
-            version, XUM1541_VERSION);
-        fprintf(stderr, "please update your xum1541 firmware\n");
-        return -1;
-    } else if (version > XUM1541_VERSION) {
-        fprintf(stderr, "xum1541 firmware version too high (%d > %d)\n",
-            version, XUM1541_VERSION);
-        fprintf(stderr, "please update your OpenCBM plugin\n");
-        return -1;
-    }
-    return 0;
-}
-
-/*! \brief Initialize the xum1541 device
-  This function tries to find and identify the xum1541 device.
-
- \param HandleXum1541  
-   Pointer to a XUM1541_HANDLE which will contain the file handle of the USB device.
-
-  \return
-    0 on success, -1 on error. On error, the handle is cleaned up if it
-    was already active.
-
-  \remark
-    On success, xum1541_handle contains a valid handle to the xum1541 device.
-    In this case, the device configuration has been set and the interface
-    been claimed. xum1541_close() should be called when the user is done
-    with it.
-*/
-int
-xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber)
+// USB bus enumeration
+static void
+xum1541_enumerate(usb_dev_handle **HandleXum1541, int PortNumber)
 {
     static char xumProduct[] = "xum1541"; // Start of USB product string id
     static int prodLen = sizeof(xumProduct) - 1;
     struct usb_bus *bus;
     struct usb_device *dev;
     char string[256];
-    unsigned char devInfo[XUM_DEVINFO_SIZE], devStatus;
-    int len;
+    int len, serial;
 
     xum1541_dbg(0, "scanning usb ...");
 
@@ -223,12 +187,114 @@ xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber)
                 xum1541_cleanup(HandleXum1541, NULL);
                 continue;
             }
+
+            // check, if we found the correctly addressed device
+            if (PortNumber != 0 && PortNumber < 256){
+                // Get device serial number and try to match against PortNumber.
+                // If no match, it could be an xum1541 so don't report an error.
+                len = usbGetStringAscii(*HandleXum1541, dev->descriptor.iSerialNumber,
+                    0x0409, string, sizeof(string) - 1);
+                if (len < 0) {
+                    xum1541_cleanup(HandleXum1541, "error: cannot query serial number: %s\n",
+                        usb.strerror());
+                    continue;
+                }
+                string[len] = '\0';
+                if ( len > 3 || PortNumber != atoi(string) ){
+                    xum1541_cleanup(HandleXum1541, NULL);
+                    continue;
+                }
+            }
+
             xum1541_dbg(0, "xum1541 name: %s", string);
-            goto done;
+            return;
         }
     }
+}
 
-done:
+// Check for a firmware version compatible with this plugin
+static int
+xum1541_check_version(int version)
+{
+    xum1541_dbg(0, "firmware version %d, library version %d", version,
+        XUM1541_VERSION);
+    if (version < XUM1541_VERSION) {
+        fprintf(stderr, "xum1541 firmware version too low (%d < %d)\n",
+            version, XUM1541_VERSION);
+        fprintf(stderr, "please update your xum1541 firmware\n");
+        return -1;
+    } else if (version > XUM1541_VERSION) {
+        fprintf(stderr, "xum1541 firmware version too high (%d > %d)\n",
+            version, XUM1541_VERSION);
+        fprintf(stderr, "please update your OpenCBM plugin\n");
+        return -1;
+    }
+    return 0;
+}
+
+/*! \brief Query unique identifier for the xum1541 device
+  This function tries to find an unique identifier for the xum1541 device.
+
+  \param PortNumber
+   The device's serial number to search for also. It is not considered, if set to 0.
+
+  \return
+    0 on success, -1 on error. On error, the handle is cleaned up if it
+    was already active.
+
+  \remark
+    On success, xum1541_handle contains a valid handle to the xum1541 device.
+    In this case, the device configuration has been set and the interface
+    been claimed. xum1541_close() should be called when the user is done
+    with it.
+*/
+const char *
+xum1541_device_path(int PortNumber){
+    #define PREFIX_OFFSET 15
+    static char dev_path[PREFIX_OFFSET + LIBUSB_PATH_MAX] = "libusb/xum1541:";
+    usb_dev_handle *HandleXum1541;
+
+    dev_path[PREFIX_OFFSET + 1] = '\0';
+    xum1541_enumerate(&HandleXum1541, PortNumber);
+
+    if (HandleXum1541 == NULL) {
+        fprintf(stderr, "error: no xum1541 device found\n");
+    }
+    else {
+        strcpy(dev_path, (usb.device(HandleXum1541))->filename);
+
+        xum1541_close(HandleXum1541);
+    }
+
+    return dev_path;
+}
+
+/*! \brief Initialize the xum1541 device
+  This function tries to find and identify the xum1541 device.
+
+  \param HandleXum1541  
+   Pointer to a XUM1541_HANDLE which will contain the file handle of the USB device.
+
+  \param PortNumber
+   The device's serial number to search for also. It is not considered, if set to 0.
+
+  \return
+    0 on success, -1 on error. On error, the handle is cleaned up if it
+    was already active.
+
+  \remark
+    On success, xum1541_handle contains a valid handle to the xum1541 device.
+    In this case, the device configuration has been set and the interface
+    been claimed. xum1541_close() should be called when the user is done
+    with it.
+*/
+int
+xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber){
+    unsigned char devInfo[XUM_DEVINFO_SIZE], devStatus;
+    int len;
+
+    xum1541_enumerate(HandleXum1541, PortNumber);
+
     if (*HandleXum1541 == NULL) {
         fprintf(stderr, "error: no xum1541 device found\n");
         return -1;

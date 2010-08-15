@@ -16,7 +16,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.7 2010-08-14 22:25:57 wmsr Exp $ \n
+** \version $Id: archlib.c,v 1.8 2010-08-15 08:06:57 wmsr Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **
@@ -66,13 +66,13 @@
    driver name, or NULL if an error occurred.
 
  \bug
-   PortNumber is not allowed to exceed 10. 
+   PortNumber is not allowed to exceed 255. 
 */
 
 const char * CBMAPIDECL
 opencbm_plugin_get_driver_name(int PortNumber)
 {
-    return "libusb/xum1541"; 
+    return xum1541_device_path(PortNumber);
 }
 
 /*! \brief Opens the driver
