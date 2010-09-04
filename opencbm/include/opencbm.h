@@ -13,7 +13,7 @@
 /*! **************************************************************
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.27 2009-12-22 21:26:11 natelawson Exp $ \n
+** \version $Id: opencbm.h,v 1.28 2010-09-04 23:35:22 natelawson Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \authors With additions from Wolfgang Moser and Arnd \n
@@ -73,12 +73,12 @@ extern int vdd_uninstall_iohook(CBM_FILE f);
 extern void vdd_usleep(CBM_FILE f, unsigned int howlong);
 #else
 
-  /* we have linux */
+  /* we have linux or Mac */
 
 # define EXTERN extern /*!< EXTERN is not defined on Linux */
 # define CBMAPIDECL /*!< CBMAPIDECL is a dummy on Linux */
 # define WINAPI /*!< WINAPI is a dummy on Linux */
-# define CBM_FILE int /*!< The "file descriptor" for an opened driver */
+# define CBM_FILE intptr_t /*!< The "file descriptor" for an opened driver */
 # define CBM_FILE_INVALID ((CBM_FILE)-1) /*!< An invalid "file descriptor" (CBM_FILE) */
 
 /* On Macs we need to define the __u_char */
