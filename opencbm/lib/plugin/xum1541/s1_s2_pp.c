@@ -15,7 +15,7 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/s1_s2_pp.c \n
 ** \author Till Harbaum, Spiro Trikaliotis \n
-** \version $Id: s1_s2_pp.c,v 1.6 2010-08-09 19:35:34 wmsr Exp $ \n
+** \version $Id: s1_s2_pp.c,v 1.7 2010-09-04 23:32:26 natelawson Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver: Code for accessing fast protocols of xum1541
 **
@@ -67,7 +67,7 @@
 void CBMAPIDECL
 opencbm_plugin_s1_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
-	xum1541_read(HandleDevice, XUM1541_S1, data, size); 
+	xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_S1, data, size); 
 }
 
 /*! \brief Write data with serial1 protocol
@@ -84,7 +84,7 @@ opencbm_plugin_s1_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned in
 void CBMAPIDECL
 opencbm_plugin_s1_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
-	xum1541_write(HandleDevice, XUM1541_S1, data, size); 
+	xum1541_write((usb_dev_handle *)HandleDevice, XUM1541_S1, data, size); 
 }
 
 /*! \brief Read data with serial2 protocol
@@ -101,7 +101,7 @@ opencbm_plugin_s1_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsi
 void CBMAPIDECL
 opencbm_plugin_s2_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
-	xum1541_read(HandleDevice, XUM1541_S2, data, size); 
+	xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_S2, data, size); 
 }
 
 /*! \brief Write data with serial2 protocol
@@ -118,7 +118,7 @@ opencbm_plugin_s2_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned in
 void CBMAPIDECL
 opencbm_plugin_s2_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
-	xum1541_write(HandleDevice, XUM1541_S2, data, size); 
+	xum1541_write((usb_dev_handle *)HandleDevice, XUM1541_S2, data, size); 
 }
 
 /*! \brief Read data with parallel protocol (d64copy)
@@ -135,7 +135,7 @@ opencbm_plugin_s2_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsi
 void CBMAPIDECL
 opencbm_plugin_pp_dc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
-	xum1541_read(HandleDevice, XUM1541_PP, data, size); 
+	xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_PP, data, size); 
 }
 
 /*! \brief Write data with parallel protocol (d64copy)
@@ -152,7 +152,7 @@ opencbm_plugin_pp_dc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned
 void CBMAPIDECL
 opencbm_plugin_pp_dc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
-	xum1541_write(HandleDevice, XUM1541_PP, data, size); 
+	xum1541_write((usb_dev_handle *)HandleDevice, XUM1541_PP, data, size); 
 }
 
 /*! \brief Read data with parallel protocol (cbmcopy)
@@ -169,7 +169,7 @@ opencbm_plugin_pp_dc_write_n(CBM_FILE HandleDevice, const unsigned char *data, u
 void CBMAPIDECL
 opencbm_plugin_pp_cc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
-	xum1541_read(HandleDevice, XUM1541_P2, data, size); 
+	xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_P2, data, size); 
 }
 
 /*! \brief Write data with parallel protocol (cbmcopy)
@@ -186,7 +186,7 @@ opencbm_plugin_pp_cc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned
 void CBMAPIDECL
 opencbm_plugin_pp_cc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
-	xum1541_write(HandleDevice, XUM1541_P2, data, size); 
+	xum1541_write((usb_dev_handle *)HandleDevice, XUM1541_P2, data, size); 
 }
 
 /*! \brief Read data with burst nibbler protocol (cbmcopy)
@@ -203,7 +203,7 @@ opencbm_plugin_pp_cc_write_n(CBM_FILE HandleDevice, const unsigned char *data, u
 void CBMAPIDECL
 opencbm_plugin_nib_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
-	xum1541_read(HandleDevice, XUM1541_NIB, data, size); 
+	xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_NIB, data, size); 
 }
 
 /*! \brief Write data with burst nibbler protocol (cbmcopy)
@@ -220,5 +220,5 @@ opencbm_plugin_nib_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned i
 void CBMAPIDECL
 opencbm_plugin_nib_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
-	xum1541_write(HandleDevice, XUM1541_NIB, data, size); 
+	xum1541_write((usb_dev_handle *)HandleDevice, XUM1541_NIB, data, size); 
 }

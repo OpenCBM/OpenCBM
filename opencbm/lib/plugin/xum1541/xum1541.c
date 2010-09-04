@@ -15,7 +15,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.15 2010-08-15 08:06:57 wmsr Exp $ \n
+** \version $Id: xum1541.c,v 1.16 2010-09-04 23:32:26 natelawson Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -31,6 +31,11 @@
 #include "dynlibusb.h"
 #include "getpluginaddress.h"
 #include "xum1541.h"
+
+// XXX Fix for Linux/Mac build, should be moved
+#ifndef LIBUSB_PATH_MAX
+#define LIBUSB_PATH_MAX 512
+#endif
 
 static int debug_level = -1; /*!< \internal \brief the debugging level for debugging output */
 
@@ -140,7 +145,7 @@ xum1541_enumerate(usb_dev_handle **HandleXum1541, int PortNumber)
     struct usb_bus *bus;
     struct usb_device *dev;
     char string[256];
-    int len, serial;
+    int len;
 
     xum1541_dbg(0, "scanning usb ...");
 
@@ -338,9 +343,23 @@ xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber){
     // Check for the xum1541's current status. (Not the drive.)
     devStatus = devInfo[2];
     if ((devStatus & XUM1541_DOING_RESET) != 0) {
+	int ret;
+
         fprintf(stderr, "previous command was interrupted, resetting\n");
-        usb.clear_halt(*HandleXum1541, XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN);
-        usb.clear_halt(*HandleXum1541, XUM_BULK_OUT_ENDPOINT);
+        ret = usb.clear_halt(*HandleXum1541, XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN);
+        if (ret != 0) {
+            fprintf(stderr, "USB clear halt request failed for in: %s\n",
+                usb.strerror());
+            xum1541_close(*HandleXum1541);
+            return -1;
+        }
+        ret = usb.clear_halt(*HandleXum1541, XUM_BULK_OUT_ENDPOINT);
+        if (ret != 0) {
+            fprintf(stderr, "USB clear halt request failed for out: %s\n",
+                usb.strerror());
+            xum1541_close(*HandleXum1541);
+            return -1;
+        }
     }
 
     return 0;
@@ -485,7 +504,7 @@ xum1541_ioctl(usb_dev_handle *HandleXum1541, unsigned int cmd, unsigned int addr
     // Send the 4-byte command block
     nBytes = usb.bulk_write(HandleXum1541,
         XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-        cmdBuf, sizeof(cmdBuf), LIBUSB_NO_TIMEOUT);
+        (char *)cmdBuf, sizeof(cmdBuf), LIBUSB_NO_TIMEOUT);
     if (nBytes < 0) {
         fprintf(stderr, "USB error in xum1541_ioctl cmd: %s\n",
             usb.strerror());
@@ -535,7 +554,7 @@ xum1541_write(usb_dev_handle *HandleXum1541, __u_char modeFlags, const __u_char 
     cmdBuf[3] = (size >> 8) & 0xff;
     wr = usb.bulk_write(HandleXum1541,
         XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-        cmdBuf, sizeof(cmdBuf), LIBUSB_NO_TIMEOUT);
+        (char *)cmdBuf, sizeof(cmdBuf), LIBUSB_NO_TIMEOUT);
     if (wr < 0) {
         fprintf(stderr, "USB error in write cmd: %s\n",
             usb.strerror());
@@ -618,7 +637,7 @@ xum1541_read(usb_dev_handle *HandleXum1541, __u_char mode, __u_char *data, size_
     cmdBuf[3] = (size >> 8) & 0xff;
     rd = usb.bulk_write(HandleXum1541,
         XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
-        cmdBuf, sizeof(cmdBuf), LIBUSB_NO_TIMEOUT);
+        (char *)cmdBuf, sizeof(cmdBuf), LIBUSB_NO_TIMEOUT);
     if (rd < 0) {
         fprintf(stderr, "USB error in read cmd: %s\n",
             usb.strerror());
@@ -636,7 +655,7 @@ xum1541_read(usb_dev_handle *HandleXum1541, __u_char mode, __u_char *data, size_
             (char *)data, bytes2read, LIBUSB_NO_TIMEOUT);
         if (rd < 0) {
             fprintf(stderr, "USB error in read data(%p, %d): %s\n",
-               data, size, usb.strerror());
+               data, (int)size, usb.strerror());
             return -1;
         } else if (rd > 0)
             xum1541_dbg(2, "read %d bytes", rd);
