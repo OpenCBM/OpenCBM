@@ -14,6 +14,18 @@
 #include "opencbm.h"
 #include "xum1541_types.h"
 
+/*
+ * Compile-time assert to make sure CBM_FILE is large enough.
+ * Perhaps this should be in the global opencbm.h
+ */
+#ifndef CTASSERT
+#define CTASSERT(x)         _CTASSERT(x, __LINE__)
+#define _CTASSERT(x, y)     __CTASSERT(x, y)
+#define __CTASSERT(x, y)    typedef char __assert ## y[(x) ? 1 : -1]
+#endif
+
+CTASSERT(sizeof(CBM_FILE) >= sizeof(usb_dev_handle *));
+
 /* 
  * Make our control transfer timeout 10% later than the device itself
  * times out. This is used for both the INIT and RESET messages since
