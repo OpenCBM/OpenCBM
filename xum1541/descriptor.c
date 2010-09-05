@@ -35,7 +35,7 @@ USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
     ManufacturerStrIndex:   0x01,
     ProductStrIndex:        0x02,
-    SerialNumStrIndex:      NO_DESCRIPTOR,
+    SerialNumStrIndex:      0x03,
 
     NumberOfConfigurations: 1,
 };
@@ -124,6 +124,11 @@ USB_Descriptor_String_t PROGMEM ProductString = {
     UnicodeString: PRODSTRING(MODELNAME),
 };
 
+USB_Descriptor_String_t PROGMEM SerialNumString = {
+    Header:        { Size: USB_STRING_LEN(3), Type: DTYPE_String },
+    UnicodeString: L"000",	/* for the xum1541 plugin, serial numbers must be less than 256 */
+};
+
 uint16_t
 CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex,
   void** const DescriptorAddress)
@@ -153,6 +158,12 @@ CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex,
         case 0x02:
             Address = (void *)&ProductString;
             Size    = pgm_read_byte(&ProductString.Header.Size);
+            break;
+        case 0x03:
+            /* Idea: it might be useful to get the serial number */
+            /* out of one EEPROM cell and convert it to Unicode  */
+            Address = (void *)&SerialNumString;
+            Size    = pgm_read_byte(&SerialNumString.Header.Size);
             break;
         }
         break;
