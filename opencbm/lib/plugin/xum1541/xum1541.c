@@ -15,7 +15,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.17 2010-09-05 00:04:39 natelawson Exp $ \n
+** \version $Id: xum1541.c,v 1.18 2010-09-05 00:24:30 natelawson Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -183,8 +183,8 @@ xum1541_enumerate(usb_dev_handle **HandleXum1541, int PortNumber)
             len = usbGetStringAscii(*HandleXum1541, dev->descriptor.iProduct,
                 0x0409, string, sizeof(string) - 1);
             if (len < 0) {
-                xum1541_cleanup(HandleXum1541, "error: cannot query product name: %s\n",
-                    usb.strerror());
+                xum1541_cleanup(HandleXum1541,
+                    "error: cannot query product name: %s\n", usb.strerror());
                 continue;
             }
             string[len] = '\0';
@@ -197,15 +197,17 @@ xum1541_enumerate(usb_dev_handle **HandleXum1541, int PortNumber)
             if (PortNumber != 0 && PortNumber < 256){
                 // Get device serial number and try to match against PortNumber.
                 // If no match, it could be an xum1541 so don't report an error.
-                len = usbGetStringAscii(*HandleXum1541, dev->descriptor.iSerialNumber,
-                    0x0409, string, sizeof(string) - 1);
+                len = usbGetStringAscii(*HandleXum1541,
+                    dev->descriptor.iSerialNumber, 0x0409,
+                    string, sizeof(string) - 1);
                 if (len < 0) {
-                    xum1541_cleanup(HandleXum1541, "error: cannot query serial number: %s\n",
+                    xum1541_cleanup(HandleXum1541,
+                        "error: cannot query serial number: %s\n",
                         usb.strerror());
                     continue;
                 }
                 string[len] = '\0';
-                if ( len > 3 || PortNumber != atoi(string) ){
+                if (len > 3 || PortNumber != atoi(string)) {
                     xum1541_cleanup(HandleXum1541, NULL);
                     continue;
                 }
@@ -254,25 +256,25 @@ xum1541_check_version(int version)
     with it.
 */
 const char *
-xum1541_device_path(int PortNumber){
-    #define PREFIX_OFFSET 15
-    static char dev_path[PREFIX_OFFSET + LIBUSB_PATH_MAX] = "libusb/xum1541:";
+xum1541_device_path(int PortNumber)
+{
+#define PREFIX_OFFSET   (sizeof("libusb/xum1541:") - 1)
     usb_dev_handle *HandleXum1541;
+    static char dev_path[PREFIX_OFFSET + LIBUSB_PATH_MAX] = "libusb/xum1541:";
 
     dev_path[PREFIX_OFFSET + 1] = '\0';
     xum1541_enumerate(&HandleXum1541, PortNumber);
 
-    if (HandleXum1541 == NULL) {
-        fprintf(stderr, "error: no xum1541 device found\n");
-    }
-    else {
+    if (HandleXum1541 != NULL) {
         strcpy(dev_path, (usb.device(HandleXum1541))->filename);
-
         xum1541_close(HandleXum1541);
+    } else {
+        fprintf(stderr, "error: no xum1541 device found\n");
     }
 
     return dev_path;
 }
+#undef PREFIX_OFFSET
 
 static int
 xum1541_clear_halt(usb_dev_handle *handle)
@@ -324,7 +326,7 @@ xum1541_clear_halt(usb_dev_handle *handle)
 /*! \brief Initialize the xum1541 device
   This function tries to find and identify the xum1541 device.
 
-  \param HandleXum1541  
+  \param HandleXum1541
    Pointer to a XUM1541_HANDLE which will contain the file handle of the USB device.
 
   \param PortNumber
@@ -341,7 +343,8 @@ xum1541_clear_halt(usb_dev_handle *handle)
     with it.
 */
 int
-xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber){
+xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber)
+{
     unsigned char devInfo[XUM_DEVINFO_SIZE], devStatus;
     int len;
 
@@ -402,7 +405,7 @@ xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber){
 }
 /*! \brief close the xum1541 device
 
- \param HandleXum1541  
+ \param HandleXum1541
    Pointer to a XUM1541_HANDLE which will contain the file handle of the USB device.
 
  \remark
@@ -432,7 +435,7 @@ xum1541_close(usb_dev_handle *HandleXum1541)
 /*! \brief  Handle synchronous USB control messages, e.g. for RESET.
     xum1541_ioctl() is used for bulk messages.
 
- \param HandleXum1541  
+ \param HandleXum1541
    A XUM1541_HANDLE which contains the file handle of the USB device.
 
  \param cmd
@@ -507,7 +510,7 @@ xum1541_wait_status(usb_dev_handle *HandleXum1541)
 /*! \brief Perform an ioctl on the xum1541, which is any command other than
     read/write or special device management commands such as INIT and RESET.
 
- \param HandleXum1541  
+ \param HandleXum1541
    A XUM1541_HANDLE which contains the file handle of the USB device.
 
  \param cmd
@@ -554,7 +557,7 @@ xum1541_ioctl(usb_dev_handle *HandleXum1541, unsigned int cmd, unsigned int addr
 
 /*! \brief Write data to the xum1541 device
 
- \param HandleXum1541  
+ \param HandleXum1541
    A XUM1541_HANDLE which contains the file handle of the USB device.
 
  \param mode
@@ -638,7 +641,7 @@ xum1541_write(usb_dev_handle *HandleXum1541, __u_char modeFlags, const __u_char 
 
 /*! \brief Read data from the xum1541 device
 
- \param HandleXum1541  
+ \param HandleXum1541
    A XUM1541_HANDLE which contains the file handle of the USB device.
 
  \param mode

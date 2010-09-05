@@ -26,7 +26,7 @@
 
 CTASSERT(sizeof(CBM_FILE) >= sizeof(usb_dev_handle *));
 
-/* 
+/*
  * Make our control transfer timeout 10% later than the device itself
  * times out. This is used for both the INIT and RESET messages since
  * INIT can do its own reset if it finds the drive in the middle of
@@ -38,13 +38,16 @@ CTASSERT(sizeof(CBM_FILE) >= sizeof(usb_dev_handle *));
 #define LIBUSB_NO_TIMEOUT   -1
 
 const char *xum1541_device_path(int PortNumber);
-int xum1541_init               (usb_dev_handle **HandleXum1541, int PortNumber);
-void xum1541_close             (usb_dev_handle  *HandleXum1541);
-int xum1541_control_msg        (usb_dev_handle  *HandleXum1541, unsigned int cmd);
-int xum1541_ioctl              (usb_dev_handle  *HandleXum1541, unsigned int cmd, unsigned int addr, unsigned int secaddr);
+int xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber);
+void xum1541_close(usb_dev_handle *HandleXum1541);
+int xum1541_control_msg(usb_dev_handle *HandleXum1541, unsigned int cmd);
+int xum1541_ioctl(usb_dev_handle *HandleXum1541, unsigned int cmd,
+    unsigned int addr, unsigned int secaddr);
 
 // Read/write data in normal CBM and speeder protocol modes
-int xum1541_write              (usb_dev_handle  *HandleXum1541, __u_char mode, const __u_char *data, size_t size);
-int xum1541_read               (usb_dev_handle  *HandleXum1541, __u_char mode,       __u_char *data, size_t size);
+int xum1541_write(usb_dev_handle *HandleXum1541, __u_char mode,
+    const __u_char *data, size_t size);
+int xum1541_read(usb_dev_handle *HandleXum1541, __u_char mode,
+    __u_char *data, size_t size);
 
 #endif // XUM1541_H

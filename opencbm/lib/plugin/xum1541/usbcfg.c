@@ -12,7 +12,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/usbcfg.c \n
 ** \author Nate Lawson \n
-** \version $Id: usbcfg.c,v 1.3 2010-08-10 21:50:18 wmsr Exp $ \n
+** \version $Id: usbcfg.c,v 1.4 2010-09-05 00:24:30 natelawson Exp $ \n
 ** \n
 ** \brief USB configuration application for the xum1541
 ****************************************************************/
@@ -43,7 +43,7 @@ main(int argc, char **argv)
 
     ret = opencbm_plugin_init();
     if (ret == 0) {
-    	ret = opencbm_plugin_driver_open(&HandleXum1541, 0);
+        ret = opencbm_plugin_driver_open(&HandleXum1541, 0);
     }
     if (ret != 0) {
         fprintf(stderr, "initialization error, aborting\n");
