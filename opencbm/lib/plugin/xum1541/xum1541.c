@@ -15,7 +15,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.16 2010-09-04 23:32:26 natelawson Exp $ \n
+** \version $Id: xum1541.c,v 1.17 2010-09-05 00:04:39 natelawson Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -274,6 +274,53 @@ xum1541_device_path(int PortNumber){
     return dev_path;
 }
 
+static int
+xum1541_clear_halt(usb_dev_handle *handle)
+{
+    int ret;
+
+    ret = usb.clear_halt(handle, XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN);
+    if (ret != 0) {
+        fprintf(stderr, "USB clear halt request failed for in ep: %s\n",
+            usb.strerror());
+        return -1;
+    }
+    ret = usb.clear_halt(handle, XUM_BULK_OUT_ENDPOINT);
+    if (ret != 0) {
+        fprintf(stderr, "USB clear halt request failed for out ep: %s\n",
+            usb.strerror());
+        return -1;
+    }
+
+#ifdef __APPLE__
+    /*
+     * The Darwin libusb implementation calls ClearPipeStall() in
+     * usb_clear_halt(). While that clears the host data toggle and resets
+     * its endpoint, it does not send the CLEAR_FEATURE(halt) control
+     * request to the device. The ClearPipeStallBothEnds() function does
+     * do this.
+     *
+     * We manually send this control request here on Mac systems.
+     */
+    ret = usb.control_msg(handle, USB_RECIP_ENDPOINT, USB_REQ_CLEAR_FEATURE,
+        0, XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN, NULL, 0, USB_TIMEOUT);
+    if (ret != 0) {
+        fprintf(stderr, "USB clear control req failed for in ep: %s\n",
+            usb.strerror());
+        return -1;
+    }
+    ret = usb.control_msg(handle, USB_RECIP_ENDPOINT, USB_REQ_CLEAR_FEATURE,
+        0, XUM_BULK_OUT_ENDPOINT, NULL, 0, USB_TIMEOUT);
+    if (ret != 0) {
+        fprintf(stderr, "USB clear control req failed for out ep: %s\n",
+            usb.strerror());
+        return -1;
+    }
+#endif // __APPLE__
+
+    return 0;
+}
+
 /*! \brief Initialize the xum1541 device
   This function tries to find and identify the xum1541 device.
 
@@ -343,20 +390,9 @@ xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber){
     // Check for the xum1541's current status. (Not the drive.)
     devStatus = devInfo[2];
     if ((devStatus & XUM1541_DOING_RESET) != 0) {
-	int ret;
-
         fprintf(stderr, "previous command was interrupted, resetting\n");
-        ret = usb.clear_halt(*HandleXum1541, XUM_BULK_IN_ENDPOINT | USB_ENDPOINT_IN);
-        if (ret != 0) {
-            fprintf(stderr, "USB clear halt request failed for in: %s\n",
-                usb.strerror());
-            xum1541_close(*HandleXum1541);
-            return -1;
-        }
-        ret = usb.clear_halt(*HandleXum1541, XUM_BULK_OUT_ENDPOINT);
-        if (ret != 0) {
-            fprintf(stderr, "USB clear halt request failed for out: %s\n",
-                usb.strerror());
+        // Clear the stalls on both endpoints
+        if (xum1541_clear_halt(*HandleXum1541) < 0) {
             xum1541_close(*HandleXum1541);
             return -1;
         }
@@ -364,7 +400,6 @@ xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber){
 
     return 0;
 }
-
 /*! \brief close the xum1541 device
 
  \param HandleXum1541  
