@@ -114,6 +114,12 @@ USB_Descriptor_String_t PROGMEM ManufacturerString = {
     UnicodeString: L"Nate Lawson and OpenCBM team",
 };
 
+// Serial for attaching more than one xum1541.
+USB_Descriptor_String_t PROGMEM SerialNumString = {
+    Header:        { Size: USB_STRING_LEN(3), Type: DTYPE_String },
+    UnicodeString: L"000",
+};
+
 #define PRODSTRING(m)  L"xum1541 floppy adapter (" UNISTR(m) L")"
 
 USB_Descriptor_String_t PROGMEM ProductString = {
@@ -122,11 +128,6 @@ USB_Descriptor_String_t PROGMEM ProductString = {
         Type: DTYPE_String,
     },
     UnicodeString: PRODSTRING(MODELNAME),
-};
-
-USB_Descriptor_String_t PROGMEM SerialNumString = {
-    Header:        { Size: USB_STRING_LEN(3), Type: DTYPE_String },
-    UnicodeString: L"000",	/* for the xum1541 plugin, serial numbers must be less than 256 */
 };
 
 uint16_t
