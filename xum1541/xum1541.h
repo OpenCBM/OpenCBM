@@ -96,7 +96,7 @@ int8_t usbRecvByte(uint8_t *data);
 #define XUM_WRITE_ATN           (1 << 1)
 #define IEC_DELAY  (0.5)        // 500 ns for IEC lines to change state
 void cbm_init(void);
-void cbm_reset(void);
+void cbm_reset(bool forever);
 bool xu1541_wait(uint8_t line, uint8_t state);
 uint8_t xu1541_poll(void);
 void xu1541_setrelease(uint8_t set, uint8_t release);

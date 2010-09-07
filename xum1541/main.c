@@ -21,7 +21,7 @@ volatile bool doDeviceReset;
 volatile uint8_t eoi;
 
 // Are we in an active state? If so, run the command loop.
-static volatile bool device_running;
+volatile bool device_running;
 
 // Is the USB bus connected? If so, wait to enter active state.
 static volatile bool usb_connected;
@@ -52,7 +52,9 @@ main(void)
     board_init();
     board_set_status(STATUS_INIT);
     cbm_init();
-    cbm_reset();
+
+    // Wait forever for a drive to be present (not yet)
+    cbm_reset(false);
 
     /*
      * Process bulk transactions as they appear. Control requests are

@@ -223,14 +223,10 @@ firmware.
 Tasks
 =====
 Bugs:
-- Test for what resistors are possible on parallel port
-- Mac hangs when transfer is aborted and new command started
 - The USBKEY firmware fails to enter bootloader mode from software.
   This will eventually be fixed but is not a big deal since that board
   has hardware buttons to do the same function. The ZoomFloppy works fine.
 - Test for cbmcopy hangs but not for 1581: cbmcopy_fill.sh mass 1541 -t p
-- Rebooting with xum1541 attached and devices off means it is not detected
-- cbmctrl reset with no devices gives a control msg failure
 - Debug printing via the UART is not supported on ZoomFloppy since it has
   to use this pin for the IEC DATA connection. Another route for debugging
   should be found for it.

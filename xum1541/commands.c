@@ -25,6 +25,7 @@ static uint8_t usbDataDir = XUM_DATA_DIR_NONE;
 
 // Are we in the middle of a command sequence (XUM1541_INIT .. SHUTDOWN)?
 static bool cmdSeqInProgress;
+extern bool device_running;
 
 // Nibtools command state. See nib_parburst_read/write_checked()
 static bool suppressNibCmd;
@@ -428,9 +429,17 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
          */
         if (cmdSeqInProgress) {
             replyBuf[2] |= XUM1541_DOING_RESET;
-            cbm_reset();
+            cbm_reset(false);
             SetAbortState();
         }
+
+        /*
+         * We wait in main() until at least one device is present on the
+         * IEC bus. Notify the user if they requested a command before
+         * that has been detected.
+         */
+        if (!device_running)
+            replyBuf[2] |= XUM1541_NO_DEVICE;
         cmdSeqInProgress = true;
         return 8;
     case XUM1541_SHUTDOWN:
@@ -438,7 +447,7 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
         board_set_status(STATUS_READY);
         return 0;
     case XUM1541_RESET:
-        cbm_reset();
+        cbm_reset(false);
         return 0;
     default:
         DEBUGF(DBG_ERROR, "ERR: control cmd %d not impl\n", cmd);

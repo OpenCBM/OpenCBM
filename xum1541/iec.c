@@ -106,11 +106,11 @@ check_if_bus_free(void)
 
 // Wait up to 1.5 secs to see if drive answers ATN toggle.
 static void
-wait_for_free_bus(void)
+wait_for_free_bus(bool forever)
 {
     uint16_t i;
 
-    for (i = (uint16_t)(XUM1541_TIMEOUT * 10000); i != 0; i--) {
+    for (i = (uint16_t)(XUM1541_TIMEOUT * 10000); i != 0 || forever; i--) {
         if (check_if_bus_free())
             return;
 
@@ -123,7 +123,7 @@ wait_for_free_bus(void)
 }
 
 void
-cbm_reset(void)
+cbm_reset(bool forever)
 {
     DEBUGF(DBG_ALL, "reset\n");
     iec_release(IO_DATA | IO_ATN | IO_CLK);
@@ -144,7 +144,7 @@ cbm_reset(void)
     DELAY_MS(30);
     iec_release(IO_RESET);
 
-    wait_for_free_bus();
+    wait_for_free_bus(forever);
 }
 
 // Wait up to 2 ms for any of the masked lines to become active.
@@ -259,6 +259,19 @@ cbm_raw_write(uint16_t len, uint8_t flags)
     DEBUGF(DBG_INFO, "cwr %d, atn %d, talk %d\n", len, atn, talk);
 
     usbInitIo(len, ENDPOINT_DIR_OUT);
+
+    /*
+     * First, check if any device is present on the bus.
+     * If ATN and RST are both low (active), we know that at least one
+     * drive is attached but none are powered up. In this case, we
+     * bail out early. Otherwise, we'd get stuck in wait_for_listener().
+     */
+    if (!iec_wait_timeout_2ms(IO_ATN|IO_RESET, 0)) {
+        DEBUGF(DBG_ERROR, "write: no devs on bus\n");
+        usbIoDone();
+        return 0;
+    }
+
     iec_release(IO_DATA);
     iec_set(IO_CLK | (atn ? IO_ATN : 0));
 
