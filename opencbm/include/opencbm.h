@@ -13,7 +13,7 @@
 /*! **************************************************************
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.28 2010-09-04 23:35:22 natelawson Exp $ \n
+** \version $Id: opencbm.h,v 1.29 2010-09-09 05:12:32 natelawson Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \authors With additions from Wolfgang Moser and Arnd \n
@@ -93,6 +93,7 @@ typedef unsigned char __u_char;
 #define IEC_CLOCK  0x02 /*!< Specify the CLOCK line */
 #define IEC_ATN    0x04 /*!< Specify the ATN line */
 #define IEC_RESET  0x08 /*!< Specify the RESET line */
+#define IEC_SRQ    0x10 /*!< Specify the SRQ line */
 
 /*! Specifies the type of a device for cbm_identify() */
 enum cbm_device_type_e
