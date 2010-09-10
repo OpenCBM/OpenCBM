@@ -232,11 +232,14 @@ Bugs:
   should be found for it.
 
 Improvements:
-- Build board for Pete
-- Add support to program in a serial number
+- Add support to program in a serial number to EEPROM
 - Add faster IO routines, probably inline instead of function calls
+- Reduce size of firmware by eliminating dead code (e.g., LUFA big-endian)
 - Add SRQ nibbling support
 - Add IEEE-488 support
+- Update firmware utility to do DFU and check device version/type so it is
+  impossible to write the wrong firmware and easier for users to upgrade.
+- Test and update to libusb 1.0 since 0.x is no longer supported.
 - Test various cable lengths and USB hubs to be sure it is reliable
 - Heavy system activity can sometimes disrupt transfers, especially timing
   sensitive operations like nibbling. Make the firmware more resistant to
