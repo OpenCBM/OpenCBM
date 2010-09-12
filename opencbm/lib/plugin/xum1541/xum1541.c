@@ -15,7 +15,7 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.18 2010-09-05 00:24:30 natelawson Exp $ \n
+** \version $Id: xum1541.c,v 1.19 2010-09-12 17:00:49 wmsr Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
@@ -143,9 +143,14 @@ xum1541_enumerate(usb_dev_handle **HandleXum1541, int PortNumber)
     static char xumProduct[] = "xum1541"; // Start of USB product string id
     static int prodLen = sizeof(xumProduct) - 1;
     struct usb_bus *bus;
-    struct usb_device *dev;
+    struct usb_device *dev, *preferredDefaultHandle;
     char string[256];
-    int len;
+    int len, serialnum, leastserial;
+
+    if (PortNumber < 0 || PortNumber > MAX_ALLOWED_XUM1541_SERIALNUM) {
+        // Normalise the Portnumber for invalid values
+        PortNumber = 0;
+    }
 
     xum1541_dbg(0, "scanning usb ...");
 
@@ -158,6 +163,8 @@ xum1541_enumerate(usb_dev_handle **HandleXum1541, int PortNumber)
     errno = 0;
 
     *HandleXum1541 = NULL;
+    preferredDefaultHandle = NULL;
+    leastserial = MAX_ALLOWED_XUM1541_SERIALNUM + 1;
     for (bus = usb.get_busses(); !*HandleXum1541 && bus; bus = bus->next) {
         xum1541_dbg(1, "scanning bus %s", bus->dirname);
         for (dev = bus->devices; !*HandleXum1541 && dev; dev = dev->next) {
@@ -192,29 +199,44 @@ xum1541_enumerate(usb_dev_handle **HandleXum1541, int PortNumber)
                 xum1541_cleanup(HandleXum1541, NULL);
                 continue;
             }
+            xum1541_dbg(0, "xum1541 name: %s", string);
 
-            // check, if we found the correctly addressed device
-            if (PortNumber != 0 && PortNumber < 256){
-                // Get device serial number and try to match against PortNumber.
-                // If no match, it could be an xum1541 so don't report an error.
-                len = usbGetStringAscii(*HandleXum1541,
-                    dev->descriptor.iSerialNumber, 0x0409,
-                    string, sizeof(string) - 1);
-                if (len < 0) {
-                    xum1541_cleanup(HandleXum1541,
-                        "error: cannot query serial number: %s\n",
-                        usb.strerror());
-                    continue;
-                }
+            len = usbGetStringAscii(*HandleXum1541,
+                dev->descriptor.iSerialNumber, 0x0409,
+                string, sizeof(string) - 1);
+            if (len < 0 && PortNumber != 0){
+                // we need the serial number, when PortNumber is not 0
+                xum1541_cleanup(HandleXum1541,
+                    "error: cannot query serial number: %s\n",
+                    usb.strerror());
+                continue;
+            }
+            serialnum = 0;
+            if (len > 0 && len <=3 ) {
                 string[len] = '\0';
-                if (len > 3 || PortNumber != atoi(string)) {
-                    xum1541_cleanup(HandleXum1541, NULL);
-                    continue;
+                serialnum = atoi(string);
+            }
+            if (PortNumber != serialnum) {
+                // keep in mind the handle, if the device's
+                // serial number is less than previous ones
+                if(serialnum < leastserial) {
+                    leastserial = serialnum;
+                    preferredDefaultHandle = dev;
                 }
+                xum1541_cleanup(HandleXum1541, NULL);
+                continue;
             }
 
-            xum1541_dbg(0, "xum1541 name: %s", string);
+            xum1541_dbg(0, "xum1541 serial number: %3u", serialnum);
             return;
+        }
+    }
+    // if no default device was found because only specific devices were present,
+    // determine the default device from the specific ones and open it
+    if(preferredDefaultHandle != NULL) {
+        if ((*HandleXum1541 = usb.open(preferredDefaultHandle)) == NULL) {
+            fprintf(stderr, "error: Cannot reopen USB device: %s\n",
+                usb.strerror());
         }
     }
 }

@@ -37,6 +37,9 @@ CTASSERT(sizeof(CBM_FILE) >= sizeof(usb_dev_handle *));
 // libusb value for "wait forever"
 #define LIBUSB_NO_TIMEOUT   -1
 
+// the maximum value for all allowed xum1541 serial numbers
+#define MAX_ALLOWED_XUM1541_SERIALNUM 255
+
 const char *xum1541_device_path(int PortNumber);
 int xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber);
 void xum1541_close(usb_dev_handle *HandleXum1541);
