@@ -74,15 +74,14 @@ CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
         -DUSE_STATIC_OPTIONS="(USB_DEVICE_OPT_FULLSPEED | USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)" \
         -funsigned-char -funsigned-bitfields \
         -ffunction-sections -fdata-sections \
-        -fpack-struct -fshort-enums \
-        -finline-functions -finline-limit=20
+        -fpack-struct -fshort-enums
 
 # --gc-sections: We store each function and each variable in its 
 # own section so that the linker can do dead-code/data elimination.
 # Used in combo with -ffunction-sections -fdata-sections (above).
 #
 # --relax: use relative calls when functions are nearby
-LDFLAGS+= --gc-sections --relax
+LDFLAGS+= -Wl,--gc-sections -Wl,--relax
 
 MYUSB_OBJS= \
         LUFA/Drivers/USB/LowLevel/DevChapter9.o \
