@@ -233,8 +233,8 @@ Bugs:
 
 Improvements:
 - Add support to program in a serial number to EEPROM
-- Add faster IO routines, probably inline instead of function calls
 - Reduce size of firmware by eliminating dead code (e.g., LUFA big-endian)
+- Improve LEDs, especially on USBKEY (which has 4)
 - Add SRQ nibbling support
 - Add IEEE-488 support
 - Update firmware utility to do DFU and check device version/type so it is
