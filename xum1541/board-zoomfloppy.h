@@ -32,14 +32,109 @@ void board_init(void);
 #define IO_MASK_C       (IO_ATN | LED_MASK)
 #define IO_MASK_D       (IO_SRQ | IO_CLK | IO_DATA | IO_RESET)
 
-// IEC and parallel port access functions
-void iec_set(uint8_t line);
-void iec_release(uint8_t line);
-void iec_set_release(uint8_t s, uint8_t r);
-uint8_t iec_get(uint8_t line);
+// IEC and parallel port accessors
+#define PAR_PORT_PORT   PORTB
+#define PAR_PORT_DDR    DDRB
+#define PAR_PORT_PIN    PINB
+
+/*
+ * Use always_inline to override gcc's -Os option. Since we measured each
+ * inline function's disassembly and verified the size decrease, we are
+ * certain when we specify inline that we really want it.
+ */
+#define INLINE          static inline __attribute__((always_inline))
+
+/*
+ * Routines for getting/setting individual IEC lines and parallel port.
+ *
+ * We no longer add a short delay after changing line(s) state, even though
+ * it takes about 0.5 us for the line to stabilize (measured with scope).
+ * This is because we need to toggle SRQ quickly to send data to the 1571
+ * and the delay was breaking our deadline.
+ *
+ * These are all inlines and this was incrementally measured that each
+ * decreases the firmware size. Some (set/get) compile into a single
+ * instruction (say, sbis). This works because the "line" argument is
+ * almost always a constant.
+ */
+
+INLINE uint8_t
+iec_get(uint8_t line)
+{
+    uint8_t ret;
+
+    switch (line) {
+    case IO_SRQ:
+        ret = PIND & IO_SRQ_IN;
+        break;
+    case IO_CLK:
+        ret = PIND & IO_CLK_IN;
+        break;
+    case IO_DATA:
+        ret = PIND & IO_DATA_IN;
+        break;
+    case IO_ATN:
+        ret = PINC & IO_DATA_IN;
+        break;
+    case IO_RESET:
+        ret = PINC & IO_RESET_IN;
+        break;
+    default:
+        // Invalid set of requested signals, trigger WD reset
+        for (;;) ;
+    }
+
+    return !ret;
+}
+
+INLINE void
+iec_set(uint8_t line)
+{
+    if ((line & IO_ATN)) {
+        PORTC |= IO_ATN;
+        line &= ~IO_ATN;
+    }
+    if (line != 0)
+        PORTD |= line;
+}
+
+INLINE void
+iec_release(uint8_t line)
+{
+    if ((line & IO_ATN)) {
+        PORTC &= ~IO_ATN;
+        line &= ~IO_ATN;
+    }
+    if (line != 0)
+        PORTD &= ~line;
+}
+
+INLINE void
+iec_set_release(uint8_t s, uint8_t r)
+{
+    iec_set(s);
+    iec_release(r);
+}
+
+// Make 8-bit port all inputs and read parallel value
+INLINE uint8_t
+xu1541_pp_read(void)
+{
+    PAR_PORT_DDR = 0;
+    PAR_PORT_PORT = 0;
+    return PAR_PORT_PIN;
+}
+
+// Make 8-bits of port output and write out the parallel data
+INLINE void
+xu1541_pp_write(uint8_t val)
+{
+    PAR_PORT_DDR = 0xff;
+    PAR_PORT_PORT = val;
+}
+
+// Since this is called with a runtime-specified mask, inlining doesn't help.
 uint8_t iec_poll(void);
-uint8_t xu1541_pp_read(void);
-void xu1541_pp_write(uint8_t val);
 
 // Status indicators (LEDs)
 uint8_t board_get_status(void);

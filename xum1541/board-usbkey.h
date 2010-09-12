@@ -29,14 +29,80 @@ void board_init(void);
 #define IO_RESET        _BV(6)
 #define IO_OUTPUT_MASK  (IO_ATN | IO_CLK | IO_DATA | IO_RESET)
 
-// IEC and parallel port access functions
-void iec_set(uint8_t line);
-void iec_release(uint8_t line);
-void iec_set_release(uint8_t s, uint8_t r);
-uint8_t iec_get(uint8_t line);
-uint8_t iec_poll(void);
-uint8_t xu1541_pp_read(void);
-void xu1541_pp_write(uint8_t val);
+// IEC and parallel port accessors
+#define CBM_PORT        PORTA
+#define CBM_DDR         DDRA
+#define CBM_PIN         PINA
+
+#define PAR_PORT_PORT   PORTC
+#define PAR_PORT_DDR    DDRC
+#define PAR_PORT_PIN    PINC
+
+/*
+ * Use always_inline to override gcc's -Os option. Since we measured each
+ * inline function's disassembly and verified the size decrease, we are
+ * certain when we specify inline that we really want it.
+ */
+#define INLINE          static inline __attribute__((always_inline))
+
+/*
+ * Routines for getting/setting individual IEC lines and parallel port.
+ *
+ * We no longer add a short delay after changing line(s) state, even though
+ * it takes about 0.5 us for the line to stabilize (measured with scope).
+ * This is because we need to toggle SRQ quickly to send data to the 1571
+ * and the delay was breaking our deadline.
+ *
+ * These are all inlines and this was incrementally measured that each
+ * decreases the firmware size. Some (set/get) compile into a single
+ * instruction (say, sbis). This works because the "line" argument is
+ * almost always a constant.
+ */
+
+INLINE void
+iec_set(uint8_t line)
+{
+    CBM_PORT |= line;
+}
+
+INLINE void
+iec_release(uint8_t line)
+{
+    CBM_PORT &= ~line;
+}
+
+INLINE void
+iec_set_release(uint8_t s, uint8_t r)
+{
+    CBM_PORT = (CBM_PORT & ~r) | s;
+}
+
+INLINE uint8_t
+iec_get(uint8_t line)
+{
+    return ((CBM_PIN >> 1) & line) == 0 ? 1 : 0;
+}
+
+INLINE uint8_t
+xu1541_pp_read(void)
+{
+    PAR_PORT_DDR = 0;
+    PAR_PORT_PORT = 0;
+    return PAR_PORT_PIN;
+}
+
+INLINE void
+xu1541_pp_write(uint8_t val)
+{
+    PAR_PORT_DDR = 0xff;
+    PAR_PORT_PORT = val;
+}
+
+INLINE uint8_t
+iec_poll(void)
+{
+    return CBM_PIN >> 1;
+}
 
 // Status indicators (LEDs)
 uint8_t board_get_status(void);

@@ -9,11 +9,6 @@
  */
 #include "xum1541.h"
 
-// IEC and parallel port accessors
-#define PAR_PORT_PORT   PORTB
-#define PAR_PORT_DDR    DDRB
-#define PAR_PORT_PIN    PINB
-
 #ifdef DEBUG
 // Send a byte to the UART for debugging printf()
 static int
@@ -54,55 +49,6 @@ board_init(void)
     TCCR1B |= (1 << WGM12) | (1 << CS02) | (1 << CS00);
 }
 
-/*
- * Routines for getting/setting individual IEC lines.
- *
- * We no longer add a short delay after changing line(s) state, even though
- * it takes about 0.5 us for the line to stabilize (measured with scope).
- * This is because we need to toggle SRQ quickly to send data to the 1571
- * and the delay was breaking our deadline.
- */
-void
-iec_set(uint8_t line)
-{
-    if ((line & IO_ATN)) {
-        PORTC |= IO_ATN;
-        line &= ~IO_ATN;
-    }
-    if (line != 0)
-        PORTD |= line;
-}
-
-void
-iec_release(uint8_t line)
-{
-    if ((line & IO_ATN)) {
-        PORTC &= ~IO_ATN;
-        line &= ~IO_ATN;
-    }
-    if (line != 0)
-        PORTD &= ~line;
-}
-
-void
-iec_set_release(uint8_t s, uint8_t r)
-{
-    iec_set(s);
-    iec_release(r);
-}
-
-// TODO: this could be compile-time optimized with a different macro API
-// This would help in adding access for RST/ATN inputs.
-uint8_t
-iec_get(uint8_t line)
-{
-    return ((((PIND & IO_SRQ_IN)  >> 1) |
-             ((PIND & IO_CLK_IN)  >> 1) |
-             ((PIND & IO_DATA_IN) << 1) |
-             ((PINC & IO_ATN_IN)  << 1) |
-             ((PINC & IO_RESET_IN) >> 1)) & line) == 0 ? 1 : 0;
-}
-
 uint8_t
 iec_poll(void)
 {
@@ -111,23 +57,6 @@ iec_poll(void)
            ((PIND & IO_DATA_IN) << 1) |
            ((PINC & IO_ATN_IN)  << 1) |
            ((PINC & IO_RESET_IN) >> 1);
-}
-
-// Make 8-bit port all inputs and read value
-uint8_t
-xu1541_pp_read(void)
-{
-    PAR_PORT_DDR = 0;
-    PAR_PORT_PORT = 0;
-    return PAR_PORT_PIN;
-}
-
-// Make 8-bits of port output and write out the data
-void
-xu1541_pp_write(uint8_t val)
-{
-    PAR_PORT_DDR = 0xff;
-    PAR_PORT_PORT = val;
 }
 
 static uint8_t statusValue;

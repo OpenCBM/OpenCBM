@@ -10,15 +10,6 @@
 #include <LUFA/Drivers/Board/LEDs.h>
 #include "xum1541.h"
 
-// IEC and parallel port accessors
-#define CBM_PORT  PORTA
-#define CBM_DDR   DDRA
-#define CBM_PIN   PINA
-
-#define PAR_PORT_PORT   PORTC
-#define PAR_PORT_DDR    DDRC
-#define PAR_PORT_PIN    PINC
-
 #ifdef DEBUG
 // Send a byte to the UART for debugging printf()
 static int
@@ -65,58 +56,6 @@ board_init(void)
     // We use this to create a repeating 100 ms (10 hz) clock.
     OCR1A = (F_CPU / 1024) / 10;
     TCCR1B |= (1 << WGM12) | (1 << CS02) | (1 << CS00);
-}
-
-/*
- * Routines for getting/setting individual IEC lines. Note that we add
- * a short delay after changing line(s) state because it takes about 0.5 us
- * for the line to stabilize (measured with scope).
- */
-void
-iec_set(uint8_t line)
-{
-    CBM_PORT |= line;
-}
-
-void
-iec_release(uint8_t line)
-{
-    CBM_PORT &= ~line;
-}
-
-void
-iec_set_release(uint8_t s, uint8_t r)
-{
-    CBM_PORT = (CBM_PORT & ~r) | s;
-}
-
-uint8_t
-iec_get(uint8_t line)
-{
-    return ((CBM_PIN >> 1) & line) == 0 ? 1 : 0;
-}
-
-uint8_t
-iec_poll(void)
-{
-    return CBM_PIN >> 1;
-}
-
-// Make 8-bit port all inputs and read value
-uint8_t
-xu1541_pp_read(void)
-{
-    PAR_PORT_DDR = 0;
-    PAR_PORT_PORT = 0;
-    return PAR_PORT_PIN;
-}
-
-// Make 8-bits of port output and write out the data
-void
-xu1541_pp_write(uint8_t val)
-{
-    PAR_PORT_DDR = 0xff;
-    PAR_PORT_PORT = val;
 }
 
 #define LED_UPPER_RED   LEDS_LED3
