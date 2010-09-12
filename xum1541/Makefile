@@ -31,7 +31,7 @@ all: $(MODELS)
 
 define MAKE_model
 $1:
-	$(MAKE) MODEL=$1 clean-one build
+	$(MAKE) MODEL=$1 build
 endef
 
 $(foreach model,$(MODELS),$(eval $(call MAKE_model,$(model))))
@@ -66,8 +66,8 @@ MODELVERSION= xum1541-$(MODEL)-v$(XUMFW_VERSION)
 #   --param inline-call-cost=2 -finline-limit=3 -fno-inline-small-functions
 CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
         -DF_CPU=$(CPURATE)UL -DF_CLOCK=F_CPU -mmcu=$(CPUMODEL) \
-        -Os -g -Werror -Wall -Wstrict-prototypes -Wundef -Winline \
-        -std=gnu99 -I . \
+        -Os -g -Werror -Wall -Wstrict-prototypes -Wundef \
+        -Winline -Wno-error=inline -std=gnu99 -I . \
         -DUSB_DEVICE_ONLY -DFIXED_CONTROL_ENDPOINT_SIZE=8 \
         -DINTERRUPT_CONTROL_ENDPOINT -DUSE_FLASH_DESCRIPTORS \
         -DUSE_SINGLE_DEVICE_CONFIGURATION \
@@ -93,21 +93,21 @@ MYUSB_OBJS= \
 
 IEC_OBJS= iec.o s1.o s2.o pp.o p2.o nib.o
 
-OBJS=     main.o commands.o descriptor.o \
+F_OBJS=     main.o commands.o descriptor.o \
           $(BOARD_OBJS) $(MYUSB_OBJS) $(IEC_OBJS)
+
+OBJS=     $(patsubst %,$(MODEL)/%,$(F_OBJS))
 
 CC=      avr-gcc
 OBJCOPY= avr-objcopy
 
-.c.o:
+$(MODEL)/%.o: %.c
+	@mkdir -p  $(dir $@)
 	${CC} $(CFLAGS) -c -o $@ $< 
 
 build: $(OBJS)
 	${CC} $(CFLAGS) -o $(MODELVERSION).bin $(OBJS) $(LDFLAGS)
 	${OBJCOPY} -O ihex $(MODELVERSION).bin $(MODELVERSION).hex
 
-clean-one:
-	rm -f $(OBJS) $(MODELVERSION).bin
-
 clean:
-	rm -f $(OBJS) board-*.o xum1541-*-v*.bin
+	rm -rf $(MODELS)
