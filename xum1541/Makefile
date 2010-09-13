@@ -69,12 +69,12 @@ CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
         -Os -g -Werror -Wall -Wstrict-prototypes -Wundef \
         -Winline -Wno-error=inline -std=gnu99 -I . \
         -DUSB_DEVICE_ONLY -DFIXED_CONTROL_ENDPOINT_SIZE=8 \
-        -DINTERRUPT_CONTROL_ENDPOINT -DUSE_FLASH_DESCRIPTORS \
+        -DINTERRUPT_CONTROL_ENDPOINT \
         -DUSE_SINGLE_DEVICE_CONFIGURATION \
         -DUSE_STATIC_OPTIONS="(USB_DEVICE_OPT_FULLSPEED | USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)" \
         -funsigned-char -funsigned-bitfields \
         -ffunction-sections -fdata-sections \
-        -fpack-struct -fshort-enums
+        -fpack-struct -fshort-enums -save-temps=obj
 
 # --gc-sections: We store each function and each variable in its 
 # own section so that the linker can do dead-code/data elimination.
@@ -93,16 +93,15 @@ MYUSB_OBJS= \
 
 IEC_OBJS= iec.o s1.o s2.o pp.o p2.o nib.o
 
-F_OBJS=     main.o commands.o descriptor.o \
-          $(BOARD_OBJS) $(MYUSB_OBJS) $(IEC_OBJS)
-
-OBJS=     $(patsubst %,obj/$(MODEL)/%,$(F_OBJS))
+OBJS=     $(addprefix obj/$(MODEL)/,              \
+          main.o commands.o descriptor.o          \
+          $(BOARD_OBJS) $(MYUSB_OBJS) $(IEC_OBJS))
 
 CC=      avr-gcc
 OBJCOPY= avr-objcopy
 
 obj/$(MODEL)/%.o: %.c
-	@mkdir -p  $(dir $@)
+	mkdir -p $(dir $@)
 	${CC} $(CFLAGS) -c -o $@ $< 
 
 build: $(OBJS)

@@ -74,6 +74,12 @@
 #define STATUS_ACTIVE           3
 #define STATUS_ERROR            4
 
+// Definition of EEPROM cells used for certain configuration settings
+// Please always add new settings at the end of this declaration
+enum {
+    EEPROM_SerialNumber,
+};
+
 extern volatile uint8_t eoi;
 extern volatile bool doDeviceReset;
 

@@ -115,7 +115,7 @@ USB_Descriptor_String_t PROGMEM ManufacturerString = {
 };
 
 // Serial for attaching more than one xum1541.
-USB_Descriptor_String_t PROGMEM SerialNumString = {
+static USB_Descriptor_String_t SerialNumString = {
     Header:        { Size: USB_STRING_LEN(3), Type: DTYPE_String },
     UnicodeString: L"000",
 };
@@ -132,10 +132,14 @@ USB_Descriptor_String_t PROGMEM ProductString = {
 
 uint16_t
 CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex,
-  void** const DescriptorAddress)
+  void **const DescriptorAddress, uint8_t *MemoryAddressSpace)
 {
     void*    Address = NULL;
     uint16_t Size    = NO_DESCRIPTOR;
+    wchar_t* ucdBuf;
+
+    /* generally assume Flash memory access unless specified otherwise */
+    *MemoryAddressSpace = MEMSPACE_FLASH;
 
     switch (wValue >> 8) {
     case DTYPE_Device:
@@ -161,10 +165,17 @@ CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex,
             Size    = pgm_read_byte(&ProductString.Header.Size);
             break;
         case 0x03:
-            /* Idea: it might be useful to get the serial number */
-            /* out of one EEPROM cell and convert it to Unicode  */
+            Size   = ~ eeprom_read_byte( EEPROM_SerialNumber );
+            ucdBuf = SerialNumString.UnicodeString + 2;
+            /*
+                precondition:  SerialNumString.UnicodeString := L"000"
+            */
+            for( Size &= 0xff ; Size > 0 ; Size /= 10 , --ucdBuf ) {
+                *ucdBuf = Size % 10 + 0x30;
+            }
             Address = (void *)&SerialNumString;
-            Size    = pgm_read_byte(&SerialNumString.Header.Size);
+            Size    = SerialNumString.Header.Size;
+            *MemoryAddressSpace = MEMSPACE_RAM;
             break;
         }
         break;
