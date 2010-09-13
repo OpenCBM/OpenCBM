@@ -99,14 +99,18 @@ OBJS=     $(addprefix obj/$(MODEL)/,              \
 
 CC=      avr-gcc
 OBJCOPY= avr-objcopy
+AVRSIZE= avr-size
 
 obj/$(MODEL)/%.o: %.c
 	mkdir -p $(dir $@)
 	${CC} $(CFLAGS) -c -o $@ $< 
 
 build: $(OBJS)
-	${CC} $(CFLAGS) -o $(MODELVERSION).bin $(OBJS) $(LDFLAGS)
-	${OBJCOPY} -O ihex $(MODELVERSION).bin $(MODELVERSION).hex
+	${CC} $(CFLAGS) -o obj/$(MODEL)/$(MODELVERSION).bin $(OBJS) $(LDFLAGS)
+	${AVRSIZE}         obj/$(MODEL)/$(MODELVERSION).bin
+	${OBJCOPY} -O ihex obj/$(MODEL)/$(MODELVERSION).bin $(MODELVERSION).hex
 
 clean:
 	rm -rf obj
+	rm -f xum1541-*-v*.hex
+	rm -f *.bak
