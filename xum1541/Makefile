@@ -96,12 +96,12 @@ IEC_OBJS= iec.o s1.o s2.o pp.o p2.o nib.o
 F_OBJS=     main.o commands.o descriptor.o \
           $(BOARD_OBJS) $(MYUSB_OBJS) $(IEC_OBJS)
 
-OBJS=     $(patsubst %,$(MODEL)/%,$(F_OBJS))
+OBJS=     $(patsubst %,obj/$(MODEL)/%,$(F_OBJS))
 
 CC=      avr-gcc
 OBJCOPY= avr-objcopy
 
-$(MODEL)/%.o: %.c
+obj/$(MODEL)/%.o: %.c
 	@mkdir -p  $(dir $@)
 	${CC} $(CFLAGS) -c -o $@ $< 
 
@@ -110,4 +110,4 @@ build: $(OBJS)
 	${OBJCOPY} -O ihex $(MODELVERSION).bin $(MODELVERSION).hex
 
 clean:
-	rm -rf $(MODELS)
+	rm -rf obj
