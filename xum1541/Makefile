@@ -62,7 +62,7 @@ endif
 MODELVERSION= xum1541-$(MODEL)-v$(XUMFW_VERSION)
 
 # If we wanted to reduce inlining to save size, these flags might be a
-# good start: -fno-default-inline -fno-implement-inlines
+# good start:
 #   --param inline-call-cost=2 -finline-limit=3 -fno-inline-small-functions
 CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
         -DF_CPU=$(CPURATE)UL -DF_CLOCK=F_CPU -mmcu=$(CPUMODEL) \
@@ -93,13 +93,13 @@ MYUSB_OBJS= \
 
 IEC_OBJS= iec.o s1.o s2.o pp.o p2.o nib.o
 
-OBJS=     $(addprefix obj/$(MODEL)/,              \
-          main.o commands.o descriptor.o          \
-          $(BOARD_OBJS) $(MYUSB_OBJS) $(IEC_OBJS))
+OBJS=   $(addprefix obj/$(MODEL)/,              \
+        main.o commands.o descriptor.o          \
+        $(BOARD_OBJS) $(MYUSB_OBJS) $(IEC_OBJS))
 
-CC=      avr-gcc
-OBJCOPY= avr-objcopy
-AVRSIZE= avr-size
+CC=     avr-gcc
+OBJCOPY=avr-objcopy
+AVRSIZE=avr-size
 
 obj/$(MODEL)/%.o: %.c
 	mkdir -p $(dir $@)

@@ -77,7 +77,7 @@
 // Definition of EEPROM cells used for certain configuration settings
 // Please always add new settings at the end of this declaration
 enum {
-    EEPROM_SerialNumber,
+    EEPROM_SerialNumber = 0,
 };
 
 extern volatile uint8_t eoi;
