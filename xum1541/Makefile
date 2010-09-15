@@ -74,7 +74,7 @@ CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
         -DUSE_STATIC_OPTIONS="(USB_DEVICE_OPT_FULLSPEED | USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)" \
         -funsigned-char -funsigned-bitfields \
         -ffunction-sections -fdata-sections \
-        -fpack-struct -fshort-enums -save-temps=obj
+        -fpack-struct -fshort-enums
 
 # --gc-sections: We store each function and each variable in its 
 # own section so that the linker can do dead-code/data elimination.
@@ -112,5 +112,3 @@ build: $(OBJS)
 
 clean:
 	rm -rf obj
-	rm -f xum1541-*-v*.hex
-	rm -f *.bak
