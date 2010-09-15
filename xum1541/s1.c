@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s1.c,v 1.3 2010-01-05 07:42:01 natelawson Exp $
+ * This Revision: $Id: s1.c,v 1.4 2010-09-15 01:08:55 natelawson Exp $
  *
  * $Log $
  * Revision 1.5  2007/03/17 19:31:34  harbaum
@@ -34,14 +34,20 @@ s1_write_byte(uint8_t c)
 {
     uint8_t i;
 
-    for (i = 0; i < 8; i++, c <<= 1) {
+    for (i = 8; i != 0; i--, c <<= 1) {
+        // Send first bit, releasing CLK and waiting for drive to ack by
+        // setting CLK.
         if ((c & 0x80) != 0)
             iec_set(IO_DATA);
         else
             iec_release(IO_DATA);
         iec_release(IO_CLK);
+        DELAY_US(1);
         while (!iec_get(IO_CLK));
 
+        // Send second bit. First, wait for drive to release CLK.
+        // Then, release DATA and set CLK and wait for drive to ack by
+        // setting DATA.
         if ((c & 0x80) != 0)
             iec_release(IO_DATA);
         else
@@ -50,6 +56,7 @@ s1_write_byte(uint8_t c)
 
         iec_release(IO_DATA);
         iec_set(IO_CLK);
+        DELAY_US(1);
         while (!iec_get(IO_DATA));
     }
 }
@@ -57,23 +64,21 @@ s1_write_byte(uint8_t c)
 uint8_t
 s1_read_byte(void)
 {
-    int8_t i;
-    uint8_t b, c;
+    uint8_t i, b, c;
 
     c = 0;
-    for (i = 7; i >= 0; i--) {
+    for (i = 8; i != 0; i--) {
         while (iec_get(IO_DATA));
-
         iec_release(IO_CLK);
+        DELAY_US(1);
         b = iec_get(IO_CLK);
         c = (c >> 1) | (b ? 0x80 : 0);
         iec_set(IO_DATA);
         while (b == iec_get(IO_CLK));
 
         iec_release(IO_DATA);
-
+        DELAY_US(1);
         while (!iec_get(IO_DATA));
-
         iec_set(IO_CLK);
     }
 
