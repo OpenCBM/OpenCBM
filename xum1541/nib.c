@@ -10,37 +10,35 @@
 #include "xum1541.h"
 
 /*
- * Timeout count for a burst read/write.
- *
- * At 8 Mhz, this is ~48 milliseconds, depending on how tight the loop is.
- * This should be more than enough to transfer a byte, given that we only
- * have about 25 us/byte at 40 KB/s.
- */
-#define TO_HANDSHAKED_READ    0xffff
-
-/*
  * ATN/DATA handshaked read from the drive.
  *
  * It takes about 2 us for the drive to pull DATA once we set ATN.
+ * Sometimes DATA is already held before we pull ATN.
  * Then it takes about 13 us for it to release DATA once a byte is ready.
- * Once we release ATN, it takes another 2 us to release DATA.
+ * Once we release ATN, it takes another 2 us to release DATA, if it is
+ * at the end of the sequence.
  */
 uint8_t
 nib_parburst_read()
 {
     uint8_t data;
 
+    // Set ATN and wait for drive to release DATA
     iec_set_release(IO_ATN, IO_DATA|IO_CLK);
     DELAY_US(5);
     while (iec_get(IO_DATA) != 0)
         ;
 
+    // Byte ready -- read it and release ATN
     data = xu1541_pp_read();
     DELAY_US(1);
     iec_release(IO_ATN);
 
+    // Wait for the drive to pull DATA again. Delay for a bit afterwards
+    // to keep the next read from being too close together.
     while (iec_get(IO_DATA) == 0)
         ;
+    DELAY_US(5);
     return data;
 }
 
@@ -48,16 +46,9 @@ nib_parburst_read()
 int8_t
 nib_read_handshaked(uint8_t *data, uint8_t toggle)
 {
-    uint16_t to;
-
     // Wait for a byte to be ready (data toggle matches expected value).
-    to = TO_HANDSHAKED_READ;
-    while (iec_get(IO_DATA) != toggle) {
-        if (to-- == 0) {
-            DEBUGF(DBG_ERROR, "nbrdh1 to\n");
-            return -1;
-        }
-    }
+    while (iec_get(IO_DATA) != toggle)
+        ;
 
     // Read it directly from the port without debouncing.
     *data = xu1541_pp_read();
@@ -104,16 +95,9 @@ nib_parburst_write(uint8_t data)
 int8_t
 nib_write_handshaked(uint8_t data, uint8_t toggle)
 {
-    uint16_t to;
-
     // Wait for drive to be ready (data toggle matches expected value).
-    to = TO_HANDSHAKED_READ;
-    while (iec_get(IO_DATA) != toggle) {
-        if (to-- == 0) {
-            DEBUGF(DBG_ERROR, "nbwrh to\n");
-            return -1;
-        }
-    }
+    while (iec_get(IO_DATA) != toggle)
+        ;
 
     // Write out the data value via parallel.
     xu1541_pp_write(data);
