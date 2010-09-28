@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s2.c,v 1.4 2010-09-15 01:08:32 natelawson Exp $
+ * This Revision: $Id: s2.c,v 1.5 2010-09-28 03:18:12 natelawson Exp $
  *
  * $Log $
  * Revision 1.7  2007/03/17 19:31:34  harbaum
@@ -48,7 +48,8 @@ s2_write_byte(uint8_t c)
             iec_release(IO_DATA);
         c >>= 1;
         iec_release(IO_ATN);
-        while (iec_get(IO_CLK));
+        while (iec_get(IO_CLK))
+            ;
 
         // Send second bit, setting ATN and waiting for CLK set ack.
         if ((c & 1) != 0)
@@ -57,7 +58,8 @@ s2_write_byte(uint8_t c)
             iec_release(IO_DATA);
         c >>= 1;
         iec_set(IO_ATN);
-        while (!iec_get(IO_CLK));
+        while (!iec_get(IO_CLK))
+            ;
     }
 
     iec_release(IO_DATA);
@@ -71,13 +73,19 @@ s2_read_byte(void)
     c = 0;
     for (i = 4; i != 0; i--) {
         // Receive first bit, waiting for CLK and releasing ATN to ack.
-        while (iec_get(IO_CLK));
+        while (iec_get(IO_CLK))
+            ;
+        // Pause each time CLK changes to be sure DATA is stable.
+        DELAY_US(0.5);
         c = (c >> 1) | (iec_get(IO_DATA) ? 0x80 : 0);
         iec_release(IO_ATN);
 
         // Receive second bit, waiting for CLK to be released and setting ATN
         // to ack.
-        while (!iec_get(IO_CLK));
+        while (!iec_get(IO_CLK))
+            ;
+        // Pause each time CLK changes to be sure DATA is stable.
+        DELAY_US(0.5);
         c = (c >> 1) | (iec_get(IO_DATA) ? 0x80 : 0);
         iec_set(IO_ATN);
     }
