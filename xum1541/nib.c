@@ -26,17 +26,17 @@ nib_parburst_read()
     // Set ATN and wait for drive to release DATA
     iec_set_release(IO_ATN, IO_DATA|IO_CLK);
     DELAY_US(5);
-    while (iec_get(IO_DATA) != 0)
+    while (iec_get(IO_DATA))
         ;
 
     // Byte ready -- read it and release ATN
-    data = xu1541_pp_read();
     DELAY_US(1);
+    data = xu1541_pp_read();
     iec_release(IO_ATN);
 
     // Wait for the drive to pull DATA again. Delay for a bit afterwards
     // to keep the next read from being too close together.
-    while (iec_get(IO_DATA) == 0)
+    while (!iec_get(IO_DATA))
         ;
     DELAY_US(5);
     return data;
@@ -69,7 +69,7 @@ nib_parburst_write(uint8_t data)
 
     iec_set_release(IO_ATN, IO_DATA|IO_CLK);
     DELAY_US(5);
-    while (iec_get(IO_DATA) != 0)
+    while (iec_get(IO_DATA))
         ;
 
     xu1541_pp_write(data);
@@ -84,7 +84,7 @@ nib_parburst_write(uint8_t data)
      * a while.
      */
     DELAY_US(10);
-    while (iec_get(IO_DATA) == 0)
+    while (!iec_get(IO_DATA))
         ;
 
     // Read from parallel port, making the outputs inputs. (critical)
