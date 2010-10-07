@@ -310,6 +310,7 @@ cbm_raw_write(uint16_t len, uint8_t flags)
 
     iec_release(IO_DATA);
     iec_set(IO_CLK | (atn ? IO_ATN : 0));
+    DELAY_US(0.5);
 
     // Wait for any device to pull data after we set CLK. This is actually
     // IEC_T_AT (1 ms) but we allow a bit longer.
@@ -397,7 +398,8 @@ cbm_raw_write(uint16_t len, uint8_t flags)
         /*
          * If there was an error, release all lines before returning.
          * Delay the minimum time to releasing ATN after frame, just in
-         * case the IEC_T_BB delay (above) was skipped.
+         * case the IEC_T_BB delay (above) was skipped. It is only performed
+         * if send_byte() succeeded and not in this error case.
          */
         DELAY_US(IEC_T_R);
         iec_release(IO_CLK | IO_ATN);
