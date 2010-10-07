@@ -28,7 +28,7 @@
  */
 #define IEC_T_AT    1000 // Max ATN response required time (us)
 //      IEC_T_H     inf  // Max listener hold-off time
-#define IEC_T_NE    200  // Max non-EOI response to RFD time (us)
+#define IEC_T_NE    40   // Typical non-EOI response to RFD time (us)
 #define IEC_T_S     20   // Min talker bit setup time (us, 70 typical)
 #define IEC_T_V     20   // Min data valid time (us, 20 typical)
 #define IEC_T_F     1000 // Max frame handshake time (us, 20 typical)
@@ -321,7 +321,15 @@ cbm_raw_write(uint16_t len, uint8_t flags)
         return 0;
     }
 
-    // Respond with data as soon as device is ready (max time IEC_T_NE).
+    /* 
+     * Wait a short while for drive to be ready for us to release CLK.
+     * This uses the typical value for IEC_T_NE. Even though it has no
+     * minimum, the transfer starts to be unreliable for Tne somewhere
+     * below 10 us.
+     */
+    DELAY_US(IEC_T_NE);
+
+    // Respond with data as soon as device is ready (max time Tne, 200 us).
     while (len != 0) {
         // Be sure DATA line has been pulled by device. If not, we timed
         // out without a device being ready.
