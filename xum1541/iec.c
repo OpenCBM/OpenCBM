@@ -23,6 +23,26 @@
 #define IEC_ATN     0x04
 #define IEC_RESET   0x08
 
+/*
+ * Table of constants from IEC timing diagram
+ */
+#define IEC_T_AT    1000 // Max ATN response required time (us)
+//      IEC_T_H     inf  // Max listener hold-off time
+#define IEC_T_NE    200  // Max non-EOI response to RFD time (us)
+#define IEC_T_S     20   // Min talker bit setup time (us, 70 typical)
+#define IEC_T_V     20   // Min data valid time (us, 20 typical)
+#define IEC_T_F     1000 // Max frame handshake time (us, 20 typical)
+#define IEC_T_R     20   // Min frame to release of ATN time (us)
+#define IEC_T_BB    100  // Min time between bytes (us)
+#define IEC_T_YE    200  // Min EOI response time (us, 250 typical)
+#define IEC_T_EI    60   // Min EOI response hold time (us)
+#define IEC_T_RY    60   // Max talker response limit (us, 30 typical)
+#define IEC_T_PR    20   // Min byte acknowledge hold time (us, 30 typical)
+#define IEC_T_TK    -1   // 20/30/100 talk-attention release time (us)
+#define IEC_T_DC    0    // Min talk-attention acknowledge time (us)
+#define IEC_T_DA    80   // Min talk-attention ack hold time (us)
+#define IEC_T_FR    60   // Min EOI acknowledge time (us)
+
 /* fast conversion between logical and physical mapping */
 static const uint8_t iec2hw_table[] PROGMEM = {
     0,
@@ -67,7 +87,7 @@ check_if_bus_free(void)
     DELAY_US(50);
 
     // If DATA is held, drive is not yet ready.
-    if (iec_get(IO_DATA) != 0)
+    if (iec_get(IO_DATA))
         return 0;
 
     /*
@@ -75,7 +95,7 @@ check_if_bus_free(void)
      * it glitch if DATA is stable for < 38 us before we pull ATN.
      */
     DELAY_US(50);
-    if (iec_get(IO_DATA) != 0)
+    if (iec_get(IO_DATA))
         return 0;
 
     /*
@@ -86,7 +106,7 @@ check_if_bus_free(void)
     DELAY_US(100);
 
     // If DATA is still unset, no drive answered.
-    if (iec_get(IO_DATA) == 0) {
+    if (!iec_get(IO_DATA)) {
         iec_release(IO_ATN);
         return 0;
     }
@@ -101,21 +121,33 @@ check_if_bus_free(void)
      * Nate noticed on a scope that the drive pulls DATA for 60 us,
      * 150-500 us after releasing it in response to when we release ATN.
      */
-    return (iec_get(IO_DATA) == 0) ? 1 : 0;
+    return !iec_get(IO_DATA);
 }
 
-// Wait up to 1.5 secs to see if drive answers ATN toggle.
+/*
+ * Wait up to 1.5 secs to see if any drive answers ATN toggle.
+ * Technically, we only have to wait up to IEC_T_AT (1 ms) but we're
+ * being generous here.
+ */
 static void
 wait_for_free_bus(bool forever)
 {
     uint16_t i;
 
-    for (i = (uint16_t)(XUM1541_TIMEOUT * 10000); i != 0 || forever; i--) {
+    for (i = (uint16_t)(XUM1541_TIMEOUT * 5000); i != 0 || forever; i--) {
+        /*
+         * We depend on the internal delays within this function to be sure
+         * the whole loop takes long enough. If there is no device, this
+         * takes 200 us per try (1.5 sec total timeout).
+         *
+         * In the minimal case (DATA held the whole time), it only delays
+         * for 50 us per try (375 ms total timeout). This is still much
+         * more than IEC_T_AT.
+         */
         if (check_if_bus_free())
             return;
 
         // Bail out early if host signalled an abort.
-        DELAY_US(100);
         if (!TimerWorker())
             return;
     }
