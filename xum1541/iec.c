@@ -229,7 +229,7 @@ send_byte(uint8_t b)
         // Set the bit value on the DATA line and wait for it to settle.
         if (!(b & 1)) {
             iec_set(IO_DATA);
-            DELAY_US(0.5);
+            IEC_DELAY();
         }
 
         // Trigger clock edge and hold valid for spec minimum time (Tv).
@@ -310,7 +310,7 @@ cbm_raw_write(uint16_t len, uint8_t flags)
 
     iec_release(IO_DATA);
     iec_set(IO_CLK | (atn ? IO_ATN : 0));
-    DELAY_US(0.5);
+    IEC_DELAY();
 
     // Wait for any device to pull data after we set CLK. This is actually
     // IEC_T_AT (1 ms) but we allow a bit longer.
@@ -391,7 +391,7 @@ cbm_raw_write(uint16_t len, uint8_t flags)
 
             // Now release CLK and wait for device to grab it.
             iec_release(IO_CLK);
-            DELAY_US(0.5);
+            IEC_DELAY();
 
             // Wait forever for device (IEC_T_DC).
             while (!iec_get(IO_CLK)) {
