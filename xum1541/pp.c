@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: pp.c,v 1.3 2010-09-15 01:08:01 natelawson Exp $
+ * This Revision: $Id: pp.c,v 1.4 2010-10-07 03:59:07 natelawson Exp $
  *
  * $Log $
  * Revision 1.3  2008/10/09 18:55:45  strik
@@ -23,26 +23,41 @@
 
 #include "xum1541.h"
 
+/*
+ * Send 2 bytes to the drive.
+ *
+ * The delays after setting the parallel data are to be sure it is
+ * ready on the port before signaling by toggling CLK. The parallel
+ * lines transition quickly because there is little load due to the
+ * drive keeping them in hi-Z. Thus the delays are not strictly needed,
+ * at least at 16 MHz or below.
+ */
 void
 pp_write_2_bytes(uint8_t *c)
 {
-    while (!iec_get(IO_DATA));
+    while (!iec_get(IO_DATA))
+        ;
     xu1541_pp_write(*c++);
+    DELAY_US(0.5);
     iec_release(IO_CLK);
 
-    while (iec_get(IO_DATA));
+    while (iec_get(IO_DATA))
+        ;
     xu1541_pp_write(*c);
+    DELAY_US(0.5);
     iec_set(IO_CLK);
 }
 
 void
 pp_read_2_bytes(uint8_t *c)
 {
-    while (!iec_get(IO_DATA));
+    while (!iec_get(IO_DATA))
+        ;
     *c++ = xu1541_pp_read();
     iec_release(IO_CLK);
 
-    while (iec_get(IO_DATA));
+    while (iec_get(IO_DATA))
+        ;
     *c = xu1541_pp_read();
     iec_set(IO_CLK);
 }

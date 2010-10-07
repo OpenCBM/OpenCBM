@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s2.c,v 1.5 2010-09-28 03:18:12 natelawson Exp $
+ * This Revision: $Id: s2.c,v 1.6 2010-10-07 03:59:07 natelawson Exp $
  *
  * $Log $
  * Revision 1.7  2007/03/17 19:31:34  harbaum
@@ -46,6 +46,7 @@ s2_write_byte(uint8_t c)
             iec_set(IO_DATA);
         else
             iec_release(IO_DATA);
+        IEC_DELAY();
         c >>= 1;
         iec_release(IO_ATN);
         while (iec_get(IO_CLK))
@@ -56,6 +57,7 @@ s2_write_byte(uint8_t c)
             iec_set(IO_DATA);
         else
             iec_release(IO_DATA);
+        IEC_DELAY();
         c >>= 1;
         iec_set(IO_ATN);
         while (!iec_get(IO_CLK))
@@ -63,6 +65,7 @@ s2_write_byte(uint8_t c)
     }
 
     iec_release(IO_DATA);
+    IEC_DELAY();
 }
 
 uint8_t
@@ -76,7 +79,7 @@ s2_read_byte(void)
         while (iec_get(IO_CLK))
             ;
         // Pause each time CLK changes to be sure DATA is stable.
-        DELAY_US(0.5);
+        IEC_DELAY();
         c = (c >> 1) | (iec_get(IO_DATA) ? 0x80 : 0);
         iec_release(IO_ATN);
 
@@ -85,7 +88,7 @@ s2_read_byte(void)
         while (!iec_get(IO_CLK))
             ;
         // Pause each time CLK changes to be sure DATA is stable.
-        DELAY_US(0.5);
+        IEC_DELAY();
         c = (c >> 1) | (iec_get(IO_DATA) ? 0x80 : 0);
         iec_set(IO_ATN);
     }
