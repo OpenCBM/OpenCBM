@@ -25,7 +25,8 @@ Revisions
 
 Installation
 ============
-First, install OpenCBM.
+First, install OpenCBM. You'll need to enable the xum1541 plugin in
+opencbm.conf. See the OpenCBM docs for more info on installation.
 
 If you are on Windows, now you need to install the libusb driver.
 Follow the steps to install the library in the xu1541/windrv directory.
@@ -93,6 +94,14 @@ the AVR bin directory is present.
 
 Currently I am building releases using WinAVR-20100110. The LUFA version
 included in this distribution is 091223.
+
+
+Usage notes
+===========
+Please note that the s2 and nib protocols do not work if multiple drives
+are connected and powered on. This is because they toggle the ATN line,
+which is only ok if there is no other drive on the bus. It is ok to have
+multiple drives connected, as long as only one is powered on.
 
 
 Developer notes
@@ -223,6 +232,7 @@ firmware.
 Tasks
 =====
 Bugs:
+- nibwrite fails to detect speed of drive
 - The USBKEY firmware fails to enter bootloader mode from software.
   This will eventually be fixed but is not a big deal since that board
   has hardware buttons to do the same function. The ZoomFloppy works fine.
