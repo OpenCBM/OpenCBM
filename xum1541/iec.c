@@ -39,7 +39,7 @@
 #define IEC_T_RY    60   // Max talker response limit (us, 30 typical)
 #define IEC_T_PR    20   // Min byte acknowledge hold time (us, 30 typical)
 #define IEC_T_TK    -1   // 20/30/100 talk-attention release time (us)
-#define IEC_T_DC    0    // Min talk-attention acknowledge time (us)
+//      IEC_T_DC    inf  // Talk-attention acknowledge time, 0 - inf
 #define IEC_T_DA    80   // Min talk-attention ack hold time (us)
 #define IEC_T_FR    60   // Min EOI acknowledge time (us)
 
@@ -212,7 +212,7 @@ iec_wait_clk(void)
  * of 70 us is also not quite long enough. Increasing the setup time to
  * 72 us appears to work consistently, but he chose the value 75 us to
  * give more margin. The 1541 consistently takes 120 us for Ts and
- * 70 us for Tv, which is why no one probably noticed this before.
+ * 70 us for Tv, which is probably why no one noticed this before.
  *
  * The hold time did not appear to have any effect. In fact, reducing the
  * hold time to 15 us still worked fine.
@@ -222,24 +222,26 @@ send_byte(uint8_t b)
 {
     uint8_t i, ack = 0;
 
-    for (i = 0; i < 8; i++) {
+    for (i = 8; i != 0; i--) {
         // Wait for Ts (setup) with additional padding
-        DELAY_US(75);
+        DELAY_US(IEC_T_S + 55);
 
-        // Set the bit value on the DATA line.
-        if ((b & 1) == 0)
+        // Set the bit value on the DATA line and wait for it to settle.
+        if (!(b & 1)) {
             iec_set(IO_DATA);
+            DELAY_US(0.5);
+        }
 
         // Trigger clock edge and hold valid for spec minimum time (Tv).
         iec_release(IO_CLK);
-        DELAY_US(20);
+        DELAY_US(IEC_T_V);
 
         iec_set_release(IO_CLK, IO_DATA);
         b >>= 1;
     }
 
     /*
-     * Wait up to 2 ms for DATA to be driven by device.
+     * Wait up to 2 ms for DATA to be driven by device (IEC_T_F).
      * It takes around 70-80 us on Nate's 1541.
      */
     ack = iec_wait_timeout_2ms(IO_DATA, IO_DATA);
@@ -261,11 +263,11 @@ send_byte(uint8_t b)
 static bool
 wait_for_listener(void)
 {
-    /* release the clock line to indicate that we are ready */
+    // Release CLK to indicate that we are ready to send.
     iec_release(IO_CLK);
 
-    /* wait forever for client to do the same with the DATA line */
-    while (iec_get(IO_DATA) != 0) {
+    // Wait forever (IEC_T_H) for device to do the same with the DATA line.
+    while (iec_get(IO_DATA)) {
         // If we got an abort, bail out of this loop.
         if (!TimerWorker())
             return false;
@@ -289,6 +291,8 @@ cbm_raw_write(uint16_t len, uint8_t flags)
     eoi = 0;
 
     DEBUGF(DBG_INFO, "cwr %d, atn %d, talk %d\n", len, atn, talk);
+    if (len == 0)
+        return 0;
 
     usbInitIo(len, ENDPOINT_DIR_OUT);
 
@@ -307,7 +311,8 @@ cbm_raw_write(uint16_t len, uint8_t flags)
     iec_release(IO_DATA);
     iec_set(IO_CLK | (atn ? IO_ATN : 0));
 
-    // Wait for any device to pull data after we set CLK.
+    // Wait for any device to pull data after we set CLK. This is actually
+    // IEC_T_AT (1 ms) but we allow a bit longer.
     if (!iec_wait_timeout_2ms(IO_DATA, IO_DATA)) {
         DEBUGF(DBG_ERROR, "write: no devs\n");
         iec_release(IO_CLK | IO_ATN);
@@ -315,61 +320,72 @@ cbm_raw_write(uint16_t len, uint8_t flags)
         return 0;
     }
 
-    while (len && rv) {
-        // Wait 50 us before starting.
-        DELAY_US(50);
-
-        // Be sure DATA line has been pulled by device
-        if (iec_get(IO_DATA)) {
-            // Release clock and wait forever for listener to release data
-            if (!wait_for_listener()) {
-                DEBUGF(DBG_ERROR, "write: w4l abrt\n");
-                rv = 0;
-                break;
-            }
-
-            /*
-             * This is timing critical and if we are not sending an eoi
-             * the iec_set(CLK) must be reached in less than ~150us.
-             */
-            if (len == 1 && !atn) {
-                /*
-                 * Signal eoi by waiting so long (>200us) that listener
-                 * pulls DATA, then wait for it to be released.
-                 */
-                iec_wait_timeout_2ms(IO_DATA, IO_DATA);
-                iec_wait_timeout_2ms(IO_DATA, 0);
-            }
-            iec_set(IO_CLK);
-
-            // Get a data byte from host, quitting if it signalled an abort.
-            if (usbRecvByte(&data) != 0) {
-                rv = 0;
-                break;
-            }
-            if (send_byte(data)) {
-                len--;
-                DELAY_US(100);
-            } else {
-                DEBUGF(DBG_ERROR, "write: io err\n");
-                rv = 0;
-            }
-        } else {
-            // Occurs if there is no device addressed by this command
+    // Respond with data as soon as device is ready (max time IEC_T_NE).
+    while (len != 0) {
+        // Be sure DATA line has been pulled by device. If not, we timed
+        // out without a device being ready.
+        if (!iec_get(IO_DATA)) {
             DEBUGF(DBG_ERROR, "write: dev not pres\n");
             rv = 0;
+            break;
+        }
+
+        // Release CLK and wait forever for listener to release data.
+        if (!wait_for_listener()) {
+            DEBUGF(DBG_ERROR, "write: w4l abrt\n");
+            rv = 0;
+            break;
+        }
+
+        /*
+         * Signal EOI by waiting so long (IEC_T_YE, > 200 us) that
+         * listener pulls DATA, then wait for it to be released.
+         * The device will do so in IEC_T_EI, >= 60 us.
+         *
+         * If we're not signalling EOI, we must set CLK (below) in less
+         * than 200 us after wait_for_listener() (IEC_T_RY).
+         */
+        if (len == 1 && !atn) {
+            iec_wait_timeout_2ms(IO_DATA, IO_DATA);
+            iec_wait_timeout_2ms(IO_DATA, 0);
+        }
+        iec_set(IO_CLK);
+
+        // Get a data byte from host, quitting if it signalled an abort.
+        if (usbRecvByte(&data) != 0) {
+            rv = 0;
+            break;
+        }
+        if (send_byte(data)) {
+            len--;
+            DELAY_US(IEC_T_BB);
+        } else {
+            DEBUGF(DBG_ERROR, "write: io err\n");
+            rv = 0;
+            break;
         }
 
         wdt_reset();
     }
-
     usbIoDone();
+
+    /*
+     * We rely on the per-byte IEC_T_BB delay (above) being more than
+     * the minimum time before releasing ATN (IEC_T_R).
+     */
     if (rv != 0) {
-        // If we're asking the device to talk, wait for it to grab CLK.
+        // Talk-ATN turn around (talker and listener exchange roles).
         if (talk) {
-            iec_set(IO_DATA);
-            iec_release(IO_CLK | IO_ATN);
-            while (iec_get(IO_CLK) == 0) {
+            // Hold DATA and release ATN, waiting talk-ATN release time.
+            iec_set_release(IO_DATA, IO_ATN);
+            DELAY_US(IEC_T_TK);
+
+            // Now release CLK and wait for device to grab it.
+            iec_release(IO_CLK);
+            DELAY_US(0.5);
+
+            // Wait forever for device (IEC_T_DC).
+            while (!iec_get(IO_CLK)) {
                 if (!TimerWorker()) {
                     rv = 0;
                     break;
@@ -377,11 +393,13 @@ cbm_raw_write(uint16_t len, uint8_t flags)
             }
         } else
             iec_release(IO_ATN);
-
-        // Wait 100 us before the next request.
-        DELAY_US(100);
     } else {
-        // If there was an error, just release all lines before returning.
+        /*
+         * If there was an error, release all lines before returning.
+         * Delay the minimum time to releasing ATN after frame, just in
+         * case the IEC_T_BB delay (above) was skipped.
+         */
+        DELAY_US(IEC_T_R);
         iec_release(IO_CLK | IO_ATN);
     }
 
