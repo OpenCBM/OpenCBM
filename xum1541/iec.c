@@ -79,6 +79,11 @@ cbm_init(void)
     DELAY_US(100);
 }
 
+/*
+ * All exit paths have to take ~200 us total for the timing in
+ * wait_for_free_bus() to be correct. Once we're past the point of finding
+ * an active drive (DATA set after ATN is set), we have hit 200 us.
+ */
 static uint8_t
 check_if_bus_free(void)
 {
@@ -87,16 +92,20 @@ check_if_bus_free(void)
     DELAY_US(50);
 
     // If DATA is held, drive is not yet ready.
-    if (iec_get(IO_DATA))
+    if (iec_get(IO_DATA)) {
+        DELAY_US(150);
         return 0;
+    }
 
     /*
      * DATA is free, now make sure it is stable for 50 us. Nate has seen
      * it glitch if DATA is stable for < 38 us before we pull ATN.
      */
     DELAY_US(50);
-    if (iec_get(IO_DATA))
+    if (iec_get(IO_DATA)) {
+        DELAY_US(100);
         return 0;
+    }
 
     /*
      * Assert ATN and wait for the drive to have time to react. It typically
