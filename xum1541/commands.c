@@ -343,8 +343,7 @@ nib_parburst_write_checked(uint8_t data)
 
     // State machine to match 00,55,aa,ff,XX where XX is read/write track.
     if (cmdIdx == sizeof(mnibCmd)) {
-        if (data == 0x03 || data == 0x04 || data == 0x05 ||
-            data == 0x0b || data == 0x0c) {
+        if (data == 0x03 || data == 0x04 || data == 0x05 || data == 0x0b) {
             suppressNibCmd = true;
         }
         cmdIdx = 0;
