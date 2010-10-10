@@ -4,25 +4,35 @@
 [Strings]
 VendorName  = "OpenCBM development team"
 SourceName  = "XU1541/XUM1541 Libusb-Win32 Driver Installation Disk"
-DeviceGUID  = "{AF072C1C-FC4A-46A0-AC8B-6D7A9EBF2B1F}"
+DeviceGUID  = "{04ECF226-1023-4259-B25C-15E904D846DE}"
 
 DeviceName1 = "OpenCBM USB (generic)"
 DeviceID1   = VID_0403&PID_c632
+
 DeviceName2 = "XU1541 BIOS (V-USB)"
 DeviceID2   = VID_0403&PID_c632&REV_0100
 DeviceName3 = "XU1541 BIOS (USBtiny)"
 DeviceID3   = VID_0403&PID_c632&REV_0200
-DeviceName4 = "XUM1541 USB floppy adapter"
+
+DeviceName4 = "XUM1541 USB floppy adapter (generic)"
 DeviceID4   = VID_16d0&PID_0504
+DeviceName5 = "XUM1541 USB floppy adapter (AT90USBKey)"
+DeviceID5   = VID_16d0&PID_0504&REV_0106
+DeviceName6 = "XUM1541 USB floppy adapter (ZoomFloppy)"
+DeviceID6   = VID_16d0&PID_0504&REV_0206
+DeviceName7 = "XUM1541 USB floppy adapter (Bumble-B)"
+DeviceID7   = VID_16d0&PID_0504&REV_0306
+DeviceName8 = "XUM1541 USB floppy adapter (Olimex)"
+DeviceID8   = VID_16d0&PID_0504&REV_0406
 
 
 [Version]
-Signature  = "$Windows NT$"
-Class     = "libusb-win32 devices"
-ClassGuid  = {EB781AAF-9C70-4523-A5DF-642A87ECA567}
-Provider   = "libusb-win32"
+Signature   = "$Windows NT$"
+Class       = "libusb-win32 devices"
+ClassGuid   = {EB781AAF-9C70-4523-A5DF-642A87ECA567}
+Provider    = "libusb-win32"
 CatalogFile = XUM1541_USB_floppy_adapter.cat
-DriverVer  = 07/29/2010, 1.2.1.0
+DriverVer   = 10/02/2010, 1.2.2.0
 
 [ClassInstall32]
 Addreg = libusb_class_install_add_reg
@@ -42,24 +52,24 @@ HKR,,Icon,,-20
 1 = %SourceName%
 
 [SourceDisksFiles.x86]
-libusb0.sys   = 1,x86
+libusb0.sys     = 1,x86
 libusb0_x86.dll = 1,x86
 
 [SourceDisksFiles.amd64]
-libusb0.sys   = 1,amd64
-libusb0.dll   = 1,amd64
+libusb0.sys     = 1,amd64
+libusb0.dll     = 1,amd64
 libusb0_x86.dll = 1,x86
 
 [SourceDisksFiles.ia64]
-libusb0.sys   = 1,ia64
-libusb0.dll   = 1,ia64
+libusb0.sys     = 1,ia64
+libusb0.dll     = 1,ia64
 libusb0_x86.dll = 1,x86
 
 [DestinationDirs]
-libusb_files_sys     = 10,system32\drivers
-libusb_files_dll     = 10,system32
+libusb_files_sys       = 10,system32\drivers
+libusb_files_dll       = 10,system32
 libusb_files_dll_wow64 = 10,syswow64
-libusb_files_dll_x86  = 10,system32
+libusb_files_dll_x86   = 10,system32
 
 [libusb_files_sys]
 libusb0.sys
@@ -126,10 +136,10 @@ HKR,,SurpriseRemovalOK,0x00010001,1
 ;--------------------------------------------------------------------------
 
 [libusb_add_service]
-DisplayName  = "libusb-win32 - Kernel Driver 07/29/2010 1.2.1.0"
-ServiceType  = 1
-StartType   = 3
-ErrorControl = 0
+DisplayName   = "libusb-win32 - Kernel Driver 10/02/2010 1.2.2.0"
+ServiceType   = 1
+StartType     = 3
+ErrorControl  = 0
 ServiceBinary = %12%\libusb0.sys
 
 ;--------------------------------------------------------------------------
@@ -145,21 +155,37 @@ ServiceBinary = %12%\libusb0.sys
 %DeviceName2% = LIBUSB_WIN32_DEV, USB\%DeviceID2%
 %DeviceName3% = LIBUSB_WIN32_DEV, USB\%DeviceID3%
 %DeviceName4% = LIBUSB_WIN32_DEV, USB\%DeviceID4%
+%DeviceName5% = LIBUSB_WIN32_DEV, USB\%DeviceID5%
+%DeviceName6% = LIBUSB_WIN32_DEV, USB\%DeviceID6%
+%DeviceName7% = LIBUSB_WIN32_DEV, USB\%DeviceID7%
+%DeviceName8% = LIBUSB_WIN32_DEV, USB\%DeviceID8%
 
 [Devices.NT]
 %DeviceName1% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID1%
 %DeviceName2% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID2%
 %DeviceName3% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID3%
 %DeviceName4% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID4%
+%DeviceName5% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID5%
+%DeviceName6% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID6%
+%DeviceName7% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID7%
+%DeviceName8% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID8%
 
 [Devices.NTAMD64]
 %DeviceName1% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID1%
 %DeviceName2% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID2%
 %DeviceName3% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID3%
 %DeviceName4% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID4%
+%DeviceName5% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID5%
+%DeviceName6% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID6%
+%DeviceName7% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID7%
+%DeviceName8% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID8%
 
 [Devices.NTIA64]
 %DeviceName1% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID1%
 %DeviceName2% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID2%
 %DeviceName3% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID3%
 %DeviceName4% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID4%
+%DeviceName5% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID5%
+%DeviceName6% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID6%
+%DeviceName7% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID7%
+%DeviceName8% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID8%
