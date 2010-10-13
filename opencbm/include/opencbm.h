@@ -13,7 +13,7 @@
 /*! **************************************************************
 ** \file include/opencbm.h \n
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
-** \version $Id: opencbm.h,v 1.29 2010-09-09 05:12:32 natelawson Exp $ \n
+** \version $Id: opencbm.h,v 1.30 2010-10-13 21:09:39 wmsr Exp $ \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
 ** \authors With additions from Wolfgang Moser and Arnd \n
@@ -74,6 +74,13 @@ extern void vdd_usleep(CBM_FILE f, unsigned int howlong);
 #else
 
   /* we have linux or Mac */
+
+/*
+ * remove this include once the CBM_FILE intptr_t declaration
+ * below is changed back to int after the plugin/driver handle
+ * mapping was implemented
+ */
+#include <stdint.h>
 
 # define EXTERN extern /*!< EXTERN is not defined on Linux */
 # define CBMAPIDECL /*!< CBMAPIDECL is a dummy on Linux */
