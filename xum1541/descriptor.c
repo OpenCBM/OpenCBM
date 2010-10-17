@@ -31,7 +31,7 @@ USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 
     VendorID:               XUM1541_VID,
     ProductID:              XUM1541_PID,
-                            XUM1541_VERSION,
+    ReleaseNumber:          (MODEL << 8) | XUM1541_VERSION,
 
     ManufacturerStrIndex:   0x01,
     ProductStrIndex:        0x02,

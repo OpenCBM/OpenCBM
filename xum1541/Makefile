@@ -61,6 +61,9 @@ endif
 # Final name for firmware hex file
 MODELVERSION= xum1541-$(MODEL)-v$(XUMFW_VERSION)
 
+# Resulting full revision number for model and firmware version
+REVISION=$(shell grep '\#define $(MODEL)' xum1541.h | sed 's/\#define $(MODEL)//' | xargs printf "%02X")$(XUMFW_VERSION)
+
 # If we wanted to reduce inlining to save size, these flags might be a
 # good start:
 #   --param inline-call-cost=2 -finline-limit=3 -fno-inline-small-functions
@@ -109,6 +112,9 @@ build: $(OBJS)
 	${CC} $(CFLAGS) -o obj/$(MODEL)/$(MODELVERSION).bin $(OBJS) $(LDFLAGS)
 	${AVRSIZE}         obj/$(MODEL)/$(MODELVERSION).bin
 	${OBJCOPY} -O ihex obj/$(MODEL)/$(MODELVERSION).bin $(MODELVERSION).hex
+	sed -e 's/XUM1541 USB floppy adapter [(]generic[)]/XUM1541 USB floppy adapter ($(MODEL)-v$(XUMFW_VERSION))/' \
+	    -e 's/ VID_16D0&PID_0504$$/ VID_16d0\&PID_0504\&REV_$(REVISION)/' \
+	    < xum1541-generic.inf > $(MODELVERSION).inf
 
 clean:
 	rm -rf obj
