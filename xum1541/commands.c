@@ -29,7 +29,7 @@ extern bool device_running;
 
 // Nibtools command state. See nib_parburst_read/write_checked()
 static bool suppressNibCmd;
-static uint8_t savedAlign;
+static uint8_t savedNibWrites[4], *savedNibWritePtr;
 
 void
 usbInitIo(uint16_t len, uint8_t dir)
@@ -236,6 +236,7 @@ ioReadNibLoop(uint16_t len)
     if (len == 0)
         return 0;
 
+    suppressNibCmd = false;
     usbInitIo(len, ENDPOINT_DIR_IN);
     iec_release(IO_DATA);
 
@@ -271,17 +272,24 @@ static uint8_t
 ioWriteNibLoop(uint16_t len)
 {
     uint16_t i;
-    uint8_t data;
+    uint8_t data, *ptr;
 
     // Probably an error, but handle it anyway.
     if (len == 0)
         return 0;
 
+    suppressNibCmd = false;
     usbInitIo(len, ENDPOINT_DIR_OUT);
     iec_release(IO_DATA);
 
-    // We're ready to go, kick off the actual data transfer
-    nib_parburst_write(savedAlign);
+    /*
+     * We're ready to go, kick off the actual data transfer by writing
+     * all saved writes. We keep a queue because the 1541 and 1571 drive
+     * code may send different numbers of bytes here.
+     */
+    for (ptr = savedNibWrites; ptr != savedNibWritePtr; ptr++)
+        nib_parburst_write(*ptr);
+    savedNibWritePtr = savedNibWrites;
 
     for (i = 0; i < len; i++) {
         // Get the byte via USB
@@ -332,12 +340,11 @@ nib_parburst_write_checked(uint8_t data)
     static uint8_t cmdIdx;
 
     /*
-     * If cmd is a write track, save the alignment value for later but
-     * suppress the handshaked write itself.
+     * If cmd is a write track, save up to 4 bytes of data that will be
+     * sent later but suppress the handshaked write for now.
      */
     if (suppressNibCmd) {
-        suppressNibCmd = false;
-        savedAlign = data;
+        *savedNibWritePtr++ = data;
         return;
     }
 
@@ -367,10 +374,8 @@ nib_parburst_read_checked(void)
 {
     if (!suppressNibCmd)
         return nib_parburst_read();
-    else {
-        suppressNibCmd = false;
+    else
         return 0x88;
-    }
 }
 
 /*
@@ -416,6 +421,7 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
         replyBuf[0] = cmd;
         return 1;
     case XUM1541_INIT:
+        savedNibWritePtr = savedNibWrites;
         board_set_status(STATUS_ACTIVE);
         replyBuf[0] = XUM1541_VERSION;
         replyBuf[1] = XUM1541_CAPABILITIES;
