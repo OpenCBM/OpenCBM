@@ -103,6 +103,10 @@ are connected and powered on. This is because they toggle the ATN line,
 which is only ok if there is no other drive on the bus. It is ok to have
 multiple drives connected, as long as only one is powered on.
 
+If using a Mac and you see multiple newlines after hitting ENTER to start
+a command, you can workaround this by setting your keyboard "delay until
+repeat" level to a slower value.
+
 
 Developer notes
 ===============
@@ -232,7 +236,10 @@ firmware.
 Tasks
 =====
 Bugs:
-- nibwrite fails to detect speed of drive
+- Interrupting hung d64copy does not recover into USB. Had to replug on Mac.
+  How to handle disk media errors in s1/s2/p2/pp? Test new errors .nib
+- Update IEC read routine
+- Star Commander needs testing as it may not work with the xum1541
 - The USBKEY firmware fails to enter bootloader mode from software.
   This will eventually be fixed but is not a big deal since that board
   has hardware buttons to do the same function. The ZoomFloppy works fine.
@@ -242,6 +249,7 @@ Bugs:
   should be found for it.
 
 Improvements:
+- Integrate Teensy support, factor out timer routines to common file
 - Add support to program in a serial number to EEPROM
 - Improve LEDs, especially on USBKEY (which has 4)
 - Add SRQ nibbling support
