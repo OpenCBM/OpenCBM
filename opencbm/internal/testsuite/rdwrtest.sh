@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $Id: rdwrtest.sh,v 1.1 2006-04-15 13:35:44 wmsr Exp $
+# $Id: rdwrtest.sh,v 1.2 2010-10-31 17:17:53 wmsr Exp $
 
 function error_info {
 	echo "rdwrtest.sh <drivenumber> <cmpbytes> [<d64copy parameters>]" 1>&2
@@ -23,7 +23,9 @@ shift
 
 echo $$ > shelltst.pid
 rm -f readtest.d64
+echo executing: d64copy $* filleddk.d64 $DRIVENO
 d64copy $* filleddk.d64 $DRIVENO
+echo executing: d64copy $* $DRIVENO readtest.d64
 d64copy $* $DRIVENO readtest.d64
   # do only compare up to CMPBYTES bytes
 cmp -n $CMPBYTES filleddk.d64 readtest.d64

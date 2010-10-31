@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# $Id: cbmcopy_fill.sh,v 1.4 2010-01-07 00:35:31 wmsr Exp $
+# $Id: cbmcopy_fill.sh,v 1.5 2010-10-31 17:17:53 wmsr Exp $
 
 function error_info {
     echo "cbmcopy_fill.sh <testfileset> <drivetype> [<cbmcopy parameters>]" 1>&2
@@ -101,7 +101,7 @@ then
     shift
     shift
     
-    echo beginning transfer
+    echo beginning transfer with: cbmcopy -R -w $* $DRIVENO $FILESPEC
     cbmcopy -R -w $* $DRIVENO $FILESPEC
     rm -f shelltst.pid
     echo transfer ended.
