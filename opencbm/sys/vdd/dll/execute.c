@@ -10,7 +10,7 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.11 2008-10-09 17:14:26 strik Exp $ \n
+** \version $Id: execute.c,v 1.12 2010-12-20 09:04:35 strik Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **
@@ -45,11 +45,8 @@ static PVOID
 get_vdm_address(WORD Offset, WORD Length)
 {
     PBYTE buffer;
-    ULONG addressInVdm;
 
-    addressInVdm = (ULONG) (getES()<<16 | Offset);
-
-    buffer = GetVDMPointer (addressInVdm, Length, FALSE);
+    buffer = VdmMapFlat(getES(), Offset, getMODE());
 
     return buffer;
 }
@@ -57,11 +54,7 @@ get_vdm_address(WORD Offset, WORD Length)
 static VOID
 release_vdm_address(WORD Offset, WORD Length, PVOID Buffer)
 {
-    ULONG addressInVdm;
-
-    addressInVdm = (ULONG) (getES()<<16 | Offset);
-
-    FreeVDMPointer(addressInVdm, Length, Length, FALSE);
+    VdmUnmapFlat(getES(), Offset, Buffer, getMODE());
 }
 
 
