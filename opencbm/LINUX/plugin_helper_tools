@@ -5,7 +5,7 @@ get_location_etc_conf() {
 
 	# generate directory for conf.d if it is not available
 	test -e "$LOCATION_ETC_CONF" || install -d "$LOCATION_ETC_CONF"
-	test -d "$LOCATION_ETC_CONF" || (echo -e "error: $LOCATION_ETC_CONF exists,\nbut it is not a directory! Aborting..."; exit 1)
+	test -d "$LOCATION_ETC_CONF" || (echo "error: $LOCATION_ETC_CONF exists,"; echo "but it is not a directory! Aborting..."; exit 1)
 }
 
 do_help() {
@@ -22,12 +22,15 @@ do_rebuild() {
 
 	NO_OF_FILES=`ls -1A $LOCATION_ETC_CONF/|wc -l`
 	if [ $NO_OF_FILES  -ne 0 ]; then
-		echo -e "; This is a GENERATED FILE! - DO NOT EDIT!\n; Modify the files in `dirname $LOCATION_ETC_CONF`/`basename $LOCATION_ETC_CONF` instead,\n; and execute '`pwd`/`basename $0` rebuild'...\n" > $CONF_FILE
+		echo "; This is a GENERATED FILE! - DO NOT EDIT!" > $CONF_FILE
+		echo "; Modify the files in `dirname $LOCATION_ETC_CONF`/`basename $LOCATION_ETC_CONF` instead," >> $CONF_FILE
+		echo "; and execute '`pwd`/`basename $0` rebuild'..." >> $CONF_FILE
+		echo "" >> $CONF_FILE
 		cat $LOCATION_ETC_CONF/*.conf >> $CONF_FILE
 	else
 		[ -e "$CONF_FILE" ] && rm "$CONF_FILE"
 		rmdir -p $LOCATION_ETC_CONF 2> /dev/null
-		echo -n "" # make sure we do not end with an errorlevel > 0
+		echo "" # make sure we do not end with an errorlevel > 0
 	fi
 }
 
@@ -63,13 +66,17 @@ do_set_default_plugin() {
 
 	if [ -e "$LOCATION_ETC_CONF/00opencbm.conf" ]; then
 		if [ -z "`grep "^default=$" "$LOCATION_ETC_CONF/00opencbm.conf"`" ]; then
-			echo -e "------- Default already set, quitting...\n"
+			echo "------- Default already set, quitting..."
+			echo ""
 			exit 0
 		fi
 	fi
 
-	echo -e "------ setting new default to: '${PLUGIN_NAME}'.\n"
-	echo -e "[plugins]\ndefault=${PLUGIN_NAME}\n" > "$LOCATION_ETC_CONF/$FILE_DESTINATION"
+	echo "------ setting new default to: '${PLUGIN_NAME}'."
+	echo ""
+	echo "[plugins]" > "$LOCATION_ETC_CONF/$FILE_DESTINATION"
+	echo "default=${PLUGIN_NAME}" >> "$LOCATION_ETC_CONF/$FILE_DESTINATION"
+	echo "" >> "$LOCATION_ETC_CONF/$FILE_DESTINATION"
 
 	do_rebuild $LOCATION_ETC
 }
@@ -100,7 +107,8 @@ process_commands() {
 			;;
 
 		*)
-			echo -e "Unknown command '$COMMAND' given.\n"
+			echo "Unknown command '$COMMAND' given."
+			echo ""
 			do_help
 			;;
 	esac
