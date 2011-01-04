@@ -116,7 +116,7 @@ usbSendByte(uint8_t data)
     // If the endpoint is now full, flush the block to the host
     if (!Endpoint_IsReadWriteAllowed()) {
         Endpoint_ClearIN();
-        while (!Endpoint_IsReadWriteAllowed())
+        while (!Endpoint_IsReadWriteAllowed() && !doDeviceReset)
             ;
     }
 
@@ -147,19 +147,19 @@ usbRecvByte(uint8_t *data)
      */
     if (!Endpoint_IsReadWriteAllowed()) {
         Endpoint_ClearOUT();
-        while (!Endpoint_IsReadWriteAllowed())
+        while (!Endpoint_IsReadWriteAllowed() && !doDeviceReset)
             ;
     }
-
-    // Read data from the host buffer, received via USB
-    *data = Endpoint_Read_Byte();
-    usbDataLen--;
 
     // Check if the current command is being aborted by the host
     if (doDeviceReset) {
         DEBUGF(DBG_ERROR, "rcvrst\n");
         return -1;
     }
+
+    // Read data from the host buffer, received via USB
+    *data = Endpoint_Read_Byte();
+    usbDataLen--;
 
     return 0;
 }

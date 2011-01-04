@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s1.c,v 1.5 2010-10-07 03:59:07 natelawson Exp $
+ * This Revision: $Id: s1.c,v 1.6 2011-01-04 02:51:31 natelawson Exp $
  *
  * $Log $
  * Revision 1.5  2007/03/17 19:31:34  harbaum
@@ -47,8 +47,10 @@ s1_write_byte(uint8_t c)
         // releasing CLK before polling for the drive setting it.
         iec_release(IO_CLK);
         IEC_DELAY();
-        while (!iec_get(IO_CLK))
-            ;
+        while (!iec_get(IO_CLK)) {
+            if (!TimerWorker())
+                return;
+        }
 
         // Send bit a second time. First, wait for drive to release CLK.
         // Then, release DATA and set CLK and wait for drive to ack by
@@ -57,14 +59,18 @@ s1_write_byte(uint8_t c)
             iec_release(IO_DATA);
         else
             iec_set(IO_DATA);
-        while (iec_get(IO_CLK))
-            ;
+        while (iec_get(IO_CLK)) {
+            if (!TimerWorker())
+                return;
+        }
 
         // Delay after releasing DATA before polling for the drive setting it.
         iec_set_release(IO_CLK, IO_DATA);
         IEC_DELAY();
-        while (!iec_get(IO_DATA))
-            ;
+        while (!iec_get(IO_DATA)) {
+            if (!TimerWorker())
+                return;
+        }
     }
 }
 
@@ -75,20 +81,26 @@ s1_read_byte(void)
 
     c = 0;
     for (i = 8; i != 0; i--) {
-        while (iec_get(IO_DATA))
-            ;
+        while (iec_get(IO_DATA)) {
+            if (!TimerWorker())
+                return -1;
+        }
         iec_release(IO_CLK);
         IEC_DELAY();
         b = iec_get(IO_CLK);
         c = (c >> 1) | (b ? 0x80 : 0);
         iec_set(IO_DATA);
-        while (b == iec_get(IO_CLK))
-            ;
+        while (b == iec_get(IO_CLK)) {
+            if (!TimerWorker())
+                return -1;
+        }
 
         iec_release(IO_DATA);
         IEC_DELAY();
-        while (!iec_get(IO_DATA))
-            ;
+        while (!iec_get(IO_DATA)) {
+            if (!TimerWorker())
+                return -1;
+        }
         iec_set(IO_CLK);
     }
 
