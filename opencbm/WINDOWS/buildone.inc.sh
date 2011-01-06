@@ -15,7 +15,7 @@ funcbuildinc()
 WHICHFILE=`echo $1|$SED 's/\.\(a\|A\)65//'`
 
 $CL65 -c $CA65_FLAGS -o $WHICHFILE.tmp $WHICHFILE.a65
-test -s $WHICHFILE.tmp && $LD65 --target none -o $WHICHFILE.o65 $WHICHFILE.tmp && $RM $WHICHFILE.tmp
+test -s $WHICHFILE.tmp && $LD65 -o $WHICHFILE.o65 --target none $WHICHFILE.tmp && $RM $WHICHFILE.tmp
 test -s $WHICHFILE.o65 && $OD -w8 -txC -v -An $WHICHFILE.o65|$SED 's/\([0-9a-f]\{2\}\) */0x\1,/g; $s/,$//' > $WHICHFILE.inc && $RM $WHICHFILE.o65
 }
 
@@ -24,6 +24,6 @@ funcbuildvice()
 WHICHFILE=`echo $1|$SED 's/\.\(a\|A\)65//'`
 
 $CL65 -c $CA65_FLAGS -g -l -o $WHICHFILE.tmp $WHICHFILE.a65
-test -s $WHICHFILE.tmp && $LD65 --target none -Ln $WHICHFILE.sym65 -o $WHICHFILE.o65 $WHICHFILE.tmp && $RM $WHICHFILE.tmp
+test -s $WHICHFILE.tmp && $LD65 -o $WHICHFILE.o65 --target none -Ln $WHICHFILE.sym65 $WHICHFILE.tmp && $RM $WHICHFILE.tmp
 #test -s $WHICHFILE.o65 && $OD -w8 -txC -v -An $WHICHFILE.o65|$SED 's/\([0-9a-f]\{2\}\) */0x\1,/g; $s/,$//' > $WHICHFILE.inc && $RM $WHICHFILE.o65
 }

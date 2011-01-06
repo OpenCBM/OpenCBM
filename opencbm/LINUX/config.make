@@ -1,4 +1,4 @@
-# $Id: config.make,v 1.30 2010-07-08 20:19:59 cnvogelg Exp $
+# $Id: config.make,v 1.31 2011-01-06 20:27:44 strik Exp $
 #
 
 # get package version (major.minor.release).
@@ -195,7 +195,7 @@ ifeq ($(XASS),xa)
 else
 ifeq ($(XASS),cl65)
 	$(CL65) -c $(CA65_FLAGS) -o $*.tmp $<
-	$(LD65) --target none -o $@ $*.tmp && rm -f $*.tmp
+	$(LD65) -o $@ --target none $*.tmp && rm -f $*.tmp
 else
 	@echo "*** Error: No crossassembler defined. Check config.make" 2>&1
 	exit 1
