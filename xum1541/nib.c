@@ -26,10 +26,8 @@ nib_parburst_read()
     // Set ATN and wait for drive to release DATA
     iec_set_release(IO_ATN, IO_DATA|IO_CLK);
     DELAY_US(5);
-    while (iec_get(IO_DATA)) {
-        if (!TimerWorker())
-            return -1;
-    }
+    while (iec_get(IO_DATA))
+        ;
 
     // Byte ready -- read it and release ATN
     DELAY_US(1);
@@ -38,10 +36,8 @@ nib_parburst_read()
 
     // Wait for the drive to pull DATA again. Delay for a bit afterwards
     // to keep the next read from being too close together.
-    while (!iec_get(IO_DATA)) {
-        if (!TimerWorker())
-            return -1;
-    }
+    while (!iec_get(IO_DATA))
+        ;
     DELAY_US(5);
     return data;
 }
@@ -51,10 +47,8 @@ int8_t
 nib_read_handshaked(uint8_t *data, uint8_t toggle)
 {
     // Wait for a byte to be ready (data toggle matches expected value).
-    while (iec_get(IO_DATA) != toggle) {
-        if (!TimerWorker())
-            return -1;
-    }
+    while (iec_get(IO_DATA) != toggle)
+        ;
 
     // Read it directly from the port without debouncing.
     *data = xu1541_pp_read();
@@ -75,10 +69,8 @@ nib_parburst_write(uint8_t data)
 
     iec_set_release(IO_ATN, IO_DATA|IO_CLK);
     DELAY_US(5);
-    while (iec_get(IO_DATA)) {
-        if (!TimerWorker())
-            return;
-    }
+    while (iec_get(IO_DATA))
+        ;
 
     xu1541_pp_write(data);
     DELAY_US(1);
@@ -92,10 +84,8 @@ nib_parburst_write(uint8_t data)
      * a while.
      */
     DELAY_US(10);
-    while (!iec_get(IO_DATA)) {
-        if (!TimerWorker())
-            return;
-    }
+    while (!iec_get(IO_DATA))
+        ;
 
     // Read from parallel port, making the outputs inputs. (critical)
     data = xu1541_pp_read();
@@ -106,10 +96,8 @@ int8_t
 nib_write_handshaked(uint8_t data, uint8_t toggle)
 {
     // Wait for drive to be ready (data toggle matches expected value).
-    while (iec_get(IO_DATA) != toggle) {
-        if (!TimerWorker())
-            return -1;
-    }
+    while (iec_get(IO_DATA) != toggle)
+        ;
 
     // Write out the data value via parallel.
     xu1541_pp_write(data);
