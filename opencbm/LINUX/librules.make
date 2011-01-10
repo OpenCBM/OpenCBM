@@ -1,4 +1,4 @@
-# $Id: librules.make,v 1.3 2009-12-13 12:04:17 cnvogelg Exp $
+# $Id: librules.make,v 1.4 2011-01-10 20:13:41 strik Exp $
 # common rules for shared lib creation
 #
 
@@ -66,7 +66,9 @@ install-plugin:
 	install -m 644 $(LIB) $(DESTDIR)$(PLUGINDIR)
 	cd $(DESTDIR)$(PLUGINDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
 
-	@echo "[${PLUGIN_NAME}]\nlocation=$(PLUGINDIR)$(SHLIB)\n" > ${TMPFILE}
+	@echo "[${PLUGIN_NAME}]" > ${TMPFILE}
+	@echo "location=$(PLUGINDIR)$(SHLIB)" >> ${TMPFILE}
+	@echo "" >> ${TMPFILE}
 	${RELATIVEPATH}/LINUX/plugin_helper_tools install "$(DESTDIR)${OPENCBM_CONFIG_PATH}" 10${PLUGIN_NAME}.conf ${TMPFILE}
 	@rm ${TMPFILE}
 
