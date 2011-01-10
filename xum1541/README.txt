@@ -2,10 +2,14 @@ xum1541 firmware
 ================
 
 The xum1541 is firmware for USB devices that connect a 15x1 drive to
-your PC. It is based on the Atmel AT90USB family of microcontrollers
-and is provided under the GPL license.
+your PC, notably the ZoomFloppy. It is based on the Atmel AT90USB family
+of microcontrollers and is provided under the GPL license.
 
-For more information, see the xum1541 web page at:
+For more information, see the ZoomFloppy web page at:
+
+    http://go4retro.com/
+
+Or the xum1541 web page:
 
     http://www.root.org/~nate/c64/xum1541/
 
@@ -46,12 +50,12 @@ The steps to program the firmware with Flip are:
 1. Start up Atmel Flip
 2. Select the appropriate device type (Device->Select). Choose one of
 the following:
+   - ZoomFloppy: ATmega32U2
    - USBKEY development board: AT90USB1287
-   - ZoomFloppy: ATMEGA32U2
    - Original Bumble-B: AT90USB162
 3. Plug in the device via USB
-4a. For most boards, run the included firmware update utility to put the
-device in bootloader mode.
+4a. For most boards, run the included firmware update utility (called
+"xum1541cfg") to put the device in bootloader mode.
 4b. For the USBKEY, press and hold both the RST and HWB buttons at the same
 time. Now, release the RST button and then the HWB button. This puts the device
 in upgrade mode. There's no need to hurry, just make sure both buttons
@@ -63,8 +67,8 @@ the steps above in #3. Be sure you're releasing the buttons in the right
 order.
 6. File->Load Hex File and choose the firmware .hex file named
 xum1541-(board)-(version).hex. Be sure to pick the right board type:
-   - USBKEY
    - ZOOMFLOPPY
+   - USBKEY
    - BUMBLEB
 Flip should say "HEX file parsed" in the lower left of the window status area.
 7. Be sure the "Operations Flow" checkboxes are set to Erase, Program, and
@@ -76,7 +80,8 @@ firmware and settings and click "Run" again.
 
 You're done! Now unplug and replug in the xum1541 and verify it is present
 by running "cbmctrl detect". You should see something like:
-"8: 1540 or 1541 (XP1541)".
+
+    8: 1540 or 1541 (XP1541)
 
 
 Compiling
@@ -100,8 +105,9 @@ Usage notes
 ===========
 Please note that the s2 and nib protocols do not work if multiple drives
 are connected and powered on. This is because they toggle the ATN line,
-which is only ok if there is no other drive on the bus. It is ok to have
-multiple drives connected, as long as only one is powered on.
+which is only ok if there is no other drive on the bus. You should
+power off and disconnect any drives that aren't in use when using s2
+transfers or nibtools.
 
 If using a Mac and you see multiple newlines after hitting ENTER to start
 a command, you can workaround this by setting your keyboard "delay until
@@ -161,6 +167,27 @@ is not any need yet to change CPU files as both use the same IO ports and
 same basic timer routines.
 
 
+ZoomFloppy model
+================
+The ZoomFloppy is a simpler version of the original design, intended for
+low-cost manufacturing with high-speed performance. It is available
+commercially from RETRO Innovations, making it the best choice for most
+users.
+
+    http://go4retro.com/
+
+If you want to build it yourself, it can also be based on the Bumble-B
+daughterboard. However, the easiest option for DIY is the USBKEY board
+(below) since that only requires soldering a single connector (DB25) to
+the development board.
+
+This device uses an ATmega32U2 microcontroller (AT90USB162 if you use the
+original Bumble-B). It has a 7406N hex inverter for better control of the
+pins. It runs at 5V with the board supplying power for the inverter.
+
+For build info, see the included schematic, zoomfloppy-schem-*.png.
+
+
 USBKEY model
 ============
 This is the first generation board and is based on the Atmel AT90USBKEY
@@ -209,24 +236,6 @@ Port C (parallel):
 10 data0
 
 
-ZoomFloppy model
-================
-The ZoomFloppy is a simpler version of the original design, intended for
-low-cost manufacturing with high-speed performance. It should be available
-commercially soon, which should make it the best choice for most users.
-
-If you want to build it yourself, it can also be based on the Bumble-B
-daughterboard. However, the easiest option for DIY is the USBKEY board
-(above) since that only requires soldering a single connector (DB25) to
-the development board.
-
-This device uses an ATMEGA32U2 microcontroller (AT90USB162 if you use the
-original Bumble-B). It has a 7406N hex inverter for better control of the
-pins. It runs at 5V with the board supplying power for the inverter.
-
-For build info, see the included schematic, zoomfloppy-schem-*.png.
-
-
 Other models
 ============
 I expect others will offer custom or prepackaged boards based on this
@@ -236,26 +245,25 @@ firmware.
 Tasks
 =====
 Bugs:
-- Interrupting hung d64copy does not recover into USB. Had to replug on Mac.
-  How to handle disk media errors in s1/s2/p2/pp? Test new errors .nib
 - Update IEC read routine
+- Resetting an interrupted command actually does two resets
 - Star Commander needs testing as it may not work with the xum1541
 - The USBKEY firmware fails to enter bootloader mode from software.
   This will eventually be fixed but is not a big deal since that board
   has hardware buttons to do the same function. The ZoomFloppy works fine.
 - Test for cbmcopy hangs but not for 1581: cbmcopy_fill.sh mass 1541 -t p
+
+Improvements:
+- Add SRQ nibbling support
+- Update firmware utility to do DFU and check device version/type so it is
+  impossible to write the wrong firmware and easier for users to upgrade.
+- Integrate Teensy support, factor out timer routines to common file
+- Add support to program in a serial number to EEPROM
+- Add IEEE-488 support
+- Improve LEDs, especially on USBKEY (which has 4)
 - Debug printing via the UART is not supported on ZoomFloppy since it has
   to use this pin for the IEC DATA connection. Another route for debugging
   should be found for it.
-
-Improvements:
-- Integrate Teensy support, factor out timer routines to common file
-- Add support to program in a serial number to EEPROM
-- Improve LEDs, especially on USBKEY (which has 4)
-- Add SRQ nibbling support
-- Add IEEE-488 support
-- Update firmware utility to do DFU and check device version/type so it is
-  impossible to write the wrong firmware and easier for users to upgrade.
 - Test and update to libusb 1.0 since 0.x is no longer supported.
 - Test various cable lengths and USB hubs to be sure it is reliable
 - Heavy system activity can sometimes disrupt transfers, especially timing
