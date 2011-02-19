@@ -34,8 +34,8 @@ CTASSERT(sizeof(CBM_FILE) >= sizeof(usb_dev_handle *));
  */
 #define USB_TIMEOUT         ((int)(XUM1541_TIMEOUT * 1100))
 
-// libusb value for "wait forever"
-#define LIBUSB_NO_TIMEOUT   -1
+// libusb value for "wait forever" (signed int)
+#define LIBUSB_NO_TIMEOUT   0x7fffffff
 
 // the maximum value for all allowed xum1541 serial numbers
 #define MAX_ALLOWED_XUM1541_SERIALNUM 255
