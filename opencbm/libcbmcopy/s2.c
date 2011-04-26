@@ -149,9 +149,9 @@ static int check_error(CBM_FILE fd, int write)
                                                                         SETSTATEDEBUG((void)0);
         cbm_iec_set(fd, IEC_ATN);
                                                                         SETSTATEDEBUG((void)0);
-        cbm_iec_wait(fd, IEC_CLOCK, 1);
         if(!write)
         {
+            cbm_iec_wait(fd, IEC_CLOCK, 1);
                                                                         SETSTATEDEBUG((void)0);
             cbm_iec_release(fd, IEC_DATA);
         }
