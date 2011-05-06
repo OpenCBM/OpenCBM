@@ -6,6 +6,8 @@
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005 Spiro Trikaliotis
+ *  Copyright 2011      Wolfgang Moser (http://d81.de)
+ *  Copyright 2011      Thomas Winkler
  *
 */
 
@@ -69,12 +71,14 @@ cbm_identify(CBM_FILE HandleDevice, __u_char DeviceAddress,
     enum cbm_device_type_e deviceType = cbm_dt_unknown;
     unsigned short magic;
     unsigned char buf[3];
-    const char command[] = { 'M', '-', 'R', (char) 0x40, (char) 0xff, (char) 0x02 };
-    char *deviceString = "*unknown*";
+    char command[] = { 'M', '-', 'R', (char) 0x40, (char) 0xff, (char) 0x02 };
+    static char unknownDevice[] = "*unknown*, footprint=<....>";
+    char *deviceString = unknownDevice;
     int rv = -1;
 
     FUNC_ENTER();
 
+    /* get footprint from 0xFF40 */
     if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0 
         && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
     {
@@ -82,8 +86,32 @@ cbm_identify(CBM_FILE HandleDevice, __u_char DeviceAddress,
         {
             magic = buf[0] | (buf[1] << 8);
 
+            if(magic == 0xaaaa)
+            {
+                cbm_untalk(HandleDevice);
+                command[3] = (char) 0xFE; /* get footprint from 0xFFFE, IRQ vector */
+                if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0 
+                    && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
+                {
+                    if (cbm_raw_read(HandleDevice, buf, 3) == 3
+                        && ( buf[0] != 0x67 || buf[1] != 0xFE ) )
+                    {
+                        magic = buf[0] | (buf[1] << 8);
+                    }
+                }
+            }
+
             switch(magic)
             {
+                default:
+                    unknownDevice[22] = (magic >> 12 & 0x0F | 0x40);
+                    unknownDevice[24] = (magic >>  4 & 0x0F | 0x40);
+                    magic &= 0x0F0F;
+                    magic |= 0x4040;
+                    unknownDevice[23] = magic >> 8;
+                    unknownDevice[25] = (char)magic;
+                    break;
+
                 case 0xaaaa:
                     deviceType = cbm_dt_cbm1541;
                     deviceString = "1540 or 1541"; 
@@ -109,6 +137,11 @@ cbm_identify(CBM_FILE HandleDevice, __u_char DeviceAddress,
                     deviceString = "SpeedDOS 1541";
                     break;
 
+                case 0x2710:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "ProfessionalDOS 1541";
+                    break;
+
                 case 0x8085:
                     deviceType = cbm_dt_cbm1541;
                     deviceString = "JiffyDOS 1541";
@@ -132,6 +165,28 @@ cbm_identify(CBM_FILE HandleDevice, __u_char DeviceAddress,
                 case 0x01ba:
                     deviceType = cbm_dt_cbm1581;
                     deviceString = "1581";
+                    break;
+
+                case 0x32f0: 
+                    deviceType = cbm_dt_cbm3040;
+                    deviceString = "3040";
+                    break;
+
+                case 0xc320: 
+                case 0x20f8: 
+                    deviceType = cbm_dt_cbm4040;
+                    deviceString = "4040";
+                    break;
+
+                case 0xf2e9:
+                    deviceType = cbm_dt_cbm8050;
+                    deviceString = "8050 dos2.5";
+                    break;
+
+                case 0xc866:       /* special dos2.7 ?? Speed-DOS 8250 ?? */
+                case 0xc611:
+                    deviceType = cbm_dt_cbm8250;
+                    deviceString = "8250 dos2.7";
                     break;
             }
             rv = 0;
