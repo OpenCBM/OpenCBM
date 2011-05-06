@@ -6,8 +6,9 @@
  *
  *  Copyright 1999-2005           Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005,2008-2009 Spiro Trikaliotis
- *  Copyright 2006                Wolfgang Moser (http://d81.de)
+ *  Copyright 2006,2011           Wolfgang Moser (http://d81.de)
  *  Copyright 2009                Arnd <arnd(at)jonnz(dot)de>
+ *  Copyright 2011                Thomas Winkler
  */
 
 /*! **************************************************************
@@ -95,12 +96,22 @@ typedef unsigned char __u_char;
 
 #endif
 
-/* specifiers for the lines */
+/* specifiers for the IEC bus lines */
 #define IEC_DATA   0x01 /*!< Specify the DATA line */
 #define IEC_CLOCK  0x02 /*!< Specify the CLOCK line */
 #define IEC_ATN    0x04 /*!< Specify the ATN line */
 #define IEC_RESET  0x08 /*!< Specify the RESET line */
 #define IEC_SRQ    0x10 /*!< Specify the SRQ line */
+
+/* specifiers for the IEEE-488 bus lines  */
+#define IEE_NDAC    0x01 /*!< Specify the NDAC line */
+#define IEE_NRFD    0x02 /*!< Specify the NRFD line */
+#define IEE_ATN     0x04 /*!< Specify the ATN line */
+#define IEE_IFC     0x08 /*!< Specify the IFC line */
+#define IEE_DAV     0x10 /*!< Specify the DAV line */
+#define IEE_EOI     0x20 /*!< Specify the EOI line */
+#define IEE_REN     0x40 /*!< Specify the REN line */
+#define IEE_SRQ     0x80 /*!< Specify the SRQ line */
 
 /*! Specifies the type of a device for cbm_identify() */
 enum cbm_device_type_e
@@ -109,7 +120,15 @@ enum cbm_device_type_e
     cbm_dt_cbm1541,      /*!< The device is a VIC 1541 */
     cbm_dt_cbm1570,      /*!< The device is a VIC 1570 */
     cbm_dt_cbm1571,      /*!< The device is a VIC 1571 */
-    cbm_dt_cbm1581       /*!< The device is a VIC 1581 */
+    cbm_dt_cbm1581,      /*!< The device is a VIC 1581 */
+    cbm_dt_cbm2040,      /*!< The device is a CBM-2040 DOS1 or 2   */
+    cbm_dt_cbm2031,      /*!< The device is a CBM-2031 DOS2.6      */
+    cbm_dt_cbm3040,      /*!< The device is a CBM-3040 DOS1 or 2   */
+    cbm_dt_cbm4040,      /*!< The device is a CBM-4040 DOS2        */ 
+    cbm_dt_cbm4031,      /*!< The device is a CBM-4031 DOS2.6      */
+    cbm_dt_cbm8050,      /*!< The device is a CBM-8050             */
+    cbm_dt_cbm8250,      /*!< The device is a CBM-8250 or SFD-1001 */
+    cbm_dt_sfd1001       /*!< The device is a SFD-1001             */
 };
 
 /*! Specifies the type of a device for cbm_identify() */
