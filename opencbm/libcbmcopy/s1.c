@@ -163,15 +163,14 @@ static int check_error(CBM_FILE fd, int write)
         cbm_iec_wait(fd, IEC_CLOCK, 0);
                                                                         SETSTATEDEBUG((void)0);
         cbm_iec_release(fd, IEC_DATA);
-                                                                        SETSTATEDEBUG((void)0);
         if(write)
         {
-            cbm_iec_set(fd, IEC_CLOCK);
                                                                         SETSTATEDEBUG((void)0);
-            cbm_iec_wait(fd, IEC_DATA, 1);
+            cbm_iec_set(fd, IEC_CLOCK);
         }
         else
         {
+                                                                        SETSTATEDEBUG((void)0);
             cbm_iec_wait(fd, IEC_DATA, 1);
                                                                         SETSTATEDEBUG((void)0);
             cbm_iec_set(fd, IEC_CLOCK);
