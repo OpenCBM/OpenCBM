@@ -707,10 +707,13 @@ converted from ASCII to PETSCII.
 .RE
 .RE
 .TP 2
-.BI dir " <device>"
-Display the directory from the disk in the specified disk drive
+.BI dir " <device> [<drive>]"
+Display the directory from a disk in the specified disk drive
 IEC device
-.IR <device> .
+.IR <device>
+with the logical drive unit (LUN)
+.IR
+<drive> of a dual disk drive.
 .TP
 .BI download " <device> <address> <count> [<file>]"
 Read
