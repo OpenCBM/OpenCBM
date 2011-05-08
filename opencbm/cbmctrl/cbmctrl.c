@@ -6,7 +6,8 @@
  *
  *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Modifications for cbm4win and general rework Copyright 2001-2007 Spiro Trikaliotis
- *  Additions Copyright 2006 Wolfgang Moser (http://d81.de)
+ *  Additions Copyright 2006,2011 Wolfgang Moser (http://d81.de)
+ *  Additions Copyright 2011      Thomas Winkler
  */
 
 #ifdef SAVE_RCSID
@@ -887,17 +888,23 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
 static int do_dir(CBM_FILE fd, OPTIONS * const options)
 {
     char c, buf[40];
+    char command[] = { '$', '0' };
     int rv;
     unsigned char unit;
 
     rv = skip_options(options);
     
     rv = rv || get_argument_char(options, &unit);
+    /* default is drive '0' */
+    if (options->argc > 0)
+    {
+        rv = rv || get_argument_char(options, command+1);
+    }
 
     if (rv || check_if_parameters_ok(options))
         return 1;
 
-    rv = cbm_open(fd, unit, 0, "$", strlen("$"));
+    rv = cbm_open(fd, unit, 0, command, sizeof(command));
     if(rv == 0)
     {
         if(cbm_device_status(fd, unit, buf, sizeof(buf)) == 0)
@@ -1455,10 +1462,11 @@ static struct prog prog_table[] =
         "NOTE: You have to give the commands in lower-case letters.\n"
         "      Upper case will NOT work!\n" },
 
-    {1, "dir"     , PA_PETSCII, do_dir     , "<device>",
+    {1, "dir"     , PA_PETSCII, do_dir     , "<device> [<drive>]",
         "output the directory of the disk in the specified drive",
-        "This command gets the directory of the disk in the drive.\n\n"
-        "<device> is the device number of the drive." },
+        "This command gets the directory of a disk in the drive.\n\n"
+        "<device> is the device number of the drive (bus ID).\n" 
+        "<drive> is the drive number of a dual drive (LUN), default is 0." },
 
     {1, "download", PA_RAW,     do_download, "<device> <adr> <count> [<file>]",
         "download memory contents from the floppy drive",
