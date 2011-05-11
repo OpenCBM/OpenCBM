@@ -6,6 +6,8 @@
  *
  *  Copyright 2001-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2004-2007 Spiro Trikaliotis
+ *  Copyright 2011      Thomas Winkler
+ *  Copyright 2011      Wolfgang Moser (http://d81.de)
  */
 
 #ifdef SAVE_RCSID
@@ -98,7 +100,8 @@ static void help(const char *prog)
 "\n"
 "  -t, --transfer=TRANSFER    set transfermode; valid modes:\n"
 "                             auto (default)\n"
-"                               serial1 or s1  (slowest)\n"
+"                               original or o  (slowest)\n"
+"                               serial1 or s1\n"
 "                               serial2 or s2\n"
 "                               parallel       (fastest)\n"
 "                             (can be abbreviated, if unambiguous)\n"

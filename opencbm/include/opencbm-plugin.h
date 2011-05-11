@@ -5,6 +5,7 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 2008-2009 Spiro Trikaliotis
+ *  Copyright 2011      Wolfgang Moser
  */
 
 /*! **************************************************************
@@ -306,86 +307,141 @@ typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_track_var_t(CBM_FILE H
 */
 typedef int CBMAPIDECL opencbm_plugin_parallel_burst_write_track_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
-/*! \brief @@@@@ \todo document
+/*! \brief read a block of data from the OpenCBM backend with protocol serial-1
 
- \param HandleDevice
-
- \param data
-
- \param size
-*/
-typedef void CBMAPIDECL opencbm_plugin_s1_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
-
-/*! \brief @@@@@ \todo document
-
- \param HandleDevice
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
+    Pointer to a buffer which will contain the data read from the OpenCBM backend
 
  \param size
+    The number of bytes to read from the OpenCBM backend
+
+ \return
+    The number of bytes actually read, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
 */
-typedef void CBMAPIDECL opencbm_plugin_s1_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+typedef int CBMAPIDECL opencbm_plugin_s1_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
 
-/*! \brief @@@@@ \todo document
+/*! \brief write a block of data to the OpenCBM backend with protocol serial-1
 
- \param HandleDevice
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
+    Pointer to buffer which contains the data to be written to the OpenCBM backend
 
  \param size
+    The length of the data buffer to be written to the OpenCBM backend
+
+ \return
+    The number of bytes actually written, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
 */
+typedef int CBMAPIDECL opencbm_plugin_s1_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
 
-typedef void CBMAPIDECL opencbm_plugin_s2_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+/*! \brief read a block of data from the OpenCBM backend with protocol serial-2
 
-/*! \brief @@@@@ \todo document
-
- \param HandleDevice
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
+    Pointer to a buffer which will contain the data read from the OpenCBM backend
 
  \param size
+    The number of bytes to read from the OpenCBM backend
+
+ \return
+    The number of bytes actually read, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
 */
-typedef void CBMAPIDECL opencbm_plugin_s2_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+typedef int CBMAPIDECL opencbm_plugin_s2_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
 
-/*! \brief @@@@@ \todo document
+/*! \brief write a block of data to the OpenCBM backend with protocol serial-2
 
- \param HandleDevice
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
+    Pointer to buffer which contains the data to be written to the OpenCBM backend
 
  \param size
+    The length of the data buffer to be written to the OpenCBM backend
+
+ \return
+    The number of bytes actually written, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
 */
-typedef void CBMAPIDECL opencbm_plugin_pp_dc_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+typedef int CBMAPIDECL opencbm_plugin_s2_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
 
-/*! \brief @@@@@ \todo document
+/*! \brief read a block of data from the OpenCBM backend with protocol parallel/d64copy
 
- \param HandleDevice
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
+    Pointer to a buffer which will contain the data read from the OpenCBM backend
 
  \param size
+    The number of bytes to read from the OpenCBM backend
+
+ \return
+    The number of bytes actually read, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
 */
-typedef void CBMAPIDECL opencbm_plugin_pp_dc_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+typedef int CBMAPIDECL opencbm_plugin_pp_dc_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
 
-/*! \brief @@@@@ \todo document
+/*! \brief write a block of data to the OpenCBM backend with protocol parallel/d64copy
 
- \param HandleDevice
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
+    Pointer to buffer which contains the data to be written to the OpenCBM backend
 
  \param size
+    The length of the data buffer to be written to the OpenCBM backend
+
+ \return
+    The number of bytes actually written, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
 */
-typedef void CBMAPIDECL opencbm_plugin_pp_cc_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+typedef int CBMAPIDECL opencbm_plugin_pp_dc_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
 
-/*! \brief @@@@@ \todo document
+/*! \brief read a block of data from the OpenCBM backend with protocol parallel/cbmcopy
 
- \param HandleDevice
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
+    Pointer to a buffer which will contain the data read from the OpenCBM backend
 
  \param size
+    The number of bytes to read from the OpenCBM backend
+
+ \return
+    The number of bytes actually read, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
 */
-typedef void CBMAPIDECL opencbm_plugin_pp_cc_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+typedef int CBMAPIDECL opencbm_plugin_pp_cc_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+
+/*! \brief write a block of data to the OpenCBM backend with protocol parallel/cbmcopy
+
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
+
+ \param data
+    Pointer to buffer which contains the data to be written to the OpenCBM backend
+
+ \param size
+    The length of the data buffer to be written to the OpenCBM backend
+
+ \return
+    The number of bytes actually written, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
+*/
+typedef int CBMAPIDECL opencbm_plugin_pp_cc_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
 
 
 /*! \brief @@@@@ \todo document

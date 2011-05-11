@@ -5,6 +5,8 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright 2011 Thomas Winkler
+ *  Copyright 2011 Wolfgang Moser
  */
 
 #ifdef SAVE_RCSID
@@ -46,7 +48,8 @@ static const unsigned char turbowrite1581[] = {
 
 extern transfer_funcs cbmcopy_s1_transfer,
                       cbmcopy_s2_transfer,
-                      cbmcopy_pp_transfer;
+                      cbmcopy_pp_transfer,
+                      cbmcopy_std_transfer;
 
 static struct _transfers
 {
@@ -59,6 +62,7 @@ transfers[] =
     { &cbmcopy_s1_transfer, "serial1", "s1" },
     { &cbmcopy_s2_transfer, "serial2", "s2" },
     { &cbmcopy_pp_transfer, "parallel", "p%" },
+    { &cbmcopy_std_transfer, "original", "o%" },
     { NULL, NULL, NULL }
 };
 
@@ -88,8 +92,7 @@ static int check_drive_type(CBM_FILE fd, unsigned char drive,
     {
         if(cbm_identify( fd, drive, &settings->drive_type, &type_str ))
         {
-            msg_cb( sev_warning, "could not identify drive, using 1541 turbo" );
-            settings->drive_type = cbm_dt_cbm1541;
+            msg_cb( sev_warning, "could not identify drive, using no turbo" );
         }
         else
         {
@@ -109,20 +112,38 @@ static int send_turbo(CBM_FILE fd, unsigned char drive, int write,
     const transfer_funcs *trf;
 
     trf = transfers[settings->transfer_mode].trf;
-    cbm_upload( fd, drive, 0x500, turbo, turbo_size );
-    msg_cb( sev_debug, "uploading %d bytes turbo code", turbo_size );
-    if(trf->upload_turbo(fd, drive, settings->drive_type, write) == 0)
+    /*
+     * minimum requirement for any transfer mode for a given device
+     * is that a transfer mode shutdown handler does exist
+     */
+    if(trf->exit_turbo != NULL)
     {
-        cbm_exec_command( fd, drive, start_cmd, cmd_len );
-        msg_cb( sev_debug, "initializing transfer code" );
-        if(trf->start_turbo(fd, write) == 0)
+        if(turbo_size)
         {
-            msg_cb( sev_debug, "done" );
-            return 0;
+            cbm_upload( fd, drive, 0x500, turbo, turbo_size );
+            msg_cb( sev_debug, "uploading %d bytes turbo code", turbo_size );
+            if(trf->upload_turbo(fd, drive, settings->drive_type, write) == 0)
+            {
+                cbm_exec_command( fd, drive, start_cmd, cmd_len );
+                msg_cb( sev_debug, "initializing transfer code" );
+                if(trf->start_turbo(fd, write) == 0)
+                {
+                    msg_cb( sev_debug, "done" );
+                    return 0;
+                }
+                else
+                {
+                    msg_cb( sev_fatal, "could not start turbo" );
+                }
+            }
         }
         else
         {
-            msg_cb( sev_fatal, "could not start turbo" );
+            msg_cb( sev_debug, "no turbo code upload is required", turbo_size );
+            /* nevertheless the transfer must be initialised */
+            trf->upload_turbo(fd, drive, settings->drive_type, write);
+            trf->start_turbo(fd, write);
+            return 0;
         }
     }
     else
@@ -184,7 +205,22 @@ static int cbmcopy_read(CBM_FILE fd,
             turbo_size = sizeof(turboread1581);
             break;
         default: /* unreachable */
-            return -1;
+            msg_cb( sev_warning, "*** unknown drive type??!" );
+            /* fall through */
+        case cbm_dt_cbm4040:
+        case cbm_dt_cbm8050:
+        case cbm_dt_cbm8250:
+        case cbm_dt_sfd1001:
+            turbo = NULL;
+            turbo_size = 0;
+            break;
+    }
+
+    if(transfers[settings->transfer_mode].abbrev[0] == 'o')
+    {
+        /* if "original" transfer mode - no drive code can be used */
+        turbo = NULL;
+        turbo_size = 0;
     }
 
     if(cbmname)
@@ -192,7 +228,7 @@ static int cbmcopy_read(CBM_FILE fd,
         /* start by file name */
         track = 0;
         sector = 0;
-        cbm_open( fd, drive, 0, NULL, 0 );
+        cbm_open( fd, drive, SA_READ, NULL, 0 );
         if(cbmname_len == 0) cbmname_len = strlen( cbmname );
         cbm_raw_write( fd, cbmname, cbmname_len );
         cbm_unlisten( fd );
@@ -200,7 +236,7 @@ static int cbmcopy_read(CBM_FILE fd,
     else
     {
         /* start by track/sector */
-        cbm_open( fd, drive, 0, "#", 1 );
+        cbm_open( fd, drive, SA_READ, "#", 1 );
     }
     rv = cbm_device_status( fd, drive, (char*)buf, sizeof(buf) );
 
@@ -238,19 +274,10 @@ static int cbmcopy_read(CBM_FILE fd,
 
         SETSTATEDEBUG(debugCBMcopyBlockCount=0);   // turbo sent condition
 
-        for(c = 0xff;
-            c == 0xff && (error = trf->check_error(fd, 0)) == 0;
-            /* nothing */ )
+        while( (error = trf->check_error(fd, 0)) == 0 )
         {
             SETSTATEDEBUG((void)0); // after check_error condition
-
             arch_usleep(1000);      // fix for Tim's environment
-            c = trf->read_byte( fd );
-
-            SETSTATEDEBUG((void)0); // afterwait condition
-
-            i = (c == 0xff) ? 0xfe : c;
-            *filedata_size += i;
 
             SETSTATEDEBUG(debugCBMcopyBlockCount++);    // preset condition
 
@@ -259,22 +286,16 @@ static int cbmcopy_read(CBM_FILE fd,
              * memory block is not freed, but realloc() returns NULL,
              * thus, we have a memory leak.
              */
-            *filedata = realloc(*filedata, *filedata_size);
-
+             /* reserve additional memory to hold to up an additional full block */
+            *filedata = realloc(*filedata, *filedata_size + 254);
             SETSTATEDEBUG((void)0);    // after check_error condition
             if(*filedata)
             {
-                SETSTATEDEBUG(debugCBMcopyByteCount=0);
-#ifdef LIBCBMCOPY_DEBUG
-                msg_cb( sev_debug, "receive block data (%d)", c );
-#endif 
-                for(cptr = (*filedata) + blocks_read * 254; i; i--)
-                {
-                    SETSTATEDEBUG(debugCBMcopyByteCount++);
-                    *(cptr++) = trf->read_byte( fd );
-                }
-                /* (drive is busy now) */
-                SETSTATEDEBUG(debugCBMcopyByteCount=-1);
+                /* read block, let the block reader also handle the initial length byte */
+                i = trf->read_blk( fd, (*filedata) + blocks_read * 254, 254, msg_cb);
+                msg_cb( sev_debug, "number of bytes read for block %d: %d", blocks_read, i );
+
+                SETSTATEDEBUG((void)0);    // afterread condition
 
                 /*
                  * FIXME: Find and eliminate the real protocol races to
@@ -289,15 +310,35 @@ static int cbmcopy_read(CBM_FILE fd,
                  */
                 arch_usleep(1000);
 
+                if( i < 255)
+                {
+                    if( i >= 0 )
+                    {
+                        /* in case of original transfers, there is no extra length byte transfer,    */
+                        /* whenever 254 bytes are read from a block a count value of 255 is returned */
+                        /* and if this was the last block, 0 bytes are read with the next block call */
+                        *filedata_size += i;
+                    }
+                    else
+                    {
+                        rv = -1;
+                    }
+                    break;
+                }
+                else
+                {
+                    /* more blocks are following, a full block was transferred */
+                    *filedata_size += 254;
+                }
+
                 SETSTATEDEBUG((void)0);    // afterread condition
                 status_cb( ++blocks_read );
             }
             else
             {
+                SETSTATEDEBUG((void)0);    // afterread condition
                 /* FIXME */
             }
-
-            SETSTATEDEBUG((void)0);    // pre loop condition
         }
         msg_cb( sev_debug, "done" );
         SETSTATEDEBUG(debugCBMcopyBlockCount=-1);   // turbo sent condition
@@ -313,11 +354,18 @@ static int cbmcopy_read(CBM_FILE fd,
          *    add a listen/unlisten sequence, just doing a decent
          *    arch_usleep() and waiting some time did not work
          */
-        cbm_listen(fd, drive, 0);
+        cbm_listen(fd, drive, SA_READ);
         cbm_unlisten(fd);
         SETSTATEDEBUG((void)0);    // turbo exited, waited for drive
+
+        rv = cbm_device_status( fd, drive, (char*)buf, sizeof(buf) );
+        if(rv)
+        {
+            msg_cb( sev_warning, "file copy ended with error status: %s", buf );
+        }
     }
 
+    cbm_close( fd, drive, SA_READ );
     return rv;
 }
 
@@ -394,67 +442,77 @@ int cbmcopy_get_transfer_mode_index(const char *name)
 
 int cbmcopy_check_auto_transfer_mode(CBM_FILE cbm_fd, int auto_transfermode, int drive)
 {
-    int transfermode = auto_transfermode;
-
     /* We assume auto is the first transfer mode */
     assert(strcmp(transfers[0].name, "auto") == 0);
 
     if (auto_transfermode == 0)
     {
-        do {
-            enum cbm_cable_type_e cable_type;
-            unsigned char testdrive;
+        enum cbm_cable_type_e cable_type;
+        enum cbm_device_type_e device_type;
+        unsigned char testdrive;
 
-            /*
-             * Test the cable
-             */
+        /*
+         * Test the cable
+         */
 
-            if (cbm_identify_xp1541(cbm_fd, (unsigned char)drive, NULL, &cable_type) == 0)
+        if (cbm_identify_xp1541(cbm_fd, (unsigned char)drive, NULL, &cable_type) == 0)
+        {
+            if (cable_type == cbm_ct_xp1541)
             {
-                if (cable_type == cbm_ct_xp1541)
-                {
-                    /*
-                     * We have a parallel cable, use that
-                     */
-                    transfermode = cbmcopy_get_transfer_mode_index("parallel");
-                    break;
-                }
+                /*
+                 * We have a parallel cable, use that
+                 */
+                return cbmcopy_get_transfer_mode_index("parallel");
             }
+        }
 
-            /*
-             * We do not have a parallel cable. Check if we are the only drive
-             * on the bus, so we can use serial2, at least.
-             */
+        /*
+         * lookup drivetyp, if IEEE-488 drive, use original
+         */
 
-            for (testdrive = 4; testdrive < 31; ++testdrive)
+        if (cbm_identify(cbm_fd, (unsigned char)drive, &device_type, NULL) == 0)
+        {
+            switch(device_type)
             {
-                enum cbm_device_type_e device_type;
-
-                /* of course, the drive to be transfered to is present! */
-                if (testdrive == drive)
-                    continue;
-
-                if (cbm_identify(cbm_fd, testdrive, &device_type, NULL) == 0)
-                {
+                case cbm_dt_cbm4040:
+                case cbm_dt_cbm8050:
+                case cbm_dt_cbm8250:
+                case cbm_dt_sfd1001:
                     /*
-                     * My bad, there is another drive -> only use serial1
+                     * We are using an IEEE-488 drive, use original transfer mode
                      */
-                    transfermode = cbmcopy_get_transfer_mode_index("serial1");
-                    break;
-                }
+                    return cbmcopy_get_transfer_mode_index("original");
             }
+        }
 
-            /*
-             * If we reached here with transfermode 0, we are the only
-             * drive, thus, use serial2.
-             */
-            if (transfermode == 0)
-                transfermode = cbmcopy_get_transfer_mode_index("serial2");
+        /*
+         * We do not have a parallel cable. Check if we are the only drive
+         * on the bus, so we can use serial2, at least.
+         */
 
-        } while (0);
+        for (testdrive = 4; testdrive < 31; ++testdrive)
+        {
+            /* of course, the drive to be transfered to is present! */
+            if (testdrive == drive)
+                continue;
+
+            if (cbm_identify(cbm_fd, testdrive, &device_type, NULL) == 0)
+            {
+                /*
+                 * My bad, there is another drive -> only use serial1
+                 */
+                return cbmcopy_get_transfer_mode_index("serial1");
+            }
+        }
+
+        /*
+         * If we reached here with transfermode 0, we are the only
+         * drive, thus, use serial2.
+         */
+        return cbmcopy_get_transfer_mode_index("serial2");
     }
 
-    return transfermode;
+    return auto_transfermode;
 }
 
 cbmcopy_settings *cbmcopy_get_default_settings(void)
@@ -520,10 +578,25 @@ int cbmcopy_write_file(CBM_FILE fd,
             turbo_size = sizeof(turbowrite1581);
             break;
         default: /* unreachable */
-            return -1;
+            msg_cb( sev_warning, "*** unknown drive type??!" );
+            /* fall through */
+        case cbm_dt_cbm4040:
+        case cbm_dt_cbm8050:
+        case cbm_dt_cbm8250:
+        case cbm_dt_sfd1001:
+            turbo = NULL;
+            turbo_size = 0;
+            break;
     }
 
-    cbm_open( fd, drive, 1, NULL, 0 );
+    if(transfers[settings->transfer_mode].abbrev[0] == 'o')
+    {
+        /* if "original" transfer mode - no drive code can be used */
+        turbo = NULL;
+        turbo_size = 0;
+    }
+
+    cbm_open( fd, drive, SA_WRITE, NULL, 0 );
     if(cbmname_len == 0) cbmname_len = strlen( cbmname );
     cbm_raw_write( fd, cbmname, cbmname_len );
     cbm_unlisten( fd );
@@ -555,47 +628,31 @@ int cbmcopy_write_file(CBM_FILE fd,
          */
         arch_usleep(1000);
 
-        SETSTATEDEBUG(debugCBMcopyBlockCount=0);
+        SETSTATEDEBUG(debugCBMcopyBlockCount=0);   // turbo sent condition
 
-        for(i = 0;
-            (i == 0) || (i < filedata_size && !error );
-            i+=254)
+        while( filedata_size > 0 )
         {
-            if( filedata_size - i <= 254 )
-            {
-                c = filedata_size - i;
-            }
-            else
-            {
-                c = 255;
-            }
+            /* if more blocks are following (more than 254 bytes) set the count value to 255 */
+            i = filedata_size <= 254 ? filedata_size : 255;
+
             SETSTATEDEBUG(debugCBMcopyBlockCount++);
-#ifdef LIBCBMCOPY_DEBUG
-            msg_cb( sev_debug, "send byte count: %d", c );
-#endif
-            trf->write_byte( fd, c );
-            SETSTATEDEBUG((void)0);
 
-            if(c)
+            /* write block, let the block writer also handle the initial length byte */
+            i = trf->write_blk( fd, filedata, (unsigned char)i, msg_cb );
+            if ( (i != 254) && (i != filedata_size) )
             {
-                SETSTATEDEBUG(debugCBMcopyByteCount=0);
-#ifdef LIBCBMCOPY_DEBUG
-                msg_cb( sev_debug, "send block data" );
-#endif 
-                if( c == 0xff ) c = 0xfe;
-                while(c)
-                {
-                    SETSTATEDEBUG(debugCBMcopyByteCount++);
-                    trf->write_byte( fd, *(filedata++) );
-                    c--;
-                }
-
-                /* (drive is busy now) */
-                
-                SETSTATEDEBUG((void)0);
+                /* normally blocks of 254 bytes are written, even if the count byte is at value 255 */
+                /* for the last block of a file, only filedata_size bytes need to be transferred    */
+                rv = -1;
+                break;
             }
-            error = trf->check_error( fd, 1 );
+
             SETSTATEDEBUG((void)0);
+            if ( trf->check_error( fd, 1 ) != 0 )
+            {
+                rv = -1;
+                break;
+            }
 
             /*
              * FIXME: Find and eliminate the real protocol races to
@@ -610,18 +667,25 @@ int cbmcopy_write_file(CBM_FILE fd,
              */
             arch_usleep(1000);
 
-            if(!error)
-            {
-                status_cb( ++blocks_written );
-            }
+            status_cb( ++blocks_written );
             SETSTATEDEBUG((void)0);
+
+            filedata_size -= 254;
+            filedata += 254;
         }
         msg_cb( sev_debug, "done" );
 
         SETSTATEDEBUG((void)0);
         trf->exit_turbo( fd, 1 );
         SETSTATEDEBUG((void)0);
+
+        rv = cbm_device_status( fd, drive, (char*)buf, sizeof(buf) );
+        if(rv)
+        {
+            msg_cb( sev_warning, "file copy ended with error status: %s", buf );
+        }
     }
+    cbm_close( fd, drive, SA_WRITE );
     return rv;
 }
 
@@ -660,4 +724,136 @@ int cbmcopy_read_file(CBM_FILE fd,
                         cbmname, cbmname_len,
                         filedata, filedata_size,
                         msg_cb, status_cb);
+}
+
+/*! \brief write a data block of a file with a sequence of byte transfers
+
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
+
+ \param wb_func
+    Callback to the write_byte function 
+
+ \param data
+    Pointer to buffer which contains the data to be written to the OpenCBM backend
+
+ \param size
+    The number of bytes to be transferred from the buffer to the OpenCBM backend,
+    or 255, to transfer 254 bytes from the buffer and tell the turbo write routine
+    that more blocks are following
+
+ \param msg_cb
+    Handle to cbmcopy's log message handler
+
+ \return
+    The number of bytes actually written, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
+*/
+int write_block_generic(CBM_FILE HandleDevice, const void *data, unsigned char size, write_byte_t wb_func, cbmcopy_message_cb msg_cb)
+{
+    int rv = 0;
+    const unsigned char *pbuffer = data;
+
+    SETSTATEDEBUG((void)0);
+#ifdef LIBCBMCOPY_DEBUG
+    msg_cb( sev_debug, "send byte count: %d", size );
+#endif
+    if ( (pbuffer == NULL) || (wb_func( HandleDevice, size ) != 0) )
+    {
+        return -1;
+    }
+
+    SETSTATEDEBUG(debugCBMcopyByteCount=0);
+    if( size == 0xff )
+    {
+        size--;
+    }
+
+#ifdef LIBCBMCOPY_DEBUG
+    msg_cb( sev_debug, "send block data" );
+#endif 
+    while( size>0 )
+    {
+        SETSTATEDEBUG(debugCBMcopyByteCount++);
+        if ( wb_func( HandleDevice, *(pbuffer++) ) != 0 )
+        {
+            break;
+        }
+        rv++;
+        size--;
+    }
+
+    /* (drive is busy now) */
+    SETSTATEDEBUG(debugCBMcopyByteCount=-1);
+
+    return rv;
+}
+
+/*! \brief read a data block of a file with a sequence of byte transfers
+
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
+
+ \param data
+    Pointer to a buffer to store the read bytes within
+
+ \param size
+    The maximum size of the buffer
+
+ \param rb_func
+    Callback to the read_byte function 
+
+ \param msg_cb
+    Handle to cbmcopy's log message handler
+
+ \return
+    The number of bytes actually read (1 to 254), 0 on OpenCBM backend error,
+    255, if more blocks are following within this file chain.
+    If there is a fatal error, returns -1.
+*/
+int read_block_generic(CBM_FILE HandleDevice, void *data, size_t size, read_byte_t rb_func, cbmcopy_message_cb msg_cb)
+{
+    int rv = 0;
+    unsigned char c;
+    unsigned char *pbuffer = data;
+
+    SETSTATEDEBUG((void)0);
+    /* get the number of bytes that need to be transferred for this block */
+    c = rb_func( HandleDevice );
+    SETSTATEDEBUG((void)0);
+#ifdef LIBCBMCOPY_DEBUG
+    msg_cb( sev_debug, "received byte count: %d", c );
+#endif 
+
+    rv = c;
+    if( c == 0xff )
+    {
+        /* this is a flag that further bytes are following, so get a full block of 254 bytes */
+        c--;
+    }
+
+    if( (pbuffer == NULL) || (c > size) )
+    {
+        /* If the block size if greater than the available buffer, return with
+         * a fatal error since the turbo handlers always need to transfer a
+         * complete block. If there is no buffer allocated at all, fail also.
+         */
+        return -1;
+    }
+
+    SETSTATEDEBUG(debugCBMcopyByteCount=0);
+#ifdef LIBCBMCOPY_DEBUG
+    msg_cb( sev_debug, "receive block data (%d)", c );
+#endif 
+    while( c>0 )
+    {
+        SETSTATEDEBUG(debugCBMcopyByteCount++);
+        *(pbuffer++) = rb_func( HandleDevice );
+        c--;
+    }
+
+    /* (drive is busy now) */
+    SETSTATEDEBUG(debugCBMcopyByteCount=-1);
+
+    return rv;
 }
