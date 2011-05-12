@@ -1,6 +1,11 @@
 #!/bin/bash
+#
+# $Id: $
+#
+# set -x
 
-# $Id: killshll.sh,v 1.3 2010-10-31 17:17:53 wmsr Exp $
+echo "Doing reset of the xum1541 firmware including IEC bus"
+avrdude -c xu1541asp -p m8 -P usb -nuqq &
 
 if [ -f shelltst.pid ]
 then
@@ -21,18 +26,10 @@ then
   then
     echo "Doing SIGKILL on process group ID $UXPID"
     kill -9 -$UXPID
-    sleep 1
+    sleep 3
   fi
   rm -f shelltst.pid
 fi
-
-# echo "Doing reset on IEC bus"
-# cbmctrl reset
-echo "Doing reset of the xum1541 firmware including IEC bus"
-# avrdude -c dragon_isp -p usb162 -P usb -B 8 -nuqq &
-avrdude -c dragon_isp -p usb647 -P usb -B 8 -nuqq &
-avrdude -c xu1541asp -p usb1287 -P usb -B 8 -nuqq &
-
 
 # let the xum1541 resurrect, it may not answer for the next command otherweise
 sleep 3

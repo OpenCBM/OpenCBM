@@ -1,5 +1,8 @@
 #!/bin/bash
-# $Id: interleave.sh,v 1.2 2006-03-11 15:30:18 wmsr Exp $
+#
+# $Id: $
+#
+# set -x
 
 DRIVE=8
 COMMAND=./d64copy

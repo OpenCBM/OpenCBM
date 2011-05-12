@@ -1,6 +1,8 @@
 #!/bin/bash
-
-# $Id: rdwrtest.sh,v 1.2 2010-10-31 17:17:53 wmsr Exp $
+#
+# $Id: $
+#
+# set -x
 
 function error_info {
 	echo "rdwrtest.sh <drivenumber> <cmpbytes> [<d64copy parameters>]" 1>&2

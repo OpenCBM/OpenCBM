@@ -1,6 +1,8 @@
 #!/bin/bash
-
-# $Id: do_1571_repeat_test.sh,v 1.6 2006-04-23 15:26:29 wmsr Exp $
+#
+# $Id: $
+#
+# set -x
 
 DRIVETYPE=1571
 IMAGEFILENAME=tstimg_rcmp_1571.d71
