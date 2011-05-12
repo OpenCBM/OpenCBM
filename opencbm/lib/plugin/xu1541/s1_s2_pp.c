@@ -60,11 +60,14 @@
 
   \param size
     The size of the data buffer the read bytes will be written to.
+
+ \return
+    The number of bytes read
 */
-void CBMAPIDECL
+int CBMAPIDECL
 opencbm_plugin_s1_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
-	xu1541_special_read(XU1541_S1, data, size); 
+    return xu1541_special_read(XU1541_S1, data, size); 
 }
 
 /*! \brief Write data with serial1 protocol
@@ -77,11 +80,14 @@ opencbm_plugin_s1_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned in
 
   \param size
     The size of the data buffer to be written
+
+ \return
+    The number of bytes written
 */
-void CBMAPIDECL
+int CBMAPIDECL
 opencbm_plugin_s1_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
-	xu1541_special_write(XU1541_S1, data, size); 
+    return xu1541_special_write(XU1541_S1, data, size); 
 }
 
 /*! \brief Read data with serial2 protocol
@@ -94,11 +100,14 @@ opencbm_plugin_s1_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsi
 
   \param size
     The size of the data buffer the read bytes will be written to.
+
+ \return
+    The number of bytes read
 */
-void CBMAPIDECL
+int CBMAPIDECL
 opencbm_plugin_s2_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
-	xu1541_special_read(XU1541_S2, data, size); 
+    return xu1541_special_read(XU1541_S2, data, size); 
 }
 
 /*! \brief Write data with serial2 protocol
@@ -111,11 +120,14 @@ opencbm_plugin_s2_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned in
 
   \param size
     The size of the data buffer to be written
+
+ \return
+    The number of bytes written
 */
-void CBMAPIDECL
+int CBMAPIDECL
 opencbm_plugin_s2_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
-	xu1541_special_write(XU1541_S2, data, size); 
+    return xu1541_special_write(XU1541_S2, data, size); 
 }
 
 /*! \brief Read data with parallel protocol (d64copy)
@@ -128,11 +140,14 @@ opencbm_plugin_s2_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsi
 
   \param size
     The size of the data buffer the read bytes will be written to.
+
+ \return
+    The number of bytes read
 */
-void CBMAPIDECL
+int CBMAPIDECL
 opencbm_plugin_pp_dc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
-	xu1541_special_read(XU1541_PP, data, size); 
+    return xu1541_special_read(XU1541_PP, data, size); 
 }
 
 /*! \brief Write data with parallel protocol (d64copy)
@@ -145,11 +160,14 @@ opencbm_plugin_pp_dc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned
 
   \param size
     The size of the data buffer to be written
+
+ \return
+    The number of bytes written
 */
-void CBMAPIDECL
+int CBMAPIDECL
 opencbm_plugin_pp_dc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
-	xu1541_special_write(XU1541_PP, data, size); 
+    return xu1541_special_write(XU1541_PP, data, size); 
 }
 
 /*! \brief Read data with parallel protocol (cbmcopy)
@@ -162,11 +180,14 @@ opencbm_plugin_pp_dc_write_n(CBM_FILE HandleDevice, const unsigned char *data, u
 
   \param size
     The size of the data buffer the read bytes will be written to.
+
+ \return
+    The number of bytes read
 */
-void CBMAPIDECL
+int CBMAPIDECL
 opencbm_plugin_pp_cc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
 {
-	xu1541_special_read(XU1541_P2, data, size); 
+    return xu1541_special_read(XU1541_P2, data, size); 
 }
 
 /*! \brief Write data with parallel protocol (cbmcopy)
@@ -179,9 +200,12 @@ opencbm_plugin_pp_cc_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned
 
   \param size
     The size of the data buffer to be written
+
+ \return
+    The number of bytes written
 */
-void CBMAPIDECL
+int CBMAPIDECL
 opencbm_plugin_pp_cc_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
-	xu1541_special_write(XU1541_P2, data, size); 
+    return xu1541_special_write(XU1541_P2, data, size); 
 }

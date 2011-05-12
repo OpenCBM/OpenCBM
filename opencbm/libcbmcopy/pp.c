@@ -55,14 +55,127 @@ static struct drive_prog
     { ppw1571, sizeof(ppw1571) }
 };
 
+static int write_byte(CBM_FILE,unsigned char);
+static unsigned char read_byte(CBM_FILE);
 
-static int write_byte(CBM_FILE fd, unsigned char c)
+/*! \brief write a data block of a file to the OpenCBM backend
+
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
+
+ \param Buffer
+    Pointer to buffer which contains the data to be written to the OpenCBM backend
+
+ \param Count
+    The number of bytes to be transferred from the buffer to the OpenCBM backend,
+    or 255, to transfer 254 bytes from the buffer and tell the turbo write routine
+    that more blocks are following
+
+ \param msg_cb
+    Handle to cbmcopy's log message handler
+
+ \return
+    The number of bytes actually written, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
+*/
+static int write_blk(CBM_FILE HandleDevice, const void *Buffer, unsigned char Count, cbmcopy_message_cb msg_cb)
 {
     if (opencbm_plugin_pp_cc_write_n)
     {
-        opencbm_plugin_pp_cc_write_n(fd, &c, 1);
-        return 0;
+#ifdef LIBCBMCOPY_DEBUG
+        msg_cb( sev_debug, "send byte count: %d", Count );
+#endif
+        SETSTATEDEBUG((void)0);
+        if ( (Buffer == NULL) || (opencbm_plugin_pp_cc_write_n( HandleDevice, &Count, 1 ) != 1) )
+        {
+            return -1;
+        }
+        SETSTATEDEBUG((void)0);
+
+        if( Count == 0xff )
+        {
+            Count--;
+        }
+
+#ifdef LIBCBMCOPY_DEBUG
+        msg_cb( sev_debug, "send block data" );
+#endif 
+        return opencbm_plugin_pp_cc_write_n( HandleDevice, Buffer, Count );
     }
+    else
+    {
+        SETSTATEDEBUG((void)0);
+        /* call generic byte oriented block handler */
+        return write_block_generic(HandleDevice, Buffer, Count, &write_byte, msg_cb);
+    }
+}
+
+/*! \brief read a data block of a file from the OpenCBM backend
+
+ \param HandleDevice  
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
+
+ \param Buffer
+    Pointer to a buffer to store the bytes read from  the OpenCBM backend 
+
+ \param Count
+    The maximum size of the buffer
+
+ \param msg_cb
+    Handle to cbmcopy's log message handler
+
+ \return
+    The number of bytes actually read (1 to 254), 0 on OpenCBM backend error,
+    255, if more blocks are following within this file chain.
+    If there is a fatal error, returns -1.
+*/
+static int read_blk(CBM_FILE HandleDevice, void *Buffer, size_t Count, cbmcopy_message_cb msg_cb)
+{
+    unsigned char c;
+    int rv = 0;
+
+    if (opencbm_plugin_pp_cc_read_n)
+    {
+        SETSTATEDEBUG((void)0);
+        /* get the number of bytes that need to be transferred for this block */
+        if( opencbm_plugin_pp_cc_read_n(HandleDevice, &c, 1) != 1 )
+        {
+            return -1;
+        }
+#ifdef LIBCBMCOPY_DEBUG
+        msg_cb( sev_debug, "received byte count: %d", c );
+#endif 
+        SETSTATEDEBUG((void)0);
+        rv = c;
+
+        if( c == 0xff )
+        {
+            /* this is a flag that further bytes are following, so get a full block of 254 bytes */
+            c--;
+        }
+        if( (Buffer == NULL) || (c > Count) )
+        {
+            /* If the block size if greater than the available buffer, return with
+             * a fatal error since the turbo handlers always need to transfer a
+             * complete block. If there is no buffer allocated at all, fail also.
+             */
+            return -1;
+        }
+#ifdef LIBCBMCOPY_DEBUG
+        msg_cb( sev_debug, "receive block data (%d)", c );
+#endif 
+        return (opencbm_plugin_pp_cc_read_n(HandleDevice, Buffer, c) != c )? -1 : rv;
+        /* (drive is busy now) */
+    }
+    else
+    {
+        /* call generic byte oriented block handler */
+    return read_block_generic(HandleDevice, Buffer, Count, &read_byte, msg_cb);
+    }
+}
+
+static int write_byte(CBM_FILE fd, unsigned char c)
+{
                                                                         SETSTATEDEBUG((void)0);
     cbm_pp_write(fd, c);
                                                                         SETSTATEDEBUG((void)0);
@@ -90,12 +203,6 @@ static int write_byte(CBM_FILE fd, unsigned char c)
 static unsigned char read_byte(CBM_FILE fd)
 {
     unsigned char c;
-
-    if (opencbm_plugin_pp_cc_read_n)
-    {
-        opencbm_plugin_pp_cc_read_n(fd, &c, 1);
-        return c;
-    }
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_release(fd, IEC_CLOCK);
                                                                         SETSTATEDEBUG((void)0);

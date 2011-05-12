@@ -10,6 +10,7 @@ TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
 INCLUDES=../../include;../../include/WINDOWS
 
 SOURCES=../pp.c \
+	../std.c \
 	../s1.c \
 	../s2.c \
 	../cbmcopy.c
