@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# $Id: $
+#
+# set -x
+
 echo $$ > shelltst.pid
 
 cbmctrl $1 command $2 I0

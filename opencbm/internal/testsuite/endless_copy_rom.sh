@@ -1,6 +1,8 @@
 #! /bin/sh
-
-# $Id: endless_copy_rom.sh,v 1.2 2006-05-06 13:34:29 strik Exp $
+#
+# $Id: $
+#
+# set -x
 
 clear
 

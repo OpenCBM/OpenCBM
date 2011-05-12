@@ -1,6 +1,6 @@
 @echo off
 cls
-echo $Id: short_install.bat,v 1.1 2006-02-12 13:41:04 strik Exp $
+echo $Id: $
 
 echo.
 echo Checking OPENCBM driver without having it installed

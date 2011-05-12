@@ -1,6 +1,6 @@
 @echo off
 cls
-echo $Id: cp.bat,v 1.1 2006-02-12 13:41:04 strik Exp $
+echo $Id: $
 
 echo.
 echo Stopping opencbm (if necessary)

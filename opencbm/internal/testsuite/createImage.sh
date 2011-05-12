@@ -1,6 +1,8 @@
 #!/bin/bash
-
-# $Id: createImage.sh,v 1.1 2006-04-23 15:22:10 wmsr Exp $
+#
+# $Id: $
+#
+# set -x
 
 function error_info {
 	echo "createImage.sh <testfileset> <drivetype> [<dotransfer>]" 1>&2

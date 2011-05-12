@@ -1,6 +1,8 @@
 #!/bin/bash
-
-# $Id: updwntst.sh,v 1.4 2010-10-31 17:17:53 wmsr Exp $
+#
+# $Id: $
+#
+# set -x
 
 function error_info {
 	echo "updwntst.sh <OpenCBM plugin:port> <drivenumber>" 1>&2

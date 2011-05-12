@@ -1,5 +1,5 @@
 @echo off
-echo $Id: IEC-Stability.cmd,v 1.1 2006-03-20 22:10:49 wmsr Exp $
+echo $Id: $
 set LOOPCOUNT=1000
 REM set LOOPCOUNT=2
 

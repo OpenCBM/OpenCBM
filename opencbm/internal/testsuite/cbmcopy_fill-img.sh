@@ -5,7 +5,7 @@
 # set -x
 
 function error_info {
-    echo "cbmcopy_rcmp.sh <testfileset> <drivetype> <adapter> [<cbmcopy parameters>]" 1>&2
+    echo "cbmcopy_fill-img.sh <testfileset> <drivetype> <adapter>" 1>&2
     echo  1>&2
     echo "testfileset: mass | fill"  1>&2
     echo  1>&2
@@ -47,39 +47,41 @@ then
 
     case "$2" in
         8250)
-            XFILEPAT='[0-9][0-9][0-9][0-9]-set-1....--\.prg'
+            echo "SFD-1001 or 8250 disk drive is not supported yet."
             ;;
         1581)
-            XFILEPAT='[0-9][0-9][0-9][0-9]-set-.8...--\.prg'
+            echo "1581 disk drive is not supported yet."
             ;;
         1571)
             cbmctrl -@"$ADAPTER" command $DRIVENO "UJ"
             cbmctrl -@"$ADAPTER" command $DRIVENO "U0>H0"
             cbmctrl -@"$ADAPTER" command $DRIVENO "U0>M1"
-            XFILEPAT='[0-9][0-9][0-9][0-9]-set-..7..--\.prg'
+            # Execute cbmforng in 1571 mode as a dummy to fix some problem
+            # with previously executed cbmforng commands in 1541 mode
+            cbmforng -@"$ADAPTER" -b 18 -e 18 -s $DRIVENO unformat,uf
+            cbmctrl -@"$ADAPTER" command $DRIVENO I
+            cbmctrl -@"$ADAPTER" command $DRIVENO "N:LONG1571REFORMAT,LR"
+            d64copy -@"$ADAPTER" -2 "$TESTDIR"/00disk"$1"_1571.d71 $DRIVENO
             ;;
         1541)
-            BLOCKSFREE=`cbmctrl -@"$ADAPTER" dir $DRIVENO | \
-                        egrep '^[0-9]+ *(.["].+["].*)|(blocks free\.) *.$' | \
-                        cut -d" " -f1 | \
-                        tr "\r\n" " +" | \
-                        sed "s/+$/\n/g" | \
-                        bc`
-
+            cbmforng -@"$ADAPTER" -x -v -o $DRIVENO LONG1541FORMAT,LF
+            cbmctrl -@"$ADAPTER" command $DRIVENO I
+            BLOCKSFREE=`cbmctrl -@"$ADAPTER" dir $DRIVENO | egrep "^[0-9]+ blocks free[.] *.$" | cut -d" " -f1`
             case $BLOCKSFREE in
                 749)    # 40 tracks format (SpeedDOS and alike)
-                    XFILEPAT='[0-9][0-9][0-9][0-9]-set-...4.--\.prg'
+                    FILESPEC="$TESTDIR"/00disk"$1"_1541-40.d64
                     ;;
                 664)    # 35 tracks standard format
-                    XFILEPAT='[0-9][0-9][0-9][0-9]-set-....3--\.prg'
+                    FILESPEC="$TESTDIR"/00disk"$1"_1541-35.d64
                     ;;
                 *)      # unknown 1541 disk format
                     echo 1>&2
-                       echo 1541 drivetype disk format unkown with $BLOCKSFREE blocks free 1>&2
+                    echo 1541 drivetype disk format unkown with $BLOCKSFREE blocks free 1>&2
                     rm -f shelltst.pid
                     exit 1
                     ;;
             esac
+            d64copy -@"$ADAPTER" "$FILESPEC" $DRIVENO
             ;;
         *)
             echo 1>&2
@@ -88,26 +90,8 @@ then
             error_info
             ;;
     esac
-
-    shift
-    shift
-    shift
-
-    echo beginning transfer
-    TMPCBMCOPYDIR=`mktemp -d -p ./ cbmcopy_rcmp.XXXXXXXXXXXX`
-    cd "$TMPCBMCOPYDIR"
-    cbmctrl -@"$ADAPTER" dir $DRIVENO | egrep 'prg *.?$' | cut -d'"' -f2 | xargs cbmcopy -@"$ADAPTER" -r $* $DRIVENO
-    cd ..
-    cbmctrl -@"$ADAPTER" command $DRIVENO "UJ"
-    echo transfer ended
-    echo beginning comparison
-    ls "$TESTDIR" | grep -v "$XFILEPAT" | diff -nqrs --binary -X - "$TESTDIR" "$TMPCBMCOPYDIR"
-    echo comparison ended
-    echo cleaning up temporary directory
-    rm -f "$TMPCBMCOPYDIR"/*.prg
-    rmdir "$TMPCBMCOPYDIR"
-    echo cleaning finished
-    rm -f shelltst.pid
+    cbmctrl -@"$ADAPTER" status $DRIVENO
+    echo transfer ended.
 else
     echo drivetype not found or not found beeing active on the bus.
 fi
