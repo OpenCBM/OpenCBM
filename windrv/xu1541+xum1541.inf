@@ -14,16 +14,16 @@ DeviceID2   = VID_0403&PID_c632&REV_0100
 DeviceName3 = "XU1541 BIOS (USBtiny)"
 DeviceID3   = VID_0403&PID_c632&REV_0200
 
-DeviceName4 = "XUM1541 USB floppy adapter (generic)"
+DeviceName4 = "XUM1541 USB floppy adapter (generic-v06)"
 DeviceID4   = VID_16d0&PID_0504
-DeviceName5 = "XUM1541 USB floppy adapter (AT90USBKey)"
-DeviceID5   = VID_16d0&PID_0504&REV_0106
-DeviceName6 = "XUM1541 USB floppy adapter (ZoomFloppy)"
-DeviceID6   = VID_16d0&PID_0504&REV_0206
-DeviceName7 = "XUM1541 USB floppy adapter (Bumble-B)"
-DeviceID7   = VID_16d0&PID_0504&REV_0306
-DeviceName8 = "XUM1541 USB floppy adapter (Olimex)"
-DeviceID8   = VID_16d0&PID_0504&REV_0406
+DeviceName5 = "XUM1541 USB floppy adapter (USBKEY-v06)"
+DeviceID5   = VID_16d0&PID_0504&REV_0006
+DeviceName6 = "XUM1541 USB floppy adapter (BUMBLEB-v06)"
+DeviceID6   = VID_16d0&PID_0504&REV_0106
+DeviceName7 = "XUM1541 USB floppy adapter (ZoomFloppy)"
+DeviceID7   = VID_16d0&PID_0504&REV_0206
+DeviceName8 = "XUM1541 USB floppy adapter (OLIMEX-v06)"
+DeviceID8   = VID_16d0&PID_0504&REV_0306
 
 
 [Version]
