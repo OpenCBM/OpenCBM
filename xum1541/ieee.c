@@ -515,6 +515,7 @@ ieee_raw_read(uint16_t len)
 
     usbInitIo(len, ENDPOINT_DIR_IN);
     ieee_status = 0;
+    eoi = 0;
 
     count = 0;
     do {
