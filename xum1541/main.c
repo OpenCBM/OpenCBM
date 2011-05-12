@@ -48,13 +48,14 @@ main(void)
     while (!usb_connected)
         wdt_reset();
 
-    // Indicate device not ready and try to reset the drive
+    // Indicate device not ready
     board_init();
     board_set_status(STATUS_INIT);
-    cbm_init();
 
-    // Wait forever for a drive to be present (not yet)
-    cbm_reset(false);
+    // If any IEC/IEEE drives are attached, detect them early.
+    // This leaves the IO pins in the proper state to allow them to come
+    // out of reset until we're ready to access them.
+    cbm_init();
 
     /*
      * Process bulk transactions as they appear. Control requests are
@@ -209,7 +210,7 @@ USB_BulkWorker()
     memset(statusBuf, 0, sizeof(statusBuf));
 
     /*
-     * Decode and process the command. 
+     * Decode and process the command.
      * usbHandleBulk() stores its extended result in the output buffer,
      * up to XUM_STATUSBUF_SIZE.
      *
@@ -267,7 +268,7 @@ TimerWorker()
         return false;
 
     // If the timer has fired, update the board display
-    if (board_timer_fired()) 
+    if (board_timer_fired())
         board_update_display();
     return true;
 }

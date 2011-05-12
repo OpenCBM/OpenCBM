@@ -33,10 +33,15 @@
 #define XUM1541_CAP_CBM             0x01 // supports CBM commands
 #define XUM1541_CAP_NIB             0x02 // parallel nibbler
 #define XUM1541_CAP_NIB_SRQ         0x04 // 1571 serial nibbler
+#ifdef IEEE_SUPPORT
 #define XUM1541_CAP_IEEE488         0x08 // GPIB (PET) parallel bus
+#else
+#define XUM1541_CAP_IEEE488         0
+#endif
 
 #define XUM1541_CAPABILITIES        (XUM1541_CAP_CBM |      \
-                                     XUM1541_CAP_NIB)
+                                     XUM1541_CAP_NIB |      \
+                                     XUM1541_CAP_IEEE488)
 
 // Actual auto-detected status
 #define XUM1541_DOING_RESET         0x01 // no clean shutdown, will reset now

@@ -27,7 +27,6 @@ cpu_bootloader_start(void)
     // Disable timer and then jump to bootloader address
     TCCR1B = 0;
     OCR1A = 0;
-    // XXX test this once I have this device
     __asm__ __volatile__ ("jmp 0x3800" "\n\t");
 }
 

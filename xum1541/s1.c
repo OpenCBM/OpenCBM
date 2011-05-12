@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s1.c,v 1.6 2011-01-04 02:51:31 natelawson Exp $
+ * This Revision: $Id$
  *
  * $Log $
  * Revision 1.5  2007/03/17 19:31:34  harbaum

@@ -17,12 +17,6 @@
  */
 #include "xum1541.h"
 
-/* specifiers for the lines (must match values from opencbm.h) */
-#define IEC_DATA    0x01
-#define IEC_CLOCK   0x02
-#define IEC_ATN     0x04
-#define IEC_RESET   0x08
-
 /*
  * Table of constants from IEC timing diagram
  */
@@ -42,6 +36,22 @@
 //      IEC_T_DC    inf  // Talk-attention acknowledge time, 0 - inf
 #define IEC_T_DA    80   // Min talk-attention ack hold time (us)
 #define IEC_T_FR    60   // Min EOI acknowledge time (us)
+
+static void iec_reset(bool forever);
+static uint16_t iec_raw_write(uint16_t len, uint8_t flags);
+static uint16_t iec_raw_read(uint16_t len);
+static bool iec_wait(uint8_t line, uint8_t state);
+static uint8_t iec_poll(void);
+static void iec_setrelease(uint8_t set, uint8_t release);
+
+static struct ProtocolFunctions iecFunctions = {
+    .cbm_reset = iec_reset,
+    .cbm_raw_write = iec_raw_write,
+    .cbm_raw_read = iec_raw_read,
+    .cbm_wait = iec_wait,
+    .cbm_poll = iec_poll,
+    .cbm_setrelease = iec_setrelease,
+};
 
 /* fast conversion between logical and physical mapping */
 static const uint8_t iec2hw_table[] PROGMEM = {
@@ -70,13 +80,12 @@ iec2hw(uint8_t iec)
 }
 
 // Initialize all IEC lines to idle
-void
-cbm_init(void)
+struct ProtocolFunctions *
+iec_init()
 {
-    DEBUGF(DBG_ALL, "init\n");
-
     iec_release(IO_ATN | IO_CLK | IO_DATA | IO_RESET);
-    DELAY_US(100);
+    DELAY_US(10);
+    return &iecFunctions;
 }
 
 /*
@@ -163,8 +172,8 @@ wait_for_free_bus(bool forever)
     DEBUGF(DBG_ERROR, "wait4free bus to\n");
 }
 
-void
-cbm_reset(bool forever)
+static void
+iec_reset(bool forever)
 {
     DEBUGF(DBG_ALL, "reset\n");
     iec_release(IO_DATA | IO_ATN | IO_CLK);
@@ -194,10 +203,10 @@ iec_wait_timeout_2ms(uint8_t mask, uint8_t state)
 {
     uint8_t count = 200;
 
-    while ((iec_poll() & mask) == state && count-- != 0)
+    while ((iec_poll_pins() & mask) == state && count-- != 0)
         DELAY_US(10);
 
-    return ((iec_poll() & mask) != state);
+    return ((iec_poll_pins() & mask) != state);
 }
 
 // Wait up to 400 us for CLK to be pulled by the drive.
@@ -284,12 +293,12 @@ wait_for_listener(void)
     return true;
 }
 
-/* 
+/*
  * Write bytes to the drive via the CBM default protocol.
  * Returns number of successful written bytes or 0 on error.
  */
-uint16_t
-cbm_raw_write(uint16_t len, uint8_t flags)
+static uint16_t
+iec_raw_write(uint16_t len, uint8_t flags)
 {
     uint8_t atn, talk, data;
     uint16_t rv;
@@ -330,7 +339,7 @@ cbm_raw_write(uint16_t len, uint8_t flags)
         return 0;
     }
 
-    /* 
+    /*
      * Wait a short while for drive to be ready for us to release CLK.
      * This uses the typical value for IEC_T_NE. Even though it has no
      * minimum, the transfer starts to be unreliable for Tne somewhere
@@ -426,8 +435,8 @@ cbm_raw_write(uint16_t len, uint8_t flags)
     return rv;
 }
 
-uint16_t
-cbm_raw_read(uint16_t len)
+static uint16_t
+iec_raw_read(uint16_t len)
 {
     uint8_t ok, bit, b;
     uint16_t to, count;
@@ -522,8 +531,8 @@ cbm_raw_read(uint16_t len)
 }
 
 /* wait forever for a specific line to reach a certain state */
-bool
-xu1541_wait(uint8_t line, uint8_t state)
+static bool
+iec_wait(uint8_t line, uint8_t state)
 {
     uint8_t hw_mask, hw_state;
 
@@ -531,7 +540,7 @@ xu1541_wait(uint8_t line, uint8_t state)
     hw_mask = iec2hw(line);
     hw_state = state ? hw_mask : 0;
 
-    while ((iec_poll() & hw_mask) == hw_state) {
+    while ((iec_poll_pins() & hw_mask) == hw_state) {
         if (!TimerWorker())
             return false;
         DELAY_US(10);
@@ -540,12 +549,12 @@ xu1541_wait(uint8_t line, uint8_t state)
     return true;
 }
 
-uint8_t
-xu1541_poll(void)
+static uint8_t
+iec_poll(void)
 {
     uint8_t iec_state, rv = 0;
 
-    iec_state = iec_poll();
+    iec_state = iec_poll_pins();
     if ((iec_state & IO_DATA) == 0)
         rv |= IEC_DATA;
     if ((iec_state & IO_CLK) == 0)
@@ -556,8 +565,8 @@ xu1541_poll(void)
     return rv;
 }
 
-void
-xu1541_setrelease(uint8_t set, uint8_t release)
+static void
+iec_setrelease(uint8_t set, uint8_t release)
 {
     if (release == 0)
         iec_set(iec2hw(set));

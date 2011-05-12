@@ -24,21 +24,10 @@ uart_putchar(char c, FILE *stream)
 static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
 #endif // DEBUG
 
-// Initialize the board (IO ports, indicators, UART)
+// Initialize the board (timer, indicator LEDs, UART)
 void
 board_init(void)
 {
-    /*
-     * Configure the IEC port for 4 inputs, 4 outputs.
-     *
-     * Add pull-ups on all the inputs since we're running at 3.3V while
-     * the 1541 is at 5V.  This causes current to flow into our Vcc
-     * through the 1541's 1K ohm pull-ups but with our pull-ups also,
-     * the current is only ~50 uA (versus 1.7 mA with just the 1K pull-ups).
-     */
-    CBM_DDR = IO_OUTPUT_MASK;
-    CBM_PORT = ~IO_OUTPUT_MASK;
-
 #ifdef DEBUG
     /*
      * Initialize the UART baud rate at 115200 8N1 and select it for
@@ -56,6 +45,26 @@ board_init(void)
     // We use this to create a repeating 100 ms (10 hz) clock.
     OCR1A = (F_CPU / 1024) / 10;
     TCCR1B |= (1 << WGM12) | (1 << CS02) | (1 << CS00);
+}
+
+// Initialize the board IO ports for IEC mode
+// This function has to work even if the ports were left in an indeterminate
+// state by a prior initialization (e.g., auto-probe for IEEE devices).
+void
+board_init_iec(void)
+{
+    /*
+     * Configure the IEC port for 4 inputs, 4 outputs.
+     *
+     * Add pull-ups on all the inputs since we're running at 3.3V while
+     * the 1541 is at 5V.  This causes current to flow into our Vcc
+     * through the 1541's 1K ohm pull-ups but with our pull-ups also,
+     * the current is only ~50 uA (versus 1.7 mA with just the 1K pull-ups).
+     */
+    CBM_DDR = IO_OUTPUT_MASK;
+    CBM_PORT = (uint8_t)~IO_OUTPUT_MASK;
+    PAR_PORT_PORT = 0;
+    PAR_PORT_DDR = 0;
 }
 
 #define LED_UPPER_RED   LEDS_LED3

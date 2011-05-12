@@ -10,8 +10,10 @@
 #ifndef _BOARD_USBKEY_H
 #define _BOARD_USBKEY_H
 
-// Initialize the board (IO ports, indicators, UART)
+// Initialize the board (timer, indicators, UART)
 void board_init(void);
+// Initialize the IO ports for IEC mode
+void board_init_iec(void);
 
 /*
  * Mapping of iec lines to IO port signals.
@@ -84,7 +86,7 @@ iec_get(uint8_t line)
 }
 
 INLINE uint8_t
-xu1541_pp_read(void)
+iec_pp_read(void)
 {
     PAR_PORT_DDR = 0;
     PAR_PORT_PORT = 0;
@@ -92,14 +94,14 @@ xu1541_pp_read(void)
 }
 
 INLINE void
-xu1541_pp_write(uint8_t val)
+iec_pp_write(uint8_t val)
 {
     PAR_PORT_DDR = 0xff;
     PAR_PORT_PORT = val;
 }
 
 INLINE uint8_t
-iec_poll(void)
+iec_poll_pins(void)
 {
     return CBM_PIN >> 1;
 }

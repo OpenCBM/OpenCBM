@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: p2.c,v 1.4 2011-01-04 02:51:31 natelawson Exp $
+ * This Revision: $Id$
  *
  * $Log $
  * Revision 1.3  2008/10/09 18:55:45  strik
@@ -36,7 +36,7 @@
 void
 p2_write_byte(uint8_t c)
 {
-    xu1541_pp_write(c);
+    iec_pp_write(c);
     DELAY_US(0.5);
 
     iec_release(IO_CLK);
@@ -63,7 +63,7 @@ p2_read_byte(void)
             return -1;
     }
 
-    c = xu1541_pp_read();
+    c = iec_pp_read();
 
     iec_set(IO_CLK);
     while (!iec_get(IO_DATA)) {

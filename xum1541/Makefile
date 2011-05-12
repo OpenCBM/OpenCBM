@@ -13,7 +13,7 @@
 #
 # Currently, valid models are:
 # USBKEY: Atmel USB key development board with 8 MHz AT90USB1287 cpu
-# ZOOMFLOPPY: commercial board with 16 MHz ATMEGA32U2 cpu
+# ZOOMFLOPPY: commercial board with 16 MHz ATmega32U2 cpu
 # BUMBLEB: Bumble-B with 16 MHz AT90USB162 cpu and IEC daughtercard
 # OLIMEX: Olimex dev board with 8 MHz AT90USB162 cpu and IEC daughtercard
 MODELS= USBKEY ZOOMFLOPPY BUMBLEB OLIMEX
@@ -45,7 +45,7 @@ else ifeq ($(MODEL),ZOOMFLOPPY)
 CPUMODEL=	atmega32u2
 CPURATE=	16000000
 BOARD=		BOARD_ZOOMFLOPPY
-BOARD_OBJS=	board-zoomfloppy.o
+BOARD_OBJS=	board-zoomfloppy.o ieee.o
 else ifeq ($(MODEL),BUMBLEB)
 CPUMODEL=	at90usb162
 CPURATE=	16000000

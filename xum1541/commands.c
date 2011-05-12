@@ -27,9 +27,41 @@ static uint8_t usbDataDir = XUM_DATA_DIR_NONE;
 static bool cmdSeqInProgress;
 extern bool device_running;
 
+// Current device state for the XUM1541_INIT response
+static uint8_t currState;
+
 // Nibtools command state. See nib_parburst_read/write_checked()
 static bool suppressNibCmd;
 static uint8_t savedNibWrites[4], *savedNibWritePtr;
+
+// Protocol handlers to use, set in cbm_init().
+struct ProtocolFunctions *cmds;
+
+/*
+ * Try to find an IEEE device first. If not found or unsupported, fall
+ * back to IEC.
+ */
+struct ProtocolFunctions *
+cbm_init(void)
+{
+    struct ProtocolFunctions *protoFn;
+
+    // Nothing going on with the device yet.
+    currState = 0;
+
+#ifdef IEEE_SUPPORT
+    protoFn = ieee_init();
+    if (protoFn != NULL) {
+        currState |= XUM1541_IEEE488_PRESENT;
+        return protoFn;
+    }
+#endif
+
+    // Always use IEC as last resort.
+    board_init_iec();
+    protoFn = iec_init();
+    return protoFn;
+}
 
 void
 usbInitIo(uint16_t len, uint8_t dir)
@@ -423,8 +455,17 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
     case XUM1541_INIT:
         savedNibWritePtr = savedNibWrites;
         board_set_status(STATUS_ACTIVE);
+
+        // First time: init IO pins and probe for IEC or IEEE devices
+        if (cmds == NULL)
+            cmds = cbm_init();
+        // If we still don't have a bus, something is really wrong.
+        if (cmds == NULL)
+            return -1;
+
         replyBuf[0] = XUM1541_VERSION;
         replyBuf[1] = XUM1541_CAPABILITIES;
+        replyBuf[2] = currState;
 
         /*
          * Our previous transaction was interrupted in the middle, say by
@@ -434,7 +475,7 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
          */
         if (cmdSeqInProgress) {
             replyBuf[2] |= XUM1541_DOING_RESET;
-            cbm_reset(false);
+            cmds->cbm_reset(false);
             SetAbortState();
         }
 
@@ -452,7 +493,7 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
         board_set_status(STATUS_READY);
         return 0;
     case XUM1541_RESET:
-        cbm_reset(false);
+        cmds->cbm_reset(false);
         return 0;
     default:
         DEBUGF(DBG_ERROR, "ERR: control cmd %d not impl\n", cmd);
@@ -477,12 +518,16 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
     board_set_status(STATUS_ACTIVE);
     switch (cmd) {
     case XUM1541_READ:
-        proto = XUM_RW_PROTO(request[1]);
+        // Disallow any other protocols if in IEEE mode.
+        if ((currState & XUM1541_IEEE488_PRESENT) == 0)
+            proto = XUM_RW_PROTO(request[1]);
+        else
+            proto = XUM1541_CBM;
         DEBUGF(DBG_INFO, "rd:%d %d\n", proto, len);
         // loop to read all the bytes now, sending back each as we get it
         switch (proto) {
         case XUM1541_CBM:
-            cbm_raw_read(len);
+            cmds->cbm_raw_read(len);
             ret = 0;
             break;
         case XUM1541_S1:
@@ -515,12 +560,16 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
         }
         break;
     case XUM1541_WRITE:
-        proto = XUM_RW_PROTO(request[1]);
+        // Disallow any other protocols if in IEEE mode.
+        if ((currState & XUM1541_IEEE488_PRESENT) == 0)
+            proto = XUM_RW_PROTO(request[1]);
+        else
+            proto = XUM1541_CBM;
         DEBUGF(DBG_INFO, "wr:%d %d\n", proto, len);
         // loop to fetch each byte and write it as we get it
         switch (proto) {
         case XUM1541_CBM:
-            len = cbm_raw_write(len, XUM_RW_FLAGS(request[1]));
+            len = cmds->cbm_raw_write(len, XUM_RW_FLAGS(request[1]));
             XUM_SET_STATUS_VAL(status, len);
             break;
         case XUM1541_S1:
@@ -561,28 +610,48 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
         eoi = 0;
         break;
     case XUM1541_IEC_WAIT:
-        if (!xu1541_wait(/*line*/request[1], /*state*/request[2])) {
+        if (!cmds->cbm_wait(/*line*/request[1], /*state*/request[2])) {
             ret = 0;
             break;
         }
         /* FALLTHROUGH */
     case XUM1541_IEC_POLL:
-        XUM_SET_STATUS_VAL(status, xu1541_poll());
+        XUM_SET_STATUS_VAL(status, cmds->cbm_poll());
         DEBUGF(DBG_INFO, "poll=%x\n", XUM_GET_STATUS_VAL(status));
         break;
     case XUM1541_IEC_SETRELEASE:
-        xu1541_setrelease(/*set*/request[1], /*release*/request[2]);
+        cmds->cbm_setrelease(/*set*/request[1], /*release*/request[2]);
         break;
     case XUM1541_PP_READ:
-        XUM_SET_STATUS_VAL(status, xu1541_pp_read());
+        // Disallow if in IEEE mode.
+        if ((currState & XUM1541_IEEE488_PRESENT)) {
+            ret = -1;
+            break;
+        }
+        XUM_SET_STATUS_VAL(status, iec_pp_read());
         break;
     case XUM1541_PP_WRITE:
-        xu1541_pp_write(request[1]);
+        // Disallow if in IEEE mode.
+        if ((currState & XUM1541_IEEE488_PRESENT)) {
+            ret = -1;
+            break;
+        }
+        iec_pp_write(request[1]);
         break;
     case XUM1541_PARBURST_READ:
+        // Disallow if in IEEE mode.
+        if ((currState & XUM1541_IEEE488_PRESENT)) {
+            ret = -1;
+            break;
+        }
         XUM_SET_STATUS_VAL(status, nib_parburst_read_checked());
         break;
     case XUM1541_PARBURST_WRITE:
+        // Disallow if in IEEE mode.
+        if ((currState & XUM1541_IEEE488_PRESENT)) {
+            ret = -1;
+            break;
+        }
         // Sets suppressNibCmd if we're doing a read/write track.
         nib_parburst_write_checked(request[1]);
         break;

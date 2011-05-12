@@ -10,8 +10,10 @@
 #ifndef _BOARD_ZOOMFLOPPY_H
 #define _BOARD_ZOOMFLOPPY_H
 
-// Initialize the board (IO ports, indicators, UART)
+// Initialize the board (timer, indicators, UART)
 void board_init(void);
+// Initialize the IO ports for IEC mode
+void board_init_iec(void);
 
 // Mapping of IEC lines to IO port output signals.
 #define IO_CLK          _BV(0) // D0
@@ -36,6 +38,28 @@ void board_init(void);
 #define PAR_PORT_PORT   PORTB
 #define PAR_PORT_DDR    DDRB
 #define PAR_PORT_PIN    PINB
+
+//
+// ZOOMFLOPPY IEEE-488 Pinout  (Port,bit) OR (Input Port,Bit,Output Port,Bit)
+//
+#if MODEL == ZOOMFLOPPY
+#define IEEE_SUPPORT    1
+#endif
+
+#define IEEE_EOI_IO     0xc5 // input, output
+#define IEEE_ATN_I      0xc6 // input only
+#define IEEE_ATN_O      0xc7 // output only
+#define IEEE_DAV_IO     0xc4 // 
+#define IEEE_IFC_I      0xd7 // 
+#define IEEE_IFC_O      0xd6 // 
+#define IEEE_SRQ_I      0xd5 // 
+#define IEEE_SRQ_O      0xd4 // 
+#define IEEE_NDAC_I     0xd2 // 
+#define IEEE_NDAC_O     0xd3 // 
+#define IEEE_NRFD_I     0xd1 // 
+#define IEEE_NRFD_O     0xd0 // 
+#define IEEE_REN_IO     0xc2 // 
+#define IEEE_DATA_IO    0xb0 // Port B - Data
 
 /*
  * Use always_inline to override gcc's -Os option. Since we measured each
@@ -118,7 +142,7 @@ iec_set_release(uint8_t s, uint8_t r)
 
 // Make 8-bit port all inputs and read parallel value
 INLINE uint8_t
-xu1541_pp_read(void)
+iec_pp_read(void)
 {
     PAR_PORT_DDR = 0;
     PAR_PORT_PORT = 0;
@@ -127,14 +151,14 @@ xu1541_pp_read(void)
 
 // Make 8-bits of port output and write out the parallel data
 INLINE void
-xu1541_pp_write(uint8_t val)
+iec_pp_write(uint8_t val)
 {
     PAR_PORT_DDR = 0xff;
     PAR_PORT_PORT = val;
 }
 
 // Since this is called with a runtime-specified mask, inlining doesn't help.
-uint8_t iec_poll(void);
+uint8_t iec_poll_pins(void);
 
 // Status indicators (LEDs)
 uint8_t board_get_status(void);

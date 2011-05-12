@@ -23,14 +23,13 @@ uart_putchar(char c, FILE *stream)
 static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
 #endif // DEBUG
 
-// Initialize the board (IO ports, indicators, UART)
+// Initialize the board (timer, indicator LED, UART)
 void
 board_init(void)
 {
-    // IO port initiailization. CBM is on D and C, parallel B.
-    DDRC = IO_MASK_C;
-    DDRD = IO_MASK_D;
-    PAR_PORT_DDR = 0;
+    // Initialize just the IO pin for LED at this point
+    PORTC = 0;
+    DDRC = LED_MASK;
 
 #ifdef DEBUG
     /*
@@ -49,8 +48,23 @@ board_init(void)
     TCCR1B |= (1 << WGM12) | (1 << CS02) | (1 << CS00);
 }
 
+// Initialize the board IO ports for IEC mode
+// This function has to work even if the ports were left in an indeterminate
+// state by a prior initialization (e.g., auto-probe for IEEE devices).
+void
+board_init_iec(void)
+{
+    // IO port initialization. CBM is on D and C, parallel B.
+    PORTC = 0;
+    PORTD = 0;
+    DDRC = IO_MASK_C;
+    DDRD = IO_MASK_D;
+    PAR_PORT_PORT = 0;
+    PAR_PORT_DDR = 0;
+}
+
 uint8_t
-iec_poll(void)
+iec_poll_pins(void)
 {
     return ((PIND & IO_SRQ_IN)  >> 1) |
            ((PIND & IO_CLK_IN)  >> 1) |

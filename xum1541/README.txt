@@ -16,6 +16,7 @@ Or the xum1541 web page:
 
 Revisions
 =========
+0.7 (2011/5/10) - Add IEEE-488 support (thanks to Tommy Winkler).
 0.6 (2010/7/5) - New protocol (version 6) with reduced latency and
     support for indefinite waiting, better reset when the previous command
     is aborted with ^C, new ZoomFloppy board design, updated to LUFA 091223
@@ -112,6 +113,14 @@ transfers or nibtools.
 If using a Mac and you see multiple newlines after hitting ENTER to start
 a command, you can workaround this by setting your keyboard "delay until
 repeat" level to a slower value.
+
+IEEE-488 support has been added (SFD-1001, CBM-8050, CBM-4040 drives).
+Currently, only cbmctrl is supported although file and image copy
+(cbmread/cbmwrite and d82copy) should be implemented in the future.
+It is possible to transfer files to/from the floppy with just cbmctrl.
+
+CAUTION: never connect serial or parallel IEC drives at the same time as
+IEEE-488 drives. You should only use one bus type at a time.
 
 
 Developer notes
@@ -245,13 +254,16 @@ firmware.
 Tasks
 =====
 Bugs:
-- Update IEC read routine
+- Build with Win2k DDK to support older versions
+- Update IEC read routine timing
 - Resetting an interrupted command actually does two resets
+- Figure out which loops don't check Timer abort routine yet.
+  Add Timer checking back into nib routines.
+- ZF watchdog fire during nibread of Alternate Reality (user ATT)
 - Star Commander needs testing as it may not work with the xum1541
 - The USBKEY firmware fails to enter bootloader mode from software.
   This will eventually be fixed but is not a big deal since that board
   has hardware buttons to do the same function. The ZoomFloppy works fine.
-- Test for cbmcopy hangs but not for 1581: cbmcopy_fill.sh mass 1541 -t p
 
 Improvements:
 - Add SRQ nibbling support
@@ -259,7 +271,6 @@ Improvements:
   impossible to write the wrong firmware and easier for users to upgrade.
 - Integrate Teensy support, factor out timer routines to common file
 - Add support to program in a serial number to EEPROM
-- Add IEEE-488 support
 - Improve LEDs, especially on USBKEY (which has 4)
 - Debug printing via the UART is not supported on ZoomFloppy since it has
   to use this pin for the IEC DATA connection. Another route for debugging

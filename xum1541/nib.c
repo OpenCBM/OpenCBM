@@ -31,7 +31,7 @@ nib_parburst_read()
 
     // Byte ready -- read it and release ATN
     DELAY_US(1);
-    data = xu1541_pp_read();
+    data = iec_pp_read();
     iec_release(IO_ATN);
 
     // Wait for the drive to pull DATA again. Delay for a bit afterwards
@@ -51,7 +51,7 @@ nib_read_handshaked(uint8_t *data, uint8_t toggle)
         ;
 
     // Read it directly from the port without debouncing.
-    *data = xu1541_pp_read();
+    *data = iec_pp_read();
     return 0;
 }
 
@@ -72,7 +72,7 @@ nib_parburst_write(uint8_t data)
     while (iec_get(IO_DATA))
         ;
 
-    xu1541_pp_write(data);
+    iec_pp_write(data);
     DELAY_US(1);
     iec_release(IO_ATN);
 
@@ -88,7 +88,7 @@ nib_parburst_write(uint8_t data)
         ;
 
     // Read from parallel port, making the outputs inputs. (critical)
-    data = xu1541_pp_read();
+    data = iec_pp_read();
 }
 
 // Caller must release IO_DATA before calling this function
@@ -100,6 +100,6 @@ nib_write_handshaked(uint8_t data, uint8_t toggle)
         ;
 
     // Write out the data value via parallel.
-    xu1541_pp_write(data);
+    iec_pp_write(data);
     return 0;
 }

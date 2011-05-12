@@ -5,7 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: pp.c,v 1.5 2011-01-04 02:51:31 natelawson Exp $
+ * This Revision: $Id$
  *
  * $Log $
  * Revision 1.3  2008/10/09 18:55:45  strik
@@ -39,7 +39,7 @@ pp_write_2_bytes(uint8_t *c)
         if (!TimerWorker())
             return;
     }
-    xu1541_pp_write(*c++);
+    iec_pp_write(*c++);
     DELAY_US(0.5);
     iec_release(IO_CLK);
 
@@ -47,7 +47,7 @@ pp_write_2_bytes(uint8_t *c)
         if (!TimerWorker())
             return;
     }
-    xu1541_pp_write(*c);
+    iec_pp_write(*c);
     DELAY_US(0.5);
     iec_set(IO_CLK);
 }
@@ -59,13 +59,13 @@ pp_read_2_bytes(uint8_t *c)
         if (!TimerWorker())
             return;
     }
-    *c++ = xu1541_pp_read();
+    *c++ = iec_pp_read();
     iec_release(IO_CLK);
 
     while (iec_get(IO_DATA)) {
         if (!TimerWorker())
             return;
     }
-    *c = xu1541_pp_read();
+    *c = iec_pp_read();
     iec_set(IO_CLK);
 }
