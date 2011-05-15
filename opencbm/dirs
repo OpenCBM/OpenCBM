@@ -6,6 +6,8 @@ DIRS= \
 	cbmcopy \
 	libd64copy \
 	d64copy \
+	libd82copy \
+	d82copy \
 	cbmctrl \
 	install \
 	lib \
