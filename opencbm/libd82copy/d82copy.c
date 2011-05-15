@@ -153,16 +153,11 @@ d82copy_settings *d82copy_get_default_settings(void)
     return settings;
 }
 
-
 static int start_turbo(CBM_FILE fd, unsigned char drive)
 {
     SETSTATEDEBUG((void)0);
     return cbm_exec_command(fd, drive, "U4:", 3);
 }
-
-
-
-
 
 void DumpBlock(unsigned char *buffer)
 {
@@ -183,15 +178,11 @@ void DumpBlock(unsigned char *buffer)
 	}
 }
 
-
-
-
-
 int ReadBAM(d82copy_settings *settings, const transfer_funcs *src, unsigned char *buffer, int *bam_count)
 {
 	int cnt;
 	int st;
-	int track, sector;
+	uint8_t track, sector;
 
 	message_cb(2, "reading BAM ...");
 				
@@ -245,9 +236,6 @@ int ReadBAM(d82copy_settings *settings, const transfer_funcs *src, unsigned char
 	*bam_count = cnt;
 	return st;
 }
-
-
-
 
 static int copy_disk(CBM_FILE fd_cbm, d82copy_settings *settings,
               const transfer_funcs *src, const void *src_arg,
