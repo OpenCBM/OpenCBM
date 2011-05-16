@@ -226,7 +226,7 @@ int ReadBAM(d82copy_settings *settings, const transfer_funcs *src, unsigned char
 		}
 		else if(cnt == 3 && !settings->two_sided)
 		{
-			message_cb(1, "single sided expected, but more than 2 BAM blocks??!");
+			message_cb(1, "single sided expected, but more than 2 BAM blocks?!");
 			st = 1;
 			break;
 		}
