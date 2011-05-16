@@ -10,6 +10,7 @@ DEVMINOR = 177
 SUBDIRS  = include arch/$(ARCH) libmisc lib \
 	   libtrans \
            cbmctrl cbmformat cbmforng d64copy cbmcopy \
+	   d82copy \
            demo/flash demo/morse demo/rpm1541 \
 	   sample/libtrans
 ifeq "$(OS)" "Linux"
