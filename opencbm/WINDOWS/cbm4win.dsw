@@ -131,6 +131,15 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name usbcfg
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name cbmrpm41
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name d82copy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libd82copy
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -282,6 +291,30 @@ Package=<4>
 
 ###############################################################################
 
+Project: "d82copy"=..\d82copy\WINBUILD\d82copy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libd82copy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "demoflash"=..\demo\flash\WINBUILD\demoflash.dsp - Package Owner=<4>
 
 Package=<5>
@@ -398,6 +431,21 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name opencbm
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "libd82copy"=..\libd82copy\WINBUILD\libd82copy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
     Begin Project Dependency
     Project_Dep_Name arch
     End Project Dependency
