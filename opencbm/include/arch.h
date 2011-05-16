@@ -40,6 +40,10 @@
 # define CHAR_BACKTICK '`'
 # define CHAR_TICK     '\''
 
+#if (_MSC_VER <= 1200) // MSVC 6 or older
+typedef unsigned long ULONG_PTR;
+#endif
+
 #else
 
 # define ARCH_CBM_LINUX_WIN( _linux, _win) _linux
@@ -52,7 +56,7 @@
 # include <error.h>
 #endif
 
-# define ULONG_PTR unsigned long
+typedef unsigned long ULONG_PTR;
 
 # define STRING_BACKTICK "`"
 # define STRING_TICK     "´"
