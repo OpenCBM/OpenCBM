@@ -11,7 +11,6 @@ CFLAGS += -I ./ -I ../libmisc/
 
 LIBCBMCOPY = ../libcbmcopy
 LIBD64COPY = ../libd64copy
-LIBD82COPY = ../libd82copy
 LIBARCH    = ../arch/linux/
 LIBMISC    = ../libmisc
 
@@ -20,14 +19,13 @@ LIBNAME = libopencbm
 SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c \
 	  LINUX/configuration_name.c \
 	  $(foreach t,cbmcopy pp s1 s2, $(LIBCBMCOPY)/$(t).c) \
-	  $(foreach t,d82copy fs gcr std, $(LIBD82COPY)/$(t).c) \
 	  $(foreach t,d64copy fs gcr pp s1 s2 std, $(LIBD64COPY)/$(t).c)
 LIBS = $(LIBARCH)/libarch.a $(LIBMISC)/libmisc.a -ldl
 
 all: build-lib
 
 clean: clean-lib
-	rm -f $(LIBD64COPY)/*.o65 $(LIBCBMCOPY)/*.o65 $(LIBD82COPY)/*.o65
+	rm -f $(LIBD64COPY)/*.o65 $(LIBCBMCOPY)/*.o65
 
 mrproper: clean
 	rm -f $(LIBCBMCOPY)/*.inc $(LIBD64COPY)/*.inc
@@ -85,17 +83,6 @@ $(LIBD64COPY)/s2.o $(LIBD64COPY)/s2.lo: \
 $(LIBD64COPY)/std.o $(LIBD64COPY)/std.lo: \
   $(LIBD64COPY)/std.c ../include/opencbm.h \
   $(LIBD64COPY)/d64copy_int.h ../include/d64copy.h $(LIBD64COPY)/gcr.h
-$(LIBD82COPY)/d82copy.o $(LIBD82COPY)/d82copy.lo: \
-  $(LIBD82COPY)/d82copy.c $(LIBD82COPY)/d82copy_int.h \
-  ../include/arch.h
-$(LIBD82COPY)/fs.o $(LIBD82COPY)/fs.lo: \
-  $(LIBD82COPY)/fs.c $(LIBD82COPY)/d82copy_int.h \
-  ../include/arch.h
-$(LIBD82COPY)/gcr.o $(LIBD82COPY)/gcr.lo: \
-  $(LIBD82COPY)/gcr.c $(LIBD82COPY)/gcr.h
-$(LIBD82COPY)/std.o $(LIBD82COPY)/std.lo: \
-  $(LIBD82COPY)/std.c ../include/opencbm.h \
-  $(LIBD82COPY)/d82copy_int.h
 detect.o detect.lo: detect.c ../include/opencbm.h
 detectxp1541.o detectxp1541.lo: detectxp1541.c ../include/opencbm.h
 petscii.o petscii.lo: petscii.c ../include/opencbm.h
