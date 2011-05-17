@@ -169,8 +169,6 @@ static int cbmcopy_read(CBM_FILE fd,
     int i;
     int turbo_size;
     int error;
-    unsigned char c;
-    unsigned char *cptr;
     unsigned char buf[48];
     const unsigned char *turbo;
     const transfer_funcs *trf;
@@ -546,7 +544,6 @@ int cbmcopy_write_file(CBM_FILE fd,
     int turbo_size;
     unsigned char drive = (unsigned char) drivei; //! \todo Find better solution
     int error;
-    unsigned char c;
     unsigned char buf[48];
     const unsigned char *turbo;
     const transfer_funcs *trf;
