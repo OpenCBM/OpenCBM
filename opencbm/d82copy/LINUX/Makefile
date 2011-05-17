@@ -5,7 +5,7 @@ include ${RELATIVEPATH}LINUX/config.make
 
 LIBD82COPY=../libd82copy
 
-OBJS = main.o $(LIBD82COPY)/fs.o $(LIBD82COPY)/gcr.o $(LIBD82COPY)/std.o
+OBJS = $(LIBD82COPY)/fs.o $(LIBD82COPY)/gcr.o $(LIBD82COPY)/std.o $(LIBD82COPY)/d82copy.o main.o
 PROG = d82copy
 LINKS = 
 
