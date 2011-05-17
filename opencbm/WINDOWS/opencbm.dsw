@@ -132,9 +132,6 @@ Package=<4>
     Project_Dep_Name usbcfg
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name cbmrpm41
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name d82copy
     End Project Dependency
     Begin Project Dependency

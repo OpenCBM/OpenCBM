@@ -99,6 +99,10 @@ SOURCE=..\s1.c
 
 SOURCE=..\s2.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\std.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
