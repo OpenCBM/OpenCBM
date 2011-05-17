@@ -18,6 +18,7 @@ set OPENCBM_SRC_HOME=%0\..\..
 
 rem set default local settings (not controlled by CVS)
 if exist %OPENCBM_SRC_HOME%\..\DDKBUILD_LOCAL.BAT call %OPENCBM_SRC_HOME%\..\DDKBUILD_LOCAL.BAT %OPENCBM_SRC_HOME%
+if exist %OPENCBM_SRC_HOME%\..\..\DDKBUILD_LOCAL.BAT call %OPENCBM_SRC_HOME%\..\..\DDKBUILD_LOCAL.BAT %OPENCBM_SRC_HOME%
 
 rem Set this to 1 if you are using DDKBUILD.BAT from Hollis Technology
 rem Solutions.  Do not set if using DDKBUILD from OSR
