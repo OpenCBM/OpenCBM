@@ -35,7 +35,7 @@
 #include "cpu-bumbleb.h"
 #include "board-zoomfloppy.h"
 #elif MODEL == OLIMEX
-#include "cpu-zoomfloppy.h"
+#include "cpu-bumbleb.h"
 #include "board-zoomfloppy.h"
 #elif MODEL == ZOOMFLOPPY
 #include "cpu-zoomfloppy.h"
