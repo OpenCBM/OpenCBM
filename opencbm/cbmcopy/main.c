@@ -94,6 +94,7 @@ static void help(const char *prog)
 "\n"
 "  -h, --help                 display this help and exit\n"
 "  -V, --version              display version information and exit\n"
+"  -@, --adapter=plugin:bus   tell OpenCBM which backend plugin and bus to use\n"
 "  -q, --quiet                quiet output\n"
 "  -v, --verbose              control verbosity (repeatedly, up to 3 times)\n"
 "  -n, --no-progress          do not display progress information\n"

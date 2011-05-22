@@ -1,8 +1,7 @@
-.\" $Id: cbmctrl.1,v 1.16 2006-07-23 20:55:32 wmsr Exp $
-.\"
+.\" $Id: $
 .\" This manual page was written by Michael Klein
 .\"   <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
-.\" additions and rework by Wolfgang Moser (http://d81.de),
+.\" additions, rework and maintenance by Wolfgang Moser (http://d81.de),
 .\" changes and corrections by Spiro Trikaliotis
 .\"
 .\" Process this file with
@@ -10,14 +9,17 @@
 .\" Test it with
 .\"    nroff -man cbmctrl.1 | less -r
 .\"
-.TH CBMCTRL "1" "July 2006" "cbmctrl 0.4.x" "User Commands"
+.\" Get help with formatting man pages via:
+.\"    man 7 man
+.\" or look up:
+.\"    http://www.kernel.org/doc/man-pages/online/pages/man7/man.7.html
+.\"
+.TH CBMCTRL "1" "May 2011" "cbmctrl 0.4.99" "User Commands"
 .SH NAME
-cbmctrl \- control serial CBM devices \- manual page for cbmctrl 0.4.x
+cbmctrl \- control serial CBM devices \- manual page for cbmctrl 0.4.99
 .P
-.B This document is poorly maintained and probably outdated. 
-If in doubt, use the Texinfo manual. If the
-.B info
-program is properly installed at your site, the command
+If the info program is properly installed at your site,
+the command
 .IP
 .B info opencbm
 .PP
@@ -103,6 +105,22 @@ action together with its arguments and parameters
 .TP
 .B \-V, \-\-version
 Output version information as well as the build date and time
+.TP
+.BI "\-@, \-\-adapter=" "<plugin>[:<bus>]"
+Tell OpenCBM which concrete backend plugin and logical plugin
+bus to use. This option requires an argument of the form
+.I <plugin>[:<bus>].
+.RS
+.TP 9
+.I <plugin>
+is the backend plugin's name to use (e.g.: xa1541).
+.TP
+.I <bus>
+is a bus unit identifier, if supported by the backend; look up
+the backend's documentation for the supported bus unit
+identifier(s) and the appropriate format for
+.I <bus>.
+.RE
 .TP
 .B \-p, \-\-petscii
 Convert input or output parameters between CBM format (PETSCII)
@@ -926,7 +944,7 @@ cbmctrl --petscii upload 10 0x500
 .RE
 .SH AUTHOR
 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>,
-additions and rework by Spiro Trikaliotis, additions by Wolfgang Moser
-http://d81.de.
+additions and rework by Spiro Trikaliotis, additions, rework and
+maintenance by Wolfgang Moser (http://d81.de).
 .SH DATE
-July 23 2006 \" Happy birthday Martin ;-)
+May 22 2011

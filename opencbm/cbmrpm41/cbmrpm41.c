@@ -42,7 +42,7 @@ const static unsigned short UcmdTblAddr   = sizeof(cbmDev_StartAddress) + offset
 
 const static int Modulus  = Via1Timer2Max * Via2Timer2Max;
 const static int V1T2rec1 =    27081;       // --16-Bit timer (inverse of a mod b)
-const static int V1T2rec2 =      121;       // -´
+const static int V1T2rec2 =      121;       // __/
 const static int V2T2rec  =  8978432;       // 7.89-Bit timer (inverse of b mod a)
 
 typedef struct
@@ -76,28 +76,30 @@ help()
         "Usage: cbmrpm41 [OPTION]... DRIVE\n"
         "High precision CBM-1541 rpm measurement\n"
         "\n"
-        "  -h, --help       display this help and exit\n"
-        "  -V, --version    display version information and exit\n"
+        "  -h, --help                 display this help and exit\n"
+        "  -V, --version              display version information and exit\n"
+        "  -@, --adapter=plugin:bus   tell OpenCBM which backend plugin and bus to use\n"
         "\n"
-        "  -j, --job=JOBID  measurement job to do:\n"
-        "                       1 - detailed RPM printout (default),\n"
-        "                       2 - track synchronization,\n"
-        "                       3 - RPM with linear regression and ANOVAR\n"
-        "                       4 - for RPM adjustment, with exponential moving average\n"
+        "  -j, --job=JOBID            measurement job to do:\n"
+        "                                 1 - detailed RPM printout (default),\n"
+        "                                 2 - track synchronization,\n"
+        "                                 3 - RPM with linear regression and ANOVAR\n"
+        "                                 4 - for RPM adjustment, with exponentially\n"
+        "                                     moving average\n"
         "\n"
-        "  -s, --status     display drive status after the measurements\n"
-        "  -x, --extended   measure out a 40 track disk\n"
-        "  -r, --retries=n  number of measurement retries for each track\n"
+        "  -s, --status               display drive status after the measurements\n"
+        "  -x, --extended             measure out a 40 track disk\n"
+        "  -r, --retries=n            number of measurement retries for each track\n"
         "\n"
-        "  -b, --begin-track=TRACK  set start track (1 <= start <= end)\n"
-        "  -e, --end-track=TRACK    set end track  (start <= end <= 42)\n"
-        "  -c, --sector=SECTOR      set trigger sector number (>=0, gets modulo limited\n"
-        "                           by the max number of sectors for a track)\n"
+        "  -b, --begin-track=TRACK    set start track (1 <= start <= end)\n"
+        "  -e, --end-track=TRACK      set end track  (start <= end <= 42)\n"
+        "  -c, --sector=SECTOR        set trigger sector number (>=0, gets modulo\n"
+        "                             limited by the max number of sectors for a track)\n"
         /*
         "\n"
-        "  -q, --quiet              quiet output\n"
-        "  -v, --verbose            control verbosity (repeatedly, up to 3 times)\n"
-        "  -n, --no-progress        do not display progress information\n"
+        "  -q, --quiet                quiet output\n"
+        "  -v, --verbose              control verbosity (repeatedly, up to 3 times)\n"
+        "  -n, --no-progress          do not display progress information\n"
         */
         "\n"
     );
