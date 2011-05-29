@@ -191,7 +191,13 @@ iec_reset(bool forever)
      * crosstalk from the VIAs being setup by the 6502.
      */
     iec_set(IO_RESET);
-    DELAY_MS(30);
+    /*
+     * For one of Womo's drives a reset low hold time of 30 ms was too short.
+     * Therefore the value was increased to 100ms. The drive already worked
+     * with a value of 45 ms, but it was more than doubled to 100 ms to get a
+     * safety margin for even very worse cabling or input circuit conditions.
+     */
+    DELAY_MS(100);
     iec_release(IO_RESET);
 
     wait_for_free_bus(forever);
