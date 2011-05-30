@@ -10,7 +10,7 @@
 
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.6 2009-02-10 21:40:19 wmsr Exp $";
+    "@(#) $Id: $";
 #endif
 
 #include "opencbm.h"

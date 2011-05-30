@@ -13,7 +13,7 @@
  
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: frm_analyzer.c,v 1.4 2010-08-15 08:06:57 wmsr Exp $";
+    "@(#) $Id: $";
 #endif
 
 #include "opencbm.h"
