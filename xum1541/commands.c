@@ -24,7 +24,8 @@ static uint16_t usbDataLen;
 static uint8_t usbDataDir = XUM_DATA_DIR_NONE;
 
 // Are we in the middle of a command sequence (XUM1541_INIT .. SHUTDOWN)?
-static bool cmdSeqInProgress;
+#define XUM1541_CMD_IN_PROGRESS 0x80
+static uint8_t cmdSeqInProgress;
 extern bool device_running;
 
 // Current device state for the XUM1541_INIT response
@@ -475,9 +476,11 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
          */
         if (cmdSeqInProgress) {
             replyBuf[2] |= XUM1541_DOING_RESET;
+            cmdSeqInProgress = XUM1541_DOING_RESET;
             cmds->cbm_reset(false);
             SetAbortState();
         }
+        cmdSeqInProgress |= XUM1541_CMD_IN_PROGRESS;
 
         /*
          * We wait in main() until at least one device is present on the
@@ -486,14 +489,15 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
          */
         if (!device_running)
             replyBuf[2] |= XUM1541_NO_DEVICE;
-        cmdSeqInProgress = true;
         return 8;
     case XUM1541_SHUTDOWN:
-        cmdSeqInProgress = false;
+        cmdSeqInProgress = 0;
         board_set_status(STATUS_READY);
         return 0;
     case XUM1541_RESET:
-        cmds->cbm_reset(false);
+        // Only do reset if we didn't just reset in INIT (above).
+        if ((cmdSeqInProgress & XUM1541_DOING_RESET) == 0)
+            cmds->cbm_reset(false);
         return 0;
     default:
         DEBUGF(DBG_ERROR, "ERR: control cmd %d not impl\n", cmd);
@@ -502,7 +506,7 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
 }
 
 // Store the 16-bit response to a bulk command in a status buffer.
-#define XUM_SET_STATUS_VAL(buf, v)  *(uint16_t *)&((buf)[1]) = (v)
+#define XUM_SET_STATUS_VAL(buf, v)  *(uint16_t *)((buf) + 1) = (v)
 
 int8_t
 usbHandleBulk(uint8_t *request, uint8_t *status)
@@ -510,6 +514,9 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
     uint8_t cmd, proto;
     int8_t ret;
     uint16_t len;
+
+    // Clear off "just did reset" flag each time a different cmd is run.
+    cmdSeqInProgress &= ~XUM1541_DOING_RESET;
 
     // Default is to return no data
     ret = XUM1541_IO_READY;
