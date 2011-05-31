@@ -125,4 +125,7 @@
 #define XUM_WRITE_TALK              (1 << 0)
 #define XUM_WRITE_ATN               (1 << 1)
 
+// Request an early exit from nib read via burst_read_track_var()
+#define XUM1541_NIB_READ_VAR        0x8000
+
 #endif // _XUM1541_TYPES_H

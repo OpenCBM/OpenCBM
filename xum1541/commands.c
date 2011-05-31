@@ -260,7 +260,7 @@ ioWrite2Loop(Write2Fn_t writeFn, uint16_t len)
 }
 
 static uint8_t
-ioReadNibLoop(uint16_t len)
+ioReadNibLoop(uint16_t len, bool earlyExit)
 {
     uint16_t i;
     uint8_t data;
@@ -292,6 +292,11 @@ ioReadNibLoop(uint16_t len)
 
         // Send the byte via USB
         if (usbSendByte(data) != 0)
+            break;
+
+        // If requested, terminate early on seeing a special marker.
+        // This is used by burst_read_track_var() to scan density.
+        if (earlyExit && data == 0x55)
             break;
     }
     usbIoDone();
@@ -514,6 +519,7 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
     uint8_t cmd, proto;
     int8_t ret;
     uint16_t len;
+    bool nibEarlyExit;
 
     // Clear off "just did reset" flag each time a different cmd is run.
     cmdSeqInProgress &= ~XUM1541_DOING_RESET;
@@ -554,7 +560,9 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
             ret = 0;
             break;
         case XUM1541_NIB:
-            ioReadNibLoop(len);
+            nibEarlyExit = (len & XUM1541_NIB_READ_VAR);
+            len &= ~XUM1541_NIB_READ_VAR;
+            ioReadNibLoop(len, nibEarlyExit);
             ret = 0;
             break;
         case XUM1541_NIB_COMMAND:
