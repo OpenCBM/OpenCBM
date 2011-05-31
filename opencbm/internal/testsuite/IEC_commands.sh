@@ -1,7 +1,4 @@
 #!/bin/bash
-#
-# $Id: $
-#
 # set -x
 
 echo $$ > shelltst.pid
@@ -19,9 +16,11 @@ cbmctrl $1 unlock
 echo -e "\n\nGetting status:"
 
 cbmctrl $1 lock
+cbmctrl $1 open $2 15 ""
 cbmctrl $1 talk $2 15
 cbmctrl $1 read | tr "\r" "\n"
 cbmctrl $1 untalk
+cbmctrl $1 close $2 15
 cbmctrl $1 unlock
 
 rm -f shelltst.pid
