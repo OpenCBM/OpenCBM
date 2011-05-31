@@ -254,12 +254,9 @@ firmware.
 Tasks
 =====
 Bugs:
-- Build with Win2k DDK to support older versions
 - Update IEC read routine timing
-- Resetting an interrupted command actually does two resets
 - Figure out which loops don't check Timer abort routine yet.
   Add Timer checking back into nib routines.
-- ZF watchdog fire during nibread of Alternate Reality (user ATT)
 - Star Commander needs testing as it may not work with the xum1541
 - The USBKEY firmware fails to enter bootloader mode from software.
   This will eventually be fixed but is not a big deal since that board
