@@ -5,10 +5,10 @@
 # set -x
 
 function error_info {
-	echo "rdwrtest.sh <drivenumber> <cmpbytes> [<d64copy parameters>]" 1>&2
+	echo "d64rwtest.sh <drivenumber> <cmpbytes> [<d64copy parameters>]" 1>&2
 	echo  1>&2
-	echo "drivenumber: device ID of the 1541/1571 disk drive to test with"  1>&2
-	echo "cmpbytes:    maximum number of bytes to do the compare with"  1>&2
+	echo "drivenumber: device ID of the 1541/1571 disk drive to test with" 1>&2
+	echo "cmpbytes:    maximum number of bytes to do the compare with" 1>&2
 	exit 1
 	}
 
