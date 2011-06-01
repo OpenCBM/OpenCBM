@@ -140,6 +140,42 @@ opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer
     return result;
 }
 
+/*! \brief PARBURST: Read a variable length track
+
+ This function is a helper function for parallel burst:
+ It reads a variable length track from the disk
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which will hold the bytes read.
+
+ \param Length
+   The length of the Buffer.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+{
+    int result;
+
+    // Add a flag to indicate this read terminates early after seeing 
+    // an 0x55 byte.
+    result = xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_NIB, Buffer, Length | XUM1541_NIB_READ_VAR);
+    if (result <= 0) {
+        DBG_WARN((DBG_PREFIX "parallel_burst_read_track_var: returned with error %d", result));
+    }
+
+    return result;
+}
+
 /*! \brief PARBURST: Write a complete track
 
  This function is a helper function for parallel burst:
