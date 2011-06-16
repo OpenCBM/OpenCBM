@@ -5,7 +5,7 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2004, 2007-2009 Spiro Trikaliotis
+ *  Copyright 2001-2004, 2007-2009, 2011 Spiro Trikaliotis
  *
  *  Parts are Copyright
  *      Jouko Valta <jopi(at)stekt(dot)oulu(dot)fi>
@@ -47,7 +47,7 @@
 
 #include "version.h"
 
-#define OPENCBM_PLUGIN 1 /*!< \brief mark: we are exporting plugin functions */
+#define OPENCBM_PLUGIN /*!< \brief mark: we are exporting plugin functions */
 
 #include "archlib.h"
 
@@ -332,9 +332,9 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
 
  Get the name of the driver for a specific parallel port.
 
- \param PortNumber
-   The port number for the driver to open. 0 means "default" driver, while
-   values != 0 enumerate each driver.
+ \param Port
+   The port specification for the driver to open. If not set (== NULL),
+   the "default" driver is used. The exact meaning depends upon the plugin.
 
  \return 
    Returns a pointer to a null-terminated string containing the
@@ -345,11 +345,13 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
 */
 
 const char * CBMAPIDECL
-opencbm_plugin_get_driver_name(int PortNumber)
+opencbm_plugin_get_driver_name(const char * const Port)
 {
     //! \todo do not hard-code the driver name
     static char driverName[] = "\\\\.\\opencbm0";
     char *ret;
+
+    int portNumber = strtoul(Port, NULL, 10);
 
     FUNC_ENTER();
 
@@ -359,16 +361,16 @@ opencbm_plugin_get_driver_name(int PortNumber)
      * the logic does not allow more than 10 entries, 
      * thus, fail this call if we want to use a port > 10!  */
 
-    if (PortNumber <= 10)
+    if (portNumber <= 10)
     {
-        if (PortNumber == 0)
+        if (portNumber == 0)
         {
             // PortNumber 0 has special meaning: Find out the default value
 
-            PortNumber = cbm_get_default_port();
+            portNumber = cbm_get_default_port();
         }
 
-        driverName[strlen(driverName)-1] = (PortNumber ? PortNumber-1 : 0) + '0';
+        driverName[strlen(driverName)-1] = (portNumber ? portNumber-1 : 0) + '0';
         ret = driverName;
     }
 
@@ -382,9 +384,9 @@ opencbm_plugin_get_driver_name(int PortNumber)
  \param HandleDevice  
    Pointer to a CBM_FILE which will contain the file handle of the driver.
 
- \param PortNumber
-   The port number of the driver to open. 0 means "default" driver, while
-   values != 0 enumerate each driver.
+ \param Port
+   The port specification for the driver to open. If not set (== NULL),
+   the "default" driver is used. The exact meaning depends upon the plugin.
 
  \return 
    ==0: This function completed successfully
@@ -396,7 +398,7 @@ opencbm_plugin_get_driver_name(int PortNumber)
 */
 
 int CBMAPIDECL
-opencbm_plugin_driver_open(CBM_FILE *HandleDevice, int PortNumber)
+opencbm_plugin_driver_open(CBM_FILE *HandleDevice, const char * const Port)
 {
     const char *driverName;
 
@@ -404,7 +406,7 @@ opencbm_plugin_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 
     // Get the name of the driver to be opened
 
-    driverName = opencbm_plugin_get_driver_name(PortNumber);
+    driverName = opencbm_plugin_get_driver_name(Port);
 
     if (driverName == NULL)
     {

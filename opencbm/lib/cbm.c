@@ -5,7 +5,7 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2005           Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005,2007-2009 Spiro Trikaliotis
+ *  Copyright 2001-2005,2007-2009, 2011 Spiro Trikaliotis
  *  Copyright 2009                Arnd <arnd(at)jonnz(dot)de>
  *
 */
@@ -397,16 +397,18 @@ initialize_plugin(const char * const Adapter)
 
 /*! \brief Split adapter in adapter and port
 
- This function extracts the adapter name and the port number
+ This function extracts the adapter name and the port
  out of the given adapter specification.
 
  \param Adapter
    The name of the adapter to be used.
    The format is specified in the remarks section below.
 
- \param PortNumber
-   Pointer to an unsigned int which will get the specified port number.
-   It is left untouched if no port number was specified.
+ \param Port
+   Pointer to a pointer to char which will get the specified port.
+   This data has to be freed with cbmlibmisc_strfree() afterwards!
+
+   It is set to NULL if no port was specified.
 
  \return
    NULL: an error occurred.
@@ -423,9 +425,11 @@ initialize_plugin(const char * const Adapter)
 */
 
 static char *
-cbm_split_adapter_in_name_and_port(char * Adapter, unsigned int * PortNumber)
+cbm_split_adapter_in_name_and_port(char * Adapter, char ** Port)
 {
     char * adapter_stripped = NULL;
+
+    *Port = NULL;
 
     if (Adapter) 
     {
@@ -438,14 +442,9 @@ cbm_split_adapter_in_name_and_port(char * Adapter, unsigned int * PortNumber)
             adapter_stripped = cbmlibmisc_strndup(Adapter, p - Adapter);
 
             if (adapter_stripped != NULL) {
-                char * nextchar;
-                unsigned int portNumber = strtoul(p + 1, &nextchar, 10); 
-
-                if (nextchar && *nextchar == 0) {
-                    *PortNumber = portNumber;
-                }
-                else {
-                    adapter_stripped[0] = 0;
+                if (p[1] != 0)
+                {
+                    *Port = cbmlibmisc_strdup(p+1);
                 }
             }
         }
@@ -486,7 +485,7 @@ cbm_get_driver_name_ex(char * Adapter)
 
     static const char * buffer = NULL;
     char *adapter_stripped = NULL;
-    unsigned int portNumber = 0;
+    char *port = NULL;
 
     int error;
 
@@ -499,19 +498,19 @@ cbm_get_driver_name_ex(char * Adapter)
 
     if (Adapter != NULL)
     {
-        adapter_stripped = cbm_split_adapter_in_name_and_port(Adapter, &portNumber);
+        adapter_stripped = cbm_split_adapter_in_name_and_port(Adapter, &port);
 
         DBG_PRINT((DBG_PREFIX 
             (adapter_stripped == NULL 
               ? "Using default adapter"
-              : "Using adapter '%s', that is, adapter '%s' with port '%u'"),
-            Adapter, adapter_stripped, portNumber));
+              : "Using adapter '%s', that is, adapter '%s' with port '%s'"),
+            Adapter, adapter_stripped, port));
     }
 
     error = initialize_plugin(adapter_stripped);
 
     if (error == 0) {
-        ret = Plugin_information.Plugin.opencbm_plugin_get_driver_name(portNumber);
+        ret = Plugin_information.Plugin.opencbm_plugin_get_driver_name(port);
     }
     else {
         ret = "NO PLUGIN DRIVER!";
@@ -520,6 +519,7 @@ cbm_get_driver_name_ex(char * Adapter)
     buffer = cbmlibmisc_strdup(ret);
 
     cbmlibmisc_strfree(adapter_stripped);
+    cbmlibmisc_strfree(port);
 
     FUNC_LEAVE_STRING(buffer);
 }
@@ -582,7 +582,7 @@ int CBMAPIDECL
 cbm_driver_open_ex(CBM_FILE *HandleDevice, char * Adapter)
 {
     int error;
-    unsigned int portNumber = 0;
+    char * port = NULL;
     char * adapter_stripped = NULL;
 
     FUNC_ENTER();
@@ -591,10 +591,10 @@ cbm_driver_open_ex(CBM_FILE *HandleDevice, char * Adapter)
 
     if (Adapter != NULL)
     {
-        adapter_stripped = cbm_split_adapter_in_name_and_port(Adapter, &portNumber);
+        adapter_stripped = cbm_split_adapter_in_name_and_port(Adapter, &port);
 
-        DBG_PRINT((DBG_PREFIX "Using adapter '%s', that is, adapter '%s' with port '%u'",
-            Adapter, adapter_stripped, portNumber));
+        DBG_PRINT((DBG_PREFIX "Using adapter '%s', that is, adapter '%s' with port '%s'",
+            Adapter, adapter_stripped, port));
     }
 
     error = initialize_plugin(adapter_stripped);
@@ -602,8 +602,10 @@ cbm_driver_open_ex(CBM_FILE *HandleDevice, char * Adapter)
     cbmlibmisc_strfree(adapter_stripped);
 
     if (error == 0) {
-        error = Plugin_information.Plugin.opencbm_plugin_driver_open(HandleDevice, portNumber);
+        error = Plugin_information.Plugin.opencbm_plugin_driver_open(HandleDevice, port);
     }
+
+    cbmlibmisc_strfree(port);
 
     FUNC_LEAVE_INT(error);
 }

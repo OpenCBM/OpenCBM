@@ -8,7 +8,7 @@
  *
  *  Copyright 2009-2010 Nate Lawson
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005, 2007, 2010 Spiro Trikaliotis
+ *  Copyright 2001-2005, 2007, 2010-2011 Spiro Trikaliotis
  *  Copyright 2010 Wolfgang Moser
  *
 */
@@ -57,9 +57,9 @@
 
  Get the name of the driver for a specific parallel port.
 
- \param PortNumber
-   The port number for the driver to open. 0 means "default" driver, while
-   values != 0 enumerate each driver.
+ \param Port
+   The port specification for the driver to open. If not set (== NULL),
+   the "default" driver is used. The exact meaning depends upon the plugin.
 
  \return 
    Returns a pointer to a null-terminated string containing the
@@ -70,9 +70,11 @@
 */
 
 const char * CBMAPIDECL
-opencbm_plugin_get_driver_name(int PortNumber)
+opencbm_plugin_get_driver_name(const char * const Port)
 {
-    return xum1541_device_path(PortNumber);
+    int portNumber = strtoul(Port, NULL, 10);
+
+    return xum1541_device_path(portNumber);
 }
 
 /*! \brief Opens the driver
@@ -82,9 +84,9 @@ opencbm_plugin_get_driver_name(int PortNumber)
  \param HandleDevice  
    Pointer to a CBM_FILE which will contain the file handle of the driver.
 
- \param PortNumber
-   The port number of the driver to open. 0 means "default" driver, while
-   values != 0 enumerate each driver.
+ \param Port
+   The port specification for the driver to open. If not set (== NULL),
+   the "default" driver is used. The exact meaning depends upon the plugin.
 
  \return 
    ==0: This function completed successfully
@@ -96,9 +98,11 @@ opencbm_plugin_get_driver_name(int PortNumber)
 */
 
 int CBMAPIDECL
-opencbm_plugin_driver_open(CBM_FILE *HandleDevice, int PortNumber)
+opencbm_plugin_driver_open(CBM_FILE *HandleDevice, const char * const Port)
 {
-    return xum1541_init((usb_dev_handle **)HandleDevice, PortNumber);
+    int portNumber = strtoul(Port, NULL, 10);
+
+    return xum1541_init((usb_dev_handle **)HandleDevice, portNumber);
 }
 
 /*! \brief Closes the driver

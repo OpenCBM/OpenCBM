@@ -4,7 +4,7 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2008-2009 Spiro Trikaliotis
+ *  Copyright 2008-2009, 2011 Spiro Trikaliotis
  *  Copyright 2011      Wolfgang Moser
  */
 
@@ -24,21 +24,21 @@
 
 /*! \brief @@@@@ \todo document
 
- \param PortNumber
+ \param Port
 
  \return
 */
-typedef const char * CBMAPIDECL opencbm_plugin_get_driver_name_t(int PortNumber);
+typedef const char * CBMAPIDECL opencbm_plugin_get_driver_name_t(const char * const Port);
 
 /*! \brief @@@@@ \todo document
 
  \param HandleDevice
 
- \param PortNumber
+ \param Port
 
  \return
 */
-typedef int CBMAPIDECL opencbm_plugin_driver_open_t(CBM_FILE *HandleDevice, int PortNumber);
+typedef int CBMAPIDECL opencbm_plugin_driver_open_t(CBM_FILE *HandleDevice, const char * const Port);
 
 /*! \brief @@@@@ \todo document
 
