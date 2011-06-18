@@ -21,9 +21,9 @@ static char *rcsid =
 
 #include "arch.h"
 
-
+#ifndef _OFF_T
 typedef long off_t ;
-
+#endif
 
 static d82copy_settings *fs_settings;
 
