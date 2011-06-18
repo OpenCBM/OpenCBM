@@ -98,10 +98,10 @@ iec_get(uint8_t line)
         ret = PIND & IO_DATA_IN;
         break;
     case IO_ATN:
-        ret = PINC & IO_DATA_IN;
+        ret = PINC & IO_ATN_IN;
         break;
     case IO_RESET:
-        ret = PINC & IO_RESET_IN;
+        ret = PIND & IO_RESET_IN;
         break;
     default:
         // Invalid set of requested signals, trigger WD reset
