@@ -514,11 +514,15 @@ ieee_raw_read(uint16_t len)
     uint16_t to, count;
 
     usbInitIo(len, ENDPOINT_DIR_IN);
-    ieee_status = 0;
-    eoi = 0;
 
     count = 0;
     do {
+        // read again after EOI??
+        if (eoi) {
+            usbIoDone();
+            return 0;
+        }
+
         to = 0;
         while(1)
         {
