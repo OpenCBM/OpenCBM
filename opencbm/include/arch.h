@@ -64,7 +64,7 @@ typedef unsigned long ULONG_PTR;
 # define CHAR_BACKTICK '`'
 # define CHAR_TICK     '´'
 
-#endif
+#endif // WIN32
 
 #include <string.h>
 

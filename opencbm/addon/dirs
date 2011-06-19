@@ -1,6 +1,6 @@
 DIRS= \
 	frm_analyzer \
-	weaktest
+	#weaktest
 
 OPTIONAL_DIRS= \
 

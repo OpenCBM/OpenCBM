@@ -89,6 +89,10 @@ extern void vdd_usleep(CBM_FILE f, unsigned int howlong);
 # define CBM_FILE intptr_t /*!< The "file descriptor" for an opened driver */
 # define CBM_FILE_INVALID ((CBM_FILE)-1) /*!< An invalid "file descriptor" (CBM_FILE) */
 
+#ifndef UNREFERENCED_PARAMETER
+#define UNREFERENCED_PARAMETER(x)
+#endif
+
 /* On Macs we need to define the __u_char */
 #ifdef __APPLE__
 typedef unsigned char __u_char;
