@@ -26,7 +26,6 @@ static uint8_t usbDataDir = XUM_DATA_DIR_NONE;
 // Are we in the middle of a command sequence (XUM1541_INIT .. SHUTDOWN)?
 #define XUM1541_CMD_IN_PROGRESS 0x80
 static uint8_t cmdSeqInProgress;
-extern bool device_running;
 
 // Current device state for the XUM1541_INIT response
 static uint8_t currState;

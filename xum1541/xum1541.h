@@ -99,6 +99,7 @@ enum {
 
 extern volatile uint8_t eoi;
 extern volatile bool doDeviceReset;
+extern volatile bool device_running;
 
 // USB IO functions and command handlers
 int8_t usbHandleControl(uint8_t cmd, uint8_t *replyBuf);
