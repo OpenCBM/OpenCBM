@@ -203,7 +203,7 @@ static int cbmcopy_read(CBM_FILE fd,
             turbo_size = sizeof(turboread1581);
             break;
         default: /* unreachable */
-            msg_cb( sev_warning, "*** unknown drive type??!" );
+            msg_cb( sev_warning, "*** unknown drive type" );
             /* fall through */
         case cbm_dt_cbm4040:
         case cbm_dt_cbm8050:
@@ -575,7 +575,7 @@ int cbmcopy_write_file(CBM_FILE fd,
             turbo_size = sizeof(turbowrite1581);
             break;
         default: /* unreachable */
-            msg_cb( sev_warning, "*** unknown drive type??!" );
+            msg_cb( sev_warning, "*** unknown drive type" );
             /* fall through */
         case cbm_dt_cbm4040:
         case cbm_dt_cbm8050:
