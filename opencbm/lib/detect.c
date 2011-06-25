@@ -104,8 +104,8 @@ cbm_identify(CBM_FILE HandleDevice, __u_char DeviceAddress,
             switch(magic)
             {
                 default:
-                    unknownDevice[22] = (magic >> 12 & 0x0F | 0x40);
-                    unknownDevice[24] = (magic >>  4 & 0x0F | 0x40);
+                    unknownDevice[22] = ((magic >> 12 & 0x0F) | 0x40);
+                    unknownDevice[24] = ((magic >>  4 & 0x0F) | 0x40);
                     magic &= 0x0F0F;
                     magic |= 0x4040;
                     unknownDevice[23] = magic >> 8;
