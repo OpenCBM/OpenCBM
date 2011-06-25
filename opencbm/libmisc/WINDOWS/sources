@@ -11,6 +11,7 @@ SOURCES= \
 	getpluginaddress.c \
 	perfeval.c \
 	registry.c \
+	../statedebug.c \
 	../libstring.c
 
 UMTYPE=console

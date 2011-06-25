@@ -107,6 +107,10 @@ SOURCE=.\perfeval.c
 
 SOURCE=.\registry.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\statedebug.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
