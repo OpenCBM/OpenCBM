@@ -27,8 +27,13 @@ static char *rcsid =
 
 #include "opencbm.h"
 #include "cbmcopy.h"
-#include "cbmcopy_int.h"
 #include "inputfiles.h"
+
+#ifdef LIBCBMCOPY_DEBUG
+# define DEBUG_STATEDEBUG
+#endif
+#include "statedebug.h"
+
 
 /* global, because of signal handler */
 static CBM_FILE fd_cbm;
