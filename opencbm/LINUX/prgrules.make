@@ -12,6 +12,7 @@ MAN1 ?= $(PROG).1
 all: $(PROG)
 
 mrproper: clean
+	rm -f $(EXTRA_A65_INC) *~ LINUX/*~
 
 clean:
 	rm -f $(PROG) $(OBJS)

@@ -12,6 +12,14 @@ PROG = d64copy
 
 CA65_FLAGS += --asm-include-dir ../libd64copy/
 
+EXTRA_A65_INC= \
+  $(LIBD64COPY)/warpread1541.inc $(LIBD64COPY)/warpwrite1541.inc \
+  $(LIBD64COPY)/warpread1571.inc $(LIBD64COPY)/warpwrite1571.inc \
+  $(LIBD64COPY)/turboread1541.inc $(LIBD64COPY)/turbowrite1541.inc \
+  $(LIBD64COPY)/turboread1571.inc $(LIBD64COPY)/turbowrite1571.inc \
+  $(LIBD64COPY)/pp1541.inc $(LIBD64COPY)/pp1571.inc \
+  $(LIBD64COPY)/s1.inc $(LIBD64COPY)/s2.inc
+
 $(LIBD64COPY)/d64copy.o $(LIBD64COPY)/d64copy.lo: \
   $(LIBD64COPY)/d64copy.c $(LIBD64COPY)/d64copy_int.h \
   ../include/opencbm.h ../include/d64copy.h $(LIBD64COPY)/gcr.h \

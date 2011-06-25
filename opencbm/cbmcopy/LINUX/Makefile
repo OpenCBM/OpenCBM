@@ -11,6 +11,17 @@ CFLAGS := -I$(RELATIVEPATH)/libcbmcopy $(CFLAGS)
 OBJS = main.o pc64.o t64.o raw.o \
  	  $(foreach t,cbmcopy pp s1 s2 std, $(LIBCBMCOPY)/$(t).o)
 
+EXTRA_A65_INC= \
+  $(LIBCBMCOPY)/turboread1541.inc $(LIBCBMCOPY)/turboread1571.inc \
+  $(LIBCBMCOPY)/turboread1581.inc $(LIBCBMCOPY)/turbowrite1541.inc \
+  $(LIBCBMCOPY)/turbowrite1571.inc $(LIBCBMCOPY)/turbowrite1581.inc \
+  $(LIBCBMCOPY)/ppr-1541.inc $(LIBCBMCOPY)/ppr-1571.inc \
+  $(LIBCBMCOPY)/ppw-1541.inc $(LIBCBMCOPY)/ppw-1571.inc \
+  $(LIBCBMCOPY)/s1r.inc $(LIBCBMCOPY)/s1w.inc $(LIBCBMCOPY)/s1r-1581.inc \
+  $(LIBCBMCOPY)/s1w-1581.inc \
+  $(LIBCBMCOPY)/s2r.inc $(LIBCBMCOPY)/s2w.inc $(LIBCBMCOPY)/s2r-1581.inc \
+  $(LIBCBMCOPY)/s2w-1581.inc
+
 PROG = cbmcopy
 LINKS = cbmread cbmwrite
 

@@ -21,7 +21,7 @@ clean:
 	rm -f cbm.mod.c *.o *.ko .cbm* Modules.symvers
 	rm -fr .tmp_versions
 	rm -f Makefile
-	rm -f Module.symvers
+	rm -f Module.symvers modules.order
 
 mrproper: clean
 
