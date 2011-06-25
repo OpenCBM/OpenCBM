@@ -888,7 +888,7 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
 static int do_dir(CBM_FILE fd, OPTIONS * const options)
 {
     char c, buf[40];
-    char command[] = { '$', '0' };
+    unsigned char command[] = { '$', '0' };
     int rv;
     unsigned char unit;
 
