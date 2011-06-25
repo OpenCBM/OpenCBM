@@ -18,6 +18,11 @@
 
 #include "arch.h"
 
+#ifdef LIBD64COPY_DEBUG
+# define DEBUG_STATEDEBUG
+#endif
+#include "statedebug.h"
+
 /* standard .d64 track count */
 #define STD_TRACKS   35
 /* "standard" 40-track .d64 */
@@ -34,17 +39,6 @@
 #define MAX_SECTORS  21
 
 #define NEED_SECTOR(b) ((((b)==bs_error)||((b)==bs_must_copy))?1:0)
-
-#ifdef LIBD64COPY_DEBUG
-    extern volatile signed int debugLibD64LineNumber, debugLibD64ByteCount, debugLibD64BitCount;
-    extern volatile char *     debugLibD64FileName;
-#   define SETSTATEDEBUG(_x)  \
-        debugLibD64LineNumber=__LINE__; \
-        debugLibD64FileName  =__FILE__; \
-        (_x)
-#else
-#   define SETSTATEDEBUG(_x) (void)0
-#endif
 
 typedef int(*turbo_start)(CBM_FILE,unsigned char);
 

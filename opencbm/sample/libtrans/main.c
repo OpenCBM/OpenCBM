@@ -20,6 +20,12 @@ static char *rcsid =
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef LIBOCT_STATE_DEBUG
+# define DEBUG_STATEDEBUG
+#endif
+#include "statedebug.h"
+
+
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
 
@@ -41,9 +47,7 @@ static void ARCH_SIGNALDECL
 handle_CTRL_C(int dummy)
 {
     fprintf(stderr, "\nSIGINT caught, resetting IEC bus...\n");
-#ifdef LIBOCT_STATE_DEBUG
-    libopencbmtransfer_printStateDebugCounters(stderr);
-#endif
+    DEBUG_PRINTDEBUGCOUNTERS();
 
     arch_sleep(1);
     cbm_reset(fd);

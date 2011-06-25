@@ -66,22 +66,6 @@ transfers[] =
     { NULL, NULL, NULL }
 };
 
-#ifdef LIBCBMCOPY_DEBUG
-    volatile signed int debugCBMcopyLineNumber=-1, debugCBMcopyBlockCount=-1,
-                        debugCBMcopyByteCount=-1, debugCBMcopyBitCount=-1;
-    volatile char * debugCBMcopyFileName = "";
-
-    void printDebugCBMcopyCounters(cbmcopy_message_cb msg_cb)
-    {
-        msg_cb( sev_info, "file: %s"
-                          "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
-                          "\n\tline=%d, blocks=%d, bytes=%d, bits=%d\n",
-                          debugCBMcopyFileName, debugCBMcopyLineNumber,
-                          debugCBMcopyBlockCount, debugCBMcopyByteCount,
-                          debugCBMcopyBitCount);
-    }
-#endif
-
 static int check_drive_type(CBM_FILE fd, unsigned char drive,
                             cbmcopy_settings *settings,
                             cbmcopy_message_cb msg_cb)
@@ -270,14 +254,14 @@ static int cbmcopy_read(CBM_FILE fd,
          */
         arch_usleep(1000);
 
-        SETSTATEDEBUG(debugCBMcopyBlockCount=0);   // turbo sent condition
+        SETSTATEDEBUG(DebugBlockCount=0);   // turbo sent condition
 
         while( (error = trf->check_error(fd, 0)) == 0 )
         {
             SETSTATEDEBUG((void)0); // after check_error condition
             arch_usleep(1000);      // fix for Tim's environment
 
-            SETSTATEDEBUG(debugCBMcopyBlockCount++);    // preset condition
+            SETSTATEDEBUG(DebugBlockCount++);    // preset condition
 
             /* @SRT: FIXME! the next statement is dangerous: If there 
              * is no memory block large enough for reallocating, the
@@ -339,7 +323,7 @@ static int cbmcopy_read(CBM_FILE fd,
             }
         }
         msg_cb( sev_debug, "done" );
-        SETSTATEDEBUG(debugCBMcopyBlockCount=-1);   // turbo sent condition
+        SETSTATEDEBUG(DebugBlockCount=-1);   // turbo sent condition
         trf->exit_turbo( fd, 0 );
         SETSTATEDEBUG((void)0);    // turbo exited condition
 
@@ -625,14 +609,14 @@ int cbmcopy_write_file(CBM_FILE fd,
          */
         arch_usleep(1000);
 
-        SETSTATEDEBUG(debugCBMcopyBlockCount=0);   // turbo sent condition
+        SETSTATEDEBUG(DebugBlockCount=0);   // turbo sent condition
 
         while( filedata_size > 0 )
         {
             /* if more blocks are following (more than 254 bytes) set the count value to 255 */
             i = filedata_size <= 254 ? filedata_size : 255;
 
-            SETSTATEDEBUG(debugCBMcopyBlockCount++);
+            SETSTATEDEBUG(DebugBlockCount++);
 
             /* write block, let the block writer also handle the initial length byte */
             i = trf->write_blk( fd, filedata, (unsigned char)i, msg_cb );
@@ -760,7 +744,7 @@ int write_block_generic(CBM_FILE HandleDevice, const void *data, unsigned char s
         return -1;
     }
 
-    SETSTATEDEBUG(debugCBMcopyByteCount=0);
+    SETSTATEDEBUG(DebugByteCount=0);
     if( size == 0xff )
     {
         size--;
@@ -771,7 +755,7 @@ int write_block_generic(CBM_FILE HandleDevice, const void *data, unsigned char s
 #endif 
     while( size>0 )
     {
-        SETSTATEDEBUG(debugCBMcopyByteCount++);
+        SETSTATEDEBUG(DebugByteCount++);
         if ( wb_func( HandleDevice, *(pbuffer++) ) != 0 )
         {
             break;
@@ -781,7 +765,7 @@ int write_block_generic(CBM_FILE HandleDevice, const void *data, unsigned char s
     }
 
     /* (drive is busy now) */
-    SETSTATEDEBUG(debugCBMcopyByteCount=-1);
+    SETSTATEDEBUG(DebugByteCount=-1);
 
     return rv;
 }
@@ -838,19 +822,19 @@ int read_block_generic(CBM_FILE HandleDevice, void *data, size_t size, read_byte
         return -1;
     }
 
-    SETSTATEDEBUG(debugCBMcopyByteCount=0);
+    SETSTATEDEBUG(DebugByteCount=0);
 #ifdef LIBCBMCOPY_DEBUG
     msg_cb( sev_debug, "receive block data (%d)", c );
 #endif 
     while( c>0 )
     {
-        SETSTATEDEBUG(debugCBMcopyByteCount++);
+        SETSTATEDEBUG(DebugByteCount++);
         *(pbuffer++) = rb_func( HandleDevice );
         c--;
     }
 
     /* (drive is busy now) */
-    SETSTATEDEBUG(debugCBMcopyByteCount=-1);
+    SETSTATEDEBUG(DebugByteCount=-1);
 
     return rv;
 }

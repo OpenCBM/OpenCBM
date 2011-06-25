@@ -155,9 +155,9 @@ read1byte(CBM_FILE fd, unsigned char *c1)
 {
     unsigned char dummy;
     int ret;
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -6401);
+                                                                        SETSTATEDEBUG(DebugByteCount = -6401);
     ret = pp_read(fd, c1, &dummy);
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return ret;
 }
 
@@ -165,9 +165,9 @@ static int
 read2byte(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 {
     int ret;
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -12801);
+                                                                        SETSTATEDEBUG(DebugByteCount = -12801);
     ret = pp_read(fd, c1, c2);
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return ret;
 }
 
@@ -176,13 +176,13 @@ readblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
     unsigned char c1;
     unsigned char c2;
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = 0);
+                                                                        SETSTATEDEBUG(DebugByteCount = 0);
     for (; length < 0x100; length++)
     {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount += 2);
+                                                                        SETSTATEDEBUG(DebugByteCount += 2);
         if (pp_read(fd, &c1, &c2))
         {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
             return 1;
         }
 
@@ -191,7 +191,7 @@ readblock(CBM_FILE fd, unsigned char *p, unsigned int length)
         if (length < 0x100)
             *p++ = c2;
     }
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     // perform end-handshake
     pp_read(fd, &c1, &c2);
                                                                         SETSTATEDEBUG((void)0);
@@ -202,9 +202,9 @@ static int
 write1byte(CBM_FILE fd, unsigned char c1)
 {
     int ret;
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -6401);
+                                                                        SETSTATEDEBUG(DebugByteCount = -6401);
     ret = pp_write(fd, c1, 0);
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return ret;
 }
 
@@ -212,27 +212,27 @@ static int
 write2byte(CBM_FILE fd, unsigned char c1, unsigned char c2)
 {
     int ret;
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -12801);
+                                                                        SETSTATEDEBUG(DebugByteCount = -12801);
     ret = pp_write(fd, c1, c2);
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return ret;
 }
 
 static int
 writeblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = 0);
+                                                                        SETSTATEDEBUG(DebugByteCount = 0);
     for (; length < 0x100; length += 2, p += 2)
     {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount += 2);
+                                                                        SETSTATEDEBUG(DebugByteCount += 2);
         if (pp_write(fd, p[0], p[1]))
         {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
             return 1;
         }
     }
 
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return 0;
 }
 

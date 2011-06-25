@@ -20,6 +20,11 @@ static char *rcsid =
 #include "arch.h"
 #include "libmisc.h"
 
+#ifdef LIBD64COPY_DEBUG
+# define DEBUG_STATEDEBUG
+#endif
+#include "statedebug.h"
+
 #include <getopt.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -102,9 +107,9 @@ static void ARCH_SIGNALDECL reset(int dummy)
     fd_cbm = CBM_FILE_INVALID;
 
     fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
-#ifdef LIBD64COPY_DEBUG
-    printDebugLibD64Counters(my_message_cb);
-#endif
+
+    DEBUG_PRINTDEBUGCOUNTERS();
+
     d64copy_cleanup();
     cbm_reset(fd_cbm_local);
     cbm_driver_close(fd_cbm_local);

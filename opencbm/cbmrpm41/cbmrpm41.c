@@ -16,6 +16,11 @@ static char *rcsid =
 #include "cbmrpm41.h"
 #include "libmisc.h"
 
+#ifdef CBMRPM41_DEBUG
+# define DEBUG_STATEDEBUG
+#endif
+#include "statedebug.h"
+
 static unsigned char cbmrpm41[] = {
 #include "cbmrpm41.inc"
 };
@@ -49,23 +54,6 @@ typedef struct
 {
     unsigned int startValue, endValue, trueNumberOfIntervals;
 } GroupOfMeasurements;
-
-#ifdef CBMRPM41_DEBUG
-static signed int debugLineNumber=0;
-
-#   define SETSTATEDEBUG(_x)  \
-    debugLineNumber=__LINE__; \
-    (_x)
-
-void printDebugCounters()
-{
-    fprintf(stderr, "file: " __FILE__
-           "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
-           "\n\tlineNumber=%d\n", debugLineNumber);
-}
-#else
-#    define SETSTATEDEBUG(_x) (void)0
-#endif
 
 
 static void
@@ -125,9 +113,9 @@ handle_CTRL_C(int dummy)
     fd = CBM_FILE_INVALID;
 
     fprintf(stderr, "\nSIGINT caught, resetting IEC bus...\n");
-#ifdef CBMRPM41_DEBUG
-    printDebugCounters();
-#endif
+
+    DEBUG_PRINTDEBUGCOUNTERS();
+
     arch_sleep(1);
     cbm_reset(fd_cbm_local);
 

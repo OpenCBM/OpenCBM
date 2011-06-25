@@ -22,23 +22,6 @@ static const unsigned char turbomain_drive_prog[] = {
 };
 
 
-#ifdef LIBOCT_STATE_DEBUG
-volatile signed int stDebugLibOCTLineNumber = -1, stDebugLibOCTBlockCount = -1,
-                    stDebugLibOCTByteCount  = -1, stDebugLibOCTBitCount   = -1;
-volatile char *     stDebugLibOCTFileName   = "";
-
-void
-libopencbmtransfer_printStateDebugCounters(FILE *channel)
-{
-    fprintf(channel, "file: %s"
-                     "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
-                     "\n\tline=%d, blocks=%d, bytes=%d, bits=%d\n",
-                     stDebugLibOCTFileName,   stDebugLibOCTLineNumber,
-                     stDebugLibOCTBlockCount, stDebugLibOCTByteCount,
-                     stDebugLibOCTBitCount);
-}
-#endif
-
 /*
 // functions to perform:
 
@@ -214,14 +197,14 @@ libopencbmtransfer_read_write_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
     FUNC_ENTER();
 
     // If we have to transfer more than one page, process the complete pages first
-                                                                        SETSTATEDEBUG(stDebugLibOCTBlockCount = 0);
+                                                                        SETSTATEDEBUG(DebugBlockCount = 0);
     while (Length >= 0x100)
     {
         int c = (Length >> 8) % (sizeof(monkey) - 1);
         fprintf(stderr, (c != 0) ? "\b%c" : "\b.%c" , monkey[c]);
         fflush(stderr);
 
-                                                                        SETSTATEDEBUG(stDebugLibOCTBlockCount++);
+                                                                        SETSTATEDEBUG(DebugBlockCount++);
         function(HandleDevice, DeviceAddress, Buffer, MemoryAddress, 0x00);
 
         Buffer += 0x100;
@@ -232,13 +215,13 @@ libopencbmtransfer_read_write_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
     if (Length > 0)
     {
         unsigned int remainder = 0x100 - Length;
-                                                                        SETSTATEDEBUG(stDebugLibOCTBlockCount++);
+                                                                        SETSTATEDEBUG(DebugBlockCount++);
         //fprintf(stderr, "."); fflush(stderr);
         fprintf(stderr, "\010.");
         fflush(stderr);
         function(HandleDevice, DeviceAddress, Buffer, MemoryAddress - remainder, remainder);
     }
-                                                                        SETSTATEDEBUG(stDebugLibOCTBlockCount = -1);
+                                                                        SETSTATEDEBUG(DebugBlockCount = -1);
     fprintf(stderr, "\010.\n");  // fflush(stderr);
 
     FUNC_LEAVE_INT(0);

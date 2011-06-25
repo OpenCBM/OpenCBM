@@ -5,6 +5,9 @@ include ${RELATIVEPATH}LINUX/config.make
 
 LIBCBMCOPY = ../libcbmcopy
 
+LIBS    = -L$(RELATIVEPATH)/libmisc -lmisc -ldl
+CFLAGS := -I$(RELATIVEPATH)/libcbmcopy $(CFLAGS)
+
 OBJS = main.o pc64.o t64.o raw.o \
  	  $(foreach t,cbmcopy pp s1 s2 std, $(LIBCBMCOPY)/$(t).o)
 

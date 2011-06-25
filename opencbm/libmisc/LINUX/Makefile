@@ -9,7 +9,7 @@ CFLAGS += -I../include -I./ $(LIBUSB_CFLAGS)
 LDFLAGS += $(LIBUSB_LDFLAGS)
 
 LIB     = libmisc.a
-SRCS    = libstring.c configuration.c LINUX/getpluginaddress.c LINUX/dynlibusb.c
+SRCS    = libstring.c configuration.c statedebug.c LINUX/getpluginaddress.c LINUX/dynlibusb.c
 
 OBJS    = $(SRCS:.c=.lo)
 

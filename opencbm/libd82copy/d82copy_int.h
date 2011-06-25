@@ -19,6 +19,11 @@
 
 #include "arch.h"
 
+#ifdef LIBD82COPY_DEBUG
+# define DEBUG_STATEDEBUG
+#endif
+#include "statedebug.h"
+
 
 /*
 8250, SFD-1001 (?):
@@ -59,17 +64,6 @@
 #define MAX_TRACKS   D82_TRACKS
 
 #define NEED_SECTOR(b) ((((b)==bs_error)||((b)==bs_must_copy))?1:0)
-
-#ifdef LIBD82COPY_DEBUG
-    extern volatile signed int debugLibD82LineNumber, debugLibD82ByteCount, debugLibD82BitCount;
-    extern volatile char *     debugLibD82FileName;
-   #define SETSTATEDEBUG(_x)  \
-        debugLibD82LineNumber=__LINE__; \
-        debugLibD82FileName  =__FILE__; \
-        (_x)
-#else
-   #define SETSTATEDEBUG(_x) 	
-#endif
 
 
 #define CAT_TRACK  		39							// catalog

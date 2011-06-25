@@ -32,9 +32,9 @@ static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
         if(rv == 0) {
             if(cbm_exec_command(fd_cbm, drive, "B-P2 0", 0) == 0) {
                 if(cbm_talk(fd_cbm, drive, 2) == 0) {
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=0);
+                                                                        SETSTATEDEBUG(DebugByteCount=0);
                     rv = cbm_raw_read(fd_cbm, block, BLOCKSIZE) != BLOCKSIZE;
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=-1);
+                                                                        SETSTATEDEBUG(DebugByteCount=-1);
                     cbm_untalk(fd_cbm);
                 }
             }
@@ -52,9 +52,9 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
     {
         if(cbm_listen(fd_cbm, drive, 2) == 0)
         {
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=0);
+                                                                        SETSTATEDEBUG(DebugByteCount=0);
             rv = cbm_raw_write(fd_cbm, blk, size) != size;
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=-1);
+                                                                        SETSTATEDEBUG(DebugByteCount=-1);
             cbm_unlisten(fd_cbm);
             if(rv == 0)
             {

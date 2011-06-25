@@ -13,10 +13,14 @@
 #define LIBTRANS_INT_H
 
 #include "opencbm.h"
-// (?) #include "d64copy.h"
 #include "libtrans.h"
 
 #include "arch.h"
+
+#ifdef LIBOCT_STATE_DEBUG
+# define DEBUG_STATEDEBUG
+#endif
+#include "statedebug.h"
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
@@ -26,17 +30,6 @@
 
 #include "debug.h"
 
-#ifdef LIBOCT_STATE_DEBUG
-    extern volatile signed int stDebugLibOCTLineNumber, stDebugLibOCTBlockCount,
-                               stDebugLibOCTByteCount, stDebugLibOCTBitCount;
-    extern volatile char *     stDebugLibOCTFileName;
-#   define SETSTATEDEBUG(_x)  \
-        stDebugLibOCTLineNumber =__LINE__; \
-        stDebugLibOCTFileName   =__FILE__; \
-        (_x)
-#else
-#   define SETSTATEDEBUG(_x) (void)0
-#endif
 
 #if 0
 

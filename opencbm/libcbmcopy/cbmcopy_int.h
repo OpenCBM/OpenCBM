@@ -17,6 +17,11 @@
 #include "opencbm.h"
 #include "cbmcopy.h"
 
+#ifdef LIBCBMCOPY_DEBUG
+# define DEBUG_STATEDEBUG
+#endif
+#include "statedebug.h"
+
 #define SA_READ     0
 #define SA_WRITE    1
 
@@ -37,17 +42,6 @@ typedef unsigned char (*read_byte_t)(CBM_FILE);
 /* generic block handlers to the transfer data with single byte transfers */
 int write_block_generic(CBM_FILE,const void *,unsigned char,write_byte_t,cbmcopy_message_cb);
 int read_block_generic(CBM_FILE,void *,size_t,read_byte_t,cbmcopy_message_cb);
-
-#ifdef LIBCBMCOPY_DEBUG
-    extern volatile signed int debugCBMcopyLineNumber, debugCBMcopyBitCount;
-    extern volatile char *     debugCBMcopyFileName;
-#   define SETSTATEDEBUG(_x)  \
-        debugCBMcopyLineNumber=__LINE__; \
-        debugCBMcopyFileName  =__FILE__; \
-        (_x)
-#else
-#   define SETSTATEDEBUG(_x) (void)0
-#endif
 
 #define DECLARE_TRANSFER_FUNCS(x) \
     transfer_funcs cbmcopy_ ## x = {write_blk, read_blk, check_error, \

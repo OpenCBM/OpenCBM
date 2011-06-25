@@ -66,7 +66,7 @@ static const struct drive_prog
     const unsigned char *prog;
 } drive_progs[] =
 {
-	0, NULL
+    { 0, NULL }
     //{sizeof(turbo_read_1541), turbo_read_1541},
 };
 

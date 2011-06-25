@@ -38,7 +38,7 @@ static int s2_read_byte(CBM_FILE fd, unsigned char *c)
     int i;
     *c = 0;
     for(i=4; i>0; i--) {
-                                                                        SETSTATEDEBUG(debugLibD64BitCount=i*2);
+                                                                        SETSTATEDEBUG(DebugBitCount=i*2);
 #ifndef USE_CBM_IEC_WAIT
         while(cbm_iec_get(fd, IEC_CLOCK));
                                                                         SETSTATEDEBUG((void)0);
@@ -48,7 +48,7 @@ static int s2_read_byte(CBM_FILE fd, unsigned char *c)
 #endif
                                                                         SETSTATEDEBUG((void)0);
         cbm_iec_release(fd, IEC_ATN);
-                                                                        SETSTATEDEBUG(debugLibD64BitCount--);
+                                                                        SETSTATEDEBUG(DebugBitCount--);
 #ifndef USE_CBM_IEC_WAIT
         while(!cbm_iec_get(fd,IEC_CLOCK));
                                                                         SETSTATEDEBUG((void)0);
@@ -59,7 +59,7 @@ static int s2_read_byte(CBM_FILE fd, unsigned char *c)
                                                                         SETSTATEDEBUG((void)0);
         cbm_iec_set(fd, IEC_ATN);
     }
-                                                                        SETSTATEDEBUG(debugLibD64BitCount=-1);
+                                                                        SETSTATEDEBUG(DebugBitCount=-1);
     return 0;
 }
 
@@ -67,7 +67,7 @@ static int s2_write_byte_nohs(CBM_FILE fd, unsigned char c)
 {
     int i;
     for(i=4; ; i--) {
-                                                                        SETSTATEDEBUG(debugLibD64BitCount=i*2);
+                                                                        SETSTATEDEBUG(DebugBitCount=i*2);
         c & 1 ? cbm_iec_set(fd, IEC_DATA) : cbm_iec_release(fd, IEC_DATA);
         c >>= 1;
                                                                         SETSTATEDEBUG((void)0);
@@ -77,7 +77,7 @@ static int s2_write_byte_nohs(CBM_FILE fd, unsigned char c)
 #else
         cbm_iec_wait(fd, IEC_CLOCK, 0);
 #endif
-                                                                        SETSTATEDEBUG(debugLibD64BitCount--);
+                                                                        SETSTATEDEBUG(DebugBitCount--);
         c & 1 ? cbm_iec_set(fd, IEC_DATA) : cbm_iec_release(fd, IEC_DATA);
         c >>= 1;
                                                                         SETSTATEDEBUG((void)0);
@@ -119,7 +119,7 @@ static int s2_write_byte(CBM_FILE fd, unsigned char c)
 #else
     cbm_iec_wait(fd, IEC_CLOCK, 1);
 #endif
-                                                                        SETSTATEDEBUG(debugLibD64BitCount=-1);
+                                                                        SETSTATEDEBUG(DebugBitCount=-1);
     cbm_iec_release(fd, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
     return 0;
@@ -153,9 +153,9 @@ static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
 #endif
                                                                         SETSTATEDEBUG((void)0);
     read_n(&status, 1);
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=0);
+                                                                        SETSTATEDEBUG(DebugByteCount=0);
     read_n(block, BLOCKSIZE);
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=-1);
+                                                                        SETSTATEDEBUG(DebugByteCount=-1);
 
     return status;
 }
@@ -167,9 +167,9 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
     write_n(&tr, 1);
                                                                         SETSTATEDEBUG((void)0);
     write_n(&se, 1);
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=0);
+                                                                        SETSTATEDEBUG(DebugByteCount=0);
     write_n(blk, size);
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=-1);
+                                                                        SETSTATEDEBUG(DebugByteCount=-1);
 #ifndef USE_CBM_IEC_WAIT
     if(size == BLOCKSIZE) {
         arch_usleep(20000);
@@ -217,7 +217,7 @@ static void close_disk(void)
                                                                         SETSTATEDEBUG((void)0);
     s2_write_byte_nohs(fd_cbm, 0);
     arch_usleep(100);
-                                                                        SETSTATEDEBUG(debugLibD64BitCount=-1);
+                                                                        SETSTATEDEBUG(DebugBitCount=-1);
     cbm_iec_release(fd_cbm, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_release(fd_cbm, IEC_ATN);
@@ -266,9 +266,9 @@ static int read_gcr_block(unsigned char *se, unsigned char *gcrbuf)
     if(s) {
         return s;
     }
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=0);
+                                                                        SETSTATEDEBUG(DebugByteCount=0);
     read_n(gcrbuf, GCRBUFSIZE);									
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=-1);
+                                                                        SETSTATEDEBUG(DebugByteCount=-1);
     return 0;
 }
 

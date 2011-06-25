@@ -179,7 +179,7 @@ static int write_byte(CBM_FILE fd, unsigned char c)
     int i;
                                                                         SETSTATEDEBUG((void)0);
     for(i=4; i>0; i--) {
-                                                                        SETSTATEDEBUG(debugCBMcopyBitCount=i*2);
+                                                                        SETSTATEDEBUG(DebugBitCount=i*2);
         c & 1 ? cbm_iec_set(fd, IEC_DATA) : cbm_iec_release(fd, IEC_DATA);
         c >>= 1;
                                                                         SETSTATEDEBUG((void)0);
@@ -190,7 +190,7 @@ static int write_byte(CBM_FILE fd, unsigned char c)
 #else
         cbm_iec_wait(fd, IEC_CLOCK, 0);
 #endif
-                                                                        SETSTATEDEBUG(debugCBMcopyBitCount--);
+                                                                        SETSTATEDEBUG(DebugBitCount--);
         c & 1 ? cbm_iec_set(fd, IEC_DATA) : cbm_iec_release(fd, IEC_DATA);
         c >>= 1;
                                                                         SETSTATEDEBUG((void)0);
@@ -202,7 +202,7 @@ static int write_byte(CBM_FILE fd, unsigned char c)
         cbm_iec_wait(fd, IEC_CLOCK, 1);
 #endif
     }
-                                                                        SETSTATEDEBUG(debugCBMcopyBitCount=-1);
+                                                                        SETSTATEDEBUG(DebugBitCount=-1);
     cbm_iec_release(fd, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
     return 0;
@@ -215,7 +215,7 @@ static unsigned char read_byte(CBM_FILE fd)
                                                                         SETSTATEDEBUG((void)0);
     c = 0;
     for(i=4; i>0; i--) {
-                                                                        SETSTATEDEBUG(debugCBMcopyBitCount=i*2);
+                                                                        SETSTATEDEBUG(DebugBitCount=i*2);
 #ifndef USE_CBM_IEC_WAIT
         while(cbm_iec_get(fd, IEC_CLOCK));
         c = (c>>1) | (cbm_iec_get(fd, IEC_DATA) ? 0x80 : 0);
@@ -224,7 +224,7 @@ static unsigned char read_byte(CBM_FILE fd)
 #endif
                                                                         SETSTATEDEBUG((void)0);
         cbm_iec_release(fd, IEC_ATN);
-                                                                        SETSTATEDEBUG(debugCBMcopyBitCount--);
+                                                                        SETSTATEDEBUG(DebugBitCount--);
 #ifndef USE_CBM_IEC_WAIT
         while(!cbm_iec_get(fd,IEC_CLOCK));
         c = (c>>1) | (cbm_iec_get(fd, IEC_DATA) ? 0x80 : 0);
@@ -235,7 +235,7 @@ static unsigned char read_byte(CBM_FILE fd)
         cbm_iec_set(fd, IEC_ATN);
     }   
 
-                                                                        SETSTATEDEBUG(debugCBMcopyBitCount=-1);
+                                                                        SETSTATEDEBUG(DebugBitCount=-1);
     return c;
 }
 

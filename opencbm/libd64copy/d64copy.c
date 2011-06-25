@@ -111,18 +111,18 @@ static const transfer_funcs *atom_dst;
 
 
 #ifdef LIBD64COPY_DEBUG
-    volatile signed int debugLibD64LineNumber=-1, debugLibD64BlockCount=-1,
-                        debugLibD64ByteCount=-1,  debugLibD64BitCount=-1;
-    volatile char *     debugLibD64FileName   = "";
+    volatile signed int DebugLineNumber=-1, DebugBlockCount=-1,
+                        DebugByteCount=-1,  DebugBitCount=-1;
+    volatile char *     DebugFileName   = "";
 
     void printDebugLibD64Counters(d64copy_message_cb msg_cb)
     {
         msg_cb( sev_info, "file: %s"
                           "\n\tversion: " OPENCBM_VERSION ", built: " __DATE__ " " __TIME__
                           "\n\tline=%d, blocks=%d, bytes=%d, bits=%d\n",
-                          debugLibD64FileName, debugLibD64LineNumber,
-                          debugLibD64BlockCount, debugLibD64ByteCount,
-                          debugLibD64BitCount);
+                          DebugFileName, DebugLineNumber,
+                          DebugBlockCount, DebugByteCount,
+                          DebugBitCount);
     }
 #endif
 
@@ -380,21 +380,21 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
             scnt = 1;
             SETSTATEDEBUG((void)0);
             src->send_track_map(18, trackmap, scnt);
-            SETSTATEDEBUG(debugLibD64BlockCount=0);
+            SETSTATEDEBUG(DebugBlockCount=0);
             st = src->read_gcr_block(&se, gcr);
-            SETSTATEDEBUG(debugLibD64BlockCount=-1);
+            SETSTATEDEBUG(DebugBlockCount=-1);
             if(st == 0) st = gcr_decode(gcr, bam);
         }
         else
         {
-            SETSTATEDEBUG(debugLibD64BlockCount=0);
+            SETSTATEDEBUG(DebugBlockCount=0);
             st = src->read_block(18, 0, bam);
             if(settings->two_sided && (st == 0))
             {
-                SETSTATEDEBUG(debugLibD64BlockCount=1);
+                SETSTATEDEBUG(DebugBlockCount=1);
                 st = src->read_block(53, 0, bam2);
             }
-            SETSTATEDEBUG(debugLibD64BlockCount=-1);
+            SETSTATEDEBUG(DebugBlockCount=-1);
         }
         if(st)
         {
@@ -451,7 +451,7 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
     message_cb(2, "copying tracks %d-%d (%d sectors)",
             settings->start_track, settings->end_track, status.total_sectors);
 
-    SETSTATEDEBUG(debugLibD64BlockCount=0);
+    SETSTATEDEBUG(DebugBlockCount=0);
     for(tr = 1; tr <= max_tracks; tr++)
     {
         if(tr >= settings->start_track && tr <= settings->end_track)
@@ -515,7 +515,7 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
                         {
                             if(++se >= sector_map[tr]) se = 0;
                         }
-                        SETSTATEDEBUG(debugLibD64BlockCount++);
+                        SETSTATEDEBUG(DebugBlockCount++);
                         status.read_result = src->read_block(tr, se, block);
                     }
 
@@ -523,14 +523,14 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
                     {
                         SETSTATEDEBUG((void)0);
                         gcr_encode(block, gcr);
-                        SETSTATEDEBUG(debugLibD64BlockCount++);
+                        SETSTATEDEBUG(DebugBlockCount++);
                         status.write_result = 
                             dst->write_block(tr, se, gcr, GCRBUFSIZE-1,
                                              status.read_result);
                     }
                     else
                     {
-                        SETSTATEDEBUG(debugLibD64BlockCount++);
+                        SETSTATEDEBUG(DebugBlockCount++);
                         status.write_result = 
                             dst->write_block(tr, se, block, BLOCKSIZE,
                                              status.read_result);
@@ -618,7 +618,7 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
             }
         }
     }
-    SETSTATEDEBUG(debugLibD64BlockCount=-1);
+    SETSTATEDEBUG(DebugBlockCount=-1);
 
     dst->close_disk();
     SETSTATEDEBUG((void)0);

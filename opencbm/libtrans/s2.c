@@ -28,7 +28,7 @@ static int s2_read_byte(CBM_FILE fd, unsigned char *c)
     int i;
     *c = 0;
     for(i=4; i>0; i--) {
-                                                                        SETSTATEDEBUG(stDebugLibOCTBitCount = i*2);
+                                                                        SETSTATEDEBUG(DebugBitCount = i*2);
         cbm_iec_release(fd, IEC_ATN);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
@@ -38,7 +38,7 @@ static int s2_read_byte(CBM_FILE fd, unsigned char *c)
 #else
         *c = (*c>>1) | ((cbm_iec_wait(fd, IEC_CLOCK, 0) & IEC_DATA) ? 0x80 : 0);
 #endif
-                                                                        SETSTATEDEBUG(stDebugLibOCTBitCount--);
+                                                                        SETSTATEDEBUG(DebugBitCount--);
         cbm_iec_set(fd, IEC_ATN);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
@@ -49,7 +49,7 @@ static int s2_read_byte(CBM_FILE fd, unsigned char *c)
         *c = (*c>>1) | ((cbm_iec_wait(fd, IEC_CLOCK, 1) & IEC_DATA) ? 0x80 : 0);
 #endif
     }
-                                                                        SETSTATEDEBUG(stDebugLibOCTBitCount = -1);
+                                                                        SETSTATEDEBUG(DebugBitCount = -1);
     cbm_iec_release(fd, IEC_ATN);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
@@ -73,7 +73,7 @@ static int s2_write_byte(CBM_FILE fd, unsigned char c)
 {
     int i;
     for(i=4; i>0; i--) {
-                                                                        SETSTATEDEBUG(stDebugLibOCTBitCount = i*2);
+                                                                        SETSTATEDEBUG(DebugBitCount = i*2);
         c & 1 ? cbm_iec_set(fd, IEC_DATA) : cbm_iec_release(fd, IEC_DATA);
         c >>= 1;
                                                                         SETSTATEDEBUG((void)0);
@@ -84,7 +84,7 @@ static int s2_write_byte(CBM_FILE fd, unsigned char c)
 #else
         cbm_iec_wait(fd, IEC_CLOCK, 0);
 #endif
-                                                                        SETSTATEDEBUG(stDebugLibOCTBitCount--);
+                                                                        SETSTATEDEBUG(DebugBitCount--);
         c & 1 ? cbm_iec_set(fd, IEC_DATA) : cbm_iec_release(fd, IEC_DATA);
         c >>= 1;
                                                                         SETSTATEDEBUG((void)0);
@@ -97,7 +97,7 @@ static int s2_write_byte(CBM_FILE fd, unsigned char c)
         cbm_iec_wait(fd, IEC_CLOCK, 1);
 #endif
     }
-                                                                        SETSTATEDEBUG(stDebugLibOCTBitCount = -1);
+                                                                        SETSTATEDEBUG(DebugBitCount = -1);
     cbm_iec_release(fd, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
     return 0;
@@ -140,9 +140,9 @@ static int
 read1byte(CBM_FILE fd, unsigned char *c1)
 {
     int ret;
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -6401);
+                                                                        SETSTATEDEBUG(DebugByteCount = -6401);
     ret = s2_read_byte(fd, c1);
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return ret;
 }
 
@@ -150,29 +150,29 @@ static int
 read2byte(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 {
     int ret = 0;
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -25601);
+                                                                        SETSTATEDEBUG(DebugByteCount = -25601);
     ret = s2_read_byte(fd, c1);
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -12802);
+                                                                        SETSTATEDEBUG(DebugByteCount = -12802);
     if (ret == 0)
         ret = s2_read_byte(fd, c2);
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return 1;
 }
 
 static int
 readblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = 0);
+                                                                        SETSTATEDEBUG(DebugByteCount = 0);
     for (; length < 0x100; length++)
     {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount++);
+                                                                        SETSTATEDEBUG(DebugByteCount++);
         if (s2_read_byte(fd, p++))
         {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
             return 1;
         }
     }
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return 0;
 }
 
@@ -180,9 +180,9 @@ static int
 write1byte(CBM_FILE fd, unsigned char c1)
 {
     int ret;
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -6401);
+                                                                        SETSTATEDEBUG(DebugByteCount = -6401);
     ret = s2_write_byte(fd, c1);
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return ret;
 }
 
@@ -190,29 +190,29 @@ static int
 write2byte(CBM_FILE fd, unsigned char c1, unsigned char c2)
 {
     int ret = 0;
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -12801);
+                                                                        SETSTATEDEBUG(DebugByteCount = -12801);
     ret = s2_write_byte(fd, c1);
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -12802);
+                                                                        SETSTATEDEBUG(DebugByteCount = -12802);
     if (ret == 0)
         ret = s2_write_byte(fd, c2);
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return 1;
 }
 
 static int
 writeblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = 0);
+                                                                        SETSTATEDEBUG(DebugByteCount = 0);
     for (; length < 0x100; length++)
     {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount++);
+                                                                        SETSTATEDEBUG(DebugByteCount++);
         if (s2_write_byte(fd, *p++))
         {
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
             return 1;
         }
     }
-                                                                        SETSTATEDEBUG(stDebugLibOCTByteCount = -1);
+                                                                        SETSTATEDEBUG(DebugByteCount = -1);
     return 0;
 }
 

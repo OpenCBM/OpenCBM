@@ -156,9 +156,9 @@ static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
                                                                         SETSTATEDEBUG((void)0);
     read_n(status, 2);
 
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=0);
+                                                                        SETSTATEDEBUG(DebugByteCount=0);
     read_n(block, BLOCKSIZE);
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=-1);
+                                                                        SETSTATEDEBUG(DebugByteCount=-1);
 
                                                                         SETSTATEDEBUG((void)0);
     return status[1];
@@ -179,10 +179,10 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
         write_n(blk, 2);
         i = 1;
     }
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=0);
+                                                                        SETSTATEDEBUG(DebugByteCount=0);
     write_n(blk+i, size-i);
 
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=-1);
+                                                                        SETSTATEDEBUG(DebugByteCount=-1);
 #ifndef USE_CBM_IEC_WAIT    
     if(size == BLOCKSIZE) {
         arch_usleep(20000);
@@ -291,9 +291,9 @@ static int read_gcr_block(unsigned char *se, unsigned char *gcrbuf)
     if(s[1]) {
         return s[1];
     }
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=0);
+                                                                        SETSTATEDEBUG(DebugByteCount=0);
     read_n(gcrbuf, GCRBUFSIZE);
-                                                                        SETSTATEDEBUG(debugLibD64ByteCount=-1);
+                                                                        SETSTATEDEBUG(DebugByteCount=-1);
 
                                                                         SETSTATEDEBUG((void)0);
     return 0;

@@ -2,10 +2,9 @@
 
 RELATIVEPATH=../../
 include ${RELATIVEPATH}LINUX/config.make
-CFLAGS     := $(subst ../,../../,$(CFLAGS))
-LINK_FLAGS := $(subst ../,../../,$(LINK_FLAGS))
 
-LINK_FLAGS   += -L../../libtrans/ -ltrans
+CFLAGS     := $(subst ../,../../,$(CFLAGS))
+LINK_FLAGS := -L$(RELATIVEPATH)/libtrans -ltrans $(subst ../,../../,$(LINK_FLAGS))
 
 .PHONY: all mrproper clean install uninstall install-files
 

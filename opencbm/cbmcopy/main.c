@@ -27,6 +27,7 @@ static char *rcsid =
 
 #include "opencbm.h"
 #include "cbmcopy.h"
+#include "cbmcopy_int.h"
 #include "inputfiles.h"
 
 /* global, because of signal handler */
@@ -141,9 +142,9 @@ static void ARCH_SIGNALDECL reset(int dummy)
     fd_cbm = CBM_FILE_INVALID;
 
     fprintf(stderr, "\nSIGINT caught X-(  Resetting IEC bus...\n");
-#ifdef LIBCBMCOPY_DEBUG
-    printDebugCBMcopyCounters(my_message_cb);
-#endif
+
+    DEBUG_PRINTDEBUGCOUNTERS();
+
     cbm_reset(fd_cbm_local);
     cbm_driver_close(fd_cbm_local);
     exit(1);
