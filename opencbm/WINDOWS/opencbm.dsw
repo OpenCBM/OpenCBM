@@ -149,9 +149,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name libmisc
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -485,6 +482,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name arch
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -497,6 +497,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -524,6 +527,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
 }}}
 
 ###############################################################################
