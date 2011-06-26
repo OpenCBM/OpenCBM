@@ -103,10 +103,6 @@ upload(CBM_FILE fd, unsigned char drive)
 
     switch (driveType)
     {
-    case cbm_dt_unknown:
-        DBG_ERROR((DBG_PREFIX "unknown device type!"));
-        return 1;
-
     case cbm_dt_cbm1581:
         DBG_ERROR((DBG_PREFIX "1581 not supported!"));
         return 1;
@@ -123,6 +119,13 @@ upload(CBM_FILE fd, unsigned char drive)
         pp_drive_prog = pp1571_drive_prog;
         pp_drive_prog_length = sizeof(pp1571_drive_prog);
         break;
+
+    case cbm_dt_unknown:
+        /* FALL THROUGH */
+
+    default:
+        DBG_ERROR((DBG_PREFIX "unknown device type!"));
+        return 1;
     }
 
     bytesWritten = cbm_upload(fd, drive, 0x700, pp_drive_prog, pp_drive_prog_length);

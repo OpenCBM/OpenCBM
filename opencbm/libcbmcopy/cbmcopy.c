@@ -464,6 +464,12 @@ int cbmcopy_check_auto_transfer_mode(CBM_FILE cbm_fd, int auto_transfermode, int
                      * We are using an IEEE-488 drive, use original transfer mode
                      */
                     return cbmcopy_get_transfer_mode_index("original");
+
+                default:
+                    /*
+                     * We are using an IEC drive, everything is o.k.
+                     */
+                    break;
             }
         }
 

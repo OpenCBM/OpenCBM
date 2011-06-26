@@ -11,9 +11,6 @@ MAN1 ?= $(PROG).1
 
 all: $(PROG)
 
-mrproper: clean
-	rm -f $(EXTRA_A65_INC) *~ LINUX/*~
-
 clean:
 	rm -f $(PROG) $(OBJS)
 
@@ -21,6 +18,7 @@ mrproper: clean
 ifneq "$(words $(INC))" "0"
 	rm -f $(INC)
 endif
+	rm -f $(EXTRA_A65_INC) *~ LINUX/*~
 
 install-files: $(PROG)
 	install -m 755 -s $(PROG) $(DESTDIR)$(BINDIR)
