@@ -72,7 +72,11 @@
 const char * CBMAPIDECL
 opencbm_plugin_get_driver_name(const char * const Port)
 {
-    int portNumber = strtoul(Port, NULL, 10);
+    int portNumber = 0;
+    
+    if(Port != NULL) {
+        portNumber = strtoul(Port, NULL, 10);
+    }
 
     return xum1541_device_path(portNumber);
 }
@@ -100,7 +104,11 @@ opencbm_plugin_get_driver_name(const char * const Port)
 int CBMAPIDECL
 opencbm_plugin_driver_open(CBM_FILE *HandleDevice, const char * const Port)
 {
-    int portNumber = strtoul(Port, NULL, 10);
+    int portNumber = 0;
+    
+    if(Port != NULL) {
+        portNumber = strtoul(Port, NULL, 10);
+    }
 
     return xum1541_init((usb_dev_handle **)HandleDevice, portNumber);
 }
