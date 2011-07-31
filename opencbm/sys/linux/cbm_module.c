@@ -33,6 +33,7 @@ static char *rcsid =
 #endif
 
 #include <linux/module.h>
+#include <linux/spinlock.h>
 
 /*
  * Starting with 2.3.10, the IRQ and bi-directional bits are uncoupled from
@@ -518,10 +519,9 @@ static ssize_t cbm_write(struct file *f, const char *buf, size_t cnt,
 	return cbm_raw_write(buf, cnt, 0, 0);
 }
 
-static int cbm_ioctl(struct inode *inode, struct file *f,
+static int cbm_ioctl(struct file *f,
 		     unsigned int cmd, unsigned long arg)
 {
-
 	/* linux parallel burst */
 	PARBURST_RW_VALUE *user_val;
 	PARBURST_RW_VALUE kernel_val;
@@ -757,6 +757,25 @@ static int cbm_ioctl(struct inode *inode, struct file *f,
 	return -EINVAL;
 }
 
+static int cbm_unlocked_ioctl(struct file *f,
+		     unsigned int cmd, unsigned long arg)
+{
+    int ret;
+
+    static spinlock_t spinlock = SPIN_LOCK_UNLOCKED;
+    unsigned long irqflags;
+
+    /* first, get the spinlock */
+    spin_lock_irqsave(&spin_lock, irqflags);
+
+    ret = cbm_ioctl(f, cmd, arg);
+
+    /* release the spinlock */
+    spin_unlock_irqrestore(&spin_lock, irqflags);
+
+    return ret;
+}
+
 static int cbm_open(struct inode *inode, struct file *f)
 {
 	if (busy)
@@ -814,7 +833,7 @@ static const struct file_operations cbm_fops = {
 	.owner		= THIS_MODULE,
 	.read		= cbm_read,
 	.write		= cbm_write,
-	.ioctl		= cbm_ioctl,
+	.unlocked_ioctl	= cbm_unlocked_ioctl,
 	.open		= cbm_open,
 	.release	= cbm_release,
 };
