@@ -33,7 +33,10 @@ static char *rcsid =
 #endif
 
 #include <linux/module.h>
+
+#ifdef USE_SPINLOCK_IOCTL
 #include <linux/spinlock.h>
+#endif
 
 /*
  * Starting with 2.3.10, the IRQ and bi-directional bits are uncoupled from
@@ -762,16 +765,20 @@ static int cbm_unlocked_ioctl(struct file *f,
 {
     int ret;
 
+#ifdef USE_SPINLOCK_IOCTL
     static spinlock_t spinlock = SPIN_LOCK_UNLOCKED;
     unsigned long irqflags;
 
     /* first, get the spinlock */
     spin_lock_irqsave(&spin_lock, irqflags);
+#endif
 
     ret = cbm_ioctl(f, cmd, arg);
 
+#ifdef USE_SPINLOCK_IOCTL
     /* release the spinlock */
     spin_unlock_irqrestore(&spin_lock, irqflags);
+#endif
 
     return ret;
 }
