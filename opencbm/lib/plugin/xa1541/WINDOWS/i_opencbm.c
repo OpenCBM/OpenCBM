@@ -341,7 +341,7 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
    driver name, or NULL if an error occurred.
 
  \bug
-   PortNumber is not allowed to exceed 10. 
+   Port is not allowed to exceed 10. 
 */
 
 const char * CBMAPIDECL
@@ -351,11 +351,16 @@ opencbm_plugin_get_driver_name(const char * const Port)
     static char driverName[] = "\\\\.\\opencbm0";
     char *ret;
 
-    int portNumber = strtoul(Port, NULL, 10);
+    int portNumber = 0;
 
     FUNC_ENTER();
 
     ret = NULL;
+
+    if (Port != NULL)
+    {
+        portNumber = strtoul(Port, NULL, 10);
+    }
 
     /*! \bug 
      * the logic does not allow more than 10 entries, 
@@ -392,7 +397,7 @@ opencbm_plugin_get_driver_name(const char * const Port)
    ==0: This function completed successfully
    !=0: otherwise
 
- PortNumber is not allowed to exceed 10. 
+ Port is not allowed to exceed 10. 
 
  cbm_driver_open() should be balanced with cbm_driver_close().
 */
