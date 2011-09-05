@@ -161,5 +161,10 @@ uint8_t nib_parburst_read(void);
 int8_t nib_read_handshaked(uint8_t *c, uint8_t toggle);
 void nib_parburst_write(uint8_t data);
 int8_t nib_write_handshaked(uint8_t data, uint8_t toggle);
+#ifdef SRQ_NIB_SUPPORT
+uint8_t nib_srqburst_read(void);
+void nib_srqburst_write(uint8_t data);
+uint8_t nib_srq_write_handshaked(uint8_t data, uint8_t toggle);
+#endif // SRQ_NIB_SUPPORT
 
 #endif // _XUM1541_H

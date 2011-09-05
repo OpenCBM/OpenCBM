@@ -37,6 +37,8 @@ static uint8_t savedNibWrites[4], *savedNibWritePtr;
 // Protocol handlers to use, set in cbm_init().
 struct ProtocolFunctions *cmds;
 
+static int nib_check_write(uint8_t data);
+
 /*
  * Try to find an IEEE device first. If not found or unsupported, fall
  * back to IEC.
@@ -351,6 +353,139 @@ ioWriteNibLoop(uint16_t len)
     return 0;
 }
 
+#ifdef SRQ_NIB_SUPPORT
+static uint8_t
+ioReadNibSrqLoop(uint16_t len)
+{
+    uint16_t i;
+    uint8_t data;
+
+    // Probably an error, but handle it anyway.
+    if (len == 0)
+        return 0;
+
+    suppressNibCmd = false;
+    usbInitIo(len, ENDPOINT_DIR_IN);
+    iec_release(IO_SRQ | IO_CLK | IO_DATA | IO_ATN);
+
+    /*
+     * Wait until the host has gotten to generating an IN transaction
+     * before doing the handshake that leads to data beginning to stream
+     * out. This value is derived from the parallel nib routine.
+     */
+    DELAY_MS(10);
+
+    // We're ready to go, kick off the actual data transfer
+    nib_srqburst_read();
+
+    // Start signal for drive code
+    iec_set(IO_CLK);
+
+    for (i = 0; i < len; i++) {
+        // Read a byte via srq
+        data = iec_srq_read();
+
+        // Stop signal for drive code is to release CLK on last byte.
+        if (i == (len - 2))
+            iec_release(IO_CLK);
+
+        // Send the byte to the host via USB
+        if (usbSendByte(data) != 0)
+            break;
+    }
+    usbIoDone();
+
+    // All bytes read ok so read the final dummy byte
+    nib_srqburst_read();
+
+    return 0;
+}
+
+static uint8_t
+ioWriteNibSrqLoop(uint16_t len)
+{
+    uint16_t i;
+    uint8_t data, *ptr;
+
+    // nibtools drive code requires at least one data byte.
+    if (len == 0)
+        return 0;
+
+    suppressNibCmd = false;
+    usbInitIo(len, ENDPOINT_DIR_OUT);
+    iec_release(IO_SRQ | IO_CLK | IO_DATA | IO_ATN);
+
+    /*
+     * We're ready to go, kick off the actual data transfer by writing
+     * all saved writes. We keep a queue because the 1541 and 1571 drive
+     * code may send different numbers of bytes here.
+     */
+    for (ptr = savedNibWrites; ptr != savedNibWritePtr; ptr++)
+        nib_srqburst_write(*ptr);
+    savedNibWritePtr = savedNibWrites;
+
+    for (i = 0; i < len; i++) {
+        // Get data byte from USB.
+        if (usbRecvByte(&data) != 0)
+            break;
+
+        // Write data byte via SRQ, break if timeout error.
+        if (nib_srq_write_handshaked(data, i & 1) != 0) {
+            DEBUGF(DBG_ERROR, "nbwrh1 to\n");
+            return -1;
+        }
+    }
+
+    // Read back the dummy result.
+    nib_srqburst_read();
+
+    usbIoDone();
+    return 0;
+}
+
+// Check with the state machine before actually doing the write
+static void
+nib_srqburst_write_checked(uint8_t data)
+{
+    if (nib_check_write(data))
+        nib_srqburst_write(data);
+}
+
+/*
+ * Delay the handshaked read until read/write track, if that's the
+ * next function to run. nib_parburst_write_checked() sets this flag.
+ */
+static uint8_t
+nib_srqburst_read_checked(void)
+{
+    if (!suppressNibCmd)
+        return nib_srqburst_read();
+    else
+        return 0x88;
+}
+#endif // SRQ_NIB_SUPPORT
+
+// Check with the state machine before actually doing the write
+static void
+nib_parburst_write_checked(uint8_t data)
+{
+    if (nib_check_write(data))
+        nib_parburst_write(data);
+}
+
+/*
+ * Delay the handshaked read until read/write track, if that's the
+ * next function to run. nib_parburst_write_checked() sets this flag.
+ */
+static uint8_t
+nib_parburst_read_checked(void)
+{
+    if (!suppressNibCmd)
+        return nib_parburst_read();
+    else
+        return 0x88;
+}
+
 /*
  * Set a flag to suppress the next nib_parburst_read(). We do this if
  * the current mnib command is to read or write a track-at-once.
@@ -370,8 +505,8 @@ ioWriteNibLoop(uint16_t len)
  * byte that indicates how to align tracks, if at all. We cache that for
  * ioWriteNibLoop().
  */
-static void
-nib_parburst_write_checked(uint8_t data)
+static int
+nib_check_write(uint8_t data)
 {
     static uint8_t mnibCmd[] = { 0x00, 0x55, 0xaa, 0xff };
     static uint8_t cmdIdx;
@@ -382,7 +517,7 @@ nib_parburst_write_checked(uint8_t data)
      */
     if (suppressNibCmd) {
         *savedNibWritePtr++ = data;
-        return;
+        return false;
     }
 
     // State machine to match 00,55,aa,ff,XX where XX is read/write track.
@@ -400,20 +535,7 @@ nib_parburst_write_checked(uint8_t data)
             cmdIdx++;
     }
 
-    nib_parburst_write(data);
-}
-
-/*
- * Delay the handshaked read until read/write track, if that's the
- * next function to run. nib_parburst_write_checked() sets this flag.
- */
-static uint8_t
-nib_parburst_read_checked(void)
-{
-    if (!suppressNibCmd)
-        return nib_parburst_read();
-    else
-        return 0x88;
+    return true;
 }
 
 /*
@@ -569,6 +691,16 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
             ioReadLoop(nib_parburst_read_checked, len);
             ret = 0;
             break;
+#ifdef SRQ_NIB_SUPPORT
+        case XUM1541_NIB_SRQ:
+            ioReadNibSrqLoop(len);
+            ret = 0;
+            break;
+        case XUM1541_NIB_SRQ_COMMAND:
+            ioReadLoop(nib_srqburst_read_checked, len);
+            ret = 0;
+            break;
+#endif // SRQ_NIB_SUPPORT
         default:
             DEBUGF(DBG_ERROR, "badproto %d\n", proto);
             ret = -1;
@@ -611,6 +743,16 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
             ioWriteLoop(nib_parburst_write_checked, len);
             ret = 0;
             break;
+#ifdef SRQ_NIB_SUPPORT
+        case XUM1541_NIB_SRQ:
+            ioWriteNibSrqLoop(len);
+            ret = 0;
+            break;
+        case XUM1541_NIB_SRQ_COMMAND:
+            ioWriteLoop(nib_srqburst_write_checked, len);
+            ret = 0;
+            break;
+#endif // SRQ_NIB_SUPPORT
         default:
             DEBUGF(DBG_ERROR, "badproto %d\n", proto);
             ret = -1;
@@ -670,6 +812,25 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
         // Sets suppressNibCmd if we're doing a read/write track.
         nib_parburst_write_checked(request[1]);
         break;
+#ifdef SRQ_NIB_SUPPORT
+    case XUM1541_SRQBURST_READ:
+        // Disallow if in IEEE mode.
+        if ((currState & XUM1541_IEEE488_PRESENT)) {
+            ret = -1;
+            break;
+        }
+        XUM_SET_STATUS_VAL(status, nib_srqburst_read_checked());
+        break;
+    case XUM1541_SRQBURST_WRITE:
+        // Disallow if in IEEE mode.
+        if ((currState & XUM1541_IEEE488_PRESENT)) {
+            ret = -1;
+            break;
+        }
+        // Sets suppressNibCmd if we're doing a read/write track.
+        nib_srqburst_write_checked(request[1]);
+        break;
+#endif // SRQ_NIB_SUPPORT
     default:
         DEBUGF(DBG_ERROR, "ERR: bulk cmd %d not impl.\n", cmd);
         ret = -1;

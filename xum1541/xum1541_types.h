@@ -88,6 +88,8 @@
 #define XUM1541_IEC_SETRELEASE      (XUM1541_IOCTL + 13)
 #define XUM1541_PARBURST_READ       (XUM1541_IOCTL + 14)
 #define XUM1541_PARBURST_WRITE      (XUM1541_IOCTL + 15)
+#define XUM1541_SRQBURST_READ       (XUM1541_IOCTL + 16)
+#define XUM1541_SRQBURST_WRITE      (XUM1541_IOCTL + 17)
 
 #define IS_CMD_ASYNC(x)             ((x) == XUM1541_IEC_WAIT)
 
@@ -120,6 +122,7 @@
 #define XUM1541_NIB                 (6 << 4) // burst nibbler parallel
 #define XUM1541_NIB_COMMAND         (7 << 4) // BN parallel commands
 #define XUM1541_NIB_SRQ             (8 << 4) // 1571 serial nibbler
+#define XUM1541_NIB_SRQ_COMMAND     (9 << 4) // Serial commands
 
 // Flags for use with write and XUM1541_CBM protocol
 #define XUM_WRITE_TALK              (1 << 0)
