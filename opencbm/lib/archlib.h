@@ -61,6 +61,12 @@ EXTERN opencbm_plugin_parallel_burst_write_n_t     opencbm_plugin_parallel_burst
 EXTERN opencbm_plugin_parallel_burst_read_track_t  opencbm_plugin_parallel_burst_read_track;
 EXTERN opencbm_plugin_parallel_burst_read_track_var_t opencbm_plugin_parallel_burst_read_track_var;
 EXTERN opencbm_plugin_parallel_burst_write_track_t opencbm_plugin_parallel_burst_write_track;
+EXTERN opencbm_plugin_parallel_burst_read_t        opencbm_plugin_srq_burst_read;
+EXTERN opencbm_plugin_parallel_burst_write_t       opencbm_plugin_srq_burst_write;
+EXTERN opencbm_plugin_parallel_burst_read_n_t      opencbm_plugin_srq_burst_read_n;
+EXTERN opencbm_plugin_parallel_burst_write_n_t     opencbm_plugin_srq_burst_write_n;
+EXTERN opencbm_plugin_parallel_burst_read_track_t  opencbm_plugin_srq_burst_read_track;
+EXTERN opencbm_plugin_parallel_burst_write_track_t opencbm_plugin_srq_burst_write_track;
 
 
 EXTERN opencbm_plugin_s1_read_n_t                  opencbm_plugin_s1_read_n;

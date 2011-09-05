@@ -805,6 +805,12 @@ struct opencbm_plugin_s {
 
     opencbm_plugin_iec_dbg_read_t               * opencbm_plugin_iec_dbg_read;               /*!< pointer to a opencbm_plugin_iec_dbg_read_t() function */
     opencbm_plugin_iec_dbg_write_t              * opencbm_plugin_iec_dbg_write;              /*!< pointer to a opencbm_plugin_iec_dbg_write_t() function */
+    opencbm_plugin_parallel_burst_read_t        * opencbm_plugin_srq_burst_read;        /*!< pointer to a opencbm_plugin_parallel_burst_read_t() function */
+    opencbm_plugin_parallel_burst_write_t       * opencbm_plugin_srq_burst_write;       /*!< pointer to a opencbm_plugin_parallel_burst_write_t() function */
+    opencbm_plugin_parallel_burst_read_n_t      * opencbm_plugin_srq_burst_read_n;      /*!< pointer to a opencbm_plugin_parallel_burst_read_n_t() function */
+    opencbm_plugin_parallel_burst_write_n_t     * opencbm_plugin_srq_burst_write_n;     /*!< pointer to a opencbm_plugin_parallel_burst_write_n_t() function */
+    opencbm_plugin_parallel_burst_read_track_t  * opencbm_plugin_srq_burst_read_track;  /*!< pointer to a opencbm_plugin_parallel_burst_read_track_t() function */
+    opencbm_plugin_parallel_burst_write_track_t * opencbm_plugin_srq_burst_write_track; /*!< pointer to a opencbm_plugin_parallel_burst_write_track_t() function */
 
 } opencbm_plugin_t;
 

@@ -227,6 +227,17 @@ EXTERN int CBMAPIDECL cbm_parallel_burst_write_track(CBM_FILE f, __u_char *buffe
 
 /* parallel burst functions end */
 
+/* functions specifically for srq nibbler */
+
+EXTERN __u_char CBMAPIDECL cbm_srq_burst_read(CBM_FILE f);
+EXTERN void CBMAPIDECL cbm_srq_burst_write(CBM_FILE f, __u_char c);
+EXTERN int CBMAPIDECL cbm_srq_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+EXTERN int CBMAPIDECL cbm_srq_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+EXTERN int CBMAPIDECL  cbm_srq_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int length);
+EXTERN int CBMAPIDECL cbm_srq_burst_write_track(CBM_FILE f, __u_char *buffer, unsigned int length);
+
+/* srq nibbler functions end */
+
 /* get function address of the plugin */
 EXTERN void * CBMAPIDECL cbm_get_plugin_function_address(const char * Functionname);
 

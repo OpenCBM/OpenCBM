@@ -210,9 +210,86 @@ opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffe
     return result;
 }
 
+/********* Fast serial nibbler routines below ********/
+
+/*! \brief SRQBURST: Read from the fast serial port
+
+ This function is a helper function for fast serial burst:
+ It reads from the fast serial port.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   The value read from the fast serial port
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+__u_char CBMAPIDECL
+opencbm_plugin_srq_burst_read(CBM_FILE HandleDevice)
+{
+    __u_char result;
+
+    result = (__u_char)xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_SRQBURST_READ, 0, 0);
+    return result;
+}
+
+/*! \brief SRQBURST: Write to the fast serial port
+
+ This function is a helper function for fast serial burst:
+ It writes to the fast serial port.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Value
+   The value to be written to the fast serial port
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+*/
+
+void CBMAPIDECL
+opencbm_plugin_srq_burst_write(CBM_FILE HandleDevice, __u_char Value)
+{
+    int result;
+
+    result = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_SRQBURST_WRITE, Value, 0);
+}
+
+int CBMAPIDECL
+opencbm_plugin_srq_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
+    unsigned int Length)
+{
+    int result;
+
+    result = xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_NIB_SRQ_COMMAND, Buffer, Length);
+    if (result != Length) {
+        DBG_WARN((DBG_PREFIX "srq_burst_read_n: returned with error %d", result));
+    }
+
+    return result;
+}
+
+int CBMAPIDECL
+opencbm_plugin_srq_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
+    unsigned int Length)
+{
+    int result;
+
+    result = xum1541_write((usb_dev_handle *)HandleDevice, XUM1541_NIB_SRQ_COMMAND, Buffer, Length);
+    if (result != Length) {
+        DBG_WARN((DBG_PREFIX "srq_burst_write_n: returned with error %d", result));
+    }
+
+    return result;
+}
+
 /*! \brief SRQ: Read a complete track
 
- This function is a helper function for parallel burst:
+ This function is a helper function for fast serial burst:
  It reads a complete track from the disk
 
  \param HandleDevice
@@ -246,7 +323,7 @@ opencbm_plugin_srq_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned 
 
 /*! \brief SRQ: Write a complete track
 
- This function is a helper function for parallel burst:
+ This function is a helper function for fast serial burst:
  It writes a complete track to the disk
 
  \param HandleDevice

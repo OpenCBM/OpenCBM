@@ -1725,6 +1725,184 @@ cbm_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned
     FUNC_LEAVE_INT(ret);
 }
 
+/*! \brief PARBURST: Read from the parallel port
+
+ This function is a helper function for parallel burst:
+ It reads from the parallel port.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   The value read from the parallel port
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+__u_char CBMAPIDECL
+cbm_srq_burst_read(CBM_FILE HandleDevice)
+{
+    __u_char ret = 0;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_srq_burst_read)
+        ret = Plugin_information.Plugin.opencbm_plugin_srq_burst_read(HandleDevice);
+
+    FUNC_LEAVE_UCHAR(ret);
+}
+
+/*! \brief PARBURST: Write to the parallel port
+
+ This function is a helper function for parallel burst:
+ It writes to the parallel port.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Value
+   The value to be written to the parallel port
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+void CBMAPIDECL
+cbm_srq_burst_write(CBM_FILE HandleDevice, __u_char Value)
+{
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_srq_burst_write)
+        Plugin_information.Plugin.opencbm_plugin_srq_burst_write(HandleDevice, Value);
+
+    FUNC_LEAVE();
+}
+
+int CBMAPIDECL
+cbm_srq_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
+    unsigned int Length)
+{
+    unsigned int i;
+    int rv;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_srq_burst_read_n) {
+        rv = Plugin_information.Plugin.opencbm_plugin_srq_burst_read_n(
+            HandleDevice, Buffer, Length);
+    } else {
+        for (i = 0; i < Length; i++) {
+            Buffer[i] = Plugin_information.Plugin
+                .opencbm_plugin_srq_burst_read(HandleDevice);
+        }
+        rv = Length;
+    }
+
+    FUNC_LEAVE_INT(rv);
+}
+
+int CBMAPIDECL
+cbm_srq_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
+    unsigned int Length)
+{
+    unsigned int i;
+    int rv;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_srq_burst_write_n) {
+        rv = Plugin_information.Plugin.opencbm_plugin_srq_burst_write_n(
+            HandleDevice, Buffer, Length);
+    } else {
+        for (i = 0; i < Length; i++) {
+            Plugin_information.Plugin.opencbm_plugin_srq_burst_write(
+                HandleDevice, Buffer[i]);
+        }
+        rv = Length;
+    }
+
+    FUNC_LEAVE_INT(rv);
+}
+
+/*! \brief PARBURST: Read a complete track
+
+ This function is a helper function for parallel burst:
+ It reads a complete track from the disk
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which will hold the bytes read.
+
+ \param Length
+   The length of the Buffer.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+ If this function is not implemented, it will return -1.
+*/
+
+int CBMAPIDECL
+cbm_srq_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_srq_burst_read_track)
+        ret = Plugin_information.Plugin.opencbm_plugin_srq_burst_read_track(HandleDevice, Buffer, Length);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief PARBURST: Write a complete track
+
+ This function is a helper function for parallel burst:
+ It writes a complete track to the disk
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which hold the bytes to be written.
+
+ \param Length
+   The length of the Buffer.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+ If this function is not implemented, it will return -1.
+*/
+
+int CBMAPIDECL
+cbm_srq_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_srq_burst_write_track)
+        ret = Plugin_information.Plugin.opencbm_plugin_srq_burst_write_track(HandleDevice, Buffer, Length);
+
+    FUNC_LEAVE_INT(ret);
+}
+
 
 /*! \brief Get the function pointer for a function in a plugin
 
