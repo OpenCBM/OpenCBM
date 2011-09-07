@@ -247,6 +247,12 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_read_track);
         PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_read_track_var);
         PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_write_track);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_read);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_write);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_read_n);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_write_n);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_read_track);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_write_track);
 
         PLUGIN_GET_ADDRESS(opencbm_plugin_iec_dbg_read);
         PLUGIN_GET_ADDRESS(opencbm_plugin_iec_dbg_write);
@@ -328,6 +334,26 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
          && NULL == Plugin_information->Plugin.opencbm_plugin_pp_write
            )
 
+            error = 0;
+
+        if (error)
+            break;
+
+        /* and the SRQ burst functions */
+
+        error = 1;
+        if (Plugin_information->Plugin.opencbm_plugin_srq_burst_read 
+         && Plugin_information->Plugin.opencbm_plugin_srq_burst_write
+         && Plugin_information->Plugin.opencbm_plugin_srq_burst_read_track
+         && Plugin_information->Plugin.opencbm_plugin_srq_burst_write_track
+           )
+           error = 0;
+
+        if (NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_read 
+         && NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_write
+         && NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_read_track
+         && NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_write_track
+           )
             error = 0;
 
         if (error)
