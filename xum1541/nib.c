@@ -103,3 +103,68 @@ nib_write_handshaked(uint8_t data, uint8_t toggle)
     iec_pp_write(data);
     return 0;
 }
+
+#ifdef SRQ_NIB_SUPPORT
+// Handshaked read of a byte via fast serial
+uint8_t
+nib_srqburst_read()
+{
+    uint8_t data;
+
+    // Set ATN, and wait for drive to start SRQ transfer
+    iec_set_release(IO_ATN, IO_SRQ | IO_CLK | IO_DATA);
+    DELAY_US(1);
+
+    // Read 8 bits via fast serial
+    data = iec_srq_read();
+    iec_release(IO_ATN);
+
+    // Wait for the drive to release CLK.
+    while (iec_get(IO_CLK))
+        ;
+
+    return data;
+}
+
+// Handshaked write of a byte via fast serial
+void
+nib_srqburst_write(uint8_t data)
+{
+    // Set ATN and wait for drive to start SRQ transfer
+    iec_set_release(IO_ATN, IO_SRQ | IO_CLK | IO_DATA);
+    DELAY_US(5);
+
+    // Wait for the drive to set CLK.
+    while (!iec_get(IO_CLK))
+        ;
+
+    // Send data byte via fast serial
+    iec_srq_write(data);
+    DELAY_US(1);
+
+    // Release ATN again.
+    iec_release(IO_ATN);
+
+    // Wait for the drive to release CLK.
+    while (iec_get(IO_CLK))
+        ;
+}
+
+uint8_t
+nib_srq_write_handshaked(uint8_t data, uint8_t toggle)
+{
+    uint16_t write_timeout = 0;
+
+    // Wait for the drive to toggle CLK, break on timeout error.
+    while (iec_get(IO_CLK) != toggle) {
+        // Timing for 16MHz CPU (ATMega32U4). XXX use proper delay method.
+        if (++write_timeout >= 100)
+            return 0xff;
+    }
+
+    // Write out the data value via SRQ.
+    iec_srq_write(data);
+
+    return 0;
+}
+#endif // SRQ_NIB_SUPPORT

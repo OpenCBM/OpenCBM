@@ -44,6 +44,7 @@ void board_init_iec(void);
 //
 #if MODEL == ZOOMFLOPPY
 #define IEEE_SUPPORT    1
+#define SRQ_NIB_SUPPORT 1
 #endif
 
 #define IEEE_EOI_IO     0xc5 // input, output
@@ -155,6 +156,48 @@ iec_pp_write(uint8_t val)
 {
     PAR_PORT_DDR = 0xff;
     PAR_PORT_PORT = val;
+}
+
+INLINE uint8_t
+iec_srq_read(void)
+{
+    uint8_t i, data;
+
+    data = 0;
+    for (i = 8; i != 0; --i) {
+        // Wait for the drive to pull IO_SRQ.
+        while (!iec_get(IO_SRQ))
+            ;
+
+        // Wait for drive to release SRQ, then delay another 375 ns for DATA
+        // to stabilize before reading it.
+        while (iec_get(IO_SRQ))
+            ;
+        DELAY_US(0.375);
+
+        // Read data bit
+        data = (data << 1) | (iec_get(IO_DATA) ? 0 : 1);
+   }
+
+   return data;
+}
+
+INLINE void
+iec_srq_write(uint8_t data)
+{
+    uint8_t i;
+
+    for (i = 8; i != 0; --i) {
+        if ((data & 0x80))   // send MSB
+            iec_release(IO_DATA);
+        else
+            iec_set(IO_DATA);
+        iec_set(IO_SRQ);     // set SRQ
+        data <<= 1;          // next bit
+        DELAY_US(0.3);       // (nibtools relies on this timing, do not change)
+        iec_release(IO_SRQ); // release SRQ
+        DELAY_US(0.935);     // (nibtools relies on this timing, do not change)
+    }
 }
 
 // Since this is called with a runtime-specified mask, inlining doesn't help.
