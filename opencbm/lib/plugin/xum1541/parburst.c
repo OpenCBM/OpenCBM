@@ -309,7 +309,7 @@ opencbm_plugin_srq_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
 */
 
 int CBMAPIDECL
-opencbm_plugin_srq_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_srq_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     int result;
 
@@ -343,7 +343,7 @@ opencbm_plugin_srq_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned 
 */
 
 int CBMAPIDECL
-opencbm_plugin_srq_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_srq_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
 {
     int result;
 
