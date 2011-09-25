@@ -25,6 +25,15 @@ DeviceID7   = VID_16d0&PID_0504&REV_0206
 DeviceName8 = "XUM1541 USB floppy adapter (OLIMEX-v06)"
 DeviceID8   = VID_16d0&PID_0504&REV_0306
 
+; AVR DFU devices for firmware updates
+DeviceName30 = "Atmel firmware update device (ATmega32U2)"
+DeviceID30   = VID_03eb&PID_2ff0
+DeviceName31 = "Atmel firmware update device (ATmega32U4)"
+DeviceID31   = VID_03eb&PID_2ff4
+DeviceName32 = "Atmel firmware update device (AT90USB162)"
+DeviceID32   = VID_03eb&PID_2ffa
+DeviceName33 = "Atmel firmware update device (AT90USB1287)"
+DeviceID33   = VID_03eb&PID_2ffb
 
 [Version]
 Signature   = "$Windows NT$"
@@ -159,6 +168,10 @@ ServiceBinary = %12%\libusb0.sys
 %DeviceName6% = LIBUSB_WIN32_DEV, USB\%DeviceID6%
 %DeviceName7% = LIBUSB_WIN32_DEV, USB\%DeviceID7%
 %DeviceName8% = LIBUSB_WIN32_DEV, USB\%DeviceID8%
+%DeviceName30% = LIBUSB_WIN32_DEV, USB\%DeviceID30%
+%DeviceName31% = LIBUSB_WIN32_DEV, USB\%DeviceID31%
+%DeviceName32% = LIBUSB_WIN32_DEV, USB\%DeviceID32%
+%DeviceName33% = LIBUSB_WIN32_DEV, USB\%DeviceID33%
 
 [Devices.NT]
 %DeviceName1% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID1%
@@ -169,6 +182,10 @@ ServiceBinary = %12%\libusb0.sys
 %DeviceName6% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID6%
 %DeviceName7% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID7%
 %DeviceName8% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID8%
+%DeviceName30% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID30%
+%DeviceName31% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID31%
+%DeviceName32% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID32%
+%DeviceName33% = LIBUSB_WIN32_DEV.NT, USB\%DeviceID33%
 
 [Devices.NTAMD64]
 %DeviceName1% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID1%
@@ -179,6 +196,10 @@ ServiceBinary = %12%\libusb0.sys
 %DeviceName6% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID6%
 %DeviceName7% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID7%
 %DeviceName8% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID8%
+%DeviceName30% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID30%
+%DeviceName31% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID31%
+%DeviceName32% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID32%
+%DeviceName33% = LIBUSB_WIN32_DEV.NTAMD64, USB\%DeviceID33%
 
 [Devices.NTIA64]
 %DeviceName1% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID1%
@@ -189,3 +210,7 @@ ServiceBinary = %12%\libusb0.sys
 %DeviceName6% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID6%
 %DeviceName7% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID7%
 %DeviceName8% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID8%
+%DeviceName30% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID30%
+%DeviceName31% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID31%
+%DeviceName32% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID32%
+%DeviceName33% = LIBUSB_WIN32_DEV.NTIA64, USB\%DeviceID33%
