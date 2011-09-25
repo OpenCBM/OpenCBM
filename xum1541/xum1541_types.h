@@ -15,7 +15,7 @@
 #define XUM1541_PID                 0x0504
 
 // XUM1541_INIT reports this versions
-#define XUM1541_VERSION             6
+#define XUM1541_VERSION             7
 
 // USB parameters for descriptor configuration
 #define XUM_BULK_IN_ENDPOINT        3
