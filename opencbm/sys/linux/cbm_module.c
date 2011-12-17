@@ -33,7 +33,6 @@ static char *rcsid =
 #endif
 
 #include <linux/module.h>
-#include <linux/spinlock.h>
 
 /*
  * Starting with 2.3.10, the IRQ and bi-directional bits are uncoupled from
@@ -519,7 +518,7 @@ static ssize_t cbm_write(struct file *f, const char *buf, size_t cnt,
 	return cbm_raw_write(buf, cnt, 0, 0);
 }
 
-static int cbm_ioctl(struct file *f,
+static int cbm_unlocked_ioctl(struct file *f,
 		     unsigned int cmd, unsigned long arg)
 {
 	/* linux parallel burst */
@@ -755,25 +754,6 @@ static int cbm_ioctl(struct file *f,
 						      kernel_val.length);
 	}
 	return -EINVAL;
-}
-
-static int cbm_unlocked_ioctl(struct file *f,
-		     unsigned int cmd, unsigned long arg)
-{
-    int ret;
-
-    static spinlock_t spinlock = SPIN_LOCK_UNLOCKED;
-    unsigned long irqflags;
-
-    /* first, get the spinlock */
-    spin_lock_irqsave(&spin_lock, irqflags);
-
-    ret = cbm_ioctl(f, cmd, arg);
-
-    /* release the spinlock */
-    spin_unlock_irqrestore(&spin_lock, irqflags);
-
-    return ret;
 }
 
 static int cbm_open(struct inode *inode, struct file *f)
