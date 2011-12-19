@@ -80,7 +80,7 @@ install: build
 		debian/tmp/etc/modutils/cbm4linux
 
 	mkdir -p debian/tmp/usr/src/modules/cbm4linux/debian
-	for f in debian/{copyright,changelog,*.MODULE}; \
+	for f in debian/copyright debian/changelog debian/*.MODULE; \
 		do cp $$f debian/tmp/usr/src/modules/cbm4linux/`echo $$f | sed 's/\\.MODULE$$//'`; \
 	done
 	cp sys/linux/cbm_module.c include/LINUX/cbm_module.h debian/tmp/usr/src/modules/cbm4linux/

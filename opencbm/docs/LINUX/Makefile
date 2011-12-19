@@ -22,8 +22,11 @@ HTML = html/opencbm.html
 %.txt: %.sgml
 	${LINUXDOCTXT} ${LINUXDOCTXTPARAM} $<
 
-%.pdf: %.dvi
-	dvipdf $<
+%.pdf: %.ps
+	ps2pdf $<
+
+%.ps: %.dvi
+	dvips -o $*.ps $<
 
 %.dvi: %.sgml
 	${LINUXDOCLATEX} ${LINUXDOCLATEXPARAM} -o dvi $<

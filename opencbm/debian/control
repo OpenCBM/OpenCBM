@@ -30,7 +30,7 @@ Description: Commodore serial IEC bus client library
  Support library for the cbm4linux utilities
 
 Package: cbm4linux-modules-source
-Architecture: i386
+Architecture: i386 amd64
 Section: misc
 Pre-Depends: perl
 Depends: debconf (>= 0.5.00), debhelper (>> 3.0.0)
