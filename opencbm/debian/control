@@ -1,14 +1,14 @@
-Source: cbm4linux
+Source: opencbm
 Section: misc
 Priority: extra
 Maintainer: Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 Build-Depends: debhelper (>= 4.1.16), linuxdoc-tools, linuxdoc-tools-latex, linuxdoc-tools-text
 Standards-Version: 3.7.2.1
 
-Package: cbm4linux
+Package: opencbm
 Architecture: any
 Depends: ${shlibs:Depends}, debconf (>= 0.5.00)
-Recommends: cbm4linux-modules-source
+Recommends: opencbm-modules-source
 Description: Commodore serial IEC bus utilities
  This package contains cbmctrl and d64copy
 
@@ -25,16 +25,16 @@ Package: libopencbm0
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
-Recommends: cbm4linux
+Recommends: opencbm
 Description: Commodore serial IEC bus client library
- Support library for the cbm4linux utilities
+ Support library for the opencbm utilities
 
-Package: cbm4linux-modules-source
+Package: opencbm-modules-source
 Architecture: i386 amd64
 Section: misc
 Pre-Depends: perl
 Depends: debconf (>= 0.5.00), debhelper (>> 3.0.0)
 Recommends: make, dpkg-dev, gcc | c-compiler, kernel-package
-Suggests: cbm4linux
+Suggests: opencbm
 Description: Kernel module source for the CBM module
- Kernel module part of cbm4linux
+ Kernel module part of opencbm.

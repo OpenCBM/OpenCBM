@@ -1,5 +1,5 @@
 #! /bin/sh
-# postrm script for cbm4linux
+# postrm script for opencbm
 
 set -e
 
@@ -8,8 +8,7 @@ set -e
 #DEBHELPER#
 
 if [ "$1" = "purge" ]; then
-	# from lirc:
-	[ -x /usr/sbin/update-devfsd ] && /usr/sbin/update-devfsd >&2
+	rmdir --ignore-fail-on-non-empty /etc/opencbm
 fi
 
 db_stop

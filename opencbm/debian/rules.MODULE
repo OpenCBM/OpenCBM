@@ -33,7 +33,7 @@ PKG_VERSION=$(EPOCH)$(VERSION)+$(REV)
 
 VERSION=$(shell dpkg-parsechangelog | grep ^Version: | cut -d ' ' -f 2)
 
-CHFILE=$(KSRC)/../cbm4linux-module-$(KVERS)_$(PKG_VERSION)_$(ARCH).changes
+CHFILE=$(KSRC)/../opencbm-module-$(KVERS)_$(PKG_VERSION)_$(ARCH).changes
 
 # This target verifies that we've got the needed variables passed to us.
 # If the user is using make-kpkg (like he should), it won't be a problem.
@@ -79,7 +79,7 @@ build-stamp: check clean
 install:
 	dh_testdir
 	dh_testroot
-	install -m 644 -D $(MODNAME) debian/cbm4linux-module-$(KVERS)/lib/modules/$(KVERS)/misc/$(MODNAME)
+	install -m 644 -D $(MODNAME) debian/opencbm-module-$(KVERS)/lib/modules/$(KVERS)/misc/$(MODNAME)
 
 # To conform with Debian policy.
 binary: binary-arch binary-indep

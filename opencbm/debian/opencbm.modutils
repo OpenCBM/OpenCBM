@@ -1,4 +1,4 @@
-# sample kernel module configuration for cbm4linux
+# sample kernel module configuration for opencbm
 
 # everyone wants to enable this:
 alias char-major-10-177 cbm

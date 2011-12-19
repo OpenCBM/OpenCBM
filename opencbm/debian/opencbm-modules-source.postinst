@@ -1,13 +1,13 @@
 #! /bin/sh
-# postinst script for cbm4linux
+# postinst script for opencbm
 
 set -e
 
 . /usr/share/debconf/confmodule
 
 if [ "$1" = "configure" ]; then
-        cfg=/etc/cbm4linux/cbm4linux-modules-source.conf.h
-	db_get cbm4linux-modules-source/direct_port
+        cfg=/etc/opencbm/opencbm-modules-source.conf.h
+	db_get opencbm-modules-source/direct_port
 	if $RET; then
 		perl -p -i -e 's/^#.*(DIRECT_PORT_ACCESS).*$/#define $1/' $cfg
 	else

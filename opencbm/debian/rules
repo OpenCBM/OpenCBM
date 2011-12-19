@@ -17,7 +17,7 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	INSTALL_PROGRAM += -s
 endif
 
-subdirs="include arch/linux lib cbmctrl cbmformat d64copy cbmcopy docs"
+subdirs="include libmisc arch/linux lib cbmctrl cbmformat d64copy cbmcopy docs"
 
 # shared library versions, option 1
 version=0.4.0
@@ -62,6 +62,7 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
+
 	# Add here commands to install the package into debian/tmp
 	$(MAKE) -f LINUX/Makefile \
 		SUBDIRS=$(subdirs) \
@@ -71,21 +72,21 @@ install: build
 		install-files
 
 	install -D -o root -g root -m 644 debian/devfs.conf \
-		debian/tmp/etc/devfs/conf.d/cbm4linux
+		debian/tmp/etc/devfs/conf.d/opencbm
 	install -D -o root -g root -m 644 debian/devfs.devices \
-		debian/tmp/etc/devfs/devices.d/cbm4linux
-	install -D -o root -g root -m 644 debian/cbm4linux-modules-source.conf.h \
-		debian/tmp/etc/cbm4linux/cbm4linux-modules-source.conf.h
-	install -D -o root -g root -m 644 debian/cbm4linux.modutils \
-		debian/tmp/etc/modutils/cbm4linux
+		debian/tmp/etc/devfs/devices.d/opencbm
+	install -D -o root -g root -m 644 debian/opencbm-modules-source.conf.h \
+		debian/tmp/etc/opencbm/opencbm-modules-source.conf.h
+	install -D -o root -g root -m 644 debian/opencbm.modutils \
+		debian/tmp/etc/modutils/opencbm
 
-	mkdir -p debian/tmp/usr/src/modules/cbm4linux/debian
+	mkdir -p debian/tmp/usr/src/modules/opencbm/debian
 	for f in debian/copyright debian/changelog debian/*.MODULE; \
-		do cp $$f debian/tmp/usr/src/modules/cbm4linux/`echo $$f | sed 's/\\.MODULE$$//'`; \
+		do cp $$f debian/tmp/usr/src/modules/opencbm/`echo $$f | sed 's/\\.MODULE$$//'`; \
 	done
-	cp sys/linux/cbm_module.c include/LINUX/cbm_module.h debian/tmp/usr/src/modules/cbm4linux/
-	cp debian/Makefile.module debian/tmp/usr/src/modules/cbm4linux/Makefile
-	tar -czf debian/tmp/usr/src/cbm4linux.tar.gz -C debian/tmp/usr/src modules/
+	cp sys/linux/cbm_module.c include/LINUX/cbm_module.h debian/tmp/usr/src/modules/opencbm/
+	cp debian/Makefile.module debian/tmp/usr/src/modules/opencbm/Makefile
+	tar -czf debian/tmp/usr/src/opencbm.tar.gz -C debian/tmp/usr/src modules/
 
 # Build architecture-independent files here.
 binary-indep: build install

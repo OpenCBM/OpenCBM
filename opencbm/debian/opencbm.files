@@ -1,0 +1,3 @@
+usr/bin/*
+etc/devfs/*/opencbm
+etc/modutils/opencbm

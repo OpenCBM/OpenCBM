@@ -1,7 +1,7 @@
-cbm4linux-modules-source for Debian
------------------------------------
+opencbm-modules-source for Debian
+---------------------------------
 
-After untarring /usr/src/cbm4linux.tar.gz, enter the top-level kernel
+After untarring /usr/src/opencbm.tar.gz, enter the top-level kernel
 source directory and compile the module with
 
 $ cd <path_to_kernel_source>
@@ -9,12 +9,12 @@ $ fakeroot make-kpkg modules_image
 
 This should give you an installable package named
 
-/usr/src/cbm4linux-<cbm4linux version>-<kernel version>.deb
+/usr/src/opencbm-<opencbm version>-<kernel version>.deb
 
 
 Alternatively, if you don't have/use make-kpkg:
 
-$ cd /usr/src/modules/cbm4linux
+$ cd /usr/src/modules/opencbm
 $ fakeroot debian/rules KSRC=<path_to_kernel_source> build
 
 This leaves you (hopefully!) with the loadable module cbm.o
