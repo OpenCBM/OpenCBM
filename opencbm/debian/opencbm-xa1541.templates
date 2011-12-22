@@ -1,13 +1,13 @@
-Template: opencbm/install_device
+Template: opencbm-xa1541/install_device
 Type: boolean
 Default: true
 _Description: Should I create the cbm device node if it is not there?
  opencbm requires the device node /dev/cbm to work.
 
-Template: opencbm/config_reminder
+Template: opencbm-xa1541/config_reminder
 Type: note
 _Description: Kernel module configuration
- The opencbm utilities require a few more steps until they are usable:
+ The opencbm xa1541 plugin requires a few more steps until they are usable:
  .
  - First, you will need to install the opencbm-modules-source package and
    compile the binary module (preferably through make-kpkg).
@@ -18,6 +18,6 @@ _Description: Kernel module configuration
  /etc/modutils/opencbm.
    Don't forget to run update-modules if you make any changes.
  .
- See /usr/share/doc/opencbm/README.gz and
+ See /usr/share/doc/opencbm-xa1541/README.gz and
  /usr/share/doc/opencbm-modules-source/README.Debian for more detailed
  instructions

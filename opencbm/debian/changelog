@@ -1,8 +1,8 @@
-opencbm (0.4.0-2) unstable; urgency=low
+opencbm (0.4.99.93-1) unstable; urgency=low
 
-  * fixing small issues with the older
+  * Update.
 
- -- Spiro Trikaliotis <cbm4in@trikaliotis.net>  Mon, 18 Dec 2011 19:31:44 +0200
+ -- Spiro Trikaliotis <cbm4in@trikaliotis.net>  Thu, 21 Dec 2011 23:04:44 +0100
 cbm4linux (0.4.0-1) unstable; urgency=low
 
   * new version

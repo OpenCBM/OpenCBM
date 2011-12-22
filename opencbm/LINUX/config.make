@@ -122,7 +122,7 @@ SONAME = -install_name $(PREFIX)/lib/
 
 else
 
-OPENCBM_CONFIG_PATH = /etc
+OPENCBM_CONFIG_PATH = $(DESTDIR)/etc
 
 endif
 

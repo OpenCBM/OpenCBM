@@ -49,8 +49,10 @@ install-lib:
 # update lib
 update-libcache:
 ifeq "$(OS)" "Linux"
-	$(shell if test -z "`grep $(LIBDIR) /etc/ld.so.conf`"; then echo $(LIBDIR) >> /etc/ld.so.conf; fi)
+	$(shell if test -z "`grep $(LIBDIR) $(DESTDIR)/etc/ld.so.conf`"; then echo $(LIBDIR) >> $(DESTDIR)/etc/ld.so.conf; fi)
+ifeq "$(DESTDIR)" ""
 	$(LDCONFIG)
+endif
 endif
 
 # uninstall lib
