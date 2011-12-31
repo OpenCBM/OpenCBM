@@ -41,7 +41,7 @@ do_install() {
 
 	get_location_etc_conf "$LOCATION_ETC"
 
-	cp -p "$FILE_SOURCE" "$LOCATION_ETC_CONF/$FILE_DESTINATION"
+	install -D -o root -g root -m 644 "$FILE_SOURCE" "$LOCATION_ETC_CONF/$FILE_DESTINATION"
 
 	do_rebuild $LOCATION_ETC
 }

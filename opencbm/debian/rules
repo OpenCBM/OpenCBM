@@ -37,7 +37,7 @@ configure-stamp:
 
 
 build: build-stamp
-build-stamp: configure-stamp 
+build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
@@ -98,8 +98,11 @@ install: build
 		debian/tmp/usr/lib/opencbm
 	install -D -o root -g root -m 755 debian/install_plugin.sh \
 		debian/tmp/usr/lib/opencbm
-	
+
 	install -D -o root -g root -m 644 ../xu1541/udev/45-opencbm.rules \
+		debian/tmp/etc/udev/rules.d
+
+	install -D -o root -g root -m 644 ../xum1541/udev/45-opencbm-usb.rules \
 		debian/tmp/etc/udev/rules.d
 
 	mkdir -p debian/tmp/usr/src/modules/opencbm/debian
@@ -134,7 +137,7 @@ binary-arch: build install
 	dh_installman
 	dh_installinfo
 #	dh_undocumented
-	dh_installchangelogs 
+	dh_installchangelogs
 	dh_link
 	dh_strip
 	dh_compress
