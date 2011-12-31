@@ -518,7 +518,7 @@ static ssize_t cbm_write(struct file *f, const char *buf, size_t cnt,
 	return cbm_raw_write(buf, cnt, 0, 0);
 }
 
-static int cbm_unlocked_ioctl(struct file *f,
+static long cbm_unlocked_ioctl(struct file *f,
 		     unsigned int cmd, unsigned long arg)
 {
 	/* linux parallel burst */
