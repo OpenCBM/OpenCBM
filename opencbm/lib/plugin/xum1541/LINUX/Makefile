@@ -8,7 +8,7 @@ include ${RELATIVEPATH}LINUX/config.make
 PLUGIN_NAME = xum1541
 LIBNAME = libopencbm-${PLUGIN_NAME}
 SRCS    = archlib.c xum1541.c s1_s2_pp.c parburst.c
-LIBS    = -L$(RELATIVEPATH)/libmisc -lmisc -ldl
+LIBS    = -L$(RELATIVEPATH)/libmisc -lmisc
 
 CFLAGS += $(LIBUSB_CFLAGS)
 CFLAGS += -I$(RELATIVEPATH)/include/LINUX/ -I$(RELATIVEPATH)/include/ -I../../ -I $(XUM1541DIR) -I$(RELATIVEPATH)/libmisc

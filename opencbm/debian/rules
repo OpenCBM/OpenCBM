@@ -6,7 +6,8 @@
 #export DH_VERBOSE=1
 
 # This is the debhelper compatibility version to use.
-export DH_COMPAT=3
+# Note: debian/compat is the place to change this!
+#export DH_COMPAT=7
 
 
 
@@ -60,7 +61,7 @@ clean:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	mkdir -p $(CURDIR)/debian/tmp/etc $(CURDIR)/debian/tmp/etc/udev/rules.d
