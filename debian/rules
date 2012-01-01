@@ -42,8 +42,8 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) -f LINUX/Makefile SUBDIRS=$(subdirs) all
-	$(MAKE) -C addon -f LINUX/Makefile all
+	$(MAKE) -C opencbm -f LINUX/Makefile SUBDIRS=$(subdirs) all
+	$(MAKE) -C opencbm/addon -f LINUX/Makefile all
 
 	touch build-stamp
 
@@ -53,7 +53,7 @@ clean:
 	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) -f LINUX/Makefile SUBDIRS=$(subdirs) clean
+	-$(MAKE) -C opencbm -f LINUX/Makefile SUBDIRS=$(subdirs) clean
 	-rm -f docs/*.dvi
 
 	dh_clean
@@ -69,7 +69,7 @@ install: build
 
 	# Add here commands to install the package into debian/tmp
 
-	$(MAKE) -f LINUX/Makefile \
+	$(MAKE) -C opencbm -f LINUX/Makefile \
 		SUBDIRS=$(subdirs) \
 		DESTDIR=$(CURDIR)/debian/tmp \
 		PREFIX=/usr \
@@ -78,7 +78,7 @@ install: build
 		INFODIR=/usr/share/info \
 		install-all
 
-	$(MAKE) -C addon -f LINUX/Makefile \
+	$(MAKE) -C opencbm/addon -f LINUX/Makefile \
 		DESTDIR=$(CURDIR)/debian/tmp \
 		PREFIX=/usr \
 		PLUGINDIR=/usr/lib/opencbm/plugin \
@@ -95,22 +95,22 @@ install: build
 	install -D -o root -g root -m 644 debian/opencbm.modutils \
 		debian/tmp/etc/modutils/opencbm
 
-	install -D -o root -g root -m 755 LINUX/plugin_helper_tools \
+	install -D -o root -g root -m 755 opencbm/LINUX/plugin_helper_tools \
 		debian/tmp/usr/lib/opencbm
 	install -D -o root -g root -m 755 debian/install_plugin.sh \
 		debian/tmp/usr/lib/opencbm
 
-	install -D -o root -g root -m 644 ../xu1541/udev/45-opencbm.rules \
+	install -D -o root -g root -m 644 xu1541/udev/45-opencbm.rules \
 		debian/tmp/etc/udev/rules.d
 
-	install -D -o root -g root -m 644 ../xum1541/udev/45-opencbm-usb.rules \
+	install -D -o root -g root -m 644 xum1541/udev/45-opencbm-usb.rules \
 		debian/tmp/etc/udev/rules.d
 
 	mkdir -p debian/tmp/usr/src/modules/opencbm/debian
 	for f in debian/copyright debian/changelog debian/*.MODULE; \
 		do cp $$f debian/tmp/usr/src/modules/opencbm/`echo $$f | sed 's/\\.MODULE$$//'`; \
 	done
-	cp sys/linux/cbm_module.c include/LINUX/cbm_module.h debian/tmp/usr/src/modules/opencbm/
+	cp opencbm/sys/linux/cbm_module.c opencbm/include/LINUX/cbm_module.h debian/tmp/usr/src/modules/opencbm/
 	cp debian/Makefile.module debian/tmp/usr/src/modules/opencbm/Makefile
 	tar -czf debian/tmp/usr/src/opencbm.tar.gz -C debian/tmp/usr/src modules/
 
