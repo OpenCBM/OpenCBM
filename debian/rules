@@ -86,10 +86,6 @@ install: build
 		INFODIR=/usr/share/info \
 		install
 
-#	install -D -o root -g root -m 644 debian/devfs.conf \
-#		debian/tmp/etc/devfs/conf.d/opencbm
-#	install -D -o root -g root -m 644 debian/devfs.devices \
-#		debian/tmp/etc/devfs/devices.d/opencbm
 	install -D -o root -g root -m 644 debian/opencbm-modules-source.conf.h \
 		debian/tmp/etc/opencbm/opencbm-modules-source.conf.h
 	install -D -o root -g root -m 644 debian/opencbm.modutils \
