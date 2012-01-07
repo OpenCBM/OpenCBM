@@ -602,7 +602,7 @@ SpdMask	.byte $0,$20,$40,$60
 	; relative to the speed zone before
 	; as carry is alway set when this add is performed,
 	; we subtract 1 from every value
-SpdADD	.byte -3-1, -5-1,9-1,0-1
+SpdADD	.byte <(-3-1), <(-5-1),9-1,<(0-1)
 
 	; the tracks at which each zone starts
 SpdTrk	.byte 31, 25, 18, 1

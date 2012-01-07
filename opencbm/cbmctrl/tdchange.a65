@@ -148,7 +148,7 @@ PulseLoop:	ldy PulseDelay		;Bright LED phase, delay with busy
 WaitBright:	iny			; loop
 		bne WaitBright
 		lda DriveCtrlPort	;Switch drive LED off
-		and #~drDriveLED
+		and #<(~drDriveLED)
 		sta DriveCtrlPort
 		ldy PulseDelay		;Dark LED phase, delay with busy loop
 WaitDark:	dey			; of inverted length
@@ -166,7 +166,7 @@ ChangeDelay:	lda PulseDelay		;Change overall LED brightness, by
 		lda MotorOffDelay	;Skip if drive motor switch off delay
 		bne DecMotorDelay	; is not over yet
 		lda DriveCtrlPort	;Switch drive motor off
-		and #~drDriveMotor
+		and #<(~drDriveMotor)
 		sta DriveCtrlPort
 		.byte mcBIT_Abs		;Hide next instruction
 DecMotorDelay:	dec MotorOffDelay	;Decrease drive motor off delay
