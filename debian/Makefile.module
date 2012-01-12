@@ -1,7 +1,4 @@
-EXTRA_CFLAGS := -include /etc/opencbm/opencbm-modules-source.conf.h
+EXTRA_CFLAGS := -include /etc/opencbm/opencbm-xa1541-modules-source.conf.h
 obj-m 	     := cbm.o
 cbm-objs     := cbm_module.o
 
-# for 2.2/2.4:
-modules:
-	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c -o $(obj-m) cbm_module.c

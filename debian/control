@@ -16,7 +16,7 @@ Package: opencbm-xa1541
 Architecture: i386 amd64
 Depends: ${shlibs:Depends}, debconf (>= 0.5.00), opencbm
 Provides: opencbm-plugin
-Recommends: opencbm-modules-source
+Recommends: opencbm-xa1541-modules-source
 Description: Commodore serial IEC bus utilities
  This package contains the XM1541 and XA1541 plugin.
 
@@ -51,7 +51,7 @@ Recommends: opencbm
 Description: Commodore serial IEC bus client library
  Support library for the opencbm utilities.
 
-Package: opencbm-modules-source
+Package: opencbm-xa1541-modules-source
 Architecture: i386 amd64
 Section: misc
 Pre-Depends: perl
@@ -63,12 +63,12 @@ Description: Kernel module source for the CBM module
 
 Package: cbm4linux
 Architecture: any
-Depends: opencbm
+Depends: opencbm-xa1541
 Description: Transitional package to ease upgrades from previous version.
  This package can be removed after an upgrade.
 
 Package: cbm4linux-modules-source
 Architecture: any
-Depends: opencbm-modules-source
+Depends: opencbm-xa1541-modules-source
 Description: Transitional package to ease upgrades from previous version.
  This package can be removed after an upgrade.

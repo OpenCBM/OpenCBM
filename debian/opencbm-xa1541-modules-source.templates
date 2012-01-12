@@ -1,4 +1,4 @@
-Template: opencbm-modules-source/direct_port
+Template: opencbm-xa1541-modules-source/direct_port
 Type: boolean
 Default: false
 _Description: Use direct parallel port access?

@@ -14,12 +14,17 @@
 # Uncomment this to turn on verbose mode. 
 #export DH_VERBOSE=1
 
-# This is the debhelper compatibility version to use.
-export DH_COMPAT=3
-
 REV=$(shell expr $(KDREV) : '[0-9]*:\(.*\)' 2>/dev/null)
 ifeq ($(REV),)
 REV=$(KDREV)
+endif
+
+ifeq ($(KVERS),)
+	KVERS=$(shell uname -r)
+endif
+
+ifeq ($(KSRC),)
+	KSRC=/lib/modules/$(KVERS)/build
 endif
 
 ifneq (,$(findstring 2.4.,$(KVERS)))
@@ -33,7 +38,7 @@ PKG_VERSION=$(EPOCH)$(VERSION)+$(REV)
 
 VERSION=$(shell dpkg-parsechangelog | grep ^Version: | cut -d ' ' -f 2)
 
-CHFILE=$(KSRC)/../opencbm-module-$(KVERS)_$(PKG_VERSION)_$(ARCH).changes
+CHFILE=$(KSRC)/../opencbm-xa1541-module-$(KVERS)_$(PKG_VERSION)_$(ARCH).changes
 
 # This target verifies that we've got the needed variables passed to us.
 # If the user is using make-kpkg (like he should), it won't be a problem.
@@ -65,7 +70,8 @@ clean:
 		mv -f debian/control.backup debian/control; \
 	fi
 
-	rm -f *.ko *.o cbm.mod.* build-stamp
+	-make -C $(KSRC) SUBDIRS=$(PWD) clean
+#	rm -f *.ko *.o cbm.mod.* build-stamp
 
 # This target builds the kernel module.
 build: build-stamp
@@ -79,7 +85,7 @@ build-stamp: check clean
 install:
 	dh_testdir
 	dh_testroot
-	install -m 644 -D $(MODNAME) debian/opencbm-module-$(KVERS)/lib/modules/$(KVERS)/misc/$(MODNAME)
+	install -m 644 -D $(MODNAME) debian/opencbm-xa1541-module-$(KVERS)/lib/modules/$(KVERS)/misc/$(MODNAME)
 
 # To conform with Debian policy.
 binary: binary-arch binary-indep
@@ -103,7 +109,7 @@ binary-arch: check build install
 	dh_compress
 	dh_installdeb
 	dh_md5sums
-	dh_builddeb --destdir=$(KSRC)/..
+	dh_builddeb
 
 # No architecture-independent files to build.
 binary-indep:

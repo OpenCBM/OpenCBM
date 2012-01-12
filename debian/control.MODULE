@@ -1,12 +1,12 @@
 Source: opencbm
 Section: misc
 Priority: extra
-Build-Depends: debhelper (>= 3.0.0)
-Maintainer: Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+Build-Depends: debhelper (>= 4.1.16)
+Maintainer: Spiro Trikaliotis <spiro.trikaliotis@gmx.de>
 Standards-Version: 3.7.2.1
 
-Package: opencbm-module-KERNEL_VERSION
-Provides: opencbm-module
+Package: opencbm-xa1541-module-KERNEL_VERSION
+Provides: opencbm-xa1541-module
 Architecture: i386
 Section: misc
 Description: Driver module for the Commodore serial IEC bus

@@ -6,8 +6,8 @@ set -e
 . /usr/share/debconf/confmodule
 
 if [ "$1" = "configure" ]; then
-        cfg=/etc/opencbm/opencbm-modules-source.conf.h
-	db_get opencbm-modules-source/direct_port
+        cfg=/etc/opencbm/opencbm-xa1541-modules-source.conf.h
+	db_get opencbm-xa1541-modules-source/direct_port
 	if $RET; then
 		perl -p -i -e 's/^#.*(DIRECT_PORT_ACCESS).*$/#define $1/' $cfg
 	else
