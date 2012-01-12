@@ -7,9 +7,6 @@ set -e
 
 #if [ "$1" = "configure" ]; then
 #
-#	# from lirc:
-#	[ -x /usr/sbin/update-devfsd ] && /usr/sbin/update-devfsd >&2
-#
 #	db_get opencbm/install_device
 #	if $RET; then
 #		if [ ! -e /dev/cbm ]; then

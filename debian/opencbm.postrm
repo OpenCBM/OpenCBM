@@ -8,8 +8,6 @@ set -e
 #DEBHELPER#
 
 if [ "$1" = "purge" ]; then
-	# from lirc:
-	[ -x /usr/sbin/update-devfsd ] && /usr/sbin/update-devfsd >&2
 
 	[ -e /etc/opencbm.conf.d/00opencbm.conf ] && rm /etc/opencbm.conf.d/00opencbm.conf
 	[ -e /etc/opencbm.conf ] && rm /etc/opencbm.conf
