@@ -21,6 +21,7 @@
 #include "configuration.h"
 #include "libmisc.h"
 
+#include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 
@@ -44,5 +45,9 @@
 const char *
 configuration_get_default_filename(void)
 {
+    char* opencbm_home = getenv("OPENCBM_HOME");
+    if (opencbm_home != NULL) {
+      return cbmlibmisc_strcat(opencbm_home, OPENCBM_CONFIG_FILE);
+    }
     return cbmlibmisc_strdup(OPENCBM_DEFAULT_CONFIGURATION_FILE_NAME);
 }
