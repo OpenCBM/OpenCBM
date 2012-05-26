@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 get_location_etc_conf() {
 	LOCATION_ETC_CONF="$1/opencbm.conf.d"
@@ -41,7 +41,13 @@ do_install() {
 
 	get_location_etc_conf "$LOCATION_ETC"
 
-	install -D -o root -g root -m 644 "$FILE_SOURCE" "$LOCATION_ETC_CONF/$FILE_DESTINATION"
+	if test $(id -u) -eq 0; then
+		install -d -o root -g root -m 755 "$LOCATION_ETC_CONF"
+		install -o root -g root -m 644 "$FILE_SOURCE" "$LOCATION_ETC_CONF/$FILE_DESTINATION"
+	else
+		install -d -m 755 "$LOCATION_ETC_CONF"
+		install -m 644 "$FILE_SOURCE" "$LOCATION_ETC_CONF/$FILE_DESTINATION"
+	fi
 
 	do_rebuild $LOCATION_ETC
 }
