@@ -18,7 +18,10 @@ mrproper: clean
 ifneq "$(words $(INC))" "0"
 	rm -f $(INC)
 endif
-	rm -f $(EXTRA_A65_INC) *~ LINUX/*~
+ifneq "$(words $(EXTRA_A65_INC))" "0"
+	rm -f $(EXTRA_A65_INC)
+endif
+	rm -f *~ LINUX/*~
 
 install-files: $(PROG)
 	install -m 755 -s $(PROG) $(DESTDIR)$(BINDIR)

@@ -36,8 +36,13 @@ ifeq "$(OS)" "Darwin"
 PLUGINS=plugin-xu1541 plugin-xum1541
 INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xum1541
 else
+ifeq "$(OS)" "FreeBSD"
+PLUGINS=plugin-xu1541 plugin-xum1541
+INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xum1541
+else
 PLUGINS=plugin-xu1541 plugin-xum1541 plugin-xa1541
 INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xum1541 install-plugin-xa1541
+endif
 endif
 
 .PHONY: all opencbm clean mrproper dist doc install install-doc uninstall dev install-files install-files-doc all-doc plugin-xu1541 plugin-xa1541 plugin install-plugin install-plugin-xu1541 install-plugin-xa1541

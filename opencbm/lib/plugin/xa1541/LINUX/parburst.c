@@ -24,7 +24,11 @@ static char *rcsid =
 #include "opencbm.h"
 #include "cbm_module.h"
 
+#if defined(__linux__)
 #include <linux/errno.h>  /* error codes */
+#else
+#include <errno.h>  /* error codes */
+#endif
 
 
 /*linux functions needed by parallel burst */

@@ -102,6 +102,11 @@ KERNEL_INCLUDE_CONFIG = ${shell for c in ${KERNEL_SOURCE}/include/linux/autoconf
 KERNEL_FLAGS = ${KERNEL_DEFINE}
 
 #
+#
+#
+OPENCBM_CONFIG_PATH = $(DESTDIR)/etc
+
+#
 # Mac specific modifications
 #
 ifeq "$(OS)" "Darwin"
@@ -115,16 +120,22 @@ LIBUSB_CFLAGS  = $(shell $(LIBUSB_CONFIG) --cflags)
 LIBUSB_LDFLAGS = $(shell $(LIBUSB_CONFIG) --libs)
 
 OD_FLAGS  = -txC -v -An
-CFLAGS   += -DOPENCBM_MAC
 SHLIB_EXT = dylib
 SHLIB_SWITCH = -dynamiclib -compatibility_version $(MAJ).$(MIN) -current_version $(MAJ).$(MIN).${OPENCBM_RELEASE}
 SONAME = -install_name $(PREFIX)/lib/
 
-else
-
-OPENCBM_CONFIG_PATH = $(DESTDIR)/etc
-
 endif
+
+#
+# FreeBSD specific modifications
+#
+ifeq "$(OS)" "FreeBSD"
+OD_FLAGS  = -txC -v -An
+endif
+
+#
+#
+#
 
 OPENCBM_CONFIG_FILE = $(OPENCBM_CONFIG_PATH)/opencbm.conf
 
@@ -134,7 +145,9 @@ OPENCBM_CONFIG_FILE = $(OPENCBM_CONFIG_PATH)/opencbm.conf
 LINUXDOCTXT = ${shell for c in linuxdoc sgml2txt; do test ! -z `which $$c` && test -f `which $$c` && echo $$c; done | head -n 1}
 ifeq "${LINUXDOCTXT}" ""
 ifneq "$(OS)" "Darwin"
+ifneq "$(OS)" "FreeBSD"
   $(error You must have linuxdoc or sgmltools installed. Check config.make)
+endif
 endif
 else
  ifeq "${LINUXDOCTXT}" "linuxdoc"

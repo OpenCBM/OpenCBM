@@ -15,6 +15,10 @@ ifeq "$(OS)" "Darwin"
 SRCS += error.c
 endif
 
+ifeq "$(OS)" "FreeBSD"
+SRCS += error.c
+endif
+
 OBJS    = $(SRCS:.c=.lo)
 
 all: $(LIB)

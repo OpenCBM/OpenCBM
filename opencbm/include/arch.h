@@ -52,7 +52,7 @@ typedef unsigned long ULONG_PTR;
 # include <errno.h>
 
 /* error.h is only available on Linux */
-#ifndef OPENCBM_MAC
+#ifdef __linux__
 # include <error.h>
 #endif
 
@@ -78,7 +78,7 @@ typedef unsigned long ULONG_PTR;
  extern void arch_error(int AUnused, unsigned int ErrorCode, const char *format, ...);
  extern char *arch_strerror(unsigned int ErrorCode);
 #else
-#ifdef OPENCBM_MAC
+#if defined(__APPLE__) || defined(__FreeBSD__)
  extern void arch_error(int AUnused, unsigned int ErrorCode, const char *format, ...);
 #else
 # define arch_error error

@@ -13,8 +13,14 @@
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H
 
+#if defined(__linux__)
 #include <linux/ioctl.h>
 #include <linux/types.h>
+#else
+#if defined(__FreeBSD__)
+#include <sys/ioctl.h>
+#endif
+#endif
 
 #define CBMCTRL_BASE        0xcb
 

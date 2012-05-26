@@ -15,7 +15,10 @@ LIBNAME = libopencbm
 SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c \
 	  LINUX/configuration_name.c
 
-LIBS = $(LIBARCH)/libarch.a $(LIBMISC)/libmisc.a -ldl
+LIBS = $(LIBARCH)/libarch.a $(LIBMISC)/libmisc.a
+ifneq "$(OS)" "FreeBSD"
+LIBS += -ldl
+endif
 
 all: build-lib
 
