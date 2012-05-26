@@ -28,6 +28,7 @@ mrproper: clean
 install-files: all
 	install -m 644 `[ -f cbm.ko ] && echo cbm.ko || echo cbm.o` $(DESTDIR)$(MODDIR)
 ifneq ($(UDEV_RULES),)
+	install -d -m 755 $(DESTDIR)$(UDEV_RULES)
 	install -m 644 45-opencbm-parallel.rules $(DESTDIR)$(UDEV_RULES)
 endif
 

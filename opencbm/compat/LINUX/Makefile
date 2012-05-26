@@ -17,13 +17,14 @@ clean:
 mrproper: clean
 
 install-files:
-	install -m 644 $(HDRS) $(INCDIR)
-	install -m 644 $(LIBS) $(LIBDIR)
+	install -m 644 $(HDRS) ${DESTDIR}$(INCDIR)
+	install -m 644 $(LIBS) ${DESTDIR}$(LIBDIR)
 
 install: install-files
 
 uninstall:
-	rm -f $(INCDIR)/$(HDRS) $(LIBDIR)/$(LIBS)
+	-cd $(DESTDIR)$(INCDIR) && rm -f $(HDRS)
+	-cd $(DESTDIR)$(LIBDIR) && rm -f $(LIBS)
 
 .c.o:
 	$(CC) $(LIB_CFLAGS) -DCBM4LINUX_OLDAPI -c $< -o $@
