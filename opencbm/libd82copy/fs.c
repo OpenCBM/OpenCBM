@@ -21,7 +21,7 @@ static char *rcsid =
 
 #include "arch.h"
 
-#ifndef _OFF_T
+#if ! (defined(_OFF_T) || defined(_OFF_T_DECLARED))
 typedef long off_t ;
 #endif
 
