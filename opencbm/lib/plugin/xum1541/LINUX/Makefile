@@ -9,10 +9,11 @@ PLUGIN_NAME = xum1541
 LIBNAME = libopencbm-${PLUGIN_NAME}
 SRCS    = archlib.c xum1541.c s1_s2_pp.c parburst.c
 LIBS    = -L$(RELATIVEPATH)/libmisc -lmisc
+LIBS   += $(LIBUSB_LIBS)
 
 CFLAGS += $(LIBUSB_CFLAGS)
 CFLAGS += -I$(RELATIVEPATH)/include/LINUX/ -I$(RELATIVEPATH)/include/ -I../../ -I $(XUM1541DIR) -I$(RELATIVEPATH)/libmisc
-LDFLAGS += $(LIBUSB_LDFLAGS)
+#LDFLAGS =
 
 all: build-lib
 

@@ -50,7 +50,8 @@ XUM1541DIR  = $(RELATIVEPATH)/../xum1541
 # Where to find libusb (libusb.sf.net)
 #
 LIBUSB_CFLAGS  = -I/usr/include
-LIBUSB_LDFLAGS = -L/usr/lib -lusb
+LIBUSB_LDFLAGS =
+LIBUSB_LIBS    = -L/usr/lib -lusb
 
 #
 # define os name
@@ -117,7 +118,8 @@ OPENCBM_CONFIG_PATH = $(PREFIX)/etc
 # use MacPort's libusb-legacy for now
 LIBUSB_CONFIG  = /opt/local/bin/libusb-legacy-config
 LIBUSB_CFLAGS  = $(shell $(LIBUSB_CONFIG) --cflags)
-LIBUSB_LDFLAGS = $(shell $(LIBUSB_CONFIG) --libs)
+LIBUSB_LDFLAGS =
+LIBUSB_LIBS    = $(shell $(LIBUSB_CONFIG) --libs)
 
 OD_FLAGS  = -txC -v -An
 SHLIB_EXT = dylib
