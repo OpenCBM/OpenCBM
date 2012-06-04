@@ -20,6 +20,7 @@
 
 #include "getpluginaddress.h"
 
+#include <stdio.h>
 #include <dlfcn.h>
 
 /*! \brief @@@@@ \todo document
@@ -31,7 +32,13 @@
 SHARED_OBJECT_HANDLE 
 plugin_load(const char * name)
 {
-    return dlopen(name, RTLD_NOW);
+    void* ret;
+    char * error;
+    ret = dlopen(name, RTLD_NOW);
+    error = dlerror();
+    if (error)
+        fprintf(stderr,"%s\n",error);
+    return ret;
 }
 
 /*! \brief @@@@@ \todo document
