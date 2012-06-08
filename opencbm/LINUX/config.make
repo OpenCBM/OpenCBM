@@ -112,7 +112,7 @@ OPENCBM_CONFIG_PATH = $(DESTDIR)/etc
 #
 ifeq "$(OS)" "Darwin"
 
-PREFIX = /opt/opencbm
+#PREFIX = /opt/opencbm
 OPENCBM_CONFIG_PATH = $(PREFIX)/etc
 
 # use MacPort's libusb-legacy for now
