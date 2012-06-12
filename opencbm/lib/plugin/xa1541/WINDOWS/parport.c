@@ -4,7 +4,7 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004, 2008 Spiro Trikaliotis
+ *  Copyright 2004, 2008, 2012 Spiro Trikaliotis
  *
  */
 
@@ -38,6 +38,7 @@
 
 #include "debug.h"
 
+#include "libmisc.h"
 
 /*! \internal \brief Output the error message for the last error
 */
@@ -48,8 +49,8 @@ output_error(void)
 
     if (error)
     {
-        DBG_ERROR((DBG_PREFIX "error: (0x%x) '%s'", error, FormatErrorMessage(error)));
-        printf("error: (0x%x) '%s'\n", error, FormatErrorMessage(error));
+        DBG_ERROR((DBG_PREFIX "error: (0x%x) '%s'", error, cbmlibmisc_format_error_message(error)));
+        printf("error: (0x%x) '%s'\n", error, cbmlibmisc_format_error_message(error));
     }
 }
 

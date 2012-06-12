@@ -5,7 +5,7 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005,2007 Spiro Trikaliotis
+ *  Copyright 2001-2005,2007,2012 Spiro Trikaliotis
  *
 */
 
@@ -20,6 +20,11 @@
 
 #include "getpluginaddress.h"
 
+#include "libmisc.h"
+
+#include <windows.h>
+#include <stdio.h>
+
 /*! \brief @@@@@ \todo document
 
  \param name
@@ -29,7 +34,17 @@
 SHARED_OBJECT_HANDLE
 plugin_load(const char * name)
 {
-    return LoadLibrary(name);
+    SHARED_OBJECT_HANDLE ModuleHandle = LoadLibrary(name);
+
+    if (ModuleHandle == NULL) {
+        DWORD Error = GetLastError();
+
+        char * ErrorMessage = cbmlibmisc_format_error_message(Error);
+
+        fprintf(stderr, "Error loading plugin '%s': %s (%u)\n", name, ErrorMessage, Error);
+    }
+
+    return ModuleHandle;
 }
 
 /*! \brief @@@@@ \todo document

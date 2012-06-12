@@ -93,6 +93,10 @@ SOURCE=.\dynlibusb.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\formaterrormessage.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\getpluginaddress.c
 # End Source File
 # Begin Source File

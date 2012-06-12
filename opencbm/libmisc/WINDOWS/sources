@@ -8,6 +8,7 @@ INCLUDES=../;../../include;../../include/WINDOWS
 SOURCES= \
 	../configuration.c \
 	dynlibusb.c        \
+	formaterrormessage.c \
 	getpluginaddress.c \
 	perfeval.c \
 	registry.c \

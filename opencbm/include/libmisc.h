@@ -4,7 +4,7 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2007-2008 Spiro Trikaliotis
+ *  Copyright 2007-2008, 2012 Spiro Trikaliotis
  */
 
 /*! **************************************************************
@@ -28,5 +28,9 @@ extern char * cbmlibmisc_strndup(const char * const OldString, size_t Length);
 
 extern void   cbmlibmisc_strfree(const char * String);
 extern char * cbmlibmisc_strcat(const char * first, const char * second);
+
+/* Windows only: */
+extern char * cbmlibmisc_format_error_message(unsigned int ErrorNumber);
+
 
 #endif /* #ifndef CBM_LIBMISC_H */

@@ -4,7 +4,7 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004, 2008 Spiro Trikaliotis
+ *  Copyright 2004, 2008, 2012 Spiro Trikaliotis
  *
  */
 
@@ -37,6 +37,8 @@
 #define DBG_PROGNAME "INSTCBM.EXE"
 
 #include "debug.h"
+
+#include "libmisc.h"
 
 static BOOL CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer);
 static BOOL CbmCheckCorrectInstallation(BOOL HaveAdminRights);
@@ -189,7 +191,7 @@ ReadDriverData(char *DriverPath, ULONG DriverPathLen, DWORD *StartMode, DWORD *L
         if (regReturn != ERROR_SUCCESS)
         {
             DBG_ERROR((DBG_PREFIX "No HKLM\\" CBM_REGKEY_SERVICE "\\ImagePath"
-                " value: %s", FormatErrorMessage(regReturn)));
+                " value: %s", cbmlibmisc_format_error_message(regReturn)));
 
             break;
         }

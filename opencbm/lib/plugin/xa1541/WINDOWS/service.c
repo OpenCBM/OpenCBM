@@ -4,7 +4,7 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004, 2008 Spiro Trikaliotis
+ *  Copyright 2004, 2008, 2012 Spiro Trikaliotis
  *
  */
 
@@ -25,6 +25,8 @@
 // #include "instcbm.h"
 
 #include "i_opencbm.h"
+
+#include "libmisc.h"
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
@@ -219,9 +221,9 @@ CreateDefaultRegistryKeys(IN ULONG DefaultLpt,
         DWORD error = GetLastError();
 
         DBG_WARN((DBG_PREFIX "COULD NOT OPEN HKLM\\" CBM_REGKEY_SERVICE " (0x%x) '%s'",
-            error, FormatErrorMessage(error)));
+            error, cbmlibmisc_format_error_message(error)));
         printf("WARNING: COULD NOT OPEN HKLM\\" CBM_REGKEY_SERVICE " (0x%x) '%s'\n",
-            error, FormatErrorMessage(error));
+            error, cbmlibmisc_format_error_message(error));
     }
     else
     {
@@ -323,15 +325,15 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
                 //  This is not an error, so process it differently from the others.
 
                 DBG_WARN((DBG_PREFIX "CreateService (0x%02x) '%s'",
-                    lasterror, FormatErrorMessage(lasterror)));
+                    lasterror, cbmlibmisc_format_error_message(lasterror)));
                 printf("WARNING: opencbm is already installed!\n");
             }
             else
             {
                 DBG_ERROR((DBG_PREFIX "CreateService (0x%02x) '%s'",
-                    lasterror, FormatErrorMessage(lasterror)));
+                    lasterror, cbmlibmisc_format_error_message(lasterror)));
                 printf("ERROR: CreateService (0x%02x) '%s'\n",
-                    lasterror, FormatErrorMessage(lasterror));
+                    lasterror, cbmlibmisc_format_error_message(lasterror));
 
                 error = TRUE;
             }
@@ -455,8 +457,8 @@ CbmRemove(IN LPCTSTR DriverName)
         {
             DWORD error = GetLastError();
 
-            DBG_ERROR((DBG_PREFIX "OpenService (0x%02x) '%s'", error, FormatErrorMessage(error)));
-            printf("ERROR: OpenService (0x%02x) '%s'\n", error, FormatErrorMessage(error));
+            DBG_ERROR((DBG_PREFIX "OpenService (0x%02x) '%s'", error, cbmlibmisc_format_error_message(error)));
+            printf("ERROR: OpenService (0x%02x) '%s'\n", error, cbmlibmisc_format_error_message(error));
             FUNC_LEAVE_BOOL(FALSE);
         }
 
@@ -471,8 +473,8 @@ CbmRemove(IN LPCTSTR DriverName)
         {
             DWORD error = GetLastError();
 
-            DBG_ERROR((DBG_PREFIX "DeleteService (0x%02x) '%s'", error, FormatErrorMessage(error)));
-            printf("ERROR: DeleteService (0x%02x) '%s'\n", error, FormatErrorMessage(error));
+            DBG_ERROR((DBG_PREFIX "DeleteService (0x%02x) '%s'", error, cbmlibmisc_format_error_message(error)));
+            printf("ERROR: DeleteService (0x%02x) '%s'\n", error, cbmlibmisc_format_error_message(error));
         }
 
         CloseServiceHandle(scService);
@@ -530,37 +532,4 @@ CbmCheckPresence(IN LPCTSTR DriverName)
     }
 
     FUNC_LEAVE_BOOL(scService ? TRUE : FALSE);
-}
-
-/*! \brief Format a returned error code into a string
-
- This function formats a returned error code into a string.
-
- \param Error
-   The error number to be formatted.
-
- \return 
-   The string describing the error given by the error code.
-*/
-PCHAR
-FormatErrorMessage(DWORD Error)
-{
-    static char ErrorMessageBuffer[2048];
-    int n;
-
-    // Format the message
-
-    n = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_MAX_WIDTH_MASK,
-        NULL,
-        Error,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-        (LPTSTR) &ErrorMessageBuffer,
-        sizeof(ErrorMessageBuffer)-1,
-        NULL);
-
-    // make sure there is a trailing zero
-
-    ErrorMessageBuffer[n] = 0;
-
-    return ErrorMessageBuffer;
 }
