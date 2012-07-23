@@ -28,24 +28,24 @@ SUBDIRS_PLUGIN_XA1541 = lib/plugin/xa1541 sys/linux/
 SUBDIRS_OPTIONAL = addon nibtools mnib36 cbmrpm41
 
 
-SUBDIRS_PLUGIN          = $(SUBDIRS_PLUGIN_XU1541) $(SUBDIRS_PLUGIN_XA1541) $(SUBDIRS_PLUGIN_XUM1541)
+SUBDIRS_PLUGIN          = $(SUBDIRS_PLUGIN_XUM1541) $(SUBDIRS_PLUGIN_XU1541) $(SUBDIRS_PLUGIN_XA1541)
 
 SUBDIRS_ALL_NON_OPTIONAL= $(SUBDIRS) $(SUBDIRS_DOC) $(SUBDIRS_PLUGIN)
 
 ifeq "$(OS)" "Darwin"
-PLUGINS=plugin-xu1541 plugin-xum1541
-INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xum1541
+PLUGINS=plugin-xum1541 plugin-xu1541
+INSTALL_PLUGINS=install-plugin-xum1541 install-plugin-xu1541
 else
 ifeq "$(OS)" "FreeBSD"
-PLUGINS=plugin-xu1541 plugin-xum1541
-INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xum1541
+PLUGINS=plugin-xum1541 plugin-xu1541
+INSTALL_PLUGINS=install-plugin-xum1541 install-plugin-xu1541
 else
-PLUGINS=plugin-xu1541 plugin-xum1541 plugin-xa1541
-INSTALL_PLUGINS=install-plugin-xu1541 install-plugin-xum1541 install-plugin-xa1541
+PLUGINS=plugin-xum1541 plugin-xu1541 plugin-xa1541
+INSTALL_PLUGINS=install-plugin-xum1541 install-plugin-xu1541 install-plugin-xa1541
 endif
 endif
 
-.PHONY: all opencbm clean mrproper dist doc install install-doc uninstall dev install-files install-files-doc all-doc plugin-xu1541 plugin-xa1541 plugin install-plugin install-plugin-xu1541 install-plugin-xa1541
+.PHONY: all opencbm clean mrproper dist doc install install-doc uninstall dev install-files install-files-doc all-doc plugin-xum1541 plugin-xu1541 plugin-xa1541 plugin install-plugin install-plugin-xum1541 install-plugin-xu1541 install-plugin-xa1541
 
 all: opencbm plugin
 
