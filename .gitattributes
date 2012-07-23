@@ -11,10 +11,13 @@
 *.h text
 
 # Declare files that will always have CRLF line endings on checkout.
+*.rtf text eol=crlf
 *.sln text eol=crlf
 *.dsp text eol=crlf
 *.dsw text eol=crlf
 *.hex text eol=crlf
+*.aps text eol=crlf
+*.aws text eol=crlf
 
 # Denote all files that are truly binary and should not be modified.
 *.png binary
@@ -22,13 +25,30 @@
 *.bmp binary
 *.ico binary
 
+# Archive extensions
 *.tar binary
 *.tgz binary
 *.gz binary
+*.tbz binary
+*.bz binary
+*.bz2 binary
 *.zip binary
 
+# CBM extensions
 *.d64 binary
+*.g64 binary
+*.d71 binary
+*.d80 binary
+*.d81 binary
+*.d82 binary
+*.crt binary
+*.tap binary
+*.t64 binary
+*.lnx binary
+*.prg binary
+*.seq binary
 
+# Windows binary extensions
 *.sys binary
 *.lib binary
 *.dll binary
