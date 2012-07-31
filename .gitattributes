@@ -9,6 +9,31 @@
 # to native line endings on checkout.
 *.c text
 *.h text
+*.C text
+*.CPP text
+*.txt text
+makefile text
+Makefile text
+Makefile.inc text
+*.asm text
+*.a65 text
+*.i65 text
+sources text
+dirs text
+*.rc text
+*.def text
+*.rules text
+*.1 text
+*.make text
+*.sh text
+*.mc text
+*.cat text
+*.inf text
+*.bat text
+*.bat.sample
+
+# Declare files that will always have CRLF line endings on checkout.
+*.patch text eol=lf
 
 # Declare files that will always have CRLF line endings on checkout.
 *.rtf text eol=crlf
@@ -24,6 +49,7 @@
 *.jpg binary
 *.bmp binary
 *.ico binary
+*.gif binary
 
 # Archive extensions
 *.tar binary
