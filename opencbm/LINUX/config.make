@@ -61,14 +61,14 @@ OS = $(shell uname -s)
 #
 # compiler/linker flags. Should be ok.
 #
-ARCH	     = linux
+OS_ARCH     = linux
 
 CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\" -DOPENCBM_CONFIG_FILE=\"$(OPENCBM_CONFIG_FILE)\"
 LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
 SHLIB_EXT    = so
 SHLIB_SWITCH = -shared
-LINK_FLAGS   = -L../lib -L../arch/$(ARCH) -L../libmisc -lopencbm -larch -lmisc
+LINK_FLAGS   = -L../lib -L../arch/$(OS_ARCH) -L../libmisc -lopencbm -larch -lmisc
 SONAME       = -Wl,-soname -Wl,
 CC           = gcc
 AR           = ar

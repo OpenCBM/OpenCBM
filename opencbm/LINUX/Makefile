@@ -7,7 +7,7 @@ CBMDEV   = /dev/cbm
 CBMPERM  = 666
 DEVMAJOR = 10
 DEVMINOR = 177
-SUBDIRS  = include arch/$(ARCH) libmisc lib \
+SUBDIRS  = include arch/$(OS_ARCH) libmisc lib \
 	   libtrans \
            cbmctrl cbmformat cbmforng d64copy cbmcopy \
 	   d82copy \
