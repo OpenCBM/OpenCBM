@@ -97,12 +97,6 @@ endif
 	done
 
 install: install-files
-	@for subdir in $(SUBDIRS); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
-	done
-	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1 ) || true; \
-	done
 
 install-all: install install-plugin
 
