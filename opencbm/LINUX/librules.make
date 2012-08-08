@@ -43,6 +43,10 @@ install-lib:
 	install -m 644 $(LIB) $(DESTDIR)$(LIBDIR)
 	cd $(DESTDIR)$(LIBDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
 
+        # Install the plugin helper tool
+	install -d $(DESTDIR)$(BINDIR)
+	install -m 755 ${RELATIVEPATH}/LINUX/plugin_helper_tools $(DESTDIR)$(BINDIR)/opencbm_plugin_helper_tools
+
 	# mark that there is no default plugin yet.
 	${RELATIVEPATH}/LINUX/plugin_helper_tools setdefaultplugin "${OPENCBM_CONFIG_PATH}" 00opencbm.conf ""
 	
@@ -59,7 +63,7 @@ endif
 uninstall-lib:
 	cd $(DESTDIR)$(LIBDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
 
-	${RELATIVEPATH}/LINUX/plugin_helper_tools uninstall "${OPENCBM_CONFIG_PATH}" 00opencbm.conf
+	$(RELATIVEPATH)/LINUX/plugin_helper_tools uninstall "$(DESTDIR)$(OPENCBM_CONFIG_PATH)" 00opencbm.conf
 
 # install plugin
 install-plugin:
@@ -69,20 +73,20 @@ install-plugin:
 	cd $(DESTDIR)$(PLUGINDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
 
 	@echo "[${PLUGIN_NAME}]" > ${TMPFILE}
-	@echo "location=$(DESTDIR)$(PLUGINDIR)$(SHLIB)" >> ${TMPFILE}
+	@echo "location=$(PLUGINDIR)$(SHLIB)" >> ${TMPFILE}
 	@echo "" >> ${TMPFILE}
-	${RELATIVEPATH}/LINUX/plugin_helper_tools install "${OPENCBM_CONFIG_PATH}" 10${PLUGIN_NAME}.conf ${TMPFILE}
+	$(RELATIVEPATH)/LINUX/plugin_helper_tools install "$(DESTDIR)$(OPENCBM_CONFIG_PATH)" 10${PLUGIN_NAME}.conf ${TMPFILE}
 	@rm ${TMPFILE}
 
 	# set this plugin as default plugin, if there is none yet.
-	${RELATIVEPATH}/LINUX/plugin_helper_tools setdefaultplugin "${OPENCBM_CONFIG_PATH}" 00opencbm.conf ${PLUGIN_NAME}
+	$(RELATIVEPATH)/LINUX/plugin_helper_tools setdefaultplugin "$(DESTDIR)$(OPENCBM_CONFIG_PATH)" 00opencbm.conf $(PLUGIN_NAME)
 
 # uninstall plugin
 uninstall-plugin:
 	-cd $(DESTDIR)$(PLUGINDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
 	-rmdir -p $(DESTDIR)$(PLUGINDIR)
 
-	${RELATIVEPATH}/LINUX/plugin_helper_tools uninstall "${OPENCBM_CONFIG_PATH}" 10${PLUGIN_NAME}.conf
+	$(RELATIVEPATH)/LINUX/plugin_helper_tools uninstall "$(DESTDIR)$(OPENCBM_CONFIG_PATH)" 10$(PLUGIN_NAME).conf
 
 
 # compile rule
