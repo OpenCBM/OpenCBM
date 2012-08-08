@@ -48,7 +48,7 @@ install-lib:
 	install -m 755 ${RELATIVEPATH}/LINUX/plugin_helper_tools $(DESTDIR)$(BINDIR)/opencbm_plugin_helper_tools
 
 	# mark that there is no default plugin yet.
-	${RELATIVEPATH}/LINUX/plugin_helper_tools setdefaultplugin "${OPENCBM_CONFIG_PATH}" 00opencbm.conf ""
+	${RELATIVEPATH}/LINUX/plugin_helper_tools setdefaultplugin "$(DESTDIR)$(OPENCBM_CONFIG_PATH)" 00opencbm.conf ""
 	
 # update lib
 update-libcache:
