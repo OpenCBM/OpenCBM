@@ -1,4 +1,29 @@
 #!/bin/bash
+#
+# opencbm_plugin_helper_tools
+#
+
+OS="$(uname -s)";
+case "${OS}" in
+	"Linux")
+	ROOTGRP="root";
+	;;
+	"FreeBSD")
+	ROOTGRP="wheel";
+	;;
+	"Darwin")
+	ROOTGRP="root";
+	;;
+	*)
+	ROOTGRP="root";
+	;;
+esac
+
+do_help() {
+	echo
+	echo "$0 USAGE:"
+	echo
+}
 
 get_location_etc_conf() {
 	LOCATION_ETC_CONF="$1/opencbm.conf.d"
@@ -6,11 +31,6 @@ get_location_etc_conf() {
 	# generate directory for conf.d if it is not available
 	test -e "$LOCATION_ETC_CONF" || install -d "$LOCATION_ETC_CONF"
 	test -d "$LOCATION_ETC_CONF" || (echo "error: $LOCATION_ETC_CONF exists,"; echo "but it is not a directory! Aborting..."; exit 1)
-}
-
-do_help() {
-	echo $0 usage:
-	echo
 }
 
 do_rebuild() {
@@ -44,8 +64,8 @@ do_install() {
 	get_location_etc_conf "$LOCATION_ETC"
 
 	if test $(id -u) -eq 0; then
-		install -d -o root -g root -m 755 "$LOCATION_ETC_CONF"
-		install -o root -g root -m 644 "$FILE_SOURCE" "$LOCATION_ETC_CONF/$FILE_DESTINATION"
+		install -d -o root -g ${ROOTGRP:-root} -m 755 "$LOCATION_ETC_CONF"
+		install -o root -g ${ROOTGRP:-root} -m 644 "$FILE_SOURCE" "$LOCATION_ETC_CONF/$FILE_DESTINATION"
 	else
 		install -d -m 755 "$LOCATION_ETC_CONF"
 		install -m 644 "$FILE_SOURCE" "$LOCATION_ETC_CONF/$FILE_DESTINATION"
