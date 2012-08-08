@@ -28,9 +28,10 @@ XASS        = cl65
 
 
 #
-# destination directories
+# Default destination directories
 #
 PREFIX      = /usr/local
+ETCDIR      = $(PREFIX)/etc
 BINDIR      = $(PREFIX)/bin
 LIBDIR      = $(PREFIX)/lib
 MANDIR      = $(PREFIX)/man/man1
@@ -41,7 +42,7 @@ PLUGINDIR   = $(PREFIX)/lib/opencbm/plugin/
 UDEV_RULES  = /etc/udev/rules.d/
 
 #
-# Where to find the xu1541 firmware
+# Where to find the xum1541 and xu1541 firmware
 #
 XU1541DIR   = $(RELATIVEPATH)/../xu1541
 XUM1541DIR  = $(RELATIVEPATH)/../xum1541
@@ -102,20 +103,29 @@ KERNEL_INCLUDE_CONFIG = ${shell for c in ${KERNEL_SOURCE}/include/linux/autoconf
 #KERNEL_FLAGS = -DDIRECT_PORT_ACCESS
 KERNEL_FLAGS = ${KERNEL_DEFINE}
 
-#
-#
-#
-OPENCBM_CONFIG_PATH = $(DESTDIR)/etc
 
 #
-# Mac specific modifications
+# Linux specific settings and modifications
+#
+ifeq "$(OS)" "Linux"
+ETCDIR=/etc
+endif
+
+#
+# FreeBSD specific settings and modifications
+#
+ifeq "$(OS)" "FreeBSD"
+ETCDIR=$(PREFIX)/etc
+OD_FLAGS  = -txC -v -An
+endif
+
+#
+# MacOS X (Darwin) specific settings and modifications
 #
 ifeq "$(OS)" "Darwin"
+ETCDIR=$(PREFIX)/etc
 
-#PREFIX = /opt/opencbm
-OPENCBM_CONFIG_PATH = $(PREFIX)/etc
-
-# use MacPort's libusb-legacy for now
+# Use MacPort's libusb-legacy for now
 LIBUSB_CONFIG  = /opt/local/bin/libusb-legacy-config
 LIBUSB_CFLAGS  = $(shell $(LIBUSB_CONFIG) --cflags)
 LIBUSB_LDFLAGS =
@@ -125,19 +135,13 @@ OD_FLAGS  = -txC -v -An
 SHLIB_EXT = dylib
 SHLIB_SWITCH = -dynamiclib -compatibility_version $(MAJ).$(MIN) -current_version $(MAJ).$(MIN).${OPENCBM_RELEASE}
 SONAME = -install_name $(PREFIX)/lib/
-
-endif
-
-#
-# FreeBSD specific modifications
-#
-ifeq "$(OS)" "FreeBSD"
-OD_FLAGS  = -txC -v -An
 endif
 
 #
 #
 #
+
+OPENCBM_CONFIG_PATH = $(ETCDIR)
 
 OPENCBM_CONFIG_FILE = $(OPENCBM_CONFIG_PATH)/opencbm.conf
 
