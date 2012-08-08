@@ -33,7 +33,12 @@
     OPENCBM_CONFIG_FILE is defined in LINUX/config.make, and it
     is given to the compiler via the command line!
 */
+
 #define OPENCBM_DEFAULT_CONFIGURATION_FILE_NAME OPENCBM_CONFIG_FILE
+
+// Special case: config file location relative to OPENCBM_HOME environment variable
+// This string get appended to the OPENCBM_HOME environment variable if it exists
+#define OPENCBM_HOME_CONFIG_FILEPATH "/etc/opencbm.conf"
 
 /*! \brief Get the default filename for the configuration file
 
@@ -47,7 +52,7 @@ configuration_get_default_filename(void)
 {
     char* opencbm_home = getenv("OPENCBM_HOME");
     if (opencbm_home != NULL) {
-      return cbmlibmisc_strcat(opencbm_home, OPENCBM_CONFIG_FILE);
+      return cbmlibmisc_strcat(opencbm_home, OPENCBM_HOME_CONFIG_FILEPATH);
     }
     return cbmlibmisc_strdup(OPENCBM_DEFAULT_CONFIGURATION_FILE_NAME);
 }
