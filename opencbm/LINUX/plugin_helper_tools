@@ -22,9 +22,11 @@ do_rebuild() {
 
 	NO_OF_FILES=`ls -1A $LOCATION_ETC_CONF/|wc -l`
 	if [ $NO_OF_FILES  -ne 0 ]; then
-		echo "; This is a GENERATED FILE! - DO NOT EDIT!" > $CONF_FILE
-		echo "; Modify the files in `dirname $LOCATION_ETC_CONF`/`basename $LOCATION_ETC_CONF` instead," >> $CONF_FILE
-		echo "; and execute '`pwd`/`basename $0` rebuild'..." >> $CONF_FILE
+		echo ";" > $CONF_FILE
+		echo "; This is a GENERATED FILE! - DO NOT EDIT!" >> $CONF_FILE
+		echo "; Modify the files in /$(basename $(dirname ${LOCATION_ETC_CONF}))/$(basename ${LOCATION_ETC_CONF})/ instead," >> $CONF_FILE
+		echo "; and execute 'opencbm_$(basename ${0}) rebuild'..." >> $CONF_FILE
+		echo ";" >> $CONF_FILE
 		echo "" >> $CONF_FILE
 		cat $LOCATION_ETC_CONF/*.conf >> $CONF_FILE
 	else
