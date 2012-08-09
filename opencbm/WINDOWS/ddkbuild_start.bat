@@ -2,8 +2,6 @@
 
 setlocal
 
-rem $Id: ddkbuild_start.bat,v 1.24 2009-12-29 22:37:08 wmsr Exp $
-
 rem These have to be adapted on your environment
 rem I'm assuming DDKBUILD.BAT, Version 5.3
 rem It can be downloaded from http://www.osronline.com/article.cfm?article=43

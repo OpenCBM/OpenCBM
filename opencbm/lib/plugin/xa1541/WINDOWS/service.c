@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/service.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: service.c,v 1.1 2008-06-16 19:24:27 strik Exp $ \n
 ** \n
 ** \brief Functions for accessing the service control manager for the OPENCBM driver
 **

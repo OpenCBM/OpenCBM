@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file libmisc/configuration.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration.c,v 1.5 2010-01-30 21:33:18 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Process configuration file

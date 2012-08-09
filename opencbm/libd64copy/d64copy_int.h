@@ -7,8 +7,6 @@
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: d64copy_int.h,v 1.7 2006-05-22 08:34:19 wmsr Exp $ */
-
 #ifndef D64COPY_INT_H
 #define D64COPY_INT_H
 

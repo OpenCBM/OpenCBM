@@ -10,7 +10,6 @@
 /*! **************************************************************
 ** \file include/arch.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch.h,v 1.14 2009-05-09 17:42:21 strik Exp $ \n
 ** \n
 ** \brief Define makros and functions which account for differences
 ** between the different architectures

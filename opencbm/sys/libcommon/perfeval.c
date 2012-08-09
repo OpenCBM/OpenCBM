@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/perfeval.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.c,v 1.8 2009-06-19 17:51:32 strik Exp $ \n
 ** \n
 ** \brief Functions for performance evaluation purposes - KERNEL version
 **

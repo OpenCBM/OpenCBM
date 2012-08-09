@@ -15,7 +15,6 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/xum1541.c \n
 ** \author Nate Lawson \n
-** \version $Id: xum1541.c,v 1.19 2010-09-12 17:00:49 wmsr Exp $ \n
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/

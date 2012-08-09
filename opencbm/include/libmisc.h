@@ -10,7 +10,6 @@
 /*! **************************************************************
 ** \file include/libmisc.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: libmisc.h,v 1.3 2009-05-09 17:42:21 strik Exp $ \n
 ** \n
 ** \brief Some functions for string handling
 **

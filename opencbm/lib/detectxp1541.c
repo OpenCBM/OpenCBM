@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file lib/detectxp1541.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: detectxp1541.c,v 1.4 2005-07-27 17:35:25 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Detect an XP1541/XP1571 parallel cable

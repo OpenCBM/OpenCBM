@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file libmisc/WINDOWS/perfeval.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.c,v 1.1 2010-01-30 21:14:47 strik Exp $ \n
 ** \n
 ** \brief Functions for performance evaluation purposes - USERMODE version
 **

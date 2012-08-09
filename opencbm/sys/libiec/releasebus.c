@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/releasebus.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: releasebus.c,v 1.5 2006-09-24 11:16:11 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

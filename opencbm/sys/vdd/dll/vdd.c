@@ -10,7 +10,6 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/vdd.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.c,v 1.5 2005-07-21 17:39:21 strik Exp $ \n
 ** \n
 ** \brief VDD for accessing the driver from DOS
 **

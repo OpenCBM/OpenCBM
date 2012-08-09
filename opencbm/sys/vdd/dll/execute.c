@@ -10,7 +10,6 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: execute.c,v 1.12 2010-12-20 09:04:35 strik Exp $ \n
 ** \n
 ** \brief Execution functions of the VDD
 **

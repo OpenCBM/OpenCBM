@@ -17,11 +17,6 @@
  *
  */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: cbm_module.c,v 1.57 2010-05-13 22:12:17 fbriere Exp $";
-#endif
-
 #include <linux/version.h>
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19)

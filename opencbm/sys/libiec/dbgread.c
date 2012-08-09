@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/dbgread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dbgread.c,v 1.1 2008-06-16 19:24:28 strik Exp $ \n
 ** \n
 ** \brief Read a RAW byte from the parallel port IN port (Status Port)
 **

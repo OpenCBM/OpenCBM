@@ -6,7 +6,6 @@
 #
 #  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 #
-#  $Id: CBMFile.pm,v 1.2 2006-02-24 12:21:42 strik Exp $
 
 package CBMFile;
 

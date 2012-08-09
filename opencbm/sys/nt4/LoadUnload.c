@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/nt4/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: LoadUnload.c,v 1.9 2009-06-19 17:52:09 strik Exp $ \n
 ** \n
 ** \brief Load and unload the driver
 **

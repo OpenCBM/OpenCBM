@@ -5,7 +5,6 @@
 # Creation Date: 2004-12-29
 # Tabsize: 4
 # Copyright: (c) 2005 OBJECTIVE DEVELOPMENT Software GmbH.
-# Revision: $Id: checksize,v 1.1 2007-02-04 12:36:33 harbaum Exp $
 
 error=0
 codelimit=2048	# default value

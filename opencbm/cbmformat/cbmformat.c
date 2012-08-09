@@ -7,11 +7,6 @@
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: cbmformat.c,v 1.12 2007-05-01 17:51:38 strik Exp $";
-#endif
-
 #include "opencbm.h"
 
 #include <ctype.h>

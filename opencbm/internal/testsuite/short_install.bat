@@ -1,8 +1,6 @@
 @echo off
 cls
-echo $Id: $
 
-echo.
 echo Checking OPENCBM driver without having it installed
 instcbm --check
 

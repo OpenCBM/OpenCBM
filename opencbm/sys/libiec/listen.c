@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/listen.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: listen.c,v 1.5 2006-03-06 05:54:35 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

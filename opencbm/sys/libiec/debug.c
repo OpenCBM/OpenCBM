@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.5 2006-05-05 11:42:53 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for libiec
 **

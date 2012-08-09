@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/release.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: release.c,v 1.6 2006-02-24 12:21:43 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

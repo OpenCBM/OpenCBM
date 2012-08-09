@@ -1,5 +1,3 @@
-# $Id$
-
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
 

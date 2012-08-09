@@ -5,7 +5,6 @@
  * Tabsize: 4
  * Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
  * License: GNU GPL v2 (see License.txt) or proprietary (CommercialLicense.txt)
- * This Revision: $Id: oddebug.c,v 1.2 2007-03-21 18:02:09 harbaum Exp $
  */
 
 #include "oddebug.h"

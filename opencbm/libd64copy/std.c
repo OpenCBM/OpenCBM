@@ -7,11 +7,6 @@
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: std.c,v 1.6 2006-05-23 12:24:31 wmsr Exp $";
-#endif
-
 #include "opencbm.h"
 #include "d64copy_int.h"
 

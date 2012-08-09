@@ -1,8 +1,6 @@
 @echo off
 cls
-echo $Id: $
 
-echo.
 echo Performing RESET
 cbmctrl reset
 

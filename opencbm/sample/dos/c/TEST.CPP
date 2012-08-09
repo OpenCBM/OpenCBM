@@ -10,7 +10,6 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/test.cpp \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: TEST.CPP,v 1.6 2007-04-22 10:32:36 strik Exp $ \n
 ** \n
 ** \brief Some tests for the DOS API
 **

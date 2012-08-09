@@ -11,11 +11,6 @@
  * patched version: Wolfgang Moser, 20050508-19:24
  */
  
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: $";
-#endif
-
 #include "opencbm.h"
 
 #include <ctype.h>

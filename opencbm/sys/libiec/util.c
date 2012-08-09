@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/util.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util.c,v 1.7 2006-03-09 17:31:35 strik Exp $ \n
 ** \n
 ** \brief Some utility functions for the IEC library
 **

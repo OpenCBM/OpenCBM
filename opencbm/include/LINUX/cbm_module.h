@@ -8,8 +8,6 @@
  *  Copyright 2009 Arnd Menge <arnd(at)jonnz(dot)de>
 */
 
-/* $Id: cbm_module.h,v 1.10 2010-05-13 22:11:51 fbriere Exp $ */
-
 #ifndef CBM_MODULE_H
 #define CBM_MODULE_H
 

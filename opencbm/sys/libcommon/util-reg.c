@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/util-reg.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util-reg.c,v 1.4 2009-06-19 17:51:32 strik Exp $ \n
 ** \n
 ** \brief Some utility functions for accessing the registry
 **

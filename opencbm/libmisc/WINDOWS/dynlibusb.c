@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file libmisc/WINDOWS/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dynlibusb.c,v 1.3 2010-08-15 09:01:54 wmsr Exp $ \n
 ** \n
 ** \brief Allow for libusb (0.1) to be loaded dynamically
 **        (Currently, this is used on Windows only)

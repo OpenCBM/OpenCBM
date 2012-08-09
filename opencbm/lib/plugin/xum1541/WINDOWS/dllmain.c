@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: dllmain.c,v 1.3 2010-02-20 20:50:37 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **

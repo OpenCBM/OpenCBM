@@ -10,7 +10,6 @@
 /*! **************************************************************
 ** \file include/WINDOWS/perfeval.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: perfeval.h,v 1.8 2010-01-30 21:06:41 strik Exp $ \n
 ** \n
 ** \brief Functions and macros for performance evaluation purposes
 **

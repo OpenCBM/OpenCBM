@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file lib/LINUX/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration_name.c,v 1.7 2008-10-10 19:05:37 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file

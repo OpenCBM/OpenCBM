@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/install.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: install.c,v 1.6 2007-04-22 10:32:39 strik Exp $ \n
 ** \n
 ** \brief Install the driver and check if anything needed is there
 **

@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file include/opencbm-plugin.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: opencbm-plugin.h,v 1.10 2010-02-21 09:53:46 strik Exp $ \n
 ** \n
 ** \brief Plugin DLL interface
 **

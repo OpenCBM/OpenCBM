@@ -16,7 +16,6 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: archlib.c,v 1.8 2010-08-15 08:06:57 wmsr Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code
 **

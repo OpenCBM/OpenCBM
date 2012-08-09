@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ia64/clisti.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: clisti.c,v 1.2 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Wrappers for CLI/STI for the different platforms. Here: iA64
 **

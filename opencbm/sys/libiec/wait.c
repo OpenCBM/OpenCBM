@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/wait.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: wait.c,v 1.5 2006-02-24 12:21:43 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

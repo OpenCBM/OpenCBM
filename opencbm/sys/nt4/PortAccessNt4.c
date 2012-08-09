@@ -13,7 +13,6 @@
 /*! ************************************************************** 
 ** \file sys/nt4/PortAccessNt4.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccessNt4.c,v 1.6 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver,
 **        NT4 version

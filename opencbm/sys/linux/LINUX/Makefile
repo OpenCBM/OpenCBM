@@ -1,5 +1,3 @@
-# $Id: Makefile,v 1.9 2009-12-13 12:04:19 cnvogelg Exp $
-
 ifneq ($(KERNELRELEASE),)
 EXTRA_CFLAGS := $(CBM4LINUX_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
 obj-m 	     := cbm.o

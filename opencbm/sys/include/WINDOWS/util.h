@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file sys/include/WINDOWS/util.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util.h,v 1.4 2007-07-25 16:37:52 strik Exp $ \n
 ** \n
 ** \brief Some utility helpers
 **

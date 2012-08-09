@@ -14,7 +14,6 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/s1_s2_pp.c \n
 ** \author Till Harbaum, Spiro Trikaliotis \n
-** \version $Id: s1_s2_pp.c,v 1.8 2010-09-05 00:24:30 natelawson Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver: Code for accessing fast protocols of xum1541
 **

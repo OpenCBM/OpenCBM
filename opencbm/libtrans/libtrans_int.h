@@ -7,8 +7,6 @@
  *  Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
-/* $Id: libtrans_int.h,v 1.2 2006-05-23 12:01:05 wmsr Exp $ */
-
 #ifndef LIBTRANS_INT_H
 #define LIBTRANS_INT_H
 

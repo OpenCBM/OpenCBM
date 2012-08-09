@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/cleanup.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cleanup.c,v 1.3 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Process an IRP_MJ_CLEANUP
 **

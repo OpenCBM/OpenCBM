@@ -1,7 +1,5 @@
 #! /bin/sh
 #
-# $Id: $
-#
 # set -x
 
 clear

@@ -4,53 +4,6 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: xu1541.c,v 1.16 2009-01-24 14:51:01 strik Exp $
- *
- * $Log: xu1541.c,v $
- * Revision 1.16  2009-01-24 14:51:01  strik
- * New version 1.17;
- * Do not return data for XU1541_READ after an EOI occurred.
- *
- * Revision 1.15  2008/10/09 18:55:45  strik
- * Removed spaces and tabs before LF.
- *
- * Revision 1.14  2007/08/30 18:50:15  strik
- * Small restructure: Moved .h files which are used to communicate between
- * different parts of the project into the include/ directory. (more to come.)
- *
- * Revision 1.13  2007/03/19 18:58:36  harbaum
- * Change in async state handling
- *
- * Revision 1.12  2007/03/18 20:40:34  harbaum
- * More hardware timer usage
- *
- * Revision 1.11  2007/03/17 19:31:34  harbaum
- * Some timeouts via hw timer
- *
- * Revision 1.9  2007/03/17 10:26:13  harbaum
- * Oops, too much optimization
- *
- * Revision 1.8  2007/03/17 07:11:04  harbaum
- * Relaxed disabled irqs
- *
- * Revision 1.6  2007/03/08 11:16:23  harbaum
- * timeout and watchdog adjustments
- *
- * Revision 1.5  2007/03/03 14:54:14  harbaum
- * More 1571 adjustments
- *
- * Revision 1.4  2007/03/01 12:59:08  harbaum
- * Added event log
- *
- * Revision 1.3  2007/02/18 19:47:32  harbaum
- * Bootloader and p2 protocol
- *
- * Revision 1.2  2007/02/13 19:20:14  harbaum
- * activity LED
- *
- * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
- * Initial version
- *
  *
  */
 

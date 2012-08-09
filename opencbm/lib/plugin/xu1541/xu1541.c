@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
-** \version $Id: xu1541.c,v 1.8 2010-02-20 20:50:26 strik Exp $ \n
 ** \n
 ** \brief libusb based xu1541 access routines
 **

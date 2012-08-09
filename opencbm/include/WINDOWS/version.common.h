@@ -10,13 +10,10 @@
 /*! **************************************************************
 ** \file include/WINDOWS/version.common.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: version.common.h,v 1.5 2009-05-09 17:42:21 strik Exp $ \n
 ** \n
 ** \brief Defining file version information for all OpenCBM tools
 **
 ****************************************************************/
-
-/* $Id: version.common.h,v 1.5 2009-05-09 17:42:21 strik Exp $ */
 
 #include "version.h"
 

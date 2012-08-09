@@ -8,11 +8,6 @@
  *  Modifications for openCBM Copyright 2011-2011 Thomas Winkler
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: std.c,v 1.6 2006-05-23 12:24:31 wmsr Exp $";
-#endif
-
 #include "opencbm.h"
 #include "d82copy_int.h"
 

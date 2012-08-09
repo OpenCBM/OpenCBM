@@ -9,11 +9,6 @@
  *  Copyright 2011-2011 Thomas Winkler
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: main.c,v 1.13 2011-04-11 17:51:38 strik Exp $";
-#endif
- 
 #include "opencbm.h"
 #include "d82copy.h" 
   

@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/lockunlock.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: lockunlock.c,v 1.6 2007-02-11 16:53:42 strik Exp $ \n
 ** \n
 ** \brief Functions for locking und unlocking the driver onto the parallel port
 **

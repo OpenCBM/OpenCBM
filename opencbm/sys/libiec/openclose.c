@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.4 2006-03-04 14:08:19 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

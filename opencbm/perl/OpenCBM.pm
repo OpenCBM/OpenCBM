@@ -6,7 +6,6 @@
 #
 #  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 #
-#  $Id: OpenCBM.pm,v 1.3 2006-04-29 07:47:52 strik Exp $
 
 package OpenCBM;
 

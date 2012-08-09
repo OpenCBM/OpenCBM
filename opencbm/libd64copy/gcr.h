@@ -8,8 +8,6 @@
  *  Copyright 2006 Wolfgang Moser (http://d81.de)
  */
 
-/* $Id: gcr.h,v 1.5 2006-05-20 08:35:47 wmsr Exp $ */
-
 #ifndef GCR_H
 #define GCR_H
 

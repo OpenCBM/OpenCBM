@@ -10,11 +10,6 @@
  *  Additions Copyright 2011      Thomas Winkler
  */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: cbmctrl.c,v 1.47 2009-12-29 22:37:10 wmsr Exp $";
-#endif
-
 #include "opencbm.h"
 
 #include <stdio.h>

@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/parport.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: parport.c,v 1.1 2008-06-16 19:24:27 strik Exp $ \n
 ** \n
 ** \brief Program to handle the parallel port for the OPENCBM driver
 **

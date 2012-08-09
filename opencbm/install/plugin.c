@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file plugin.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: plugin.c,v 1.4 2010-01-30 21:33:13 strik Exp $ \n
 ** \n
 ** \brief Program to install and uninstall the OPENCBM driver; handling of plugins
 **

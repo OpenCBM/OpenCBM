@@ -8,11 +8,6 @@
  *  Copyright 2008 Spiro Trikaliotis
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: s2.c,v 1.15 2010-07-08 02:57:13 natelawson Exp $";
-#endif
-
 #include "opencbm.h"
 #include "d64copy_int.h"
 

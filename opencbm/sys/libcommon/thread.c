@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/thread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: thread.c,v 1.4 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief Common functions für initialization the WDM and NT4 driver
 **

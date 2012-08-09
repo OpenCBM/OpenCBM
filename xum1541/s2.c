@@ -5,29 +5,7 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id$
  *
- * $Log $
- * Revision 1.7  2007/03/17 19:31:34  harbaum
- * Some timeouts via hw timer
- *
- * Revision 1.6  2007/03/15 17:40:51  harbaum
- * Plenty of changes incl. first async support
- *
- * Revision 1.5  2007/03/08 11:16:23  harbaum
- * timeout and watchdog adjustments
- *
- * Revision 1.4  2007/03/03 14:54:14  harbaum
- * More 1571 adjustments
- *
- * Revision 1.3  2007/02/06 22:34:44  harbaum
- * Release IO_DATA after byte was written
- *
- * Revision 1.2  2007/02/04 15:12:04  harbaum
- * Fixed broken optimization in s1/s2 write byte
- *
- * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
- * Initial version
  */
 
 /* This file contains the "serial2" helper functions for opencbm */

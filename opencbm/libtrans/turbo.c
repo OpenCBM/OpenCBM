@@ -7,11 +7,6 @@
  *  Copyright 2006 Spiro Trikaliotis
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: turbo.c,v 1.5 2009-05-09 17:42:21 strik Exp $";
-#endif
-
 #include "libtrans.h"
 #include "libtrans_int.h"
 

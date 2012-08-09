@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/dbgwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dbgwrite.c,v 1.1 2008-06-16 19:24:28 strik Exp $ \n
 ** \n
 ** \brief Write a RAW byte to the parallel port OUT port (Control Port)
 **

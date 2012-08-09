@@ -1,5 +1,3 @@
-rem $Id: ddkbuild_local.bat.sample,v 1.11 2010-01-30 21:45:36 strik Exp $
-rem
 rem THIS IS A SAMPLE FILE FOR DDKBUILD_LOCAL.BAT
 rem ADJUST THIS TO YOUR OWN NEEDS, AND PLACE IT *ABOVE* THE
 rem CURRENT OPENCBM DIRECTORY.
@@ -67,6 +65,8 @@ rem if exist %1\libopencbmtransfer set CMDARGUMENTS=%CMDARGUMENTS% libopencbmtra
 	rem macro definition within the DDK build process
 	rem here, inclusion of the CVS ID strings into the binaries is
 	rem enabled, but only if USER_C_FLAGS was not defined before
+        rem (this feature is not available anymore, but left "as is" for
+	rem illustrative purposes!)
 if not defined USER_C_FLAGS set USER_C_FLAGS=/DSAVE_RCSID=1
 
 rem Settings for the BASH CC65 build process:

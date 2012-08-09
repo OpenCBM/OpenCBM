@@ -8,8 +8,6 @@
  *  Copyright 2011-2011 Thomas Winkler <t(dot)winkler(at)tirol(dot)com>
 */
 
-/* $Id: d82copy.h,v 1.8 2011-04-03 diddl Exp $ */
-
 #ifndef D82COPY_H
 #define D82COPY_H
 

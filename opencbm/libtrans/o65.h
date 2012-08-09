@@ -7,8 +7,6 @@
  *  Copyright 2006, 2009 Spiro Trikaliotis
 */
 
-/* $Id: o65.h,v 1.3 2010-01-30 21:29:01 strik Exp $ */
-
 #ifndef O65_H
 #define O65_H
 

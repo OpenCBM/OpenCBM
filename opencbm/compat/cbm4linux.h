@@ -7,8 +7,6 @@
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: cbm4linux.h,v 1.3 2006-05-23 12:24:31 wmsr Exp $ */
-
 #ifndef CBM4LINUX_OLDAPI
 # warning \
 "cbm4linux.h has been replaced by opencbm.h and should not be used any more"

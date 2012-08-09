@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/testirq.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: testirq.c,v 1.8 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Test for IRQ capabilities
 **

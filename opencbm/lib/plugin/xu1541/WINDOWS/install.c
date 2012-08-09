@@ -10,7 +10,6 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xu1541/WINDOWS/install.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: install.c,v 1.3 2010-01-30 21:33:18 strik Exp $ \n
 ** \n
 ** \brief Helper functions for installing the plugin
 **        on a Windows machine

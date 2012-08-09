@@ -8,8 +8,6 @@
  *
 }
 
-{ $Id: opencbm.pas,v 1.3 2006-02-24 12:21:41 strik Exp $ }
-
 unit opencbm;
 
 interface

@@ -1,7 +1,5 @@
 #!/bin/bash
 #
-# $Id: $
-#
 # set -x
 
 echo "Doing reset of the xum1541 firmware including IEC bus"

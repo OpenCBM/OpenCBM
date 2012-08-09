@@ -15,7 +15,6 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.c,v 1.6 2010-01-30 21:33:15 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

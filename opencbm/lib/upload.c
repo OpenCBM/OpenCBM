@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: upload.c,v 1.12 2009-01-25 14:24:09 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **

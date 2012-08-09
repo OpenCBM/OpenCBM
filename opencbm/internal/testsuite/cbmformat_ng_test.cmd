@@ -1,5 +1,4 @@
 @ECHO OFF
-echo $Id: $
 
 REM transfer mode can be set to `auto' since some versions now
 SET TRANSFEROPT=-ta

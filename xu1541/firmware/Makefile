@@ -5,7 +5,6 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile,v 1.8 2008-12-26 13:27:36 wmsr Exp $
 
 include ../bootloader/Makefile.common
 LDFLAGS += -Wl,$(COMMON_SECTIONS) -nostdlib

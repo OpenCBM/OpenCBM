@@ -1,7 +1,6 @@
 /*! ************************************************************** 
 ** \file arch/windows/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.4 2006-04-08 13:41:14 strik Exp $ \n
 ** \n
 ** \brief Debugging help functions and definitions
 **

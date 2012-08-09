@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/debug.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.c,v 1.17 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Debug helper functions for kernel-mode drivers
 **

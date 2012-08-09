@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file flasher.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: flasher.c,v 1.9 2009-01-04 19:09:03 strik Exp $ \n
 ** \n
 ** \brief Flash the bootloader from the application space
 **

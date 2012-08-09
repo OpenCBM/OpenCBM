@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xa1541/WINDOWS/startstop.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startstop.c,v 1.4 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Functions for starting and stopping the driver
 **

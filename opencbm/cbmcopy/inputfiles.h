@@ -7,8 +7,6 @@
  *  Copyright 2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: inputfiles.h,v 1.3 2006-05-23 12:24:31 wmsr Exp $ */
-
 #ifndef INPUTFILES_H
 #define INPUTFILES_H
 

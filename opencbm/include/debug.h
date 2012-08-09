@@ -10,7 +10,6 @@
 /*! **************************************************************
 ** \file include/debug.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: debug.h,v 1.21 2010-01-30 21:33:09 strik Exp $ \n
 ** \n
 ** \brief Define makros for debugging purposes
 **

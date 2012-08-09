@@ -15,7 +15,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis, Arnd M. \n
-** \version $Id: mnib.c,v 1.19 2009-11-15 20:55:41 strik Exp $ \n
 ** \authors Based on code from
 **    Markus Brenner
 ** \n

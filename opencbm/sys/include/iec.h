@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file sys/include/iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: iec.h,v 1.21 2009-11-15 20:55:41 strik Exp $ \n
 ** \n
 ** \brief Definitions for the libiec library
 **

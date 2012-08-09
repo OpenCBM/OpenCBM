@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/wdm/PortAccessWdm.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccessWdm.c,v 1.2 2006-02-24 12:21:44 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **        Only use WDM functions

@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file lib/gcr_4b5b.c \n
 ** \author Wolfgang Moser \n
-** \version $Id: gcr_4b5b.c,v 1.3 2006-05-20 08:35:47 wmsr Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Commodore GCR conversion functions
@@ -23,11 +22,6 @@
 
 /*! The name of the executable */
 #define DBG_PROGNAME "OPENCBM.DLL"
-
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: gcr_4b5b.c,v 1.3 2006-05-20 08:35:47 wmsr Exp $";
-#endif
 
 #include "debug.h"
 

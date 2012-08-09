@@ -10,7 +10,6 @@
 /*! ************************************************************** 
 ** \file sys/vdd/dll/cbmfile.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbmfile.c,v 1.4 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Function for handling the CBM_FILE to BX conversions
 **

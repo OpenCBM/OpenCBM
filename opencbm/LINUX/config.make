@@ -1,6 +1,3 @@
-# $Id: config.make,v 1.31 2011-01-06 20:27:44 strik Exp $
-#
-
 # get package version (major.minor.release).
 
 VERSIONH:=$(RELATIVEPATH)include/version.h

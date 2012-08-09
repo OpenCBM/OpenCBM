@@ -4,18 +4,6 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: pp.c,v 1.3 2008-10-09 18:55:45 strik Exp $
- *
- * $Log: pp.c,v $
- * Revision 1.3  2008-10-09 18:55:45  strik
- * Removed spaces and tabs before LF.
- *
- * Revision 1.2  2007/03/15 17:40:51  harbaum
- * Plenty of changes incl. first async support
- *
- * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
- * Initial version
- *
  *
  */
 

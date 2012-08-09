@@ -28,8 +28,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id: gcrt1.S,v 1.1 2007-08-28 17:37:37 strik Exp $ */
-
 #if (__GNUC__ < 3) || (__GNUC__ == 3 && __GNUC_MINOR__ < 3)
 #error "GCC version >= 3.3 required"
 #endif

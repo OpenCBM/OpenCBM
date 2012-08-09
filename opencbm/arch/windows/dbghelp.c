@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file arch/windows/dbghelp.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: dbghelp.c,v 1.4 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Some debugging help functions
 **

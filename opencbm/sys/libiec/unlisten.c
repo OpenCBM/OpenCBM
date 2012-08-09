@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/unlisten.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: unlisten.c,v 1.6 2009-01-02 18:19:15 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

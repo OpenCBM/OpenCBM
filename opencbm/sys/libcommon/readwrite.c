@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/readwrite.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: readwrite.c,v 1.4 2006-03-04 14:08:16 strik Exp $ \n
 ** \n
 ** \brief Perform reading from and writing to the driver
 **

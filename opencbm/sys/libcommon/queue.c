@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/queue.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: queue.c,v 1.8 2006-03-09 17:31:35 strik Exp $ \n
 ** \n
 ** \brief Functions for queueung IRPs
 **

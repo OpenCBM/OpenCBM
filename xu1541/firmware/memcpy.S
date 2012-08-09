@@ -26,8 +26,6 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id: memcpy.S,v 1.1 2007-08-28 17:37:38 strik Exp $ */
-
 #include "macros.inc"
 
 #define dest_hi r25

@@ -9,8 +9,6 @@
  *  Copyright 2011 Wolfgang Moser
 */
 
-/* $Id: cbmcopy_int.h,v 1.9 2007-07-25 16:37:51 strik Exp $ */
-
 #ifndef CBMCOPY_INT_H
 #define CBMCOPY_INT_H
 

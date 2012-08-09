@@ -9,11 +9,6 @@
  *  Copyright 2011 Wolfgang Moser
  */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: cbmcopy.c,v 1.21 2010-01-05 07:45:03 natelawson Exp $";
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

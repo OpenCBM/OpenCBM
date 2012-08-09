@@ -17,7 +17,6 @@
 /*! ************************************************************** 
 ** \file sample/dos/c/opencbn.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: OPENCBM.C,v 1.6 2006-02-20 12:11:16 strik Exp $ \n
 ** \n
 ** \brief Library for accessing the driver from DOS
 **

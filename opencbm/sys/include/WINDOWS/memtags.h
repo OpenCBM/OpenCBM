@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file sys/include/WINDOWS/memtags.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: memtags.h,v 1.5 2007-07-25 16:37:52 strik Exp $ \n
 ** \n
 ** \brief Define tags for ExAllocatePoolWithTag()
 **

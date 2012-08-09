@@ -8,11 +8,6 @@
  *  Copyright (C) 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: cbmrpm41.c,v 1.19 2010-06-10 19:47:08 strik Exp $";
-#endif
-
 #include "cbmrpm41.h"
 #include "libmisc.h"
 

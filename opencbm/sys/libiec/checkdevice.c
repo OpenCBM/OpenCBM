@@ -13,7 +13,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/checkdevice.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: checkdevice.c,v 1.5 2006-05-20 08:35:47 wmsr Exp $ \n
 ** \authors Based on code from SC written by 
 **    Joe Forster & Wolfgang Moser
 ** \n

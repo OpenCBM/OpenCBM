@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/setrelease.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: setrelease.c,v 1.6 2008-10-09 17:14:26 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

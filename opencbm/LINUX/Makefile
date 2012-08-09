@@ -1,5 +1,3 @@
-# $Id: Makefile,v 1.23 2010-07-08 20:15:48 cnvogelg Exp $
-
 RELATIVEPATH=./
 include ${RELATIVEPATH}LINUX/config.make
 

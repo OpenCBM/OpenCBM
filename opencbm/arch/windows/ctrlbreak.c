@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file arch/windows/ctrlbreak.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ctrlbreak.c,v 1.2 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Helper function for setting a handler for Ctrl+C 
 ** and Ctrl+Break

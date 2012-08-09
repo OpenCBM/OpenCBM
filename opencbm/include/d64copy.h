@@ -7,8 +7,6 @@
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-/* $Id: d64copy.h,v 1.8 2007-07-25 16:37:51 strik Exp $ */
-
 #ifndef D64COPY_H
 #define D64COPY_H
 

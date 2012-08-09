@@ -8,8 +8,6 @@
  *  Modifications for openCBM Copyright 2011-2011 Thomas Winkler
 */
 
-/* $Id: d82copy_int.h,v 1.7 2006-05-22 08:34:19 wmsr Exp $ */
-
 #ifndef D82COPY_INT_H
 #define D82COPY_INT_H
 

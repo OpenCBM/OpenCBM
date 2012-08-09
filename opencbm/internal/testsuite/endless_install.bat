@@ -1,8 +1,6 @@
 @echo off
 cls
-echo $Id: $
 
-echo.
 echo Checking without having installed the driver
 instcbm --check
 

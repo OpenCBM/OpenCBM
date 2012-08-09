@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file libmisc/WINDOWS/registry.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: registry.c,v 1.1 2010-01-30 21:47:03 strik Exp $ \n
 ** \n
 ** \brief Registry manipulation functions
 **

@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_opencbm.h,v 1.7 2010-01-30 21:33:15 strik Exp $ \n
 ** \n
 ** \brief Internal API for opencbm installation
 **

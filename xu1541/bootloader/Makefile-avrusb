@@ -8,7 +8,6 @@
 # Tabsize: 4
 # Copyright: (c) 2005 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: Proprietary, free under certain conditions. See Documentation.
-# This Revision: $Id: Makefile-avrusb,v 1.12 2010-01-24 14:47:11 strik Exp $
 
 include Makefile.common
 LDFLAGS += $(LDFLAGS_BOOTLOADER)

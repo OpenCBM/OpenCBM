@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file sys/libiec/i_iec.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: i_iec.h,v 1.20 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Internal functions and definitions of the libiec library
 **

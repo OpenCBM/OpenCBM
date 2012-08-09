@@ -1,8 +1,6 @@
 @echo off
 cls
-echo $Id: $
 
-echo.
 echo Stopping opencbm (if necessary)
 net stop opencbm
 

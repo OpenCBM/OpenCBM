@@ -10,7 +10,6 @@
 /*! **************************************************************
 ** \file sys/vdd/dll/vdd.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: vdd.h,v 1.8 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Function prototypes for the VDD
 **

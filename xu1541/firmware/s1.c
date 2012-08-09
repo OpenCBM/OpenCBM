@@ -4,24 +4,6 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: s1.c,v 1.5 2007-03-17 19:31:34 harbaum Exp $
- *
- * $Log: s1.c,v $
- * Revision 1.5  2007-03-17 19:31:34  harbaum
- * Some timeouts via hw timer
- *
- * Revision 1.4  2007/03/15 17:40:51  harbaum
- * Plenty of changes incl. first async support
- *
- * Revision 1.3  2007/03/08 11:16:23  harbaum
- * timeout and watchdog adjustments
- *
- * Revision 1.2  2007/02/04 15:12:04  harbaum
- * Fixed broken optimization in s1/s2 write byte
- *
- * Revision 1.1.1.1  2007/02/04 12:36:34  harbaum
- * Initial version
- *
  *
  */
 

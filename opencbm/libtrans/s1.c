@@ -7,11 +7,6 @@
  *  Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: s1.c,v 1.3 2006-07-18 10:02:24 strik Exp $";
-#endif
-
 #include "opencbm.h"
 #include "libtrans_int.h"
 

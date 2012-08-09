@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file flasher.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: flasher.h,v 1.3 2008-10-09 18:55:45 strik Exp $ \n
 ** \n
 ** \brief Flash the bootloader from the application space
 **

@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file sys/include/cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: cbm_driver.h,v 1.11 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Definitions for the opencbm driver
 **

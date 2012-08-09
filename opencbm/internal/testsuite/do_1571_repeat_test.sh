@@ -1,7 +1,5 @@
 #!/bin/bash
 #
-# $Id: $
-#
 # set -x
 
 DRIVETYPE=1571

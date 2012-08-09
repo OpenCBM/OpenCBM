@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file include/configuration.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: configuration.h,v 1.3 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **        Read configuration file

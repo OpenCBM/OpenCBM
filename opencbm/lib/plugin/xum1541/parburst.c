@@ -10,7 +10,6 @@
 /*! ************************************************************** 
 ** \file lib/plugin/xum1541/WINDOWS/parburst.c \n
 ** \author Nate Lawson \n
-** \version $Id: parburst.c,v 1.7 2010-09-05 00:24:30 natelawson Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the mnib driver functions, windows specific code
 **

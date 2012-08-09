@@ -9,11 +9,6 @@
  *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: parburst.c,v 1.4 2010-01-30 21:33:15 strik Exp $";
-#endif
-
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>

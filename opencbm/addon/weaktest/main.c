@@ -8,11 +8,6 @@
  *  Copyright (C) 2007      Wolfgang Moser (http://d81.de)
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: $";
-#endif
-
 #include "opencbm.h"
 #include "d64copy.h"
 #include "d64copy_int.h"

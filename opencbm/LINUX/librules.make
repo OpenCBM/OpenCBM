@@ -1,4 +1,3 @@
-# $Id: librules.make,v 1.4 2011-01-10 20:13:41 strik Exp $
 # common rules for shared lib creation
 #
 

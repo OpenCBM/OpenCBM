@@ -7,11 +7,6 @@
  *  Copyright 2006 Wolfgang Moser (http://d81.de)
  */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: gcr.c,v 1.6 2007-03-22 12:50:28 strik Exp $";
-#endif
-
 #include "gcr.h"
 
 int gcr_decode(unsigned const char *gcr, unsigned char *decoded)

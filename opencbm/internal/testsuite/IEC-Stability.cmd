@@ -1,5 +1,4 @@
 @echo off
-echo $Id: $
 set LOOPCOUNT=1000
 REM set LOOPCOUNT=2
 

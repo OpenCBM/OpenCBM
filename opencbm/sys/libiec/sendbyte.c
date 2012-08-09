@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/sendbyte.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: sendbyte.c,v 1.7 2006-03-09 17:31:35 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

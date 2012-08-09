@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/ppread.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ppread.c,v 1.6 2009-11-15 20:55:41 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

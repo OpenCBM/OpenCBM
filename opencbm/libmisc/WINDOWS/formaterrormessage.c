@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file libmisc/WINDOWS/formaterrormessage.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id$ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **

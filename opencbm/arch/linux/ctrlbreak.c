@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file arch/linux/ctrlbreak.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: ctrlbreak.c,v 1.1 2006-07-20 11:45:28 strik Exp $ \n
 ** \n
 ** \brief Helper function for setting a handler for Ctrl+C 
 ** and Ctrl+Break

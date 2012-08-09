@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: openclose.c,v 1.13 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Functions for opening and closing the driver
 **

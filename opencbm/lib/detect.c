@@ -14,7 +14,6 @@
 /*! ************************************************************** 
 ** \file lib/detect.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: detect.c,v 1.3 2007-03-22 12:50:16 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **

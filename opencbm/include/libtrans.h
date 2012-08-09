@@ -7,8 +7,6 @@
  *  Copyright 2005 Spiro Trikaliotis
 */
 
-/* $Id: libtrans.h,v 1.2 2006-05-23 12:01:05 wmsr Exp $ */
-
 #ifndef LIBTRANS_H
 #define LIBTRANS_H
 

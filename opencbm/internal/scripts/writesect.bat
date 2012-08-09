@@ -1,5 +1,4 @@
 @echo off
-: $Id: writesect.bat,v 1.1 2006-04-05 16:38:37 strik Exp $
 if "%3" == "" (
 	echo Write sectors to a CBM diskette.
 	echo Usage: writesect DRIVE TRACK SECT

@@ -1,5 +1,4 @@
 echo off
-echo $Id: a8.bat,v 1.3 2006-03-14 21:11:56 wmsr Exp $
 :a
 if exist test8.bin del test8.bin
 cbmctrl download 8 0xc000 0x0001 test8.bin

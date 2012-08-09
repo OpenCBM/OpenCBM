@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id: obfuscate_@_in_files.sh,v 1.2 2006-02-24 15:16:18 wmsr Exp $
 #
 # Copyright (C) 2006 Wolfgang Moser
 #

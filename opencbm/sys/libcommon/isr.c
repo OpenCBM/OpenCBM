@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/isr.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: isr.c,v 1.5 2006-02-24 12:21:43 strik Exp $ \n
 ** \n
 ** \brief The Interrupt Service Routine (ISR) for the parallel port
 **

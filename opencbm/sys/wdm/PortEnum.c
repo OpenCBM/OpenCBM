@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/wdm/PortEnum.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortEnum.c,v 1.4 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **

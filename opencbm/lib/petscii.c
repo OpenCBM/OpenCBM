@@ -15,7 +15,6 @@
 /*! ************************************************************** 
 ** \file lib/petscii.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: petscii.c,v 1.4 2006-03-10 15:43:36 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **

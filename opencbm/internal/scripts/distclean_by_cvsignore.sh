@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id: distclean_by_cvsignore.sh,v 1.1 2006-06-04 11:42:54 wmsr Exp $
 #
 # Copyright (C) 2006 Wolfgang Moser
 #

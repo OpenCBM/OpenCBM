@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file sys/include/WINDOWS/arch_cbm_driver.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: arch_cbm_driver.h,v 1.13 2007-07-25 16:37:52 strik Exp $ \n
 ** \n
 ** \brief Windows-specific definitions for the opencbm driver
 **

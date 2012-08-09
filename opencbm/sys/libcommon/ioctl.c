@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/ioctl.c \n
 ** \author Spiro Trikaliotis, Arnd \n
-** \version $Id: ioctl.c,v 1.21 2009-11-15 20:55:41 strik Exp $ \n
 ** \n
 ** \brief Perform an IOCTL
 **

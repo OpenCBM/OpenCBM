@@ -8,11 +8,6 @@
  *  Copyright (C) 2005,2006 Wolfgang Moser (http://d81.de)
  */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: cbmforng.c,v 1.13 2007-05-01 17:51:38 strik Exp $";
-#endif
-
 #include "cbmforng.h"
 #include "libmisc.h"
 

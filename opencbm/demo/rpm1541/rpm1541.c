@@ -9,12 +9,6 @@
  *  Copyright      2005 Spiro Trikaliotis
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: rpm1541.c,v 1.7 2007-05-28 14:25:47 wmsr Exp $";
-#endif
-
-
 #include <opencbm.h>
 #include <arch.h>
 

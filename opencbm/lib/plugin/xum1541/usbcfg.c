@@ -12,7 +12,6 @@
 /*! **************************************************************
 ** \file lib/plugin/xum1541/usbcfg.c \n
 ** \author Nate Lawson \n
-** \version $Id: usbcfg.c,v 1.4 2010-09-05 00:24:30 natelawson Exp $ \n
 ** \n
 ** \brief USB configuration application for the xum1541
 ****************************************************************/

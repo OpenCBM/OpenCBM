@@ -9,11 +9,6 @@
  *  Copyright 2011 Wolfgang Moser
  */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: std.c,v 1.6 2006-05-23 12:24:31 wmsr Exp $";
-#endif
-
 #include "opencbm.h"
 #include "cbmcopy_int.h"
 

@@ -8,11 +8,6 @@
  *  Modifications for openCBM Copyright 2011-2011 Thomas Winkler
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: fs.c,v 1.12 2006-12-11 18:43:47 cbm4linux Exp $";
-#endif
-
 #include "d82copy_int.h"
 
 #include <stdio.h>

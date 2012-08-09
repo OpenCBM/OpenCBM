@@ -11,7 +11,6 @@
 /*! **************************************************************
 ** \file instcbm.h \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: instcbm.h,v 1.13 2008-10-09 17:14:26 strik Exp $ \n
 ** \n
 ** \brief Header for installation routines
 **

@@ -1,5 +1,4 @@
 @echo off
-: $Id: readsect.bat,v 1.1 2006-04-05 16:38:37 strik Exp $
 if "%3" == "" (
 	echo Read sectors of a CBM diskette.
 	echo Usage: readsect DRIVE TRACK SECT

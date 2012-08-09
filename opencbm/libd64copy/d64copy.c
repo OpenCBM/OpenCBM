@@ -8,11 +8,6 @@
  *  Modifications for cbm4win Copyright 2001-2004 Spiro Trikaliotis
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: d64copy.c,v 1.17 2006-05-23 12:24:31 wmsr Exp $";
-#endif
-
 #include "d64copy_int.h"
 #include <stdlib.h>
 #include <string.h>

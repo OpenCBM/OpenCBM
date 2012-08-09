@@ -13,7 +13,6 @@
 /*! ************************************************************** 
 ** \file lib/cbm.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: cbm.c,v 1.33 2010-04-07 19:20:20 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **

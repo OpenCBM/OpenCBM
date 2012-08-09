@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/waitlistener.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: waitlistener.c,v 1.7 2006-05-06 13:34:52 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

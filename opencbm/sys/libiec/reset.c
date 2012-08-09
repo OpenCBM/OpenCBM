@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file sys/libiec/reset.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: reset.c,v 1.5 2006-10-14 16:50:57 strik Exp $ \n
 ** \authors Based on code from
 **    Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 ** \n

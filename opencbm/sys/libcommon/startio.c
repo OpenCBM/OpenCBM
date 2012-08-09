@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/startio.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: startio.c,v 1.4 2007-02-11 16:53:42 strik Exp $ \n
 ** \n
 ** \brief StartIo function for processing the IRP queue
 **

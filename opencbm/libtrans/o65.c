@@ -7,11 +7,6 @@
  *  Copyright 2006, 2009 Spiro Trikaliotis
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: o65.c,v 1.4 2010-01-30 21:29:01 strik Exp $";
-#endif
-
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
 

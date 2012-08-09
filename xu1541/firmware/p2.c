@@ -4,18 +4,6 @@
  * Tabsize: 4
  * Copyright: (c) 2007 by Till Harbaum <till@harbaum.org>
  * License: GPL
- * This Revision: $Id: p2.c,v 1.3 2008-10-09 18:55:45 strik Exp $
- *
- * $Log: p2.c,v $
- * Revision 1.3  2008-10-09 18:55:45  strik
- * Removed spaces and tabs before LF.
- *
- * Revision 1.2  2007/03/15 17:40:51  harbaum
- * Plenty of changes incl. first async support
- *
- * Revision 1.1  2007/02/18 19:47:32  harbaum
- * Bootloader and p2 protocol
- *
  *
  */
 

@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/util.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: util.c,v 1.4 2006-05-23 12:24:31 wmsr Exp $ \n
 ** \n
 ** \brief Some utility functions for the driver
 **

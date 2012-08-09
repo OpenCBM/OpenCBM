@@ -11,7 +11,6 @@
 /*! ************************************************************** 
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
-** \version $Id: PortAccess.c,v 1.12 2006-07-21 11:55:35 strik Exp $ \n
 ** \n
 ** \brief Functions for communicating with the parallel port driver
 **

@@ -7,11 +7,6 @@
  *  Copyright 1999 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
 */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: flash.c,v 1.5 2007-05-28 14:25:46 wmsr Exp $";
-#endif
-
 #include "opencbm.h"
 
 #include "arch.h"

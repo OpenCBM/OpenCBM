@@ -10,11 +10,6 @@
  *  Copyright 2011      Wolfgang Moser (http://d81.de)
  */
 
-#ifdef SAVE_RCSID
-static char *rcsid =
-    "@(#) $Id: main.c,v 1.19 2007-05-01 17:51:37 strik Exp $";
-#endif
-
 #include <ctype.h>
 #include <getopt.h>
 #include <stdarg.h>

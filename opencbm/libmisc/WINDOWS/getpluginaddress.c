@@ -12,7 +12,6 @@
 /*! ************************************************************** 
 ** \file libmisc/WINDOWS/getpluginaddress.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
-** \version $Id: getpluginaddress.c,v 1.1 2010-01-30 20:48:48 strik Exp $ \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
