@@ -10,7 +10,7 @@
 
 /* $Id: d82copy.h,v 1.8 2011-04-03 diddl Exp $ */
 
-#ifndef D84COPY_H
+#ifndef D82COPY_H
 #define D82COPY_H
 
 //#define LIBD82COPY_DEBUG    /* enable state logging and debugging */
