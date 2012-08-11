@@ -13,7 +13,7 @@ MASTER_SITES=	SF
 
 LATEST_LINK=    ${PORTNAME}
 
-COMMENT=	Commodore CBM serial IEC bus utilities
+COMMENT=	Commodore CBM serial IEC/IEEE-488 bus utilities
 MAINTAINER=	uffe@uffe.org
 
 LICENSE=	GPLv2
