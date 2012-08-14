@@ -80,7 +80,7 @@ mrproper:
 
 dist: all-doc clean
 	rm -f build-stamp configure-stamp
-	tar czvf ../`basename \`pwd\``.tar.gz --exclude=CVS --exclude=debian -C .. `basename \`pwd\``
+	tar czvf ../`basename \`pwd\``.tar.gz --exclude=.git --exclude=debian -C .. `basename \`pwd\``
 
 install-files: all
 	mkdir -p -m 755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(MANDIR) $(DESTDIR)$(INCDIR) $(DESTDIR)$(INFODIR)
