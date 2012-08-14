@@ -171,7 +171,7 @@ cvs -q tag -d cbm4win-$TAGVERSION `find . -name LINUX -type d` cbm4linux.spec de
 
 # untag all windows-specifics for cbm4linux
 
-cvs -q tag -d cbm4linux-$TAGVERSION `find . -name WINDOWS -type d` `find . -name WINBUILD -type d` arch/windows/ sys/ install/ sample/
+cvs -q tag -d cbm4linux-$TAGVERSION `find . -name WINDOWS -type d` `find . -name WINDOWS -type d` arch/windows/ sys/ install/ sample/
 
 # sys/linux is special: Although sys/ is almost Windows specific, sys/linux is for Linux. Thus, re-tag it.
 cvs -q tag cbm4linux-$TAGVERSION sys/linux/

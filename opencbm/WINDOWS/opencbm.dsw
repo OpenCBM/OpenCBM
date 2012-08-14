@@ -141,7 +141,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "arch"=..\arch\windows\WINBUILD\arch.dsp - Package Owner=<4>
+Project: "arch"=..\arch\windows\WINDOWS\arch.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -153,7 +153,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cbmcopy"=..\cbmcopy\WINBUILD\cbmcopy.dsp - Package Owner=<4>
+Project: "cbmcopy"=..\cbmcopy\WINDOWS\cbmcopy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -177,7 +177,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cbmctrl"=..\cbmctrl\WINBUILD\cbmctrl.dsp - Package Owner=<4>
+Project: "cbmctrl"=..\cbmctrl\WINDOWS\cbmctrl.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -198,7 +198,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cbmformat"=..\cbmformat\WINBUILD\cbmformat.dsp - Package Owner=<4>
+Project: "cbmformat"=..\cbmformat\WINDOWS\cbmformat.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -219,7 +219,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cbmforng"=..\cbmforng\WINBUILD\cbmforng.dsp - Package Owner=<4>
+Project: "cbmforng"=..\cbmforng\WINDOWS\cbmforng.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -240,7 +240,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cbmrpm41"=..\cbmrpm41\WINBUILD\cbmrpm41.dsp - Package Owner=<4>
+Project: "cbmrpm41"=..\cbmrpm41\WINDOWS\cbmrpm41.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -261,7 +261,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "d64copy"=..\d64copy\WINBUILD\d64copy.dsp - Package Owner=<4>
+Project: "d64copy"=..\d64copy\WINDOWS\d64copy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -285,7 +285,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "d82copy"=..\d82copy\WINBUILD\d82copy.dsp - Package Owner=<4>
+Project: "d82copy"=..\d82copy\WINDOWS\d82copy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -309,7 +309,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "demoflash"=..\demo\flash\WINBUILD\demoflash.dsp - Package Owner=<4>
+Project: "demoflash"=..\demo\flash\WINDOWS\demoflash.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -330,7 +330,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "demomorse"=..\demo\morse\WINBUILD\demomorse.dsp - Package Owner=<4>
+Project: "demomorse"=..\demo\morse\WINDOWS\demomorse.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -351,7 +351,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "demorpm1541"=..\demo\rpm1541\WINBUILD\demorpm1541.dsp - Package Owner=<4>
+Project: "demorpm1541"=..\demo\rpm1541\WINDOWS\demorpm1541.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -372,7 +372,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "install"=..\install\WINBUILD\install.dsp - Package Owner=<4>
+Project: "install"=..\install\WINDOWS\install.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -399,7 +399,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libcbmcopy"=..\libcbmcopy\WINBUILD\libcbmcopy.dsp - Package Owner=<4>
+Project: "libcbmcopy"=..\libcbmcopy\WINDOWS\libcbmcopy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -414,7 +414,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libd64copy"=..\libd64copy\WINBUILD\libd64copy.dsp - Package Owner=<4>
+Project: "libd64copy"=..\libd64copy\WINDOWS\libd64copy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -432,7 +432,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libd82copy"=..\libd82copy\WINBUILD\libd82copy.dsp - Package Owner=<4>
+Project: "libd82copy"=..\libd82copy\WINDOWS\libd82copy.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -459,7 +459,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libtrans"=..\libtrans\WINBUILD\libtrans.dsp - Package Owner=<4>
+Project: "libtrans"=..\libtrans\WINDOWS\libtrans.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -471,7 +471,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "opencbm"=..\lib\WINBUILD\opencbm.dsp - Package Owner=<4>
+Project: "opencbm"=..\lib\WINDOWS\opencbm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -627,7 +627,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "vdd"=..\sys\vdd\dll\WINBUILD\vdd.dsp - Package Owner=<4>
+Project: "vdd"=..\sys\vdd\dll\WINDOWS\vdd.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -9,7 +9,7 @@
 */
 
 /*! ************************************************************** 
-** \file lib/WINBUILD/configuration_name.c \n
+** \file lib/WINDOWS/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver

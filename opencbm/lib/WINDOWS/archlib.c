@@ -10,7 +10,7 @@
 */
 
 /*! ************************************************************** 
-** \file lib/WINBUILD/archlib.c \n
+** \file lib/WINDOWS/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
 ** \n
 ** \brief Shared library / DLL for accessing the driver, windows specific code

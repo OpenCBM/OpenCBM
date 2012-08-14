@@ -1,4 +1,4 @@
-DIRS=WINBUILD \
+DIRS=WINDOWS \
      plugin
 
 #     WINVICEBUILD

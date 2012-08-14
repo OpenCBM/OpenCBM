@@ -9,7 +9,7 @@ TARGETLIBS=../../bin/*/arch.lib         \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib
 
-INCLUDES=../../include;../../include/WINDOWS;../../lib;../../lib/WINBUILD;../../lib/plugin/xa1541/WINDOWS/;../../arch/windows
+INCLUDES=../../include;../../include/WINDOWS;../../lib;../../lib/WINDOWS;../../lib/plugin/xa1541/WINDOWS/;../../arch/windows
 
 SOURCES=../instcbm.c \
         ../plugin.c \
