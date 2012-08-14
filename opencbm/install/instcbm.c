@@ -593,19 +593,24 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
         }
     }
 
-    if (Parameter->DefaultAdapter && ! Parameter->Update && ! Parameter->Install ) {
+    if (!error && Parameter->DefaultAdapter && ! Parameter->Update && ! Parameter->Install ) {
         printf("--adapter/-@ only allowed when installing or updating, aborting!");
         hint(Argv[0]);
-        exit(1);
+        error = 1;
     }
 
-    if (Parameter->Install && ! Parameter->DefaultAdapter && Parameter->PluginList->Name) {
+    if (!error && !Parameter->PluginList) {
+        printf("No plugins detected, have to abort...\n");
+        error = 1;
+    }
+
+    if (!error && Parameter->Install && ! Parameter->DefaultAdapter && Parameter->PluginList->Name) {
         /* generate a default adapter: The first one given */
         Parameter->DefaultAdapter = cbmlibmisc_strdup(Parameter->PluginList->Name);
     }
 
 /*! \todo is this needed anymore?
-    if (Parameter->Install && Parameter->PluginList == NULL) {
+    if (!error && Parameter->Install && Parameter->PluginList == NULL) {
         error = TRUE;
     }
 */
