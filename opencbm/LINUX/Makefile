@@ -45,110 +45,88 @@ endif
 
 .PHONY: all opencbm clean mrproper dist doc install install-doc uninstall dev install-files install-files-doc all-doc plugin-xum1541 plugin-xu1541 plugin-xa1541 plugin install-plugin install-plugin-xum1541 install-plugin-xu1541 install-plugin-xa1541
 
+CREATE_TARGET = $(patsubst %,BUILDSYSTEM.%,$(1:=.$2))
+CREATE_TARGETS = $(patsubst %,BUILDSYSTEM.%,$(foreach base, $2, $(1:=.$(base))))
+GET_TARGET_DIR = $(patsubst BUILDSYSTEM.%,%,$(basename $@))
+GET_TARGET =$(patsubst .%,%,$(suffix $@))
+
+
 all: opencbm plugin
 
 all-doc: all doc
 
-opencbm:
-	@for subdir in $(SUBDIRS); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile all || exit 1; \
-	done
-	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile all || exit 1) || true; \
-	done
+$(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL),all clean mrproper install install-files install-files-doc install-doc uninstall)::
+	$(MAKE) -C $(call GET_TARGET_DIR,$@) -f LINUX/Makefile $(call GET_TARGET,$@)
 
-doc:
-	@for subdir in $(SUBDIRS_DOC); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
-	done
+$(call CREATE_TARGETS,$(SUBDIRS_OPTIONAL),all clean mrproper install install-files install-files-doc install-doc uninstall)::
+	test ! -e $(call GET_TARGET_DIR,$@)/LINUX/Makefile || $(MAKE) -C $(call GET_TARGET_DIR,$@) -f LINUX/Makefile $(call GET_TARGET,$@)
 
-clean:
-	@for subdir in $(SUBDIRS_ALL_NON_OPTIONAL); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
-	done
-	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1) || true; \
-	done
+clean:  $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),clean)
 
-mrproper:
-	@for subdir in $(SUBDIRS_ALL_NON_OPTIONAL); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
-	done
-	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1) || true; \
-	done
+mrproper:  $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),mrproper)
+
+.PHONY: opencbm
+opencbm: $(call CREATE_TARGET,$(SUBDIRS) $(SUBDIRS_OPTIONAL),all)
+
+
+
+doc: $(call CREATE_TARGETS,$(SUBDIRS_DOC),all)
+
 
 dist: all-doc clean
 	rm -f build-stamp configure-stamp
 	tar czvf ../`basename \`pwd\``.tar.gz --exclude=.git --exclude=debian -C .. `basename \`pwd\``
 
-install-files: all
+install-files: $(call CREATE_TARGET,$(SUBDIRS) $(SUBDIRS_OPTIONAL),install-files)
+$(call CREATE_TARGET,$(SUBDIRS) $(SUBDIRS_OPTIONAL),install-files):: install-files.prepare
+
+install-files.prepare: all
 	mkdir -p -m 755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(MANDIR) $(DESTDIR)$(INCDIR) $(DESTDIR)$(INFODIR)
 ifeq "$(OS)" "Linux"
 	mkdir -p -m 755 $(DESTDIR)$(MODDIR)
 endif 
-	@for subdir in $(SUBDIRS); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
-	done
-	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1 ) || true; \
-	done
 
 install: install-files
 
 install-all: install install-plugin
 
-install-plugin-xu1541: plugin-xu1541
-	@for subdir in $(SUBDIRS_PLUGIN_XU1541); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile install || exit 1; \
-	done
+install-plugin-xu1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XU1541),install)
 
-install-plugin-xum1541: plugin-xum1541
-	@for subdir in $(SUBDIRS_PLUGIN_XUM1541); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile install || exit 1; \
-	done
+$(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XU1541),install):: plugin-xu1541
 
-install-plugin-xa1541: plugin-xa1541
-	@for subdir in $(SUBDIRS_PLUGIN_XA1541); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile install || exit 1; \
-	done
+install-plugin-xum1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XUM1541),install)
+
+$(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XUM1541),install):: plugin-xum1541
+
+install-plugin-xa1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),install)
+
+$(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),install):: plugin-xa1541
+
 
 install-plugin: $(INSTALL_PLUGINS)
 
-install-files-doc: install-files all-doc
-	@for subdir in $(SUBDIRS_DOC); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
-	done
+install-files-doc: $(call CREATE_TARGET,$(SUBDIRS_DOC),install-files-doc)
+$(call CREATE_TARGET,$(SUBDIRS_DOC),install-files-doc):: install-files all-doc
 
-install-doc: install-files-doc install
-	@for subdir in $(SUBDIRS_DOC); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
-	done
+install-doc: $(call CREATE_TARGET,$(SUBDIRS_DOC),install-doc)
+$(call CREATE_TARGET,$(SUBDIRS_DOC),install-doc):: install-files-doc install
 
-plugin-xu1541: opencbm
-	@for subdir in $(SUBDIRS_PLUGIN_XU1541); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile || exit 1; \
-	done
 
-plugin-xum1541: opencbm
-	@for subdir in $(SUBDIRS_PLUGIN_XUM1541); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile || exit 1; \
-	done
+plugin-xu1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XU1541),all)
 
-plugin-xa1541: opencbm
-	@for subdir in $(SUBDIRS_PLUGIN_XA1541); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile || exit 1; \
-	done
+$(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XU1541),all):: opencbm
+
+plugin-xum1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XUM1541),all)
+
+$(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XUM1541),all):: opencbm
+
+plugin-xa1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),all)
+
+$(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),all):: opencbm
 
 plugin: $(PLUGINS)
 
-uninstall:
-	@for subdir in $(SUBDIRS_ALL_NON_OPTIONAL); do \
-	  $(MAKE) -C $$subdir -f LINUX/Makefile $@ || exit 1; \
-	done
-	@for subdir in $(SUBDIRS_OPTIONAL); do \
-	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
-	done
+uninstall: $(call CREATE_TARGET,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_ALL_OPTIONAL),uninstall)
 
 dev:
 	mkdir -p -m 755 `dirname $(CBMDEV)`
