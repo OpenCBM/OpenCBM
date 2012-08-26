@@ -2,28 +2,30 @@
 
 [ "$CC65PATH" = "" ] && CC65PATH=
 
-[ "$CL65"     = "" ] && CL65=$CC65PATH\cl65
+[ "$CA65"     = "" ] && CA65=$CC65PATH\ca65
 [ "$LD65"     = "" ] && LD65=$CC65PATH\ld65
 [ "$OD"       = "" ] && OD=od
 [ "$SED"      = "" ] && SED=sed
 [ "$RM"       = "" ] && RM=rm
 
-CA65_FLAGS="$CA65_FLAGS --feature labels_without_colons --feature pc_assignment --feature loose_char_term --asm-include-dir .."
+CA65_FLAGS="$CA65_FLAGS --feature labels_without_colons --feature pc_assignment --feature loose_char_term --include-dir .."
 
 funcbuildinc()
 {
 WHICHFILE=`echo $1|$SED 's/\.\(a\|A\)65//'`
 
-$CL65 -c $CA65_FLAGS -o $WHICHFILE.tmp $WHICHFILE.a65
-test -s $WHICHFILE.tmp && $LD65 -o $WHICHFILE.o65 --target none $WHICHFILE.tmp && $RM $WHICHFILE.tmp
-test -s $WHICHFILE.o65 && $OD -w8 -txC -v -An $WHICHFILE.o65|$SED 's/\([0-9a-f]\{2\}\) */0x\1,/g; $s/,$//' > $WHICHFILE.inc && $RM $WHICHFILE.o65
-}
+# assemble the file
+$CA65 $CA65_FLAGS -o $WHICHFILE.o $WHICHFILE.a65
 
-funcbuildvice()
-{
-WHICHFILE=`echo $1|$SED 's/\.\(a\|A\)65//'`
+# link it
+if test -s $WHICHFILE.o; then
+	$LD65 -o $WHICHFILE.bin --target none $WHICHFILE.o
+	$RM $WHICHFILE.o
+fi
 
-$CL65 -c $CA65_FLAGS -g -l -o $WHICHFILE.tmp $WHICHFILE.a65
-test -s $WHICHFILE.tmp && $LD65 -o $WHICHFILE.o65 --target none -Ln $WHICHFILE.sym65 $WHICHFILE.tmp && $RM $WHICHFILE.tmp
-#test -s $WHICHFILE.o65 && $OD -w8 -txC -v -An $WHICHFILE.o65|$SED 's/\([0-9a-f]\{2\}\) */0x\1,/g; $s/,$//' > $WHICHFILE.inc && $RM $WHICHFILE.o65
+# convert it into #include-able form for C
+if test -s $WHICHFILE.bin; then
+	$OD -w8 -txC -v -An $WHICHFILE.bin|$SED 's/\([0-9a-f]\{2\}\) */0x\1,/g; $s/,$//' > $WHICHFILE.inc
+	$RM $WHICHFILE.bin
+fi
 }

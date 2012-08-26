@@ -80,7 +80,7 @@ if not defined CC65PATH       set CC65PATH=%CC65_INC%/../bin/
 	rem a fixed path
 rem if not defined CC65PATH   set CC65PATH=/usr/local/bin/
 
-if not defined CL65           set     CL65=%CC65PATH%cl65
+if not defined CA65           set     CA65=%CC65PATH%ca65
 if not defined LD65           set     LD65=%CC65PATH%ld65
 
 rem Explicit settings for Cygwin based tools
@@ -97,3 +97,8 @@ rem if not defined CA65_FLAGS set CA65_FLAGS=%CA65_FLAGS% --listing
 rem Adjust for XU1541/XUM1541 compilation
 rem set XU1541DIR=\xu1541\include
 rem set XUM1541DIR=xum1541
+
+rem if not defined CYGWINPATHSET (
+rem	set PATH=%PATH%;%CYGWIN%\bin
+rem	set CYGWINPATHSET=1
+rem	)
