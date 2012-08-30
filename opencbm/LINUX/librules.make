@@ -41,11 +41,9 @@ install-lib:
 	install -m 755 $(SHLIBV3) $(DESTDIR)$(LIBDIR)
 	install -m 644 $(LIB) $(DESTDIR)$(LIBDIR)
 	cd $(DESTDIR)$(LIBDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
-
-        # Install the plugin helper tool
+	# Install the plugin helper tool
 	install -d $(DESTDIR)$(BINDIR)
 	install -m 755 ${RELATIVEPATH}/LINUX/plugin_helper_tools $(DESTDIR)$(BINDIR)/opencbm_plugin_helper_tools
-
 	# mark that there is no default plugin yet.
 	${RELATIVEPATH}/LINUX/plugin_helper_tools setdefaultplugin "$(DESTDIR)$(OPENCBM_CONFIG_PATH)" 00opencbm.conf ""
 	
@@ -61,7 +59,6 @@ endif
 # uninstall lib
 uninstall-lib:
 	cd $(DESTDIR)$(LIBDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
-
 	$(RELATIVEPATH)/LINUX/plugin_helper_tools uninstall "$(DESTDIR)$(OPENCBM_CONFIG_PATH)" 00opencbm.conf
 
 # install plugin
@@ -70,7 +67,6 @@ install-plugin:
 	install -m 755 $(SHLIBV3) $(DESTDIR)$(PLUGINDIR)
 	install -m 644 $(LIB) $(DESTDIR)$(PLUGINDIR)
 	cd $(DESTDIR)$(PLUGINDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
-
 	@echo "[${PLUGIN_NAME}]" > ${TMPFILE}
 	@echo "location=$(PLUGINDIR)$(SHLIB)" >> ${TMPFILE}
 	@echo "" >> ${TMPFILE}
@@ -84,7 +80,6 @@ install-plugin:
 uninstall-plugin:
 	-cd $(DESTDIR)$(PLUGINDIR) && rm -f $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
 	-rmdir -p $(DESTDIR)$(PLUGINDIR)
-
 	$(RELATIVEPATH)/LINUX/plugin_helper_tools uninstall "$(DESTDIR)$(OPENCBM_CONFIG_PATH)" 10$(PLUGIN_NAME).conf
 
 
