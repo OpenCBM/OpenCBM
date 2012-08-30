@@ -12,7 +12,7 @@ case "${OS}" in
 	ROOTGRP="wheel";
 	;;
 	"Darwin")
-	ROOTGRP="root";
+	ROOTGRP="wheel";
 	;;
 	*)
 	ROOTGRP="root";
