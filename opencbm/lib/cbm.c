@@ -6,7 +6,7 @@
  *
  *  Copyright 1999-2005           Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005,2007-2009, 2011 Spiro Trikaliotis
- *  Copyright 2009                Arnd <arnd(at)jonnz(dot)de>
+ *  Copyright 2009,2011           Arnd Menge <arnd(at)jonnz(dot)de>
  *
 */
 
@@ -252,6 +252,19 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_write_n);
         PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_read_track);
         PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_write_track);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_prepare_capture);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_prepare_write);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_get_sense);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_wait_for_stop_sense);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_wait_for_play_sense);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_motor_on);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_motor_off);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_start_capture);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_start_write);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_get_ver);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_download_config);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_upload_config);
+        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_break);
 
         PLUGIN_GET_ADDRESS(opencbm_plugin_iec_dbg_read);
         PLUGIN_GET_ADDRESS(opencbm_plugin_iec_dbg_write);
@@ -275,6 +288,19 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
               || NULL == Plugin_information->Plugin.opencbm_plugin_iec_poll
               || NULL == Plugin_information->Plugin.opencbm_plugin_iec_setrelease
               || NULL == Plugin_information->Plugin.opencbm_plugin_iec_wait
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_prepare_capture
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_prepare_write
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_get_sense
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_wait_for_stop_sense
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_wait_for_play_sense
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_motor_on
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_motor_off
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_start_capture
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_start_write
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_get_ver
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_download_config
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_upload_config
+              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_break
 
               ) ? 1 : 0;
 
@@ -1928,6 +1954,430 @@ cbm_srq_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int 
     FUNC_LEAVE_INT(ret);
 }
 
+/*! \brief TAPE: Prepare capture
+
+ This function is a helper function for tape:
+ It prepares the ZoomFloppy hardware for tape capture.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_prepare_capture(CBM_FILE HandleDevice, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_prepare_capture)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_prepare_capture(HandleDevice, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief TAPE: Prepare write
+
+ This function is a helper function for tape:
+ It prepares the ZoomFloppy hardware for tape write.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_prepare_write(CBM_FILE HandleDevice, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_prepare_write)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_prepare_write(HandleDevice, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief TAPE: Get tape sense
+
+ This function is a helper function for tape:
+ It returns the current tape sense state.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   The tape sense state
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_get_sense(CBM_FILE HandleDevice, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_get_sense)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_get_sense(HandleDevice, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief TAPE: Wait for <STOP> sense
+
+ This function is a helper function for tape:
+ It waits until the user stops the tape.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_wait_for_stop_sense(CBM_FILE HandleDevice, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_wait_for_stop_sense)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_wait_for_stop_sense(HandleDevice, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief TAPE: Wait for <PLAY> sense
+
+ This function is a helper function for tape:
+ It waits until the user presses play on tape.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_wait_for_play_sense(CBM_FILE HandleDevice, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_wait_for_play_sense)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_wait_for_play_sense(HandleDevice, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief TAPE: Motor on
+
+ This function is a helper function for tape:
+ It turns the tape drive motor on.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_motor_on(CBM_FILE HandleDevice, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_motor_on)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_motor_on(HandleDevice, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief TAPE: Motor off
+
+ This function is a helper function for tape:
+ It turns the tape drive motor off.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_motor_off(CBM_FILE HandleDevice, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_motor_off)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_motor_off(HandleDevice, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief TAPE: Start capture
+
+ This function is a helper function for tape:
+ It starts the actual tape capture.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which holds the bytes that are read.
+
+ \param Buffer_Length
+   The length of the Buffer.
+
+ \param Status
+   The return status.
+
+ \param BytesRead
+   The number of bytes read.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_start_capture(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_start_capture)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_start_capture(HandleDevice, Buffer, Buffer_Length, Status, BytesRead);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief TAPE: Start write
+
+ This function is a helper function for tape:
+ It starts the actual tape write.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which holds the bytes to be written.
+
+ \param Length
+   The number of bytes to write.
+
+ \param Status
+   The return status.
+
+ \param BytesWritten
+   The number of bytes written.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_start_write(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_start_write)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_start_write(HandleDevice, Buffer, Length, Status, BytesWritten);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+
+/*! \brief TAPE: Return tape firmware version
+
+ This function is a helper function for tape:
+ It returns the tape firmware version.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_get_ver(CBM_FILE HandleDevice, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_get_ver)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_get_ver(HandleDevice, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+
+int CBMAPIDECL
+cbm_tap_break(CBM_FILE HandleDevice)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_break)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_break(HandleDevice);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+
+/*! \brief TAPE: Download configuration
+
+ This function is a helper function for tape:
+ It reads the active configuration.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which holds the bytes that are read.
+
+ \param Buffer_Length
+   The length of the Buffer.
+
+ \param Status
+   The return status.
+
+ \param BytesRead
+   The number of bytes read.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_download_config(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_download_config)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_download_config(HandleDevice, Buffer, Buffer_Length, Status, BytesRead);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+/*! \brief TAPE: Upload configuration
+
+ This function is a helper function for tape:
+ It writes the active configuration.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which holds the bytes to be written.
+
+ \param Length
+   The number of bytes to write.
+
+ \param Status
+   The return status.
+
+ \param BytesWritten
+   The number of bytes written.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_upload_config(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_upload_config)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_upload_config(HandleDevice, Buffer, Length, Status, BytesWritten);
+
+    FUNC_LEAVE_INT(ret);
+}
+
 
 /*! \brief Get the function pointer for a function in a plugin
 
@@ -1943,6 +2393,7 @@ cbm_srq_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
 */
+
 
 void * CBMAPIDECL
 cbm_get_plugin_function_address(const char * Functionname)

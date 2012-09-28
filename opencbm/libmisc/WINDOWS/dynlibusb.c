@@ -60,7 +60,7 @@ int dynlibusb_init(void) {
         READ(claim_interface);
         READ(release_interface);
 //        READ(set_altinterface);
-//        READ(resetep);
+        READ(resetep);
         READ(clear_halt);
 //        READ(reset);
         READ(strerror);

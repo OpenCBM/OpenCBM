@@ -7,7 +7,7 @@
  *  Copyright 1999-2005           Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005,2008-2009 Spiro Trikaliotis
  *  Copyright 2006,2011           Wolfgang Moser (http://d81.de)
- *  Copyright 2009                Arnd <arnd(at)jonnz(dot)de>
+ *  Copyright 2009,2012           Arnd Menge
  *  Copyright 2011                Thomas Winkler
  */
 
@@ -16,7 +16,8 @@
 ** \author Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de> \n
 ** \authors With modifications to fit on Windows from
 **    Spiro Trikaliotis \n
-** \authors With additions from Wolfgang Moser and Arnd \n
+** \authors With additions from Wolfgang Moser \n
+** \authors With CBM 1530/1531 tape drive additions from Arnd Menge \n
 ** \n
 ** \brief DLL interface for accessing the driver
 **
@@ -236,6 +237,24 @@ EXTERN int CBMAPIDECL  cbm_srq_burst_read_track(CBM_FILE f, __u_char *buffer, un
 EXTERN int CBMAPIDECL cbm_srq_burst_write_track(CBM_FILE f, __u_char *buffer, unsigned int length);
 
 /* srq nibbler functions end */
+
+/* functions specifically for CBM 153x tape drive */
+
+EXTERN int CBMAPIDECL cbm_tap_prepare_capture(CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_prepare_write(CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_get_sense(CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_wait_for_stop_sense(CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_wait_for_play_sense(CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_start_capture(CBM_FILE f, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
+EXTERN int CBMAPIDECL cbm_tap_start_write(CBM_FILE f, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
+EXTERN int CBMAPIDECL cbm_tap_motor_on(CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_motor_off(CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_get_ver(CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_download_config(CBM_FILE f, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
+EXTERN int CBMAPIDECL cbm_tap_upload_config(CBM_FILE f, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
+EXTERN int CBMAPIDECL cbm_tap_break(CBM_FILE f);
+
+/* tape capture functions end */
 
 /* get function address of the plugin */
 EXTERN void * CBMAPIDECL cbm_get_plugin_function_address(const char * Functionname);

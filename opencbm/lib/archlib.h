@@ -68,6 +68,19 @@ EXTERN opencbm_plugin_parallel_burst_write_n_t     opencbm_plugin_srq_burst_writ
 EXTERN opencbm_plugin_parallel_burst_read_track_t  opencbm_plugin_srq_burst_read_track;
 EXTERN opencbm_plugin_parallel_burst_write_track_t opencbm_plugin_srq_burst_write_track;
 
+EXTERN opencbm_plugin_tap_prepare_capture_t        opencbm_plugin_tap_prepare_capture;
+EXTERN opencbm_plugin_tap_prepare_write_t          opencbm_plugin_tap_prepare_write;
+EXTERN opencbm_plugin_tap_get_sense_t              opencbm_plugin_tap_get_sense;
+EXTERN opencbm_plugin_tap_wait_for_stop_sense_t    opencbm_plugin_tap_wait_for_stop_sense;
+EXTERN opencbm_plugin_tap_wait_for_play_sense_t    opencbm_plugin_tap_wait_for_play_sense;
+EXTERN opencbm_plugin_tap_motor_on_t               opencbm_plugin_tap_motor_on;
+EXTERN opencbm_plugin_tap_motor_off_t              opencbm_plugin_tap_motor_off;
+EXTERN opencbm_plugin_tap_start_capture_t          opencbm_plugin_tap_start_capture;
+EXTERN opencbm_plugin_tap_start_write_t            opencbm_plugin_tap_start_write;
+EXTERN opencbm_plugin_tap_get_ver_t                opencbm_plugin_tap_get_ver;
+EXTERN opencbm_plugin_tap_download_config_t        opencbm_plugin_tap_download_config;
+EXTERN opencbm_plugin_tap_upload_config_t          opencbm_plugin_tap_upload_config;
+EXTERN opencbm_plugin_tap_break_t                  opencbm_plugin_tap_break;
 
 EXTERN opencbm_plugin_s1_read_n_t                  opencbm_plugin_s1_read_n;
 EXTERN opencbm_plugin_s1_write_n_t                 opencbm_plugin_s1_write_n;

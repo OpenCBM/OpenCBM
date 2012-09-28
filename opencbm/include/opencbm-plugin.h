@@ -306,6 +306,30 @@ typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_track_var_t(CBM_FILE H
 */
 typedef int CBMAPIDECL opencbm_plugin_parallel_burst_write_track_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
 
+/*! \brief @@@@@ \todo document
+
+ \param HandleDevice
+
+ \param Buffer
+
+ \param Length
+
+ \return
+*/
+typedef int CBMAPIDECL opencbm_plugin_tap_prepare_capture_t(CBM_FILE HandleDevice, int *Status);
+typedef int CBMAPIDECL opencbm_plugin_tap_prepare_write_t(CBM_FILE HandleDevice, int *Status);
+typedef int CBMAPIDECL opencbm_plugin_tap_get_sense_t(CBM_FILE HandleDevice, int *Status);
+typedef int CBMAPIDECL opencbm_plugin_tap_wait_for_stop_sense_t(CBM_FILE HandleDevice, int *Status);
+typedef int CBMAPIDECL opencbm_plugin_tap_wait_for_play_sense_t(CBM_FILE HandleDevice, int *Status);
+typedef int CBMAPIDECL opencbm_plugin_tap_motor_on_t(CBM_FILE HandleDevice, int *Status);
+typedef int CBMAPIDECL opencbm_plugin_tap_motor_off_t(CBM_FILE HandleDevice, int *Status);
+typedef int CBMAPIDECL opencbm_plugin_tap_start_capture_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
+typedef int CBMAPIDECL opencbm_plugin_tap_start_write_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
+typedef int CBMAPIDECL opencbm_plugin_tap_get_ver_t(CBM_FILE HandleDevice, int *Status);
+typedef int CBMAPIDECL opencbm_plugin_tap_download_config_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
+typedef int CBMAPIDECL opencbm_plugin_tap_upload_config_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
+typedef int CBMAPIDECL opencbm_plugin_tap_break_t(CBM_FILE HandleDevice);
+
 /*! \brief read a block of data from the OpenCBM backend with protocol serial-1
 
  \param HandleDevice  
@@ -810,6 +834,20 @@ struct opencbm_plugin_s {
     opencbm_plugin_parallel_burst_write_n_t     * opencbm_plugin_srq_burst_write_n;     /*!< pointer to a opencbm_plugin_parallel_burst_write_n_t() function */
     opencbm_plugin_parallel_burst_read_track_t  * opencbm_plugin_srq_burst_read_track;  /*!< pointer to a opencbm_plugin_parallel_burst_read_track_t() function */
     opencbm_plugin_parallel_burst_write_track_t * opencbm_plugin_srq_burst_write_track; /*!< pointer to a opencbm_plugin_parallel_burst_write_track_t() function */
+
+    opencbm_plugin_tap_prepare_capture_t        * opencbm_plugin_tap_prepare_capture;     /*!< pointer to a opencbm_plugin_tap_prepare_capture_t() function */
+    opencbm_plugin_tap_prepare_write_t          * opencbm_plugin_tap_prepare_write;       /*!< pointer to a opencbm_plugin_tap_prepare_write_t() function */
+    opencbm_plugin_tap_get_sense_t              * opencbm_plugin_tap_get_sense;           /*!< pointer to a opencbm_plugin_tap_get_sense_t() function */
+    opencbm_plugin_tap_wait_for_stop_sense_t    * opencbm_plugin_tap_wait_for_stop_sense; /*!< pointer to a opencbm_plugin_tap_wait_for_stop_sense_t() function */
+    opencbm_plugin_tap_wait_for_play_sense_t    * opencbm_plugin_tap_wait_for_play_sense; /*!< pointer to a opencbm_plugin_tap_wait_for_play_sense_t() function */
+    opencbm_plugin_tap_motor_on_t               * opencbm_plugin_tap_motor_on;            /*!< pointer to a opencbm_plugin_tap_motor_on_t() function */
+    opencbm_plugin_tap_motor_off_t              * opencbm_plugin_tap_motor_off;           /*!< pointer to a opencbm_plugin_tap_motor_off_t() function */
+    opencbm_plugin_tap_start_capture_t          * opencbm_plugin_tap_start_capture;       /*!< pointer to a opencbm_plugin_tap_start_capture_t() function */
+    opencbm_plugin_tap_start_write_t            * opencbm_plugin_tap_start_write;         /*!< pointer to a opencbm_plugin_tap_start_write_t() function */
+    opencbm_plugin_tap_get_ver_t                * opencbm_plugin_tap_get_ver;             /*!< pointer to a opencbm_plugin_tap_get_ver_t() function */
+    opencbm_plugin_tap_download_config_t        * opencbm_plugin_tap_download_config;     /*!< pointer to a opencbm_plugin_tap_download_config_t() function */
+    opencbm_plugin_tap_upload_config_t          * opencbm_plugin_tap_upload_config;       /*!< pointer to a opencbm_plugin_tap_upload_config_t() function */
+    opencbm_plugin_tap_break_t                  * opencbm_plugin_tap_break;               /*!< pointer to a opencbm_plugin_tap_break_t() function */
 
 } opencbm_plugin_t;
 

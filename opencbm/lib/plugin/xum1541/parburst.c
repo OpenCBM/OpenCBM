@@ -353,3 +353,368 @@ opencbm_plugin_srq_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, un
 
     return result;
 }
+
+/**************** Tape routines below ****************/
+
+/*! \brief TAPE: Prepare capture
+
+ This function is a helper function for tape:
+ It prepares the ZoomFloppy hardware for tape capture.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_prepare_capture(CBM_FILE HandleDevice, int *Status)
+{
+    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_PREPARE_CAPTURE, 0, 0);
+    //printf("opencbm_plugin_tap_prepare_capture: %x\n", result);
+    return 1;
+}
+
+/*! \brief TAPE: Prepare write
+
+ This function is a helper function for tape:
+ It prepares the ZoomFloppy hardware for tape write.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_prepare_write(CBM_FILE HandleDevice, int *Status)
+{
+    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_PREPARE_WRITE, 0, 0);
+    //printf("opencbm_plugin_tap_prepare_write: %x\n", result);
+    return 1;
+}
+
+/*! \brief TAPE: Get tape sense
+
+ This function is a helper function for tape:
+ It returns the current tape sense state.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   The tape sense state
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_get_sense(CBM_FILE HandleDevice, int *Status)
+{
+    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_GET_SENSE, 0, 0);
+    //printf("opencbm_plugin_tap_get_sense: %x\n", result);
+    return 1;
+}
+
+/*! \brief TAPE: Wait for <STOP> sense
+
+ This function is a helper function for tape:
+ It waits until the user stops the tape.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_wait_for_stop_sense(CBM_FILE HandleDevice, int *Status)
+{
+    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_WAIT_FOR_STOP_SENSE, 0, 0);
+    //printf("opencbm_plugin_tap_wait_for_stop_sense: %x\n", result);
+    return 1;
+}
+
+/*! \brief TAPE: Wait for <PLAY> sense
+
+ This function is a helper function for tape:
+ It waits until the user presses play on tape.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_wait_for_play_sense(CBM_FILE HandleDevice, int *Status)
+{
+    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_WAIT_FOR_PLAY_SENSE, 0, 0);
+    //printf("opencbm_plugin_tap_wait_for_play_sense: %x\n", result);
+    return 1;
+}
+
+/*! \brief TAPE: Motor on
+
+ This function is a helper function for tape:
+ It turns the tape drive motor on.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_motor_on(CBM_FILE HandleDevice, int *Status)
+{
+    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_MOTOR_ON, 0, 0);
+    //printf("opencbm_plugin_tap_motor_on: %x\n", result);
+    return 1;
+}
+
+/*! \brief TAPE: Motor off
+
+ This function is a helper function for tape:
+ It turns the tape drive motor off.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_motor_off(CBM_FILE HandleDevice, int *Status)
+{
+    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_MOTOR_OFF, 0, 0);
+    //printf("opencbm_plugin_tap_motor_off: %x\n", result);
+    return 1;
+}
+
+/*! \brief TAPE: Start capture
+
+ This function is a helper function for tape:
+ It starts the actual tape capture.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which hold the bytes to be written.
+
+ \param Buffer_Length
+   The length of the Buffer.
+
+ \param Status
+   The return status.
+
+ \param BytesRead
+   The number of bytes read.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_start_capture(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
+{
+    int result = xum1541_read_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP, Buffer, Buffer_Length, Status, BytesRead);
+    if (result <= 0) {
+        DBG_WARN((DBG_PREFIX "opencbm_plugin_tap_start_capture: returned with error %d", result));
+    }
+    return result;
+}
+
+/*! \brief TAPE: Start write
+
+ This function is a helper function for tape:
+ It starts the actual tape write.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which holds the bytes to be written.
+
+ \param Length
+   The number of bytes to write.
+
+ \param Status
+   The return status.
+
+ \param BytesWritten
+   The number of bytes written.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_start_write(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
+{
+    int result = xum1541_write_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP, Buffer, Length, Status, BytesWritten);
+    if (result <= 0) {
+        DBG_WARN((DBG_PREFIX "opencbm_plugin_tap_start_write: returned with error %d", result));
+    }
+    return result;
+}
+
+/*! \brief TAPE: Return tape firmware version
+
+ This function is a helper function for tape:
+ It returns the tape firmware version.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_get_ver(CBM_FILE HandleDevice, int *Status)
+{
+    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_GET_VER, 0, 0);
+    //printf("opencbm_plugin_tap_get_ver: %x\n", result);
+    return 1;
+}
+
+int CBMAPIDECL
+opencbm_plugin_tap_break(CBM_FILE HandleDevice)
+{
+    return xum1541_tap_break((usb_dev_handle *)HandleDevice);
+    //printf("opencbm_plugin_tap_break: %x\n", result);
+}
+
+/*! \brief TAPE: Download configuration
+
+ This function is a helper function for tape:
+ It reads the active configuration.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which hold the bytes to be written.
+
+ \param Buffer_Length
+   The length of the Buffer.
+
+ \param Status
+   The return status.
+
+ \param BytesRead
+   The number of bytes read.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_download_config(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
+{
+    int result = xum1541_read_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP_CONFIG, Buffer, Buffer_Length, Status, BytesRead);
+    if (result <= 0) {
+        DBG_WARN((DBG_PREFIX "opencbm_plugin_tap_download_config: returned with error %d", result));
+    }
+    return result;
+}
+
+/*! \brief TAPE: Upload configuration
+
+ This function is a helper function for tape:
+ It writes the active configuration.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which holds the bytes to be written.
+
+ \param Length
+   The number of bytes to write.
+
+ \param Status
+   The return status.
+
+ \param BytesWritten
+   The number of bytes written.
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+opencbm_plugin_tap_upload_config(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
+{
+    int result = xum1541_write_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP_CONFIG, Buffer, Length, Status, BytesWritten);
+    if (result <= 0) {
+        DBG_WARN((DBG_PREFIX "opencbm_plugin_tap_upload_config: returned with error %d", result));
+    }
+    return result;
+}

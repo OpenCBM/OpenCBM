@@ -16,6 +16,7 @@ DIRS= \
 	demo \
 	sample \
 	cbmrpm41 \
+	tape \
 	sys
 
 OPTIONAL_DIRS= \

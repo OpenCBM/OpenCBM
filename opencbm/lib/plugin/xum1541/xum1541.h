@@ -40,6 +40,12 @@ CTASSERT(sizeof(CBM_FILE) >= sizeof(usb_dev_handle *));
 // the maximum value for all allowed xum1541 serial numbers
 #define MAX_ALLOWED_XUM1541_SERIALNUM 255
 
+// Disk/tape mode
+#define DeviceDriveMode_NoTapeSupport  -1 // Firmware has no tape support
+#define DeviceDriveMode_Uninit          0 // Uninitialized
+#define DeviceDriveMode_Disk            1 // Disk drive mode (only communication to disk drives allowed)
+#define DeviceDriveMode_Tape            2 // Tape drive mode (only communication to tape drive allowed)
+
 const char *xum1541_device_path(int PortNumber);
 int xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber);
 void xum1541_close(usb_dev_handle *HandleXum1541);
@@ -50,7 +56,13 @@ int xum1541_ioctl(usb_dev_handle *HandleXum1541, unsigned int cmd,
 // Read/write data in normal CBM and speeder protocol modes
 int xum1541_write(usb_dev_handle *HandleXum1541, __u_char mode,
     const __u_char *data, size_t size);
+int xum1541_write_ext(usb_dev_handle *HandleXum1541, __u_char mode,
+    const __u_char *data, size_t size, int *Status, int *BytesWritten);
 int xum1541_read(usb_dev_handle *HandleXum1541, __u_char mode,
     __u_char *data, size_t size);
+int xum1541_read_ext(usb_dev_handle *HandleXum1541, __u_char mode,
+    __u_char *data, size_t size, int *Status, int *BytesRead);
+
+int xum1541_tap_break(usb_dev_handle *HandleXum1541);
 
 #endif // XUM1541_H

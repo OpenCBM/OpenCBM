@@ -54,7 +54,7 @@ struct usb_dll_s {
     int (LIBUSB_APIDECL *claim_interface)(usb_dev_handle *dev, int interface);
     int (LIBUSB_APIDECL *release_interface)(usb_dev_handle *dev, int interface);
 //    int (LIBUSB_APIDECL *set_altinterface)(usb_dev_handle *dev, int alternate);
-//    int (LIBUSB_APIDECL *resetep)(usb_dev_handle *dev, unsigned int ep);
+    int (LIBUSB_APIDECL *resetep)(usb_dev_handle *dev, unsigned int ep);
     int (LIBUSB_APIDECL *clear_halt)(usb_dev_handle *dev, unsigned int ep);
 //    int (LIBUSB_APIDECL *reset)(usb_dev_handle *dev);
 

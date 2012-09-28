@@ -45,7 +45,7 @@ else ifeq ($(MODEL),ZOOMFLOPPY)
 CPUMODEL=	atmega32u2
 CPURATE=	16000000
 BOARD=		BOARD_ZOOMFLOPPY
-BOARD_OBJS=	board-zoomfloppy.o ieee.o
+BOARD_OBJS=	board-zoomfloppy.o ieee.o tape_153x.o
 else ifeq ($(MODEL),BUMBLEB)
 CPUMODEL=	at90usb162
 CPURATE=	16000000

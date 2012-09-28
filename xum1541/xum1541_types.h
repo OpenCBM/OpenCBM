@@ -28,6 +28,7 @@
 #define XUM1541_RESET               (XUM1541_ECHO + 2)
 #define XUM1541_SHUTDOWN            (XUM1541_ECHO + 3)
 #define XUM1541_ENTER_BOOTLOADER    (XUM1541_ECHO + 4)
+#define XUM1541_TAP_BREAK           (XUM1541_ECHO + 5)
 
 // Adapter capabilities, but device may not support them
 #define XUM1541_CAP_CBM             0x01 // supports CBM commands
@@ -38,15 +39,22 @@
 #else
 #define XUM1541_CAP_IEEE488         0
 #endif
+#ifdef TAPE_SUPPORT
+#define XUM1541_CAP_TAP             0x10 // 153x tape support
+#else
+#define XUM1541_CAP_TAP             0
+#endif
 
 #define XUM1541_CAPABILITIES        (XUM1541_CAP_CBM |      \
                                      XUM1541_CAP_NIB |      \
+                                     XUM1541_CAP_TAP |      \
                                      XUM1541_CAP_IEEE488)
 
 // Actual auto-detected status
 #define XUM1541_DOING_RESET         0x01 // no clean shutdown, will reset now
 #define XUM1541_NO_DEVICE           0x02 // no IEC device present yet
 #define XUM1541_IEEE488_PRESENT     0x10 // IEEE-488 device connected
+#define XUM1541_TAPE_PRESENT        0x20 // 153x tape device connected
 
 // Sizes for commands and responses in bytes
 #define XUM_CMDBUF_SIZE             4 // Command block (out)
@@ -90,6 +98,14 @@
 #define XUM1541_PARBURST_WRITE      (XUM1541_IOCTL + 15)
 #define XUM1541_SRQBURST_READ       (XUM1541_IOCTL + 16)
 #define XUM1541_SRQBURST_WRITE      (XUM1541_IOCTL + 17)
+#define XUM1541_TAP_MOTOR_ON            (XUM1541_IOCTL + 50)
+#define XUM1541_TAP_GET_VER             (XUM1541_IOCTL + 51)
+#define XUM1541_TAP_PREPARE_CAPTURE     (XUM1541_IOCTL + 52)
+#define XUM1541_TAP_PREPARE_WRITE       (XUM1541_IOCTL + 53)
+#define XUM1541_TAP_GET_SENSE           (XUM1541_IOCTL + 54)
+#define XUM1541_TAP_WAIT_FOR_STOP_SENSE (XUM1541_IOCTL + 55)
+#define XUM1541_TAP_WAIT_FOR_PLAY_SENSE (XUM1541_IOCTL + 56)
+#define XUM1541_TAP_MOTOR_OFF           (XUM1541_IOCTL + 57)
 
 #define IS_CMD_ASYNC(x)             ((x) == XUM1541_IEC_WAIT)
 
@@ -102,6 +118,12 @@
 #define XUM1541_IO_BUSY             1
 #define XUM1541_IO_READY            2
 #define XUM1541_IO_ERROR            3
+
+// Tape/disk mode error return values for xum1541_ioctl, xum1541_read, xum1541_write.
+#define XUM1541_Error_NoTapeSupport      -100
+#define XUM1541_Error_NoDiskTapeMode     -101
+#define XUM1541_Error_TapeCmdInDiskMode  -102
+#define XUM1541_Error_DiskCmdInTapeMode  -103
 
 // Macros to retrive the status and extended value (usually a length).
 #define XUM_GET_STATUS(buf)         (buf[0])
@@ -123,6 +145,8 @@
 #define XUM1541_NIB_COMMAND         (7 << 4) // BN parallel commands
 #define XUM1541_NIB_SRQ             (8 << 4) // 1571 serial nibbler
 #define XUM1541_NIB_SRQ_COMMAND     (9 << 4) // Serial commands
+#define XUM1541_TAP                (10 << 4) // tape read/write
+#define XUM1541_TAP_CONFIG         (11 << 4) // tape send/receive configuration
 
 // Flags for use with write and XUM1541_CBM protocol
 #define XUM_WRITE_TALK              (1 << 0)

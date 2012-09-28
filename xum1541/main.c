@@ -52,6 +52,7 @@ main(void)
     board_init();
     board_set_status(STATUS_INIT);
 
+    // If a CBM 153x tape drive is attached, detect it and enable tape mode.
     // If any IEC/IEEE drives are attached, detect them early.
     // This leaves the IO pins in the proper state to allow them to come
     // out of reset until we're ready to access them.

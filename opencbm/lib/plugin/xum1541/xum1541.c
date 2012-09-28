@@ -2,6 +2,7 @@
  * xum1541 driver for bulk and control messages
  * Copyright 2009-2010 Nate Lawson <nate@root.org>
  * Copyright 2010 Spiro Trikaliotis
+ * Copyright 2012 Arnd Menge
  *
  * Incorporates some code from the xu1541 driver by:
  * Copyright 2007 Till Harbaum <till@harbaum.org>
@@ -18,6 +19,9 @@
 ** \n
 ** \brief libusb-based xum1541 access routines
 ****************************************************************/
+
+// This XUM1541 plugin has tape support.
+#define TAPE_SUPPORT 1
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -38,6 +42,8 @@
 #endif
 
 static int debug_level = -1; /*!< \internal \brief the debugging level for debugging output */
+
+unsigned char DeviceDriveMode; // Temporary disk/tape mode hack until usb device handle context is there.
 
 /*! \internal \brief Output debugging information for the xum1541
 
@@ -370,6 +376,9 @@ xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber)
     unsigned char devInfo[XUM_DEVINFO_SIZE], devStatus;
     int len;
 
+    // Place after "xum1541_usb_handle" allocation:
+    /*uh->*/DeviceDriveMode = DeviceDriveMode_Uninit;
+
     xum1541_enumerate(HandleXum1541, PortNumber);
 
     if (*HandleXum1541 == NULL) {
@@ -422,6 +431,26 @@ xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber)
             return -1;
         }
     }
+
+    //  Enable disk or tape mode.
+	if (devInfo[1] & XUM1541_CAP_TAP)
+	{
+		if (devInfo[2] & XUM1541_TAPE_PRESENT)
+		{
+			/*uh->*/DeviceDriveMode = DeviceDriveMode_Tape;
+            xum1541_dbg(1, "[xum1541_init] Tape supported, tape mode entered.");
+		}
+		else
+		{
+			/*uh->*/DeviceDriveMode = DeviceDriveMode_Disk;
+            xum1541_dbg(1, "[xum1541_init] Tape supported, disk mode entered.");
+		}
+	}
+	else
+	{
+		DeviceDriveMode = (unsigned char) DeviceDriveMode_NoTapeSupport;
+        xum1541_dbg(1, "[xum1541_init] No tape support.");
+	}
 
     return 0;
 }
@@ -529,6 +558,40 @@ xum1541_wait_status(usb_dev_handle *HandleXum1541)
     return ret;
 }
 
+// Macro to enforce disk/tape mode.
+// Checks if xum1541_ioctl/xum1541_read/xum1541_write command is allowed in currently set disk/tape mode.
+#define RefuseToWorkInWrongMode \
+    {                                                                                                    \
+        if (/*uh->*/DeviceDriveMode == DeviceDriveMode_Uninit)                                               \
+        {                                                                                                \
+            xum1541_dbg(1, "[RefuseToWorkInWrongMode] cmd blocked - No disk or tape mode set.");         \
+            return XUM1541_Error_NoDiskTapeMode;                                                         \
+        }                                                                                                \
+                                                                                                         \
+        if (isTapeCmd)                                                                                   \
+        {                                                                                                \
+            if (/*uh->*/DeviceDriveMode == DeviceDriveMode_NoTapeSupport)                                \
+            {                                                                                            \
+                xum1541_dbg(1, "[RefuseToWorkInWrongMode] cmd blocked - Firmware has no tape support."); \
+                return XUM1541_Error_NoTapeSupport;                                                      \
+            }                                                                                            \
+                                                                                                         \
+            if (/*uh->*/DeviceDriveMode == DeviceDriveMode_Disk)                                             \
+            {                                                                                            \
+                xum1541_dbg(1, "[RefuseToWorkInWrongMode] cmd blocked - Tape cmd in disk mode.");        \
+                return XUM1541_Error_TapeCmdInDiskMode;                                                  \
+            }                                                                                            \
+        }                                                                                                \
+        else /*isDiskCmd*/                                                                               \
+        {                                                                                                \
+            if (/*uh->*/DeviceDriveMode == DeviceDriveMode_Tape)                                             \
+            {                                                                                            \
+                xum1541_dbg(1, "[RefuseToWorkInWrongMode] cmd blocked - Disk cmd in tape mode.");        \
+                return XUM1541_Error_DiskCmdInTapeMode;                                                  \
+            }                                                                                            \
+        }                                                                                                \
+    }
+
 /*! \brief Perform an ioctl on the xum1541, which is any command other than
     read/write or special device management commands such as INIT and RESET.
 
@@ -554,8 +617,12 @@ xum1541_ioctl(usb_dev_handle *HandleXum1541, unsigned int cmd, unsigned int addr
 {
     int nBytes, ret;
     unsigned char cmdBuf[XUM_CMDBUF_SIZE];
+    BOOL isTapeCmd = ((XUM1541_TAP_MOTOR_ON <= cmd) && (cmd <= XUM1541_TAP_MOTOR_OFF));
 
     xum1541_dbg(1, "ioctl %d for device %d, sub %d", cmd, addr, secaddr);
+
+    RefuseToWorkInWrongMode; // Check if command allowed in current disk/tape mode.
+
     cmdBuf[0] = (unsigned char)cmd;
     cmdBuf[1] = (unsigned char)addr;
     cmdBuf[2] = (unsigned char)secaddr;
@@ -575,6 +642,25 @@ xum1541_ioctl(usb_dev_handle *HandleXum1541, unsigned int cmd, unsigned int addr
     ret = xum1541_wait_status(HandleXum1541);
     xum1541_dbg(2, "return val = %x", ret);
     return ret;
+}
+
+/*! \brief Send tape operations abort command to the xum1541 device
+
+ \param HandleXum1541
+   A XUM1541_HANDLE which contains the file handle of the USB device.
+
+ \return
+   Returns the value the USB device sent back.
+*/
+int
+xum1541_tap_break(usb_dev_handle *HandleXum1541)
+{
+    BOOL isTapeCmd = TRUE;
+    RefuseToWorkInWrongMode; // Check if command allowed in current disk/tape mode.
+
+    xum1541_dbg(1, "[xum1541_tap_break] Sending tape break command.");
+
+    return xum1541_control_msg(HandleXum1541, XUM1541_TAP_BREAK);
 }
 
 /*! \brief Write data to the xum1541 device
@@ -602,10 +688,13 @@ xum1541_write(usb_dev_handle *HandleXum1541, __u_char modeFlags, const __u_char 
     int wr, mode, ret;
     size_t bytesWritten, bytes2write;
     __u_char cmdBuf[XUM_CMDBUF_SIZE];
+    BOOL isTapeCmd = ((modeFlags == XUM1541_TAP) || (modeFlags == XUM1541_TAP_CONFIG));
 
     mode = modeFlags & 0xf0;
     xum1541_dbg(1, "write %d %d bytes from address %p flags %x",
         mode, size, data, modeFlags & 0x0f);
+
+    RefuseToWorkInWrongMode; // Check if command allowed in current disk/tape mode.
 
     // Send the write command
     cmdBuf[0] = XUM1541_WRITE;
@@ -630,6 +719,14 @@ xum1541_write(usb_dev_handle *HandleXum1541, __u_char modeFlags, const __u_char 
             XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT,
             (char *)data, bytes2write, LIBUSB_NO_TIMEOUT);
         if (wr < 0) {
+            if (isTapeCmd)
+            {
+                if (usb.resetep(HandleXum1541, XUM_BULK_OUT_ENDPOINT | USB_ENDPOINT_OUT) < 0)
+                    fprintf(stderr, "USB reset ep request failed for out ep (tape stall): %s\n", usb.strerror());
+                if (usb.control_msg(HandleXum1541, USB_RECIP_ENDPOINT, USB_REQ_CLEAR_FEATURE, 0, XUM_BULK_OUT_ENDPOINT, NULL, 0, USB_TIMEOUT) < 0)
+                    fprintf(stderr, "USB error in xum1541_control_msg (tape stall): %s\n", usb.strerror());
+                return bytesWritten;
+            }
             fprintf(stderr, "USB error in write data: %s\n",
                 usb.strerror());
             return -1;
@@ -661,6 +758,58 @@ xum1541_write(usb_dev_handle *HandleXum1541, __u_char modeFlags, const __u_char 
     return bytesWritten;
 }
 
+/*! \brief Wrapper for xum1541_write() forcing xum1541_wait_status(), with additional parameters:
+
+ \param Status
+   The return status.
+
+ \param BytesWritten
+   The number of bytes written.
+
+ \return
+     1 : Finished successfully.
+    <0 : Fatal error.
+*/
+
+int
+xum1541_write_ext(usb_dev_handle *HandleXum1541, __u_char modeFlags, const __u_char *data, size_t size, int *Status, int *BytesWritten)
+{
+    xum1541_dbg(1, "[xum1541_write_ext]");
+    *BytesWritten = xum1541_write(HandleXum1541, modeFlags, data, size);
+    if (*BytesWritten < 0)
+        return *BytesWritten;
+    xum1541_dbg(2, "[xum1541_write_ext] BytesWritten = %d", *BytesWritten);
+    *Status = xum1541_wait_status(HandleXum1541);
+    xum1541_dbg(2, "[xum1541_write_ext] Status = %d", *Status);
+    return 1;
+}
+
+/*! \brief Wrapper for xum1541_read() forcing xum1541_wait_status(), with additional parameters:
+
+ \param Status
+   The return status.
+
+ \param BytesRead
+   The number of bytes read.
+
+ \return
+     1 : Finished successfully.
+    <0 : Fatal error.
+*/
+
+int
+xum1541_read_ext(usb_dev_handle *HandleXum1541, __u_char mode, __u_char *data, size_t size, int *Status, int *BytesRead)
+{
+    xum1541_dbg(1, "[xum1541_read_ext]");
+    *BytesRead = xum1541_read(HandleXum1541, mode, data, size);
+    if (*BytesRead < 0)
+        return *BytesRead;
+    xum1541_dbg(2, "[xum1541_read_ext] BytesRead = %d", *BytesRead);
+    *Status = xum1541_wait_status(HandleXum1541);
+    xum1541_dbg(2, "[xum1541_read_ext] Status = %d", *Status);
+    return 1;
+}
+
 /*! \brief Read data from the xum1541 device
 
  \param HandleXum1541
@@ -686,9 +835,12 @@ xum1541_read(usb_dev_handle *HandleXum1541, __u_char mode, __u_char *data, size_
     int rd;
     size_t bytesRead, bytes2read;
     unsigned char cmdBuf[XUM_CMDBUF_SIZE];
+    BOOL isTapeCmd = ((mode == XUM1541_TAP) || (mode == XUM1541_TAP_CONFIG));
 
     xum1541_dbg(1, "read %d %d bytes to address %p",
                mode, size, data);
+
+    RefuseToWorkInWrongMode; // Check if command allowed in current disk/tape mode.
 
     // Send the read command
     cmdBuf[0] = XUM1541_READ;

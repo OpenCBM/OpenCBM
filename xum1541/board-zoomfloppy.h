@@ -45,7 +45,43 @@ void board_init_iec(void);
 #if MODEL == ZOOMFLOPPY
 #define IEEE_SUPPORT    1
 #define SRQ_NIB_SUPPORT 1
+#define TAPE_SUPPORT    1
 #endif
+
+#ifdef TAPE_SUPPORT
+
+// Define tape SENSE line
+#define IO_SENSE        _BV(0) // B0/PCINT0
+#define DDR_SENSE       DDRB
+#define PORT_SENSE      PORTB
+#define PIN_SENSE       PINB
+
+// Define tape MOTOR CONTROL line
+#define IO_MOTOR        _BV(1) // B1
+#define DDR_MOTOR       DDRB
+#define PORT_MOTOR      PORTB
+
+// Define tape disconnect test lines
+#define IO_DETECT_IN    _BV(0) // D0/INT0
+#define IO_DETECT_OUT   _BV(1) // D1
+#define DDR_DETECT      DDRD
+#define PORT_DETECT     PORTD
+#define PIN_DETECT      PIND
+#define IN_EIFR         _BV(INTF0)            // EIFR: INT0 flag.
+#define IN_EIMSK        _BV(INT0)             // EIMSK: INT0 mask.
+#define IN_EICRA        _BV(ISC01)|_BV(ISC00) // Interrupt Sense Control: Rising edge of D0 generates interrupt request.
+
+// Define tape READ line
+#define IO_READ         _BV(7) // C7/ICP1
+#define DDR_READ        DDRC
+#define PORT_READ       PORTC
+
+// Define tape WRITE line
+#define IO_WRITE        _BV(6) // C6/OC1A
+#define DDR_WRITE       DDRC
+#define PORT_WRITE      PORTC
+
+#endif // TAPE_SUPPORT
 
 #define IEEE_EOI_IO     0xc5 // input, output
 #define IEEE_ATN_I      0xc6 // input only

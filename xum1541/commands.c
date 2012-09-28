@@ -39,17 +39,31 @@ struct ProtocolFunctions *cmds;
 
 static int nib_check_write(uint8_t data);
 
+// Allow setting tracking var usbDataLen from outside.
+void Set_usbDataLen(uint16_t Len) { usbDataLen = Len; }
+
 /*
- * Try to find an IEEE device first. If not found or unsupported, fall
+ * Probe for CBM 153x tape device first. If found enter tape mode and
+ * return. If not found or unsupported, continue device detection.
+ * Try to find an IEEE device next. If not found or unsupported, fall
  * back to IEC.
  */
 struct ProtocolFunctions *
 cbm_init(void)
 {
-    struct ProtocolFunctions *protoFn;
+    struct ProtocolFunctions *protoFn = NULL;
 
     // Nothing going on with the device yet.
     currState = 0;
+
+#ifdef TAPE_SUPPORT
+    if (Probe4TapeDevice() == Tape_Status_OK_Tape_Device_Present)
+    {
+        Enter_Tape_Mode(&protoFn);
+        currState |= XUM1541_TAPE_PRESENT;
+        return protoFn;
+    }
+#endif
 
 #ifdef IEEE_SUPPORT
     protoFn = ieee_init();
@@ -626,6 +640,11 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
         if ((cmdSeqInProgress & XUM1541_DOING_RESET) == 0)
             cmds->cbm_reset(false);
         return 0;
+#ifdef TAPE_SUPPORT
+    case XUM1541_TAP_BREAK:
+        cmds->cbm_reset(false);
+        return 0;
+#endif // TAPE_SUPPORT
     default:
         DEBUGF(DBG_ERROR, "ERR: control cmd %d not impl\n", cmd);
         return -1;
@@ -701,6 +720,14 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
             ret = 0;
             break;
 #endif // SRQ_NIB_SUPPORT
+#ifdef TAPE_SUPPORT
+        case XUM1541_TAP:
+            XUM_SET_STATUS_VAL(status, Tape_Capture());
+            break;
+        case XUM1541_TAP_CONFIG:
+            XUM_SET_STATUS_VAL(status, Tape_DownloadConfig());
+            break;
+#endif // TAPE_SUPPORT
         default:
             DEBUGF(DBG_ERROR, "badproto %d\n", proto);
             ret = -1;
@@ -753,6 +780,14 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
             ret = 0;
             break;
 #endif // SRQ_NIB_SUPPORT
+#ifdef TAPE_SUPPORT
+        case XUM1541_TAP:
+            XUM_SET_STATUS_VAL(status, Tape_Write());
+            break;
+        case XUM1541_TAP_CONFIG:
+            XUM_SET_STATUS_VAL(status, Tape_UploadConfig());
+            break;
+#endif // TAPE_SUPPORT
         default:
             DEBUGF(DBG_ERROR, "badproto %d\n", proto);
             ret = -1;
@@ -831,6 +866,32 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
         nib_srqburst_write_checked(request[1]);
         break;
 #endif // SRQ_NIB_SUPPORT
+#ifdef TAPE_SUPPORT
+    case XUM1541_TAP_PREPARE_CAPTURE:
+        XUM_SET_STATUS_VAL(status, Tape_PrepareCapture());
+        break;
+    case XUM1541_TAP_PREPARE_WRITE:
+        XUM_SET_STATUS_VAL(status, Tape_PrepareWrite());
+        break;
+    case XUM1541_TAP_GET_SENSE:
+        XUM_SET_STATUS_VAL(status, Tape_GetSense());
+        break;
+    case XUM1541_TAP_WAIT_FOR_STOP_SENSE:
+        XUM_SET_STATUS_VAL(status, Tape_WaitForStopSense());
+        break;
+    case XUM1541_TAP_WAIT_FOR_PLAY_SENSE:
+        XUM_SET_STATUS_VAL(status, Tape_WaitForPlaySense());
+        break;
+    case XUM1541_TAP_MOTOR_ON:
+        XUM_SET_STATUS_VAL(status, Tape_MotorOn());
+        break;
+    case XUM1541_TAP_MOTOR_OFF:
+        XUM_SET_STATUS_VAL(status, Tape_MotorOff());
+        break;
+    case XUM1541_TAP_GET_VER:
+        XUM_SET_STATUS_VAL(status, Tape_GetTapeFirmwareVersion());
+        break;
+#endif // TAPE_SUPPORT
     default:
         DEBUGF(DBG_ERROR, "ERR: bulk cmd %d not impl.\n", cmd);
         ret = -1;

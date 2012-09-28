@@ -1,0 +1,3 @@
+DIRS= \
+    cap     \
+    tap-cbm
