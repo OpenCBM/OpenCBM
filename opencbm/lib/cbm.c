@@ -288,6 +288,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
               || NULL == Plugin_information->Plugin.opencbm_plugin_iec_poll
               || NULL == Plugin_information->Plugin.opencbm_plugin_iec_setrelease
               || NULL == Plugin_information->Plugin.opencbm_plugin_iec_wait
+/*
               || NULL == Plugin_information->Plugin.opencbm_plugin_tap_prepare_capture
               || NULL == Plugin_information->Plugin.opencbm_plugin_tap_prepare_write
               || NULL == Plugin_information->Plugin.opencbm_plugin_tap_get_sense
@@ -301,6 +302,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
               || NULL == Plugin_information->Plugin.opencbm_plugin_tap_download_config
               || NULL == Plugin_information->Plugin.opencbm_plugin_tap_upload_config
               || NULL == Plugin_information->Plugin.opencbm_plugin_tap_break
+*/
 
               ) ? 1 : 0;
 
