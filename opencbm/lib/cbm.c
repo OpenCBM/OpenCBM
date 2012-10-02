@@ -288,21 +288,6 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
               || NULL == Plugin_information->Plugin.opencbm_plugin_iec_poll
               || NULL == Plugin_information->Plugin.opencbm_plugin_iec_setrelease
               || NULL == Plugin_information->Plugin.opencbm_plugin_iec_wait
-/*
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_prepare_capture
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_prepare_write
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_get_sense
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_wait_for_stop_sense
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_wait_for_play_sense
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_motor_on
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_motor_off
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_start_capture
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_start_write
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_get_ver
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_download_config
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_upload_config
-              || NULL == Plugin_information->Plugin.opencbm_plugin_tap_break
-*/
 
               ) ? 1 : 0;
 
@@ -380,6 +365,44 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
          && NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_write
          && NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_read_track
          && NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_write_track
+           )
+            error = 0;
+
+        if (error)
+            break;
+
+        /* and the tape functions */
+
+        error = 1;
+        if (Plugin_information->Plugin.opencbm_plugin_tap_prepare_capture 
+         && Plugin_information->Plugin.opencbm_plugin_tap_prepare_write
+         && Plugin_information->Plugin.opencbm_plugin_tap_get_sense
+         && Plugin_information->Plugin.opencbm_plugin_tap_wait_for_stop_sense
+         && Plugin_information->Plugin.opencbm_plugin_tap_wait_for_play_sense
+         && Plugin_information->Plugin.opencbm_plugin_tap_motor_on
+         && Plugin_information->Plugin.opencbm_plugin_tap_motor_off
+         && Plugin_information->Plugin.opencbm_plugin_tap_start_capture
+         && Plugin_information->Plugin.opencbm_plugin_tap_start_write
+         && Plugin_information->Plugin.opencbm_plugin_tap_get_ver
+         && Plugin_information->Plugin.opencbm_plugin_tap_download_config
+         && Plugin_information->Plugin.opencbm_plugin_tap_upload_config
+         && Plugin_information->Plugin.opencbm_plugin_tap_break
+           )
+           error = 0;
+
+        if (NULL == Plugin_information->Plugin.opencbm_plugin_tap_prepare_capture 
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_prepare_write
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_get_sense
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_wait_for_stop_sense
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_wait_for_play_sense
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_motor_on
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_motor_off
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_start_capture
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_start_write
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_get_ver
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_download_config
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_upload_config
+         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_break
            )
             error = 0;
 
