@@ -49,6 +49,7 @@ typedef unsigned long ULONG_PTR;
 
 # include <unistd.h>
 # include <errno.h>
+# include <stdbool.h>
 
 /* error.h is only available on Linux */
 #ifdef __linux__
@@ -56,6 +57,11 @@ typedef unsigned long ULONG_PTR;
 #endif
 
 typedef unsigned long ULONG_PTR;
+
+typedef bool BOOL;
+
+# define TRUE true
+# define FALSE false
 
 # define STRING_BACKTICK "`"
 # define STRING_TICK     "´"
