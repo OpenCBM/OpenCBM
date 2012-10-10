@@ -42,6 +42,8 @@
 
 #include "configuration.h"
 
+#include "arch.h"
+
 /*! \brief @@@@@ \todo document
 
  \param Handle
@@ -122,6 +124,221 @@ typedef struct plugin_information_s plugin_information_t;
 static
 struct plugin_information_s Plugin_information = { 0 };
 
+struct plugin_read_pointer
+{
+    UINT_PTR offset;
+    const char * name;
+};
+
+#define OFFSETOF(_type, _element) \
+    ((UINT_PTR) (void *) &((_type *)0)->_element)
+
+#define GETELEMENT(_type, _structpointer, _elementoffset) \
+    ((_type *)(((char*)(_structpointer)) + (_elementoffset)))
+
+#define PLUGIN_POINTER_DEF(_xxx) \
+    { OFFSETOF(plugin_information_t, Plugin._xxx), #_xxx }
+
+#define PLUGIN_POINTER_GET(_what, _element) \
+    GEELEMENT(void, _what, _element)
+
+#define PLUGIN_POINTER_END() \
+    { 0, NULL }
+
+static struct plugin_read_pointer plugin_pointer_to_read_mandatory[] =
+{
+	PLUGIN_POINTER_DEF(opencbm_plugin_get_driver_name),
+	PLUGIN_POINTER_DEF(opencbm_plugin_driver_open),
+	PLUGIN_POINTER_DEF(opencbm_plugin_driver_close),
+	PLUGIN_POINTER_DEF(opencbm_plugin_raw_write),
+	PLUGIN_POINTER_DEF(opencbm_plugin_raw_read),
+	PLUGIN_POINTER_DEF(opencbm_plugin_open),
+	PLUGIN_POINTER_DEF(opencbm_plugin_close),
+	PLUGIN_POINTER_DEF(opencbm_plugin_listen),
+	PLUGIN_POINTER_DEF(opencbm_plugin_talk),
+	PLUGIN_POINTER_DEF(opencbm_plugin_unlisten),
+	PLUGIN_POINTER_DEF(opencbm_plugin_untalk),
+	PLUGIN_POINTER_DEF(opencbm_plugin_get_eoi),
+	PLUGIN_POINTER_DEF(opencbm_plugin_clear_eoi),
+	PLUGIN_POINTER_DEF(opencbm_plugin_reset),
+	PLUGIN_POINTER_DEF(opencbm_plugin_iec_poll),
+	PLUGIN_POINTER_DEF(opencbm_plugin_iec_setrelease),
+	PLUGIN_POINTER_DEF(opencbm_plugin_iec_wait),
+    PLUGIN_POINTER_END()
+}; 
+
+static struct plugin_read_pointer plugin_pointer_to_read_optional[] =
+{
+    PLUGIN_POINTER_DEF(opencbm_plugin_init),
+    PLUGIN_POINTER_DEF(opencbm_plugin_uninit),
+	PLUGIN_POINTER_DEF(opencbm_plugin_lock),
+	PLUGIN_POINTER_DEF(opencbm_plugin_unlock),
+	PLUGIN_POINTER_DEF(opencbm_plugin_iec_set),
+	PLUGIN_POINTER_DEF(opencbm_plugin_iec_release),
+	PLUGIN_POINTER_DEF(opencbm_plugin_parallel_burst_read),
+	PLUGIN_POINTER_DEF(opencbm_plugin_parallel_burst_write),
+	PLUGIN_POINTER_DEF(opencbm_plugin_parallel_burst_read_track),
+	PLUGIN_POINTER_DEF(opencbm_plugin_parallel_burst_write_track),
+	PLUGIN_POINTER_DEF(opencbm_plugin_pp_read),
+	PLUGIN_POINTER_DEF(opencbm_plugin_pp_write),
+    PLUGIN_POINTER_END()
+};
+
+static struct plugin_read_pointer plugin_pointer_to_read_parallel_burst[] =
+{
+	PLUGIN_POINTER_DEF(opencbm_plugin_parallel_burst_read),
+	PLUGIN_POINTER_DEF(opencbm_plugin_parallel_burst_write),
+	PLUGIN_POINTER_DEF(opencbm_plugin_parallel_burst_read_track),
+	PLUGIN_POINTER_DEF(opencbm_plugin_parallel_burst_write_track),
+    PLUGIN_POINTER_END()
+};
+
+static struct plugin_read_pointer plugin_pointer_to_read_pp_readwrite[] =
+{
+	PLUGIN_POINTER_DEF(opencbm_plugin_pp_read),
+	PLUGIN_POINTER_DEF(opencbm_plugin_pp_write),
+    PLUGIN_POINTER_END()
+};
+
+static struct plugin_read_pointer plugin_pointer_to_read_srq_burst[] =
+{
+	PLUGIN_POINTER_DEF(opencbm_plugin_srq_burst_read ),
+	PLUGIN_POINTER_DEF(opencbm_plugin_srq_burst_write),
+	PLUGIN_POINTER_DEF(opencbm_plugin_srq_burst_read_track),
+	PLUGIN_POINTER_DEF(opencbm_plugin_srq_burst_write_track),
+    PLUGIN_POINTER_END()
+};
+
+static struct plugin_read_pointer plugin_pointer_to_read_tape[] =
+{
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_prepare_capture),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_prepare_write),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_get_sense),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_wait_for_stop_sense),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_wait_for_play_sense),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_motor_on),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_motor_off),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_start_capture),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_start_write),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_get_ver),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_download_config),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_upload_config),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_break),
+    PLUGIN_POINTER_END()
+};
+
+
+struct plugin_read_pointer_group
+{
+    struct plugin_read_pointer * read_pointer;
+    enum {
+        PRP_MANDATORY,
+        PRP_OPTIONAL,
+        PRP_OPTIONAL_ALL_OR_NOTHING
+    } type;
+};
+
+static struct plugin_read_pointer_group read_pointer_group[] =
+{
+    { plugin_pointer_to_read_mandatory, PRP_MANDATORY },
+    { plugin_pointer_to_read_optional, PRP_OPTIONAL },
+    { plugin_pointer_to_read_parallel_burst, PRP_OPTIONAL_ALL_OR_NOTHING },
+    { plugin_pointer_to_read_pp_readwrite, PRP_OPTIONAL_ALL_OR_NOTHING },
+    { plugin_pointer_to_read_srq_burst, PRP_OPTIONAL_ALL_OR_NOTHING },
+    { plugin_pointer_to_read_tape, PRP_OPTIONAL_ALL_OR_NOTHING },
+    { NULL, PRP_OPTIONAL }
+};
+
+static void
+read_plugin_pointer(
+        plugin_information_t * Plugin_information,
+        struct plugin_read_pointer pointer_to_read[]
+)
+{
+    while (pointer_to_read->name) {
+        void * ptr_read = plugin_get_address(Plugin_information->Library, pointer_to_read->name);
+        void ** ptr_to_save = GETELEMENT(void *, Plugin_information, pointer_to_read->offset);
+        *ptr_to_save = ptr_read;
+        DBGDO(
+            if (ptr_read == NULL) {
+               DBG_PRINT((DBG_PREFIX "Plugin entry point %s not found!", pointer_to_read->name));
+            }
+        )
+        ++pointer_to_read;
+    }
+}
+
+static int check_plugin_pointer(
+        plugin_information_t * Plugin_information,
+        struct plugin_read_pointer pointer_to_check[]
+)
+{
+    while (pointer_to_check->name) {
+        void ** ptr_to_check = GETELEMENT(void *, Plugin_information, pointer_to_check->offset);
+        DBGDO(
+            if (ptr_to_check == NULL) {
+               DBG_PRINT((DBG_PREFIX "Plugin entry point %s not found!", pointer_to_check->name));
+            }
+        )
+        if (ptr_to_check == NULL) return 1;
+        ++pointer_to_check;
+    }
+    return 0;
+}
+
+static int check_plugin_pointer_all_or_nothing(
+        plugin_information_t * Plugin_information,
+        struct plugin_read_pointer pointer_to_check[]
+)
+{
+    int error;
+
+    // first, check if all pointers are available
+    error = check_plugin_pointer(Plugin_information, pointer_to_check);
+    if (!error) return 0;
+
+    // if not, check if all pointers are *not* available
+    while (pointer_to_check->name) {
+        void ** ptr_to_check = GETELEMENT(void *, Plugin_information, pointer_to_check->offset);
+        DBGDO(
+            if (ptr_to_check != NULL) {
+               DBG_PRINT((DBG_PREFIX "Plugin entry point %s found, but it should not be available!", pointer_to_check->name));
+            }
+        )
+        if (ptr_to_check != NULL) return 1;
+        ++pointer_to_check;
+    }
+    return 0;
+}
+
+static int
+read_plugin_pointer_groups(
+        plugin_information_t * Plugin_information,
+        struct plugin_read_pointer_group pointer_to_read_group[]
+)
+{
+    int error = 0;
+
+    while (pointer_to_read_group->read_pointer) {
+        read_plugin_pointer(Plugin_information, pointer_to_read_group->read_pointer);
+
+        switch (pointer_to_read_group->type) {
+        case PRP_MANDATORY:
+            error = error || check_plugin_pointer(Plugin_information, pointer_to_read_group->read_pointer);
+            break;
+
+        case PRP_OPTIONAL:
+            break;
+        case PRP_OPTIONAL_ALL_OR_NOTHING:
+            error = error || check_plugin_pointer_all_or_nothing(Plugin_information, pointer_to_read_group->read_pointer);
+            break;
+        };
+
+        ++pointer_to_read_group;
+    }
+
+    return error;
+}
 
 static int
 initialize_plugin_pointer(plugin_information_t *Plugin_information, const char * const Adapter)
@@ -204,212 +421,10 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         if (!Plugin_information->Library)
             break;
 
-#define PLUGIN_GET_ADDRESS(_xxx) \
-        Plugin_information->Plugin._xxx = plugin_get_address(Plugin_information->Library, #_xxx); \
-        DBGDO( \
-            if (Plugin_information->Plugin._xxx == NULL) { \
-               DBG_PRINT((DBG_PREFIX "Plugin entry point %s not found!", #_xxx)); \
-            } \
-        )
-
-#ifdef WIN32
-        PLUGIN_GET_ADDRESS(opencbm_plugin_init);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_uninit);
-#endif
-        PLUGIN_GET_ADDRESS(opencbm_plugin_get_driver_name);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_driver_open);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_driver_close);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_lock);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_unlock);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_raw_write);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_raw_read);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_open);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_close);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_listen);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_talk);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_unlisten);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_untalk);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_get_eoi);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_clear_eoi);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_reset);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_pp_read);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_pp_write);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_poll);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_set);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_release);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_setrelease);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_wait);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_read);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_write);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_read_n);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_write_n);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_read_track);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_read_track_var);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_parallel_burst_write_track);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_read);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_write);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_read_n);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_write_n);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_read_track);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_srq_burst_write_track);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_prepare_capture);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_prepare_write);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_get_sense);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_wait_for_stop_sense);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_wait_for_play_sense);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_motor_on);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_motor_off);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_start_capture);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_start_write);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_get_ver);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_download_config);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_upload_config);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_tap_break);
-
-        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_dbg_read);
-        PLUGIN_GET_ADDRESS(opencbm_plugin_iec_dbg_write);
-
-        /* Make sure that all required functions are available: */
-
-        error = (NULL == Plugin_information->Plugin.opencbm_plugin_get_driver_name
-              || NULL == Plugin_information->Plugin.opencbm_plugin_driver_open
-              || NULL == Plugin_information->Plugin.opencbm_plugin_driver_close
-              || NULL == Plugin_information->Plugin.opencbm_plugin_raw_write
-              || NULL == Plugin_information->Plugin.opencbm_plugin_raw_read
-              || NULL == Plugin_information->Plugin.opencbm_plugin_open
-              || NULL == Plugin_information->Plugin.opencbm_plugin_close
-              || NULL == Plugin_information->Plugin.opencbm_plugin_listen
-              || NULL == Plugin_information->Plugin.opencbm_plugin_talk
-              || NULL == Plugin_information->Plugin.opencbm_plugin_unlisten
-              || NULL == Plugin_information->Plugin.opencbm_plugin_untalk
-              || NULL == Plugin_information->Plugin.opencbm_plugin_get_eoi
-              || NULL == Plugin_information->Plugin.opencbm_plugin_clear_eoi
-              || NULL == Plugin_information->Plugin.opencbm_plugin_reset
-              || NULL == Plugin_information->Plugin.opencbm_plugin_iec_poll
-              || NULL == Plugin_information->Plugin.opencbm_plugin_iec_setrelease
-              || NULL == Plugin_information->Plugin.opencbm_plugin_iec_wait
-
-              ) ? 1 : 0;
-
+        error = read_plugin_pointer_groups(Plugin_information, read_pointer_group);
         if (error)
             break;
 
-        /* the following functions are optional:
-         *  - Plugin_information->Plugin.opencbm_plugin_lock
-         *  - Plugin_information->Plugin.opencbm_plugin_unlock
-         *  - Plugin_information->Plugin.opencbm_plugin_iec_set
-         *  - Plugin_information->Plugin.opencbm_plugin_iec_release
-         *  - Plugin_information->Plugin.opencbm_plugin_parallel_burst_read
-         *  - Plugin_information->Plugin.opencbm_plugin_parallel_burst_write
-         *  - Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_track
-         *  - Plugin_information->Plugin.opencbm_plugin_parallel_burst_write_track)
-         *  - Plugin_information->Plugin.opencbm_plugin_pp_read
-         *  - Plugin_information->Plugin.opencbm_plugin_pp_write
-         */
-
-
-        /* make sure that the parburst function are either ALL, or NONE implemented: */
-
-        error = 1;
-
-        if (Plugin_information->Plugin.opencbm_plugin_parallel_burst_read 
-         && Plugin_information->Plugin.opencbm_plugin_parallel_burst_write
-         && Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_track
-         && Plugin_information->Plugin.opencbm_plugin_parallel_burst_write_track
-           )
-
-           error = 0;
-
-        if (NULL == Plugin_information->Plugin.opencbm_plugin_parallel_burst_read 
-         && NULL == Plugin_information->Plugin.opencbm_plugin_parallel_burst_write
-         && NULL == Plugin_information->Plugin.opencbm_plugin_parallel_burst_read_track
-         && NULL == Plugin_information->Plugin.opencbm_plugin_parallel_burst_write_track
-           )
-
-            error = 0;
-
-        if (error)
-            break;
-
-
-        error = 1;
-
-        /* the same for the pp_read() and pp_write() functions */
-
-        if (Plugin_information->Plugin.opencbm_plugin_pp_read
-         && Plugin_information->Plugin.opencbm_plugin_pp_write
-           )
-
-            error = 0;
-
-        if (NULL == Plugin_information->Plugin.opencbm_plugin_pp_read
-         && NULL == Plugin_information->Plugin.opencbm_plugin_pp_write
-           )
-
-            error = 0;
-
-        if (error)
-            break;
-
-        /* and the SRQ burst functions */
-
-        error = 1;
-        if (Plugin_information->Plugin.opencbm_plugin_srq_burst_read 
-         && Plugin_information->Plugin.opencbm_plugin_srq_burst_write
-         && Plugin_information->Plugin.opencbm_plugin_srq_burst_read_track
-         && Plugin_information->Plugin.opencbm_plugin_srq_burst_write_track
-           )
-           error = 0;
-
-        if (NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_read 
-         && NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_write
-         && NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_read_track
-         && NULL == Plugin_information->Plugin.opencbm_plugin_srq_burst_write_track
-           )
-            error = 0;
-
-        if (error)
-            break;
-
-        /* and the tape functions */
-
-        error = 1;
-        if (Plugin_information->Plugin.opencbm_plugin_tap_prepare_capture 
-         && Plugin_information->Plugin.opencbm_plugin_tap_prepare_write
-         && Plugin_information->Plugin.opencbm_plugin_tap_get_sense
-         && Plugin_information->Plugin.opencbm_plugin_tap_wait_for_stop_sense
-         && Plugin_information->Plugin.opencbm_plugin_tap_wait_for_play_sense
-         && Plugin_information->Plugin.opencbm_plugin_tap_motor_on
-         && Plugin_information->Plugin.opencbm_plugin_tap_motor_off
-         && Plugin_information->Plugin.opencbm_plugin_tap_start_capture
-         && Plugin_information->Plugin.opencbm_plugin_tap_start_write
-         && Plugin_information->Plugin.opencbm_plugin_tap_get_ver
-         && Plugin_information->Plugin.opencbm_plugin_tap_download_config
-         && Plugin_information->Plugin.opencbm_plugin_tap_upload_config
-         && Plugin_information->Plugin.opencbm_plugin_tap_break
-           )
-           error = 0;
-
-        if (NULL == Plugin_information->Plugin.opencbm_plugin_tap_prepare_capture 
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_prepare_write
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_get_sense
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_wait_for_stop_sense
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_wait_for_play_sense
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_motor_on
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_motor_off
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_start_capture
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_start_write
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_get_ver
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_download_config
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_upload_config
-         && NULL == Plugin_information->Plugin.opencbm_plugin_tap_break
-           )
-            error = 0;
-
-        if (error)
-            break;
-
-#ifdef WIN32
         if (Plugin_information->Plugin.opencbm_plugin_init) {
             error = Plugin_information->Plugin.opencbm_plugin_init();
             if (error) {
@@ -419,7 +434,6 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
                 break;
             }
         }
-#endif
 
     } while (0);
 
@@ -435,11 +449,9 @@ uninitialize_plugin(void)
 {
     if (Plugin_information.Library != NULL)
     {
-#ifdef WIN32
         if (Plugin_information.Plugin.opencbm_plugin_uninit) {
             Plugin_information.Plugin.opencbm_plugin_uninit();
         }
-#endif
 
         plugin_unload(Plugin_information.Library);
 

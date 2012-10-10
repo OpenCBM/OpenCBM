@@ -51,6 +51,8 @@ typedef unsigned long ULONG_PTR;
 # include <errno.h>
 # include <stdbool.h>
 
+typedef unsigned int UINT_PTR;
+
 /* error.h is only available on Linux */
 #ifdef __linux__
 # include <error.h>

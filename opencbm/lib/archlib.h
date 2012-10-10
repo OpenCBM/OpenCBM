@@ -94,10 +94,10 @@ EXTERN opencbm_plugin_pp_cc_write_n_t              opencbm_plugin_pp_cc_write_n;
 EXTERN opencbm_plugin_iec_dbg_read_t               opencbm_plugin_iec_dbg_read;
 EXTERN opencbm_plugin_iec_dbg_write_t              opencbm_plugin_iec_dbg_write;
 
-#ifdef WIN32
-
 EXTERN opencbm_plugin_init_t                       opencbm_plugin_init;
 EXTERN opencbm_plugin_uninit_t                     opencbm_plugin_uninit;
+
+#ifdef WIN32
 
 EXTERN opencbm_plugin_install_process_commandline_t opencbm_plugin_install_process_commandline;
 
