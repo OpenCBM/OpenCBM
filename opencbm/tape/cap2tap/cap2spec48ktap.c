@@ -26,7 +26,7 @@
 // Convert CAP to Spectrum48K TAP format. *EXPERIMENTAL*
 int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 {
-	unsigned char    DBG = 0; // 1 = Debug output
+	unsigned char    DBGFLAG = 0; // 1 = Debug output
 	unsigned char    zb[10000000]; // Spectrum48K TAP image buffer. Should be dynamic size.
 	unsigned char    ch = 0;
 	unsigned __int64 ui64Delta, ui64Len;
@@ -72,7 +72,7 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 	{
 		ui64Len = (ui64Delta+(Timer_Precision_MHz/2))/Timer_Precision_MHz;
 
-		if (DBG == 1) printf("%d ",ui64Len);
+		if (DBGFLAG == 1) printf("%d ",ui64Len);
 		
 		LastPulse = Pulse;
 
@@ -80,17 +80,17 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 		if ((150 <= ui64Len) && (ui64Len <= 360))
 		{
 			Pulse = ShortPulse;
-			if (DBG == 1) printf("(SP) ");
+			if (DBGFLAG == 1) printf("(SP) ");
 		}
 		else if ((360 < ui64Len) && (ui64Len < 550))
 		{
 			Pulse = LongPulse;
-			if (DBG == 1) printf("(LP) ");
+			if (DBGFLAG == 1) printf("(LP) ");
 		}
 		else // <150 or >550
 		{
 			Pulse = PausePulse;
-			if (DBG == 1) printf("(PP) ");
+			if (DBGFLAG == 1) printf("(PP) ");
 		}
 
 
@@ -104,7 +104,7 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 				// Calculate block size and write to TAP image.
 				zb[BlockStart  ] = ByteCount & 0xff;
 				zb[BlockStart+1] = (ByteCount >> 8) & 0xff;
-				if (DBG == 1) printf("Block size = %u",ByteCount);
+				if (DBGFLAG == 1) printf("Block size = %u",ByteCount);
 				BlockStart = BlockPos;
 				BlockPos += 2;
 			}
@@ -122,17 +122,17 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 			if ((LastPulse == ShortPulse) && (Pulse == ShortPulse))
 			{
 				Wave = ShortWave;
-				if (DBG == 1) printf("(SW) ");
+				if (DBGFLAG == 1) printf("(SW) ");
 			}
 			else if ((LastPulse == LongPulse) && (Pulse == LongPulse))
 			{
 				Wave = LongWave;
-				if (DBG == 1) printf("(LW) ");
+				if (DBGFLAG == 1) printf("(LW) ");
 			}
 			else
 			{
 				Wave = ErrorWave;
-				if (DBG == 1) printf("(EW) ");
+				if (DBGFLAG == 1) printf("(EW) ");
 			}
 
 			if ((Wave == ShortWave) || (Wave == LongWave))
@@ -150,12 +150,12 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 				if (Wave == ShortWave)
 				{
 					ch = (ch << 1);
-					if (DBG == 1) printf("(0)");
+					if (DBGFLAG == 1) printf("(0)");
 				}
 				else if (Wave == LongWave)
 				{
 					ch = (ch << 1) + 1;
-					if (DBG == 1) printf("(1)");
+					if (DBGFLAG == 1) printf("(1)");
 				}
 
 				if (BitCount == 8)
@@ -164,12 +164,12 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 					BitCount = 0; // Reset bit counter.
 
 					zb[BlockPos++] = ch; // Store byte to image.
-					if (DBG == 1) printf(" -----> 0x%.2x <%c>",ch,ch);
+					if (DBGFLAG == 1) printf(" -----> 0x%.2x <%c>",ch,ch);
 
 					if (ByteCount == 1)
 					{
 						// Evaluate first block byte.
-						if (DBG == 1)
+						if (DBGFLAG == 1)
 						{
 							if (ch == 0)
 								printf(" [Header]");
@@ -182,7 +182,7 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 				} // if (BitCount == 8)
 
 			} // if (BlockCounter > 1)
-			else if (DBG == 1) printf("(x)");
+			else if (DBGFLAG == 1) printf("(x)");
 		} // if (DataPulseCounter > 0)
 	} // while ((numread = fread(buf5, 5, 1, CapFile)) != 0)
 
@@ -198,7 +198,7 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 		// Calculate block size and write to TAP image.
 		zb[BlockStart  ] = ByteCount & 0xff;
 		zb[BlockStart+1] = (ByteCount >> 8) & 0xff;
-		if (DBG == 1) printf("Block size = %u\n",ByteCount);
+		if (DBGFLAG == 1) printf("Block size = %u\n",ByteCount);
 		BlockStart = BlockPos;
 		BlockPos += 2;
 	}
