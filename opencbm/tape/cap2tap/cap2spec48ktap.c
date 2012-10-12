@@ -26,33 +26,52 @@
 // Convert CAP to Spectrum48K TAP format. *EXPERIMENTAL*
 int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 {
-	unsigned char    DBGFLAG = 0; // 1 = Debug output
-	unsigned char    zb[10000000]; // Spectrum48K TAP image buffer. Should be dynamic size.
-	unsigned char    ch = 0;
+	unsigned __int8  DBGFLAG = 0; // 1 = Debug output
+	unsigned __int8  *zb; // Spectrum48K TAP image buffer.
+	unsigned __int8  ch = 0;
 	unsigned __int64 ui64Delta, ui64Len;
-	unsigned int     Timer_Precision_MHz;
-	int              FuncRes;
+	unsigned __int32 Timer_Precision_MHz;
+	__int32          FuncRes;
 
 	// Declare variables holding current/last pulse & wave information.
-	unsigned int LastPulse  = PausePulse;
-	unsigned int Pulse      = PausePulse;
-	unsigned int Wave       = HalfWave;
+	unsigned __int8 LastPulse = PausePulse;
+	unsigned __int8 Pulse     = PausePulse;
+	unsigned __int8 Wave      = HalfWave;
 
 	// Declare image pointers.
-	unsigned int BlockStart = 0; // Data block start in image.
-	unsigned int BlockPos   = 2; // Current position in image.
+	unsigned __int32 BlockStart = 0; // Data block start in image.
+	unsigned __int32 BlockPos   = 2; // Current position in image.
 
 	// Declare bit & byte counters.
-	unsigned int BitCount         = 0; // Data block bit counter.
-	unsigned int ByteCount        = 0; // Data block data byte counter.
-	unsigned int DataPulseCounter = 0; // Data block pulse counter.
-	unsigned int BlockByteCounter = 0; // Data block byte counter.
+	unsigned __int8  BitCount         = 0; // Data block bit counter.
+	unsigned __int32 ByteCount        = 0; // Data block data byte counter.
+	unsigned __int32 DataPulseCounter = 0; // Data block pulse counter.
+	unsigned __int32 BlockByteCounter = 0; // Data block byte counter.
+
+	// Get memory for Spectrum48K TAP image buffer. Should be dynamic size.
+	zb = (unsigned __int8*)malloc(10000000);
+	if (zb == NULL)
+	{
+		printf("Error: Not enough memory for Spectrum48K TAP image buffer.");
+		return -1;
+	}
+	memset(zb, 0x00, 10000000);
 
 	// Seek to start of image file and read image header, extract & verify header contents, seek to start of image data.
-	Check_CAP_Error_TextRetM1(CAP_ReadHeader(hCAP));
+	FuncRes = CAP_ReadHeader(hCAP);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Return timestamp precision from header.
-	Check_CAP_Error_TextRetM1(CAP_GetHeader_Precision(hCAP, &Timer_Precision_MHz));
+	FuncRes = CAP_GetHeader_Precision(hCAP, &Timer_Precision_MHz);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Skip first halfwave (time until first pulse starts).
 	FuncRes = CAP_ReadSignal(hCAP, &ui64Delta, NULL);
@@ -183,8 +202,8 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 
 			} // if (BlockCounter > 1)
 			else if (DBGFLAG == 1) printf("(x)");
-		} // if (DataPulseCounter > 0)
-	} // while ((numread = fread(buf5, 5, 1, CapFile)) != 0)
+		} // if ((DataPulseCounter > 0) && ((DataPulseCounter % 2) == 0))
+	} // While CAP 5-byte timestamp available.
 
 	if (FuncRes == CAP_Status_Error_Reading_data)
 	{
@@ -208,8 +227,15 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 	else
 	{
 		printf("Error: Empty image file.\n");
+
+		// Release memory for Spectrum48K TAP image buffer.
+		free(zb);
+
 		return -1;
 	}
+
+	// Release memory for Spectrum48K TAP image buffer.
+	free(zb);
 
 	return 0;
 }
