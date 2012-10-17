@@ -3,15 +3,17 @@
  *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
 */
 
-#include <opencbm.h>
-#include <arch.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "..\common\tape.h"
+#include <opencbm.h>
+#include <arch.h>
+#include "tape.h"
+#include "misc.h"
 
 // Global variables
-BYTE MotorOn = 0, MotorOff = 0;
+unsigned __int8 MotorOn  = 0,
+                MotorOff = 0;
 
 
 void usage(void)
@@ -28,7 +30,7 @@ void usage(void)
 }
 
 
-int EvaluateCommandlineParams(int argc, char *argv[])
+__int32 EvaluateCommandlineParams(__int32 argc, __int8 *argv[])
 {
 	if (argc != 2)
 		return -1;
@@ -56,12 +58,12 @@ int EvaluateCommandlineParams(int argc, char *argv[])
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
 	CBM_FILE fd;
-	int      Status, FuncRes, ret;
+	__int32  Status, FuncRes, RetVal = 0;
 
 	printf("\ntapcontrol v1.00 - Commodore 1530/1531 tape control\n");
 	printf("Copyright 2012 Arnd Menge\n\n");
 
-	if ((ret = EvaluateCommandlineParams(argc, argv)) == -1)
+	if ((RetVal = EvaluateCommandlineParams(argc, argv)) == -1)
 	{
 		usage();
 		goto exit;
@@ -70,7 +72,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	if (cbm_driver_open_ex(&fd, NULL) != 0)
 	{
 		printf("\nDriver error.\n");
-		ret = -1;
+		RetVal = -1;
 		goto exit;
 	}
 
@@ -84,7 +86,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	if (FuncRes != 1)
 	{
 		printf("\nReturned error [get_ver]: %d\n", FuncRes);
-		ret = -1;
+		RetVal = -1;
 		goto exit2;
 	}
 	if (Status < 0)
@@ -93,14 +95,14 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 		if (OutputError(Status) < 0)
 			if (OutputFuncError(Status) < 0)
 				printf("%d\n", Status);
-		ret = -1;
+		RetVal = -1;
 		goto exit2;
 	}
 	if (Status != TapeFirmwareVersion)
 	{
 		printf("\nError [get_ver]: ");
 		OutputError(Tape_Status_ERROR_Wrong_Tape_Firmware);
-		ret = -1;
+		RetVal = -1;
 		goto exit2;
 	}
 
@@ -116,7 +118,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 		if (FuncRes != 1)
 		{
 			printf("\nReturned error [motor_on]: %d\n", FuncRes);
-			ret = -1;
+			RetVal = -1;
 		}
 		if (Status != Tape_Status_OK_Motor_On)
 		{
@@ -124,7 +126,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 			if (OutputError(Status) < 0)
 				if (OutputFuncError(Status) < 0)
 					printf("%d\n", Status);
-			ret = -1;
+			RetVal = -1;
 		}
 	}
 
@@ -140,7 +142,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 		if (FuncRes != 1)
 		{
 			printf("\nReturned error [motor_off]: %d\n", FuncRes);
-			ret = -1;
+			RetVal = -1;
 		}
 		if (Status != Tape_Status_OK_Motor_Off)
 		{
@@ -148,7 +150,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 			if (OutputError(Status) < 0)
 				if (OutputFuncError(Status) < 0)
 					printf("%d\n", Status);
-			ret = -1;
+			RetVal = -1;
 		}
 	}
 
@@ -157,5 +159,5 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     exit:
    	printf("\n");
-   	return ret;
+   	return RetVal;
 }

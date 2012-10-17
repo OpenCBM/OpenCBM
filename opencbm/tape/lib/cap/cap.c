@@ -8,6 +8,7 @@
 #include <string.h>
 #include <Windows.h>
 #include <malloc.h>
+
 #include "cap.h"
 
 #define Default_CAP_Header_Size 0xA0

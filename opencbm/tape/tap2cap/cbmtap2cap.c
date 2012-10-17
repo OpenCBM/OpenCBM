@@ -3,12 +3,14 @@
  *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
 */
 
-#include <arch.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <Windows.h>
+
+#include <arch.h>
 #include "cap.h"
 #include "tap-cbm.h"
+#include "misc.h"
 
 #define FREQ_C64_PAL    985248
 #define FREQ_C64_NTSC  1022727
@@ -21,16 +23,16 @@
 #define NoSplit              3
 
 // Global variables
-unsigned char CAP_Machine, CAP_Video, CAP_StartEdge, CAP_SignalFormat;
-unsigned int  CAP_Precision, CAP_SignalWidth, CAP_StartOfs;
-unsigned char TAP_Machine, TAP_Video, TAPv;
-unsigned int  TAP_ByteCount;
+unsigned __int8   CAP_Machine, CAP_Video, CAP_StartEdge, CAP_SignalFormat;
+unsigned __int32  CAP_Precision, CAP_SignalWidth, CAP_StartOfs;
+unsigned __int8   TAP_Machine, TAP_Video, TAPv;
+unsigned __int32  TAP_ByteCount;
 
 
-int HandleDeltaAndWriteToCAP(HANDLE hCAP, unsigned __int64 ui64Delta, unsigned int uiSplit)
+__int32 HandleDeltaAndWriteToCAP(HANDLE hCAP, unsigned __int64 ui64Delta, unsigned __int32 uiSplit)
 {
 	unsigned __int64 ui64SplitLen;
-	int              FuncRes;
+	__int32          FuncRes;
 
 	if (uiSplit == NeedSplit)
 	{
@@ -50,9 +52,9 @@ int HandleDeltaAndWriteToCAP(HANDLE hCAP, unsigned __int64 ui64Delta, unsigned i
 }
 
 
-int Initialize_CAP_header_and_return_frequency(HANDLE hCAP, HANDLE hTAP, unsigned int *puiFreq)
+__int32 Initialize_CAP_header_and_return_frequency(HANDLE hCAP, HANDLE hTAP, unsigned __int32 *puiFreq)
 {
-	int FuncRes;
+	__int32 FuncRes;
 
 	// Determine target machine & video.
 
@@ -126,13 +128,13 @@ int Initialize_CAP_header_and_return_frequency(HANDLE hCAP, HANDLE hTAP, unsigne
 
 
 // Convert CBM TAP to CAP format.
-int CBMTAP2CAP(HANDLE hCAP, HANDLE hTAP)
+__int32 CBMTAP2CAP(HANDLE hCAP, HANDLE hTAP)
 {
 	unsigned __int64 ui64Delta;
-	unsigned int     uiDelta, uiFreq;
-	unsigned int     TAP_Counter = 0; // CAP & TAP file byte counters.
-	unsigned char    ch;
-	int              FuncRes;
+	unsigned __int32 uiDelta, uiFreq;
+	unsigned __int32 TAP_Counter = 0; // CAP & TAP file byte counters.
+	unsigned __int8  ch;
+	__int32          FuncRes;
 
 	// Seek to & read image header, extract & verify header contents.
 	Check_TAP_CBM_Error_TextRetM1(TAP_CBM_ReadHeader(hTAP));
@@ -146,7 +148,7 @@ int CBMTAP2CAP(HANDLE hCAP, HANDLE hTAP)
 	// Start conversion TAP->CAP.
 
 	// Start with 100us delay (can be replaced with specified start delay in tapwrite).
-	ui64Delta = 100*CAP_Precision;
+	ui64Delta = CAP_Precision*100;
 	if (HandleDeltaAndWriteToCAP(hCAP, ui64Delta, NoSplit) == -1)
 		return -1;
 

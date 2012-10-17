@@ -3,14 +3,15 @@
  *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
 */
 
-#include <arch.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <arch.h>
 #include "cap2cbmtap.h"
 #include "cap2spec48ktap.h"
 #include "cap.h"
 #include "tap-cbm.h"
+#include "misc.h"
 
 
 void usage(void)
@@ -20,7 +21,7 @@ void usage(void)
 }
 
 
-int Evaluate_Commandline_Params(int argc, char *argv[])
+__int32 Evaluate_Commandline_Params(__int32 argc, __int8 *argv[])
 {
 	if (argc == 3) return 0;
 	else return -1;
@@ -33,10 +34,10 @@ int Evaluate_Commandline_Params(int argc, char *argv[])
 //   -1: an error occurred
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
-	HANDLE        hCAP, hTAP;
-	FILE          *fd; // Experimental Spectrum48K support.
-	int           FuncRes, ret = -1;
-	unsigned char CAP_Machine;
+	HANDLE          hCAP, hTAP;
+	FILE            *fd; // Experimental Spectrum48K support.
+	unsigned __int8 CAP_Machine;
+	__int32         FuncRes, RetVal = -1;
 
 	printf("\nCAP2TAP v1.00 - ZoomTape CAP image to TAP image conversion\n");
 	printf("Copyright 2012 Arnd Menge\n\n");
@@ -86,20 +87,20 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	if (CAP_Machine == CAP_Machine_Spec48K)
 	{
 		// Convert CAP to Spectrum48K TAP format. *EXPERIMENTAL*
-		ret = CAP2SPEC48KTAP(hCAP, fd);
+		RetVal = CAP2SPEC48KTAP(hCAP, fd);
 
 		CAP_CloseFile(&hCAP);
 
 		if (fclose(fd) != 0)
 		{
 			printf("Error: Closing TAP file failed.");
-			ret = -1;
+			RetVal = -1;
 		}
 	}
 	else
 	{
 		// Convert CAP to CBM TAP format.
-		ret = CAP2CBMTAP(hCAP, hTAP);
+		RetVal = CAP2CBMTAP(hCAP, hTAP);
 
 		CAP_CloseFile(&hCAP);
 
@@ -107,11 +108,11 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 		if (FuncRes != TAP_CBM_Status_OK)
 		{
 			TAP_CBM_OutputError(FuncRes);
-			ret = -1;
+			RetVal = -1;
 		}
 	}
 
-	if (ret == 0)
+	if (RetVal == 0)
 		printf("Conversion successful.");
 
 	goto exit;
@@ -121,5 +122,5 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     exit:
    	printf("\n");
-   	return ret;
+   	return RetVal;
 }

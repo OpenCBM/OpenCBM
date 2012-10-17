@@ -66,26 +66,6 @@
 // Default data start offset for tape image
 #define CAP_Default_Data_Start_Offset 0xA0
 
-// Macro to handle errors of called exported functions.
-#define	Check_CAP_Error_TextRetM1(FuncRes) \
-	{                                      \
-		if (FuncRes != CAP_Status_OK)      \
-		{                                  \
-			CAP_OutputError(FuncRes);      \
-			return -1;                     \
-		}                                  \
-	}
-
-// Macro to handle errors of called exported functions.
-#define	Check_CAP_Error_TextGoto(FuncRes, Target) \
-	{                                             \
-		if (FuncRes != CAP_Status_OK)             \
-		{                                         \
-			CAP_OutputError(FuncRes);             \
-			goto Target;                          \
-		}                                         \
-	}
-
 // Create (overwrite) an image file for writing.
 int CAP_CreateFile(HANDLE *hHandle, char *pcFilename);
 

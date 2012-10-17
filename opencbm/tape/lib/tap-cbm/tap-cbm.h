@@ -42,26 +42,6 @@
 #define TAPv1 1
 #define TAPv2 2
 
-// Macro to handle errors of called exported functions.
-#define	Check_TAP_CBM_Error_TextRetM1(FuncRes) \
-	{                                          \
-		if (FuncRes != TAP_CBM_Status_OK)      \
-		{                                      \
-			TAP_CBM_OutputError(FuncRes);      \
-			return -1;                         \
-		}                                      \
-	}
-
-// Macro to handle errors of called exported functions.
-#define	Check_TAP_CBM_Error_TextGoto(FuncRes, Target) \
-	{                                                 \
-		if (FuncRes != TAP_CBM_Status_OK)             \
-		{                                             \
-			TAP_CBM_OutputError(FuncRes);             \
-			goto Target;                              \
-		}                                             \
-	}
-
 // Create (overwrite) an image file for writing.
 int TAP_CBM_CreateFile(HANDLE *hHandle, char *pcFilename);
 

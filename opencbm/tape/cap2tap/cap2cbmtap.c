@@ -3,12 +3,13 @@
  *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
 */
 
-#include <arch.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <Windows.h>
+
 #include "cap.h"
 #include "tap-cbm.h"
+#include "misc.h"
 
 #define FREQ_C64_PAL    985248
 #define FREQ_C64_NTSC  1022727
@@ -23,19 +24,19 @@
 #define NoSplit              3
 
 
-int HandlePause(HANDLE hTAP, unsigned __int64 ui64Len, unsigned int uiNeededSplit, unsigned char TAPv, unsigned int *puiCounter)
+__int32 HandlePause(HANDLE hTAP, unsigned __int64 ui64Len, unsigned __int8 uiNeededSplit, unsigned __int8 TAPv, unsigned __int32 *puiCounter)
 {
-	unsigned int numsplits, i;
-	int          FuncRes;
+	unsigned __int32 numsplits, i;
+	__int32          FuncRes;
 
 	if (TAPv == TAPv2)
 	{
 		if (ui64Len > 0x00ffffff)
 		{
-			numsplits = (unsigned int) (ui64Len/0x00ffffff);
+			numsplits = (unsigned __int32) (ui64Len/0x00ffffff);
 			if ((ui64Len % 0x00ffffff) != 0) numsplits++;
 
-			if ((numsplits % 2) != uiNeededSplit) // NeedEvenSplitNumber=0 / NeedOddSplitNumber=1
+			if (((unsigned __int8)(numsplits % 2)) != uiNeededSplit) // NeedEvenSplitNumber=0 / NeedOddSplitNumber=1
 			{
 				// Split last 2 parts into 3, make sure last halfwave is not too short.
 				// Write (n-2) long ones, last two /3: 0.33 < length < 0.67.
@@ -77,7 +78,7 @@ int HandlePause(HANDLE hTAP, unsigned __int64 ui64Len, unsigned int uiNeededSpli
 		if (ui64Len > 0)
 		{
 			// Write 32bit unsigned integer to image file: LSB first, MSB last.
-			Check_TAP_CBM_Error_TextRetM1(TAP_CBM_WriteSignal_4Bytes(hTAP, (unsigned int) ((ui64Len << 8) & 0xffffff00), puiCounter));
+			Check_TAP_CBM_Error_TextRetM1(TAP_CBM_WriteSignal_4Bytes(hTAP, (unsigned __int32) ((ui64Len << 8) & 0xffffff00), puiCounter));
 		}
 	}
 
@@ -99,10 +100,10 @@ int HandlePause(HANDLE hTAP, unsigned __int64 ui64Len, unsigned int uiNeededSpli
 }
 
 
-int Initialize_TAP_header_and_return_frequencies(HANDLE hCAP, HANDLE hTAP, unsigned int *puiTimer_Precision_MHz, unsigned int *puiFreq)
+__int32 Initialize_TAP_header_and_return_frequencies(HANDLE hCAP, HANDLE hTAP, unsigned __int32 *puiTimer_Precision_MHz, unsigned __int32 *puiFreq)
 {
-	unsigned char CAP_Machine, CAP_Video, TAP_Machine, TAP_Video, TAP_Version;
-	int           FuncRes;
+	unsigned __int8 CAP_Machine, CAP_Video, TAP_Machine, TAP_Video, TAP_Version;
+	__int32         FuncRes;
 
 	// Seek to start of image file and read image header, extract & verify header contents, seek to start of image data.
 	Check_CAP_Error_TextRetM1(CAP_ReadHeader(hCAP));
@@ -181,14 +182,14 @@ int Initialize_TAP_header_and_return_frequencies(HANDLE hCAP, HANDLE hTAP, unsig
 
 
 // Convert CAP to CBM TAP format.
-int CAP2CBMTAP(HANDLE hCAP, HANDLE hTAP)
+__int32 CAP2CBMTAP(HANDLE hCAP, HANDLE hTAP)
 {
 	unsigned __int64 ui64Delta, ui64Delta2, ui64Len;
-	unsigned int     Timer_Precision_MHz, uiFreq;
-	int              TAP_Counter = 0; // CAP & TAP file byte counters.
-	unsigned char    TAPv;
-	unsigned char    ch;
-	int              FuncRes, ReadFuncRes;
+	unsigned __int32 Timer_Precision_MHz, uiFreq;
+	unsigned __int8  TAPv; // TAP file format version.
+	unsigned __int8  ch;   // Single TAP data byte.
+	__int32          TAP_Counter = 0; // CAP & TAP file byte counters.
+	__int32          FuncRes, ReadFuncRes; // Function call results.
 
 	if (Initialize_TAP_header_and_return_frequencies(hCAP, hTAP, &Timer_Precision_MHz, &uiFreq) != 0)
 		return -1;
@@ -211,6 +212,7 @@ int CAP2CBMTAP(HANDLE hCAP, HANDLE hTAP)
 		return -1;
 	}
 
+	// Convert while CAP file signal available.
 	while ((ReadFuncRes = CAP_ReadSignal(hCAP, &ui64Delta, NULL)) == CAP_Status_OK)
 	{
 		if ((TAPv == TAPv0) || (TAPv == TAPv1))
@@ -247,10 +249,10 @@ int CAP2CBMTAP(HANDLE hCAP, HANDLE hTAP)
 		else
 		{
 			// We have a data byte.
-			ch = (unsigned char) ((ui64Len+4)/8);
+			ch = (unsigned __int8) ((ui64Len+4)/8);
 			Check_TAP_CBM_Error_TextRetM1(TAP_CBM_WriteSignal_1Byte(hTAP, ch, &TAP_Counter));
 		}
-	} // while (1)
+	} // Convert while CAP file signal available.
 
 	if (ReadFuncRes == CAP_Status_Error_Reading_data)
 	{

@@ -6,7 +6,9 @@
 #ifndef __CAP2SPEC48KTAP_H_
 #define __CAP2SPEC48KTAP_H_
 
+#include <Windows.h>
+
 // Convert CAP to Spectrum48K TAP format. *EXPERIMENTAL*
-int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile);
+__int32 CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile);
 
 #endif

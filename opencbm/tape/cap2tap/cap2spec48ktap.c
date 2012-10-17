@@ -3,11 +3,11 @@
  *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
 */
 
-#include <arch.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <Windows.h>
+
 #include "cap.h"
 
 // Define pulses.
@@ -24,14 +24,15 @@
 
 
 // Convert CAP to Spectrum48K TAP format. *EXPERIMENTAL*
-int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
+__int32 CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 {
 	unsigned __int8  DBGFLAG = 0; // 1 = Debug output
 	unsigned __int8  *zb; // Spectrum48K TAP image buffer.
 	unsigned __int8  ch = 0;
 	unsigned __int64 ui64Delta, ui64Len;
 	unsigned __int32 Timer_Precision_MHz;
-	__int32          FuncRes;
+	__int32          FuncRes;    // Function call result.
+	__int32          RetVal = 0; // Default return value.
 
 	// Declare variables holding current/last pulse & wave information.
 	unsigned __int8 LastPulse = PausePulse;
@@ -49,20 +50,21 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 	unsigned __int32 BlockByteCounter = 0; // Data block byte counter.
 
 	// Get memory for Spectrum48K TAP image buffer. Should be dynamic size.
-	zb = (unsigned __int8*)malloc(10000000);
+	zb = (unsigned __int8 *)malloc((size_t)10000000);
 	if (zb == NULL)
 	{
 		printf("Error: Not enough memory for Spectrum48K TAP image buffer.");
 		return -1;
 	}
-	memset(zb, 0x00, 10000000);
+	memset((void *)zb, (__int32)0, (size_t)10000000);
 
 	// Seek to start of image file and read image header, extract & verify header contents, seek to start of image data.
 	FuncRes = CAP_ReadHeader(hCAP);
 	if (FuncRes != CAP_Status_OK)
 	{
 		CAP_OutputError(FuncRes);
-		return -1;
+		RetVal = -1;
+		goto exit;
 	}
 
 	// Return timestamp precision from header.
@@ -70,20 +72,23 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 	if (FuncRes != CAP_Status_OK)
 	{
 		CAP_OutputError(FuncRes);
-		return -1;
+		RetVal = -1;
+		goto exit;
 	}
 
-	// Skip first halfwave (time until first pulse starts).
+	// Skip first halfwave (time until first pulse occurs).
 	FuncRes = CAP_ReadSignal(hCAP, &ui64Delta, NULL);
 	if (FuncRes == CAP_Status_OK_End_of_file)
 	{
 		printf("Error: Empty image file.");
-		return -1;
+		RetVal = -1;
+		goto exit;
 	}
 	else if (FuncRes == CAP_Status_Error_Reading_data)
 	{
 		CAP_OutputError(FuncRes);
-		return -1;
+		RetVal = -1;
+		goto exit;
 	}
 
 	// While CAP 5-byte timestamp available.
@@ -91,7 +96,7 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 	{
 		ui64Len = (ui64Delta+(Timer_Precision_MHz/2))/Timer_Precision_MHz;
 
-		if (DBGFLAG == 1) printf("%d ",ui64Len);
+		if (DBGFLAG == 1) printf("%I64u ", ui64Len);
 		
 		LastPulse = Pulse;
 
@@ -123,7 +128,7 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 				// Calculate block size and write to TAP image.
 				zb[BlockStart  ] = ByteCount & 0xff;
 				zb[BlockStart+1] = (ByteCount >> 8) & 0xff;
-				if (DBGFLAG == 1) printf("Block size = %u",ByteCount);
+				if (DBGFLAG == 1) printf("Block size = %u", ByteCount);
 				BlockStart = BlockPos;
 				BlockPos += 2;
 			}
@@ -183,7 +188,7 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 					BitCount = 0; // Reset bit counter.
 
 					zb[BlockPos++] = ch; // Store byte to image.
-					if (DBGFLAG == 1) printf(" -----> 0x%.2x <%c>",ch,ch);
+					if (DBGFLAG == 1) printf(" -----> 0x%.2x <%c>", ch, ch);
 
 					if (ByteCount == 1)
 					{
@@ -208,7 +213,8 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 	if (FuncRes == CAP_Status_Error_Reading_data)
 	{
 		CAP_OutputError(FuncRes);
-		return -1;
+		RetVal = -1;
+		goto exit;
 	}
 
 	// Handle final data block, if exists.
@@ -217,25 +223,23 @@ int CAP2SPEC48KTAP(HANDLE hCAP, FILE *TapFile)
 		// Calculate block size and write to TAP image.
 		zb[BlockStart  ] = ByteCount & 0xff;
 		zb[BlockStart+1] = (ByteCount >> 8) & 0xff;
-		if (DBGFLAG == 1) printf("Block size = %u\n",ByteCount);
+		if (DBGFLAG == 1) printf("Block size = %u\n", ByteCount);
 		BlockStart = BlockPos;
 		BlockPos += 2;
 	}
 
 	if (BlockPos > 2)
-		fwrite(zb, (BlockPos-2), 1, TapFile);
+		fwrite((const void *)zb, (size_t)(BlockPos-2), (size_t)1, (FILE *)TapFile);
 	else
 	{
 		printf("Error: Empty image file.\n");
-
-		// Release memory for Spectrum48K TAP image buffer.
-		free(zb);
-
-		return -1;
+		RetVal = -1;
+		goto exit;
 	}
 
+exit:
 	// Release memory for Spectrum48K TAP image buffer.
-	free(zb);
+	free((void *)zb);
 
-	return 0;
+	return RetVal;
 }

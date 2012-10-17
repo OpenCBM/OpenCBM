@@ -3,13 +3,15 @@
  *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
 */
 
-#include <arch.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <arch.h>
 #include "cbmtap2cap.h"
 #include "cap.h"
 #include "tap-cbm.h"
+#include "misc.h"
+
 
 void usage(void)
 {
@@ -18,7 +20,7 @@ void usage(void)
 }
 
 
-int Evaluate_Commandline_Params(int argc, char *argv[])
+__int32 Evaluate_Commandline_Params(__int32 argc, __int8 *argv[])
 {
 	if (argc == 3) return 0;
 	else return -1;
@@ -31,8 +33,8 @@ int Evaluate_Commandline_Params(int argc, char *argv[])
 //   -1: an error occurred
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
-	HANDLE hCAP, hTAP;
-	int    FuncRes, ret = -1;
+	HANDLE  hCAP, hTAP;
+	__int32 FuncRes, RetVal = -1;
 
 	printf("\nTAP2CAP v1.00 - TAP image to ZoomTape CAP image conversion\n");
 	printf("Copyright 2012 Arnd Menge\n\n");
@@ -70,7 +72,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	printf("Converting: %s -> %s\n\n", argv[1], argv[2]);
 
 	// Convert CBM TAP to CAP format.
-	ret = CBMTAP2CAP(hCAP, hTAP);
+	RetVal = CBMTAP2CAP(hCAP, hTAP);
 
 	TAP_CBM_CloseFile(&hTAP);
 
@@ -78,10 +80,10 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	if (FuncRes != CAP_Status_OK)
 		CAP_OutputError(FuncRes);
 
-	if (ret == 0)
+	if (RetVal == 0)
 		printf("Conversion successful.");
 
     exit:
    	printf("\n");
-   	return ret;
+   	return RetVal;
 }

@@ -9,6 +9,6 @@
 #include <Windows.h>
 
 // Convert CAP to CBM TAP format.
-int CAP2CBMTAP(HANDLE hCAP, HANDLE hTAP);
+__int32 CAP2CBMTAP(HANDLE hCAP, HANDLE hTAP);
 
 #endif
