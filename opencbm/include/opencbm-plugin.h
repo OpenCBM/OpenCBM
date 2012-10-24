@@ -23,6 +23,18 @@
 
 /*! \brief @@@@@ \todo document
 
+\return
+*/
+typedef int CBMAPIDECL opencbm_plugin_init_t(void); 
+
+/*! \brief @@@@@ \todo document
+
+\return
+*/
+typedef void CBMAPIDECL opencbm_plugin_uninit_t(void); 
+
+/*! \brief @@@@@ \todo document
+
  \param Port
 
  \return
@@ -637,18 +649,6 @@ typedef int CBMAPIDECL opencbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, uns
         opencbm_install_parameter_t                   * InstallParameter;   /*!< some generic install parameters */
 
     } CbmPluginInstallProcessCommandlineData_t;
-
-    /*! \brief @@@@@ \todo document
-
-     \return
-    */
-    typedef int CBMAPIDECL opencbm_plugin_init_t(void); 
-
-    /*! \brief @@@@@ \todo document
-
-     \return
-    */
-    typedef void CBMAPIDECL opencbm_plugin_uninit_t(void); 
 
     
     /*! \brief @@@@@ \todo document
