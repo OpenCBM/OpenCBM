@@ -4,7 +4,7 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2007,2008 Spiro Trikaliotis
+ *  Copyright 2007,2008,2012 Spiro Trikaliotis
  *
 */
 
@@ -28,9 +28,97 @@
 
 #include <windows.h>
 
-/*! \brief @@@@@ \todo document */
-#define DEFAULT_FILENAME "/System32/opencbm.conf"
+#ifndef INVALID_FILE_ATTRIBUTES
+#define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
+#endif
 
+/*! \brief The filename of the configuration file */
+#define FILENAME_CONFIGFILE "opencbm.conf"
+
+
+/*! \internal \brief Get a possible filename for the configuration file
+
+ This function returns the possible filenames for the configuration
+ file, one after the other.
+ 
+ For this, the function is called with an index, starting with zero, 
+ being incremented with every call. If the list is exhaused, the function
+ returns NULL.
+
+ \return 
+   pointer to a newly allocated memory area which contains the
+   candidate for the given index. If there is no candidate with
+   the given index, the returned value is NULL.
+
+ \remark
+   There is not a single default filename for the configuration;
+   instead, there are some locations that are searched one after
+   the other. This function returns the candidates for these locations.
+
+ \remark
+   The caller is responsible for free()ing the returned buffer pointer.
+*/
+static char *
+get_windir()
+{
+    char * buffer = NULL;
+
+    DWORD length;
+
+    length = GetEnvironmentVariable("WINDIR", NULL, 0);
+
+    while (length > 0) {
+
+        DWORD length2;
+
+        free(buffer);
+        buffer = malloc(length + 1);
+
+        length2 = GetEnvironmentVariable("WINDIR", buffer, length + 1);
+
+        if (length2 > length) {
+            length = length2;
+        }
+        else {
+            length = 0;
+        }
+    }
+    return buffer;
+}
+
+static char *
+configuration_get_default_filename_candidate(unsigned int index)
+{
+    char * buffer = NULL;
+
+    switch (index)
+    {
+        case 0:
+            buffer = cbmlibmisc_strdup(FILENAME_CONFIGFILE);
+            break;
+        case 1:
+            {
+            char * windir = get_windir();
+            buffer = cbmlibmisc_strcat(windir, "/System32/" FILENAME_CONFIGFILE);
+            free(windir);
+            }
+            break;
+        default:
+            /* no more candidates */
+            buffer = NULL;
+            break;
+    }
+
+    return buffer;
+}
+
+static int
+FileExists(const char * filename)
+{
+    DWORD attrib = GetFileAttributes(filename);
+
+    return (attrib != INVALID_FILE_ATTRIBUTES && !(attrib & FILE_ATTRIBUTE_DIRECTORY));
+}
 
 /*! \brief Get the default filename for the configuration file
 
@@ -42,41 +130,19 @@
 const char *
 configuration_get_default_filename(void)
 {
-    DWORD length;
-    char * buffer = NULL;
+    unsigned int index = 0;
+    char * string_candidate = NULL;
 
-    static const char addendum[] = DEFAULT_FILENAME;
+    while (NULL != (string_candidate = configuration_get_default_filename_candidate(index)))
+    {
+        if (FileExists(string_candidate)) {
+            break;
+        };
 
-    length = GetEnvironmentVariable("WINDIR", NULL, 0);
+        free(string_candidate);
+        ++index;
+    };
 
-#ifdef USE_FAKE_WIN_DIRECTORY_AS_COPY_TARGET
-    buffer = cbmlibmisc_strdup(USE_FAKE_WIN_DIRECTORY_AS_COPY_TARGET "\\");
-#else
-    while (length > 0) {
-
-        DWORD length2;
-
-        free(buffer);
-        buffer = malloc(length + sizeof(addendum));
-
-        length2 = GetEnvironmentVariable("WINDIR", buffer, length + 1);
-
-        if (length2 > length) {
-            length = length2;
-        }
-        else {
-            length = 0;
-        }
-    }
-#endif
-
-    if (buffer) {
-        char * tmpbuffer = cbmlibmisc_strcat(buffer, addendum);
-
-        free(buffer);
-
-        buffer = tmpbuffer;
-    }
-
-    return buffer;
+    return string_candidate;
 }
+
