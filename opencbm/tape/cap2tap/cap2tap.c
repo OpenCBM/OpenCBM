@@ -49,20 +49,40 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	}
 
 	// Open specified image file for reading.
-	Check_CAP_Error_TextGoto(CAP_OpenFile(&hCAP, argv[1]), exit);
+	FuncRes = CAP_OpenFile(&hCAP, argv[1]);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		goto exit;
+	}
 
 	// Seek to start of image file and read image header, extract & verify header contents, seek to start of image data.
-	Check_CAP_Error_TextGoto(CAP_ReadHeader(hCAP), exit2);
+	FuncRes = CAP_ReadHeader(hCAP);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		CAP_CloseFile(&hCAP);
+		goto exit;
+	}
 
 	// Get target machine type from header.
-	Check_CAP_Error_TextGoto(CAP_GetHeader_Machine(hCAP, &CAP_Machine), exit2);
+	FuncRes = CAP_GetHeader_Machine(hCAP, &CAP_Machine);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		CAP_CloseFile(&hCAP);
+		goto exit;
+	}
 
 	// Check if specified TAP image file is already existing.
 	if (TAP_CBM_isFilePresent(argv[2]) == TAP_CBM_Status_OK)
 	{
 		printf("Overwrite existing file? (y/N)");
 		if (getchar() != 'y')
-			goto exit2;
+		{
+			CAP_CloseFile(&hCAP);
+			goto exit;
+		}
 		printf("\n");
 	}
 
@@ -74,12 +94,19 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 		if (fd == NULL)
 		{
 			printf("Error creating TAP file.");
-			goto exit2;
+			CAP_CloseFile(&hCAP);
+			goto exit;
 		}
 	}
 	else
 	{
-		Check_TAP_CBM_Error_TextGoto(TAP_CBM_CreateFile(&hTAP, argv[2]), exit2);
+		FuncRes = TAP_CBM_CreateFile(&hTAP, argv[2]);
+		if (FuncRes != CAP_Status_OK)
+		{
+			CAP_OutputError(FuncRes);
+			CAP_CloseFile(&hCAP);
+			goto exit;
+		}
 	}
 
 	printf("Converting: %s -> %s\n\n", argv[1], argv[2]);
@@ -114,11 +141,6 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
 	if (RetVal == 0)
 		printf("Conversion successful.");
-
-	goto exit;
-
-	exit2:
-	CAP_CloseFile(&hCAP);
 
     exit:
    	printf("\n");

@@ -197,10 +197,20 @@ __int32 ReadCaptureFile(HANDLE hCAP, unsigned __int8 *pucTapeBuffer, __int32 *pi
 	BOOL             FirstSignal = TRUE;
 
 	// Seek to start of image file and read image header, extract & verify header contents, seek to start of image data.
-	Check_CAP_Error_TextRetM1(CAP_ReadHeader(hCAP));
+	FuncRes = CAP_ReadHeader(hCAP);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Get all header entries at once.
-	Check_CAP_Error_TextRetM1(CAP_GetHeader(hCAP, &CAP_Precision, &CAP_Machine, &CAP_Video, &CAP_StartEdge, &CAP_SignalFormat, &CAP_SignalWidth, &CAP_StartOfs));
+	FuncRes = CAP_GetHeader(hCAP, &CAP_Precision, &CAP_Machine, &CAP_Video, &CAP_StartEdge, &CAP_SignalFormat, &CAP_SignalWidth, &CAP_StartOfs);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
 	if (CAP_Precision == 16)
 	{
@@ -650,7 +660,12 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	}
 
 	// Open specified image file for reading.
-	Check_CAP_Error_TextGoto(CAP_OpenFile(&hCAP, filename), exit);
+	FuncRes = CAP_OpenFile(&hCAP, filename);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		goto exit;
+	}
 
 	// Allocate memory for tape image.
 	if (AllocateImageBuffer(hCAP, &pucTapeBuffer, &iTapeBufferSize) == -1)
@@ -687,6 +702,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	LeaveCriticalSection(&CritSec_fd); // Release handle flag access.
 
     exit:
+	DeleteCriticalSection(&CritSec_fd);
+	DeleteCriticalSection(&CritSec_BreakHandler);
    	if (pucTapeBuffer != NULL) free(pucTapeBuffer);
    	printf("\n");
    	return RetVal;

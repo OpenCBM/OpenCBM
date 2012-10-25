@@ -19,32 +19,12 @@
 	}
 
 // Macro to handle errors of called exported functions.
-#define	Check_CAP_Error_TextGoto(FuncRes, Target_Label) \
-	{                                 \
-		if (FuncRes != CAP_Status_OK) \
-		{                             \
-			CAP_OutputError(FuncRes); \
-			goto Target_Label;        \
-		}                             \
-	}
-
-// Macro to handle errors of called exported functions.
 #define	Check_TAP_CBM_Error_TextRetM1(FuncRes) \
 	{                                     \
 		if (FuncRes != TAP_CBM_Status_OK) \
 		{                                 \
 			TAP_CBM_OutputError(FuncRes); \
 			return -1;                    \
-		}                                 \
-	}
-
-// Macro to handle errors of called exported functions.
-#define	Check_TAP_CBM_Error_TextGoto(FuncRes, Target_Label) \
-	{                                     \
-		if (FuncRes != TAP_CBM_Status_OK) \
-		{                                 \
-			TAP_CBM_OutputError(FuncRes); \
-			goto Target_Label;            \
 		}                                 \
 	}
 

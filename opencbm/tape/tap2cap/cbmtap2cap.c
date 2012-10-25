@@ -29,7 +29,7 @@ unsigned __int8   TAP_Machine, TAP_Video, TAPv;
 unsigned __int32  TAP_ByteCount;
 
 
-__int32 HandleDeltaAndWriteToCAP(HANDLE hCAP, unsigned __int64 ui64Delta, unsigned __int32 uiSplit)
+__int32 HandleDeltaAndWriteToCAP(HANDLE hCAP, unsigned __int64 ui64Delta, unsigned __int8 uiSplit)
 {
 	unsigned __int64 ui64SplitLen;
 	__int32          FuncRes;
@@ -95,11 +95,26 @@ __int32 Initialize_CAP_header_and_return_frequency(HANDLE hCAP, HANDLE hTAP, uns
 	CAP_SignalWidth  = CAP_SignalWidth_40bit;     // Default: 40bit.
 	CAP_StartOfs     = CAP_Default_Data_Start_Offset+0x30; // Text addon after standard header.
 
-	Check_CAP_Error_TextRetM1(CAP_SetHeader(hCAP, CAP_Precision, CAP_Machine, CAP_Video, CAP_StartEdge, CAP_SignalFormat, CAP_SignalWidth, CAP_StartOfs));
+	FuncRes = CAP_SetHeader(hCAP, CAP_Precision, CAP_Machine, CAP_Video, CAP_StartEdge, CAP_SignalFormat, CAP_SignalWidth, CAP_StartOfs);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
-	Check_CAP_Error_TextRetM1(CAP_WriteHeader(hCAP));
+	FuncRes = CAP_WriteHeader(hCAP);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
-	Check_CAP_Error_TextRetM1(CAP_WriteHeaderAddon(hCAP, "   Created by       TAP2CAP     ----------------", 0x30));
+	FuncRes = CAP_WriteHeaderAddon(hCAP, "   Created by       TAP2CAP     ----------------", 0x30);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Determine frequency.
 
@@ -137,10 +152,20 @@ __int32 CBMTAP2CAP(HANDLE hCAP, HANDLE hTAP)
 	__int32          FuncRes;
 
 	// Seek to & read image header, extract & verify header contents.
-	Check_TAP_CBM_Error_TextRetM1(TAP_CBM_ReadHeader(hTAP));
+	FuncRes = TAP_CBM_ReadHeader(hTAP);
+	if (FuncRes != TAP_CBM_Status_OK)
+	{
+		TAP_CBM_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Get all header entries at once.
-	Check_TAP_CBM_Error_TextRetM1(TAP_CBM_GetHeader(hTAP, &TAP_Machine, &TAP_Video, &TAPv, &TAP_ByteCount));
+	FuncRes = TAP_CBM_GetHeader(hTAP, &TAP_Machine, &TAP_Video, &TAPv, &TAP_ByteCount);
+	if (FuncRes != TAP_CBM_Status_OK)
+	{
+		TAP_CBM_OutputError(FuncRes);
+		return -1;
+	}
 
 	if (Initialize_CAP_header_and_return_frequency(hCAP, hTAP, &uiFreq) != 0)
 		return -1;

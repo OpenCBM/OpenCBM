@@ -284,7 +284,12 @@ __int32 ConvertAndWriteCaptureData(HANDLE hCAP, unsigned __int8 *pucTapeBuffer, 
 
 		if (CAP_Precision == 1) ui64Delta = (ui64Delta + 8) >> 4; // downscale by 16
 
-		Check_CAP_Error_TextRetM1(CAP_WriteSignal(hCAP, ui64Delta, NULL));
+		FuncRes = CAP_WriteSignal(hCAP, ui64Delta, NULL);
+		if (FuncRes != CAP_Status_OK)
+		{
+			CAP_OutputError(FuncRes);
+			return -1;
+		}
 	}
 
 	// Calculate tape length in seconds.
@@ -303,11 +308,26 @@ __int32 WriteTapeBufferToCaptureFile(HANDLE hCAP, unsigned __int8 *pucTapeBuffer
 	if (iCaptureLen == 0)
 		printf("Empty capture file.\n");
 
-	Check_CAP_Error_TextRetM1(CAP_SetHeader(hCAP, CAP_Precision, CAP_Machine, CAP_Video, CAP_StartEdge, CAP_SignalFormat, CAP_SignalWidth, CAP_StartOfs));
+	FuncRes = CAP_SetHeader(hCAP, CAP_Precision, CAP_Machine, CAP_Video, CAP_StartEdge, CAP_SignalFormat, CAP_SignalWidth, CAP_StartOfs);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
-	Check_CAP_Error_TextRetM1(CAP_WriteHeader(hCAP));
+	FuncRes = CAP_WriteHeader(hCAP);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
-	Check_CAP_Error_TextRetM1(CAP_WriteHeaderAddon(hCAP, "   Created by       ZoomTape    ----------------", 0x30));
+	FuncRes = CAP_WriteHeaderAddon(hCAP, "   Created by       ZoomTape    ----------------", 0x30);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Convert timestamps to 5 bytes, downscale precision to 1us if requested and write to CAP file.
 	if (ConvertAndWriteCaptureData(hCAP, pucTapeBuffer, iCaptureLen, &uiTotalTapeTimeSeconds, &uiNumSignals) == -1)
@@ -674,7 +694,12 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	printf("\n");
 
 	// Create specified image file for writing.
-	Check_CAP_Error_TextGoto(CAP_CreateFile(&hCAP, filename), exit);
+	FuncRes = CAP_CreateFile(&hCAP, filename);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		goto exit;
+	}
 
 	EnterCriticalSection(&CritSec_fd); // Acquire handle flag access.
 
@@ -705,11 +730,18 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	// Write tape image to specified image file.
 	RetVal = WriteTapeBufferToCaptureFile(hCAP, pucTapeBuffer, iCaptureLen);
 
-	Check_CAP_Error_TextGoto(CAP_CloseFile(&hCAP), exit);
+	FuncRes = CAP_CloseFile(&hCAP);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		goto exit;
+	}
 
 	printf("Capture file successfully created.\n");
 
 	exit:
+	DeleteCriticalSection(&CritSec_fd);
+	DeleteCriticalSection(&CritSec_BreakHandler);
    	if (pucTapeBuffer != NULL) free(pucTapeBuffer);
    	printf("\n");
    	return RetVal;

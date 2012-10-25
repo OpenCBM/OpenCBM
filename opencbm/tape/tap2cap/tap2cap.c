@@ -46,7 +46,12 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	}
 
 	// Open specified TAP image file for reading.
-	Check_TAP_CBM_Error_TextGoto(TAP_CBM_OpenFile(&hTAP, argv[1]), exit);
+	FuncRes = TAP_CBM_OpenFile(&hTAP, argv[1]);
+	if (FuncRes != TAP_CBM_Status_OK)
+	{
+		TAP_CBM_OutputError(FuncRes);
+		goto exit;
+	}
 
 	// Check if specified CAP image file is already existing.
 	if (CAP_isFilePresent(argv[2]) == CAP_Status_OK)

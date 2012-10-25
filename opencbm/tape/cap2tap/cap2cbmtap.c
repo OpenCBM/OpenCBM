@@ -106,13 +106,28 @@ __int32 Initialize_TAP_header_and_return_frequencies(HANDLE hCAP, HANDLE hTAP, u
 	__int32         FuncRes;
 
 	// Seek to start of image file and read image header, extract & verify header contents, seek to start of image data.
-	Check_CAP_Error_TextRetM1(CAP_ReadHeader(hCAP));
+	FuncRes = CAP_ReadHeader(hCAP);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Return target machine type from header.
-	Check_CAP_Error_TextRetM1(CAP_GetHeader_Machine(hCAP, &CAP_Machine));
+	FuncRes = CAP_GetHeader_Machine(hCAP, &CAP_Machine);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Return target video type from header.
-	Check_CAP_Error_TextRetM1(CAP_GetHeader_Video(hCAP, &CAP_Video));
+	FuncRes = CAP_GetHeader_Video(hCAP, &CAP_Video);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
 	if (CAP_Machine == CAP_Machine_C64)
 	{
@@ -147,15 +162,30 @@ __int32 Initialize_TAP_header_and_return_frequencies(HANDLE hCAP, HANDLE hTAP, u
 	else return -1;
 
 	// Set all header entries at once.
-	Check_TAP_CBM_Error_TextRetM1(TAP_CBM_SetHeader(hTAP, TAP_Machine, TAP_Video, TAP_Version, 0));
+	FuncRes = TAP_CBM_SetHeader(hTAP, TAP_Machine, TAP_Video, TAP_Version, 0);
+	if (FuncRes != TAP_CBM_Status_OK)
+	{
+		TAP_CBM_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Seek to start of file & write image header.
-	Check_TAP_CBM_Error_TextRetM1(TAP_CBM_WriteHeader(hTAP));
+	FuncRes = TAP_CBM_WriteHeader(hTAP);
+	if (FuncRes != TAP_CBM_Status_OK)
+	{
+		TAP_CBM_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Determine frequencies.
 
 	// Return timestamp precision from header.
-	Check_CAP_Error_TextRetM1(CAP_GetHeader_Precision(hCAP, puiTimer_Precision_MHz));
+	FuncRes = CAP_GetHeader_Precision(hCAP, puiTimer_Precision_MHz);
+	if (FuncRes != CAP_Status_OK)
+	{
+		CAP_OutputError(FuncRes);
+		return -1;
+	}
 
 	if (     (CAP_Machine == CAP_Machine_C64)  && (CAP_Video == CAP_Video_PAL))
 		*puiFreq = FREQ_C64_PAL;
@@ -197,7 +227,12 @@ __int32 CAP2CBMTAP(HANDLE hCAP, HANDLE hTAP)
 	// Start conversion CAP->TAP.
 
 	// Get target TAP version from header.
-	Check_TAP_CBM_Error_TextRetM1(TAP_CBM_GetHeader_TAPversion(hTAP, &TAPv));
+	FuncRes = TAP_CBM_GetHeader_TAPversion(hTAP, &TAPv);
+	if (FuncRes != TAP_CBM_Status_OK)
+	{
+		TAP_CBM_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Skip first halfwave (time until first pulse starts).
 	FuncRes = CAP_ReadSignal(hCAP, &ui64Delta, NULL);
@@ -261,10 +296,20 @@ __int32 CAP2CBMTAP(HANDLE hCAP, HANDLE hTAP)
 	}
 
 	// Set signal byte count in header (sum of all signal bytes).
-	Check_TAP_CBM_Error_TextRetM1(TAP_CBM_SetHeader_ByteCount(hTAP, TAP_Counter));
+	FuncRes = TAP_CBM_SetHeader_ByteCount(hTAP, TAP_Counter);
+	if (FuncRes != TAP_CBM_Status_OK)
+	{
+		TAP_CBM_OutputError(FuncRes);
+		return -1;
+	}
 
 	// Seek to start of file & write image header.
-	Check_TAP_CBM_Error_TextRetM1(TAP_CBM_WriteHeader(hTAP));
+	FuncRes = TAP_CBM_WriteHeader(hTAP);
+	if (FuncRes != TAP_CBM_Status_OK)
+	{
+		TAP_CBM_OutputError(FuncRes);
+		return -1;
+	}
 
 	return 0;
 }
