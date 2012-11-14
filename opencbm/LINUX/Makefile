@@ -80,7 +80,7 @@ dist: all-doc clean
 install-files: $(call CREATE_TARGET,$(SUBDIRS) $(SUBDIRS_OPTIONAL),install-files)
 $(call CREATE_TARGET,$(SUBDIRS) $(SUBDIRS_OPTIONAL),install-files):: install-files.prepare
 
-install-files.prepare: all
+install-files.prepare: opencbm
 	mkdir -p -m 755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(MANDIR) $(DESTDIR)$(INCDIR) $(DESTDIR)$(INFODIR)
 ifeq "$(OS)" "Linux"
 	mkdir -p -m 755 $(DESTDIR)$(MODDIR)
