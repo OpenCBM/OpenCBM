@@ -266,8 +266,10 @@ static void wait_for_free_bus(void)
 	int i = 1;
 
 	while (1) {
-		if (check_if_bus_free())
+		if (check_if_bus_free()) {
+			printk("cbm: bus is free!\n");
 			break;
+        }
 
 		++i;
 
