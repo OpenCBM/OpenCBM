@@ -17,20 +17,20 @@ long_description    The opencbm (cbm4linux) package contains user space \
                     via a custom USB adapter (called xu1541 or xum1541).
 
 platforms           darwin
-homepage            http://sourceforge.net/projects/opencbm/
+homepage            https://sourceforge.net/projects/opencbm/
 
 depends_build       port:cc65
 depends_lib         port:libusb-legacy
 
 fetch.type          git
-git.url             git://opencbm.git.sourceforge.net/gitroot/opencbm/opencbm
+git.url             git://git.code.sf.net/p/opencbm/code
 git.branch          master
 
 checksum {}
 
 use_configure       no
 
-worksrcdir          opencbm
+worksrcdir          code
 
 build.cmd           cd opencbm && make -f LINUX/Makefile PREFIX=${prefix} MANDIR=${prefix}/share/man/man1
 use_parallel_build  no
