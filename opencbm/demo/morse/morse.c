@@ -20,7 +20,7 @@ static unsigned char morse[] = {
 
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
-    __u_char drv = argc > 1 ? arch_atoc(argv[1]) : 8;
+    unsigned char drv = argc > 1 ? arch_atoc(argv[1]) : 8;
     CBM_FILE fd;
     
     if(cbm_driver_open_ex(&fd, NULL) == 0)

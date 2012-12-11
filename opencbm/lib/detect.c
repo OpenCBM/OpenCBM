@@ -63,7 +63,7 @@
 */
 
 int CBMAPIDECL 
-cbm_identify(CBM_FILE HandleDevice, __u_char DeviceAddress,
+cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
              enum cbm_device_type_e *CbmDeviceType, 
              const char **CbmDeviceString)
 {

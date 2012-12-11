@@ -125,7 +125,7 @@ handle_CTRL_C(int dummy)
 }
 
 static int
-cbm_sendUxCommand(CBM_FILE HandleDevice, __u_char DeviceAddress, enum UcmdVectorNames UxCommand)
+cbm_sendUxCommand(CBM_FILE HandleDevice, unsigned char DeviceAddress, enum UcmdVectorNames UxCommand)
 {
     char UxCmdBuffer[3]="U_";
 
@@ -190,8 +190,8 @@ reconstruct_v32bitInc(struct Timer24bitValues TimerRegisters)
 }
 
 static int
-measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
-                    __u_char diskTrack, __u_char sector, __u_char count,
+measure_2cyleJitter(CBM_FILE HandleDevice, unsigned char DeviceAddress,
+                    unsigned char diskTrack, unsigned char sector, unsigned char count,
                     GroupOfMeasurements *pDeltaGroup,
                     int printDeltas)
 {
@@ -239,7 +239,7 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
         }
 
         if( cbm_download(HandleDevice, DeviceAddress,
-                     timerShotMain, (__u_char *) & T24Sample,
+                     timerShotMain, (unsigned char *) & T24Sample,
                      sizeof(T24Sample))
              != sizeof(T24Sample)) return 1;
 
@@ -273,8 +273,8 @@ measure_2cyleJitter(CBM_FILE HandleDevice, __u_char DeviceAddress,
     return 0;
 }
 
-static __u_char
-limitSectorNo41(register __u_char track, int secno)
+static unsigned char
+limitSectorNo41(register unsigned char track, int secno)
 {
     // 17/18, 24/25, 30/31
 
@@ -303,9 +303,9 @@ limitSectorNo41(register __u_char track, int secno)
 }
 
 static int
-do_RPMmeasurment(__u_char start, __u_char end, int sec, __u_char retries)
+do_RPMmeasurment(unsigned char start, unsigned char end, int sec, unsigned char retries)
 {
-    __u_char track;
+    unsigned char track;
     GroupOfMeasurements measureGroup;
     float meanTime;
 
@@ -327,9 +327,9 @@ do_RPMmeasurment(__u_char start, __u_char end, int sec, __u_char retries)
 }
 
 static int
-do_SKEWmeasurment(__u_char start, __u_char end, int sec, __u_char retries)
+do_SKEWmeasurment(unsigned char start, unsigned char end, int sec, unsigned char retries)
 {
-    __u_char track;
+    unsigned char track;
     GroupOfMeasurements measureGroup, prevMeasureGroup;
     float meanDelta, skewDelta;
 
@@ -386,10 +386,10 @@ do_SKEWmeasurment(__u_char start, __u_char end, int sec, __u_char retries)
 }
 
 static int
-do_RPMregression(__u_char start, __u_char end, int sec, __u_char retries)
+do_RPMregression(unsigned char start, unsigned char end, int sec, unsigned char retries)
 {
     int i, x;
-    __u_char track;
+    unsigned char track;
     GroupOfMeasurements measureGroup;
     unsigned int lastTValue;
 
@@ -466,7 +466,7 @@ do_RPMregression(__u_char start, __u_char end, int sec, __u_char retries)
 }
 
 static int
-do_RPMadjustment(__u_char track, __u_char dummy, int sec, __u_char retries)   // end track not needed
+do_RPMadjustment(unsigned char track, unsigned char dummy, int sec, unsigned char retries)   // end track not needed
 {
     GroupOfMeasurements measureGroup;
     const float alpha[] = { 0.22f, 0.10f, 0.047f, 0.022f };
@@ -539,7 +539,7 @@ main(int argc, char *argv[])
 {
     int status = 0;
     char cmd[40];
-    __u_char job = 1, begintrack = 1, endtrack = 35, retries = 5;
+    unsigned char job = 1, begintrack = 1, endtrack = 35, retries = 5;
     char c, *arg;
     char *adapter = NULL;
     int sector = 0, berror = 0;

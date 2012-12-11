@@ -17,22 +17,22 @@
 
 const char cbm_dev[] = "/dev/cbm";
 
-int cbm_listen(int f, __u_char dev, __u_char secadr)
+int cbm_listen(int f, unsigned char dev, unsigned char secadr)
 {
     return ioctl(f, CBMCTRL_LISTEN, (dev<<8) | secadr);
 }
 
-int cbm_talk(int f, __u_char dev, __u_char secadr)
+int cbm_talk(int f, unsigned char dev, unsigned char secadr)
 {
     return ioctl(f, CBMCTRL_TALK, (dev<<8) | secadr);
 }
 
-int cbm_open(int f, __u_char dev, __u_char secadr)
+int cbm_open(int f, unsigned char dev, unsigned char secadr)
 {
     return ioctl(f, CBMCTRL_OPEN, (dev<<8) | secadr);
 }
 
-int cbm_close(int f, __u_char dev, __u_char secadr)
+int cbm_close(int f, unsigned char dev, unsigned char secadr)
 {
     return ioctl(f, CBMCTRL_CLOSE, (dev<<8) | secadr);
 }
@@ -57,12 +57,12 @@ int cbm_reset(int f)
     return ioctl(f, CBMCTRL_RESET);
 }
 
-__u_char cbm_pp_read(int f)
+unsigned char cbm_pp_read(int f)
 {
     return ioctl(f, CBMCTRL_PP_READ);
 }
 
-void cbm_pp_write(int f, __u_char c)
+void cbm_pp_write(int f, unsigned char c)
 {
     ioctl(f, CBMCTRL_PP_WRITE, c);
 }

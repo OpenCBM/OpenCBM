@@ -1858,21 +1858,21 @@ Return value is the actual number of bytes read. &lt; indicates an error.
 Send data after <tt/cbm_listen();/. At most <tt/size/ bytes are written,
 Return value is the actual number of bytes written. &lt; indicates an error.
 
-<tag/int cbm_listen(CBM_FILE f, __u_char dev, __u_char secadr);/
+<tag/int cbm_listen(CBM_FILE f, unsigned char dev, unsigned char secadr);/
 Tell device <it/dev/ to listen on secondary channel <it/secadr/.
 Return value is 0 on success, &lt; 0 means error.
 
-<tag/int cbm_talk(CBM_FILE f, __u_char dev, __u_char secadr);/
+<tag/int cbm_talk(CBM_FILE f, unsigned char dev, unsigned char secadr);/
 Tell device <it/dev/ to talk on secondary channel <it/secadr/.
 Return value is 0 on success, &lt; 0 means error.
 
-<tag/int cbm_open(CBM_FILE f, __u_char dev, __u_char secadr);/
+<tag/int cbm_open(CBM_FILE f, unsigned char dev, unsigned char secadr);/
 Prepare device <it/dev/ for opening a file. This device listens for the file
 name after this call which is normally sent by a call to the
 <it/write()/-function followed by an <it/unlisten()/ call.
 Return value 0 on success, &lt; 0 means error.
 
-<tag/int cbm_close(CBM_FILE f, __u_char dev, __u_char secadr);/
+<tag/int cbm_close(CBM_FILE f, unsigned char dev, unsigned char secadr);/
 Close file associated with secondary address <it/secadr/ on device <it/dev/.
 Return value 0 on success, &lt; 0 means error.
 
@@ -1900,10 +1900,10 @@ a 5 second delay.
 <sect2>Low-level port access<label id="opencbm-lowlevel-functions">
 
 <p><descrip>
-<tag/__u_char cbm_pp_read(CBM_FILE f);/
+<tag/unsigned char cbm_pp_read(CBM_FILE f);/
 Read byte from XP1541/XP1571 bus. No handshaking or such involved.
 
-<tag/void cbm_pp_write(CBM_FILE f, __u_char c);/
+<tag/void cbm_pp_write(CBM_FILE f, unsigned char c);/
 Write byte to XP1541/XP1571 bus. No handshaking or such involved.
 
 <tag/int cbm_iec_poll(CBM_FILE f);/
@@ -1939,19 +1939,19 @@ Experimental, do not use.
 <sect2>Helper functions<label id="opencbm-helper-functions">
 
 <p><descrip>
-<tag/int cbm_upload(CBM_FILE f, __u_char dev, int adr, void *prog, int size);/
+<tag/int cbm_upload(CBM_FILE f, unsigned char dev, int adr, void *prog, int size);/
 Write <it/prog/ into device <it/dev/'s memory space via a series of <tt/"M-W"/
 commands.
 
-<tag/int cbm_device_status(CBM_FILE f, __u_char drv, void *buf, int bufsize);/
+<tag/int cbm_device_status(CBM_FILE f, unsigned char drv, void *buf, int bufsize);/
 Read device status info <it/buf/, at most <it/bufsize/ bytes are read.
 Returns <it/atoi(buf)/.
 
-<tag/int cbm_exec_command(CBM_FILE f, __u_char drv, void *cmd, int len);/
+<tag/int cbm_exec_command(CBM_FILE f, unsigned char drv, void *cmd, int len);/
 Execute command <it/cmd/. Returns number of bytes actually written.
 if <it/len/ is 0, <it/cmd/ is considered a 0-terminated string.
 
-<tag/int cbm_identify(CBM_FILE f, __u_char drv, enum cbm_device_type_e *t, const char **type_str);/
+<tag/int cbm_identify(CBM_FILE f, unsigned char drv, enum cbm_device_type_e *t, const char **type_str);/
 Tries to identify the device <it/drv/. The hardware type is returned in <it/t/,
 <it/type_str/ contains a descriptive string which also includes the drives'
 operating system. Both <it/t/ and <it/type_str/ may be <tt/NULL/ in case the
@@ -1959,7 +1959,7 @@ caller is not interrested in any of both values.<p>
 The return value is <tt/0/ if the device responded to the <tt/"M-R"/ command,
 even if it could not be identified, &lt; 0 indicates error.
 
-<tag/int cbm_identify_xp1541(CBM_FILE f, __u_char drv, enum cbm_device_type_e *t1, enum cbm_cable_type_e *t2);/
+<tag/int cbm_identify_xp1541(CBM_FILE f, unsigned char drv, enum cbm_device_type_e *t1, enum cbm_cable_type_e *t2);/
 Tries to identify the device <it/drv/. The hardware type is returned in <it/t1/,
 <it/t2/ contains whether the drive has an parallel (XP1541) cable attached.
 Both <it/t1/ and <it/t2/ may be <tt/NULL/ in case the caller is not interrested
@@ -1989,19 +1989,19 @@ Convert a null-terminated string <it/str/ from ASCII to PetSCII.
 <sect2>Parallel Burst functions<label id="opencbm-parburst-functions">
 
 <p><descrip>
-<tag/__u_char cbm_parallel_burst_read(CBM_FILE f);/
+<tag/unsigned char cbm_parallel_burst_read(CBM_FILE f);/
 Support function for mnib. Do not use.
 
-<tag/void cbm_parallel_burst_write(CBM_FILE f, __u_char c);/
+<tag/void cbm_parallel_burst_write(CBM_FILE f, unsigned char c);/
 Support function for mnib. Do not use.
 
-<tag/int cbm_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int length);/
+<tag/int cbm_parallel_burst_read_track(CBM_FILE f, unsigned char *buffer, unsigned int length);/
 Support function for mnib. Do not use.
 
-<tag/int cbm_parallel_burst_read_track_var(CBM_FILE f, __u_char *buffer, unsigned int length);/
+<tag/int cbm_parallel_burst_read_track_var(CBM_FILE f, unsigned char *buffer, unsigned int length);/
 Support function for mnib. Do not use.
 
-<tag/int cbm_parallel_burst_write_track(CBM_FILE f, __u_char *buffer, unsigned int length);/
+<tag/int cbm_parallel_burst_write_track(CBM_FILE f, unsigned char *buffer, unsigned int length);/
 Support function for mnib. Do not use.
 
 </descrip>

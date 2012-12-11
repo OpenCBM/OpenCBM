@@ -22,7 +22,7 @@
 #include <dos.h>
 
 int
-own_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress,
+own_device_status(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                   void *Buffer, size_t BufferLength)
 {
     int retValue;
@@ -66,7 +66,7 @@ own_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress,
     return retValue;
 }
 
-void morse(CBM_FILE f, __u_char drv)
+void morse(CBM_FILE f, unsigned char drv)
 {
     static char morsecode[] = {
  0x20,0xe5,0xc1,0xd0,0x0a,0xa9,0x30,0x4c,
@@ -100,7 +100,7 @@ void morse(CBM_FILE f, __u_char drv)
 }
 
 void
-writefile(CBM_FILE f, __u_char drv, const char * const filename)
+writefile(CBM_FILE f, unsigned char drv, const char * const filename)
 {
     const char text[] = "Hello, just a simple Test!";
 
@@ -123,7 +123,7 @@ writefile(CBM_FILE f, __u_char drv, const char * const filename)
 }
 
 void
-readfile(CBM_FILE f, __u_char drv, const char * const filename)
+readfile(CBM_FILE f, unsigned char drv, const char * const filename)
 {
     int n;
 

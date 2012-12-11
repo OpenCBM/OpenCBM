@@ -54,14 +54,14 @@ int xum1541_ioctl(usb_dev_handle *HandleXum1541, unsigned int cmd,
     unsigned int addr, unsigned int secaddr);
 
 // Read/write data in normal CBM and speeder protocol modes
-int xum1541_write(usb_dev_handle *HandleXum1541, __u_char mode,
-    const __u_char *data, size_t size);
-int xum1541_write_ext(usb_dev_handle *HandleXum1541, __u_char mode,
-    const __u_char *data, size_t size, int *Status, int *BytesWritten);
-int xum1541_read(usb_dev_handle *HandleXum1541, __u_char mode,
-    __u_char *data, size_t size);
-int xum1541_read_ext(usb_dev_handle *HandleXum1541, __u_char mode,
-    __u_char *data, size_t size, int *Status, int *BytesRead);
+int xum1541_write(usb_dev_handle *HandleXum1541, unsigned char mode,
+    const unsigned char *data, size_t size);
+int xum1541_write_ext(usb_dev_handle *HandleXum1541, unsigned char mode,
+    const unsigned char *data, size_t size, int *Status, int *BytesWritten);
+int xum1541_read(usb_dev_handle *HandleXum1541, unsigned char mode,
+    unsigned char *data, size_t size);
+int xum1541_read_ext(usb_dev_handle *HandleXum1541, unsigned char mode,
+    unsigned char *data, size_t size, int *Status, int *BytesRead);
 
 int xum1541_tap_break(usb_dev_handle *HandleXum1541);
 

@@ -929,7 +929,7 @@ cbm_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 */
 
 int CBMAPIDECL 
-cbm_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+cbm_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     FUNC_ENTER();
 
@@ -960,7 +960,7 @@ cbm_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddr
 */
 
 int CBMAPIDECL 
-cbm_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+cbm_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     FUNC_ENTER();
 
@@ -996,7 +996,7 @@ cbm_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
 */
 
 int CBMAPIDECL 
-cbm_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress, 
+cbm_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress, 
          const void *Filename, size_t FilenameLength)
 {
     int returnValue;
@@ -1056,7 +1056,7 @@ cbm_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddres
 */
 
 int CBMAPIDECL
-cbm_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+cbm_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     FUNC_ENTER();
 
@@ -1227,10 +1227,10 @@ cbm_reset(CBM_FILE HandleDevice)
    This function can't signal an error, thus, be careful!
 */
 
-__u_char CBMAPIDECL 
+unsigned char CBMAPIDECL 
 cbm_pp_read(CBM_FILE HandleDevice)
 {
-    __u_char ret = -1;
+    unsigned char ret = -1;
 
     FUNC_ENTER();
 
@@ -1266,7 +1266,7 @@ cbm_pp_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL 
-cbm_pp_write(CBM_FILE HandleDevice, __u_char Byte)
+cbm_pp_write(CBM_FILE HandleDevice, unsigned char Byte)
 {
     FUNC_ENTER();
 
@@ -1509,7 +1509,7 @@ cbm_iec_get(CBM_FILE HandleDevice, int Line)
 */
 
 int CBMAPIDECL
-cbm_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress, 
+cbm_device_status(CBM_FILE HandleDevice, unsigned char DeviceAddress, 
                   void *Buffer, size_t BufferLength)
 {
     int retValue;
@@ -1583,7 +1583,7 @@ cbm_device_status(CBM_FILE HandleDevice, __u_char DeviceAddress,
 */
 
 int CBMAPIDECL
-cbm_exec_command(CBM_FILE HandleDevice, __u_char DeviceAddress, 
+cbm_exec_command(CBM_FILE HandleDevice, unsigned char DeviceAddress, 
                  const void *Command, size_t Size)
 {
     int rv;
@@ -1618,10 +1618,10 @@ cbm_exec_command(CBM_FILE HandleDevice, __u_char DeviceAddress,
  Note that a plugin is not required to implement this function.
 */
 
-__u_char CBMAPIDECL
+unsigned char CBMAPIDECL
 cbm_parallel_burst_read(CBM_FILE HandleDevice)
 {
-    __u_char ret = 0;
+    unsigned char ret = 0;
 
     FUNC_ENTER();
 
@@ -1649,7 +1649,7 @@ cbm_parallel_burst_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbm_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
+cbm_parallel_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
     FUNC_ENTER();
 
@@ -1660,7 +1660,7 @@ cbm_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 }
 
 int CBMAPIDECL
-cbm_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
+cbm_parallel_burst_read_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     unsigned int Length)
 {
     unsigned int i;
@@ -1683,7 +1683,7 @@ cbm_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
 }
 
 int CBMAPIDECL
-cbm_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
+cbm_parallel_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     unsigned int Length)
 {
     unsigned int i;
@@ -1730,7 +1730,7 @@ cbm_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
 */
 
 int CBMAPIDECL
-cbm_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbm_parallel_burst_read_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int ret = -1;
 
@@ -1764,7 +1764,7 @@ cbm_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned 
 */
 
 int CBMAPIDECL
-cbm_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbm_parallel_burst_read_track_var(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int ret = -1;
 
@@ -1801,7 +1801,7 @@ cbm_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsig
 */
 
 int CBMAPIDECL
-cbm_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbm_parallel_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int ret = -1;
 
@@ -1830,10 +1830,10 @@ cbm_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned
  Note that a plugin is not required to implement this function.
 */
 
-__u_char CBMAPIDECL
+unsigned char CBMAPIDECL
 cbm_srq_burst_read(CBM_FILE HandleDevice)
 {
-    __u_char ret = 0;
+    unsigned char ret = 0;
 
     FUNC_ENTER();
 
@@ -1861,7 +1861,7 @@ cbm_srq_burst_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-cbm_srq_burst_write(CBM_FILE HandleDevice, __u_char Value)
+cbm_srq_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
     FUNC_ENTER();
 
@@ -1872,7 +1872,7 @@ cbm_srq_burst_write(CBM_FILE HandleDevice, __u_char Value)
 }
 
 int CBMAPIDECL
-cbm_srq_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
+cbm_srq_burst_read_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     unsigned int Length)
 {
     unsigned int i;
@@ -1895,7 +1895,7 @@ cbm_srq_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
 }
 
 int CBMAPIDECL
-cbm_srq_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
+cbm_srq_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     unsigned int Length)
 {
     unsigned int i;
@@ -1942,7 +1942,7 @@ cbm_srq_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
 */
 
 int CBMAPIDECL
-cbm_srq_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbm_srq_burst_read_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int ret = -1;
 
@@ -1979,7 +1979,7 @@ cbm_srq_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int L
 */
 
 int CBMAPIDECL
-cbm_srq_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+cbm_srq_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int ret = -1;
 
@@ -2231,7 +2231,7 @@ cbm_tap_motor_off(CBM_FILE HandleDevice, int *Status)
 */
 
 int CBMAPIDECL
-cbm_tap_start_capture(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
+cbm_tap_start_capture(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
 {
     int ret = -1;
 
@@ -2273,7 +2273,7 @@ cbm_tap_start_capture(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buff
 */
 
 int CBMAPIDECL
-cbm_tap_start_write(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
+cbm_tap_start_write(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
 {
     int ret = -1;
 
@@ -2361,7 +2361,7 @@ cbm_tap_break(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-cbm_tap_download_config(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
+cbm_tap_download_config(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
 {
     int ret = -1;
 
@@ -2403,7 +2403,7 @@ cbm_tap_download_config(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Bu
 */
 
 int CBMAPIDECL
-cbm_tap_upload_config(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
+cbm_tap_upload_config(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
 {
     int ret = -1;
 

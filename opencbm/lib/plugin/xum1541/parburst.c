@@ -43,12 +43,12 @@
  call this function.
 */
 
-__u_char CBMAPIDECL
+unsigned char CBMAPIDECL
 opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
 {
-    __u_char result;
+    unsigned char result;
 
-    result = (__u_char)xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_PARBURST_READ, 0, 0);
+    result = (unsigned char)xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_PARBURST_READ, 0, 0);
     //printf("parburst read: %x\n", result);
     return result;
 }
@@ -69,7 +69,7 @@ opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
+opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
     int result;
 
@@ -78,7 +78,7 @@ opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 }
 
 int CBMAPIDECL
-opencbm_plugin_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
+opencbm_plugin_parallel_burst_read_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     unsigned int Length)
 {
     int result;
@@ -92,7 +92,7 @@ opencbm_plugin_parallel_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
 }
 
 int CBMAPIDECL
-opencbm_plugin_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
+opencbm_plugin_parallel_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     unsigned int Length)
 {
     int result;
@@ -127,7 +127,7 @@ opencbm_plugin_parallel_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
 */
 
 int CBMAPIDECL
-opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int result;
 
@@ -161,7 +161,7 @@ opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer
 */
 
 int CBMAPIDECL
-opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int result;
 
@@ -197,7 +197,7 @@ opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Bu
 */
 
 int CBMAPIDECL
-opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int result;
 
@@ -226,12 +226,12 @@ opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffe
  call this function.
 */
 
-__u_char CBMAPIDECL
+unsigned char CBMAPIDECL
 opencbm_plugin_srq_burst_read(CBM_FILE HandleDevice)
 {
-    __u_char result;
+    unsigned char result;
 
-    result = (__u_char)xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_SRQBURST_READ, 0, 0);
+    result = (unsigned char)xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_SRQBURST_READ, 0, 0);
     return result;
 }
 
@@ -251,7 +251,7 @@ opencbm_plugin_srq_burst_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-opencbm_plugin_srq_burst_write(CBM_FILE HandleDevice, __u_char Value)
+opencbm_plugin_srq_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
     int result;
 
@@ -259,7 +259,7 @@ opencbm_plugin_srq_burst_write(CBM_FILE HandleDevice, __u_char Value)
 }
 
 int CBMAPIDECL
-opencbm_plugin_srq_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
+opencbm_plugin_srq_burst_read_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     unsigned int Length)
 {
     int result;
@@ -273,7 +273,7 @@ opencbm_plugin_srq_burst_read_n(CBM_FILE HandleDevice, __u_char *Buffer,
 }
 
 int CBMAPIDECL
-opencbm_plugin_srq_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
+opencbm_plugin_srq_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     unsigned int Length)
 {
     int result;
@@ -308,7 +308,7 @@ opencbm_plugin_srq_burst_write_n(CBM_FILE HandleDevice, __u_char *Buffer,
 */
 
 int CBMAPIDECL
-opencbm_plugin_srq_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_srq_burst_read_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int result;
 
@@ -342,7 +342,7 @@ opencbm_plugin_srq_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, uns
 */
 
 int CBMAPIDECL
-opencbm_plugin_srq_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_srq_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int result;
 
@@ -561,7 +561,7 @@ opencbm_plugin_tap_motor_off(CBM_FILE HandleDevice, int *Status)
 */
 
 int CBMAPIDECL
-opencbm_plugin_tap_start_capture(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
+opencbm_plugin_tap_start_capture(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
 {
     int result = xum1541_read_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP, Buffer, Buffer_Length, Status, BytesRead);
     if (result <= 0) {
@@ -600,7 +600,7 @@ opencbm_plugin_tap_start_capture(CBM_FILE HandleDevice, __u_char *Buffer, unsign
 */
 
 int CBMAPIDECL
-opencbm_plugin_tap_start_write(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
+opencbm_plugin_tap_start_write(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
 {
     int result = xum1541_write_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP, Buffer, Length, Status, BytesWritten);
     if (result <= 0) {
@@ -671,7 +671,7 @@ opencbm_plugin_tap_break(CBM_FILE HandleDevice)
 */
 
 int CBMAPIDECL
-opencbm_plugin_tap_download_config(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
+opencbm_plugin_tap_download_config(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
 {
     int result = xum1541_read_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP_CONFIG, Buffer, Buffer_Length, Status, BytesRead);
     if (result <= 0) {
@@ -710,7 +710,7 @@ opencbm_plugin_tap_download_config(CBM_FILE HandleDevice, __u_char *Buffer, unsi
 */
 
 int CBMAPIDECL
-opencbm_plugin_tap_upload_config(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
+opencbm_plugin_tap_upload_config(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
 {
     int result = xum1541_write_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP_CONFIG, Buffer, Length, Status, BytesWritten);
     if (result <= 0) {

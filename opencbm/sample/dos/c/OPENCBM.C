@@ -166,7 +166,7 @@ cbm_driver_close(CBM_FILE f)
 
 
 int
-cbm_listen(CBM_FILE f, __u_char dev, __u_char secadr)
+cbm_listen(CBM_FILE f, unsigned char dev, unsigned char secadr)
 {
     WORD retVal;
 
@@ -179,7 +179,7 @@ cbm_listen(CBM_FILE f, __u_char dev, __u_char secadr)
 }
 
 int
-cbm_talk(CBM_FILE f, __u_char dev, __u_char secadr)
+cbm_talk(CBM_FILE f, unsigned char dev, unsigned char secadr)
 {
     WORD retVal;
 
@@ -192,7 +192,7 @@ cbm_talk(CBM_FILE f, __u_char dev, __u_char secadr)
 }
 
 int
-cbm_open(CBM_FILE f, __u_char dev, __u_char secadr, const void *fname, size_t len)
+cbm_open(CBM_FILE f, unsigned char dev, unsigned char secadr, const void *fname, size_t len)
 {
     WORD retVal;
 
@@ -207,7 +207,7 @@ cbm_open(CBM_FILE f, __u_char dev, __u_char secadr, const void *fname, size_t le
 }
 
 int
-cbm_close(CBM_FILE f, __u_char dev, __u_char secadr)
+cbm_close(CBM_FILE f, unsigned char dev, unsigned char secadr)
 {
     WORD retVal;
 
@@ -307,7 +307,7 @@ cbm_reset(CBM_FILE f)
 
 
 // @@@untested
-__u_char
+unsigned char
 cbm_pp_read(CBM_FILE f)
 {
     WORD retVal;
@@ -320,7 +320,7 @@ cbm_pp_read(CBM_FILE f)
 
 // @@@untested
 void
-cbm_pp_write(CBM_FILE f, __u_char c)
+cbm_pp_write(CBM_FILE f, unsigned char c)
 {
     asm {
         mov cl,[c]
@@ -387,7 +387,7 @@ cbm_iec_wait(CBM_FILE f, int line, int state)
 
 
 int
-cbm_upload(CBM_FILE f, __u_char dev, int adr, const void *prog, size_t size)
+cbm_upload(CBM_FILE f, unsigned char dev, int adr, const void *prog, size_t size)
 {
     WORD retVal;
 
@@ -403,7 +403,7 @@ cbm_upload(CBM_FILE f, __u_char dev, int adr, const void *prog, size_t size)
 
 
 int
-cbm_device_status(CBM_FILE f, __u_char dev, void *buf, size_t bufsize)
+cbm_device_status(CBM_FILE f, unsigned char dev, void *buf, size_t bufsize)
 {
     WORD retVal;
 
@@ -417,7 +417,7 @@ cbm_device_status(CBM_FILE f, __u_char dev, void *buf, size_t bufsize)
 }
 
 int
-cbm_exec_command(CBM_FILE f, __u_char dev, const void *cmd, size_t len)
+cbm_exec_command(CBM_FILE f, unsigned char dev, const void *cmd, size_t len)
 {
     WORD retVal;
 
@@ -432,7 +432,7 @@ cbm_exec_command(CBM_FILE f, __u_char dev, const void *cmd, size_t len)
 
 
 int
-cbm_identify(CBM_FILE f, __u_char drv,
+cbm_identify(CBM_FILE f, unsigned char drv,
                                    enum cbm_device_type_e *t,
                                    const char **type_str)
 {

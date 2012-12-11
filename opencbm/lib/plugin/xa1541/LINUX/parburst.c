@@ -28,17 +28,17 @@
 
 /*linux functions needed by parallel burst */
 
-__u_char opencbm_plugin_parallel_burst_read(CBM_FILE f)
+unsigned char opencbm_plugin_parallel_burst_read(CBM_FILE f)
 {
     return ioctl(f, CBMCTRL_PARBURST_READ);
 }
 
-void opencbm_plugin_parallel_burst_write(CBM_FILE f, __u_char c)
+void opencbm_plugin_parallel_burst_write(CBM_FILE f, unsigned char c)
 {
     ioctl(f, CBMCTRL_PARBURST_WRITE, c);
 }
 
-int opencbm_plugin_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsigned int length)
+int opencbm_plugin_parallel_burst_read_track(CBM_FILE f, unsigned char *buffer, unsigned int length)
 {
     int retval;
 
@@ -50,7 +50,7 @@ int opencbm_plugin_parallel_burst_read_track(CBM_FILE f, __u_char *buffer, unsig
     return retval;
 }
 
-int opencbm_plugin_parallel_burst_read_track_var(CBM_FILE f, __u_char *buffer, unsigned int length)
+int opencbm_plugin_parallel_burst_read_track_var(CBM_FILE f, unsigned char *buffer, unsigned int length)
 {
     int retval;
 
@@ -62,7 +62,7 @@ int opencbm_plugin_parallel_burst_read_track_var(CBM_FILE f, __u_char *buffer, u
     return retval;
 }
 
-int opencbm_plugin_parallel_burst_write_track(CBM_FILE f,  __u_char *buffer, unsigned int length)
+int opencbm_plugin_parallel_burst_write_track(CBM_FILE f,  unsigned char *buffer, unsigned int length)
 {
     int retval;
 

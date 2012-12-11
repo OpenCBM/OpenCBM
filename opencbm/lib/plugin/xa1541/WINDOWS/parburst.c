@@ -59,7 +59,7 @@
  call this function.
 */
 
-__u_char CBMAPIDECL
+unsigned char CBMAPIDECL
 opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
 {
     CBMT_PARBURST_PREAD_OUT result;
@@ -87,7 +87,7 @@ opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
+opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
     CBMT_PARBURST_PWRITE_IN parameter;
 
@@ -122,7 +122,7 @@ opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, __u_char Value)
 */
 
 int CBMAPIDECL
-opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int retval = 0;
 
@@ -162,7 +162,7 @@ opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, __u_char *Buffer
 */
 
 int CBMAPIDECL
-opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int retval = 0;
 
@@ -202,7 +202,7 @@ opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, __u_char *Bu
 */
 
 int CBMAPIDECL
-opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length)
+opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length)
 {
     int retval = 0;
 

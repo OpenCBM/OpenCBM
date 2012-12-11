@@ -27,11 +27,11 @@ extern "C" {
 
 extern const char cbm_dev[];
 
-extern int cbm_listen(int f, __u_char dev, __u_char secadr);
-extern int cbm_talk(int f, __u_char dev, __u_char secadr);
+extern int cbm_listen(int f, unsigned char dev, unsigned char secadr);
+extern int cbm_talk(int f, unsigned char dev, unsigned char secadr);
 
-extern int cbm_open(int f, __u_char dev, __u_char secadr);
-extern int cbm_close(int f, __u_char dev, __u_char secadr);
+extern int cbm_open(int f, unsigned char dev, unsigned char secadr);
+extern int cbm_close(int f, unsigned char dev, unsigned char secadr);
 
 extern int cbm_unlisten(int f);
 extern int cbm_untalk(int f);
@@ -40,8 +40,8 @@ extern int cbm_get_eoi(int f);
 
 extern int cbm_reset(int f);
 
-extern __u_char cbm_pp_read(int f);
-extern void cbm_pp_write(int f, __u_char c);
+extern unsigned char cbm_pp_read(int f);
+extern void cbm_pp_write(int f, unsigned char c);
 
 extern int cbm_iec_poll(int f);
 extern int cbm_iec_get(int f, int line);
@@ -49,7 +49,7 @@ extern void cbm_iec_set(int f, int line);
 extern void cbm_iec_release(int f, int line);
 extern int cbm_iec_wait(int f, int line, int state);
 
-extern int cbm_upload(int f, __u_char dev, int adr, __u_char *prog, int size);
+extern int cbm_upload(int f, unsigned char dev, int adr, unsigned char *prog, int size);
 
 extern int cbm_device_status(int f, int drv, char *buf, int bufsize);
 extern int cbm_exec_command(int f, int drv, char *cmd, int len);

@@ -71,7 +71,7 @@ libopencbmtransfer_set_transfer(opencbm_transfer_t TransferType)
  to call any other libopencbmtransfer function.
 */
 int
-libopencbmtransfer_install(CBM_FILE HandleDevice, __u_char DeviceAddress)
+libopencbmtransfer_install(CBM_FILE HandleDevice, unsigned char DeviceAddress)
 {
     enum cbm_device_type_e cbmDeviceType;
     const char *cbmDeviceString;
@@ -130,24 +130,24 @@ libopencbmtransfer_install(CBM_FILE HandleDevice, __u_char DeviceAddress)
 
 
 int
-libopencbmtransfer_execute_command(CBM_FILE HandleDevice, __u_char DeviceAddress,
+libopencbmtransfer_execute_command(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                                    unsigned int ExecutionAddress)
 {
     current_transfer_funcs->write1byte(HandleDevice, 0x80);
     current_transfer_funcs->write2byte(HandleDevice, 
-        (__u_char) (ExecutionAddress & 0xFF), 
-        (__u_char) (ExecutionAddress >> 8));
+        (unsigned char) (ExecutionAddress & 0xFF), 
+        (unsigned char) (ExecutionAddress >> 8));
 
     return 0;
 }
 
 typedef int
-(*ll_read_write_mem)(CBM_FILE HandleDevice, __u_char DeviceAddress,
-                     __u_char Buffer[], unsigned int MemoryAddress, unsigned int Length);
+(*ll_read_write_mem)(CBM_FILE HandleDevice, unsigned char DeviceAddress,
+                     unsigned char Buffer[], unsigned int MemoryAddress, unsigned int Length);
 
 static int
-libopencbmtransfer_ll_write_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
-                                __u_char Buffer[], unsigned int MemoryAddress, unsigned int Length)
+libopencbmtransfer_ll_write_mem(CBM_FILE HandleDevice, unsigned char DeviceAddress,
+                                unsigned char Buffer[], unsigned int MemoryAddress, unsigned int Length)
 {
     FUNC_ENTER();
 
@@ -155,9 +155,9 @@ libopencbmtransfer_ll_write_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
     current_transfer_funcs->write1byte(HandleDevice, 0x00);
     current_transfer_funcs->write2byte(HandleDevice,
-        (__u_char) (MemoryAddress & 0xFF),
-        (__u_char) (MemoryAddress >> 8));
-    current_transfer_funcs->write1byte(HandleDevice, (__u_char) Length);
+        (unsigned char) (MemoryAddress & 0xFF),
+        (unsigned char) (MemoryAddress >> 8));
+    current_transfer_funcs->write1byte(HandleDevice, (unsigned char) Length);
     current_transfer_funcs->writeblock(HandleDevice, Buffer, Length);
 
     FUNC_LEAVE_INT(0);
@@ -165,8 +165,8 @@ libopencbmtransfer_ll_write_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
 
 static int
-libopencbmtransfer_ll_read_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
-                               __u_char Buffer[], unsigned int MemoryAddress, unsigned int Length)
+libopencbmtransfer_ll_read_mem(CBM_FILE HandleDevice, unsigned char DeviceAddress,
+                               unsigned char Buffer[], unsigned int MemoryAddress, unsigned int Length)
 {
     FUNC_ENTER();
 
@@ -174,17 +174,17 @@ libopencbmtransfer_ll_read_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
 
     current_transfer_funcs->write1byte(HandleDevice, 0x01);
     current_transfer_funcs->write2byte(HandleDevice,
-        (__u_char) (MemoryAddress & 0xFF),
-        (__u_char) (MemoryAddress >> 8));
-    current_transfer_funcs->write1byte(HandleDevice, (__u_char) Length);
+        (unsigned char) (MemoryAddress & 0xFF),
+        (unsigned char) (MemoryAddress >> 8));
+    current_transfer_funcs->write1byte(HandleDevice, (unsigned char) Length);
     current_transfer_funcs->readblock(HandleDevice, Buffer, Length);
 
     FUNC_LEAVE_INT(0);
 }
 
 static int
-libopencbmtransfer_read_write_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
-                                  __u_char Buffer[], unsigned int MemoryAddress, unsigned int Length,
+libopencbmtransfer_read_write_mem(CBM_FILE HandleDevice, unsigned char DeviceAddress,
+                                  unsigned char Buffer[], unsigned int MemoryAddress, unsigned int Length,
                                   ll_read_write_mem function)
 {
     const static char monkey[]={",oO*^!:;"};// for fast moves
@@ -223,23 +223,23 @@ libopencbmtransfer_read_write_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
 }
 
 int
-libopencbmtransfer_read_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
-                            __u_char Buffer[], unsigned int MemoryAddress, unsigned int Length)
+libopencbmtransfer_read_mem(CBM_FILE HandleDevice, unsigned char DeviceAddress,
+                            unsigned char Buffer[], unsigned int MemoryAddress, unsigned int Length)
 {
     return libopencbmtransfer_read_write_mem(HandleDevice, DeviceAddress,
                                   Buffer, MemoryAddress, Length, libopencbmtransfer_ll_read_mem);
 }
 
 int
-libopencbmtransfer_write_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
-                            __u_char Buffer[], unsigned int MemoryAddress, unsigned int Length)
+libopencbmtransfer_write_mem(CBM_FILE HandleDevice, unsigned char DeviceAddress,
+                            unsigned char Buffer[], unsigned int MemoryAddress, unsigned int Length)
 {
     return libopencbmtransfer_read_write_mem(HandleDevice, DeviceAddress,
                                   Buffer, MemoryAddress, Length, libopencbmtransfer_ll_write_mem);
 }
 
 int
-libopencbmtransfer_remove(CBM_FILE HandleDevice, __u_char DeviceAddress)
+libopencbmtransfer_remove(CBM_FILE HandleDevice, unsigned char DeviceAddress)
 {
     return libopencbmtransfer_execute_command(HandleDevice, DeviceAddress, 0xEBE7);
 }

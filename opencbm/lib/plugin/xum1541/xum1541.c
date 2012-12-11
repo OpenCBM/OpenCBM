@@ -683,11 +683,11 @@ xum1541_tap_break(usb_dev_handle *HandleXum1541)
     fatal error, returns -1.
 */
 int
-xum1541_write(usb_dev_handle *HandleXum1541, __u_char modeFlags, const __u_char *data, size_t size)
+xum1541_write(usb_dev_handle *HandleXum1541, unsigned char modeFlags, const unsigned char *data, size_t size)
 {
     int wr, mode, ret;
     size_t bytesWritten, bytes2write;
-    __u_char cmdBuf[XUM_CMDBUF_SIZE];
+    unsigned char cmdBuf[XUM_CMDBUF_SIZE];
     BOOL isTapeCmd = ((modeFlags == XUM1541_TAP) || (modeFlags == XUM1541_TAP_CONFIG));
 
     mode = modeFlags & 0xf0;
@@ -772,7 +772,7 @@ xum1541_write(usb_dev_handle *HandleXum1541, __u_char modeFlags, const __u_char 
 */
 
 int
-xum1541_write_ext(usb_dev_handle *HandleXum1541, __u_char modeFlags, const __u_char *data, size_t size, int *Status, int *BytesWritten)
+xum1541_write_ext(usb_dev_handle *HandleXum1541, unsigned char modeFlags, const unsigned char *data, size_t size, int *Status, int *BytesWritten)
 {
     xum1541_dbg(1, "[xum1541_write_ext]");
     *BytesWritten = xum1541_write(HandleXum1541, modeFlags, data, size);
@@ -798,7 +798,7 @@ xum1541_write_ext(usb_dev_handle *HandleXum1541, __u_char modeFlags, const __u_c
 */
 
 int
-xum1541_read_ext(usb_dev_handle *HandleXum1541, __u_char mode, __u_char *data, size_t size, int *Status, int *BytesRead)
+xum1541_read_ext(usb_dev_handle *HandleXum1541, unsigned char mode, unsigned char *data, size_t size, int *Status, int *BytesRead)
 {
     xum1541_dbg(1, "[xum1541_read_ext]");
     *BytesRead = xum1541_read(HandleXum1541, mode, data, size);
@@ -830,7 +830,7 @@ xum1541_read_ext(usb_dev_handle *HandleXum1541, __u_char mode, __u_char *data, s
     fatal error, returns -1.
 */
 int
-xum1541_read(usb_dev_handle *HandleXum1541, __u_char mode, __u_char *data, size_t size)
+xum1541_read(usb_dev_handle *HandleXum1541, unsigned char mode, unsigned char *data, size_t size)
 {
     int rd;
     size_t bytesRead, bytes2read;

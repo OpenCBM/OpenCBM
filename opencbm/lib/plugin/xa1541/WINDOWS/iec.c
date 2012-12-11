@@ -418,7 +418,7 @@ opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 */
 
 int CBMAPIDECL
-opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     CBMT_LISTEN_IN parameter;
     int returnValue;
@@ -458,7 +458,7 @@ opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Se
 */
 
 int CBMAPIDECL
-opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     CBMT_TALK_IN parameter;
     int returnValue;
@@ -496,7 +496,7 @@ opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Seco
 */
 
 int CBMAPIDECL
-opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     CBMT_OPEN_IN parameter;
     int returnValue;
@@ -540,7 +540,7 @@ opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Seco
 */
 
 int CBMAPIDECL
-opencbm_plugin_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     CBMT_CLOSE_IN parameter;
     int returnValue;
@@ -744,7 +744,7 @@ opencbm_plugin_reset(CBM_FILE HandleDevice)
    This function can't signal an error, thus, be careful!
 */
 
-__u_char CBMAPIDECL
+unsigned char CBMAPIDECL
 opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 {
     CBMT_PP_READ_OUT result;
@@ -780,7 +780,7 @@ opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-opencbm_plugin_pp_write(CBM_FILE HandleDevice, __u_char Byte)
+opencbm_plugin_pp_write(CBM_FILE HandleDevice, unsigned char Byte)
 {
     CBMT_PP_WRITE_IN parameter;
 

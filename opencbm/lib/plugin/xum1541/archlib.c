@@ -269,9 +269,9 @@ opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 */
 
 int CBMAPIDECL
-opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
-    __u_char proto, dataBuf[2];
+    unsigned char proto, dataBuf[2];
 
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x20 | DeviceAddress;
@@ -303,9 +303,9 @@ opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Se
 */
 
 int CBMAPIDECL
-opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
-    __u_char proto, dataBuf[2];
+    unsigned char proto, dataBuf[2];
 
     proto = XUM1541_CBM | XUM_WRITE_ATN | XUM_WRITE_TALK;
     dataBuf[0] = 0x40 | DeviceAddress;
@@ -335,9 +335,9 @@ opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Seco
 */
 
 int CBMAPIDECL
-opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
-    __u_char proto, dataBuf[2];
+    unsigned char proto, dataBuf[2];
 
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x20 | DeviceAddress;
@@ -367,9 +367,9 @@ opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Seco
 */
 
 int CBMAPIDECL
-opencbm_plugin_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
-    __u_char proto, dataBuf[2];
+    unsigned char proto, dataBuf[2];
 
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x20 | DeviceAddress;
@@ -400,7 +400,7 @@ opencbm_plugin_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Sec
 int CBMAPIDECL
 opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 {
-    __u_char proto, dataBuf[1];
+    unsigned char proto, dataBuf[1];
 
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x3f;
@@ -430,7 +430,7 @@ opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_untalk(CBM_FILE HandleDevice)
 {
-    __u_char proto, dataBuf[1];
+    unsigned char proto, dataBuf[1];
 
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x5f;
@@ -537,10 +537,10 @@ opencbm_plugin_reset(CBM_FILE HandleDevice)
    This function can't signal an error, thus, be careful!
 */
 
-__u_char CBMAPIDECL
+unsigned char CBMAPIDECL
 opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 {
-    return (__u_char) xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_PP_READ, 0, 0);
+    return (unsigned char) xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_PP_READ, 0, 0);
 }
 
 /*! \brief Write a byte to a XP1541/XP1571 cable
@@ -567,7 +567,7 @@ opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-opencbm_plugin_pp_write(CBM_FILE HandleDevice, __u_char Byte)
+opencbm_plugin_pp_write(CBM_FILE HandleDevice, unsigned char Byte)
 {
     xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_PP_WRITE, Byte, 0);
 }

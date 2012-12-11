@@ -35,7 +35,7 @@ reset(int dummy)
 int ARCH_MAINDECL
 main(int argc, char **argv)
 {
-    __u_char drive = 8;
+    unsigned char drive = 8;
     int i;
     unsigned char cmd[] = "M-R\x87\x00\x02";
     static unsigned char rpm_prog[] =

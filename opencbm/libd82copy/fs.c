@@ -42,7 +42,7 @@ static int block_offset(int tr, int se)
     return (sectors + se) * BLOCKSIZE;
 }
 
-static int read_block(__u_char tr, __u_char se, __u_char *block)
+static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
 {
     if(fseek(the_file, block_offset(tr, se), SEEK_SET) == 0)
     {
@@ -55,13 +55,13 @@ static int read_block(__u_char tr, __u_char se, __u_char *block)
  * Variables to make sure writing the block is an atomary process
  */
 static int atom_execute = 0;
-static __u_char atom_tr;
-static __u_char atom_se;
+static unsigned char atom_tr;
+static unsigned char atom_se;
 static const unsigned char *atom_blk;
 static int atom_size;
 static int atom_read_status;
 
-static int write_block(__u_char tr, __u_char se, const unsigned char *blk, int size, int read_status)
+static int write_block(unsigned char tr, unsigned char se, const unsigned char *blk, int size, int read_status)
 {
     long ofs;
     int ret;

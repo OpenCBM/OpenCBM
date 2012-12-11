@@ -257,7 +257,7 @@ opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 */
 
 int CBMAPIDECL
-opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     return xu1541_ioctl(XU1541_LISTEN, DeviceAddress, SecondaryAddress);
 }
@@ -286,7 +286,7 @@ opencbm_plugin_listen(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Se
 */
 
 int CBMAPIDECL
-opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     return xu1541_ioctl(XU1541_TALK, DeviceAddress, SecondaryAddress);
 }
@@ -313,7 +313,7 @@ opencbm_plugin_talk(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Seco
 */
 
 int CBMAPIDECL
-opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     return xu1541_ioctl(XU1541_OPEN, DeviceAddress, SecondaryAddress);
 }
@@ -340,7 +340,7 @@ opencbm_plugin_open(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char Seco
 */
 
 int CBMAPIDECL
-opencbm_plugin_close(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress)
+opencbm_plugin_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     return xu1541_ioctl(XU1541_CLOSE, DeviceAddress, SecondaryAddress);
 }
@@ -497,10 +497,10 @@ opencbm_plugin_reset(CBM_FILE HandleDevice)
    This function can't signal an error, thus, be careful!
 */
 
-__u_char CBMAPIDECL
+unsigned char CBMAPIDECL
 opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 {
-    return (__u_char) xu1541_ioctl(XU1541_PP_READ, 0, 0);
+    return (unsigned char) xu1541_ioctl(XU1541_PP_READ, 0, 0);
 }
 
 /*! \brief Write a byte to a XP1541/XP1571 cable
@@ -527,7 +527,7 @@ opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 */
 
 void CBMAPIDECL
-opencbm_plugin_pp_write(CBM_FILE HandleDevice, __u_char Byte)
+opencbm_plugin_pp_write(CBM_FILE HandleDevice, unsigned char Byte)
 {
     xu1541_ioctl(XU1541_PP_WRITE, Byte, 0);
 }

@@ -184,7 +184,7 @@ output_pia(CBM_FILE HandleDevice, unsigned char Drive, unsigned int PiaAddress, 
 */
 
 int CBMAPIDECL 
-cbm_identify_xp1541(CBM_FILE HandleDevice, __u_char DeviceAddress,
+cbm_identify_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                     enum cbm_device_type_e *CbmDeviceType,
                     enum cbm_cable_type_e *CableType)
 {

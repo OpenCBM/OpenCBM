@@ -130,7 +130,7 @@ static __inline void StoreAddressAndCount(unsigned char * Buffer, unsigned int D
 */
 
 int CBMAPIDECL
-cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress, 
+cbm_upload(CBM_FILE HandleDevice, unsigned char DeviceAddress, 
            int DriveMemAddress, const void *Program, size_t Size)
 {
     const char *bufferToProgram = Program;
@@ -240,7 +240,7 @@ cbm_upload(CBM_FILE HandleDevice, __u_char DeviceAddress,
 enum { TRANSFER_SIZE_DOWNLOAD = 0x100u };
 
 int CBMAPIDECL
-cbm_download(CBM_FILE HandleDevice, __u_char DeviceAddress, 
+cbm_download(CBM_FILE HandleDevice, unsigned char DeviceAddress, 
              int DriveMemAddress, void *const Buffer, size_t Size)
 {
     unsigned char command[] = { 'M', '-', 'R', ' ', ' ', '\0', '\r' };

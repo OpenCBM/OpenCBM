@@ -103,7 +103,7 @@ typedef int CBMAPIDECL opencbm_plugin_raw_read_t(CBM_FILE HandleDevice, void *Bu
 
  \return
 */
-typedef int CBMAPIDECL opencbm_plugin_open_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+typedef int CBMAPIDECL opencbm_plugin_open_t(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress);
 
 /*! \brief @@@@@ \todo document
 
@@ -115,7 +115,7 @@ typedef int CBMAPIDECL opencbm_plugin_open_t(CBM_FILE HandleDevice, __u_char Dev
 
  \return
 */
-typedef int CBMAPIDECL opencbm_plugin_close_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+typedef int CBMAPIDECL opencbm_plugin_close_t(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress);
 
 /*! \brief @@@@@ \todo document
 
@@ -127,7 +127,7 @@ typedef int CBMAPIDECL opencbm_plugin_close_t(CBM_FILE HandleDevice, __u_char De
 
  \return
 */
-typedef int CBMAPIDECL opencbm_plugin_listen_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+typedef int CBMAPIDECL opencbm_plugin_listen_t(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress);
 
 /*! \brief @@@@@ \todo document
 
@@ -139,7 +139,7 @@ typedef int CBMAPIDECL opencbm_plugin_listen_t(CBM_FILE HandleDevice, __u_char D
 
  \return
 */
-typedef int CBMAPIDECL opencbm_plugin_talk_t(CBM_FILE HandleDevice, __u_char DeviceAddress, __u_char SecondaryAddress);
+typedef int CBMAPIDECL opencbm_plugin_talk_t(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress);
 
 /*! \brief @@@@@ \todo document
 
@@ -187,7 +187,7 @@ typedef int CBMAPIDECL opencbm_plugin_reset_t(CBM_FILE HandleDevice);
 
  \return
 */
-typedef __u_char CBMAPIDECL opencbm_plugin_pp_read_t(CBM_FILE HandleDevice);
+typedef unsigned char CBMAPIDECL opencbm_plugin_pp_read_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -195,7 +195,7 @@ typedef __u_char CBMAPIDECL opencbm_plugin_pp_read_t(CBM_FILE HandleDevice);
 
  \param Byte
 */
-typedef void CBMAPIDECL opencbm_plugin_pp_write_t(CBM_FILE HandleDevice, __u_char Byte);
+typedef void CBMAPIDECL opencbm_plugin_pp_write_t(CBM_FILE HandleDevice, unsigned char Byte);
 
 /*! \brief @@@@@ \todo document
 
@@ -248,7 +248,7 @@ typedef int CBMAPIDECL opencbm_plugin_iec_wait_t(CBM_FILE HandleDevice, int Line
 
  \return
 */
-typedef __u_char CBMAPIDECL opencbm_plugin_parallel_burst_read_t(CBM_FILE HandleDevice);
+typedef unsigned char CBMAPIDECL opencbm_plugin_parallel_burst_read_t(CBM_FILE HandleDevice);
 
 /*! \brief @@@@@ \todo document
 
@@ -256,7 +256,7 @@ typedef __u_char CBMAPIDECL opencbm_plugin_parallel_burst_read_t(CBM_FILE Handle
 
  \param Value
 */
-typedef void CBMAPIDECL opencbm_plugin_parallel_burst_write_t(CBM_FILE HandleDevice, __u_char Value);
+typedef void CBMAPIDECL opencbm_plugin_parallel_burst_write_t(CBM_FILE HandleDevice, unsigned char Value);
 
 /*! \brief @@@@@ \todo document
 
@@ -268,7 +268,7 @@ typedef void CBMAPIDECL opencbm_plugin_parallel_burst_write_t(CBM_FILE HandleDev
 
  \return
 */
-typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_n_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_n_t(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -280,7 +280,7 @@ typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_n_t(CBM_FILE HandleDev
 
  \return
 */
-typedef int CBMAPIDECL opencbm_plugin_parallel_burst_write_n_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+typedef int CBMAPIDECL opencbm_plugin_parallel_burst_write_n_t(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -292,7 +292,7 @@ typedef int CBMAPIDECL opencbm_plugin_parallel_burst_write_n_t(CBM_FILE HandleDe
 
  \return
 */
-typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_track_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_track_t(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -304,7 +304,7 @@ typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_track_t(CBM_FILE Handl
 
  \return
 */
-typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_track_var_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_track_var_t(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -316,7 +316,7 @@ typedef int CBMAPIDECL opencbm_plugin_parallel_burst_read_track_var_t(CBM_FILE H
 
  \return
 */
-typedef int CBMAPIDECL opencbm_plugin_parallel_burst_write_track_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length);
+typedef int CBMAPIDECL opencbm_plugin_parallel_burst_write_track_t(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length);
 
 /*! \brief @@@@@ \todo document
 
@@ -335,11 +335,11 @@ typedef int CBMAPIDECL opencbm_plugin_tap_wait_for_stop_sense_t(CBM_FILE HandleD
 typedef int CBMAPIDECL opencbm_plugin_tap_wait_for_play_sense_t(CBM_FILE HandleDevice, int *Status);
 typedef int CBMAPIDECL opencbm_plugin_tap_motor_on_t(CBM_FILE HandleDevice, int *Status);
 typedef int CBMAPIDECL opencbm_plugin_tap_motor_off_t(CBM_FILE HandleDevice, int *Status);
-typedef int CBMAPIDECL opencbm_plugin_tap_start_capture_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
-typedef int CBMAPIDECL opencbm_plugin_tap_start_write_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
+typedef int CBMAPIDECL opencbm_plugin_tap_start_capture_t(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
+typedef int CBMAPIDECL opencbm_plugin_tap_start_write_t(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
 typedef int CBMAPIDECL opencbm_plugin_tap_get_ver_t(CBM_FILE HandleDevice, int *Status);
-typedef int CBMAPIDECL opencbm_plugin_tap_download_config_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
-typedef int CBMAPIDECL opencbm_plugin_tap_upload_config_t(CBM_FILE HandleDevice, __u_char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
+typedef int CBMAPIDECL opencbm_plugin_tap_download_config_t(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
+typedef int CBMAPIDECL opencbm_plugin_tap_upload_config_t(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
 typedef int CBMAPIDECL opencbm_plugin_tap_break_t(CBM_FILE HandleDevice);
 
 /*! \brief read a block of data from the OpenCBM backend with protocol serial-1

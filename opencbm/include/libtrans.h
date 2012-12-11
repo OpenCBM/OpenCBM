@@ -31,22 +31,22 @@ int
 libopencbmtransfer_set_transfer(opencbm_transfer_t type);
 
 int
-libopencbmtransfer_install(CBM_FILE HandleDevice, __u_char DeviceAddress);
+libopencbmtransfer_install(CBM_FILE HandleDevice, unsigned char DeviceAddress);
 
 int
-libopencbmtransfer_execute_command(CBM_FILE HandleDevice, __u_char DeviceAddress,
+libopencbmtransfer_execute_command(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                                    unsigned int ExecutionAddress);
 
 int
-libopencbmtransfer_read_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
-                            __u_char Buffer[], unsigned int MemoryAddress, unsigned int Length);
+libopencbmtransfer_read_mem(CBM_FILE HandleDevice, unsigned char DeviceAddress,
+                            unsigned char Buffer[], unsigned int MemoryAddress, unsigned int Length);
 
 int
-libopencbmtransfer_write_mem(CBM_FILE HandleDevice, __u_char DeviceAddress,
-                            __u_char Buffer[], unsigned int MemoryAddress, unsigned int Length);
+libopencbmtransfer_write_mem(CBM_FILE HandleDevice, unsigned char DeviceAddress,
+                            unsigned char Buffer[], unsigned int MemoryAddress, unsigned int Length);
 
 int
-libopencbmtransfer_remove(CBM_FILE HandleDevice, __u_char DeviceAddress);
+libopencbmtransfer_remove(CBM_FILE HandleDevice, unsigned char DeviceAddress);
 
 #ifdef LIBOCT_STATE_DEBUG
 extern void libopencbmtransfer_printStateDebugCounters(FILE *channel);

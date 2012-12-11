@@ -97,17 +97,17 @@ int opencbm_plugin_raw_read(CBM_FILE f, void *buf, size_t size)
     return read(f, buf, size);
 }
 
-int opencbm_plugin_listen(CBM_FILE f, __u_char dev, __u_char secadr)
+int opencbm_plugin_listen(CBM_FILE f, unsigned char dev, unsigned char secadr)
 {
     return ioctl(f, CBMCTRL_LISTEN, (dev<<8) | secadr);
 }
 
-int opencbm_plugin_talk(CBM_FILE f, __u_char dev, __u_char secadr)
+int opencbm_plugin_talk(CBM_FILE f, unsigned char dev, unsigned char secadr)
 {
     return ioctl(f, CBMCTRL_TALK, (dev<<8) | secadr);
 }
 
-int opencbm_plugin_open(CBM_FILE f, __u_char dev, __u_char secadr)
+int opencbm_plugin_open(CBM_FILE f, unsigned char dev, unsigned char secadr)
 {
     int rv;
 
@@ -115,7 +115,7 @@ int opencbm_plugin_open(CBM_FILE f, __u_char dev, __u_char secadr)
     return rv;
 }
 
-int opencbm_plugin_close(CBM_FILE f, __u_char dev, __u_char secadr)
+int opencbm_plugin_close(CBM_FILE f, unsigned char dev, unsigned char secadr)
 {
     return ioctl(f, CBMCTRL_CLOSE, (dev<<8) | secadr);
 }
@@ -145,12 +145,12 @@ int opencbm_plugin_reset(CBM_FILE f)
     return ioctl(f, CBMCTRL_RESET);
 }
 
-__u_char opencbm_plugin_pp_read(CBM_FILE f)
+unsigned char opencbm_plugin_pp_read(CBM_FILE f)
 {
     return ioctl(f, CBMCTRL_PP_READ);
 }
 
-void opencbm_plugin_pp_write(CBM_FILE f, __u_char c)
+void opencbm_plugin_pp_write(CBM_FILE f, unsigned char c)
 {
     ioctl(f, CBMCTRL_PP_WRITE, c);
 }

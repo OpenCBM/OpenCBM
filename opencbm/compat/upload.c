@@ -12,7 +12,7 @@
 
 #include "cbm4linux.h"
 
-int cbm_upload(int f, __u_char dev, int adr, __u_char *prog, int size)
+int cbm_upload(int f, unsigned char dev, int adr, unsigned char *prog, int size)
 {
     int c, i, rv = 0;
     char cmd[40];
