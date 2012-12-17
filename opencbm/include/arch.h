@@ -62,8 +62,12 @@ typedef unsigned long ULONG_PTR;
 
 typedef bool BOOL;
 
-# define TRUE true
-# define FALSE false
+# ifndef TRUE
+#  define TRUE true
+# endif
+# ifndef FALSE
+#  define FALSE false
+# endif
 
 # define STRING_BACKTICK "`"
 # define STRING_TICK     "´"
