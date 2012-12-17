@@ -23,7 +23,7 @@ SUBDIRS_PLUGIN_XUM1541 = lib/plugin/xum1541
 
 SUBDIRS_PLUGIN_XA1541 = lib/plugin/xa1541 sys/linux/
 
-SUBDIRS_OPTIONAL = addon nibtools mnib36 cbmrpm41
+SUBDIRS_OPTIONAL = addon nibtools mnib36 cbmrpm41 cbmlinetester
 
 
 SUBDIRS_PLUGIN          = $(SUBDIRS_PLUGIN_XUM1541) $(SUBDIRS_PLUGIN_XU1541) $(SUBDIRS_PLUGIN_XA1541)

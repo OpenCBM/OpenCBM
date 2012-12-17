@@ -2,6 +2,7 @@ DIRS= \
 	arch \
 	cbmformat \
 	cbmforng \
+	cbmlinetester \
 	libcbmcopy \
 	cbmcopy \
 	libd64copy \
