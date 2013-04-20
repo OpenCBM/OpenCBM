@@ -5,6 +5,7 @@
  *  2 of the License, or (at your option) any later version.
  *
  *  Copyright 2004, 2008, 2009 Spiro Trikaliotis
+ *  Additions Copyright 2013   Arnd Menge
  *
  */
 
@@ -39,6 +40,11 @@
 
 /*! This file is "like" debug.c, that is, define some variables */
 #define DBG_IS_DEBUG_C
+
+/*! GetOsVersion() uses the following functions */
+#define KERNEL32_DLL "kernel32.dll"
+#define KERNEL32API_GetNativeSystemInfo "GetNativeSystemInfo"
+typedef void (WINAPI* PGetNativeSystemInfo)(LPSYSTEM_INFO);
 
 #include "debug.h"
 
@@ -80,6 +86,27 @@ NeededAccessRights(VOID)
     FUNC_LEAVE_BOOL(scManager ? TRUE : FALSE);
 }
 
+/*! \brief \internal Return processor architecture as string
+
+ This function returns the current processor architecture as string.
+ wProcessorArchitecture is a SYSTEM_INFO member, determined by
+ GetNativeSystemInfo or GetSystemInfo.
+
+ \return 
+   Returns the current processor architecture as string.
+*/
+void GetProcessorArchitecture(WORD wProcessorArchitecture, char szOS[])
+{
+    if (wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64)
+        strcat(szOS, TEXT(" IA64"));
+    else if (wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
+        strcat(szOS, TEXT(" x64"));
+    else if (wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
+        strcat(szOS, TEXT(" x86"));
+    else
+        strcat(szOS, TEXT(" (?)"));
+}
+
 /*! \brief \internal Check out the operating system version
 
  This function checks out the operating system version we are
@@ -91,8 +118,12 @@ NeededAccessRights(VOID)
 static osversion_t
 GetOsVersion(VOID)
 {
-    OSVERSIONINFO ovi;
+    SYSTEM_INFO si;
+    OSVERSIONINFOEX ovi;
     osversion_t retValue;
+    char szOS[1024] = {0};
+    PGetNativeSystemInfo pGetNativeSystemInfo;
+    DWORD dwReturnedProductType;
 
     FUNC_ENTER();
 
@@ -100,13 +131,24 @@ GetOsVersion(VOID)
 
     retValue = WINUNSUPPORTED;
 
+    ZeroMemory(&si, sizeof(SYSTEM_INFO));
+    ZeroMemory(&ovi, sizeof(OSVERSIONINFOEX));
+
+    pGetNativeSystemInfo = (PGetNativeSystemInfo) GetProcAddress(GetModuleHandle(KERNEL32_DLL), KERNEL32API_GetNativeSystemInfo);
+    if (pGetNativeSystemInfo != NULL)
+        pGetNativeSystemInfo(&si);
+    else
+        GetSystemInfo(&si);
+
+    ovi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+
     // Check out the operating system version
 
-    ovi.dwOSVersionInfoSize = sizeof(ovi);
-
-    if (GetVersionEx(&ovi))
+    if (GetVersionEx((OSVERSIONINFO*)&ovi))
     {
         DBGDO(char *platform = "";)
+
+        strcpy(szOS, TEXT("Microsoft "));
 
         switch (ovi.dwPlatformId)
         {
@@ -149,22 +191,72 @@ GetOsVersion(VOID)
             case 5:
                 switch (ovi.dwMinorVersion)
                 {
-                case 0:  retValue = WIN2000;  break;
-                case 1:  retValue = WINXP;    break;
-                default: retValue = WINNEWER; break; // comment below for default dwMajorversion applies here, too
+                case 0:
+                    strcat(szOS, TEXT("Windows 2000"));
+                    if (ovi.wProductType != VER_NT_WORKSTATION)
+                        strcat(szOS, TEXT(" Server"));
+                    GetProcessorArchitecture(si.wProcessorArchitecture, szOS);
+                    retValue = WIN2000;
+                    break;
+                case 1:
+                    strcat(szOS, TEXT("Windows XP"));
+                    GetProcessorArchitecture(si.wProcessorArchitecture, szOS);
+                    retValue = WINXP;
+                    break;
+                case 2:
+                    if (GetSystemMetrics(SM_SERVERR2))
+                        strcat(szOS, TEXT("Windows Server 2003 R2"));
+                    else if (ovi.wSuiteMask & VER_SUITE_STORAGE_SERVER)
+                        strcat(szOS, TEXT("Windows Storage Server 2003"));
+                    else if (ovi.wSuiteMask & VER_SUITE_WH_SERVER)
+                        strcat(szOS, TEXT("Windows Home Server"));
+                    else if (ovi.wProductType == VER_NT_WORKSTATION && (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64))
+                        strcat(szOS, TEXT("Windows XP Professional x64"));
+                    else
+                        strcat(szOS, TEXT("Windows Server 2003"));
+
+                    if (ovi.wProductType != VER_NT_WORKSTATION)
+                        GetProcessorArchitecture(si.wProcessorArchitecture, szOS);
+
+                    retValue = WINXP; // Set to WINXP for now.
+                    break;
+                default:
+                    retValue = WINNEWER;
                 }
                 break;
 
             case 6:
-                if (ovi.dwMinorVersion == 0) {
-                    retValue = WINVISTA;
+                if ((ovi.dwMinorVersion == 0) || (ovi.dwMinorVersion == 1) || (ovi.dwMinorVersion == 2))
+                {
+                    if (ovi.dwMinorVersion == 0)
+                    {
+                        if (ovi.wProductType == VER_NT_WORKSTATION)
+                            strcat(szOS, TEXT("Windows Vista"));
+                        else
+                            strcat(szOS, TEXT("Windows Server 2008"));
+                        retValue = WINVISTA;
+                    }
+                    else if (ovi.dwMinorVersion == 1)
+                    {
+                        if (ovi.wProductType == VER_NT_WORKSTATION)
+                            strcat(szOS, TEXT("Windows 7"));
+                        else
+                            strcat(szOS, TEXT("Windows Server 2008 R2"));
+                        retValue = WIN7;
+                    }
+                    else if (ovi.dwMinorVersion == 2)
+                    {
+                        if (ovi.wProductType == VER_NT_WORKSTATION)
+                            strcat(szOS, TEXT("Windows 8"));
+                        else
+                            strcat(szOS, TEXT("Windows Server 2012"));
+                        retValue = WIN7; // Set to WIN7 for now.
+                    }
+
+                    GetProcessorArchitecture(si.wProcessorArchitecture, szOS);
                     break;
                 }
-                else if (ovi.dwMinorVersion == 1) {
-                    /* Who the heck had to the idea to name NT 6.1 as "Windows 7"? */
-                    retValue = WIN7;
-                    break;
-                }
+
                 /* else */
                 /* FALL THROUGH */
 
@@ -192,6 +284,9 @@ GetOsVersion(VOID)
         DBG_SUCCESS((DBG_PREFIX "OS VERSION: %u.%u.%u %s (%s)",
             ovi.dwMajorVersion, ovi.dwMinorVersion, ovi.dwBuildNumber,
             platform, ovi.szCSDVersion));
+
+        printf("OS: %s %s\n", szOS, NeededAccessRights() ? "[Admin]" : "-- We need admin rights!");
+
     }
 
     FUNC_LEAVE_TYPE(retValue, osversion_t, "%u");
