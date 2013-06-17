@@ -12,6 +12,7 @@ clean:
 mrproper: clean
 
 install-files:
+	install -d $(DESTDIR)$(INCDIR)
 	install -m 644 $(INSTHDRS) $(DESTDIR)$(INCDIR)
 
 install: install-files

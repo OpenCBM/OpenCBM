@@ -24,12 +24,16 @@ endif
 	rm -f *~ LINUX/*~
 
 install-files: $(PROG)
+	install -d $(DESTDIR)$(BINDIR)
 	install -m 755 -s $(PROG) $(DESTDIR)$(BINDIR)
 ifneq "$(words $(MAN1))" "0"
+	install -d $(DESTDIR)$(MANDIR)
 	install -m 644    $(MAN1) $(DESTDIR)$(MANDIR)
 endif
 ifneq "$(words $(LINKS))" "0"
+	install -d $(DESTDIR)$(BINDIR)
 	for l in $(LINKS); do ln -sf $(PROG) $(DESTDIR)$(BINDIR)/$$l; done
+	install -d $(DESTDIR)$(MANDIR)
 	for l in $(LINKS); do ln -sf $(MAN1) $(DESTDIR)$(MANDIR)/$$l.1; done
 endif
 

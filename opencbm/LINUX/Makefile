@@ -55,9 +55,11 @@ all: opencbm plugin
 
 all-doc: all doc
 
+.PHONY: $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL),all clean mrproper install install-files install-files-doc install-doc uninstall)
 $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL),all clean mrproper install install-files install-files-doc install-doc uninstall)::
 	$(MAKE) -C $(call GET_TARGET_DIR,$@) -f LINUX/Makefile $(call GET_TARGET,$@)
 
+.PHONY: $(call CREATE_TARGETS,$(SUBDIRS_OPTIONAL),all clean mrproper install install-files install-files-doc install-doc uninstall)
 $(call CREATE_TARGETS,$(SUBDIRS_OPTIONAL),all clean mrproper install install-files install-files-doc install-doc uninstall)::
 	test ! -e $(call GET_TARGET_DIR,$@)/LINUX/Makefile || $(MAKE) -C $(call GET_TARGET_DIR,$@) -f LINUX/Makefile $(call GET_TARGET,$@)
 
@@ -65,7 +67,6 @@ clean:  $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),cl
 
 mrproper:  $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),mrproper)
 
-.PHONY: opencbm
 opencbm: $(call CREATE_TARGET,$(SUBDIRS) $(SUBDIRS_OPTIONAL),all)
 
 
