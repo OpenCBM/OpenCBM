@@ -14,16 +14,16 @@ DeviceID2   = VID_0403&PID_c632&REV_0100
 DeviceName3 = "XU1541 BIOS (USBtiny)"
 DeviceID3   = VID_0403&PID_c632&REV_0200
 
-DeviceName4 = "XUM1541 USB floppy adapter (generic-v06)"
+DeviceName4 = "XUM1541 USB floppy adapter"
 DeviceID4   = VID_16d0&PID_0504
-DeviceName5 = "XUM1541 USB floppy adapter (USBKEY-v06)"
-DeviceID5   = VID_16d0&PID_0504&REV_0006
-DeviceName6 = "XUM1541 USB floppy adapter (BUMBLEB-v06)"
-DeviceID6   = VID_16d0&PID_0504&REV_0106
+DeviceName5 = "XUM1541 USB floppy adapter (USBKEY)"
+DeviceID5   = VID_16d0&PID_0504&REV_0007
+DeviceName6 = "XUM1541 USB floppy adapter (BUMBLEB)"
+DeviceID6   = VID_16d0&PID_0504&REV_0107
 DeviceName7 = "XUM1541 USB floppy adapter (ZoomFloppy)"
-DeviceID7   = VID_16d0&PID_0504&REV_0206
-DeviceName8 = "XUM1541 USB floppy adapter (OLIMEX-v06)"
-DeviceID8   = VID_16d0&PID_0504&REV_0306
+DeviceID7   = VID_16d0&PID_0504&REV_0207
+DeviceName8 = "XUM1541 USB floppy adapter (OLIMEX)"
+DeviceID8   = VID_16d0&PID_0504&REV_0307
 
 ; AVR DFU devices for firmware updates
 DeviceName30 = "Atmel firmware update device (ATmega32U2)"
@@ -40,8 +40,8 @@ Signature   = "$Windows NT$"
 Class       = "libusb-win32 devices"
 ClassGuid   = {EB781AAF-9C70-4523-A5DF-642A87ECA567}
 Provider    = "libusb-win32"
-CatalogFile = XUM1541_USB_floppy_adapter.cat
-DriverVer   = 10/02/2010, 1.2.2.0
+CatalogFile = xu1541+xum1541.cat
+DriverVer   = 01/17/2012, 1.2.6.0
 
 [ClassInstall32]
 Addreg = libusb_class_install_add_reg
@@ -145,7 +145,7 @@ HKR,,SurpriseRemovalOK,0x00010001,1
 ;--------------------------------------------------------------------------
 
 [libusb_add_service]
-DisplayName   = "libusb-win32 - Kernel Driver 10/02/2010 1.2.2.0"
+DisplayName   = "libusb-win32 - Kernel Driver 01/17/2012 1.2.6.0"
 ServiceType   = 1
 StartType     = 3
 ErrorControl  = 0
