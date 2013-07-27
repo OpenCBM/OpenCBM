@@ -154,7 +154,7 @@ __int32 Initialize_TAP_header_and_return_frequencies(HANDLE hCAP, HANDLE hTAP, u
 		printf("* PAL\n");
 		TAP_Video = TAP_Video_PAL;
 	}
-	else if (CAP_Video == CAP_Video_PAL)
+	else if (CAP_Video == CAP_Video_NTSC)
 	{
 		printf("* NTSC\n");
 		TAP_Video = TAP_Video_NTSC;
