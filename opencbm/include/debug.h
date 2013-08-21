@@ -46,10 +46,37 @@
 #elif defined(DBG_KERNELMODE)
   #define DBG_I_BREAKPOINT() DbgBreakPoint()
 #else
-  #define DBG_I_BREAKPOINT() DebugBreak()
+  #ifdef __WIN32
+    #define DBG_I_BREAKPOINT() DebugBreak()
+  #else
+    #define DBG_I_BREAKPOINT()
+  #endif
 #endif
 
 #if DBG
+
+#ifndef _WIN32
+
+#include <stdlib.h>
+#include <stdio.h>
+#define OutputDebugString(_xxx) printf( "%s\n", _xxx);
+
+#define IN const
+#define OUT
+#define STATUS_SUCCESS 0
+
+typedef void VOID;
+typedef char CHAR;
+typedef unsigned char UCHAR;
+typedef long LONG;
+typedef unsigned long ULONG;
+typedef char* PCHAR;
+typedef unsigned long* PULONG;
+
+typedef int NTSTATUS;
+typedef void* PDEVICE_EXTENSION;
+
+#endif
 
        extern void dbg_memdump(const char *Where,
            const unsigned char *InputBuffer,
@@ -172,7 +199,11 @@ int __cdecl main(int argc, char *argv[])
 
 
 /*! hint for the optimiser (and prefast): _x holds true */
+#ifdef _WIN32
 #define DBG_I_ASSUME(_x) __assume(_x)
+#else
+#define DBG_I_ASSUME(_x)
+#endif
 
 #ifdef DBG_KERNELMODE
 
@@ -260,7 +291,9 @@ int __cdecl main(int argc, char *argv[])
 
 #else // #ifdef DBG_KERNELMODE
 
+#ifdef _WIN32
               #include <windows.h>
+#endif
 
               /*! This macro is called to output the buffer */
               #define _DBG_PERFORM(_xxx) OutputDebugString(_xxx);

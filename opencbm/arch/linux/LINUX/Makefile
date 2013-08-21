@@ -17,6 +17,8 @@ ifeq "$(OS)" "FreeBSD"
 SRCS += error.c
 endif
 
+SRCS += debug.c dbghelp.c
+
 OBJS    = $(SRCS:.c=.lo)
 
 all: $(LIB)

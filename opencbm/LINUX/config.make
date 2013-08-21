@@ -62,6 +62,8 @@ OS = $(shell uname -s)
 OS_ARCH     = linux
 
 CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\" -DOPENCBM_CONFIG_FILE=\"$(OPENCBM_CONFIG_FILE)\"
+CFLAGS      += $(USER_CFLAGS)
+
 LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
 SHLIB_EXT    = so
