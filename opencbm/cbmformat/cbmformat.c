@@ -58,9 +58,10 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     unsigned char drive, tracks = 35, bump = 1, orig = 0, show_progress = 0;
     unsigned char verify = 0;
     unsigned char demagnetize = 0;
-    char cmd[40], c, name[20], *arg;
+    char cmd[40], name[20], *arg;
     int err = 0;
     char *adapter = NULL;
+    int option;
 
     struct option longopts[] =
     {
@@ -81,10 +82,9 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     };
 
     const char shortopts[] ="hVnxospvct:@:";
-
-    while((c=(unsigned char)getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
+    while((option=getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
-        switch(c)
+        switch(option)
         {
             case 'n': bump = 0;
                       break;
@@ -139,6 +139,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     name_len = 0;
     while(*arg)
     {
+        unsigned char c;
         c = (unsigned char) toupper(*arg);
         if(c == ',')
         {
