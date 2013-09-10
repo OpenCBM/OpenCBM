@@ -119,10 +119,11 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     CBM_FILE fd;
     unsigned char drive, starttrack = 1, endtrack = 35, bump = 1, orig = 0;
     unsigned char verify = 0, demagnetize = 0, retries = 7;
-    char cmd[40], c, name[20], *arg;
+    char cmd[40], name[20], *arg;
     struct FormatParameters parmBlock;
     int berror = 0;
     char *adapter = NULL;
+    int option;
 
     struct option longopts[] =
     {
@@ -146,9 +147,9 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     const char shortopts[] ="hVnxosvcr:f:b:e:@:";
 
-    while((c=(unsigned char)getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
+    while((option = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
-        switch(c)
+        switch(option)
         {
             case 'n': bump = 0;
                       break;
@@ -215,7 +216,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     name_len = 0;
     while(*arg)
     {
-        c = (unsigned char) toupper(*arg);
+        unsigned char c;
+        c = toupper(*arg);
         if(c == ',')
         {
             if(id_ofs)

@@ -394,7 +394,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     d64copy_settings *settings = d64copy_get_default_settings();
     char *dst_arg;
     int  rv = 1;
-    int c;
+    int option;
     int dst_is_cbm;
     unsigned char drive;
     char *adapter = NULL;
@@ -408,9 +408,9 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     };
     const char shortopts[] ="hV";
 
-    while((c=getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
+    while((option = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
-        switch(c)
+        switch(option)
         {
             case 'h': help();
                       return 0;

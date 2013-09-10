@@ -177,7 +177,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
     char *fname;
 
     int mode;
-    int c;
+    int option;
     unsigned char *filedata;
     size_t filesize;
     char buf[48];
@@ -258,9 +258,9 @@ int ARCH_MAINDECL main(int argc, char **argv)
     settings = cbmcopy_get_default_settings();
 
     /* loop over cmd line opts */
-    while((c=getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
+    while((option = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
-        switch(c)
+        switch(option)
         {
             case 'h': /* --help */
                 help(argv[0]);
@@ -288,7 +288,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
                     hint(argv[0]);
                     return 1;
                 }
-                mode = c;
+                mode = option;
                 break;
 
             case 't': /* --transfer */

@@ -505,7 +505,7 @@ static BOOL
 processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
 {
     BOOL error;
-    int c;
+    int option;
 
     struct option longopts[] =
     {
@@ -542,9 +542,9 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
 
     DBG_ASSERT(Parameter);
 
-    while ( ! quitGlobalProcessing && (c=getopt_long(Argc, Argv, shortopts, longopts, NULL)) != -1)
+    while ( ! quitGlobalProcessing && (option = getopt_long(Argc, Argv, shortopts, longopts, NULL)) != -1)
     {
-        switch (c)
+        switch (option)
         {
         case 'h':
             usage();

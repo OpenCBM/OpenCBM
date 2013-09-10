@@ -82,7 +82,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     };
 
     const char shortopts[] ="hVnxospvct:@:";
-    while((option=getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
+    while((option = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
         switch(option)
         {

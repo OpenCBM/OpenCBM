@@ -188,7 +188,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 #endif // #ifdef HAVE_NCURSES
 
     char *adapter = NULL;
-    char c;
+    int option;
 
     static const struct option longopts[] =
     {
@@ -216,9 +216,9 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 #endif // #ifdef HAVE_NCURSES
                                    ;
  
-    while ((c = (unsigned char)getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
+    while ((option = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
-        switch(c)
+        switch(option)
         {
             case 'h': help();
                       return 0;

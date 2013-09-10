@@ -210,7 +210,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     char *dst_arg;
     char *adapter = NULL;
 
-    int  c;
+    int  option;
     int  rv = 1;
     int  l;
 
@@ -243,9 +243,9 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     const char shortopts[] ="hVwqbBt:i:s:e:d:r:12vnE:@:";
 
-    while((c=getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
+    while((option = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
-        switch(c)
+        switch(option)
         {
             case 'h': help();
                       return 0;

@@ -205,7 +205,7 @@ static int
 process_individual_option(OPTIONS * const options, const char short_options[], struct option long_options[])
 {
     static int firstcall = 1;
-    int c;
+    int option;
 
     if (firstcall)
     {
@@ -218,9 +218,9 @@ process_individual_option(OPTIONS * const options, const char short_options[], s
     }
 
 
-    c = getopt_long(options->argc, options->argv, short_options, long_options, NULL);
+    option = getopt_long(options->argc, options->argv, short_options, long_options, NULL);
 
-    if (c == EOF)
+    if (option == EOF)
     {
         // skip the options that are already processed
         //optind --;
@@ -229,7 +229,7 @@ process_individual_option(OPTIONS * const options, const char short_options[], s
         options->argv += optind;
     }
 
-    return c;
+    return option;
 }
 
 
@@ -1652,7 +1652,7 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
 {
     unsigned int use_rc = 1;
     int option_index;
-    int c;
+    int option;
 
     static const char short_options[] = "+fhVpr@:";
     static struct option long_options[] =
@@ -1679,9 +1679,9 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
     //
     optind = 0;
 
-    while ((c = getopt_long(options->argc, options->argv, short_options, long_options, &option_index)) != EOF)
+    while ((option = getopt_long(options->argc, options->argv, short_options, long_options, &option_index)) != EOF)
     {
-        if (c == 'f')
+        if (option == 'f')
             use_rc = 0;
     }
 
@@ -1692,9 +1692,9 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
     // now, we start the "real" scanning
     optind = 0;
 
-    while ((c = getopt_long(options->argc, options->argv, short_options, long_options, &option_index)) != EOF)
+    while ((option = getopt_long(options->argc, options->argv, short_options, long_options, &option_index)) != EOF)
     {
-        switch (c)
+        switch (option)
         {
         case '?':
             fprintf(stderr, "unknown option %s specified!\n",

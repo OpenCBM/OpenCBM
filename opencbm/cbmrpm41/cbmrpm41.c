@@ -540,9 +540,10 @@ main(int argc, char *argv[])
     int status = 0;
     char cmd[40];
     unsigned char job = 1, begintrack = 1, endtrack = 35, retries = 5;
-    char c, *arg;
+    char *arg;
     char *adapter = NULL;
     int sector = 0, berror = 0;
+    int option;
 
     struct option longopts[] =
     {
@@ -568,9 +569,9 @@ main(int argc, char *argv[])
     const char shortopts[] ="hVj:sxr:b:e:c:@:";
 
 
-    while((c=(unsigned char)getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
+    while((option = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
-        switch(c)
+        switch(option)
         {
             case 'h': help();
                       return 0;
