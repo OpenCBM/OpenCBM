@@ -201,6 +201,12 @@ static struct pardevice *cbm_device;
 # define SHOW(str)
 #endif
 
+#ifdef DEBUG_INTERRUPT
+# define DPRINTK_INT(fmt,args...)     printk(fmt, ## args)
+#else
+# define DPRINTK_INT(fmt,args...)
+#endif
+
 static wait_queue_head_t cbm_wait_q;
 volatile static int eoi;
 volatile static int cbm_irq_count;
@@ -343,6 +349,7 @@ static void wait_for_listener(void)
 	SET(LP_IRQ);
 #endif
 	add_wait_queue(&cbm_wait_q, &wait);
+	DPRINTK_INT("cbm: wait_for_listener() waits for interrupt\n");
 	current->state = TASK_INTERRUPTIBLE;
 	RELEASE(CLK_OUT);
 	while (cbm_irq_count && !signal_pending(current))
@@ -353,6 +360,7 @@ static void wait_for_listener(void)
 #else
 	RELEASE(LP_IRQ);
 #endif
+	DPRINTK_INT("cbm: wait_for_listener() got an interrupt\n");
 }
 
 static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
@@ -776,14 +784,21 @@ static int cbm_release(struct inode *inode, struct file *f)
 
 static irqreturn_t cbm_interrupt(int irq, void *dev_id)
 {
+	DPRINTK_INT("cbm: cbm_interrupt()\n");
 	POLL();			/* acknowledge interrupt */
 
-	if (cbm_irq_count == 0)
+	if (cbm_irq_count == 0) {
+		DPRINTK_INT("cbm: cbm_interrupt(): spurious interrupt\n");
 		return IRQ_NONE;
-	if (--cbm_irq_count == 0) {
-		DPRINTK("continue to send (no EOI)\n");
+	}
+	else if (--cbm_irq_count == 0) {
+		DPRINTK_INT("cbm: cbm_interrupt(): can continue\n");
+		DPRINTK("cbm: cbm_interrupt(): continue to send (no EOI)\n");
 		SET(CLK_OUT);
 		wake_up_interruptible(&cbm_wait_q);
+	}
+	else {
+		DPRINTK_INT("cbm: cbm_interrupt(): must still wait\n");
 	}
 	return IRQ_HANDLED;
 }
