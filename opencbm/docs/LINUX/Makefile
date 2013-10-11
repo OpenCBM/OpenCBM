@@ -1,5 +1,8 @@
 RELATIVEPATH=../
 include ${RELATIVEPATH}LINUX/config.make
+ifneq "${CREATELINUXDOC}" ""
+include ${RELATIVEPATH}LINUX/config.doc.make
+endif
 
 .PHONY: all clean mrproper install uninstall install-files doc install-files-doc install--doc
 
@@ -18,7 +21,11 @@ HTML = html/opencbm.html
 	unix2dos $@
 
 %.txt: %.sgml
+ifeq "${CREATELINUXDOC}" ""
+	CREATELINUXDOC=1 ${MAKE} --silent -f LINUX/Makefile $@
+else
 	${LINUXDOCTXT} ${LINUXDOCTXTPARAM} $<
+endif
 
 %.pdf: %.ps
 	ps2pdf $<
@@ -27,15 +34,27 @@ HTML = html/opencbm.html
 	dvips -o $*.ps $<
 
 %.dvi: %.sgml
+ifeq "${CREATELINUXDOC}" ""
+	CREATELINUXDOC=1 ${MAKE} --silent -f LINUX/Makefile $@
+else
 	${LINUXDOCLATEX} ${LINUXDOCLATEXPARAM} -o dvi $<
+endif
 
 %.info: %.sgml
+ifeq "${CREATELINUXDOC}" ""
+	CREATELINUXDOC=1 ${MAKE} --silent -f LINUX/Makefile $@
+else
 	${LINUXDOCINFO} ${LINUXDOCINFOPARAM} $<
+endif
 	perl -p -i -e 'if(m/^   \\input texinfo/){print "INFO-DIR-SECTION Miscellaneous\nSTART-INFO-DIR-ENTRY\n* opencbm: (opencbm).	Commodore serial IEC bus support.\nEND-INFO-DIR-ENTRY\n";}' $@
 
 %.html: opencbm.sgml
 	([ ! -d html ] && mkdir html/) || true
+ifeq "${CREATELINUXDOC}" ""
+	CREATELINUXDOC=1 ${MAKE} --silent -f LINUX/Makefile $@
+else
 	cd html; ${LINUXDOCHTML} ${LINUXDOCHTMLPARAM} -s 2 ../$<; cd ..
+endif
 
 all: $(TXT) $(DVI) $(INFO) $(HTML) ${PDF}
 
