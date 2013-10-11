@@ -21,7 +21,7 @@ endif
 ifneq "$(words $(EXTRA_A65_INC))" "0"
 	rm -f $(EXTRA_A65_INC)
 endif
-	rm -f *~ LINUX/*~
+	rm -f *~ LINUX/*~ WINDOWS/*~
 
 install-files: $(PROG)
 	install -d $(DESTDIR)$(BINDIR)

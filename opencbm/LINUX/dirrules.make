@@ -22,6 +22,7 @@ mrproper:
 	@for subdir in $(SUBDIRS_OPTIONAL); do \
 	  (test -e $$subdir/LINUX/Makefile && $(MAKE) -C $$subdir -f LINUX/Makefile $@; ) || true; \
 	done
+	rm -f *~ LINUX/*~ WINDOWS/*~
 
 clean:
 	@for subdir in $(SUBDIRS); do \

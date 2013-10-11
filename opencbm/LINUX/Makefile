@@ -66,6 +66,7 @@ $(call CREATE_TARGETS,$(SUBDIRS_OPTIONAL),all clean mrproper install install-fil
 clean:  $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),clean)
 
 mrproper:  $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),mrproper)
+	rm -f *~ LINUX/*~ WINDOWS/*~
 
 opencbm: $(call CREATE_TARGET,$(SUBDIRS) $(SUBDIRS_OPTIONAL),all)
 

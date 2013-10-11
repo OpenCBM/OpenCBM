@@ -70,6 +70,7 @@ clean:
 mrproper: clean
 	rm -f $(DVI) $(INFO) $(TXT) ${PDF} ${WINTXT} html/* || true
 	([ -d html/ ] && rmdir html/) || true
+	rm -f *~ LINUX/*~ WINDOWS/*~
 
 install-files:
 	gzip -c9 $(INFO) > $(DESTDIR)$(INFODIR)/$(INFO).gz
