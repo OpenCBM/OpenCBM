@@ -1,17 +1,31 @@
 <!doctype linuxdoc system>
 
 <article>
-<title>opencbm 0.4.0 Users Guide
+<title>opencbm 0.4.99.95 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
 name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de/" name="d81.de">,
-Arnd <htmlurl url="mailto:arnd(at)jonnz(dot)de" name="arnd(at)jonnz(dot)de">,
-<!-- _DATE_ --><date>2006-04-28
+Arnd Menge <htmlurl url="mailto:arnd(at)jonnz(dot)de" name="arnd(at)jonnz(dot)de">,
+<date>2016-01-02
 
 <abstract>
-This document describes the opencbm package, a Linux kernel module and Windows
-kernel mode driver, and a few user space support programs to control and use
-serial devices as used by most Commodore (CBM) 8-bit machines.
+This document describes the opencbm package, which can be used to control and
+use serial devices as userd by most Commodore (CBM) 8-bit machines.
+
+The latest version of the document can be found online at <htmlurl
+url="http://opencbm.trikaliotis.net/" name="http://opencbm,trikaliotis.net/">.
+
+OpenCBM consists of a kernel module ("driver") for Linux and Windows for cables
+connected via the parallel port, which is almost obsolete on modern PC
+hardware. Additionally, it has support software and tools to access these old
+parallel port based cables as well as more modern USB replacements.
+
+On top of that, a few user space support programs to control and use serial
+devices as used by most Commodore (CBM) 8-bit machines are included.
+
+The document also contains descriptions for the corresponding cables, namely,
+the XU1541 adapter, the XUM1541 adapter (a.k.a. "ZoomFloppy"), and the
+XA1541/XM1541 adapter.
 </abstract>
 
 <!-- Table of contents -->
@@ -19,38 +33,58 @@ serial devices as used by most Commodore (CBM) 8-bit machines.
 
 <!-- Begin the document -->
 
-
 <sect>Overview<label id="overview">
+
+<p>
+<em/Please read the section <ref id="WARNINGS" name="WARNINGS"> at the end of
+this document before proceeding. Improper use of the cable adapters (XA1541,
+XU1541, XUM1541) may damage your drives or the cables themselves./
 
 <p>
 The popular Commodore 8-bit home-computers like the C-64 and the VIC-20 are
 using a custom serial bus to talk to attached devices (disk drive, printer).
-The opencbm kernel module provides an interface to this so-called IEC bus at
-the level of simple TALK and LISTEN commands, similar to the one provided by
-the Commodore kernel routines. Additionally, some higher and lower level bus
-control is available as well, allowing for full control of the bus. The serial
-devices are connected to the PC's parallel port via an XM1541 or XA1541 cable
-and, optionally, an XP1541 or XP1571 add-on cable. For cables, cf. <ref
+This proprietary serial bus protocol is not natively supported by modern hard-
+or software.
+
+opencbm provides an interface to this so-called IEC bus at the level of simple
+TALK and LISTEN commands, similar to the one provided by the Commodore kernel
+routines. Additionally, some higher and lower level bus control is available as
+well, allowing for full control of the bus.
+
+The CBM serial devices are connected to the PC either to the parallel port via
+an XM1541 or XA1541 cable and, optionally, an XP1541 or XP1571 add-on cable.
+Alternatively, more modern USB cable solutions like XU1541 or XUM1541 (a.k.a.
+ZoomFloppy) are supported. For cables, cf. <ref
 id="cable" name="cable">.
+
+opencbm has a plugin concept which allows to additionally add custom build
+cables.
+
+opencbm can be used on PCs on Linux and Windows (all cables). Additioanlly, USB
+based cables are supported on FreeBSD and on Mac OS X.
 
 <sect1>Introduction to opencbm<label id="introduction">
 
 <p>
-This is version 0.4.0 of opencbm, a kernel device driver for the serial CBM bus
-(C64, VIC-20, etc.) for Linux and Windows. opencbm is a re-join of the two
-projects cbm4linux (latest standalone version: 0.3.2) and cbm4win (latest
-standalone version: 0.1.0a). It should be noted that both projects were highly
-related from the beginning, as cbm4win 0.1.0 was based on cbm4linux 0.3.2.
+This is version 0.4.99.95 of opencbm, a support package for retro devices that
+communicate with the serial CBM bus protocol, known from the C64, VIC-20, etc.
+Opencbm runs on Linux, Windows, FreeBSD and Mac OS X.  opencbm 0.4.0 was a
+re-join of the two projects cbm4linux (latest standalone version: 0.3.2) and
+cbm4win (latest standalone version: 0.1.0a). It should be noted that both
+projects were highly related from the beginning, as cbm4win 0.1.0 was based on
+cbm4linux 0.3.2.
 
 Opencbm should work with any devices that understand the "normal" talk and
 listen commands of the CBM IEC bus. It has been tested with several 1541,
-1541-II, 1571 and 1581 drives, and a MPS-1200 pritnter. 1541 clones like the
-Oceanic OC-118 have also been reported to work.
+1541-II, 1570, 1571 and 1581 drives, and a MPS-1200 printer. 1541 clones like
+the Oceanic OC-118 have also been reported to work.
 
 The following cable types are supported: 
 
 <p>
 <itemize>
+<item>XUM1541            (opencbm version >= 0.4.99.x)
+<item>XU1541             (opencbm version >= 0.4.99.x)
 <item>XM1541 and XA1541  (cbm4linux version >= 0.2.1, cbm4win version >= 0.1.0)
 <item>XP1541             (cbm4linux version >= 0.2.0, cbm4win version >= 0.1.0)
 <item>XP1571             (cbm4linux version >= 0.2.4, cbm4win version >= 0.1.0)
@@ -83,11 +117,20 @@ damage or data loss caused by it or by any use of it.
 <it/opencbm/ supports the following operating systems:
 
 <itemize>
-<item>Linux 2.4 and 2.6; 2.0 and 2.2 might still work, but have not been tested
-      for ages. For Linux, i386 and AMD64 architectures are supported.
-<item>Windows NT 4.0, 2000, XP and Server 2003. The i386 architecture is fully
-      supported; additionally, there are experimental AMD64 and iA64 versions
-      available.
+<item>For USB based cables: Any Linux, FreeBSD or MacOS X variant that
+      support libusb-0.1 should be supported. Linux, FreeBSD and Mac OS X
+      have been explicitly tested.
+<item>For parallel port based cables:
+      Linux 3.x and 2.6 variants. 2.0, 2.2 and 2.4 might still work, but have
+      not been tested for ages. For Linux, i386 and AMD64 architectures are
+      supported.
+<item>For parallel port based as well as USB based cables:
+      Windows NT 4.0, 2000, XP and Server 2003, Vista, 7 and 8. For USB based
+      cables, NT 4.0 is not supported, though.
+      The i386 architecture a.k.a "x86" ("32 bit") is fully supported;
+      additionally, 64 bit Windows ("x64", "x86_64") versions are supported.
+      Itanium-based Windows ("iA64") are <tt><it/not/</tt> supported,
+      though.
 </itemize>
 
 <sect1>Supported CBM hardware<label id="supported-drives">
@@ -96,20 +139,85 @@ damage or data loss caused by it or by any use of it.
 Currently, opencbm supports the following CBM devices:
 
 <itemize>
-<item>VIC 1541 (all variants, including VIC 1540 and clones)
-<item>VIC 1570
-<item>VIC 1571
-<item>VIC 1581 (not with d64copy, not with cbmformat or cbmforng)
-<item>other CBM IEC drives, printers, and compatibles (only with cbmctrl)
+<item>VIC 1541, VIC1540 (all variants, including clones)
+<item>VIC 1570, VIC 1571 (including the 1571CR and the 1571 inside of a C128DCR)
+<item>VIC 1581 (not with d64copy (<ref id="d64copy" name="d64copy">), not with
+cbmformat (<ref id="cbmformat" name="cbmformat">) or cbmforng (<ref id="cbmforng" name="cbmforng">))
+<item>other CBM IEC drives, printers, and compatibles (only with cbmctrl (<ref
+id="cbmctrl" name="cbmctrl">))
+<item>VIC 8250, 8050, 4040, 2031, SFD 1001, and possibly other IEEE drives with
+an IEC to IEEE converter (for example, IEC2IEEE from Jochen Adler, cf. <htmlurl
+url="http://www.nlq.de/" name="http://www.nlq.de/">, or with a ZoomFloppy
+extension that lets you use IEEE devices directly.
 </itemize>
 
 <sect1>Cables<label id="cable">
 
 <p>
-A standard X(E)1541 cable won't work with _this_ driver. In fact, there will
-probably never be a multitasking OS which works with one of these, that's why
-we call it XM1541, M for Multi­ tasking. Anyway, if you have a XE1541, the
-necessary modification is simple:
+Since the last opencbm release, the PC market has changed considerably. Modern
+PCs do not contain parallel ports anymore, nor do they have ISA type connectors
+for extension cards. Additionally, parallel port cards connected via PCI, PCIe
+or other modern replacements are reported not to work with OpenCBM.
+
+Also, devices that allow you to connect your parallel port printer to the
+USB port of your PC cannot work, either.
+
+Thus, there was a need for newer cable replacements. While OpenCBM still
+supports parallel port based cables, more modern USB variants are supported,
+too, and they should be preferred to the parallel port based ones.
+
+<sect2>USB cables<label id="cable_usb">
+
+<p>
+There are two types of USB cables currently supported. The <htmlurl
+url="http://www.trikaliotis.net/xu1541" name="XU1541"> cable is a simple cable,
+optimised for ease of building and low costs. Its big downside is that
+transfers with this cable are very slow. In fact, the parallel port based
+solutions for the XA1541 or XM1541 (a.k.a. XAP1541 or XMP1541) were faster than
+the XU1541 cable. Thus, it can be recommended only
+if you do not plan to use the XU1541 regularly, but only for a limited time.
+
+If you have the money to spend and plan to use your CBM equipment regularly, it
+is highly suggested to use a <htmlurl url="abc" name="XUM1541"> cable, for
+example, in the incarnation of the <htmlurl url="abc" name="ZoomFloppy">.
+
+Building these cables is beyond the scope of this document. We refer to the
+appropriate links on the web for instrutions how to build or order them.
+
+<sect2>Parallel port based cables<label id="cable_pp">
+<p>
+As parallel ports more and more vanish from modern PC hardware, it is
+recommended not to use these cables for new projects, but to use <ref
+id="cable_usb" name="USB based cables"> instead.
+
+Another problem for Windows machines is that using such cables requires a
+kernel mode driver. For 64 bit Windows machines (with the exception of Win XP
+64 bit), in order to load kernel mode drivers, these drivers have to be signed.
+Signing a driver not only costs money; it also requires you to have a company in
+order to get the needed certificate. Thus, the OpenCBM drivers currently are not
+signed, thus, you will
+not be able to use parallel port based cables with 64 bit versions of Windows.
+
+This is not completely true, as you can switch off the driver signature
+enforcement in windows. Normally, this is used for driver development only.
+Use at your own risk! Instructions on disabling the driver signature enforcement
+can be found on the web.
+
+These cables are still supported on 32 bit Windows variants, and
+they will remain as long as the developers have access to the necessary
+infrastructure.
+
+<bf><it/
+Please note that USB-to-parallel converters that are designed to let you
+access your parallel port based printers on the PC will definitely not work!
+If your PC does not have a native parallel port, please consider using an
+XU1541 or XUM1541 cable instead!/</bf>
+
+<p>
+Also note that a standard X(E)1541 cable won't work with _this_ driver. In
+fact, there will probably never be a multitasking OS which works with one of
+these, that's why we call it XM1541, M for Multitasking. Anyway, if you have
+a XE1541, the necessary modification is simple:
 
 <p>
  <bf>Exchange pins 5 & 6 on the Commodore DIN plug</bf>
@@ -221,6 +329,12 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 
 <p>
 <descrip>
+<tag/opencbm v0.4.99.95:/
+
+<itemize>
+ <item> TBD @@@
+</itemize>
+
 <tag/opencbm v0.4.0:/
 
 <itemize>
@@ -354,20 +468,137 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 Depending on the system you are running opencbm on, there are different ways to
 install opencbm. Use the appropriate category for you:
 
-<sect1>Installing opencbm on Linux (cbm4linux)<label id="cbm4linux-install">
+<sect1>Quick installation walk-through
+<p>
+If you want to install OpenCBM as fast as possible, but you are not interested
+in the details, just use the instructions from this section and ignore the rest
+of this chapter unless you encounter any problems.
+
+If you are more interested for a clean installation, skip this section and read
+the rest of this chapter.
+
+<sect2>Linux
+
+<p>
+Perform the following steps to install OpenCBM on you Linux machine:
+
+<itemize>
+<item>Get the sources from the <htmlurl url="@@@TODO" name="tarball">.
+<item>Unpack them into a directory (i.e., <it>&tilde;/opencbm</it>)
+<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm/opencbm</it>
+<item>Compile OpenCBM and the appropriate plugin: <it>make -f LINUX/Makefile
+opencbm plugin-<em/XXX/</it>, with <it/XXX/ being one of <it/xa1541/, <it/xu1541/ or
+<it/xum1541/, depending upon which adapter you are using.
+<item>Now, install the OpenCBM package. You must perform this as root, either
+by using <it/sudo/, or by explicitly becoming root with <it/su/. The following
+command assumes you are using <it/sudo/: <it>sudo make -f LINUX/Makefile
+install install-plugin-<em/XXX/</it>, with <it/XXX/ being the same one of
+<it/xa1541/, <it/xu1541/ or <it/xum1541/ as above.
+<item>(For machines with udev only): Copy one or more files into the directory
+<it>/etc/udev/rules.d/</it>. Either choose the one of the following, that fits
+your cable type, or just copy all of them:
+	<itemize>
+	<item><it>sudo cp sys/linux/45-opencbm-parallel.rules /etc/udev/rules.d/</it> (for XA1541/XM1541
+	cables)
+	<item><it>sudo cp ../xu1541/udev/45-opencbm.rules /etc/udev/rules.d/</it> (for XU1541 cables)
+	<item><it>sudo cp ../xum1541/udev/45-opencbm-usb.rules /etc/udev/rules.d/</it> (for XUM1541 cables)
+	</itemize>
+<item>Connect your cable (XU1541, XUM1541, XA1541, XM1541) to your CBM IEC
+device. Plug your XU1541 or XUM1541 into the USB port, or your XA1541 or XM1541
+cable to the parallel port. Switch on your CBM IEC device.
+<item>(For XA1541/XM1541 cables only): Load the kernel module:
+	<itemize>
+	<item><it>sudo /sbin/depmod -a</it>
+	<item><it>sudo /sbin/modprobe parport</it> (this one might fail if you
+have the parallelport compiled into the kernel instead of being a module)
+	<item><it>sudo /sbin/insmod cbm</it>
+	<item>Now, check the file <it>/var/log/messages</it> if your cable was
+correctly recognized.
+	</itemize>
+<item>You are almost done. Check if the command <it/cbmctrl reset/ resets your
+drive, or if the command <it/cbmctrl detect/ prints out your device with your
+device number. If this works, you are done! If not, please proceed:
+<item>If you get an error message that libopencbm cannot be found, you must add
+it to your linker path. In order to do so, do the following:
+	<itemize>
+	<item>If the directory <it>/etc/ld.so.conf.d/</it> exists, create a
+new file with the contents <it>/usr/local/lib</it> to it by issuing:
+	<it>echo "/usr/local/lib" > /etc/ld.so.conf.d/99-opencbm.conf</it>.
+If the directory does not exist, <em/append/ the directory to the file
+<it>/etc/ld.so.conf</it> by issuing
+	<it>echo "/usr/local/lib" >> /etc/ld.so.conf</it>.
+	Then, perform <it>sudo ldconfig</it>
+	</itemize>
+<item>Now, everything should be working, and you should be able to use the
+OpenCBM tools even as non-root.
+</itemize>
+
+<sect2>Mac OS X
+
+<p>
+Please check the instructions at <htmlurl
+url="http://lallafa.de/blog/c64-projects/opencbm-on-mac/"
+name="http://lallafa.de/blog/c64-projects/opencbm-on-mac/"> available on the
+blog of Christian Vogelgsang, who actually ported OpenCBM to the Mac. His site
+should be your primary source for instructions.
+
+<sect2>Windows
+
+<p>
+<sect1>Installing opencbm on Mac OS X (USB cable)<label id="cbm4mac-install">
+
+<p>
+For Mac OS X, there are <htmlurl
+url="http://lallafa.de/blog/c64-projects/opencbm-on-mac/" name="special
+installation instructions"> available on the blog of Christian Vogelgsang, who
+actually ported OpenCBM to the Mac. His site should be your primary source for
+instructions.
+
+<sect1>Installing opencbm on Linux or FreeBSD<label id="cbm4linux-install-all">
+
+<p>
+The installation of OpenCBM differs a little bit depending on the cable used to
+connect your CBM equipment. The following instructions try to show the
+installation procedure as straight-forward as possible.
+At first, I will describe the prerequisites for each cable type. Afterwards, I
+will describe the installation bits that are common to all cable types.
+At last, I will describe some special postprocessing steps that are needed for
+some cable types.
+
+<sect2>Prerequisites
+
+<sect3>XUM1541 cable (a.k.a. ZoomFloppy) and XU1541 cable
+
+<p>
+These two cables are rather easy. In order to compile them, you need the libusb
+packages (libusb 0.1, <it/not/ 1.0) and the corresponding libusb development
+package. For Debian based systems, it is enough to install the package
+`libusb-dev'.
+
+<sect3>XA1541 cable or XM1541 cable
+
+<p>
+The XA1541 cable and the XM1541 cable need a kernel module (cbm.o) which acts
+as a driver for the parallel port based cables.
 
 <p>
 The kernel module (cbm.o) does not require any kernel patches and should
-compile right out of the box, at least with kernel 2.2.x and 2.4.x, but 2.0.x
-might still work as well.
+compile right out of the box, at least with kernel 3.x and 2.6.x, but 2.0.x,
+2.2.x and 2.4.x might still work as well. They have not been tested in ages,
+though, thus, you are on your own.
 
+<p>
+In order to compile the kernel module, you will need the headers that
+correspond to your current running kernel. For debian-based systems, you can
+accomplish this by running <it/aptitude install linux-headers-`uname -r`/ as
+root.
+
+
+<sect3>Any cable type
+<p>
 If you intend to modify the drive routines for `d64copy' and `cbmformat' you
-also need a crossassembler. `LINUX/config.make' comes with rules for A.Fachat's
-`xa' (available from <htmlurl url="http://www.floodgap.com/retrotech/xa/"
-name="http://www.floodgap.com/retrotech/xa/"> or <htmlurl
-url="http://www.lb.shuttle.de/puffin/cbm4linux/"
-name="http://www.lb.shuttle.de/puffin/cbm4linux/">; Note: xa has not been tested
-lately, and might not work anymore) and Ullrich von Bassewitz' `cl65' (comes
+also need a crossassembler. `LINUX/config.make' comes with rules for Ullrich
+von Bassewitz' `cl65' (comes
 with cc65, <htmlurl url="http://www.cc65.org/" name="http://www.cc65.org/">).
 Starting with version cbm4linux 0.2.3, opencbm includes precompiled 6502
 binaries, so as long as you don't touch the .a65 files, there's no need for a
@@ -392,28 +623,38 @@ Linux parport subsystem for some reason. Same goes for SMP machines.
 <sect2>Compilation
 
 <p>
-Type
-
 <itemize>
-<item><it>make -f LINUX/Makefile</it>    (no root privileges required)
+<item><it>make -f LINUX/Makefile opencbm plugin-XXX</it>    (no root privileges required)
 
-to  build  the  kernel module, libraries and utility programs (no
-root privileges required),
+(replacing XXX with either xum1541, xu1541 or xa1541, depending upon the cable
+type you are using)
 
-<item><it>make -f LINUX/Makefile dev</it>    (as root)
+to build OpenCBM, which includes the libraries and utility programs (no
+root privileges required).
+
+Example: In case you are compiling for the xum1541 cable, use <it>make -f
+LINUX/Makefile opencbm plugin-xum1541</it>
+
+<item>If you are using an XA1541 or XM1541 cable, issue <it>make -f LINUX/Makefile dev</it>    (as root)
 
 to   create   the  character  device "/dev/cbm" with major 10 and
 minor 177 (this number is registered,  so  it  shouldn't  collide
-with anything else :)). Finally
+with anything else :)).
 
-<item><it>make -f LINUX/Makefile install</it>     (as root)
+<item>Finally, install everything by running <it>make -f LINUX/Makefile
+install install-plugin-XXX</it>     (as root)
 
-will  install  all  necessary  stuff  to  /usr/local/...  (can be
+again replacing XXX with xum1541, xu1541 or xa1541, depending upon the cable
+type you are using.
+
+This will  install  all  necessary  stuff  to  /usr/local/...  (can be
 changed in `LINUX/config.make')
 </itemize>
 
-<sect2>Loading the module
+<sect2>Loading the module (XA1541/XM1541 only)
 
+<p>
+<bf/This is only needed if you are using the XA1541 or XM1541 cables. Otherwise, skip this section/
 <p>
 If  you're  using  the  parport subsystem (which is default), you
 should now be able to load the driver module by issuing (as root)
@@ -438,6 +679,28 @@ Check <tt>/var/log/messages</tt> if the correct cable type was recognized
 (XA1541/XM1541).
 
 
+<sect2>udev rules so that you can access the cables as non-root user (Linux only)
+<p>
+Normally, you will have access to your device only if you are logged in as root,
+or if you use <it/sudo/.
+You might want to change this behaviour. For this, OpenCBM includes udev rules
+that allow you to customize who is able to access the devices.
+
+These files are located in:
+<itemize>
+<item><it>opencbm/sys/linux/45-opencbm-parallel.rules</it> (for XA1541/XM1541
+cables)
+<item><it>xu1541/udev/45-opencbm.rules</it> (for XU1541 cables)
+<item><it>xum1541/udev/45-opencbm-usb.rules</it> (for XUM1541 cables)
+</itemize>
+
+<p>
+In order to use these files, just copy the appropriate one(s) into the directory
+<it>/etc/udev/rules.d/</it>. They will allow any member of the group
+<it/user/ to use the corresponding cable.
+
+If you want to use another group, just change the files accordingly.
+
 <sect2>Troubleshooting
 
 <p>
@@ -447,6 +710,14 @@ following tips might help you:
 <itemize>
 <item>Check <tt>/var/log/messages</tt>; it might give you some hints.
 
+<item>For XU1541 and XUM1541 cable:
+<itemize>
+<item>Did you install libusb? You need v0.1, a v1.0 libusb will not work unless
+you install the v0.1 compatibility layer, too.
+</itemize>
+
+<item>For XA1541 and XM1541 cable:
+<itemize>
 <item>If you are using the parport subsystem (no -DDIRECT_PORT_ACCESS):
 
 <itemize>
@@ -471,6 +742,7 @@ following tips might help you:
      out.
 </itemize>
 </itemize>
+</itemize>
 
 
 <sect2>Device access
@@ -491,7 +763,7 @@ Failure can be caused by:
 <itemize>
 <item>Possibly, the shared library in <tt>/usr/local/lib/</tt> cannot be found;
 in this case, add <tt>/usr/local/lib/</tt> to <tt>/etc/ld.so.conf</tt> and
-execute <it/ldconfig/ (as root)
+execute <it/ldconfig/ (as root).
 <item>You might not have the necessary rights to the <tt>/dev/cbm</tt> device;
 try <it>chmod 777 /dev/cbm</it>
 <item>incorrect module parameters
@@ -499,7 +771,7 @@ try <it>chmod 777 /dev/cbm</it>
 <item>broken cable
 </itemize>
 
-<sect2>Runtime configuration
+<sect2>Runtime configuration (Applies to XA1541 and XM1541 cables only!)
 
 <p>
 Most probably, you will want to add this to <tt>/etc/modules.conf</tt> to have
@@ -542,7 +814,7 @@ Congratulation, you have successfully set up your opencbm installation!
 <p>
 <it/WARNING! If you have already installed a previous version of OpenCBM on your
 machine, you have to uninstall it before installing a new version. For this, go
-to the directory where the old version is located, and enter instcbm
+to the directory where the old (!) version is located, and enter instcbm
 --remove./
 
 First of all, Windows must know about the driver. For this, we must install it
@@ -558,7 +830,7 @@ following actions.
 following:
 
 <itemize>
-<item>Get your supported drive <ref id="supported-drives">.
+<item>Get your supported drive <ref id="supported-drives" name="supported drive">.
 
 <item>Moving cables with equipment turned on can damage either your PC,
 and/or the drive, so, be carefull!
@@ -581,7 +853,13 @@ directory you unpackaged the drivers into (with "<it/cd/").
 
 <item>Type "<it/cd exe/"
 
-<item>Type "<it/instcbm/" and check the outputs. Its last line should look like
+<item>The next step depends upon the cable type you are using.
+ <itemize>
+   <item>If you are using an XUM1541 cable (a.k.a. ZoomFloppy), type "<it/instcbm xum1541/"
+   <item>If you are using an XU1541 cable, type "<it/instcbm xu1541/"
+   <item>If you are using an XA1541 or XM1541 cable, type "<it/instcbm xa1541/"
+ </itemize>
+<item>In any case, check the outputs of the <it/instcbm/ command. Its last line should look like
 <it/No problems found in current configuration/. In this case, you are done. In
 some rare cases, <it/instcbm/ will suggest a reboot, which you should follow.
 
@@ -595,14 +873,7 @@ name="instcbm">.
 unpackaged the drivers into again.
 
 <item>Type "<it/cd exe/"
-
-<item>Type "<it/instcbm --check/". There should not be any further suggestion
-for a reboot. If there is, do not proceed, but contact me instead.
 </itemize>
-
-<item>If you want to use another port than LPT1, you must tell this to the
-driver. I assume you want to use LPTX, with X being the correct value, then
-type: "<it/instcbm --lpt=X --update/"
 </itemize>
 
 <sect>Checking if the installation is complete
@@ -621,7 +892,7 @@ floppy drive LED should light up, and the drive should start spinning. After
 approximately one second (up to five seconds in the case of a 1581), the red
 LED should switch off again, and the drive stops spinning.
 
-<item>Now, type "<it/cbmctrl status 8/" to get the status (error) code from the
+<item>Type "<it/cbmctrl status 8/" to get the status (error) code from the
 attached floppy drive. If everything works fine, your drive should answer with
 its identification string. For a 1541, this is something like <it/73,cbm dos v2.6
 1541,00,00/, while for a 1571, this line looks like <it/73,cbm dos v3.0
@@ -636,7 +907,7 @@ drive again. As the power on message has been read, your drive should answer wit
 <item>Type "<it/cbmctrl detect/". This command tries to detect the types of drive
 which are connected on the cable. You should see the drive which you posess.
 
-<item>Now, we want to check if we can send anything to the floppy drive. Remove
+<item>We want to check if we can send anything to the floppy drive. Remove
 any diskette from the drive and press "<it/cbmctrl open 8 15 I0/". (Make sure the "I"
 is an upper-case "I". A lower-case "I" will not work!) This command tries to
 initialize the disk. Anyway, since there isn't a disk in the drive, an error
@@ -644,7 +915,7 @@ occurs. You should hear the floppy spinning, and in case of a 1541, the R/W-head
 should start bumping. After some seconds, the red LED starts starts flashing,
 indicating that an error occurred.
 
-<item>Now, try again "<it/cbmctrl status 8/" to get the status (error) code from
+<item>Try again "<it/cbmctrl status 8/" to get the status (error) code from
 the floppy drive. As an error occurred before, an error string should be
 displayed. For my setup, it is the "<it/21,read error,18,00/" string. Furthermore,
 the red LED should stop flashing.
@@ -655,7 +926,7 @@ receive answers from it. This is very good so far. Furthermore, don't panic:
 you do not have to enter these commands over and over again, these are only
 tests to make sure that anything is correctly installed.
 
-Now, let's proceed. If you have a D64 file or a floppy disc ready, you can try
+If you have a D64 file or a floppy disc ready, you can try
 transferring it over the cable. Do not use all of the following commands, but
 only the ones you want to perform.
 
@@ -695,19 +966,19 @@ As the kernel driver is quite useless for itself, the following utility
 programs are included with this package:
 
 <itemize>
-<item><it/cbmctrl/
+<item><it/cbmctrl/ (cf. <ref id="cbmctrl" name="cbmctrl">)
 
  command line utility for direct device access at talk/listen level.
 
-<item><it/cbmformat/
+<item><it/cbmformat/ (cf. <ref id="cbmformat" name="cbmformat">)
 
  fast 1541 disk formatter (for 1541, 1570 and 1571 drives).
 
-<item><it/cbmforng/
+<item><it/cbmforng/ (cf. <ref id="cbmforng" name="cbmforng">)
 
  fast 1541 disk formatter (for 1541, 1570 and 1571 drives).
 
-<item><it/d64copy/
+<item><it/d64copy/ (cf. <ref id="d64copy" name="d64copy">)
 
  copies .d64 images to 1541 compatible drives and vice versa. Type `d64copy -h'
  to get a list of valid options. Use the device number to address the disk
@@ -728,31 +999,53 @@ programs are included with this package:
  serial2 warp       88.29    80.57
  </verb></tscreen>
 
-<item><it/cbmcopy/
+<item><it/d82copy/ (cf. <ref id="d82copy" name="d82copy">)
+
+ Like <ref id="d64copy" name="d64copy">, but for d80 and d82 images with a CBM
+ 8250 drive or compatibles.
+
+<item><it/imgcopy/ (cf. <ref id="imgcopy" name="imgcopy">)
+
+ Tries to integrate the functionality of <ref id="d64copy" name="d64copy"> and
+ <ref id="d82copy" name="d82copy"> into one generic application.
+
+<item><it/cbmcopy/ (cf. <ref id="cbmcopy" name="cbmcopy">)
 
  fast 1541/1570/1571/1581 file copier.
 
-<item><it/rpm1541/ demo
+<item><it/rpm1541/ demo (cf. <ref id="rpm1541" name="rpm1541">)
 
  determines the drive rotation speed of 1541, 1570 and 1571 drives.
 
-<item><it/flash/ demo
+<item><it/flash/ demo (cf. <ref id="flash" name="flash">)
 
  flashes the LED of 1541, 1570 and 1571 drives.
 
-<item><it/morse/ demo
+<item><it/morse/ demo (cf. <ref id="morse" name="morse">)
 
  morses arbitrary texts with the help of the LED of 1541, 1570 and 1571 drives.
+
+<item><it/cbmlinetester/ debugging aid (cf. <ref id="cbmlinetester"
+ name="cbmlinetester">)
+
+ is a debugging aid which helps you set the IEC lines to specific values
+ and read out the current state of the lines.
 
 </itemize>
 
 <sect1>instcbm (Windows only)<label id="instcbm">
+
 <p>
 <it/instcbm/ is used on Windows to install the opencbm driver.
 
-<sect2>instcbm invocation<label id="instcbm command structure">
-<p>Synopsis: <tt>instcbm <it>[options]</it></tt>
+<em/Please note that the syntax of instcbm has changed considerably in v0.5.0
+with respect to the syntax used until version v0.4.2!/
 
+<sect2>instcbm invocation<label id="instcbm command structure">
+<p>Synopsis: <tt>instcbm {<it/[global-options]/ <it/[plugin]/
+<it/[plugin-options]}*/</tt>
+
+<p>Where the following <it/[global-options]/ are possible:
 <descrip>
 <tag/-h, --help/
 display help and exit.
@@ -763,11 +1056,37 @@ display version information about cbm4win.
 <tag/-r, --remove/
 remove (uninstall) the driver.
 
-<tag/-e, --enumpport/
-re-enumerate the parallel port driver.
-
 <tag/-u, --update/
 update parameters if driver is already installed. 
+
+<tag/-n, --nocopy/
+do not copy the driver files into the system directory. This is not recommended.
+
+<tag/-c, --check/
+only check if the installation is ok. Do not install or uninstall anything.
+
+<tag/-@, --adapter=[plugin]/
+Define the specified plugin as default plugin.
+
+</descrip>
+
+<p>
+The <it/[plugin]/ is one of <it/xa1541/, <it/xu1541/ or <it/xum1541/. For each
+plugin, there are plugin specific options possible.
+
+<p>
+For the <it/xa1541/ plugin, the following <it/[plugin-options]/ are possible:
+<descrip>
+<tag/-h, --help/
+display help and exit.
+
+<tag/-V, --version/
+display version information about the xa1541 plugin.
+
+<!--
+<tag/-e, -enumpport/
+re-enumerate the parallel port driver.
+-->
 
 <tag/-l, --lpt=*no*/
 set default LPT port to number <it/*no*/. For example, for LPT2, use <it/--lpt=2/.
@@ -785,18 +1104,12 @@ or <it/no/ (do not automatically lock).
 
 If not specified, <it/--lock=yes/ is assumed.
 
-<tag/-n, --nocopy/
-do not copy the driver files into the system directory. This is not recommended.
-
-<tag/-c, --check/
-only check if the installation is ok. Do not install or uninstall anything.
-
 <tag/-F, --forcent4/
 force the NT4 driver on a Win 2000, XP, or newer systems (NOT RECOMMENDED!).
 This option is only available on i386 architectures; AMD64 and iA64 do not support it.
 
 <tag/-A, --automatic/
-(default) automatically start the driver on system boot.a
+(default) automatically start the driver on system boot.
 
 The driver can be used from a normal user, no need for administrator rights.
 The opposite of <it/--on-demand/.
@@ -805,24 +1118,45 @@ The opposite of <it/--on-demand/.
 start the driver only on demand.
 
 The opposite of <it/--automatic/.
-
 </descrip>
+
+<p>
+For the <it/xu1541/ plugin, the following <it/[plugin-options]/ are possible:
+<descrip>
+<tag/-h, --help/
+display help and exit.
+
+<tag/-V, --version/
+display version information about the xu1541 plugin.
+</descrip>
+
+<p>
+For the <it/xum1541/ plugin, the following <it/[plugin-options]/ are possible:
+<descrip>
+<tag/-h, --help/
+display help and exit.
+
+<tag/-V, --version/
+display version information about the xum1541 plugin.
+</descrip>
+
+
 
 <sect2>instcbm Examples<label id="instcbm examples">
 
 <p>
-Install the driver and the DLL on the machine. The driver and the DLL
+Install the XA1541/XM1541 driver and the DLL on the machine. The driver and the DLL
 are copied into the Windows system directory, so opencbm can be used from
 every program:
 <code>
-instcbm
+instcbm xa1541
 </code>
 
 <p>
 Install the driver, like above. Additionally, specify that you
 are using an XM1541 cable:
 <code>
-instcbm --cabletype=xm1541
+instcbm xa1541 --cabletype=xm1541
 </code>
 
 <p>
@@ -832,9 +1166,26 @@ instcbm --check
 </code>
 
 <p>
-Remove the driver from the system. You will not be able to use opencbm
-after this command, unless you re-install it. If files were copied into
-the Windows system directory, they will be removed:
+Install OpenCBM ready for use with the XU1541 cable:
+<code/instcbm xu1541/
+
+<p>
+Install OpenCBM ready for use with the XUM1541 (a.k.a. ZoomFloppy) cable:
+<code/instcbm xum1541/
+
+<p>
+Install OpenCBM for all the XA1541, XU1541 and XUM1541 cables at once, making
+the xum1541 cable the default adapter:
+<code/instcbm xum1541 xu1541 xa1541/ or, equivalent: <code/instcbm --adapter=xum1541/
+
+<p>
+Change the default adapter after OpenCBM was already installed:
+<code/instcbm --update --adapter=xa1541/
+
+<p>
+Remove the driver including <em/all/ plugins from the system. You will not be
+able to use opencbm after this command, unless you re-install it. If files were
+copied into the Windows system directory, they will be removed:
 <code>
 instcbm --remove
 </code>
@@ -843,13 +1194,13 @@ instcbm --remove
 After opencbm has been installed (with <it/instcbm/>), change the parallel
 port to be used to 2:
 <code>
-instcbm --lpt=2 --update
+instcbm --update xa1541 --lpt=2
 </code>
 
 <p>
 Install opencbm, directly specifying LPT3 as the parallel port to use:
 <code>
-instcbm --lpt=3
+instcbm xa1541 --lpt=3
 </code>
 
 <p>
@@ -864,7 +1215,7 @@ instcbm --nocopy
 
 <sect1>cbmctrl<label id="cbmctrl">
 
-<p><it>cbmctrl</it> is used to send commands to external devices. It can
+<p><it/cbmctrl/ is used to send commands to external devices. It can
 control all kinds of serial CBM devices like floppy drives and printers. So
 far, it has been successfully tested with the disk drives 1541(-II), 1571
 and a MPS-1200 printer.
@@ -893,6 +1244,29 @@ the optional <it>ACTION</it> name is given also, you retrieve more information
 on a special action together with its arguments and parameters
 <tag>-V, --version</tag>
 <p>Output version information as well as the built date and time
+<tag/-@, --adapter=&lt;plugin&gt;[:&lt;bus&gt;]/
+<p>Specify the plugin to use. If you have installed more than one plugin
+(XA1541, XU1541, XUM1541), you can specifiy which one to use for this command.
+This way, you can use all three variants at the same time.
+
+This requires an argument of the form &lt;plugin&gt;[:&lt;bus&gt;], where
+&lt;plugin&gt; is the plugin's backend name (currently: <it/xa1541/,
+<it/xu1541/, <it/xum1541/), and &lt;bus&gt; is the bus identifier, if it is
+supported by the backend.
+
+<tag>-f, --forget</tag>
+<p>Future extension, unused at the moment
+<tag>-p, --petscii (default for all actions but <it>open</it> and
+<it>command</it>)</tag>
+<p>Convert input or output parameter from CBM format (PETSCII)
+
+When specifying texts to be sent to the floppy or when receiving
+texts from the floppy, convert them from/to petscii before outputting.
+This way, small letters on the PC side are small letters on the CBM side.
+The opposite is -r, --raw.
+<tag>-r, --raw (default for <it>open</it> and <it>command</it></tag>
+<p>Do not convert data between CBM and PC side.
+
 </descrip>
 
 <sect3>Actions overview<label id="cbmctrl actions overview">
@@ -916,20 +1290,28 @@ on a special action together with its arguments and parameters
 <p>Perform an untalk on the IEC bus
 <tag>open</tag>
 <p>Perform an open on the IEC bus
+<tag>popen</tag>
+<p>Same as open, but with ASCII to PETSCII conversion.
+Its use is deprecated, use the global option --petscii with <it>open</it>
+instead.
 <tag>close</tag>
 <p>Perform a close on the IEC bus
-<tag>popen</tag>
-<p>Same as open, but with ASCII to PETSCII conversion
 <tag>read</tag>
 <p>Get a stream of raw data from an IEC bus device
 <tag>write</tag>
 <p>Put a stream of raw data to an IEC bus device
+<tag>put</tag>
+<p>Put specified data to the IEC bus device.
+In contrast to <it>write</it>, it allows you to specify the data as decimal,
+hexadecimal or octal values.
 <tag>status</tag>
 <p>Give the status of a specified drive
 <tag>command</tag>
 <p>Issue a command to a specified drive
 <tag>pcommand</tag>
 <p>Same as command, with ASCII to PETSCII conversion
+Its use is deprecated, use the global option --petscii with <it>command</it>
+instead.
 <tag>dir</tag>
 <p>Output the directory of a disk in a specified drive
 <tag>download</tag>
@@ -959,7 +1341,7 @@ specifed <it>[DEVICE]</it> . IEC bus channel numbers can be denoted in the
 range from 0 to 15. Take note that for floppy disk drive devices some
 secondary addresses are interpreted in a special way. Secondary address 0 is
 used, when a program is loaded, address 1, when a program is saved. Address
-number 15 represents the command channel of the disk drive, so e®ectively,
+number 15 represents the command channel of the disk drive, so effectively,
 for bulk data transfers to and from disk drives, only the logical channel
 numbers 2 to 14 can be used.
 </descrip>
@@ -979,8 +1361,9 @@ This action tries to detect all devices attached to the IEC bus.
 For this, this subcommand accesses all possible devices and tries to
 read some bytes from its memory. If a devices is detected, its name
 is output. Additionally, this routine determines if the device is
-connected via a parallel cable (XP1541 companion cable, may be true
-for disk drives only).
+connected via a parallel cable (XP1541 companion cable for XA1541/XM1541 cables,
+or the equivalent option for the XU1541 or XUM1541 cables; may be true for disk
+drives only).
 
 <label id="action-lock">
 <tag>lock</tag>
@@ -1050,18 +1433,19 @@ specified by appending <tt/,type,mode/ to <it/filename/. Valid types are
 D, P, S, U, R (DEL, PRG, SEQ, USR, REL), valid modes are R for reading and W
 for writing.
 
+Depending upon if <it>--petscii</it> or <it>--raw</it> is specified, the file
+name is converted before being sent on the IEC bus.
+
 Note: You cannot do an open without a filename. Although a CBM machine (i.e., a
 C64) allows this, this is an internal operation for the Computer only. It does
 not have any effect on the IEC bus.
-
-<it/cbmctrl open/ does not change any character encoding, that is, it does not
-convert between ASCII (used by the PC) and PETSCII (used by the CBM device). If
-this is needed, use <it/cbmctrl popen/ instead.
 
 <label id="popen">
 <tag>popen <it/device secadr filename/</tag>
 Like <it/cbmctrl open/, but converts the filename from ASCII to PetSCII before
 sending it to the floppy.
+
+Its use is deprecated, use <it/open/ with <it/--petscii/ instead.
 
 <label id="action-close">
 <tag>close <it/device secadr/</tag>
@@ -1073,11 +1457,36 @@ Close the file associated with secondary address <it/secadr/ on device
 This command reads raw data from the IEC bus and outputs it into the given
 file, or to stdout if no file is given (or if it is a simple dash, "-").
 
+If <it/--petscii/ is given, the output is converted from PETSCII before being
+output to the file or to stdout.
+
 <label id="action-write">
 <tag>write <it/[file]/</tag>
 This command writes raw data to the IEC bus; the data is taken from the given
 file, or from stdin if no filename is given (or if it is a simple dash, "-").
+If <it/--petscii/ is given, the output is converted to PETSCII before being
+output to the IEC bus.
 
+<label id="action-put">
+<tag>put <it/[-e|--extended] &lt;datastr&gt; [&lt;data1&gt; ... &lt;dataN&gt;]/</tag>
+
+puts the specified data to the IEC bus
+
+With this command, you can write raw data to the IEC bus.
+&lt;datastr&gt; is the string to output to the IEC bus.
+          It must be given, but may be empty by specifying it as "".
+
+&lt;data1&gt;, ..., &lt;dataN&gt; are additional bytes to append to the string &lt;datastr&gt;.
+           Single bytes can be given as decimal, octal (0 prefix) or
+           hexadecimal (0x prefix).
+
+If the option <it/-e/ or <it/--extended/ is given, an extended format is used:
+  You can specify extra characters by given their ASCII value in hex,
+  prepended with `%', that is: `%20' => SPACE, `%41' => `A', `%35' => `5',
+  and-so-on. A `%' is given by giving its hex ASCII: `%25' => `%'.
+
+If using both <it/--pestscii/ and <it/--extended/ options, the bytes given via the
+  `%' meta-character or as &lt;data1&gt;, ..., &lt;dataN&gt; are <em/not/ converted to petscii.
 
 <label id="action-status">
 <tag>status <it/device/</tag>
@@ -1098,14 +1507,18 @@ cbmctrl untalk
 cbmctrl unlock
 </code>
 
+The output depends upon if <it/--petscii/ or <it/--raw/ is specified.
+
 <label id="action-command">
 <tag>command <it/device cmdstr/</tag>
 Sends <it/cmdstr/ to device <it/device/, secondary address 15 (command/status
-channel). Since there is no PetSCII->ASCII conversion, commands must be sent
-in <em/upper case/ (kind of poor man's PetSCII conversion). This is because
-charset conversion would break the <tt/M-W/ and <tt/M-E/ commands.
+channel).
 
-Note: If you need PetSCII->ASCII conversion, use <it/pcommand/ instead.
+Depending upon if <it>--petscii</it> or <it>--raw</it> is specified, the file
+name is converted before being sent on the IEC bus. Be careful, though, because
+the <it>--petscii</it> conversion might break some commands like <tt/M-W/ and
+<tt/M-E/. If in doubt, it is better to use <it/--raw/ and use the commands in
+<em/upper case/ (kind of poor man's PetSCII conversion).
 
 Assuming the device number is 8, this command is identical to (Note: This does
 not work on Windows, because <it/echo/ there does not know the <it/-n/ option.)
@@ -1113,6 +1526,7 @@ not work on Windows, because <it/echo/ there does not know the <it/-n/ option.)
 cbmctrl lock
 cbmctrl listen 8 15
 echo -n cmdstr|cbmctrl write -
+<it/@@@TODO/  cbmctrl put "cmdstr"
 cbmctrl unlisten
 cbmctrl unlock
 </code>
@@ -1120,24 +1534,26 @@ cbmctrl unlock
 <label id="action-pcommand">
 <tag>pcommand <it/device cmdstr/</tag>
 Like <it/command/, but converts the data from ASCII to PetSCII before sending
-it.
+it. Its use is deprecated, use <it/command/ with <it/--petscii/ instead.
 
 <label id="action-dir">
 <tag>dir <it/device/</tag>
 Read directory from disk in device <it/device/, print on standard out.
 
+The output depends upon if <it/--petscii/ or <it/--raw/ is specified.
+
 <label id="action-download">
 <tag>download <it/device address count [file]/</tag>
 Read <it/count/ bytes from drive memory, starting at <it/address/ via one
 or more <tt/M-R/ commands. Memory contents are written to standard output
-if <it/file/ is ommited or equivalent to <tt/"-"/.
+if <it/file/ is <tt/"-"/ or ommited.
 
 <label id="action-upload">
 <tag>upload <it/device address [file]/</tag>
 Send <it/file/ to drive memory, starting at <it/address/ via one
 or more <tt/M-W/ commands. If <it/address/ is -1, the first two bytes from
 <it/file/ are considered as start address. Reads standard input if <it/file/ is
-ommited or equivalent to <tt/"-"/.
+<tt/"-"/ or ommited.
 
 <label id="change">
 <tag>change <it/device/</tag>
@@ -1226,6 +1642,16 @@ Display help and exit.
 
 <tag/-V, --version/
 Display version information and exit.
+
+<tag/-@, --adapter=&lt;plugin&gt;[:&lt;bus&gt;]/
+<p>Specify the plugin to use. If you have installed more than one plugin
+(XA1541, XU1541, XUM1541), you can specifiy which one to use for this command.
+This way, you can use all three variants at the same time.
+
+This requires an argument of the form &lt;plugin&gt;[:&lt;bus&gt;], where
+&lt;plugin&gt; is the plugin's backend name (currently: <it/xa1541/,
+<it/xu1541/, <it/xum1541/), and &lt;bus&gt; is the bus identifier, if it is
+supported by the backend.
 
 <tag/-n, --no-bump/
 Do not bump drive head at the beginning. Don't use this on eventually
@@ -1349,6 +1775,16 @@ Display help and exit.
 <tag/-V, --version/
 Display version information and exit.
 
+<tag/-@, --adapter=&lt;plugin&gt;[:&lt;bus&gt;]/
+<p>Specify the plugin to use. If you have installed more than one plugin
+(XA1541, XU1541, XUM1541), you can specifiy which one to use for this command.
+This way, you can use all three variants at the same time.
+
+This requires an argument of the form &lt;plugin&gt;[:&lt;bus&gt;], where
+&lt;plugin&gt; is the plugin's backend name (currently: <it/xa1541/,
+<it/xu1541/, <it/xum1541/), and &lt;bus&gt; is the bus identifier, if it is
+supported by the backend.
+
 <tag/-n, --no-bump/
 Do not bump drive head at the beginning. Don't use this on eventually
 misaligned drives.
@@ -1447,6 +1883,9 @@ the 1541 and compatible devices (1570, 1571, third-party clones). A 1581 drive
 is <it/not/ supported! Maximum transfer speed is achieved by custom drive- and
 transfer-routines based on the Star Commander ((C) Joe Forster/STA) routines.
 
+See also <ref id="d82copy" name="d82copy"> and <ref id="imgcopy"
+name="imgcopy">.
+
 <sect2>d64copy invocation<label id="invoking-d64copy">
 <p>
 Synopsis: <tt/d64copy [OPTION]... SOURCE TARGET/
@@ -1464,6 +1903,16 @@ Display help and exit
 <tag/-V, --version/
 Display version information and exit.
 
+<tag/-@, --adapter=&lt;plugin&gt;[:&lt;bus&gt;]/
+<p>Specify the plugin to use. If you have installed more than one plugin
+(XA1541, XU1541, XUM1541), you can specifiy which one to use for this command.
+This way, you can use all three variants at the same time.
+
+This requires an argument of the form &lt;plugin&gt;[:&lt;bus&gt;], where
+&lt;plugin&gt; is the plugin's backend name (currently: <it/xa1541/,
+<it/xu1541/, <it/xum1541/), and &lt;bus&gt; is the bus identifier, if it is
+supported by the backend.
+
 <tag/-q, --quiet/
 Quiet output, fewer messages (also suppresses warnings, should not be used)
 
@@ -1476,7 +1925,7 @@ Omit progress display
 <tag>-s, --start-track=<it/start track/</tag>
 Set start track (defaults to 1)
 
-<tag>-e, --end-track=<it/end track/</tag>
+<tag>-e, --end-track=<IT/End track/</tag>
 Set end track (default is 35 for .d64 images, 70 for .d71 images). <it/d64copy/
 is able to access tracks 1-35 in <tt/original/ transfer mode and 1-42 with
 <tt/serial1/, <tt/serial2/ and <tt/parallel/. The 1571 supports tracks 1-70
@@ -1547,7 +1996,7 @@ not supported (yet).
 <tag>-r, --retry-count=<tt/count/</tag>
 Number of retries.
 
-<tag>-E, --error-mode=<tt/mode/</tag>
+<tag>-E, --error-map=<tt/mode/</tag>
 Controls whether error is appended to the disk image (15x1->PC only).
 Allowed values for <tt/mode/ are (abbreviations allowed):
 <itemize>
@@ -1582,6 +2031,307 @@ marked as used in the BAM:
 d64copy -2 -B --transfer=serial1 9 image.d64
 </code>
 
+<sect1>d82copy<label id="d82copy">
+
+<p>
+<it/d82copy/ is a fast disk image transfer (both read and write) program for
+the 8050, 8250 and SFD 1001. 
+
+<p>
+See also <ref id="d64copy" name="d64copy"> and <ref id="imgcopy"
+name="imgcopy">.
+
+<sect2>d82copy invocation<label id="invoking-d82copy">
+<p>
+Synopsis: <tt/d82copy [OPTION]... SOURCE TARGET/
+
+<p>
+Either SOURCE or TARGET must be an external drive, valid names are 8, 9, 10 and
+11. The other parameter specifies the file name of the .d80 or .d82 image.
+
+Here's a complete list of known options:
+
+<descrip>
+<tag/-h, --help/
+Display help and exit
+
+<tag/-V, --version/
+Display version information and exit.
+
+<tag/-@, --adapter=&lt;plugin&gt;[:&lt;bus&gt;]/
+<p>Specify the plugin to use. If you have installed more than one plugin
+(XA1541, XU1541, XUM1541), you can specifiy which one to use for this command.
+This way, you can use all three variants at the same time.
+
+This requires an argument of the form &lt;plugin&gt;[:&lt;bus&gt;], where
+&lt;plugin&gt; is the plugin's backend name (currently: <it/xa1541/,
+<it/xu1541/, <it/xum1541/), and &lt;bus&gt; is the bus identifier, if it is
+supported by the backend.
+
+<tag/-q, --quiet/
+Quiet output, fewer messages (also suppresses warnings, should not be used)
+
+<tag/-v, --verbose/
+Verbose output, more messages (can be repeated)
+
+<tag/-n, --no-progress/
+Omit progress display
+
+<tag>-s, --start-track=<it/start track/</tag>
+Set start track (defaults to 1)
+
+<tag>-e, --end-track=<IT/End track/</tag>
+Set end track (default is 77 for .d80 images, 154 for .d82 images).
+
+<tag>-t, --transfer=<it/transfer mode/</tag>
+Set transfermode. Valid modes are:
+<itemize>
+<item><tt/auto/     (default)
+<item><tt/original/ (slowest)
+</itemize>
+
+<p>
+If <tt/auto/ is used, d82copy itself determines the best transfer mode usable
+with the current setup, and uses that one. Thus, you will seldom want to 
+manually overdrive the <it>transfer mode</it> option.
+
+<p>
+Note that <it/d82copy/ currently only supports <it/original/ mode; thus, either
+<it/auto/ or omitting the transfer mode will both default to <it/original/.
+
+<tag>-i, --interleave=<it/interleave/</tag>
+Set interleave value. This is ignored when reading in warp mode. Default is 16
+for transfer mode <tt/original/, for turbo and warp write as follows:
+<tscreen><verb>
+
+original     22
+
+</verb></tscreen>
+Lower values might slightly reduce transfer times, but if set a bit to low,
+transfer times will dramatically increase.
+
+<tag>-w, --warp</tag>
+Enable warp mode. This is default now; this option is only supported for
+backward-compatibility with opencbm (cbm4linux/cbm4win) versions before 0.4.0.
+
+<p>
+Note that <it/d82copy/ currently supports <it/original/ transfer mode only;
+thus, <it/--warp/ and <it/--no-warp/ are ignored at the moment.
+
+<tag>--no-warp</tag>
+Disable warp mode. Warp mode is usually a good idea for transferring disk
+images unless you have a very slow CPU and/or bad disk material. Warp mode
+sends raw GCR data over the bus, which assures data integrity on the PC side
+and relieves the drive's CPU. Thus, it is unlikely you will want to use that
+option.
+
+<p>
+Note that <it/d82copy/ currently supports <it/original/ transfer mode only;
+thus, <it/--warp/ and <it/--no-warp/ are ignored at the moment.
+
+<tag>-b, --bam-only</tag>
+BAM-only copy. Only blocks marked as allocated are copied.
+
+<tag>-B, --bam-save</tag>
+Safe BAM-only copy. This is like the <tt/-b/ option but always copies the
+entire directory track (18, 18 and 53 in double-sided mode).
+
+<tag>-d, --drive-type=<tt/type/</tag>
+Skip drive type detection. Possible values are: <tt/8050/, <tt/8250/ or
+<tt/1001/.
+
+<tag>-1, --one-sided</tag>
+Single-sided mode (D80).
+
+<tag>-2, --two-sided</tag>
+Double-sided mode (D82); requires a VIC 8250 or SFD 1001 drive.
+
+<tag>-r, --retry-count=<tt/count/</tag>
+Number of retries.
+
+<tag>-E, --error-map=<tt/mode/</tag>
+Controls whether error is appended to the disk image (15x1->PC only).
+Allowed values for <tt/mode/ are (abbreviations allowed):
+<itemize>
+<item><tt/always/
+<item><tt/on_error/  (default)
+<item><tt/never/
+</itemize>
+
+</descrip>
+
+<sect2>d82copy Examples<label id="d82copy examples">
+
+<p>
+Read a D82 disc image from the floppy in drive 8 to the file image.d82,
+automatically selecting the fastest transfer method:
+<code>
+d82copy -2 8 image.d82
+</code>
+
+<p>
+Copy the D80 disc image in image.d80 to the floppy in drive 9, automatically
+selecting the fastest transfer method:
+<code>
+d82copy -1 image.d80 9
+</code>
+
+<p>
+Copy a double-sided disc from a 1001 drive 9 to image.d82, only reading the
+blocks which are marked as used in the BAM:
+<code>
+d82copy -2 -B --drive-type=1001 9 image.d82
+</code>
+
+
+<sect1>imgcopy<label id="imgcopy">
+
+<p>
+<bf>@@@TODO Note: <it/imgcopy/ is currently not well-tested. It might be a
+better idea to stick with d64copy and d82copy at the moment.</bf>
+
+<p>
+<bf/@@@TODO Check if the options are correct./
+
+<p>
+<it/imgcopy/ is a fast disk image transfer (both read and write) program for
+various CBM disk drives, namely, VIC 1540, 1541, 1570, 1571, 1581, 2031, 2040,
+3040, 4031, 4040, 8050, 8250, and SFD 1001.
+
+<p>
+See also <ref id="d64copy" name="d64copy"> and <ref id="d82copy"
+name="d82copy">.
+
+
+<sect2>imgcopy invocation<label id="invoking-imgcopy">
+<p>
+Synopsis: <tt/imgcopy [OPTION]... SOURCE TARGET/
+
+<p>
+Either SOURCE or TARGET must be an external drive, valid names are 8, 9, 10 and
+11. The other parameter specifies the file name of the image file.
+
+The extension of the image file determines the default Imagefiletype (.d64,
+.d71, .d80, .d81, .d82)
+<itemize>
+<item><tt/.d64/  1540, 1541, 1570, 1571 (single-sided) or 2031 image
+<item><tt/.d71/  1571 image (double-sided)
+<item><tt/.d81/  1581 image
+<item><tt/.d80/  8050 image (single-sided)
+<item><tt/.d82/  8250 or 1001 image (double-sided)
+</itemize>
+
+Here's a complete list of known options:
+
+<descrip>
+<tag/-h, --help/
+Display help and exit
+
+<tag/-V, --version/
+Display version information and exit.
+
+<tag/-@, --adapter=&lt;plugin&gt;[:&lt;bus&gt;]/
+<p>Specify the plugin to use. If you have installed more than one plugin
+(XA1541, XU1541, XUM1541), you can specifiy which one to use for this command.
+This way, you can use all three variants at the same time.
+
+<bf/@@@TODO CURRENTLY NOT IMPLEMENTED: ADD!/
+
+This requires an argument of the form &lt;plugin&gt;[:&lt;bus&gt;], where
+&lt;plugin&gt; is the plugin's backend name (currently: <it/xa1541/,
+<it/xu1541/, <it/xum1541/), and &lt;bus&gt; is the bus identifier, if it is
+supported by the backend.
+
+<tag/-q, --quiet/
+Quiet output, fewer messages (also suppresses warnings, should not be used)
+
+<tag/-v, --verbose/
+Verbose output, more messages (can be repeated)
+
+<tag/-n, --no-progress/
+Omit progress display
+
+<tag>-s, --start-track=<it/start track/</tag>
+Set start track (defaults to 1)
+
+<tag>-e, --end-track=<IT/End track/</tag>
+Set end track (default depends upon the file image type).
+
+<tag>-t, --transfer=<it/transfer mode/</tag>
+Set transfermode. Valid modes are:
+<itemize>
+<item><tt/auto/     (default)
+<item><tt/original/ (slowest)
+<item><tt/serial1/
+<item><tt/serial2/
+<item><tt/serial3/
+<item><tt/parallel/ (fastest)
+</itemize>
+
+<p>
+Not all modes are supported with all drives!
+
+<p>
+If <tt/auto/ is used, imgcopy itself determines the best transfer mode usable
+with the current setup, and uses that one. Thus, you will seldom want to 
+manually overdrive the <it>transfer mode</it> option.
+
+<tag>-i, --interleave=<it/interleave/</tag>
+Set interleave value. This is ignored when reading in warp mode.
+The default depends upon the file image type.
+
+Lower values might slightly reduce transfer times, but if set a bit to low,
+transfer times will dramatically increase.
+
+<tag>-w, --warp</tag>
+Enable warp mode. This is default now; this option is only supported for
+backward-compatibility with opencbm (cbm4linux/cbm4win) versions before 0.4.0.
+
+<tag>--no-warp</tag>
+Disable warp mode. Warp mode is usually a good idea for transferring disk
+images unless you have a very slow CPU and/or bad disk material. Warp mode
+sends raw GCR data over the bus, which assures data integrity on the PC side
+and relieves the drive's CPU. Thus, it is unlikely you will want to use that
+option.
+
+<tag>-b, --bam-only</tag>
+BAM-only copy. Only blocks marked as allocated are copied.
+
+<tag>-B, --bam-save</tag>
+Safe BAM-only copy. This is like the <tt/-b/ option but always copies the
+entire directory track (18, 18 and 53 in double-sided mode).
+
+<tag>-d, --drive-type=<tt/type/</tag>
+Skip drive type detection. Possible values are: <tt/1541/, <tt/1571/, <tt/1581/,
+<tt/2031/, <tt/2040/, <tt/3040/,  <tt/4031/, <tt/4040/, <tt/8050/, <tt/8250/ or
+<tt/1001/.
+
+<tag>-1, --one-sided</tag>
+Single-sided mode (D80).
+
+<tag>-2, --two-sided</tag>
+Double-sided mode (D82); requires a VIC 8250 or SFD 1001 drive.
+
+<tag>-r, --retry-count=<tt/count/</tag>
+Number of retries.
+
+<tag>-E, --error-map=<tt/mode/</tag>
+Controls whether error is appended to the disk image (15x1->PC only).
+Allowed values for <tt/mode/ are (abbreviations allowed):
+<itemize>
+<item><tt/always/
+<item><tt/on_error/  (default)
+<item><tt/never/
+</itemize>
+
+</descrip>
+
+<sect2>imgcopy Examples<label id="imgcopy examples">
+
+<p>
+<bf/@@@TODO Add examples and test them!/
+
+
 <sect1>cbmcopy<label id="cbmcopy">
 <p>
 <it/cbmcopy/ is a fast file transfer program for various disk drives,
@@ -1609,6 +2359,16 @@ Display help and exit
 
 <tag/-V, --version/
 Display version information and exit.
+
+<tag/-@, --adapter=&lt;plugin&gt;[:&lt;bus&gt;]/
+<p>Specify the plugin to use. If you have installed more than one plugin
+(XA1541, XU1541, XUM1541), you can specifiy which one to use for this command.
+This way, you can use all three variants at the same time.
+
+This requires an argument of the form &lt;plugin&gt;[:&lt;bus&gt;], where
+&lt;plugin&gt; is the plugin's backend name (currently: <it/xa1541/,
+<it/xu1541/, <it/xum1541/), and &lt;bus&gt; is the bus identifier, if it is
+supported by the backend.
 
 <tag/-q, --quiet/
 Quiet output, fewer messages (also suppresses warnings, should not be used)
@@ -1695,6 +2455,9 @@ For Linux, <it/rpm1541/ is not installed automatically. You have to compile it
 yourself (found in <tt>demo/rpm1541/</tt>) if you want to use it.
 For Windows, it is part of the binary distribution.
 
+This demo program does not allow you to specify a specific adapter/plugin.
+Instead, it always uses the default plugin.
+
 <sect2>rpm1541 usage<label id="rpm1541-usage">
 <p>
 Synopsis: <tt>rpm1541 <it>[device]</it></tt>
@@ -1720,6 +2483,9 @@ cbmctrl unlock
 For Linux, <it/flash/ is not installed automatically. You have to
 compile it yourself (found in <tt>demo/flash/</tt>) if you want to use it.
 For Windows, it is part of the binary distribution.
+
+This demo program does not allow you to specify a specific adapter/plugin.
+Instead, it always uses the default plugin.
 
 <sect2>flash usage<label id="flash-usage">
 <p>
@@ -1747,6 +2513,9 @@ For Linux, <it/morse/ is not installed automatically. You have to compile it
 yourself (found in <tt>demo/morse/</tt>) if you want to use it.
 For Windows, it is part of the binary distribution.
 
+This demo program does not allow you to specify a specific adapter/plugin.
+Instead, it always uses the default plugin.
+
 <sect2>morse usage<label id="morse-usage">
 <p>
 Synopsis: <tt>morse <it>[device]</it></tt>
@@ -1766,8 +2535,62 @@ cbmctrl command 9 U3:YOU
 cbmctrl unlock
 </code>
 
+<sect1>cbmlinetester<label id="cbmlinetester">
+
+<p>
+This tool can be used for debugging purposes. You can use it to test and check
+if the IEC lines react on actions of the PC.
+
+<sect2>cbmlinetester invocation<label id="invoking-cbmlinetester">
+<p>
+Synopsis: <tt/cbmlinetester [OPTION]/
+
+Set the IEC lines to specific values
+
+<p>
+Here's a complete list of known options:
+
+<descrip>
+<tag/-h, --help/                 display help and exit
+<tag/-V, --version/              <p>display version information and exit
+<tag/-@, --adapter=&lt;plugin&gt;[:&lt;bus&gt;]/
+<p>Specify the plugin to use. If you have installed more than one plugin
+(XA1541, XU1541, XUM1541), you can specifiy which one to use for this command.
+This way, you can use all three variants at the same time.
+
+This requires an argument of the form &lt;plugin&gt;[:&lt;bus&gt;], where
+&lt;plugin&gt; is the plugin's backend name (currently: <it/xa1541/,
+<it/xu1541/, <it/xum1541/), and &lt;bus&gt; is the bus identifier, if it is
+supported by the backend.
+
+<tag/-i, --interactive/          Use the tool interactively (only with ncurses)
+<tag/-p, --poll/                 Poll the values of the lines
+
+<tag/-r, --reset/                <em/set/ the RESET line (set to 0V)
+<tag/-R, --RESET/                <em/release/ the RESET line (set to 5V)
+<tag/-a, --atn/                  <em/set/ the ATN line (set to 0V)
+<tag/-A, --ATN/                  <em/release/ the ATN line (set to 5V)
+<tag/-c, --clock/                <em/set/ the CLOCK line (set to 0V)
+<tag/-C, --CLOCK/                <em/release/ the CLOCK line (set to 5V)
+<tag/-d, --data/                 <em/set/ the DATA line (set to 0V)
+<tag/-D, --DATA/                 <em/release/ the DATA line (set to 5V)
+</descrip>
+
+<sect1>tape routines<label id="tape">
+
+<p>
+For Windows, special tape routines are avaiblel for use with the ZoomFloppy
+cable. Currently, the only documentation for this can be found in the source
+tarball at <it>opencbm/tape/</it>.
+
 
 <sect>opencbm API<label id="opencbm-API">
+<p>
+The OpenCBM API is documented as doxygen file. You can find it only on
+@@@TODO
+<htmlurl url="http://api.opencbm.trikaliotis.net/" name="http://api.opencbm.trikaliotis.net/">
+
+<!--
 <p>
 All communication between the user space applications and the kernel module
 is done with ioctl's. Since ioctl's are quite unportable and hardly provide
@@ -2015,6 +2838,7 @@ Types and prototypes are defined in <tt/d64copy.h/.
 <p>
 Not documented yet. See <it/libcbmcopy/ and <it/cbmcopy/ source.<p>
 Types and prototypes are defined in <tt/cbmcopy.h/.
+-->
 
 
 <sect>Known bugs and problems<label id="knownbugs">
@@ -2026,32 +2850,156 @@ There are some known bugs in opencbm:
  1581 drives; thus, it does not always work reliably.
 <item><it/cbmctrl detect/ as well as <it/cbmcopy/ and <it/d64copy/ do not
  recognize the drive type if some custom ROM is used.
+ Whenever this happens, use <it/--drive-type/ for <it/cbmcopy/ and <it/d64copy/.
+ Furthermore, I would be happy if you could send me a ROM dump of the floppy ROM
+ so I can update the drive type recognition for some future version of OpenCBM.
 <item>Windows: If you have any other devices connected to your parallel port,
  you cannot use them as long as cbm4win is installed. In this case, either
  remove opencbm whenever you want to access that other device, or install
  opencbm with <it/instcbm --lock=no/ and make sure to issue <it/cbmctrl lock/
  before accessing the drive, and <it/cbmctrl unlock/ afterwards.
-<item>Windows: No third party PCI parallel port card does work with
+<item>Windows: No third party PCI or PCIe parallel port card does work with
   opencbm on Windows currently; to say it with other words: there
-  is no proof or positive report that any third party PCI
+  is no proof or positive report that any third party PCI or PCIe
   parallel port card does or did work with opencbm on Windows. The exact
   failure reason is not known to date, but we are investigating
   further since that feature is a must, when integrated parallel
   ports were removed from mainstream mainboards in the future.
+  Thus, it would be best if you use XU1541 or XUM1541 adapters instead
+  of XA1541 and XM1541!
+<item>Linux: PCI or PCIe based parallel port cards might work, but there
+  is no guarantee for this.
+  Thus, it would be best if you use XU1541 or XUM1541 adapters instead
+  of XA1541 and XM1541!
+<item>All: An XA1541 or XM1541 cable will definitely <em/not/ work with a
+  USB-to-parallel-port adapter. These are commonly used to connect parallel port
+  printers to modern PCs. However, neither do they offer full access to all
+  parallel port lines, as it is needed for the XA1541/XM1541 cables, nor do they
+  allow for the tight timing needed for XA1541/XM1541 cables.
+<item>Windows: The <htmlurl url="http://sta.c64.org/sc.html" name="Star Commander">
+  is supported on 32 bit versions of Windows.  For this, a special VXD driver
+  is installed. The Star Commander then uses the VXD to communicate with the
+  drive.
+  This does not work for 64 bit Windows variants, though.
 </itemize>
+
+<sect>WARNINGS<label id="WARNINGS">
+
+<p>
+You should be careful when operating the adapters, in order to prevent any
+damage to your drive or your adapter. The following general rules apply to all
+of the XA1541, the XM1541, the XU1541 and the XUM1541 (ZoomFloppy) devices,
+unless specified otherwise.
+
+<itemize>
+<item>
+Do not plug or unplug any cables to the floppy drive when the drive is powered
+on or the XU1541, XUM1541, or ZoomFloppy is connected to a PC via USB, or the
+XA1541 is connected to the PC via the parallel port. When the USB based adapters
+are plugged into USB, they are powered on and could zap your drive if you
+connect or remove a floppy drive. This is also the same way you should treat
+floppy drives attached to your Commodore computers.
+
+<item>
+Do not attach more than 4 floppy drives to a single ZoomFloppy. For the other
+adapters (XU1541, general XUM1541, XA1541 or XM1541), other limits may be valid.
+If you need more drives, get another ZoomFloppy or other adapter. The OpenCBM
+softare allows you to use more than one adapter at the same time (subject to
+PC performance limitations). These can be multiple adapters of the same type, or
+of different ones.
+
+<item>
+Do not connect more than one drive to the XU1541, XUM1541, ZoomFloppy, or
+XAP1541/XMP1541 parallel ports. While there are multiple connectors, only one
+should be used at a time. Otherwise, chances are you will damage your floppy
+drive!
+
+<item>
+When accessing floppy drives, all devices connected to the same IEC bus must be
+turned on. Even if you are only going to use one drive, for example, all other
+connected drives must also be turned on. Unpowered IEC devices may interfere
+with proper operation of other drives.
+
+<item>
+Be careful of static electricity discharge when plugging/unplugging any
+electronic components. Consider getting a case for your XU1541, XUM1541 or
+ZoomFloppy board if you are concerned about the environment you will be using it
+on.
+</itemize>
+
+<sect1>Proper power-on sequence
+
+<p>
+We have tested leaving the XU1541, XUM1541, ZoomFloppy, XA1541 or XM1541
+adapters connected to powered-on drives for days with no problems, even though
+they were not connected via USB or via the PC's parallel port. You can also
+leave the adapters plugged into USB with the drive(s) off with no problems. But
+while the ZoomFloppy is designed to be robust, you can avoid unnecessary wear by
+following these instructions for starting up and shutting it down.  Other
+adapters (XU1541, other XUM1541 variants, XA1541 or XM1541) may be even more
+picky than the ZoomFloppy.
+
+<sect2>Power-on sequence for USB based adapters
+
+<p>
+For USB based adapters (XU1541, XUM1541, ZoomFloppy), the following procedure
+is recommended:
+
+<enum>
+<item>Start with drive off and XU1541, XUM1541, ZoomFloppy unplugged from the PC's USB;
+<item>Plug in all cable(s) between XU1541, XUM1541, ZoomFloppy and drive(s);
+<item>Plug in XU1541, XUM1541 or ZoomFloppy via USB;
+<item>Turn on drive power switch(es).
+</enum>
+
+<p>
+Turn off the equipment via the same sequence in reverse, at least doing steps 4
+and 3. You don't need to unplug the floppy drive from XU1541, XUM1541 or
+ZoomFloppy while not in use.
+
+The 15x1 drives with an internal power supply tend to get hot if left on for a
+long time, so you may want to power them off when not in use.
+
+<sect2>Power-on sequence for PC parallel port based adapters
+
+<p>For the parallel port based adapters (XA1541, XM1541, XAP1541, XMP1541), the following procedure
+is recommended:
+
+<enum>
+<item>Start with drive off and XA1541, XM1541, XAP1541 or XMP1541 unplugged from
+the PC's parallel port. Furthermore, leave the PC switched off;
+<item>Plug in all cable(s) between XA1541, XM1541, XAP1541 or XMP1541 and drive(s);
+<item>Plug in XA1541, XM1541, XAP1541 or XMP154 to the PC's parallel port;
+<item>Turn on the PC
+<item>Turn on drive power switch(es).
+</enum>
+
+<p>
+Turn off the equipment via the same sequence in reverse, at least doing steps 5,
+4 and 3. It is highly suggested to unplug the floppy drive(s) from the parallel
+port while not in use, by removing the XA1541, XM1541, XAP1541 or XMP1541
+adapter from the PC, at least.
+
+The 15x1 drives with an internal power supply tend to get hot if left on for a
+long time, so you may want to power them off when not in use.
 
 <sect>Misc
 
 <sect1>Credits
 
 <p>
-The fast format drive routine used by `cbmformat' and the turbo and warp drive
-routines used in `libd64copy' and `libcbmcopy' are heavily based on Joe
-Forster/STAs Star Commander routines.
+The fast format drive routine used by the original `cbmformat' and the turbo and
+warp drive routines used in `libd64copy' and `libcbmcopy' are heavily based on
+Joe Forster/STAs Star Commander routines.
+The `cbmformat' routines were highly modified afterwards. The `cbmforng' drive
+routine is derived from this, but was a massive rewrite by Wolfgang Moser.
 
 The XP1541 and XP1571 cables (C) by Joe Forster/STA.
 The original XE1541 cable (C) by Nicolas Welte and Wolfgang Moser
 The XA1541 cable (C) by Michael Klein and Nicolas Welte
+The XU1541 cable is copyright by a person who does not want to be mentioned
+anymore.
+The XUM1541 / ZoomFloppy cable is (C) Jim Brain and Nate Lawson.
 
 <sect1>Contributions
 
@@ -2065,7 +3013,7 @@ order):
 part)
 <item>
 <it>Joe Forster/STA</it> made the Star Commander and supplied the source and
-about the X?1541 interfaces; who knows, without this work, opencbm might never
+info about the X?1541 interfaces; who knows, without this work, opencbm might never
 have appeared at all.
 <item>
 <it/Nicolas Welte/ helped with the XA1541 and XM1541 interfaces and supplied a
@@ -2075,17 +3023,54 @@ free factory-new 1571 mechanic for Michael
 <item>
 <it/André Fachat/ made the xa 6502 crossassembler
 <item>
-<it/Ullrich von Bassewitz/ made the ca65 crossassembler
+<it/Ullrich von Bassewitz/ made the ca65 crossassembler as part of the cc65 package
+<item>
+<it/Oliver Schmidt/ took over the cc65 package (and, thus, the ca65
+crossassembler) after Ullrich von Bassewitz retired from supporting it.
 <item>
 <it/Wolfgang Moser/ contributed <it/many/ discussions, patches, and hardware
 whenever it was needed.
 <item>
 <it/Spiro Trikaliotis/ with discussions, lots of fixes and doing an overall
 great review while porting the driver to "other" operating systems ;-)
+<item>
+<it/Christian Vogelgsang/ made the MacOS port and documented it.
+<item>
+<it/A person who does not want to be mentioned anymore/ for building the XU1541
+device as low-cost variant and proof-of-concept that such a communication tool
+can be built as USB device.
+<item>
+<it/Nate Lawson/ for building the XUM1541 firmware, especially for the
+ZoomFloppy, in a collaborative effort with
+<it/Jim Brain/ who built the ZoomFloppy hardware, which is the standard and best
+tested implementation of the XUM1541 device.
+<it/Uffe Jakobsen/ worked on FreeBSD ports and MacOS variants, and fixed many
+other things especially for Linux.
+<item>
+<it/Frédéric Brière/ made some enhancements especially for the Linux kernel
+module for the XA1541/XM1541 devices.
+<item>
+<it/Markus Brenner/ wrote mnib, a parallel nibbler for DOS, that was later ported
+by <it/Arnd Menge/ to also work with OpenCBM on Windows and Linux.
+<item>
+<it/Peter 'Pete' Rittwage/ took over mnib, renamed it to nibtools, and still
+supports it.
+<item>
+<it/Arnd Menge/ not only ported mnib to the OpenCBM environment, he also made
+many changes in many aspects, especially for the Windows version, for the
+support of tape drives, and many other small and big things. He also added the
+SRQ nibbling support which allows to use the nibtools without a parallel
+connection for some drives.
+<item>
+<it/Thomas `Tommy' Winkler/ wrote <it/d82copy/ and <it/imgcopy/ and implemented
+IEEE-488 support for the XUM1541.
+<item>
+<it/Jochen Adler/ @@@TODO for the IEC2IEEE device and for sending me free
+hardware in order to test it with my SFD1001 and VIC 8250LP.
+<item>
+and anyone else who sent patches, suggestions, praises & flames!
 </itemize>
 
-<p>
-And anyone else who sent patches, suggestions, praises & flames!
 
 <sect1>Feedback
 
