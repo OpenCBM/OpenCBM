@@ -140,7 +140,7 @@ orig=arch_atoc(optarg);
     while(*arg)
     {
         unsigned char c;
-        c = toupper(*arg);
+        c = (unsigned char) toupper(*arg);
         if(c == ',')
         {
             if(id_ofs)
