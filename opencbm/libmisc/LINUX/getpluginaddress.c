@@ -31,12 +31,16 @@
 SHARED_OBJECT_HANDLE 
 plugin_load(const char * name)
 {
-    void* ret;
+    void * ret = NULL;
     char * error;
-    ret = dlopen(name, RTLD_NOW);
-    error = dlerror();
-    if (error)
-        fprintf(stderr,"%s\n",error);
+
+    if (name != NULL) {
+       ret = dlopen(name, RTLD_NOW);
+       error = dlerror();
+       if (error){
+           fprintf(stderr, "%s\n", error);
+       }
+    }
     return ret;
 }
 
