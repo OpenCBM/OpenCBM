@@ -250,7 +250,12 @@ GetOsVersion(VOID)
                             strcat(szOS, TEXT("Windows 8"));
                         else
                             strcat(szOS, TEXT("Windows Server 2012"));
-                        retValue = WIN7; // Set to WIN7 for now.
+                        retValue = WIN8;
+                    }
+                    else if (ovi.dwMinorVersion == 3)
+                    {
+                        strcat(szOS, TEXT("Windows 8.1"));
+                        retValue = WIN8_1;
                     }
 
                     GetProcessorArchitecture(si.wProcessorArchitecture, szOS);
@@ -270,7 +275,7 @@ GetOsVersion(VOID)
                 DBG_PRINT((DBG_PREFIX "Running on NT %u.%02u.",
                     ovi.dwMajorVersion, ovi.dwMinorVersion));
                 fprintf(stderr, "You're using Windows NT %u.%02u.\n"
-                    "I do not know it, but OpenCBM should work, anymore.\n",
+                    "I do not know it, but OpenCBM should work, anyway.\n",
                     ovi.dwMajorVersion, ovi.dwMinorVersion);
                 break;
             }

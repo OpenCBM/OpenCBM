@@ -533,7 +533,9 @@ typedef int CBMAPIDECL opencbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, uns
         WINXP,          //!< Windows XP (NT 5.1)
         WINVISTA,       //!< Windows Vista (NT 6.0)
         WIN7,           //!< Windows 7 (NT 6.1)
-        WINNEWER        //!< newer than Windows Vista
+        WIN8,           //!< Windows 8 (NT 6.2)
+        WIN8_1,         //!< Windows 8.1 (NT 6.3)
+        WINNEWER        //!< newer than Windows 8.1
     } osversion_t;
 
     /*! \brief describe the files needed for installation */
