@@ -355,6 +355,7 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
         opencbm_configuration_handle handle_configuration;
 
         if (configurationFilename == NULL) {
+            DBG_ERROR((DBG_PREFIX "Do not know where the plugin information is stored!\n"));
             break;
         }
 
@@ -410,24 +411,36 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
 
             opencbm_configuration_close(handle_configuration);
         }
+        else
+        {
+            DBG_ERROR((DBG_PREFIX "Cannot open config file '%s'.\n", configurationFilename));
+            break;
+        }
         DBG_PRINT((DBG_PREFIX "Using plugin at '%s'", plugin_location ? plugin_location : "(none)"));
 
         memset(&Plugin_information->Plugin, 0, sizeof(Plugin_information->Plugin));
 
         Plugin_information->Library = plugin_load(plugin_location);
 
-        DBG_PRINT((DBG_PREFIX "LoadLibrary returned %p", Plugin_information->Library));
+        DBG_PRINT((DBG_PREFIX "plugin_load() returned %p", Plugin_information->Library));
 
-        if (!Plugin_information->Library)
+        if (!Plugin_information->Library) {
+            DBG_ERROR((DBG_PREFIX "Could not open plugin driver at '%s'.\n", plugin_location));
             break;
+        }
 
         error = read_plugin_pointer_groups(Plugin_information, read_pointer_group);
-        if (error)
+        if (error) {
+            DBG_ERROR((DBG_PREFIX "The entry points of plugin %s do not validate correctly.\n",
+                                  plugin_location));
             break;
+        }
 
         if (Plugin_information->Plugin.opencbm_plugin_init) {
             error = Plugin_information->Plugin.opencbm_plugin_init();
             if (error) {
+                DBG_ERROR((DBG_PREFIX "Plugin %s fails to initialize itself.\n",
+                            plugin_location));
                 if (Plugin_information->Plugin.opencbm_plugin_uninit) {
                     Plugin_information->Plugin.opencbm_plugin_uninit();
                 }
