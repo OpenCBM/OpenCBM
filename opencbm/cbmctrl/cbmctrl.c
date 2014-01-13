@@ -1810,6 +1810,10 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             {
                 arch_error(0, arch_get_errno(), "%s", cbm_get_driver_name_ex(options.adapter));
             }
+            else
+            {
+                fprintf(stderr, "An error occurred opening OpenCBM, aborting...\n");
+            }
             break;
         }
 
