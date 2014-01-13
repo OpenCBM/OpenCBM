@@ -27,6 +27,7 @@ SHOBJS  = $(SRCS:.c=.lo)
 
 .PHONY: build-lib clean-lib install-lib uninstall-lib update-libcache
 .PHONY: install-plugin uninstall-plugin
+.PHONY: clean mrproper
 
 # build lib rule
 build-lib: $(LIB) $(SHLIB) $(SHLIBV) $(SHLIBV3)
@@ -101,3 +102,8 @@ $(SHLIBV3): $(SHOBJS)
 # build static lib
 $(LIB): $(OBJS)
 	$(AR) r $@ $(OBJS)
+
+clean:
+
+mrproper: clean
+	rm -f *~ LINUX/*~ WINDOWS/*~
