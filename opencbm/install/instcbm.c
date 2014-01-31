@@ -50,6 +50,7 @@ typedef void (WINAPI* PGetNativeSystemInfo)(LPSYSTEM_INFO);
 
 #include "instcbm.h"
 
+// defines for older DDKs
 #ifndef VER_SUITE_WH_SERVER
 #define VER_SUITE_WH_SERVER 0x00008000
 #endif
@@ -124,10 +125,13 @@ GetOsVersion(VOID)
 {
     SYSTEM_INFO si;
     OSVERSIONINFOEX ovi;
+    OSVERSIONINFOEXW osvi = { sizeof(osvi), 0, 0, 0, 0, {0}, 0, 0 };
     osversion_t retValue;
     char szOS[1024] = {0};
     PGetNativeSystemInfo pGetNativeSystemInfo;
     DWORD dwReturnedProductType;
+    ULONGLONG ConditionMask;
+    BOOL isServer;
 
     FUNC_ENTER();
 
@@ -250,16 +254,39 @@ GetOsVersion(VOID)
                     }
                     else if (ovi.dwMinorVersion == 2)
                     {
-                        if (ovi.wProductType == VER_NT_WORKSTATION)
-                            strcat(szOS, TEXT("Windows 8"));
-                        else
-                            strcat(szOS, TEXT("Windows Server 2012"));
-                        retValue = WIN8;
-                    }
-                    else if (ovi.dwMinorVersion == 3)
-                    {
-                        strcat(szOS, TEXT("Windows 8.1"));
-                        retValue = WIN8_1;
+                        osvi.wProductType = VER_NT_WORKSTATION;
+                        ConditionMask = VerSetConditionMask( 0, VER_PRODUCT_TYPE, VER_EQUAL );
+                        isServer = !VerifyVersionInfoW(&osvi, VER_PRODUCT_TYPE, ConditionMask);
+
+                        osvi.dwMajorVersion = 6;
+                        osvi.dwMinorVersion = 3;
+                        osvi.dwBuildNumber = 9600;
+
+                        ConditionMask = VerSetConditionMask(
+                            VerSetConditionMask(
+                                VerSetConditionMask(0, VER_MAJORVERSION, VER_EQUAL),
+                                VER_MINORVERSION, VER_EQUAL),
+                            VER_BUILDNUMBER, VER_EQUAL);
+
+                        if (VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_BUILDNUMBER, ConditionMask))
+                        {
+                            if (!isServer)
+                                strcat(szOS, TEXT("Windows 8.1"));
+                            else
+                                strcat(szOS, TEXT("Windows Server 2012 R2"));
+
+                            retValue = WIN8_1;
+                    	}
+
+                        if (retValue == WINUNSUPPORTED)
+                        {
+                            if (!isServer)
+                                strcat(szOS, TEXT("Windows 8"));
+                            else
+                                strcat(szOS, TEXT("Windows Server 2012"));
+
+                            retValue = WIN8;
+                        }
                     }
 
                     GetProcessorArchitecture(si.wProcessorArchitecture, szOS);
@@ -294,7 +321,7 @@ GetOsVersion(VOID)
             ovi.dwMajorVersion, ovi.dwMinorVersion, ovi.dwBuildNumber,
             platform, ovi.szCSDVersion));
 
-        printf("OS: %s %s\n", szOS, NeededAccessRights() ? "[Admin]" : "-- We need admin rights!");
+//        printf("OS: %s %s\n", szOS, NeededAccessRights() ? "[admin]" : "[no admin rights]");
 
     }
 
