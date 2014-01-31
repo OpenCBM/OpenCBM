@@ -50,6 +50,10 @@ typedef void (WINAPI* PGetNativeSystemInfo)(LPSYSTEM_INFO);
 
 #include "instcbm.h"
 
+#ifndef VER_SUITE_WH_SERVER
+#define VER_SUITE_WH_SERVER 0x00008000
+#endif
+
 static BOOL
 SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname);
 
