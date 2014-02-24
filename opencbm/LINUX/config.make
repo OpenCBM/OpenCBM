@@ -133,6 +133,7 @@ LIBUSB_LIBS    = $(shell $(LIBUSB_CONFIG) --libs)
 OD_FLAGS  = -txC -v -An
 SHLIB_EXT = dylib
 SHLIB_SWITCH = -dynamiclib -compatibility_version $(MAJ).$(MIN) -current_version $(MAJ).$(MIN).${OPENCBM_RELEASE}
+SHLIB_CFLAGS += -fno-common
 SONAME = -install_name $(PREFIX)/lib/
 endif
 
