@@ -244,6 +244,8 @@ static imgcopy_status_cb status_cb;
 //
 static int imgcopy_set_image_type(imgcopy_settings *settings, const char *filename)
 {
+	int i;
+
 	if(settings->image_type == cbm_it_unknown && filename != NULL)
 	{
 		char 	*s;
@@ -377,7 +379,7 @@ static int imgcopy_set_image_type(imgcopy_settings *settings, const char *filena
 	}
 
 	settings->block_count = 0;
-	for(int i = 1; i <= settings->max_tracks; i++)
+	for(i = 1; i <= settings->max_tracks; i++)
 	{
 		settings->block_count += imgcopy_sector_count(settings, i);
 	}
@@ -1225,7 +1227,7 @@ transfers[] =
 //
 // get name strings of all transfermodes
 //
-char __stdcall  *imgcopy_get_transfer_modes()
+char *imgcopy_get_transfer_modes()
 {
     const struct _transfers *t;
     int size;
