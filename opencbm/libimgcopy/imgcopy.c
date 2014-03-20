@@ -551,7 +551,7 @@ int ReadBAM_81(imgcopy_settings *settings, const transfer_funcs *src, unsigned c
 {
 	int cnt;
 	int st;
-	int track, sector;
+	unsigned char track, sector;
 
 	track =  D81_BAM_TRACK;
 	sector = 1;
@@ -594,7 +594,7 @@ int ReadBAM_82(imgcopy_settings *settings, const transfer_funcs *src, unsigned c
 {
 	int cnt;
 	int st;
-	int track, sector;
+	unsigned char track, sector;
 
 	track =  D82_CAT_TRACK;
 	sector = 0;
@@ -1004,7 +1004,7 @@ static int copy_disk(CBM_FILE fd_cbm, imgcopy_settings *settings,
 	SETSTATEDEBUG(debugLibImgBlockCount=0);
 	for(tr = 1; tr <= settings->max_tracks; tr++)
 	{
-		int sectorCount = imgcopy_sector_count(settings, tr);
+		unsigned char sectorCount = (unsigned char) imgcopy_sector_count(settings, tr);
 
 		if(tr >= settings->start_track && tr <= settings->end_track)
 		{
