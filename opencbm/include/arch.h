@@ -33,12 +33,6 @@
 # include <io.h>
 # include <fcntl.h>
 
-# define STRING_BACKTICK "`"
-# define STRING_TICK     "'"
-
-# define CHAR_BACKTICK '`'
-# define CHAR_TICK     '\''
-
 #if (_MSC_VER <= 1200) // MSVC 6 or older
 typedef unsigned long ULONG_PTR;
 #endif
@@ -72,12 +66,6 @@ typedef bool BOOL;
 # ifndef FALSE
 #  define FALSE false
 # endif
-
-# define STRING_BACKTICK "`"
-# define STRING_TICK     "'"
-
-# define CHAR_BACKTICK '`'
-# define CHAR_TICK     '\''
 
 #endif // WIN32
 

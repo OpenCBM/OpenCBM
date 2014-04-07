@@ -64,7 +64,7 @@ static void help(void)
 "  -t, --transfer=TRANSFER  set transfermode; valid modes:\n" 
 "                             auto (default)\n"
 "                             original       (slowest)\n"
-"                           `auto' tries to determine the best option.\n"
+"                           'auto' tries to determine the best option.\n"
 "\n"
 "  -i, --interleave=VALUE   set interleave value; ignored when reading with\n"
 "                           warp mode; default values are:\n"
@@ -76,15 +76,15 @@ static void help(void)
 "                           value may help.\n"
 "\n"
 "  -w, --warp               enable warp mode; this is not possible if\n"
-"                           TRANSFER is set to `original'\n"
-"                           This is the default if transfer is not `original`.\n"
+"                           TRANSFER is set to 'original'\n"
+"                           This is the default if transfer is not 'original'.\n"
 "\n"
 "      --no-warp            disable warp mode; this is the default if\n"
-"                           TRANSFER is set to `original'.\n"
+"                           TRANSFER is set to 'original'.\n"
 "\n"
 "  -b, --bam-only           BAM-only copy; only allocated blocks are copied;\n"
 "\n"
-"  -B, --bam-save           save BAM-only copy; this is like the `-b' option\n"
+"  -B, --bam-save           save BAM-only copy; this is like the '-b' option\n"
 "                           but copies always the entire directory track.\n"
 "\n"
 "  -d, --drive-type=TYPE    specify drive type:\n"
@@ -113,7 +113,7 @@ static void help(void)
 //
 static void hint(char *s)
 {
-    fprintf(stderr, "Try `%s' --help for more information.\n", s);
+    fprintf(stderr, "Try '%s' --help for more information.\n", s);
 }
 
 
