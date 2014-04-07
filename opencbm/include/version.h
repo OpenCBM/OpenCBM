@@ -4,7 +4,7 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2004-2009 Spiro Trikaliotis
+ *  Copyright 2004-2014 Spiro Trikaliotis
  */
 
 /*! **************************************************************
@@ -22,7 +22,7 @@
 #define OPENCBM_VERSION_MINOR       4
 #define OPENCBM_VERSION_SUBMINOR    99
 #define OPENCBM_VERSION_PATCHLEVEL  0
-#define OPENCBM_VERSION_DEVEL       96
+#define OPENCBM_VERSION_DEVEL       97
 
 #define OPENCBM_BUILD_VERSION_HELP(          _a        ) #_a
 #define OPENCBM_BUILD_VERSION_STRING_PART(   _a        ) OPENCBM_BUILD_VERSION_HELP(_a)
