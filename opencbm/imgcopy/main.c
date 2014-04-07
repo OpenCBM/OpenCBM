@@ -84,7 +84,7 @@ static void help(void)
 "\n"
 "  -b, --bam-only           BAM-only copy; only allocated blocks are copied;\n"
 "\n"
-"  -B, --bam-save           save BAM-only copy; this is like the `-b´ option\n"
+"  -B, --bam-save           save BAM-only copy; this is like the `-b' option\n"
 "                           but copies always the entire directory track.\n"
 "\n"
 "  -d, --drive-type=TYPE    specify drive type:\n"

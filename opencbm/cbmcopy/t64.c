@@ -49,7 +49,7 @@ static int probe(FILE *file, const char *fname, cbmcopy_message_cb msg_cb)
                 used_entries =
                     t64header.used_entries_l +
                     t64header.used_entries_h * 256;
-                msg_cb( sev_debug, "found t64 signature `%s´", signatures[i] );
+                msg_cb( sev_debug, "found t64 signature '%s'", signatures[i] );
                 msg_cb( sev_debug, "tape version %u.%u",
                         t64header.major, t64header.minor );
                 msg_cb( sev_debug, "tape contains %d file%c",

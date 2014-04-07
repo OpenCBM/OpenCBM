@@ -156,7 +156,7 @@ static int cbmcopy_read(CBM_FILE fd,
     *filedata = NULL;
     *filedata_size = 0;
 
-    msg_cb( sev_debug, "using transfer mode `%s´",
+    msg_cb( sev_debug, "using transfer mode '%s'",
             transfers[settings->transfer_mode].name);
     trf = transfers[settings->transfer_mode].trf;
 
@@ -534,7 +534,7 @@ int cbmcopy_write_file(CBM_FILE fd,
     const transfer_funcs *trf;
     int blocks_written;
 
-    msg_cb( sev_debug, "using transfer mode `%s´",
+    msg_cb( sev_debug, "using transfer mode `%s'",
             transfers[settings->transfer_mode].name);
     trf = transfers[settings->transfer_mode].trf;
 

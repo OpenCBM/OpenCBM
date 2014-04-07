@@ -74,10 +74,10 @@ typedef bool BOOL;
 # endif
 
 # define STRING_BACKTICK "`"
-# define STRING_TICK     "´"
+# define STRING_TICK     "'"
 
 # define CHAR_BACKTICK '`'
-# define CHAR_TICK     '´'
+# define CHAR_TICK     '\''
 
 #endif // WIN32
 
