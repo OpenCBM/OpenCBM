@@ -12,7 +12,7 @@ USE_MSVCRT = 1
 
 DLLBASE=0x71000000
 
-INCLUDES=../../../../libmisc/WINDOWS;../;../../../../include;../../../../include/WINDOWS;../../..;../../../../arch/windows;../../../../libmisc;$(XU1541DIR)
+INCLUDES=../../../../libmisc/WINDOWS;../;../../../../include;../../../../include/WINDOWS;../../..;../../../WINDOWS;../../../../arch/windows;../../../../libmisc;$(XU1541DIR)
 
 SOURCES=../archlib.c \
 	../xu1541.c \

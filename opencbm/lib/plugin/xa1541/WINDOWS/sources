@@ -14,7 +14,7 @@ USE_MSVCRT = 1
 
 DLLBASE=0x71000000
 
-INCLUDES=../../../../include;../../../../include/WINDOWS;../../..;../../../../arch/windows
+INCLUDES=../../../../include;../../../../include/WINDOWS;../../..;../../../WINDOWS;../../../../arch/windows
 
 SOURCES=iec.c \
 	parburst.c \

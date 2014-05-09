@@ -41,6 +41,7 @@
 #define OPENCBM_PLUGIN 1 /*!< \brief mark: we are exporting plugin functions */
 
 #include "archlib.h"
+#include "archlib-windows.h"
 
 
 /*! \brief The parameter which are given on the command-line */

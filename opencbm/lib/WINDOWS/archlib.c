@@ -39,6 +39,7 @@
 
 #define OPENCBM_PLUGIN 1 /*!< \brief mark: we are exporting plugin functions */
 #include "archlib.h"
+#include "archlib-windows.h"
 #include "libmisc.h"
 
 /*! \brief DLL initialization und unloading

@@ -28,6 +28,7 @@
 #include "i_opencbm.h"
 #include "libmisc.h"
 #include "opencbm-plugin.h"
+#include "opencbm-plugin-install.h"
 #include "version.h"
 
 #include <getopt.h>
@@ -276,7 +277,7 @@ GetOsVersion(VOID)
                                 strcat(szOS, TEXT("Windows Server 2012 R2"));
 
                             retValue = WIN8_1;
-                    	}
+                        }
 
                         if (retValue == WINUNSUPPORTED)
                         {

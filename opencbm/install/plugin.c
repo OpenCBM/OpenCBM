@@ -25,6 +25,7 @@
 #include <getopt.h>
 
 #include "archlib.h"
+#include "archlib-windows.h"
 #include "cbmioctl.h"
 #include "configuration.h"
 #include "version.h"
