@@ -562,7 +562,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
                 }
                 else
                 {
-                    tail = strchr(fname, ',');
+                    tail = strrchr(fname, ',');
 
                     ext = "prg"; /* default */
 
