@@ -562,18 +562,18 @@ int ARCH_MAINDECL main(int argc, char **argv)
                 }
                 else
                 {
-                    for(tail = fname; *tail && *tail != ','; tail++);
+                    tail = strchr(fname, ',');
 
                     ext = "prg"; /* default */
 
-                    if(*tail)
+                    if(tail)
                     {
-                        tail++;
+                        *tail++ = '\0';
                         switch(*tail)
                         {
-                            case 'D': ext = "del"; break;
-                            case 'S': ext = "seq"; break;
-                            case 'U': ext = "usr"; break;
+                            case 'd': ext = "del"; break;
+                            case 's': ext = "seq"; break;
+                            case 'u': ext = "usr"; break;
                         }
                     }
                     fs_name = malloc(strlen(fname) + strlen(ext) + 2);
