@@ -1213,8 +1213,6 @@ AreNeededFilesPresent(opencbm_plugin_install_neededfiles_t NeededFiles[])
 
             fileattributes = GetFileAttributes(filename);
 
-            cbmlibmisc_strfree(filename);
-
             /*
              * Yes, this constant 0xFFFFFFFF is defined for the function failing,
              * not ((DWORD)-1) as one might expect.
@@ -1225,6 +1223,8 @@ AreNeededFilesPresent(opencbm_plugin_install_neededfiles_t NeededFiles[])
                 DBG_PRINT((DBG_PREFIX "File '%s' not found.", filename));
                 isPresent = FALSE;
             }
+
+            cbmlibmisc_strfree(filename);
         }
     } while (0);
 
