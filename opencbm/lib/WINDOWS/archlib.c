@@ -92,9 +92,13 @@ DllMain(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 
  \param DefaultPluginname
 
+ \param DefaultLocation
+    Must be one of INDEX_DEFAULT_FILENAME_LOCAL,
+    INDEX_DEFAULT_FILENAME_USERDIR or INDEX_DEFAULT_FILENAME_WINDIR.
+
  \return
 */
-BOOL CBMAPIDECL opencbm_plugin_install_generic(const char * DefaultPluginname)
+BOOL CBMAPIDECL opencbm_plugin_install_generic(const char * DefaultPluginname, unsigned int DefaultLocation)
 {
     BOOL error = TRUE;
 
@@ -107,7 +111,7 @@ BOOL CBMAPIDECL opencbm_plugin_install_generic(const char * DefaultPluginname)
     do {
         /* create the INI file, if not present, and create the needed keys */
 
-        configurationFilename = configuration_get_default_filename();
+        configurationFilename = configuration_get_default_filename_for_install(DefaultLocation);
         if (configurationFilename == NULL) {
             break;
         }

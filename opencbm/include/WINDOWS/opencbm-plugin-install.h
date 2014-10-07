@@ -242,13 +242,21 @@
     typedef unsigned int CBMAPIDECL opencbm_plugin_install_get_needed_files_t(CbmPluginInstallProcessCommandlineData_t * Data, opencbm_plugin_install_neededfiles_t * Destination);
 
 
+    #define INDEX_DEFAULT_FILENAME_LOCAL 0
+    #define INDEX_DEFAULT_FILENAME_USERDIR 1
+    #define INDEX_DEFAULT_FILENAME_WINDIR 2
+
     /*! \brief @@@@@ \todo document
 
      \param DefaultPluginname
 
+     \param DefaultLocation
+        Must be one of INDEX_DEFAULT_FILENAME_LOCAL,
+        INDEX_DEFAULT_FILENAME_USERDIR or INDEX_DEFAULT_FILENAME_WINDIR.
+
      \return
     */
-    typedef BOOL CBMAPIDECL opencbm_plugin_install_generic_t(const char * DefaultPluginname);
+    typedef BOOL CBMAPIDECL opencbm_plugin_install_generic_t(const char * DefaultPluginname, unsigned int DefaultLocation);
 
     /*! \brief @@@@@ \todo document
 

@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DLL_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "../../../../libmisc/WINDOWS/" /I "../" /I "../../../" /I "../../../../include" /I "../../../../include/WINDOWS/" /I "../../../../../xu1541/include/" /I "../../../../arch/windows/" /I "../../../../libmisc/" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DLL_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "../../../../lib/WINDOWS/" /I "../../../../libmisc/WINDOWS/" /I "../" /I "../../../" /I "../../../../include" /I "../../../../include/WINDOWS/" /I "../../../../../xu1541/include/" /I "../../../../arch/windows/" /I "../../../../libmisc/" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DLL_EXPORTS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -75,7 +75,7 @@ PostBuild_Cmds=copy "$(OutDir)\opencbmxu1541.dll" "$(OutDir)\opencbm-xu1541.dll"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DLL_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "../../../../libmisc/WINDOWS/" /I "../" /I "../../../" /I "../../../../include" /I "../../../../include/WINDOWS/" /I "../../../../../xu1541/include/" /I "../../../../arch/windows/" /I "../../../../libmisc/" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DLL_EXPORTS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "../../../../lib/WINDOWS/" /I "../../../../libmisc/WINDOWS/" /I "../" /I "../../../" /I "../../../../include" /I "../../../../include/WINDOWS/" /I "../../../../../xu1541/include/" /I "../../../../arch/windows/" /I "../../../../libmisc/" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DLL_EXPORTS" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "_DEBUG"

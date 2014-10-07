@@ -75,6 +75,7 @@ typedef int  opencbm_configuration_enum_data_callback_t(opencbm_configuration_ha
                                     void * Context);
 
 extern const char *configuration_get_default_filename(void);
+extern const char *configuration_get_default_filename_for_install(unsigned int local_install);
 
 extern opencbm_configuration_handle opencbm_configuration_open(const char * Filename);
 extern opencbm_configuration_handle opencbm_configuration_create(const char * Filename);

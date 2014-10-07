@@ -57,7 +57,7 @@ typedef void (WINAPI* PGetNativeSystemInfo)(LPSYSTEM_INFO);
 #endif
 
 static BOOL
-SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname);
+SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname, BOOL NoCopy);
 
 /*! \internal \brief Check if we have the needed access rights
 
@@ -1010,7 +1010,9 @@ UpdateOpenCBM(cbm_install_parameter_t *Parameter)
             break;
         }
 
-        error = SelfInitGenericOpenCBM(openCbmDllHandle, Parameter->DefaultAdapter);
+        error = SelfInitGenericOpenCBM(openCbmDllHandle,
+                                       Parameter->DefaultAdapter,
+                                       Parameter->NoCopy);
         if (error) {
             break;
         }
@@ -1470,15 +1472,20 @@ LoadLocalOpenCBMDll(void)
 
  \param DefaultPluginname
 
+ \param NoCopy
+
  \return
 */
 static BOOL
-SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
+SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname, BOOL NoCopy)
 {
     BOOL error = TRUE;
     opencbm_plugin_install_generic_t * opencbm_plugin_install_generic = NULL;
+    unsigned int DefaultLocation;
 
     FUNC_ENTER();
+
+    DefaultLocation = NoCopy ? INDEX_DEFAULT_FILENAME_LOCAL : INDEX_DEFAULT_FILENAME_WINDIR;
 
     do {
         /* ... get the address of opencbm_plugin_install_generic() ... */
@@ -1495,7 +1502,7 @@ SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
         }
 
         /* ... and execute it */
-        error = opencbm_plugin_install_generic(DefaultPluginname);
+        error = opencbm_plugin_install_generic(DefaultPluginname, DefaultLocation);
 
     } while (0);
 
@@ -1511,7 +1518,7 @@ SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname)
  \return
 */
 static BOOL
-CopyGenericOpenCBM(HMODULE OpenCbmDllHandle)
+CopyGenericOpenCBM(HMODULE OpenCbmDllHandle, cbm_install_parameter_t *Parameter)
 {
     BOOL error = TRUE;
 
@@ -1523,7 +1530,7 @@ CopyGenericOpenCBM(HMODULE OpenCbmDllHandle)
             break;
         }
 
-        error = SelfInitGenericOpenCBM(OpenCbmDllHandle, NULL);
+        error = SelfInitGenericOpenCBM(OpenCbmDllHandle, NULL, Parameter->NoCopy);
         if (error) {
             break;
         }
@@ -1806,13 +1813,13 @@ InstallOpenCBM(cbm_install_parameter_t *Parameter)
         }
 
         if ( Parameter->NoCopy ) {
-            error = SelfInitGenericOpenCBM(openCbmDllHandle, NULL);
+            error = SelfInitGenericOpenCBM(openCbmDllHandle, NULL, Parameter->NoCopy);
         }
         else if ( ! IsPresentGenericOpenCBM() )
         {
             // install generic OpenCBM files
 
-            if ( CopyGenericOpenCBM(openCbmDllHandle) ) {
+            if ( CopyGenericOpenCBM(openCbmDllHandle, Parameter) ) {
                 break;
             }
         }
