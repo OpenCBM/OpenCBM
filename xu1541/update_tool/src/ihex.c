@@ -198,7 +198,7 @@ static ihex_chunk_t *ihex_new_chunk(ihex_line_t *iline) {
   ihex_chunk_t *ichunk = NULL;
 
   if(!(ichunk = malloc(sizeof(ihex_chunk_t)))) {
-    fprintf(stderr, "ERROR: Out of memory allocating %d bytes chunk\n",
+    fprintf(stderr, "ERROR: Out of memory allocating %zu bytes chunk\n",
 	    sizeof(ihex_chunk_t));
     return NULL;
   }

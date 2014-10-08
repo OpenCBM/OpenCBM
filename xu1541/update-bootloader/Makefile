@@ -2,9 +2,7 @@ include ../bootloader/Makefile.common
 LDFLAGS += -Wl,$(COMMON_SECTIONS)
 
 DEFINES += -DF_CPU=12000000
-# "--param inline-call-cost=3" is used to overdrive some unwanted behaviour with
-# GCC-4.2, -4.3 and -4.4, where even twice or more called functions get inlined
-COMPILE = avr-gcc -Wall -O2 --param inline-call-cost=3 -Iusbdrv -I. -mmcu=atmega8 $(DEFINES) -I../include/
+COMPILE = avr-gcc -Wall -O2 -Iusbdrv -I. -mmcu=atmega8 $(DEFINES) -I../include/
 
 OBJECTS = flasher.o spm.o firmwaretable.o
 

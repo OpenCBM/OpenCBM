@@ -75,7 +75,7 @@ the file appropriate for the given clock rate.
 #   define nop2     rjmp    .+0 /* jump to next instruction */
 
 #   ifndef USB_INTR_VECTOR /* default to hardware interrupt INT0 */
-#       define USB_INTR_VECTOR  SIG_INTERRUPT0
+#       define USB_INTR_VECTOR  INT0_vect
 #   endif
     .text
     .global USB_INTR_VECTOR

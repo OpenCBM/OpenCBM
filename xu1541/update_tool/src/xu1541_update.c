@@ -49,15 +49,13 @@ void xu1541_close(usb_dev_handle *handle) {
 }
 
 int xu1541_start_application(usb_dev_handle *handle, int page_size) {
-  int nBytes;
-
   if (page_for_address_0_is_valid) {
     /* page 0 was flashed 'invalidly', correct it now as last step */
     /* before rebooting. */
     xu1541_write_page(handle, (char*)page_for_address_0, 0, page_size);
   }
 
-  nBytes = usb_control_msg(handle,
+  usb_control_msg(handle,
 	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
 	   USBBOOT_FUNC_LEAVE_BOOT, 0, 0,
 	   NULL, 0, 1000);

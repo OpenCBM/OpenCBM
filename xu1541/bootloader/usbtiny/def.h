@@ -39,7 +39,7 @@
 #if	defined SIG_INT0
 #  define USB_INT_VECTOR	CAT2(SIG_INT, USBTINY_INT)
 #else
-#  define USB_INT_VECTOR	CAT2(SIG_INTERRUPT, USBTINY_INT)
+#  define USB_INT_VECTOR	CAT3(INT, USBTINY_INT, VECTOR)
 #endif
 
 // Interrupt enable

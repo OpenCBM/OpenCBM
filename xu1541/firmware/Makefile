@@ -18,8 +18,6 @@ UISP = uisp -dprog=stk200
 # Choose your favorite programmer and interface.
 
 DEFINES += -DF_CPU=12000000
-# "--param inline-call-cost=3" is used to overdrive some unwanted behaviour with
-# GCC-4.2, -4.3 and -4.4, where even twice or more called functions get inlined
 COMPILE = avr-gcc -Wall -O2 --param max-inline-insns-auto=3 -I. -mmcu=atmega8 $(DEFINES) -I../include/
 
 OBJECTS = gcrt1.o memcpy.o firmwaretable.o main.o xu1541.o s1.o s2.o pp.o p2.o event_log.o
