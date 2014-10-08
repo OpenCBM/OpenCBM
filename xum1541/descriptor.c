@@ -15,7 +15,7 @@
 #define UNISTR(x)   L ## x
 
 // Device descriptor
-USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
+const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
 {
     Header: {
         Size: sizeof(USB_Descriptor_Device_t),
@@ -48,7 +48,7 @@ typedef struct {
     USB_Descriptor_Endpoint_t             DataOutEndpoint;
 } USB_Descriptor_Configuration_t;
 
-USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
+const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
 {
     Config: {
         Header: {
@@ -104,12 +104,12 @@ USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
     },
 };
 
-USB_Descriptor_String_t PROGMEM LanguageString = {
+const USB_Descriptor_String_t PROGMEM LanguageString = {
     Header:        { Size: USB_STRING_LEN(1), Type: DTYPE_String },
     UnicodeString: { LANGUAGE_ID_ENG },
 };
 
-USB_Descriptor_String_t PROGMEM ManufacturerString = {
+const USB_Descriptor_String_t PROGMEM ManufacturerString = {
     Header:        { Size: USB_STRING_LEN(28), Type: DTYPE_String },
     UnicodeString: L"Nate Lawson and OpenCBM team",
 };
@@ -122,7 +122,7 @@ static USB_Descriptor_String_t SerialNumString = {
 
 #define PRODSTRING(m)  L"xum1541 floppy adapter (" UNISTR(m) L")"
 
-USB_Descriptor_String_t PROGMEM ProductString = {
+const USB_Descriptor_String_t PROGMEM ProductString = {
     Header: {
         Size: USB_STRING_LEN(((sizeof(PRODSTRING(MODELNAME)) / 2) - 1)),
         Type: DTYPE_String,

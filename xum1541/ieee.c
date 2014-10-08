@@ -646,8 +646,6 @@ static uint8_t IeeeIn(void)
 // IEEE SEND ATN
 static int8_t IeeeAtnOut(uint8_t by)
 {
-    int8_t    rc;
-
     while(1) 
     {
         IeeeNrfd(1);
@@ -657,7 +655,7 @@ static int8_t IeeeAtnOut(uint8_t by)
         {
             // SEND LAST BYTE WITH EOI
             IeeeEoi(0);
-            rc = IeeeByteOut(last_byte);
+            IeeeByteOut(last_byte);
             IeeeEoi(1);
 
             last_byte = -1;
