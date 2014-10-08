@@ -6,7 +6,7 @@
 #
 27499f59e7e2d8c1dedfabdd0a9ec9aa243ba3a2e72eee0fa21375e054938e9f *./packages/	http://nongnu.askapache.com/avr-libc/	avr-libc-1.7.0.tar.bz2
 81501b63d5b8699874d00c9eca42837b85695bc0820ba9843b17f573ce38be5e *./packages/	http://mirror.lihnidos.org/GNU/savannah/avrdude/	avrdude-5.10.tar.gz
-228b84722d87e88e7fdd36869e590e649ab523a0800a7d53df906498afe6f6f8 *./packages/	http://ftp.gnu.org/gnu/binutils/	binutils-2.20.1.tar.bz2
+71d37c96451333c5c0b84b170169fdcb138bbb27397dc06281905d9717c8ed64 *./packages/	http://ftp.gnu.org/gnu/binutils/	binutils-2.20.1.tar.bz2
 b57b37a83840b134572b042f170d7a9429863ba0308b56b403b35de6f0e0526a *./packages/	http://ftp.gnu.org/gnu/gcc/gcc-4.5.1/	gcc-core-4.5.1.tar.bz2
 a5349ea8d531aa0a248484f426513e5d05b12915e5412d332c278f65d272ce48 *./packages/	http://ftp.gnu.org/gnu/gcc/gcc-4.5.1/	gcc-g++-4.5.1.tar.bz2
 # gdb
@@ -21,7 +21,7 @@ d04d9f4b0a506645a04c7ecbaaa6e0a932853f50069c32f1154e49213f696f01 *./patches/priv
 # fix a line ending detection bug in autoconf for cygwin systems
 9509ab3199c8e6a857a2551d524c3a1dce3e80d8e388b417037fb68bb7a5891a *patches/private/	NOT_PUBLICALLY_AVAILABLE	10500-avrdude-5.10_carriage-return.patch
 # Introduce USB VID/PID support for all USB programmers to the configuration file and let USBAsp recognise these
-9ca5bb26b8b1ca93abd8348f4461da01ec0aca80a7fea673ef41cd3be109bb11 *patches/private/	NOT_PUBLICALLY_AVAILABLE	10501-avrdude-5.10_usbVidPid_support.patch
+ea5d8916ef97c0fb79516ccc6a9ddb26f0405d1fb0b614f5fdf52fd8b2f398c4 *patches/private/	NOT_PUBLICALLY_AVAILABLE	10501-avrdude-5.10_usbVidPid_support.patch
 # remove an architecture independent implementation of usleep since it is already available through unistd.h
 e0d5bb5f505a3efd584e28b64abaf0aa1d8c8f92bf8ddb2aa08f0086eb303d59 *patches/private/	NOT_PUBLICALLY_AVAILABLE	10502-avrdude-5.10_disabled_usleep.patch
 # modified new-sections patch for binutils-2.20
