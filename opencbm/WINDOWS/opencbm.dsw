@@ -90,12 +90,6 @@ Package=<4>
     Project_Dep_Name demomorse
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libcbmcopy
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libd64copy
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name opencbm
     End Project Dependency
     Begin Project Dependency
@@ -135,7 +129,7 @@ Package=<4>
     Project_Dep_Name d82copy
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libd82copy
+    Project_Dep_Name imgcopy
     End Project Dependency
 }}}
 
@@ -390,6 +384,30 @@ Package=<4>
 
 ###############################################################################
 
+Project: "imgcopy"=..\imgcopy\WINDOWS\imgcopy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libimgcopy
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "install"=..\install\WINDOWS\install.dsp - Package Owner=<4>
 
 Package=<5>
@@ -460,6 +478,24 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name arch
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "libimgcopy"=..\libimgcopy\WINDOWS\libimgcopy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
     End Project Dependency
 }}}
 
