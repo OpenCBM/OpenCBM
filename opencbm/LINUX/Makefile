@@ -43,7 +43,7 @@ INSTALL_PLUGINS=install-plugin-xum1541 install-plugin-xu1541 install-plugin-xa15
 endif
 endif
 
-.PHONY: all opencbm clean mrproper dist doc install install-doc uninstall dev install-files install-files-doc all-doc plugin-xum1541 plugin-xu1541 plugin-xa1541 plugin install-plugin install-plugin-xum1541 install-plugin-xu1541 install-plugin-xa1541
+.PHONY: all opencbm clean mrproper dist doc install-all install install-doc uninstall dev install-files install-files-doc all-doc plugin-xum1541 plugin-xu1541 plugin-xa1541 plugin install-plugin install-plugin-xum1541 install-plugin-xu1541 install-plugin-xa1541
 
 CREATE_TARGET = $(patsubst %,BUILDSYSTEM.%,$(1:=.$2))
 CREATE_TARGETS = $(patsubst %,BUILDSYSTEM.%,$(foreach base, $2, $(1:=.$(base))))
@@ -128,7 +128,7 @@ $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),all):: opencbm
 
 plugin: $(PLUGINS)
 
-uninstall: $(call CREATE_TARGET,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_ALL_OPTIONAL),uninstall)
+uninstall: $(call CREATE_TARGET,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),uninstall)
 
 dev:
 	mkdir -p -m 755 `dirname $(CBMDEV)`

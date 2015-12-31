@@ -5,11 +5,14 @@ include ${RELATIVEPATH}LINUX/config.make
 
 INSTHDRS = opencbm.h d64copy.h cbmcopy.h
 
+INSTHDR_INSTALLED=$(foreach t,$(INSTHDRS), $(DESTDIR)/$(INCDIR)/$(t))
+
 all:
 
 clean:
 
 mrproper: clean
+	rm -f *~ LINUX/*~
 
 install-files:
 	install -d $(DESTDIR)$(INCDIR)
@@ -18,4 +21,4 @@ install-files:
 install: install-files
 
 uninstall:
-	-cd $(DESTDIR)$(INCDIR) && rm -d $(INSTHDRS)
+	rm -f $(INSTHDR_INSTALLED)

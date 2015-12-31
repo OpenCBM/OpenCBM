@@ -29,6 +29,7 @@ install-files: install-lib
 install: install-files update-libcache
 
 uninstall: uninstall-lib
+	rm -f $(DESTDIR)$(BINDIR)/opencbm_plugin_helper_tools
 
 include ../LINUX/librules.make
 
