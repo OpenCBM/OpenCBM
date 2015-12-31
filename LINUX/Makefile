@@ -1,29 +1,29 @@
-RELATIVEPATH=./
+RELATIVEPATH=opencbm/
 include ${RELATIVEPATH}LINUX/config.make
 
 CBMDEV   = /dev/cbm
 CBMPERM  = 666
 DEVMAJOR = 10
 DEVMINOR = 177
-SUBDIRS  = include arch/$(OS_ARCH) libmisc lib \
-	   libtrans \
-           cbmctrl cbmformat cbmforng d64copy cbmcopy \
-	   d82copy imgcopy \
-           demo/flash demo/morse demo/rpm1541 \
-	   sample/libtrans
+SUBDIRS  = opencbm/include opencbm/arch/$(OS_ARCH) opencbm/libmisc opencbm/lib \
+	   opencbm/libtrans \
+           opencbm/cbmctrl opencbm/cbmformat opencbm/cbmforng opencbm/d64copy opencbm/cbmcopy \
+	   opencbm/d82copy opencbm/imgcopy \
+           opencbm/demo/flash opencbm/demo/morse opencbm/demo/rpm1541 \
+	   opencbm/sample/libtrans
 ifeq "$(OS)" "Linux"
-SUBDIRS += compat
+SUBDIRS += opencbm/compat
 endif
 
-SUBDIRS_DOC = docs
+SUBDIRS_DOC = opencbm/docs
 
-SUBDIRS_PLUGIN_XU1541 = lib/plugin/xu1541
+SUBDIRS_PLUGIN_XU1541 = opencbm/lib/plugin/xu1541
 
-SUBDIRS_PLUGIN_XUM1541 = lib/plugin/xum1541
+SUBDIRS_PLUGIN_XUM1541 = opencbm/lib/plugin/xum1541
 
-SUBDIRS_PLUGIN_XA1541 = lib/plugin/xa1541 sys/linux/
+SUBDIRS_PLUGIN_XA1541 = opencbm/lib/plugin/xa1541 opencbm/sys/linux/
 
-SUBDIRS_OPTIONAL = addon nibtools mnib36 cbmrpm41 cbmlinetester
+SUBDIRS_OPTIONAL = opencbm/addon opencbm/nibtools opencbm/mnib36 opencbm/cbmrpm41 opencbm/cbmlinetester
 
 
 SUBDIRS_PLUGIN          = $(SUBDIRS_PLUGIN_XUM1541) $(SUBDIRS_PLUGIN_XU1541) $(SUBDIRS_PLUGIN_XA1541)
@@ -64,9 +64,11 @@ $(call CREATE_TARGETS,$(SUBDIRS_OPTIONAL),all clean mrproper install install-fil
 	test ! -e $(call GET_TARGET_DIR,$@)/LINUX/Makefile || $(MAKE) -C $(call GET_TARGET_DIR,$@) -f LINUX/Makefile $(call GET_TARGET,$@)
 
 clean:  $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),clean)
+	rm -f xu1541/misc/usb_echo_test xu1541/misc/read_event_log xu1541/lib/libxu1541.a
 
 mrproper:  $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),mrproper)
 	rm -f *~ LINUX/*~ WINDOWS/*~
+	rm -f xu1541/misc/usb_echo_test xu1541/misc/read_event_log xu1541/lib/libxu1541.a
 
 opencbm: $(call CREATE_TARGET,$(SUBDIRS) $(SUBDIRS_OPTIONAL),all)
 
@@ -93,10 +95,15 @@ install: install-files
 install-all: install install-plugin
 
 install-plugin-xu1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XU1541),install)
+	install -m 644 xu1541/udev/45-opencbm.rules ${DESTDIR}/etc/udev/rules.d/
+
+	install -d $(DESTDIR)$(PLUGINDIR)/xu1541
+	install -m 755 xu1541/misc/usb_echo_test xu1541/misc/read_event_log ${DESTDIR}/${PLUGINDIR}/xu1541/
 
 $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XU1541),install):: plugin-xu1541
 
 install-plugin-xum1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XUM1541),install)
+	install -m 644 xum1541/udev/45-opencbm-usb.rules ${DESTDIR}/etc/udev/rules.d/
 
 $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XUM1541),install):: plugin-xum1541
 
@@ -115,6 +122,7 @@ $(call CREATE_TARGET,$(SUBDIRS_DOC),install-doc):: install-files-doc install
 
 
 plugin-xu1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XU1541),all)
+	$(MAKE) --dir=xu1541/misc all
 
 $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XU1541),all):: opencbm
 
@@ -129,6 +137,18 @@ $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),all):: opencbm
 plugin: $(PLUGINS)
 
 uninstall: $(call CREATE_TARGET,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),uninstall)
+	rm ${DESTDIR}/etc/udev/rules.d/45-opencbm-usb.rules \
+	   ${DESTDIR}/etc/udev/rules.d/45-opencbm.rules \
+	   ${DESTDIR}/etc/udev/rules.d/45-opencbm-parallel.rules \
+	   ${DESTDIR}/etc/ld.so.conf.d/99-opencbm.conf \
+	   ${DESTDIR}/${PLUGINDIR}/xu1541/usb_echo_test \
+	   ${DESTDIR}/${PLUGINDIR}/xu1541/read_event_log \
+	|| /bin/true
+	ldconfig || /bin/true
+
+ldconfig:
+	echo "${BINDIR}" > ${DESTDIR}/etc/ld.so.conf.d/99-opencbm.conf
+	ldconfig
 
 dev:
 	mkdir -p -m 755 `dirname $(CBMDEV)`
