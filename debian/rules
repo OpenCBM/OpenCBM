@@ -83,12 +83,6 @@ install: build
 	install -D -o root -g root -m 755 debian/install_plugin.sh \
 		debian/tmp/usr/lib/opencbm
 
-	install -D -o root -g root -m 644 xu1541/udev/45-opencbm.rules \
-		debian/tmp/etc/udev/rules.d
-
-	install -D -o root -g root -m 644 xum1541/udev/45-opencbm-usb.rules \
-		debian/tmp/etc/udev/rules.d
-
 	mkdir -p debian/tmp/usr/src/modules/opencbm/debian
 	for f in debian/copyright debian/changelog debian/*.MODULE; \
 		do cp $$f debian/tmp/usr/src/modules/opencbm/`echo $$f | sed 's/\\.MODULE$$//'`; \

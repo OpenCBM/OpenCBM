@@ -27,7 +27,7 @@ install-files: all
 	install -m 644 `[ -f cbm.ko ] && echo cbm.ko || echo cbm.o` $(DESTDIR)$(MODDIR)
 ifneq ($(UDEV_RULES),)
 	install -d -m 755 $(DESTDIR)$(UDEV_RULES)
-	install -m 644 45-opencbm-parallel.rules $(DESTDIR)$(UDEV_RULES)
+	install -m 644 45-opencbm-xa1541.rules $(DESTDIR)$(UDEV_RULES)
 endif
 
 install: install-files
@@ -37,7 +37,7 @@ uninstall:
 	if [ ! -z "`lsmod|grep '^cbm '`" ]; then rmmod cbm; fi
 	rm -f $(DESTDIR)$(MODDIR)/cbm.o $(DESTDIR)$(MODDIR)/cbm.ko
 ifneq ($(UDEV_RULES),)
-	rm -f $(DESTDIR)$(UDEV_RULES)/45-opencbm-parallel.rules
+	rm -f $(DESTDIR)$(UDEV_RULES)/45-opencbm-xa1541.rules
 endif
 
 cbm.o: checksources cbm_module.c

@@ -672,16 +672,16 @@ that allow you to customize who is able to access the devices.
 
 These files are located in:
 <itemize>
-<item><it>opencbm/sys/linux/45-opencbm-parallel.rules</it> (for XA1541/XM1541
+<item><it>opencbm/sys/linux/45-opencbm-xa1541.rules</it> (for XA1541/XM1541
 cables)
-<item><it>xu1541/udev/45-opencbm.rules</it> (for XU1541 cables)
-<item><it>xum1541/udev/45-opencbm-usb.rules</it> (for XUM1541 cables)
+<item><it>xu1541/udev/45-opencbm-xu1541.rules</it> (for XU1541 cables)
+<item><it>xum1541/udev/45-opencbm-xum1541.rules</it> (for XUM1541 cables)
 </itemize>
 
 <p>
-In order to use these files, just copy the appropriate one(s) into the directory
-<it>/etc/udev/rules.d/</it>. They will allow any member of the group
-<it/user/ to use the corresponding cable.
+The appropriate file(s) are copied into the directory
+<it>/etc/udev/rules.d/</it> at installation time. They will allow any member of
+the group <it/user/ to use the corresponding cable.
 
 If you want to use another group, just change the files accordingly.
 
