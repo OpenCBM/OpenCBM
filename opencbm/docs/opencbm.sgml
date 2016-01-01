@@ -89,7 +89,7 @@ The following cable types are supported:
 <item>XP1541             (cbm4linux version >= 0.2.0, cbm4win version >= 0.1.0)
 <item>XP1571             (cbm4linux version >= 0.2.4, cbm4win version >= 0.1.0)
 <item>Modified XE1541    (only on Linux, obsoleted by the XM1541, see
-`LINUX/config.make')
+`opencbm/LINUX/config.make')
 </itemize>
 
 More information on the different cable types can be found in <ref id="cable"
@@ -484,8 +484,9 @@ Perform the following steps to install OpenCBM on you Linux machine:
 
 <itemize>
 <item>Get the sources from the <htmlurl url="@@@TODO" name="tarball">.
-<item>Unpack them into a directory (i.e., <it>&tilde;/opencbm</it>)
-<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm/opencbm</it>
+<item>Unpack them into a directory (i.e., <it>&tilde;/opencbm-0.5.0</it>, with
+      0.5.0 being the version number of OpenCBM).
+<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.5.0</it>
 <item>Compile OpenCBM and the appropriate plugin: <it>make -f LINUX/Makefile
 opencbm plugin-<em/XXX/</it>, with <it/XXX/ being one of <it/xa1541/, <it/xu1541/ or
 <it/xum1541/, depending upon which adapter you are using.
@@ -494,15 +495,6 @@ by using <it/sudo/, or by explicitly becoming root with <it/su/. The following
 command assumes you are using <it/sudo/: <it>sudo make -f LINUX/Makefile
 install install-plugin-<em/XXX/</it>, with <it/XXX/ being the same one of
 <it/xa1541/, <it/xu1541/ or <it/xum1541/ as above.
-<item>(For machines with udev only): Copy one or more files into the directory
-<it>/etc/udev/rules.d/</it>. Either choose the one of the following, that fits
-your cable type, or just copy all of them:
-	<itemize>
-	<item><it>sudo cp sys/linux/45-opencbm-parallel.rules /etc/udev/rules.d/</it> (for XA1541/XM1541
-	cables)
-	<item><it>sudo cp ../xu1541/udev/45-opencbm.rules /etc/udev/rules.d/</it> (for XU1541 cables)
-	<item><it>sudo cp ../xum1541/udev/45-opencbm-usb.rules /etc/udev/rules.d/</it> (for XUM1541 cables)
-	</itemize>
 <item>Connect your cable (XU1541, XUM1541, XA1541, XM1541) to your CBM IEC
 device. Plug your XU1541 or XUM1541 into the USB port, or your XA1541 or XM1541
 cable to the parallel port. Switch on your CBM IEC device.
@@ -519,16 +511,8 @@ correctly recognized.
 drive, or if the command <it/cbmctrl detect/ prints out your device with your
 device number. If this works, you are done! If not, please proceed:
 <item>If you get an error message that libopencbm cannot be found, you must add
-it to your linker path. In order to do so, do the following:
-	<itemize>
-	<item>If the directory <it>/etc/ld.so.conf.d/</it> exists, create a
-new file with the contents <it>/usr/local/lib</it> to it by issuing:
-	<it>echo "/usr/local/lib" > /etc/ld.so.conf.d/99-opencbm.conf</it>.
-If the directory does not exist, <em/append/ the directory to the file
-<it>/etc/ld.so.conf</it> by issuing
-	<it>echo "/usr/local/lib" >> /etc/ld.so.conf</it>.
-	Then, perform <it>sudo ldconfig</it>
-	</itemize>
+it to your linker path. In order to do so, enter the command <it>make -f
+LINUX/Makefile ldconfig</it>
 <item>Now, everything should be working, and you should be able to use the
 OpenCBM tools even as non-root.
 </itemize>
@@ -597,7 +581,7 @@ root.
 <sect3>Any cable type
 <p>
 If you intend to modify the drive routines for `d64copy' and `cbmformat' you
-also need a crossassembler. `LINUX/config.make' comes with rules for Ullrich
+also need a crossassembler. `opencbm/LINUX/config.make' comes with rules for Ullrich
 von Bassewitz' `cl65' (comes
 with cc65, <htmlurl url="http://www.cc65.org/" name="http://www.cc65.org/">).
 Starting with version cbm4linux 0.2.3, opencbm includes precompiled 6502
@@ -615,7 +599,7 @@ old files hanging aroung (just do "<it/make uninstall/", preferably in the
 
 <sect2>Compile-time configuration
 <p>
-The compile-time configuration is located in `LINUX/config.make'. Check the
+The compile-time configuration is located in `opencbm/LINUX/config.make'. Check the
 KERN_FLAGS line if you're running kernel 2.0.x or if you don't want to use the
 Linux parport subsystem for some reason. Same goes for SMP machines.
 
@@ -624,7 +608,7 @@ Linux parport subsystem for some reason. Same goes for SMP machines.
 
 <p>
 <itemize>
-<item><it>make -f LINUX/Makefile opencbm plugin-XXX</it>    (no root privileges required)
+<item>Type <it>make -f LINUX/Makefile opencbm plugin-XXX</it>    (no root privileges required)
 
 (replacing XXX with either xum1541, xu1541 or xa1541, depending upon the cable
 type you are using)
@@ -648,7 +632,7 @@ again replacing XXX with xum1541, xu1541 or xa1541, depending upon the cable
 type you are using.
 
 This will  install  all  necessary  stuff  to  /usr/local/...  (can be
-changed in `LINUX/config.make')
+changed in `opencbm/LINUX/config.make')
 </itemize>
 
 <sect2>Loading the module (XA1541/XM1541 only)
