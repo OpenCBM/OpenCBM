@@ -73,6 +73,7 @@ mrproper: clean
 	rm -f *~ LINUX/*~ WINDOWS/*~
 
 install-files:
+	install -d $(DESTDIR)$(INFODIR)
 	gzip -c9 $(INFO) > $(DESTDIR)$(INFODIR)/$(INFO).gz
 
 install: install-files
