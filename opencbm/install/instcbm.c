@@ -56,6 +56,14 @@ typedef void (WINAPI* PGetNativeSystemInfo)(LPSYSTEM_INFO);
 #define VER_SUITE_WH_SERVER 0x00008000
 #endif
 
+#ifndef SM_SERVERR2
+#define SM_SERVERR2 89
+#endif
+
+#ifndef VER_SUITE_STORAGE_SERVER
+#define VER_SUITE_STORAGE_SERVER 0x00002000
+#endif
+
 static BOOL
 SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname, BOOL NoCopy);
 
@@ -130,7 +138,6 @@ GetOsVersion(VOID)
     osversion_t retValue;
     char szOS[1024] = {0};
     PGetNativeSystemInfo pGetNativeSystemInfo;
-    DWORD dwReturnedProductType;
     ULONGLONG ConditionMask;
     BOOL isServer;
 
@@ -255,6 +262,15 @@ GetOsVersion(VOID)
                     }
                     else if (ovi.dwMinorVersion == 2)
                     {
+#if _MSC_VER <= 1200
+                        /*
+                         * as MSVC6 does not know about the functions
+                         * VerifyVersionInfo() and VerSetConditionMask(), skip this test
+                         */
+                        ConditionMask = 0;
+                        isServer = FALSE;
+                        retValue = WINNEWER;
+#else
                         osvi.wProductType = VER_NT_WORKSTATION;
                         ConditionMask = VerSetConditionMask( 0, VER_PRODUCT_TYPE, VER_EQUAL );
                         isServer = !VerifyVersionInfoW(&osvi, VER_PRODUCT_TYPE, ConditionMask);
@@ -288,6 +304,7 @@ GetOsVersion(VOID)
 
                             retValue = WIN8;
                         }
+#endif
                     }
 
                     GetProcessorArchitecture(si.wProcessorArchitecture, szOS);
