@@ -5,6 +5,7 @@ set OC_DESTINATION=%ProgramFiles%\opencbm
 
 set OC_VARIANT_DISPLAY_DEFAULT=ZoomFloppy
 set OC_VARIANT_DEFAULT=xum1541
+set OC_VARIANT_DEFAULT_INSTALL_DRIVER=OC_INSTALL_DRIVER_ZOOMFLOPPY
 
 rem ---------------------------------------
 
@@ -57,6 +58,7 @@ rem If no variant was given, use default
 if "%OC_VARIANT_DISPLAY%" == "" (
 	set OC_VARIANT_DISPLAY=%OC_VARIANT_DISPLAY_DEFAULT%
 	set OC_VARIANT=%OC_VARIANT_DEFAULT%
+	set %OC_VARIANT_DEFAULT_INSTALL_DRIVER%=1
 )
 
 rem delete, only for testing purposes
