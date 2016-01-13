@@ -487,7 +487,7 @@ the rest of this chapter.
 Perform the following steps to install OpenCBM on your Linux machine:
 
 <itemize>
-<item>Get the sources from the <htmlurl url="http://www.trikaliotis.net/Download/opencbm-0.4.99.98/opencbm-0.4.99.98.zip" name="tarball">.
+<item>Get the sources from the <htmlurl url="http://www.trikaliotis.net/Download/opencbm-0.4.99.98/opencbm-0.4.99.98-source.zip" name="tarball">.
 <item>Unpack them into a directory (i.e., <it>&tilde;/opencbm-0.4.99.98</it>, with
       0.4.99.98 being the version number of OpenCBM).
 <item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.98</it>
@@ -545,6 +545,11 @@ blog of Christian Vogelgsang, who actually ported OpenCBM to the Mac. His site
 should be your primary source for instructions.
 
 <sect2>Windows installation walk-through
+
+<p>
+You need the Windows binaries from <htmlurl
+url="http://www.trikaliotis.net/Download/opencbm-0.4.99.98/opencbm-0.4.99.98.zip"
+name="http://www.trikaliotis.net/Download/opencbm-0.4.99.98/opencbm-0.4.99.98.zip"> in order to install OpenCBM.
 
 <p>
 For Windows, you have to install the USB drivers first if you want to use the ZoomFloppy, XUM1541 or XU1541 devices.
