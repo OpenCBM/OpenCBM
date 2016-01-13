@@ -1,12 +1,12 @@
 <!doctype linuxdoc system>
 
 <article>
-<title>opencbm 0.4.99.95 Users Guide
+<title>opencbm 0.4.99.98 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
 name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de/" name="d81.de">,
 Arnd Menge <htmlurl url="mailto:arnd(at)jonnz(dot)de" name="arnd(at)jonnz(dot)de">,
-<date>2016-01-02
+<date>2016-01-13
 
 <abstract>
 This document describes the opencbm package, which can be used to control and
@@ -30,6 +30,10 @@ XA1541/XM1541 adapter.
 
 <!-- Table of contents -->
 <toc>
+
+<!-- List of figures -->
+
+<lof>
 
 <!-- Begin the document -->
 
@@ -66,7 +70,7 @@ based cables are supported on FreeBSD and on Mac OS X.
 <sect1>Introduction to opencbm<label id="introduction">
 
 <p>
-This is version 0.4.99.95 of opencbm, a support package for retro devices that
+This is version 0.4.99.98 of opencbm, a support package for retro devices that
 communicate with the serial CBM bus protocol, known from the C64, VIC-20, etc.
 Opencbm runs on Linux, Windows, FreeBSD and Mac OS X.  opencbm 0.4.0 was a
 re-join of the two projects cbm4linux (latest standalone version: 0.3.2) and
@@ -329,7 +333,7 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 
 <p>
 <descrip>
-<tag/opencbm v0.4.99.95:/
+<tag/opencbm v0.4.99.98:/
 
 <itemize>
  <item> TBD @@@
@@ -477,28 +481,42 @@ of this chapter unless you encounter any problems.
 If you are more interested for a clean installation, skip this section and read
 the rest of this chapter.
 
-<sect2>Linux
+<sect2>Linux installation walk-through
 
 <p>
-Perform the following steps to install OpenCBM on you Linux machine:
+Perform the following steps to install OpenCBM on your Linux machine:
 
 <itemize>
-<item>Get the sources from the <htmlurl url="@@@TODO" name="tarball">.
-<item>Unpack them into a directory (i.e., <it>&tilde;/opencbm-0.5.0</it>, with
-      0.5.0 being the version number of OpenCBM).
-<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.5.0</it>
+<item>Get the sources from the <htmlurl url="http://www.trikaliotis.net/Download/opencbm-0.4.99.98/opencbm-0.4.99.98.zip" name="tarball">.
+<item>Unpack them into a directory (i.e., <it>&tilde;/opencbm-0.4.99.98</it>, with
+      0.4.99.98 being the version number of OpenCBM).
+<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.98</it>
 <item>Compile OpenCBM and the appropriate plugin: <it>make -f LINUX/Makefile
 opencbm plugin-<em/XXX/</it>, with <it/XXX/ being one of <it/xa1541/, <it/xu1541/ or
-<it/xum1541/, depending upon which adapter you are using.
+<it/xum1541/, depending upon which adapter you are using:
+      <itemize>
+      <item><bf/XUM1541 + Zoomfloppy only:/ <it>make -f LINUX/Makefile opencbm plugin-xum1541</it>
+      <item><bf/XU1541 only:/ <it>make -f LINUX/Makefile opencbm plugin-xu1541</it>
+      <item><bf/XA1541 + XM1541 only:/ <it>make -f LINUX/Makefile opencbm plugin-xa1541</it>
+      </itemize>
 <item>Now, install the OpenCBM package. You must perform this as root, either
 by using <it/sudo/, or by explicitly becoming root with <it/su/. The following
 command assumes you are using <it/sudo/: <it>sudo make -f LINUX/Makefile
 install install-plugin-<em/XXX/</it>, with <it/XXX/ being the same one of
-<it/xa1541/, <it/xu1541/ or <it/xum1541/ as above.
+<it/xa1541/, <it/xu1541/ or <it/xum1541/ as above:
+      <itemize>
+      <item><bf/XUM1541 + Zoomfloppy only:/ <it>sudo make -f LINUX/Makefile opencbm install-plugin-xum1541</it>
+      <item><bf/XU1541 only:/ <it>sudo make -f LINUX/Makefile opencbm install-plugin-xu1541</it>
+      <item><bf/XA1541 + XM1541 only:/ <it>sudo make -f LINUX/Makefile opencbm install-plugin-xa1541</it>
+      </itemize>
 <item>Connect your cable (XU1541, XUM1541, XA1541, XM1541) to your CBM IEC
-device. Plug your XU1541 or XUM1541 into the USB port, or your XA1541 or XM1541
-cable to the parallel port. Switch on your CBM IEC device.
-<item>(For XA1541/XM1541 cables only): Load the kernel module:
+device:
+      <itemize>
+      <item><bf/XUM1541 + Zoomfloppy + XU1541 only:/ Plug your XU1541 or XUM1541 into the USB port
+      <item><bf/XA1541 + XM1541 only:/ Plug your XA1541 or XM1541 cable to the parallel port
+      </itemize>
+<item>Switch on your CBM IEC device.
+<item><bf/XA1541 + XM1541 only:/ Load the kernel module:
 	<itemize>
 	<item><it>sudo /sbin/depmod -a</it>
 	<item><it>sudo /sbin/modprobe parport</it> (this one might fail if you
@@ -517,7 +535,7 @@ LINUX/Makefile ldconfig</it>
 OpenCBM tools even as non-root.
 </itemize>
 
-<sect2>Mac OS X
+<sect2>Mac OS X installation walk-through
 
 <p>
 Please check the instructions at <htmlurl
@@ -526,9 +544,97 @@ name="http://lallafa.de/blog/c64-projects/opencbm-on-mac/"> available on the
 blog of Christian Vogelgsang, who actually ported OpenCBM to the Mac. His site
 should be your primary source for instructions.
 
-<sect2>Windows
+<sect2>Windows installation walk-through
 
 <p>
+For Windows, you have to install the USB drivers first if you want to use the ZoomFloppy, XUM1541 or XU1541 devices.
+
+<sect3>USB driver installation
+
+<p>
+For previous version of OpenCBM and 64 bit versions of Windows, that meant you had to fiddle around with the
+driver signature enforcement in order to get this done.
+
+For v0.4.99.98, we rely on an external tool which makes it much easier for you.
+
+Please proceed as follows
+
+<itemize>
+<item>Attach your XUM1541/ZoomFloppy or XU1541 device to your PC via USB.
+<item>Download the zadig tool from <htmlurl url="http://zadig.akeo.ie/" name="http://zadig.akeo.ie/">.
+Note that there are different versions for Windows XP and later versions for Windows; download the appropriate one!
+<item>Unpack the tool in a directory and start it. You might get an UAC prompt (Vista and later, <ref id="zadig-uac">), which you must confirm.
+<item>You should see your USB device (XUM1541, XU1541) mentioned in the screen.
+If you do not, please select, <ref id="zadig-listalldevices">. This is
+especially true if you installed the drivers for the USB device before.
+<item>Now, adjust some settings.
+      <itemize>
+      <item><bf/XUM1541 + ZoomFloppy only:/ Make sure that zadig tells you it found the "xum1541 floppy adapter", and that it
+      wants to install the libusb-win32 driver. The USB id is 16D0 (vendor) and 0504 (product). 
+      Your screen should look like figure <ref id="zadig-xum1541">.
+      <item><bf/XU1541 only:/ Make sure that zadig tells you it found the "xu1541", and that it
+      wants to install the libusb-win32 driver. The USB id is 0403 (vendor) and C632 (product).
+      Your screen should look like figure <ref id="zadig-xu1541">.
+      </itemize>
+<item>Now, press "install driver".
+<item>Wait until you get the message "The driver was installed successfully." <ref id="zadig-success">
+</itemize>
+
+<figure>
+<eps file="zadig-uac.eps">
+<img src="zadig-uac.png">
+<caption>UAC for zadig which must be confirmed<label id="zadig-uac"></caption>
+</figure>
+
+<figure>
+<eps file="zadig-listalldevices.eps">
+<img src="zadig-listalldevices.png">
+<caption>Enable "List all devices" for zadig<label id="zadig-listalldevices"></caption>
+</figure>
+
+<figure>
+<eps file="zadig-xum1541.eps">
+<img src="zadig-xum1541.png">
+<caption>zadig settings for installing an xum1541 device<label id="zadig-xum1541"></caption>
+</figure>
+
+<figure>
+<eps file="zadig-xu1541.eps">
+<img src="zadig-xu1541.png">
+<caption>zadig settings for installing an xu1541 device<label id="zadig-xu1541"></caption>
+</figure>
+
+<figure>
+<eps file="zadig-success.eps">
+<img src="zadig-success.png">
+<caption>zadig message that it installed the driver successfully<label id="zadig-success"></caption>
+</figure>
+
+Now, proceed with installation the OpenCBM tools.
+
+<sect3>OpenCBM tool installation
+
+<p>
+In order to install OpenCBM, proceed as follows:
+
+<itemize>
+<item>Download the OpenCBM package binary for Windows from <htmlurl url="" name="">.
+      Note that unlike previous versions of OpenCBM, v0.4.99.98 now contains one package for
+      all supported architectures (i386 vs. amd64, 32 bit vs. 64 bit). You do not have to
+      choose which one to get.
+<item>Unpack it into a directory of your liking
+<item>Start a cmd.exe shell as administrator. The exact procedure varies among the different Windows versions.
+<item>Go to the directory where you unpacked the OpenCBM installation package (with the "cd" command)
+<item>Enter<itemize>
+      <item><bf/ZoomFloppy only:/ <it/install zoomfloppy/ (this is also default, that it, it suffices if you enter <it/install/ only)
+      <item><bf/XUM1541 only:/ <it/install xum1541/
+      <item><bf/XU1541 only:/ <it/install xu1541/
+      <item><bf/XA1541 only:/ <it/install xa1541/
+      </itemize>
+<item>Now, you have to add the directory given in the last line of the output to your command prompt,
+      so that you can use them whenever you are on the commandline (cmd.exe shell).
+</itemize>
+
 <sect1>Installing opencbm on Mac OS X (USB cable)<label id="cbm4mac-install">
 
 <p>
@@ -793,7 +899,7 @@ With [options] being one or more of:
 Congratulation, you have successfully set up your opencbm installation!
 
 
-<sect1>Installing opencbm on Windows (cbm4win)<label id="cbm4win-install">
+<sect1>Installing opencbm on Windows (cbm4win)<label id="opencbm-install">
 
 <p>
 <it/WARNING! If you have already installed a previous version of OpenCBM on your
@@ -935,13 +1041,83 @@ id="cbmforng" name="cbmforng">.
 </itemize>
 
 <p>
-If you want to completely remove the cbm4win driver from your machine, you can
-do so by issuing a "<it/instcbm --remove/" command.
-
 You can have a look at the available cbmctrl commands by issuing cbmctrl on
 your command line, or look at <ref id="cbmctrl" name="cbmctrl">. For the other
 programs, you get help by issuing the "--help" option, or look at the
 appropriate section in <ref id="utilities" name="utilities">.
+
+<sect>Uninstall<label id="installation">
+
+<p>
+Depending on the system you are running opencbm on, there are different ways to
+uninstall opencbm. Use the appropriate category for you:
+
+<sect1>Quick uninstallation walk-through
+<p>
+If you want to uninstall OpenCBM as fast as possible, but you are not interested
+in the details, just use the instructions from this section and ignore the rest
+of this chapter unless you encounter any problems.
+
+If you are more interested in a clean uninstallation, skip this section and read
+the rest of this chapter.
+
+<sect2>Linux uninstallation walk-through
+
+<p>
+Perform the following steps to uninstall OpenCBM on your Linux machine:
+
+<itemize>
+<item>I assume you already have an installation directory for OpenCBM handy.
+      Let's assume it is <it>&tilde;/opencbm-0.4.99.98</it>, with
+      0.4.99.98 being the version number of OpenCBM.
+<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.98</it>
+<item>Enter: <it>sudo make -f LINUX/Makefile uninstall</it>
+<item>Now, everything should be uninstalled.
+</itemize>
+
+<sect2>Mac OS X uninstallation walk-through
+
+<p>
+Please check the instructions at <htmlurl
+url="http://lallafa.de/blog/c64-projects/opencbm-on-mac/"
+name="http://lallafa.de/blog/c64-projects/opencbm-on-mac/"> available on the
+blog of Christian Vogelgsang, who actually ported OpenCBM to the Mac. His site
+should be your primary source for instructions.
+
+<sect2>Windows uninstallation walk-through
+
+<p>
+In order to uninstall OpenCBM, proceed as follows:
+
+<itemize>
+<item>If you <bf/did/ follow the quick installation walk-through:
+  <itemize>
+  <item>Go to the control panel, select <it/Programs/, and have a look at the list of installed programs <ref id="opencbm-software-installed">.
+  <item>Right-click on the entry "OpenCBM", and select "uninstall" <ref id="opencbm-software-installed-uninstall">.
+  <item>If you added the OpenCBM installation directory to your path, you should undo this.
+  </itemize>
+
+<item>If you did <bf/not/ follow the quick installation walk-through:
+  <itemize>
+  <item>Open a cmd.exe shell with administrator privileges.
+  <item><it/cd/ into the directory where OpenCBM is installed.
+  <item>Enter <it/instcbm --remove/ to uninstall OpenCBM.
+  <item>If you added the OpenCBM installation directory to your path, you should undo this.
+  </itemize>
+</itemize>
+
+<figure>
+<eps file="opencbm-software-installed.eps">
+<img src="opencbm-software-installed.png">
+<caption>OpenCBM as installed program on Windows<label id="opencbm-software-installed"></caption>
+</figure>
+
+<figure>
+<eps file="opencbm-software-installed-uninstall.eps">
+<img src="opencbm-software-installed-uninstall.png">
+<caption>Uninstall OpenCBM from Windows<label id="opencbm-software-installed-uninstall"></caption>
+</figure>
+
 
 <sect>Utilities<label id="utilities">
 
@@ -1022,7 +1198,7 @@ programs are included with this package:
 <p>
 <it/instcbm/ is used on Windows to install the opencbm driver.
 
-<em/Please note that the syntax of instcbm has changed considerably in v0.5.0
+<em/Please note that the syntax of instcbm has changed considerably in v0.4.99.98
 with respect to the syntax used until version v0.4.2!/
 
 <sect2>instcbm invocation<label id="instcbm command structure">
@@ -1035,7 +1211,7 @@ with respect to the syntax used until version v0.4.2!/
 display help and exit.
 
 <tag/-V, --version/
-display version information about cbm4win.
+display version information about OpenCBM.
 
 <tag/-r, --remove/
 remove (uninstall) the driver.
@@ -2571,8 +2747,7 @@ tarball at <it>opencbm/tape/</it>.
 <sect>opencbm API<label id="opencbm-API">
 <p>
 The OpenCBM API is documented as doxygen file. You can find it only on
-@@@TODO
-<htmlurl url="http://api.opencbm.trikaliotis.net/" name="http://api.opencbm.trikaliotis.net/">
+<htmlurl url="http://opencbm.trikaliotis.net/doxygen/" name="http://opencbm.trikaliotis.net/doxygen/">
 
 <!--
 <p>
@@ -2838,7 +3013,7 @@ There are some known bugs in opencbm:
  Furthermore, I would be happy if you could send me a ROM dump of the floppy ROM
  so I can update the drive type recognition for some future version of OpenCBM.
 <item>Windows: If you have any other devices connected to your parallel port,
- you cannot use them as long as cbm4win is installed. In this case, either
+ you cannot use them as long as OpenCBM is installed. In this case, either
  remove opencbm whenever you want to access that other device, or install
  opencbm with <it/instcbm --lock=no/ and make sure to issue <it/cbmctrl lock/
  before accessing the drive, and <it/cbmctrl unlock/ afterwards.
@@ -3049,7 +3224,8 @@ connection for some drives.
 <it/Thomas `Tommy' Winkler/ wrote <it/d82copy/ and <it/imgcopy/ and implemented
 IEEE-488 support for the XUM1541.
 <item>
-<it/Jochen Adler/ @@@TODO for the IEC2IEEE device and for sending me free
+<it/Jochen Adler/ for the IEC2IEEE device <htmlurl url="http://www.nlq.de/"
+name="http://www.nlq.de/"> and for sending me free
 hardware in order to test it with my SFD1001 and VIC 8250LP.
 <item>
 and anyone else who sent patches, suggestions, praises & flames!

@@ -16,6 +16,9 @@ DVI  = opencbm.dvi
 INFO = opencbm.info
 HTML = html/opencbm.html
 
+EPS  = zadig-uac.eps zadig-listalldevices.eps zadig-xum1541.eps zadig-xu1541.eps zadig-success.eps opencbm-software-installed.eps opencbm-software-installed-uninstall.eps
+PNG  = zadig-uac.png zadig-listalldevices.png zadig-xum1541.png zadig-xu1541.png zadig-success.png opencbm-software-installed.png opencbm-software-installed-uninstall.png
+
 %.win.txt: %.txt
 	sed -e 's/.//g;' -e 's/\[[0-9]*m//g;' $< > $@
 	unix2dos $@
@@ -27,13 +30,16 @@ else
 	${LINUXDOCTXT} ${LINUXDOCTXTPARAM} $<
 endif
 
+%.eps: %.eps.gz
+	gzip -d -c $< > $@
+
 %.pdf: %.ps
 	ps2pdf $<
 
 %.ps: %.dvi
 	dvips -o $*.ps $<
 
-%.dvi: %.sgml
+%.dvi: %.sgml ${EPS}
 ifeq "${CREATELINUXDOC}" ""
 	CREATELINUXDOC=1 ${MAKE} --silent -f LINUX/Makefile $@
 else
@@ -54,6 +60,7 @@ ifeq "${CREATELINUXDOC}" ""
 	CREATELINUXDOC=1 ${MAKE} --silent -f LINUX/Makefile $@
 else
 	cd html; ${LINUXDOCHTML} ${LINUXDOCHTMLPARAM} -s 2 ../$<; cd ..
+	cp -p ${PNG} html/
 endif
 
 all: $(TXT) $(DVI) $(INFO) $(HTML) ${PDF}
