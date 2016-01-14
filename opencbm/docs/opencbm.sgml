@@ -487,7 +487,9 @@ the rest of this chapter.
 Perform the following steps to install OpenCBM on your Linux machine:
 
 <itemize>
-<item>Get the sources from the <htmlurl url="http://www.trikaliotis.net/Download/opencbm-0.4.99.98/opencbm-0.4.99.98-source.zip" name="tarball">.
+<item>Get the sources from the tarball at <htmlurl
+      url="http://www.trikaliotis.net/Download/opencbm-0.4.99.98/opencbm-0.4.99.98-source.tar.bz2"
+      name="http://www.trikaliotis.net/Download/opencbm-0.4.99.98/opencbm-0.4.99.98-source.tar.bz2">.
 <item>Unpack them into a directory (i.e., <it>&tilde;/opencbm-0.4.99.98</it>, with
       0.4.99.98 being the version number of OpenCBM).
 <item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.98</it>
@@ -562,7 +564,7 @@ driver signature enforcement in order to get this done.
 
 For v0.4.99.98, we rely on an external tool which makes it much easier for you.
 
-Please proceed as follows
+Please proceed as follows:
 
 <itemize>
 <item>Attach your XUM1541/ZoomFloppy or XU1541 device to your PC via USB.
@@ -584,6 +586,10 @@ especially true if you installed the drivers for the USB device before.
 <item>Now, press "install driver".
 <item>Wait until you get the message "The driver was installed successfully." <ref id="zadig-success">
 </itemize>
+
+<it><bf/Note:/ zadig does not rely on the OpenCBM files at all! Specifically, it contains its own version of the
+USB drivers embedded into the executable; thus, you do not have to specify a link to the driver files,
+or put them at a specific location. Just use it "as is".</it>
 
 <figure>
 <eps file="zadig-uac.eps">
@@ -623,7 +629,9 @@ Now, proceed with installation the OpenCBM tools.
 In order to install OpenCBM, proceed as follows:
 
 <itemize>
-<item>Download the OpenCBM package binary for Windows from <htmlurl url="" name="">.
+<item>Download the OpenCBM package binary for Windows from <htmlurl
+      url="http://www.trikaliotis.net/Download/opencbm-0.4.99.98/opencbm-0.4.99.98.zip"
+      name="http://www.trikaliotis.net/Download/opencbm-0.4.99.98/opencbm-0.4.99.98.zip">
       Note that unlike previous versions of OpenCBM, v0.4.99.98 now contains one package for
       all supported architectures (i386 vs. amd64, 32 bit vs. 64 bit). You do not have to
       choose which one to get.
@@ -636,8 +644,10 @@ In order to install OpenCBM, proceed as follows:
       <item><bf/XU1541 only:/ <it/install xu1541/
       <item><bf/XA1541 only:/ <it/install xa1541/
       </itemize>
-<item>Now, you have to add the directory given in the last line of the output to your command prompt,
-      so that you can use them whenever you are on the commandline (cmd.exe shell).
+<item>If you want to use the OpenCBM tool whenever you are in the cmd.exe
+      shell, you have to add the directory that is printed in the last line of
+      the install.cmd output to your PATH environment variable. In many cases,
+      it will be C:\Program Files\OpenCBM.
 </itemize>
 
 <sect1>Installing opencbm on Mac OS X (USB cable)<label id="cbm4mac-install">
