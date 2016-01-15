@@ -24,7 +24,7 @@ if [%PROCESSOR_ARCHITECTURE%] == [AMD64] (
 ) else if [%PROCESSOR_ARCHITECTURE%] == [x86] (
 	set OC_BINDIR_LOCAL=i386
 ) else (
-	echo "unknown architecture, exiting..."
+	echo unknown architecture, exiting...
 	exit
 )
 
@@ -50,6 +50,9 @@ for /d %%p in (%*) do (
 	) else if [%%~p] == [xa1541] (
 		set OC_VARIANT_DISPLAY=!OC_VARIANT_DISPLAY! xa1541
 		set OC_VARIANT=!OC_VARIANT! xa1541
+	) else (
+		echo Unknown parameter %%~p, ignoring ...
+		pause
 	)
 )
 
@@ -60,11 +63,6 @@ if "%OC_VARIANT_DISPLAY%" == "" (
 	set OC_VARIANT=%OC_VARIANT_DEFAULT%
 	set %OC_VARIANT_DEFAULT_INSTALL_DRIVER%=1
 )
-
-rem delete, only for testing purposes
-
-rem if exist "%OC_DESTINATION%" rd /s /q "%OC_DESTINATION%"
-rem if exist "%SystemRoot%\System32\opencbm.conf" del "%SystemRoot%\System32\opencbm.conf"
 
 rem Install by copying everything in place
 
