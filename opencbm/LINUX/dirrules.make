@@ -35,7 +35,9 @@ clean:
 install-dirs:
 	mkdir -p -m 755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(MANDIR) $(DESTDIR)$(INCDIR) $(DESTDIR)$(INFODIR)
 ifeq "$(OS)" "Linux"
+ifneq "$(MODDIR)" ""
 	mkdir -p -m 755 $(DESTDIR)$(MODDIR)
+endif
 endif
 
 install-files: all install-dirs

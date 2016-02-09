@@ -87,7 +87,9 @@ $(call CREATE_TARGET,$(SUBDIRS) $(SUBDIRS_OPTIONAL),install-files):: install-fil
 install-files.prepare: opencbm
 	mkdir -p -m 755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(MANDIR) $(DESTDIR)$(INCDIR) $(DESTDIR)$(INFODIR)
 ifeq "$(OS)" "Linux"
+ifneq "$(MODDIR)" ""
 	mkdir -p -m 755 $(DESTDIR)$(MODDIR)
+endif
 endif 
 
 install: install-files
