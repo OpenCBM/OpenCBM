@@ -29,6 +29,7 @@
 
 #include "debug.h"
 
+static int startaddress = 0x8000;
 static int transferlength = 0x110;
 static int writedumpfile = 0;
 static int outputdump = 0;
@@ -129,6 +130,11 @@ processParameter(const int argc, char ** argv)
 
             case 'w':
                 writedumpfile = 1;
+                break;
+
+            case 'a':
+                startaddress = atoi(&argv[i][2]);
+                printf("using start address of 0x%x\n", startaddress);
                 break;
 
             default:
@@ -246,7 +252,7 @@ main_testtransfer(int argc, char **argv)
     while (count--)
     {
         printf("read:  %i, error = %u: \n", count+1, error);
-        libopencbmtransfer_read_mem(fd, drive, buffer, 0x8000, transferlength);
+        libopencbmtransfer_read_mem(fd, drive, buffer, startaddress, transferlength);
         if (compare)
         {
             if (memcmp(buffer, compare_buffer, transferlength) != 0)
@@ -276,12 +282,15 @@ main_testtransfer(int argc, char **argv)
         }
 
         printf("write: %i, error = %u: \n", count+1, error);
-        libopencbmtransfer_write_mem(fd, drive, compare_buffer, 0x8000, transferlength);
+        libopencbmtransfer_write_mem(fd, drive, compare_buffer, startaddress, transferlength);
     }
 #endif
 
-    if (outputdump)
-        DBG_MEMDUMP("8000:", buffer, transferlength + 0x10);
+    if (outputdump) {
+        char address[10];
+        sprintf(address, "%04x:", startaddress);
+        DBG_MEMDUMP(address, buffer, transferlength + 0x10);
+    }
 
     if (writedumpfile)
         write_to_file(buffer, transferlength, "image.bin");
