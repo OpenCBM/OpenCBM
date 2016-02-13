@@ -1700,11 +1700,13 @@ not work on Windows, because <it/echo/ there does not know the <it/-n/ option.)
 <code>
 cbmctrl lock
 cbmctrl listen 8 15
-echo -n cmdstr|cbmctrl write -
-<it/@@@TODO/  cbmctrl put "cmdstr"
+cbmctrl put "cmdstr"
 cbmctrl unlisten
 cbmctrl unlock
 </code>
+
+Note that the command <it/cbmctrl put "cmdstr"/ replaced the older variant
+<it/echo -n cmdstr|cbmctrl write -/, which still works.
 
 <label id="action-pcommand">
 <tag>pcommand <it/device cmdstr/</tag>
@@ -2362,13 +2364,6 @@ d82copy -2 -B --drive-type=1001 9 image.d82
 <sect1>imgcopy<label id="imgcopy">
 
 <p>
-<bf>@@@TODO Note: <it/imgcopy/ is currently not well-tested. It might be a
-better idea to stick with d64copy and d82copy at the moment.</bf>
-
-<p>
-<bf/@@@TODO Check if the options are correct./
-
-<p>
 <it/imgcopy/ is a fast disk image transfer (both read and write) program for
 various CBM disk drives, namely, VIC 1540, 1541, 1570, 1571, 1581, 2031, 2040,
 3040, 4031, 4040, 8050, 8250, and SFD 1001.
@@ -2409,8 +2404,6 @@ Display version information and exit.
 <p>Specify the plugin to use. If you have installed more than one plugin
 (XA1541, XU1541, XUM1541), you can specifiy which one to use for this command.
 This way, you can use all three variants at the same time.
-
-<bf/@@@TODO CURRENTLY NOT IMPLEMENTED: ADD!/
 
 This requires an argument of the form &lt;plugin&gt;[:&lt;bus&gt;], where
 &lt;plugin&gt; is the plugin's backend name (currently: <it/xa1541/,
@@ -2502,9 +2495,6 @@ Allowed values for <tt/mode/ are (abbreviations allowed):
 </descrip>
 
 <sect2>imgcopy Examples<label id="imgcopy examples">
-
-<p>
-<bf/@@@TODO Add examples and test them!/
 
 
 <sect1>cbmcopy<label id="cbmcopy">

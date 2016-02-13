@@ -54,6 +54,7 @@ static void help(void)
 "Options:\n"
 "  -h, --help               display this help and exit\n"
 "  -V, --version            display version information and exit\n"
+"  -@, --adapter=plugin:bus tell OpenCBM which backend plugin and bus to use\n"
 "  -q, --quiet              quiet output\n"
 "  -v, --verbose            control verbosity (repeatedly, up to 3 times)\n"
 "  -n, --no-progress        do not display progress information\n"
@@ -344,8 +345,9 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                       }
                       else
                       {
-                          settings->drive_type = atoi(optarg) != 0 ?
-                              cbm_dt_cbm8250 : cbm_dt_cbm8050;
+                          my_message_cb(sev_fatal, "unknown drive type.");
+                          hint(argv[0]);
+                          exit(1);
                       }
                       break;
             case 'r': settings->retries = atoi(optarg);
