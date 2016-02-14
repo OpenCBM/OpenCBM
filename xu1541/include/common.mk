@@ -32,8 +32,9 @@ else
  ifeq "$(OS)" "Darwin"
    # MacOS compilation:
 
-   LIBUSB_DIR = $(shell libusb-config --prefix)
-   LDFLAGS_EXTRA = $(shell libusb-config --libs)
+   LIBUSB_DIR = $(shell libusb-legacy-config --prefix)
+   LDFLAGS_EXTRA = $(shell libusb-legacy-config --libs)
+   CFLAGS_EXTRA = $(shell libusb-legacy-config --cflags)
    
  else
    ifeq "$(shell uname -o)" "Cygwin"
