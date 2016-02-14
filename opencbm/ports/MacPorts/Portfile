@@ -32,7 +32,7 @@ use_configure       no
 
 worksrcdir          code
 
-build.cmd           cd opencbm && make -f LINUX/Makefile PREFIX=${prefix} MANDIR=${prefix}/share/man/man1
+build.cmd           make -f LINUX/Makefile PREFIX=${prefix} MANDIR=${prefix}/share/man/man1
 use_parallel_build  no
 
 destroot.target     install-all
