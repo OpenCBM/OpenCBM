@@ -57,7 +57,7 @@ ifeq "${CREATELINUXDOC}" ""
 else
 	${LINUXDOCINFO} ${LINUXDOCINFOPARAM} $<
 endif
-	perl -p -i -e 'if(m/^   \\input texinfo/){print "INFO-DIR-SECTION Miscellaneous\nSTART-INFO-DIR-ENTRY\n* opencbm: (opencbm).	Commodore serial IEC bus support.\nEND-INFO-DIR-ENTRY\n";}' $@
+	sed -i -e 's/^\([ \t]*\\input texinfo\)/INFO-DIR-SECTION Miscellaneous\nSTART-INFO-DIR-ENTRY\n* opencbm: (opencbm).	Commodore serial IEC bus support.\nEND-INFO-DIR-ENTRY\n\1/' $@
 
 %.html: opencbm.sgml
 	([ ! -d html ] && mkdir html/) || true
