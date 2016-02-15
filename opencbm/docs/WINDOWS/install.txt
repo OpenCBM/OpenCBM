@@ -112,7 +112,7 @@ receive answers from it. This is very good so far. Furthermore, don't panic:
 you do not have to enter these commands over and over again, these are only
 tests to make sure that anything is correctly installed.
 
-Now, let's proceed. If you have a D64 file or a floppy disc ready, you can try
+Now, let's proceed. If you have a D64 file or a floppy disk ready, you can try
 transferring it over the cable. Do not use all of the followinng commands, but
 only these one you want to perform.
 
@@ -125,13 +125,13 @@ only these one you want to perform.
 
 - WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
   BEFORE, so make sure you do not need that floppy anymore.  If you have a D64
-  or D71 on your PC, and you want to write it to a new, already formatted disc,
+  or D71 on your PC, and you want to write it to a new, already formatted disk,
   enter "d64copy --transfer=serial2 --warp A.D64 8" if the file is called
   A.D64. Again, if you have a parallel cable, you might want to replace
   "--transfer=parallel".
 
 - WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
-  BEFORE, so make sure you do not need that floppy anymore.  If you have a disc
+  BEFORE, so make sure you do not need that floppy anymore.  If you have a disk
   you want to format, you have two options: Either use the command "cbmctrl
   command 8 N0:NAME,ID", or use the cbmformat program.
 

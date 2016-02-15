@@ -95,8 +95,8 @@ JOB0    = $00   ; job code for buffer 0
 TRACK0  = $06   ; track for buffer 0 ($0300-$03ff)
 SECTCNT = $07   ; sector counter for current track (sector for buffer 0)
 
-HDRID1  = $16   ; 1st character of disc ID
-HDRID2  = $17   ; 2nd character of disc ID
+HDRID1  = $16   ; 1st character of disk ID
+HDRID2  = $17   ; 2nd character of disk ID
 DRVTRK  = $22   ; Track currently under R/W head on drive #0
 
 BUFPTR  = $30   ; pointer to the currently active buffer
@@ -462,7 +462,7 @@ IncrementTrack
     ; advance to next track
     ldy #$02    ; advance for 2 half-tracks
 AdvTrk
-    jsr STPIN   ; advance one half-track to the inner of the disc
+    jsr STPIN   ; advance one half-track to the inner of the disk
 
     ; wait for R/W head to react
     ldx #$80

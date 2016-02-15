@@ -454,7 +454,7 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
  <item><it/cbmctrl download/ takes optionally a file name argument (Spiro Trikaliotis)
  <item><it/libd64copy/ failed to recognize .d71 images as valid images. Because of this,
   you could not write a .d71 image back to a real floppy drive
- <item><it/d64copy/: If you copy a disc to an image which already exists, the error
+ <item><it/d64copy/: If you copy a disk to an image which already exists, the error
   information was not removed from the file if necessary. This is fixed now.
   (Spiro Trikaliotis)
  <item><it/libd64copy/: Fixed a crash on exit of d64copy if a .d64 file grows.
@@ -1031,7 +1031,7 @@ receive answers from it. This is very good so far. Furthermore, don't panic:
 you do not have to enter these commands over and over again, these are only
 tests to make sure that anything is correctly installed.
 
-If you have a D64 file or a floppy disc ready, you can try
+If you have a D64 file or a floppy disk ready, you can try
 transferring it over the cable. Do not use all of the following commands, but
 only the ones you want to perform.
 
@@ -1044,12 +1044,12 @@ name you want to give to the file.
 BEFORE, so make sure you do not need that floppy anymore.</bf>
 
 If you have a D64 or D71 on your PC, and you want to write it to a new, already
-formatted disc, enter "<it/d64copy A.D64 8/" if the file is called A.D64.
+formatted disk, enter "<it/d64copy A.D64 8/" if the file is called A.D64.
 
 <item><bf>WARNING THE FOLLOWING COMMAND OVERWRITES ANYTHING THAT WAS ON THE FLOPPY
 BEFORE, so make sure you do not need that floppy anymore.</bf>
 
-If you have a disc you want to format, you have two options: Either use the
+If you have a disk you want to format, you have two options: Either use the
 command "<it/cbmctrl command 8 N0:NAME,ID/", or use the cbmformat program, cf.
 <ref id="cbmformat" name="cbmformat">, or the cbmforng program, cf. <ref
 id="cbmforng" name="cbmforng">.
@@ -1734,9 +1734,9 @@ or more <tt/M-W/ commands. If <it/address/ is -1, the first two bytes from
 
 <label id="change">
 <tag>change <it/device/</tag>
-Wait for a disc to be changed in the specified device. It waits for the current
-disc to be removed, for a new disc to be inserted and for the drive door to be
-closed. It does not return until the disc is ready to be read or written.
+Wait for a disk to be changed in the specified device. It waits for the current
+disk to be removed, for a new disk to be inserted and for the drive door to be
+closed. It does not return until the disk is ready to be read or written.
 </descrip>
 
 <sect2>cbmctrl Examples<label id="cbmctrl examples">
@@ -1803,9 +1803,9 @@ There is also another, very similar tool, <ref id="cbmforng" name="cbmforng">.
 <p>
 Synopsis: <tt/cbmformat [OPTION]... DRIVE# NAME,ID/
 
-<it/DRIVE#/ has to be the drive number of the disc drive, <it/NAME/ is a name
-with up to 16 characters which will be the name of the disc after formatting,
-<it/ID/ is the 2-letter disc ID.
+<it/DRIVE#/ has to be the drive number of the disk drive, <it/NAME/ is a name
+with up to 16 characters which will be the name of the disk after formatting,
+<it/ID/ is the 2-letter disk ID.
 
 <p>Note: Unlike the <it/N0/ command of the drive, the ID must be given (thus,
 no so-called "short format" is possible).
@@ -1838,8 +1838,8 @@ misaligned drives.
 Format a 40 track disk, the BAM format is compatible to SpeedDOS.
 
 <tag/-c, --clear/
-clear (demagnetize) this disc.
-This is highly recommended if the disc is used for the first time,
+clear (demagnetize) this disk.
+This is highly recommended if the disk is used for the first time,
 or if it was previously formatted for another system (i.e., MS-DOS).
 Note that this option takes much time.
 
@@ -1882,7 +1882,7 @@ We did not encounter these problems with either of 1541 (1541-II, 1541C), 1570
 or 1571CR (the drive which is part of the C128DCR) drives, only with original
 1571 drives.
 
-In the current state, cbmformat is not able to format double-sided discs on a
+In the current state, cbmformat is not able to format double-sided disks on a
 1571 drive.
 
 <sect2>cbmformat Examples<label id="cbmformat examples">
@@ -1896,7 +1896,7 @@ cbmformat 8 GAMES,42
 <p>
 Format standard disk (35 tracks) in drive 9, use (buggy) 1541 sector pattern (for example, because this is a 1571 drive), show drive status when done:
 <code>
-cbmformat -os 9 1571disc,71
+cbmformat -os 9 1571disk,71
 </code>
 
 <p>
@@ -1935,9 +1935,9 @@ which was needed for developing may find its way into future releases.
 <p>
 Synopsis: <tt/cbmforng [OPTION]... DRIVE# NAME,ID/
 
-<it/DRIVE#/ has to be the drive number of the disc drive, <it/NAME/ is a name
-with up to 16 characters which will be the name of the disc after formatting,
-<it/ID/ is the 2-letter disc ID.
+<it/DRIVE#/ has to be the drive number of the disk drive, <it/NAME/ is a name
+with up to 16 characters which will be the name of the disk after formatting,
+<it/ID/ is the 2-letter disk ID.
 
 <p>Note: Unlike the <it/N0/ command of the drive, the ID must be given (thus,
 no so-called "short format" is possible).
@@ -1968,14 +1968,14 @@ misaligned drives.
 
 <tag/-r, --retries n/
 Set the maximum number of retries on errors. This accounts for all
-errors that may happen when formatting all the tracks of the whole disc.
+errors that may happen when formatting all the tracks of the whole disk.
 
 <tag/-x, --extended/
 Format a 40 track disk, the BAM format is compatible to SpeedDOS.
 
 <tag/-c, --clear/
-clear (demagnetize) this disc.
-This is highly recommended if the disc is used for the first time,
+clear (demagnetize) this disk.
+This is highly recommended if the disk is used for the first time,
 or if it was previously formatted for another system (i.e., MS-DOS).
 Note that this option takes much time.
 
@@ -2027,7 +2027,7 @@ We did not encounter these problems with either of 1541 (1541-II, 1541C), 1570
 or 1571CR (the drive which is part of the C128DCR) drives, only with original
 1571 drives.
 
-In the current state, cbmforng is not able to format double-sided discs on a
+In the current state, cbmforng is not able to format double-sided disks on a
 1571 drive.
 
 <sect2>cbmforng Examples<label id="cbmforng examples">
@@ -2042,7 +2042,7 @@ cbmforng 8 GAMES,42
 Format standard disk (35 tracks) in drive 9, use (buggy) 1541 sector pattern
 (for example, because this is a 1571 drive), show drive status when done:
 <code>
-cbmforng -os 9 1571disc,71
+cbmforng -os 9 1571disk,71
 </code>
 
 <p>
@@ -2187,21 +2187,21 @@ Allowed values for <tt/mode/ are (abbreviations allowed):
 <sect2>d64copy Examples<label id="d64copy examples">
 
 <p>
-Read a D64 disc image from the floppy in drive 8 to the file image.d64,
+Read a D64 disk image from the floppy in drive 8 to the file image.d64,
 automatically selecting the fastest transfer method:
 <code>
 d64copy 8 image.d64
 </code>
 
 <p>
-Copy the D64 disc image in image.d64 to the floppy in drive 9, automatically
+Copy the D64 disk image in image.d64 to the floppy in drive 9, automatically
 selecting the fastest transfer method:
 <code>
 d64copy image.d64 9
 </code>
 
 <p>
-Copy a double-sided disc from a 1571 drive 9 to image.d71, using
+Copy a double-sided disk from a 1571 drive 9 to image.d71, using
 <tt/serial1/ transfer method and only reading the blocks which are
 marked as used in the BAM:
 <code>
@@ -2340,21 +2340,21 @@ Allowed values for <tt/mode/ are (abbreviations allowed):
 <sect2>d82copy Examples<label id="d82copy examples">
 
 <p>
-Read a D82 disc image from the floppy in drive 8 to the file image.d82,
+Read a D82 disk image from the floppy in drive 8 to the file image.d82,
 automatically selecting the fastest transfer method:
 <code>
 d82copy -2 8 image.d82
 </code>
 
 <p>
-Copy the D80 disc image in image.d80 to the floppy in drive 9, automatically
+Copy the D80 disk image in image.d80 to the floppy in drive 9, automatically
 selecting the fastest transfer method:
 <code>
 d82copy -1 image.d80 9
 </code>
 
 <p>
-Copy a double-sided disc from a 1001 drive 9 to image.d82, only reading the
+Copy a double-sided disk from a 1001 drive 9 to image.d82, only reading the
 blocks which are marked as used in the BAM:
 <code>
 d82copy -2 -B --drive-type=1001 9 image.d82
@@ -2603,7 +2603,7 @@ cbmcopy -r 8 cbmfile -o file.bin
 </code>
 
 <p>
-Write out the file file.p00 in P64 format to the disc in drive 9, using
+Write out the file file.p00 in P64 format to the disk in drive 9, using
 <tt/serial1/ transfer method:
 <code>
 cbmcopy -w 9 file.p00

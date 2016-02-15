@@ -18,7 +18,7 @@ version 0.3.3 (NEVER RELEASED!)
 - "cbmctrl download" takes optionally a file name argument (Spiro Trikaliotis)
 - libd64copy failed to recognize .d71 images as valid images. Because of this,
   you could not write a .d71 image back to a real floppy drive
-- d64copy: If you copy a disc to an image which already exists, the error
+- d64copy: If you copy a disk to an image which already exists, the error
   information was not removed from the file if necessary. This is fixed now.
   (Spiro Trikaliotis)
 - libd64copy: Fixed a crash on exit of d64copy if a .d64 file grows.
