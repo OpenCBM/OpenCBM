@@ -66,8 +66,11 @@ if "%OC_VARIANT_DISPLAY%" == "" (
 
 rem Install by copying everything in place
 
-echo Copying opencbm.conf...
-xcopy opencbm.conf %SystemRoot%\System32\ /i /q
+rem The current version should not exhibit the opencbm.conf problem anymore.
+rem (https://sourceforge.net/p/opencbm/bugs/60/)
+rem
+rem echo Copying opencbm.conf...
+rem xcopy opencbm.conf %SystemRoot%\System32\ /i /q
 
 xcopy %OC_BINDIR_LOCAL%\*.exe "%OC_DESTINATION%\"     /q /i
 xcopy %OC_BINDIR_LOCAL%\*.dll "%OC_DESTINATION%\"     /q /i
