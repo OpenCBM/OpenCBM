@@ -27,6 +27,12 @@ usb_dev_handle      *handle = NULL;
 #define QUIT_KEY
 #endif
 
+// Linux: newer usb.h does not have USB_LE16_TO_CPU() macro anymore
+#ifndef USB_LE16_TO_CPU
+#include <endian.h>
+#define USB_LE16_TO_CPU(x) x=le16toh(x);
+#endif
+
 /* send a number of 16 bit words to the xu1541 interface */
 /* and verify that they are correctly returned by the echo */
 /* command. This may be used to check the reliability of */
