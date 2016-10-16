@@ -12,6 +12,8 @@
 #include "opencbm.h"
 #include "imgcopy_int.h"
 
+#include <stdio.h>
+
 #include <stdlib.h>
 
 #include "arch.h"

@@ -15,6 +15,7 @@ static char *rcsid =
 #endif
 
 #include "imgcopy_int.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>  
 #include <assert.h>  
@@ -149,9 +150,9 @@ static const struct drive_prog
 	{sizeof(warp_write_1571), warp_write_1571},
 	{sizeof(turbo_read_1581), turbo_read_1581},
 	{sizeof(turbo_write_1581), turbo_write_1581},
-	0, NULL,												// no warp mode on 1581 devices
-	0, NULL,
-	0, NULL
+	{0, NULL},												// no warp mode on 1581 devices
+	{0, NULL},
+	{0, NULL},
     //{sizeof(turbo_read_1541), turbo_read_1541},
 };
 
@@ -874,7 +875,7 @@ static int copy_disk(CBM_FILE fd_cbm, imgcopy_settings *settings,
 	        {
 	            if(settings->warp>0)
 	                message_cb(1, "drive type doesn't support warp mode");
-	            	settings->warp = 0;
+                    settings->warp = 0;
 	        }
 		break;
 	}
