@@ -862,7 +862,7 @@ static int copy_disk(CBM_FILE fd_cbm, imgcopy_settings *settings,
 		{
 		    if(settings->warp>0)
 		        message_cb(1, "`-w' for this transfer mode ignored");
-		    settings->warp = 0;
+		        settings->warp = 0;
 		}
 		break;
 
