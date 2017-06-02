@@ -32,6 +32,8 @@
 
 #include "usb.h"
 
+#include "util.h"
+
 // dfu-programmer includes
 #include "commands.h"
 #include "dfu-device.h"
@@ -82,18 +84,8 @@ static struct XumDevice *FindDeviceByName(const char *commonName);
 static int16_t *ihex_search(int16_t *buf, int bufSize,
     uint8_t *pattern, uint8_t patternSize);
 
-// xum1541 util.c
-int xum1541_get_model_version(usb_dev_handle *handle, int *model,
-    int *version);
-usb_dev_handle *xum1541_find_device(int PortNumber, char *devNameBuf,
-    int devNameBufSize);
-void verbose_print(char *msg, ...);
-
 int verbose;
 int debug;  // Used by dfu-programmer
-
-// XXX should be from xum1541_types.h
-#define XUM1541_ENTER_BOOTLOADER    4
 
 
 // Update a device with new firmware from a file

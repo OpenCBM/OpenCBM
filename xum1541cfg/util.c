@@ -34,6 +34,8 @@
 
 #include "usb.h"
 
+#include "util.h"
+
 // XXX Fix for Linux/Mac build, should be moved
 #ifndef LIBUSB_PATH_MAX
 #define LIBUSB_PATH_MAX 512
