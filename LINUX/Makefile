@@ -19,7 +19,7 @@ SUBDIRS_DOC = opencbm/docs
 
 SUBDIRS_PLUGIN_XU1541 = opencbm/lib/plugin/xu1541
 
-SUBDIRS_PLUGIN_XUM1541 = opencbm/lib/plugin/xum1541
+SUBDIRS_PLUGIN_XUM1541 = opencbm/lib/plugin/xum1541 xum1541cfg
 
 SUBDIRS_PLUGIN_XA1541 = opencbm/lib/plugin/xa1541 opencbm/sys/linux/
 
