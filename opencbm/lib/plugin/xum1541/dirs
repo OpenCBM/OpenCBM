@@ -1,4 +1,2 @@
 DIRS= \
-	WINDOWS \
-	WINDOWS-usbcfg
-
+	WINDOWS 

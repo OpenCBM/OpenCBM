@@ -123,9 +123,6 @@ Package=<4>
     Project_Dep_Name opencbmxum1541
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name usbcfg
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name d82copy
     End Project Dependency
     Begin Project Dependency
@@ -662,21 +659,6 @@ Package=<5>
 
 Package=<4>
 {{{
-}}}
-
-###############################################################################
-
-Project: "usbcfg"="..\lib\plugin\xum1541\WINDOWS-usbcfg\usbcfg.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name opencbmxum1541
-    End Project Dependency
 }}}
 
 ###############################################################################
