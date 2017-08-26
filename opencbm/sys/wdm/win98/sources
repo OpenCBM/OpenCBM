@@ -1,5 +1,5 @@
 TARGETNAME=cbm4w98
-TARGETPATH=../../../bin
+TARGETPATH=../../../../bin
 TARGETTYPE=DRIVER
 USE_PDB=1
 
@@ -9,9 +9,9 @@ TARGETLIBS=	$(DDK_LIB_PATH)/csq.lib \
 !else
 TARGETLIBS= \
 !endif
-		../../../bin/*/libiec.lib \
-		../../../bin/*/libw98.lib \
-		../../../bin/*/libcommon.lib
+		../../../../bin/*/libiec.lib \
+		../../../../bin/*/libw98.lib \
+		../../../../bin/*/libcommon.lib
 
 BROWSERFILE=w98driver.bsc -n
 

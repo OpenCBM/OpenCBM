@@ -1,9 +1,9 @@
 
 TARGETNAME=tapview
-TARGETPATH=../../../bin
+TARGETPATH=../../../../bin
 TARGETTYPE=PROGRAM
 
-TARGETLIBS=../../../bin/*/libtapcap.lib \
+TARGETLIBS=../../../../bin/*/libtapcap.lib \
            $(SDK_LIB_PATH)/comdlg32.lib \
            $(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/user32.lib

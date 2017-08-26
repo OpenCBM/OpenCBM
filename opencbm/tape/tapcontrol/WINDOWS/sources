@@ -1,11 +1,11 @@
 
 TARGETNAME=tapcontrol
-TARGETPATH=../../../bin
+TARGETPATH=../../../../bin
 TARGETTYPE=PROGRAM
 
-TARGETLIBS=../../../bin/*/opencbm.lib    \
-           ../../../bin/*/arch.lib       \
-           ../../../bin/*/libtapmisc.lib \
+TARGETLIBS=../../../../bin/*/opencbm.lib    \
+           ../../../../bin/*/arch.lib       \
+           ../../../../bin/*/libtapmisc.lib \
            $(SDK_LIB_PATH)/kernel32.lib  \
            $(SDK_LIB_PATH)/user32.lib
 

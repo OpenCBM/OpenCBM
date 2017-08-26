@@ -1,6 +1,6 @@
 
 TARGETNAME=libcbmcopy
-TARGETPATH=../../bin
+TARGETPATH=../../../bin
 TARGETTYPE=LIBRARY
 
 TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \

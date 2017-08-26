@@ -1,5 +1,5 @@
 TARGETNAME=cbm4wdm
-TARGETPATH=../../../bin
+TARGETPATH=../../../../bin
 TARGETTYPE=DRIVER
 USE_PDB=1
 
@@ -9,9 +9,9 @@ TARGETLIBS=	$(DDK_LIB_PATH)/csq.lib \
 !else
 TARGETLIBS= \
 !endif
-		../../../bin/*/libiec.lib \
-		../../../bin/*/libwnt.lib \
-		../../../bin/*/libcommon.lib
+		../../../../bin/*/libiec.lib \
+		../../../../bin/*/libwnt.lib \
+		../../../../bin/*/libcommon.lib
 
 BROWSERFILE=wdmdriver.bsc -n
 

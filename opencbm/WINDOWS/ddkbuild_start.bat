@@ -148,7 +148,7 @@ echo Calling: %DDKBUILD% %CMDLINE%
 call %DDKBUILD% %CMDLINE%
 
 rem Copy the INF file into the bin directory
-copy %OPENCBM_SRC_HOME%\opencbm\sys\wdm\*.inf %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%
+copy %OPENCBM_SRC_HOME%\opencbm\sys\wdm\*.inf %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%
 
 if not exist %OPENCBM_SRC_HOME%\build*.err (
 
@@ -159,19 +159,19 @@ if not exist %OPENCBM_SRC_HOME%\build*.err (
 			echo.
 			echo =============== copying files to target =============
 
-			xcopy /q/y %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%\*.inf %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.inf %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy INF file to %COPYTARGET%"
-			xcopy /q/y %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%\*.sys %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.sys %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy SYS files to %COPYTARGET%"
-			xcopy /q/y %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%\*.exe %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.exe %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy EXE files to %COPYTARGET%"
-			xcopy /q/y %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%\*.dll %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.dll %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy DLL files to %COPYTARGET%"
 		)
 
 		if "%COPYSYM%" NEQ "" (
 			echo Copying debugging information
-			xcopy /q/y %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%\*.pdb %COPYSYM%\%DDKBUILD_PLATFORM%\*
+			xcopy /q/y %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.pdb %COPYSYM%\%DDKBUILD_PLATFORM%\*
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy PDB files for debugging %COPYSYM%"
 		)
 	)

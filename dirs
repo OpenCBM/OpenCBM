@@ -1,5 +1,2 @@
 DIRS= \
 	opencbm
-
-OPTIONAL_DIRS= \
-	xum1541cfg

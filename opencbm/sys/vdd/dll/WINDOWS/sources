@@ -1,12 +1,12 @@
 TARGETNAME=OpenCbmVDD
-TARGETPATH=../../../../bin
+TARGETPATH=../../../../../bin
 TARGETTYPE=DYNLINK
 TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib \
            $(SDK_LIB_PATH)/ntvdm.lib    \
-           ../../../../bin/*/arch.lib   \
-           ../../../../bin/i386/opencbm.lib
+           ../../../../../bin/*/arch.lib   \
+           ../../../../../bin/i386/opencbm.lib
 
 USE_MSVCRT = 1
 

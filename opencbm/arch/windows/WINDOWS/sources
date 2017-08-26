@@ -1,6 +1,6 @@
 
 TARGETNAME=arch
-TARGETPATH=../../../bin
+TARGETPATH=../../../../bin
 TARGETTYPE=LIBRARY
 
 INCLUDES=../../../include;../../../include/WINDOWS
