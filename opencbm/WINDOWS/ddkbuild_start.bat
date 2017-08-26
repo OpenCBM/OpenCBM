@@ -12,7 +12,7 @@ rem Another option is to use DDKBUILD from Hollies Technologies,
 rem downloadable from http://www.hollistech.com/Resources/ddkbuild/ddkbuild.htm
 rem To use that one, just define DDKBUILD_HOLLIS to be 1 on startup.
 
-set OPENCBM_SRC_HOME=%0\..\..
+set OPENCBM_SRC_HOME=%0\..\..\..
 
 rem set default local settings (not controlled by CVS)
 if exist %OPENCBM_SRC_HOME%\..\DDKBUILD_LOCAL.BAT call %OPENCBM_SRC_HOME%\..\DDKBUILD_LOCAL.BAT %OPENCBM_SRC_HOME%
@@ -132,9 +132,9 @@ if %DDKBUILD_HOLLIS% EQU 1 (
 
 shift
 
-if exist %OPENCBM_SRC_HOME%\addon set CMDARGUMENTS=%CMDARGUMENTS% addon
-if exist %OPENCBM_SRC_HOME%\mnib36 set CMDARGUMENTS=%CMDARGUMENTS% mnib36
-if exist %OPENCBM_SRC_HOME%\nibtools set CMDARGUMENTS=%CMDARGUMENTS% nibtools
+if exist %OPENCBM_SRC_HOME%\opencbm\addon set CMDARGUMENTS=%CMDARGUMENTS% addon
+if exist %OPENCBM_SRC_HOME%\opencbm\mnib36 set CMDARGUMENTS=%CMDARGUMENTS% mnib36
+if exist %OPENCBM_SRC_HOME%\opencbm\nibtools set CMDARGUMENTS=%CMDARGUMENTS% nibtools
 
 set CMDLINE=%TARGETSPEC% %DDKBUILD_ARGUMENTS% %CHECKEDFREE% %OPENCBM_SRC_HOME% %OPTIONAL_DIRS% %0 %1 %2 %3 %4 %5 %6 %7 %8 %9 %CMDARGUMENTS% -F
 
@@ -148,7 +148,7 @@ echo Calling: %DDKBUILD% %CMDLINE%
 call %DDKBUILD% %CMDLINE%
 
 rem Copy the INF file into the bin directory
-copy %OPENCBM_SRC_HOME%\sys\wdm\*.inf %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%
+copy %OPENCBM_SRC_HOME%\opencbm\sys\wdm\*.inf %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%
 
 if not exist %OPENCBM_SRC_HOME%\build*.err (
 
@@ -159,25 +159,25 @@ if not exist %OPENCBM_SRC_HOME%\build*.err (
 			echo.
 			echo =============== copying files to target =============
 
-			xcopy /q/y %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.inf %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%\*.inf %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy INF file to %COPYTARGET%"
-			xcopy /q/y %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.sys %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%\*.sys %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy SYS files to %COPYTARGET%"
-			xcopy /q/y %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.exe %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%\*.exe %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy EXE files to %COPYTARGET%"
-			xcopy /q/y %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.dll %COPYTARGET%\%DDKBUILD_PLATFORM%\
+			xcopy /q/y %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%\*.dll %COPYTARGET%\%DDKBUILD_PLATFORM%\
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy DLL files to %COPYTARGET%"
 		)
 
 		if "%COPYSYM%" NEQ "" (
 			echo Copying debugging information
-			xcopy /q/y %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%\*.pdb %COPYSYM%
+			xcopy /q/y %OPENCBM_SRC_HOME%\opencbm\bin\%DDKBUILD_PLATFORM%\*.pdb %COPYSYM%\%DDKBUILD_PLATFORM%\*
 			if errorlevel 1 echo "ddkbuild.bat(1) : error : could not copy PDB files for debugging %COPYSYM%"
 		)
 	)
 
 	if "%USERDEFPOSTBUILD%" NEQ "" (
-		if exist %USERDEFPOSTBUILD% call %USERDEFPOSTBUILD% %OPENCBM_SRC_HOME%
+		if exist %USERDEFPOSTBUILD% call %USERDEFPOSTBUILD% %OPENCBM_SRC_HOME%\opencbm
 	)
 ) else (
 	echo.
