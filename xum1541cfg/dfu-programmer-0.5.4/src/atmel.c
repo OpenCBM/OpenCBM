@@ -53,10 +53,15 @@
 #define ATMEL_DEBUG_THRESHOLD   50
 #define ATMEL_TRACE_THRESHOLD   55
 
+#ifdef NOC99
+static void DEBUG(char *dummy, ...) { };
+static void TRACE(char *dummy, ...) { };
+#else
 #define DEBUG(...)  dfu_debug( __FILE__, __FUNCTION__, __LINE__, \
                                ATMEL_DEBUG_THRESHOLD, __VA_ARGS__ )
 #define TRACE(...)  dfu_debug( __FILE__, __FUNCTION__, __LINE__, \
                                ATMEL_TRACE_THRESHOLD, __VA_ARGS__ )
+#endif
 
 static int32_t atmel_flash_block( dfu_device_t *device,
                                   int16_t *buffer,

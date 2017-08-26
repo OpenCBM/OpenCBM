@@ -33,8 +33,12 @@
 
 #define COMMAND_DEBUG_THRESHOLD 40
 
+#ifdef NOC99
+static void DEBUG(char *dummy, ...) { };
+#else
 #define DEBUG(...)  dfu_debug( __FILE__, __FUNCTION__, __LINE__, \
                                COMMAND_DEBUG_THRESHOLD, __VA_ARGS__ )
+#endif
 
 
 static int32_t execute_erase( dfu_device_t *device,

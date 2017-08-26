@@ -59,12 +59,18 @@
 #define DFU_TRACE_THRESHOLD         200
 #define DFU_MESSAGE_DEBUG_THRESHOLD 300
 
+#ifdef NOC99
+static void DEBUG(char *dummy, ...) { };
+static void TRACE(char *dummy, ...) { };
+static void MSG_DEBUG(char *dummy, ...) { };
+#else
 #define DEBUG(...)  dfu_debug( __FILE__, __FUNCTION__, __LINE__, \
                                DFU_DEBUG_THRESHOLD, __VA_ARGS__ )
 #define TRACE(...)  dfu_debug( __FILE__, __FUNCTION__, __LINE__, \
                                DFU_TRACE_THRESHOLD, __VA_ARGS__ )
 #define MSG_DEBUG(...)  dfu_debug( __FILE__, __FUNCTION__, __LINE__, \
                                DFU_MESSAGE_DEBUG_THRESHOLD, __VA_ARGS__ )
+#endif
 
 static uint16_t transaction = 0;
 
