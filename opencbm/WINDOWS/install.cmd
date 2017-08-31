@@ -13,7 +13,7 @@ setlocal enabledelayedexpansion
 
 @cd /d "%~dp0"
 
-set OC_VERSION=0.4.99.98
+set OC_VERSION=0.4.99.99
 set OC_INSTALLED_SIZE_IN_KB=1125
 
 set OC_VARIANT_DISPLAY=
