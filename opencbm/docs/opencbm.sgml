@@ -6,7 +6,7 @@
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
 name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de/" name="d81.de">,
 Arnd Menge <htmlurl url="mailto:arnd(at)jonnz(dot)de" name="arnd(at)jonnz(dot)de">,
-<date>2016-01-13
+<date>2017-09-06
 
 <abstract>
 This document describes the opencbm package, which can be used to control and
@@ -339,8 +339,6 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
  <item>New tool xum1541cfg, because the old one was severely outdated
 </itemize>
 
-<p>
-<descrip>
 <tag/opencbm v0.4.99.98:/
 
 <itemize>
