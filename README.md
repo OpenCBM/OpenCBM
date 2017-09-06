@@ -42,6 +42,11 @@ The mailing lists of OpenCBM can be found at https://sourceforge.net/p/opencbm/m
 
 Bug tracker are available at https://sourceforge.net/p/opencbm/_list/tickets.
 
+## Contributions
+
+We explicitly welcome outside contributors. If you feel like you can add to the projects, feel free to ask.
+
+
 ## Maintainers
 
 [@spiro-trikaliotis](https://github.com/spiro-trikaliotis),
