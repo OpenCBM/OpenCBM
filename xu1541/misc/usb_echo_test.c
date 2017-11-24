@@ -29,8 +29,13 @@ usb_dev_handle      *handle = NULL;
 
 // Linux: newer usb.h does not have USB_LE16_TO_CPU() macro anymore
 #ifndef USB_LE16_TO_CPU
+#ifdef __linux__
 #include <endian.h>
 #define USB_LE16_TO_CPU(x) x=le16toh(x);
+#elif defined(__APPLE__)
+#include <libkern/OSByteOrder.h>
+#define USB_LE16_TO_CPU(x) x=OSSwapLittleToHostInt16(x);
+#endif
 #endif
 
 /* send a number of 16 bit words to the xu1541 interface */
