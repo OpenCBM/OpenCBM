@@ -167,9 +167,9 @@ Please refer to the "ZoomTape-Manual-1.0_DRAFT.pdf" for using the tape tools
 
 Links:
 https://sourceforge.net/projects/libusb-win32/
-https://sourceforge.net/projects/opencbm/
-http://opencbm.trikaliotis.net/
-http://zadig.akeo.ie/
+https://github.com/OpenCBM
+http://opencbm.trikaliotis.net
+http://zadig.akeo.ie
 
 ------------------------------------------------------------------------------
 
