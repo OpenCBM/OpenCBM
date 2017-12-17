@@ -727,12 +727,16 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
                 "\txa1541\tfor XA1541, XM1541, XAP1541 and XMP1541 cables (parallel port).\n"
                 "\txu1541\tfor XU1541 cable (cheap USB solution, with restrictions)\n"
                 "\txum1541\tfor XUM1541 cable (include ZoomFloppy).\n"
+                "\txuac\tfor XUAC cable (include ZoomTape).\n"
                 "\n"
                 "If you are upgrading from OpenCBM 0.4.2 or earlier, with the same cable\n"
                 "as before, you most probably want to use the command line:\n\tinstcbm xa1541\n"
                 "\n"
                 "If you have the ZoomFloppy, you most probably want the command line\n"
                 "\tinstcbm xum1541\n"
+                "\n"
+                "If you have the ZoomTape, you most probably want the command line\n"
+                "\tinstcbm xuac\n"
                 );
             error = 1;
             /* error = get_all_plugins(Parameter); */

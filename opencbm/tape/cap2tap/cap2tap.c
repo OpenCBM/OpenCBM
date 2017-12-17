@@ -1,6 +1,6 @@
 /*
  *  CBM 1530/1531 tape routines.
- *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
+ *  Copyright 2012 Arnd Menge
 */
 
 #include <stdio.h>
@@ -40,7 +40,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	__int32         FuncRes, RetVal = -1;
 
 	printf("\nCAP2TAP v1.00 - ZoomTape CAP image to TAP image conversion\n");
-	printf("Copyright 2012 Arnd Menge\n\n");
+	printf("Copyright 2012-2017 Arnd Menge\n\n");
 
 	if (Evaluate_Commandline_Params(argc, argv) == -1)
 	{

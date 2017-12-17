@@ -78,9 +78,14 @@ EXTERN opencbm_plugin_tap_motor_off_t              opencbm_plugin_tap_motor_off;
 EXTERN opencbm_plugin_tap_start_capture_t          opencbm_plugin_tap_start_capture;
 EXTERN opencbm_plugin_tap_start_write_t            opencbm_plugin_tap_start_write;
 EXTERN opencbm_plugin_tap_get_ver_t                opencbm_plugin_tap_get_ver;
+EXTERN opencbm_plugin_tap_board_info_t             opencbm_plugin_tap_board_info;
 EXTERN opencbm_plugin_tap_download_config_t        opencbm_plugin_tap_download_config;
 EXTERN opencbm_plugin_tap_upload_config_t          opencbm_plugin_tap_upload_config;
 EXTERN opencbm_plugin_tap_break_t                  opencbm_plugin_tap_break;
+EXTERN opencbm_plugin_tap_buffer_fill_t            opencbm_plugin_tap_buffer_fill;
+EXTERN opencbm_plugin_tap_buffer_isfull_t          opencbm_plugin_tap_buffer_isfull;
+EXTERN opencbm_plugin_dev_set_value32_t            opencbm_plugin_dev_set_value32;
+EXTERN opencbm_plugin_dev_get_value32_t            opencbm_plugin_dev_get_value32;
 
 EXTERN opencbm_plugin_s1_read_n_t                  opencbm_plugin_s1_read_n;
 EXTERN opencbm_plugin_s1_write_n_t                 opencbm_plugin_s1_write_n;

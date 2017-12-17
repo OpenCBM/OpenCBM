@@ -6,7 +6,7 @@
  *
  *  Copyright 1999-2005           Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
  *  Copyright 2001-2005,2007-2009, 2011 Spiro Trikaliotis
- *  Copyright 2009,2011           Arnd Menge <arnd(at)jonnz(dot)de>
+ *  Copyright 2009,2011           Arnd Menge
  *
 */
 
@@ -221,9 +221,14 @@ static struct plugin_read_pointer plugin_pointer_to_read_tape[] =
 	PLUGIN_POINTER_DEF(opencbm_plugin_tap_start_capture),
 	PLUGIN_POINTER_DEF(opencbm_plugin_tap_start_write),
 	PLUGIN_POINTER_DEF(opencbm_plugin_tap_get_ver),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_board_info),
 	PLUGIN_POINTER_DEF(opencbm_plugin_tap_download_config),
 	PLUGIN_POINTER_DEF(opencbm_plugin_tap_upload_config),
 	PLUGIN_POINTER_DEF(opencbm_plugin_tap_break),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_buffer_fill),
+	PLUGIN_POINTER_DEF(opencbm_plugin_tap_buffer_isfull),
+	PLUGIN_POINTER_DEF(opencbm_plugin_dev_set_value32),
+	PLUGIN_POINTER_DEF(opencbm_plugin_dev_get_value32),
     PLUGIN_POINTER_END()
 };
 
@@ -2331,6 +2336,22 @@ cbm_tap_get_ver(CBM_FILE HandleDevice, int *Status)
 
 
 int CBMAPIDECL
+cbm_tap_board_info(CBM_FILE HandleDevice,
+                   unsigned __int32 InfoRequest,
+                   unsigned char *RecvBuffer, unsigned int RecvLength, int *BytesRead,
+                   int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_board_info)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_board_info(HandleDevice,
+                  InfoRequest, RecvBuffer, RecvLength, BytesRead, Status);
+    FUNC_LEAVE_INT(ret);
+}
+
+int CBMAPIDECL
 cbm_tap_break(CBM_FILE HandleDevice)
 {
     int ret = -1;
@@ -2428,6 +2449,86 @@ cbm_tap_upload_config(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int
     FUNC_LEAVE_INT(ret);
 }
 
+/*! \brief Fill buffer
+
+ This function caches data (to be written out to disk or tape)
+ in the device's system buffer.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \param Buffer
+   Pointer to a buffer which holds the bytes to be cached.
+
+ \param Length
+   The number of bytes to write (cache).
+
+ \param Status
+   The return status.
+
+ \param BytesWritten
+   The number of bytes written (cached).
+
+ \return
+   != 0 on success.
+
+ If cbm_driver_open() did not succeed, it is illegal to 
+ call this function.
+
+ Note that a plugin is not required to implement this function.
+*/
+
+int CBMAPIDECL
+cbm_tap_buffer_fill(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_buffer_fill)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_buffer_fill(HandleDevice, Buffer, Length, Status, BytesWritten);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+int CBMAPIDECL
+cbm_tap_buffer_isfull(CBM_FILE HandleDevice, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_tap_buffer_isfull)
+        ret = Plugin_information.Plugin.opencbm_plugin_tap_buffer_isfull(HandleDevice, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+int CBMAPIDECL
+dev_set_value32(CBM_FILE HandleDevice, unsigned char ValueID, unsigned int data, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_dev_set_value32)
+        ret = Plugin_information.Plugin.opencbm_plugin_dev_set_value32(HandleDevice, ValueID, data, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
+
+int CBMAPIDECL
+dev_get_value32(CBM_FILE HandleDevice, unsigned char ValueID, unsigned int *data, int *Status)
+{
+    int ret = -1;
+
+    FUNC_ENTER();
+
+    if (Plugin_information.Plugin.opencbm_plugin_dev_get_value32)
+        ret = Plugin_information.Plugin.opencbm_plugin_dev_get_value32(HandleDevice, ValueID, data, Status);
+
+    FUNC_LEAVE_INT(ret);
+}
 
 /*! \brief Get the function pointer for a function in a plugin
 

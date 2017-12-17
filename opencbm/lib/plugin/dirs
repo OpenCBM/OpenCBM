@@ -3,4 +3,5 @@ DIRS= \
 
 OPTIONAL_DIRS= \
 	xu1541 \
-	xum1541
+	xum1541 \
+	xuac

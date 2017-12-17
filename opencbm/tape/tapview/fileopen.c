@@ -1,6 +1,6 @@
 /*
  *  CBM 1530/1531 tape routines.
- *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
+ *  Copyright 2012 Arnd Menge
 */
 
 #include <stdio.h>
@@ -12,8 +12,6 @@
 #include "resource.h"
 #include "fileopen.h"
 #include "cap.h"
-
-#define Tape_Status_OK 1 // from tape.h
 
 typedef struct sLineInfo {
 	unsigned __int8  Info; // [1bit Empty/Data | 1bit FirstHW]

@@ -1,6 +1,6 @@
 /*
  *  CBM 1530/1531 tape routines.
- *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
+ *  Copyright 2012-2017 Arnd Menge
 */
 
 #include <stdio.h>
@@ -16,6 +16,7 @@
 // Global variables
 unsigned __int8  CAP_Machine, CAP_Video, CAP_StartEdge, CAP_SignalFormat;
 unsigned __int32 CAP_Precision, CAP_SignalWidth, CAP_StartOfs;
+unsigned __int32 TimerSpeed, uiBufferSize;
 CBM_FILE         fd;
 
 // Break handling variables
@@ -195,6 +196,7 @@ __int32 ReadCaptureFile(HANDLE hCAP, unsigned __int8 *pucTapeBuffer, __int32 *pi
 	unsigned __int32 uiTotalTapeTimeSeconds;
 	__int32          FuncRes;
 	BOOL             FirstSignal = TRUE;
+	unsigned __int32 uiShortSignalWarnings = 0, uiShortSignalErrors = 0;
 
 	// Seek to start of image file and read image header, extract & verify header contents, seek to start of image data.
 	FuncRes = CAP_ReadHeader(hCAP);
@@ -212,59 +214,75 @@ __int32 ReadCaptureFile(HANDLE hCAP, unsigned __int8 *pucTapeBuffer, __int32 *pi
 		return -1;
 	}
 
-	if (CAP_Precision == 16)
-	{
-		ShortWarning = 16*75; // 75us
-		ShortError = 16*60;   // 60us
-	}
-	else
-	{
-		ShortWarning = 75; // 75us
-		ShortError = 60;   // 60us
-	}
+	// Init tape data pointer.
+	*piCaptureLen = 0;
 
-	// Keep space for leading number of deltas.
-	*piCaptureLen = 5;
-
-	// Read timestamps, convert to 16MHz hardware resolution if necessary.
+	// Read timestamps, convert to hardware resolution if necessary.
 	while ((FuncRes = CAP_ReadSignal(hCAP, &ui64Delta, NULL)) == CAP_Status_OK)
 	{
 		if (FirstSignal)
 		{
 			// Replace first timestamp with start delay if requested
-			if (StartDelayActivated == TRUE)
+			if (StartDelayActivated)
 			{
 				if (StartDelay == 0)
-					ui64Delta = 1600; // 100us minimum
+					ui64Delta = TimerSpeed*100; // 100us minimum
 				else
 				{
 					ui64Delta = StartDelay;
-					ui64Delta *= 15625; //16000000;
-					ui64Delta <<= 10;
+					ui64Delta *= TimerSpeed*15625;
+					ui64Delta <<= 6;
 				}
 			}
 			FirstSignal = FALSE;
 		}
 		else
-			if (CAP_Precision == 1) ui64Delta <<= 4; // Convert from 1MHz to 16MHz.
-
-		if (ui64Delta < ShortWarning) printf("Warning - Short signal length detected: 0x%.10X\n", ui64Delta);
-		if (ui64Delta < ShortError)
 		{
-			printf("Warning - Replaced by minimum signal length.\n");
-			ui64Delta = ShortError;
+			// Convert timestamp (CAP_Precision -> TimerSpeed).
+			// No calculation needed if CAP_Precision==TimerSpeed.
+
+			if (CAP_Precision == 1)
+			{
+				ui64Delta *= TimerSpeed;
+			}
+			else if (CAP_Precision != TimerSpeed)
+			{
+				// Effective timestamp width is 39bit unsigned, delta is 64bit unsigned.
+				// Hence we can safely multiply:
+				ui64Delta *= TimerSpeed;
+				ui64Delta += CAP_Precision/2; // Correct rounding.
+				ui64Delta /= CAP_Precision;
+			}
+		}
+
+		ShortWarning = TimerSpeed*40; // 40us
+		ShortError = TimerSpeed*25;   // 25us
+
+		if (ui64Delta < ShortWarning)
+		{
+			if (ui64Delta < ShortError)
+			{
+				uiShortSignalErrors++;
+				ui64Delta = ShortError;
+				//printf("Warning - Replaced with minimum signal length.\n");
+			}
+			else
+			{
+				uiShortSignalWarnings++;
+				//printf("Warning - Short signal (0x%.10X)\n", ui64Delta);
+			}
 		}
 
 		ui64TotalTapeTime += ui64Delta;
 
 		if (ui64Delta < 0x8000)
 		{
-			// Short signal (<2ms)
+			// Short signal.
 			(*piCaptureLen) += 2;
 		}
 		else
 		{
-			// Long signal (>=2ms)
+			// Long signal.
 			(*piCaptureLen) += 5;
 			pucTapeBuffer[*piCaptureLen-5] = (unsigned __int8) (((ui64Delta >> 32) & 0x7f) | 0x80); // MSB must be 1.
 			pucTapeBuffer[*piCaptureLen-4] = (unsigned __int8)  ((ui64Delta >> 24) & 0xff);
@@ -281,27 +299,27 @@ __int32 ReadCaptureFile(HANDLE hCAP, unsigned __int8 *pucTapeBuffer, __int32 *pi
 	}
 
 	// Add final timestamp for stop delay
-	if (StopDelayActivated == TRUE)
+	if (StopDelayActivated)
 	{
 		if (StopDelay == 0xffffffff)
 			ui64Delta = 0xffffffffff;
 		else
 		{
 			ui64Delta = StopDelay;
-			ui64Delta *= 15625;
-			ui64Delta <<= 10; //16000000;
+			ui64Delta *= TimerSpeed*15625;
+			ui64Delta <<= 6;
 		}
 
 		ui64TotalTapeTime += ui64Delta;
 
 		if (ui64Delta < 0x8000)
 		{
-			// Short signal (<2ms)
+			// Short signal.
 			(*piCaptureLen) += 2;
 		}
 		else
 		{
-			// Long signal (>=2ms)
+			// Long signal.
 			(*piCaptureLen) += 5;
 			pucTapeBuffer[*piCaptureLen-5] = (unsigned __int8) (((ui64Delta >> 32) & 0x7f) | 0x80); // MSB must be 1.
 			pucTapeBuffer[*piCaptureLen-4] = (unsigned __int8)  ((ui64Delta >> 24) & 0xff);
@@ -311,16 +329,133 @@ __int32 ReadCaptureFile(HANDLE hCAP, unsigned __int8 *pucTapeBuffer, __int32 *pi
 		pucTapeBuffer[*piCaptureLen-1] = (unsigned __int8) (ui64Delta & 0xff);
 	}
 
-	// Send number of delta bytes first.
-	pucTapeBuffer[0] = 0x80;
-	pucTapeBuffer[1] = ((*piCaptureLen-5) >> 24) & 0xff;
-	pucTapeBuffer[2] = ((*piCaptureLen-5) >> 16) & 0xff;
-	pucTapeBuffer[3] = ((*piCaptureLen-5) >>  8) & 0xff;
-	pucTapeBuffer[4] =  (*piCaptureLen-5) & 0xff;
+	// Output short signal warnings/errors.
+	if (uiShortSignalWarnings > 0)
+	{
+		printf("Warning - %u short signal%s detected\n",
+			uiShortSignalWarnings, (uiShortSignalWarnings == 1) ? "" : "s");
+	}
+	if (uiShortSignalErrors > 0)
+	{
+		printf("Warning - %u short signal%s replaced with minimum signal length.\n",
+			uiShortSignalErrors, (uiShortSignalErrors == 1) ? "" : "s");
+	}
+	if ((uiShortSignalWarnings > 0) || (uiShortSignalErrors > 0))
+	{
+		printf("\n");
+	}
 
-	// Calculate tape recording length.
-	uiTotalTapeTimeSeconds = (unsigned __int32) ((ui64TotalTapeTime >> 10)/15625); //16000000;
+	// Calculate tape recording length (rounded down).
+	uiTotalTapeTimeSeconds = (unsigned __int32) ((ui64TotalTapeTime >> 6)/15625/TimerSpeed);
 	OutputTapeLength(uiTotalTapeTimeSeconds);
+
+	return 0;
+}
+
+
+
+// Get the specified hardware info from the attached board.
+__int32 GetBoardInfo(CBM_FILE fd,
+                     unsigned __int32 InfoRequest,
+                     unsigned __int8 *InfoResult,
+                     unsigned __int32 InfoResultSize,
+                     __int32 *Length)
+{
+	__int32         Status, BytesRead, BytesWritten, FuncRes;
+
+	FuncRes = cbm_tap_board_info(fd, InfoRequest, InfoResult, BOARD_INFO_MAX_SIZE, &BytesRead, &Status);
+	if (FuncRes < 0)
+	{
+		printf("\nReturned error [board_info]: ");
+		if (OutputFuncError(FuncRes) < 0)
+			printf("%d\n", FuncRes);
+		return -1;
+	}
+	if (Status != Info_Status_OK_Info_Sent)
+	{
+		printf("\nReturned error [board_info]: ");
+		if (OutputInfoError(Status) < 0)
+			printf("%d\n", Status);
+		return -1;
+	}
+
+	// Add zero termination to the returned string.
+	InfoResult[BytesRead] = '\0';
+
+	return Status;
+}
+
+
+// Get some hardware info from the attached board.
+__int32 PrintBoardInfo(CBM_FILE fd)
+{
+	unsigned __int8 InfoResult[BOARD_INFO_MAX_SIZE+1], InfoResult2[BOARD_INFO_MAX_SIZE+1];
+	__int32         Status, BytesRead, BytesWritten, FuncRes;
+
+	// ---- Get board name -----------------------------------------------------
+
+	FuncRes = GetBoardInfo(fd, INFO_BOARD_NAME, InfoResult, BOARD_INFO_MAX_SIZE, &BytesRead);
+	if (FuncRes < 0)
+		return -1;
+
+	printf("* Board: %s\n", InfoResult);
+
+	// ---- Get MCU name & speed -----------------------------------------------
+
+	FuncRes = GetBoardInfo(fd, INFO_MCU_NAME, InfoResult, BOARD_INFO_MAX_SIZE, &BytesRead);
+	if (FuncRes < 0)
+		return -1;
+
+	FuncRes = GetBoardInfo(fd, INFO_MCU_MHZ, InfoResult2, BOARD_INFO_MAX_SIZE, &BytesRead);
+	if (FuncRes < 0)
+		return -1;
+
+	printf("* MCU: %s @ %s MHz\n", InfoResult, InfoResult2);
+
+	// ---- Get firmware version -----------------------------------------------
+
+	FuncRes = GetBoardInfo(fd, INFO_FIRMWARE_VERSION, InfoResult, BOARD_INFO_MAX_SIZE, &BytesRead);
+	if (FuncRes < 0)
+		return -1;
+
+	printf("* Firmware: %s\n", InfoResult);
+
+	// ---- Get buffer size (description string) -------------------------------
+
+	FuncRes = GetBoardInfo(fd, INFO_BUFFER_SIZE_STR, InfoResult, BOARD_INFO_MAX_SIZE, &BytesRead);
+	if (FuncRes < 0)
+		return -1;
+
+	printf("* Device buffer: %s\n", InfoResult);
+
+	// ---- Get buffer size (value string) -------------------------------------
+
+	FuncRes = GetBoardInfo(fd, INFO_BUFFER_SIZE_VAL_STR, InfoResult, BOARD_INFO_MAX_SIZE, &BytesRead);
+	if (FuncRes < 0)
+		return -1;
+
+	// Remember buffer size.
+	uiBufferSize = atoi(InfoResult);
+
+	// ---- Get timer speed ----------------------------------------------------
+
+	FuncRes = GetBoardInfo(fd, INFO_TIMER_SPEED_MHZ, InfoResult, BOARD_INFO_MAX_SIZE, &BytesRead);
+	if (FuncRes < 0)
+		return -1;
+
+	// Remember timer speed from the board.
+	TimerSpeed = atoi(InfoResult);
+	if (TimerSpeed == 0)
+	{
+		printf("* Timer speed: error (=0)\n");
+		return -1;
+	}
+
+	printf("* Timer speed: %d MHz\n", TimerSpeed);
+
+	// -------------------------------------------------------------------------
+
+	printf("\n");
 
 	return 0;
 }
@@ -328,19 +463,23 @@ __int32 ReadCaptureFile(HANDLE hCAP, unsigned __int8 *pucTapeBuffer, __int32 *pi
 
 __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 uiCaptureLen)
 {
-	__int32         Status, BytesRead, BytesWritten, FuncRes;
-	unsigned __int8 WriteConfig, WriteConfig2;
+	__int32          Status, BytesRead, BytesWritten, FuncRes;
+	unsigned __int8  WriteConfig, WriteConfig2;
+	unsigned __int32 WriteConfig3;
+	unsigned __int32 uiNumParts, uiBufferPartSize, i;
+
+	// -------------------------------------------------------------------------
 
 	// Check abort flag.
 	if (AbortTapeOps)
 		return -1;
 
+	// -------------------------------------------------------------------------
+
 	// Check tape firmware version compatibility.
 	//   Status value:
 	//   - tape firmware version
-	//   - XUM1541_Error_NoTapeSupport
-	//   - XUM1541_Error_NoDiskTapeMode
-	//   - XUM1541_Error_TapeCmdInDiskMode
+	//   - XUAC_Error_NoTapeSupport
 	FuncRes = cbm_tap_get_ver(fd, &Status);
 	if (FuncRes != 1)
 	{
@@ -362,87 +501,123 @@ __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 
 		return -1;
 	}
 
+	// -------------------------------------------------------------------------
+
+	// Check abort flag.
+	if (AbortTapeOps)
+		return -1;
+
+	// -------------------------------------------------------------------------
+
+	// Set device debug level. Check serial port for debug output.
+	FuncRes = dev_set_value32(fd, XUAC_SET_DBG_LEVEL, DEV_DEBUG_LEVEL, &Status);
+	if (FuncRes < 0)
+	{
+		printf("\nReturned error [set_dbg_level]: ");
+		if (OutputFuncError(FuncRes) < 0)
+			printf("%d\n", FuncRes);
+		return -1;
+	}
+	if (Status != XUAC_Status_OK)
+	{
+		printf("\nReturned error [set_dbg_level]: ");
+		if (OutputError(Status) < 0)
+			printf("%d\n", Status);
+		return -1;
+	}
+
+	// -------------------------------------------------------------------------
+
+	// Check abort flag.
+	if (AbortTapeOps)
+		return -1;
+
+	// -------------------------------------------------------------------------
+
+	// Set tape device SENSE delay to prevent noise.
+	FuncRes = dev_set_value32(fd, XUAC_TAP_SET_SENSE_DELAY, TAPE_SENSE_DELAY_WRITE, &Status);
+	if (FuncRes < 0)
+	{
+		printf("\nReturned error [set_sense_delay]: ");
+		if (OutputFuncError(FuncRes) < 0)
+			printf("%d\n", FuncRes);
+		return -1;
+	}
+	if (Status != XUAC_Status_OK)
+	{
+		printf("\nReturned error [set_sense_delay]: ");
+		if (OutputError(Status) < 0)
+			printf("%d\n", Status);
+		return -1;
+	}
+
+	// -------------------------------------------------------------------------
+
+	// Check abort flag.
+	if (AbortTapeOps)
+		return -1;
+
+	// -------------------------------------------------------------------------
+
 	// Prepare tape write configuration.
 	// Write signal is inverted read signal.
-	if (CAP_StartEdge == CAP_StartEdge_Falling)
-		WriteConfig = ~(unsigned __int8)XUM1541_TAP_WRITE_STARTFALLEDGE; // Start writing with rising edge.
-	else
-		WriteConfig = (unsigned __int8)XUM1541_TAP_WRITE_STARTFALLEDGE; // Start writing with falling edge.
-
-	// Check abort flag.
-	if (AbortTapeOps)
-		return -1;
+	WriteConfig = (unsigned __int8)
+		((CAP_StartEdge == CAP_StartEdge_Falling) ? RisingEdge : FallingEdge);
 
 	// Upload tape write configuration.
-	//   Status values:
-	//   - Tape_Status_OK_Config_Uploaded
-	//   - Tape_Status_ERROR_usbRecvByte
-	//   FuncRes values concerning tape mode:
-	//   - XUM1541_Error_NoTapeSupport
-	//   - XUM1541_Error_NoDiskTapeMode
-	//   - XUM1541_Error_TapeCmdInDiskMode
-	FuncRes = cbm_tap_upload_config(fd, &WriteConfig, 1, &Status, &BytesWritten);
+	FuncRes = dev_set_value32(fd, XUAC_TAP_SET_FIRST_WRITE_EDGE, WriteConfig, &Status);
 	if (FuncRes < 0)
 	{
-		printf("\nReturned error [upload_config]: ");
+		printf("\nReturned error [set_first_write_edge]: ");
 		if (OutputFuncError(FuncRes) < 0)
 			printf("%d\n", FuncRes);
 		return -1;
 	}
-	if (Status != Tape_Status_OK_Config_Uploaded)
+	if (Status != XUAC_Status_OK)
 	{
-		printf("\nReturned error [upload_config]: ");
+		printf("\nReturned error [set_first_write_edge]: ");
 		if (OutputError(Status) < 0)
 			printf("%d\n", Status);
 		return -1;
 	}
-	if (BytesWritten != 1)
-	{
-		printf("\nError [upload_config]: Invalid data size (%d).\n", BytesWritten);
-		return -1;
-	}
+
+	// -------------------------------------------------------------------------
 
 	// Check abort flag.
 	if (AbortTapeOps)
 		return -1;
+
+	// -------------------------------------------------------------------------
 
 	// Download tape write configuration and check.
-	//   Status values:
-	//   - Tape_Status_OK_Config_Downloaded
-	//   - Tape_Status_ERROR_usbSendByte
-	//   FuncRes values concerning tape mode:
-	//   - XUM1541_Error_NoTapeSupport
-	//   - XUM1541_Error_NoDiskTapeMode
-	//   - XUM1541_Error_TapeCmdInDiskMode
-	FuncRes = cbm_tap_download_config(fd, &WriteConfig2, 1, &Status, &BytesRead);
+	FuncRes = dev_get_value32(fd, XUAC_TAP_GET_FIRST_WRITE_EDGE, &WriteConfig3, &Status);
 	if (FuncRes < 0)
 	{
-		printf("\nReturned error [download_config]: ");
+		printf("\nReturned error [get_first_write_edge]: ");
 		if (OutputFuncError(FuncRes) < 0)
 			printf("%d\n", FuncRes);
 		return -1;
 	}
-	if (Status != Tape_Status_OK_Config_Downloaded)
+	if (Status != XUAC_Status_OK)
 	{
-		printf("\nReturned error [download_config]: ");
+		printf("\nReturned error [get_first_write_edge]: ");
 		if (OutputError(Status) < 0)
 			printf("%d\n", Status);
 		return -1;
 	}
-	if (BytesRead != 1)
+	if (WriteConfig != (unsigned __int8) WriteConfig3)
 	{
-		printf("\nReturned error [download_config]: Invalid data size (%d).\n", BytesRead);
+		printf("\nError [get_first_write_edge]: Configuration mismatch.\n");
 		return -1;
 	}
-	if ((WriteConfig & 0x60) != (WriteConfig2 & 0x60))
-	{
-		printf("\nError [download_config]: Configuration mismatch.\n");
-		return -1;
-	}
+
+	// -------------------------------------------------------------------------
 
 	// Check abort flag.
 	if (AbortTapeOps)
 		return -1;
+
+	// -------------------------------------------------------------------------
 
 	// Prepare tape firmware for write.
 	//   Status values:
@@ -450,9 +625,7 @@ __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 
 	//   - Tape_Status_ERROR_Device_Disconnected
 	//   - Tape_Status_ERROR_Not_In_Tape_Mode
 	//   FuncRes values concerning tape mode:
-	//   - XUM1541_Error_NoTapeSupport
-	//   - XUM1541_Error_NoDiskTapeMode
-	//   - XUM1541_Error_TapeCmdInDiskMode
+	//   - XUAC_Error_NoTapeSupport
 	FuncRes = cbm_tap_prepare_write(fd, &Status);
 	if (FuncRes < 0)
 	{
@@ -469,9 +642,97 @@ __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 
 		return -1;
 	}
 
+	// -------------------------------------------------------------------------
+
 	// Check abort flag.
 	if (AbortTapeOps)
 		return -1;
+
+	// -------------------------------------------------------------------------
+
+	// Cache tape data in device buffer if possible.
+	// Some devices may not have a buffer for USB transfers.
+	if (uiBufferSize > 0)
+	{
+
+		// Split buffer size into 'uiNumParts' parts.
+		uiNumParts = 16;
+		uiBufferPartSize = uiBufferSize/uiNumParts;
+
+		// Print status line.
+		printf("Buffering tape data [");
+		for (i = 0; i < uiNumParts; i++) { printf(" "); }
+		printf("]");
+		for (i = 0; i < uiNumParts+1; i++) { printf("\b"); }
+
+		// Send buffer parts.
+		for (i = 0; i < uiNumParts; i++)
+		{
+			FuncRes = cbm_tap_buffer_fill(fd, pucTapeBuffer, uiBufferPartSize, &Status, &BytesWritten);
+			if (FuncRes < 0)
+			{
+				printf("\nReturned error [fill_buffer]: ");
+				if (OutputFuncError(FuncRes) < 0)
+					printf("%d\n", FuncRes);
+				return -1;
+			}
+			if (Status != Memory_Status_OK_Buffer_Filled)
+			{
+				printf("\nReturned error [fill_buffer]: ");
+				if (OutputError(Status) < 0)
+					printf("%d\n", Status);
+				return -1;
+			}
+			if (uiBufferPartSize != BytesWritten)
+			{
+				printf("\nError [fill_buffer]: Not enough buffered.\n");
+				return -1;
+			}
+
+			// Update status line.
+			printf("*");
+
+			// Update tape data pointer & remaining amount.
+			pucTapeBuffer += uiBufferPartSize;
+			uiCaptureLen -= uiBufferPartSize;
+
+			// Check abort flag.
+			if (AbortTapeOps)
+				return -1;
+		}
+
+		// ---------------------------------------------------------------------
+
+		// Make sure buffer is full.
+		FuncRes = cbm_tap_buffer_isfull(fd, &Status);
+		if (FuncRes != 1)
+		{
+			printf("\nReturned error [buffer_isfull]: %d\n", FuncRes);
+			return -1;
+		}
+		if (Status != Memory_Status_OK_Buffer_Full)
+		{
+			printf("\nReturned error [buffer_isfull]: ");
+			if (OutputError(Status) < 0)
+				if (OutputFuncError(Status) < 0)
+					printf("%d\n", Status);
+			return -1;
+		}
+
+		// ---------------------------------------------------------------------
+
+		// Update status line.
+		printf("] ok\n\n");
+
+	} // if (uiBufferSize > 0)
+
+	// -------------------------------------------------------------------------
+
+	// Check abort flag.
+	if (AbortTapeOps)
+		return -1;
+
+	// -------------------------------------------------------------------------
 
 	// Get tape SENSE state.
 	//   Status values:
@@ -480,9 +741,7 @@ __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 
 	//   - Tape_Status_ERROR_Device_Not_Configured
 	//   - Tape_Status_ERROR_Device_Disconnected
 	//   - Tape_Status_ERROR_Not_In_Tape_Mode
-	//   - XUM1541_Error_NoTapeSupport
-	//   - XUM1541_Error_NoDiskTapeMode
-	//   - XUM1541_Error_TapeCmdInDiskMode
+	//   - XUAC_Error_NoTapeSupport
 	FuncRes = cbm_tap_get_sense(fd, &Status);
 	if (FuncRes != 1)
 	{
@@ -498,6 +757,8 @@ __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 
 		return -1;
 	}
 
+	// -------------------------------------------------------------------------
+
 	if (Status == Tape_Status_OK_Sense_On_Play)
 	{
 		// Check abort flag.
@@ -511,9 +772,7 @@ __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 
 		//   - Tape_Status_ERROR_Device_Not_Configured
 		//   - Tape_Status_ERROR_Device_Disconnected
 		//   - Tape_Status_ERROR_Not_In_Tape_Mode
-		//   - XUM1541_Error_NoTapeSupport
-		//   - XUM1541_Error_NoDiskTapeMode
-		//   - XUM1541_Error_TapeCmdInDiskMode
+		//   - XUAC_Error_NoTapeSupport
 		FuncRes = cbm_tap_wait_for_stop_sense(fd, &Status);
 		if (FuncRes != 1)
 		{
@@ -530,20 +789,24 @@ __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 
 		}
 	}
 
+	// -------------------------------------------------------------------------
+
 	// Check abort flag.
 	if (AbortTapeOps)
 		return -1;
 
+	// -------------------------------------------------------------------------
+
 	printf("Press <RECORD> and <PLAY> on tape.\n");
+
+	// -------------------------------------------------------------------------
 
 	//   Status values:
 	//   - Tape_Status_OK_Sense_On_Play
 	//   - Tape_Status_ERROR_Device_Not_Configured
 	//   - Tape_Status_ERROR_Device_Disconnected
 	//   - Tape_Status_ERROR_Not_In_Tape_Mode
-	//   - XUM1541_Error_NoTapeSupport
-	//   - XUM1541_Error_NoDiskTapeMode
-	//   - XUM1541_Error_TapeCmdInDiskMode
+	//   - XUAC_Error_NoTapeSupport
 	FuncRes = cbm_tap_wait_for_play_sense(fd, &Status);
 	if (FuncRes != 1)
 	{
@@ -559,11 +822,17 @@ __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 
 		return -1;
 	}
 
+	// -------------------------------------------------------------------------
+
 	// Check abort flag.
 	if (AbortTapeOps)
 		return -1;
 
+	// -------------------------------------------------------------------------
+
 	printf("\nWriting tape...\n");
+
+	// -------------------------------------------------------------------------
 
 	//   Status values:
 	//   - Tape_Status_OK_Write_Finished
@@ -572,9 +841,7 @@ __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 
 	//   - Tape_Status_ERROR_Device_Not_Configured
 	//   - Tape_Status_ERROR_Device_Disconnected
 	//   FuncRes values concerning tape mode:
-	//   - XUM1541_Error_NoTapeSupport
-	//   - XUM1541_Error_NoDiskTapeMode
-	//   - XUM1541_Error_TapeCmdInDiskMode
+	//   - XUAC_Error_NoTapeSupport
 	FuncRes = cbm_tap_start_write(fd, pucTapeBuffer, uiCaptureLen, &Status, &BytesWritten);
 	if (FuncRes < 0)
 	{
@@ -596,11 +863,16 @@ __int32 WriteTape(CBM_FILE fd, unsigned __int8 *pucTapeBuffer, unsigned __int32 
 		return -1;
 	}
 
+	// -------------------------------------------------------------------------
+
 	// Check abort flag.
 	if (AbortTapeOps)
 		return -1;
 
+	// -------------------------------------------------------------------------
+
 	printf("\nWriting finished OK.\n");
+
 	return 0;
 }
 
@@ -644,8 +916,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	__int32         iCaptureLen = 0, iTapeBufferSize;
 	__int32         FuncRes, RetVal = -1;
 
-	printf("\ntapwrite v1.00 - Commodore 1530/1531 tape mastering software\n");
-	printf("Copyright 2012 Arnd Menge\n\n");
+	printf("\ntapwrite %s -- Commodore 1530/1531 tape mastering software\n", APP_VERSION_STRING);
+	printf("Copyright 2012-2017 Arnd Menge\n\n");
 
 	InitializeCriticalSection(&CritSec_fd);
 	InitializeCriticalSection(&CritSec_BreakHandler);
@@ -653,58 +925,73 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 	if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE) BreakHandler, TRUE))
 		printf("Ctrl-C break handler not installed.\n\n");
 
-	if (EvaluateCommandlineParams(argc, argv, filename) == -1)
-	{
-		usage();
-		goto exit;
-	}
+	// Set defaults.
+	TimerSpeed = 0;
 
-	// Open specified image file for reading.
-	FuncRes = CAP_OpenFile(&hCAP, filename);
-	if (FuncRes != CAP_Status_OK)
-	{
-		CAP_OutputError(FuncRes);
-		goto exit;
-	}
+	do {
 
-	// Allocate memory for tape image.
-	if (AllocateImageBuffer(hCAP, &pucTapeBuffer, &iTapeBufferSize) == -1)
-	{
+		if (EvaluateCommandlineParams(argc, argv, filename) == -1)
+		{
+			usage();
+			break;
+		}
+
+		EnterCriticalSection(&CritSec_fd); // Acquire handle flag access.
+
+		if (cbm_driver_open_ex(&fd, NULL) != 0)
+		{
+			printf("Driver error.\n");
+			LeaveCriticalSection(&CritSec_fd);
+			break;
+		}
+
+		fd_Initialized = TRUE;
+		LeaveCriticalSection(&CritSec_fd); // Release handle flag access.
+
+		// Print some hardware info about the attached board.
+		PrintBoardInfo(fd);
+
+		// Open specified image file for reading.
+		FuncRes = CAP_OpenFile(&hCAP, filename);
+		if (FuncRes != CAP_Status_OK)
+		{
+			CAP_OutputError(FuncRes);
+			break;
+		}
+
+		// Allocate memory for tape image.
+		if (AllocateImageBuffer(hCAP, &pucTapeBuffer, &iTapeBufferSize) == -1)
+		{
+			CAP_CloseFile(&hCAP);
+			break;
+		}
+
+		// Read tape image into memory.
+		RetVal = ReadCaptureFile(hCAP, pucTapeBuffer, &iCaptureLen);
+
 		CAP_CloseFile(&hCAP);
-		goto exit;
-	}
 
-	// Read tape image into memory.
-	RetVal = ReadCaptureFile(hCAP, pucTapeBuffer, &iCaptureLen);
+		if (RetVal == -1)
+			break;
 
-	CAP_CloseFile(&hCAP);
+		RetVal = WriteTape(fd, pucTapeBuffer, iCaptureLen);
 
-	if (RetVal == -1)
-		goto exit;
+	} while(0);
 
 	EnterCriticalSection(&CritSec_fd); // Acquire handle flag access.
-
-	if (cbm_driver_open_ex(&fd, NULL) != 0)
+	if (fd_Initialized)
 	{
-		printf("Driver error.\n");
-		LeaveCriticalSection(&CritSec_fd);
-		goto exit;
+		cbm_driver_close(fd);
+		fd_Initialized = FALSE;
 	}
-
-	fd_Initialized = TRUE;
 	LeaveCriticalSection(&CritSec_fd); // Release handle flag access.
 
-	RetVal = WriteTape(fd, pucTapeBuffer, iCaptureLen);
-
-	EnterCriticalSection(&CritSec_fd); // Acquire handle flag access.
-	cbm_driver_close(fd);
-	fd_Initialized = FALSE;
-	LeaveCriticalSection(&CritSec_fd); // Release handle flag access.
-
-    exit:
 	DeleteCriticalSection(&CritSec_fd);
 	DeleteCriticalSection(&CritSec_BreakHandler);
+
    	if (pucTapeBuffer != NULL) free(pucTapeBuffer);
+
    	printf("\n");
+
    	return RetVal;
 }

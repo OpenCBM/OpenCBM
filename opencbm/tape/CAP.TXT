@@ -3,12 +3,12 @@
 
 *** CAP (cassette CAPture images)
 *** Document revision: 1.0-DRAFT
-*** Last updated: July 23, 2012
+*** Last updated: December 15, 2017
 *** Compiler/Editor: Arnd Menge
 
   The CAP format represents the data stored on a cassette tape by storing
-timestamps of customizable resolution of the digital signal edges. It
-should be compatible with any existing tape loaders.
+timestamps of the digital signal edges at a hardware dependent resolution.
+It should be compatible with any existing tape loaders.
 
   The layout is simple - a small header precedes the timestamps.
 
@@ -17,7 +17,7 @@ should be compatible with any existing tape loaders.
       -----------------------------------------------   ----------------
 0000: 54 41 50 52 45 41 44 00 00 00 00 00 00 00 00 00   TAPREAD.........
 0010: 76 31 2E 30 30 00 00 00 00 00 00 00 00 00 00 00   v1.00...........
-0020: 36 32 2E 35 6E 73 00 00 00 00 00 00 00 00 00 00   62.5ns..........
+0020: 31 36 4D 48 7A 00 00 00 00 00 00 00 00 00 00 00   16MHz...........
 0030: 43 36 34 00 00 00 00 00 00 00 00 00 00 00 00 00   C64.............
 0040: 50 41 4C 00 00 00 00 00 00 00 00 00 00 00 00 00   PAL.............
 0050: 46 61 6C 6C 69 6E 67 45 64 67 65 00 00 00 00 00   FallingEdge.....
@@ -32,9 +32,9 @@ should be compatible with any existing tape loaders.
     Bytes: $0000-000F: File signature "TAPREAD"
             0010-001F: CAP image version
                          "v1.00" - Original layout
-            0020-002F: Timestamp precision
-                         Default: 1us (microsecond)
-                         Maximum: 62.5ns (nanoseconds)
+            0020-002F: Timer speed (Timestamp precision)
+                         Depends on board, possible values are:
+                         1MHz, 12MHz, 14MHz, 16MHz, 18MHz, 20MHz.
             0030-003F: Target computer
                          C64, C16, VC20, Spectrum48K, or CUSTOM
             0040-004F: Target video standard
@@ -53,9 +53,11 @@ should be compatible with any existing tape loaders.
 
   All header entries are padded with trailing zero bytes.
 
-  The hardware sampling rate of 16MHz allows a maximum signal/timestamp
-precision of 62.5 nanoseconds. Default setting is 1 microsecond (us),
-which is equivalent to 1MHz.
+  A hardware timer speed of 16MHz allows a maximum signal/timestamp
+precision of 62.5 nanoseconds. The value is hardware dependent and
+automatically read from the board firmware. When writing a CAP image
+timestamps are automatically converted to the timer speed of the board
+used for writing.
 
   The timestamps (bitwidth specified at 0x70) and are stored in hi/lo order
 hexadecimal format. Each timestamp corresponds to a tape signal level change.

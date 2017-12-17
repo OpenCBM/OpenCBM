@@ -195,10 +195,18 @@ int Extract_and_Verify_CAP_Header_Contents(HANDLE hHandle)
 		return CAP_Status_Error_Wrong_version;
 
 	// Extract timer precision.
-	if      (strcmp(&(pInfoBlock->header[0x20]),"1us") == 0)
+	if      (strcmp(&(pInfoBlock->header[0x20]),"1MHz") == 0)
 		pInfoBlock->Precision = 1;
-	else if (strcmp(&(pInfoBlock->header[0x20]),"62.5ns") == 0)
+	else if (strcmp(&(pInfoBlock->header[0x20]),"12MHz") == 0)
+		pInfoBlock->Precision = 12;
+	else if (strcmp(&(pInfoBlock->header[0x20]),"14MHz") == 0)
+		pInfoBlock->Precision = 14;
+	else if (strcmp(&(pInfoBlock->header[0x20]),"16MHz") == 0)
 		pInfoBlock->Precision = 16;
+	else if (strcmp(&(pInfoBlock->header[0x20]),"18MHz") == 0)
+		pInfoBlock->Precision = 18;
+	else if (strcmp(&(pInfoBlock->header[0x20]),"20MHz") == 0)
+		pInfoBlock->Precision = 20;
 	else
 		return CAP_Status_Error_Wrong_precision;
 
@@ -304,10 +312,17 @@ int Update_CAP_Header_Contents(HANDLE hHandle)
 	sprintf(&(pInfoBlock->header[0x10]), "%s", "v1.00");
 
 	// Set timer precision.
-	if (pInfoBlock->Precision == 16)
-		sprintf(&(pInfoBlock->header[0x20]), "%s", "62.5ns");
-	else if (pInfoBlock->Precision == 1)
-		sprintf(&(pInfoBlock->header[0x20]), "%s", "1us");
+	if (   (pInfoBlock->Precision == 20)
+		|| (pInfoBlock->Precision == 18)
+		|| (pInfoBlock->Precision == 16)
+		|| (pInfoBlock->Precision == 14)
+		|| (pInfoBlock->Precision == 12)
+		|| (pInfoBlock->Precision == 1))
+	{
+		sprintf(&(pInfoBlock->header[0x20]), "%u%s", pInfoBlock->Precision, "MHz");
+	}
+	else
+		sprintf(&(pInfoBlock->header[0x20]), "%u%s-?", pInfoBlock->Precision, "MHz");
 
 	// Set machine.
 	if (pInfoBlock->Machine == CAP_Machine_C64)
@@ -494,7 +509,11 @@ int CAP_isValidHeader(HANDLE hHandle)
 		return CAP_Status_Error_Wrong_version;
 
 	// Check timer precision.
-	if (   (pInfoBlock->Precision != 16)
+	if (   (pInfoBlock->Precision != 20)
+		&& (pInfoBlock->Precision != 18)
+		&& (pInfoBlock->Precision != 16)
+		&& (pInfoBlock->Precision != 14)
+		&& (pInfoBlock->Precision != 12)
 		&& (pInfoBlock->Precision != 1))
 		return CAP_Status_Error_Wrong_precision;
 

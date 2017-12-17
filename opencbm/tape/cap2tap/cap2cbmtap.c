@@ -1,6 +1,6 @@
 /*
  *  CBM 1530/1531 tape routines.
- *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
+ *  Copyright 2012-2017 Arnd Menge
 */
 
 #include <stdio.h>
@@ -216,6 +216,7 @@ __int32 CAP2CBMTAP(HANDLE hCAP, HANDLE hTAP)
 {
 	unsigned __int64 ui64Delta, ui64Delta2, ui64Len;
 	unsigned __int32 Timer_Precision_MHz, uiFreq;
+	unsigned __int8  ucStartEdge; // CAP file first edge.
 	unsigned __int8  TAPv; // TAP file format version.
 	unsigned __int8  ch;   // Single TAP data byte.
 	__int32          TAP_Counter = 0; // CAP & TAP file byte counters.
@@ -234,17 +235,29 @@ __int32 CAP2CBMTAP(HANDLE hCAP, HANDLE hTAP)
 		return -1;
 	}
 
-	// Skip first halfwave (time until first pulse starts).
-	FuncRes = CAP_ReadSignal(hCAP, &ui64Delta, NULL);
-	if (FuncRes == CAP_Status_OK_End_of_file)
-	{
-		printf("Error: Empty image file.");
-		return -1;
-	}
-	else if (FuncRes == CAP_Status_Error_Reading_data)
+	// Get start edge.
+	FuncRes = CAP_GetHeader_StartEdge(hCAP, &ucStartEdge);
+	if (FuncRes != CAP_Status_OK)
 	{
 		CAP_OutputError(FuncRes);
 		return -1;
+	}
+
+	// Skip first halfwave if first edge is falling edge.
+	if (ucStartEdge == CAP_StartEdge_Falling)
+	{
+		// Skip first halfwave (time until first pulse starts).
+		FuncRes = CAP_ReadSignal(hCAP, &ui64Delta, NULL);
+		if (FuncRes == CAP_Status_OK_End_of_file)
+		{
+			printf("Error: Empty image file.");
+			return -1;
+		}
+		else if (FuncRes == CAP_Status_Error_Reading_data)
+		{
+			CAP_OutputError(FuncRes);
+			return -1;
+		}
 	}
 
 	// Convert while CAP file signal available.

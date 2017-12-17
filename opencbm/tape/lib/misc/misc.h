@@ -1,6 +1,6 @@
 /*
  *  CBM 1530/1531 tape routines.
- *  Copyright 2012 Arnd Menge, arnd(at)jonnz(dot)de
+ *  Copyright 2012-2017 Arnd Menge
 */
 
 #ifndef __TAP_MISC_H_
@@ -30,5 +30,6 @@
 
 __int32 OutputError(__int32 Status);
 __int32 OutputFuncError(__int32 Status);
+__int32 OutputInfoError(__int32 Status);
 
 #endif

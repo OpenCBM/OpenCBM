@@ -233,21 +233,28 @@ EXTERN int CBMAPIDECL cbm_srq_burst_write_track(CBM_FILE f, unsigned char *buffe
 
 /* functions specifically for CBM 153x tape drive */
 
-EXTERN int CBMAPIDECL cbm_tap_prepare_capture(CBM_FILE f, int *Status);
-EXTERN int CBMAPIDECL cbm_tap_prepare_write(CBM_FILE f, int *Status);
-EXTERN int CBMAPIDECL cbm_tap_get_sense(CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_prepare_capture    (CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_prepare_write      (CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_get_sense          (CBM_FILE f, int *Status);
 EXTERN int CBMAPIDECL cbm_tap_wait_for_stop_sense(CBM_FILE f, int *Status);
 EXTERN int CBMAPIDECL cbm_tap_wait_for_play_sense(CBM_FILE f, int *Status);
-EXTERN int CBMAPIDECL cbm_tap_start_capture(CBM_FILE f, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
-EXTERN int CBMAPIDECL cbm_tap_start_write(CBM_FILE f, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
-EXTERN int CBMAPIDECL cbm_tap_motor_on(CBM_FILE f, int *Status);
-EXTERN int CBMAPIDECL cbm_tap_motor_off(CBM_FILE f, int *Status);
-EXTERN int CBMAPIDECL cbm_tap_get_ver(CBM_FILE f, int *Status);
-EXTERN int CBMAPIDECL cbm_tap_download_config(CBM_FILE f, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
-EXTERN int CBMAPIDECL cbm_tap_upload_config(CBM_FILE f, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
-EXTERN int CBMAPIDECL cbm_tap_break(CBM_FILE f);
+EXTERN int CBMAPIDECL cbm_tap_start_capture      (CBM_FILE f, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
+EXTERN int CBMAPIDECL cbm_tap_start_write        (CBM_FILE f, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
+EXTERN int CBMAPIDECL cbm_tap_motor_on           (CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_motor_off          (CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_get_ver            (CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL cbm_tap_board_info         (CBM_FILE f, unsigned __int32 InfoRequest,
+                                                              unsigned char *RecvBuffer, unsigned int RecvLength, int *BytesRead,
+                                                              int *Status);
+EXTERN int CBMAPIDECL cbm_tap_download_config    (CBM_FILE f, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead);
+EXTERN int CBMAPIDECL cbm_tap_upload_config      (CBM_FILE f, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
+EXTERN int CBMAPIDECL cbm_tap_break              (CBM_FILE f);
+EXTERN int CBMAPIDECL cbm_tap_buffer_fill        (CBM_FILE f, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten);
+EXTERN int CBMAPIDECL cbm_tap_buffer_isfull      (CBM_FILE f, int *Status);
+EXTERN int CBMAPIDECL dev_set_value32            (CBM_FILE f, unsigned char ValueID, unsigned int data, int *Status);
+EXTERN int CBMAPIDECL dev_get_value32            (CBM_FILE f, unsigned char ValueID, unsigned int *data, int *Status);
 
-/* tape capture functions end */
+/* tape functions end */
 
 /* get function address of the plugin */
 EXTERN void * CBMAPIDECL cbm_get_plugin_function_address(const char * Functionname);

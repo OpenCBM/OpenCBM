@@ -15,6 +15,10 @@ __int32 OutputError(__int32 Status)
 		case Tape_Status_ERROR:
 			printf("General error.\n");
 			break;
+		case Tape_Status_ERROR_Unsupported_Function:
+			printf("Device firmware does not recognize USB request ID.\n");
+			printf("Please update device firmware and try again.\n");
+			break;
 		case Tape_Status_ERROR_Device_Disconnected:
 			printf("ZoomTape device was disconnected.\n");
 			printf("Please disconnect and reconnect ZoomFloppy to continue.\n");
@@ -31,17 +35,39 @@ __int32 OutputError(__int32 Status)
 		case Tape_Status_ERROR_Write_Interrupted_By_Stop:
 			printf("Write interrupted by <STOP>.\n");
 			break;
-		case Tape_Status_ERROR_usbSendByte:
-			printf("usbSendByte failed.\n");
-			break;
-		case Tape_Status_ERROR_usbRecvByte:
-			printf("usbRecvByte failed.\n");
+		case Tape_Status_ERROR_RecvBufferEmpty:
+			printf("Receive buffer empty. Could not get timestamp.\n");
 			break;
 		case Tape_Status_ERROR_External_Break:
 			printf("External break.\n");
 			break;
+		case Tape_Status_ERROR_Buffer_Full:
+			printf("Device buffer full. Could not store timestamp.\n");
+			break;
 		case Tape_Status_ERROR_Wrong_Tape_Firmware:
-			printf("Wrong tape firmware version.\n");
+			printf("Incompatible tape firmware version.\n");
+			break;
+		case Memory_Status_ERROR_Not_Enough_Space:
+			printf("Buffer already full.\n");
+			break;
+		default:
+			// printf("Unknown error: %d\n", Status);
+			return -1;
+	}
+	return 0;
+}
+
+
+__int32 OutputInfoError(__int32 Status)
+{
+	switch (Status)
+	{
+		case Info_Status_ERROR:
+			printf("General error.\n");
+			break;
+		case Info_Status_ERROR_Unknown_Request:
+			printf("Device firmware does not recognize USB request ID.\n");
+			printf("Please update device firmware and try again.\n");
 			break;
 		default:
 			// printf("Unknown error: %d\n", Status);
@@ -55,16 +81,8 @@ __int32 OutputFuncError(__int32 Status)
 {
 	switch (Status)
 	{
-		case XUM1541_Error_NoTapeSupport:
-			printf("No tape support. Update ZoomFloppy firmware.\n");
-			break;
-		case XUM1541_Error_NoDiskTapeMode:
-			printf("ZoomFloppy not correctly initialized.\n");
-			printf("Disconnect ZoomFloppy from USB and reconnect.\n");
-			break;
-		case XUM1541_Error_TapeCmdInDiskMode:
-			printf("ZoomTape not detected at ZoomFloppy start.\n");
-			printf("Disconnect ZoomFloppy from USB and reconnect.\n");
+		case XUAC_Error_NoTapeSupport:
+			printf("No tape support. Update ZoomTape firmware.\n");
 			break;
 		default:
 			// printf("Unknown error: %d\n", Status);
