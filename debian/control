@@ -2,7 +2,7 @@ Source: opencbm
 Section: misc
 Priority: extra
 Maintainer: Spiro Trikaliotis <spiro.trikaliotis@gmx.de>
-Build-Depends: debhelper (>= 4.1.16), linuxdoc-tools, linuxdoc-tools-latex, linuxdoc-tools-text, libusb-dev
+Build-Depends: debhelper (>= 4.1.16), linuxdoc-tools, libusb-dev
 Standards-Version: 3.7.2.1
 
 Package: opencbm

@@ -1,3 +1,9 @@
+opencbm (0.4.99.99a) unstable; urgency=low
+
+  * Compile latest version.
+
+ -- Spiro Trikaliotis <cbm4in@trikaliotis.net>  Mon, 08 Jan 2018 18:46:00 +0100
+
 opencbm (0.4.99.94-1) unstable; urgency=low
 
   * Fix for newer cc65 versions to allow compilation again.
