@@ -2,8 +2,9 @@ Source: opencbm
 Section: misc
 Priority: extra
 Maintainer: Spiro Trikaliotis <spiro.trikaliotis@gmx.de>
-Build-Depends: debhelper (>= 4.1.16), linuxdoc-tools, libusb-dev
-Standards-Version: 3.7.2.1
+Build-Depends: debhelper (>= 9), linuxdoc-tools, libusb-dev
+Homepage: http://opencbm.trikaliotis.net/
+Standards-Version: 3.9.8
 
 Package: opencbm
 Architecture: any
@@ -37,7 +38,7 @@ Description: Commodore serial IEC bus utilities
 Package: libopencbm0-dev
 Section: devel
 Architecture: any
-Depends: libopencbm0 (= ${Source-Version}), libc6-dev
+Depends: libopencbm0 (= ${binary:Version}), libc6-dev
 Provides: libopencbm-dev
 Conflicts: libopencbm-dev
 Description: Development files for the OpenCBM library
