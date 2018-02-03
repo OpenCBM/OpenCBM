@@ -494,8 +494,8 @@ Perform the following steps to install OpenCBM on your Linux machine:
 
 <itemize>
 <item>Get the sources from the tarball at <htmlurl
-      url="http://www.trikaliotis.net/Download/opencbm-0.4.99.99/opencbm-0.4.99.99-source.tar.bz2"
-      name="http://www.trikaliotis.net/Download/opencbm-0.4.99.99/opencbm-0.4.99.99-source.tar.bz2">.
+      url="http://www.trikaliotis.net/Download/opencbm-0.4.99.99/opencbm-0.4.99.99.tar.bz2"
+      name="http://www.trikaliotis.net/Download/opencbm-0.4.99.99/opencbm-0.4.99.99.tar.bz2">.
 <item>Unpack them into a directory (i.e., <it>&tilde;/opencbm-0.4.99.99</it>, with
       0.4.99.99 being the version number of OpenCBM).
 <item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.99</it>
