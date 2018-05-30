@@ -730,8 +730,22 @@ xum1541_write(usb_dev_handle *HandleXum1541, unsigned char modeFlags, const unsi
             fprintf(stderr, "USB error in write data: %s\n",
                 usb.strerror());
             return -1;
-        } else if (wr > 0)
-            xum1541_dbg(2, "wrote %d bytes", wr);
+        } else if (wr > 0) {
+	    // I'm lazy.
+	    switch (wr) {
+	    case 1:
+            	xum1541_dbg(2, "wrote %d bytes (%02x)", wr, data[0]);
+		break;
+	    case 2:
+            	xum1541_dbg(2, "wrote %d bytes (%02x %02x)", wr, data[0], data[1]);
+		break;
+	    case 3:
+            	xum1541_dbg(2, "wrote %d bytes (%02x %02x %02x)", wr, data[0], data[1], data[2]);
+		break;
+	    default:
+            	xum1541_dbg(2, "wrote %d bytes (%02x %02x %02x %02x ...)", wr, data[0], data[1], data[2], data[3]);
+	    }
+	}
 
         data += wr;
         bytesWritten += wr;
@@ -869,8 +883,22 @@ xum1541_read(usb_dev_handle *HandleXum1541, unsigned char mode, unsigned char *d
             fprintf(stderr, "USB error in read data(%p, %d): %s\n",
                data, (int)size, usb.strerror());
             return -1;
-        } else if (rd > 0)
-            xum1541_dbg(2, "read %d bytes", rd);
+        } else if (rd > 0) {
+	    // I'm lazy.
+	    switch (rd) {
+	    case 1:
+            	xum1541_dbg(2, "read %d bytes (%02x)", rd, data[0]);
+		break;
+	    case 2:
+            	xum1541_dbg(2, "read %d bytes (%02x %02x)", rd, data[0], data[1]);
+		break;
+	    case 3:
+            	xum1541_dbg(2, "read %d bytes (%02x %02x %02x)", rd, data[0], data[1], data[2]);
+		break;
+	    default:
+            	xum1541_dbg(2, "read %d bytes (%02x %02x %02x %02x ...)", rd, data[0], data[1], data[2], data[3]);
+	    }
+	}
 
         data += rd;
         bytesRead += rd;
