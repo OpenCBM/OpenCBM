@@ -1,5 +1,7 @@
 #!/bin/bash
 
+DEVICE=9
+
 if [ ! -z "$1" ]; then
 	COUNT=$1
 else
@@ -7,6 +9,33 @@ else
 fi
 
 clear
+
+if [ 1 == 0 ]; then
+	ROMFILE_COMPARE=rom1541p.bin
+
+	ROMFILE_TEMPLATE=rom1541p-auto
+
+	ROM_START=0xc000
+	ROM_LENGTH=0x4000
+fi
+
+if [ 1 == 0 ]; then
+	ROMFILE_COMPARE=rom2031lp.bin
+
+	ROMFILE_TEMPLATE=rom2031lp-auto
+
+	ROM_START=0xc000
+	ROM_LENGTH=0x4000
+fi
+
+if [ 1 == 1 ]; then
+	ROMFILE_COMPARE=rom1001.bin
+
+	ROMFILE_TEMPLATE=rom1001-auto
+
+	ROM_START=0xc000
+	ROM_LENGTH=0x4000
+fi
 
 if [ 1 == 0 ]; then
 	ROMFILE_COMPARE=rom1570.bin
@@ -17,7 +46,7 @@ if [ 1 == 0 ]; then
 	ROM_LENGTH=0x8000
 fi
 
-if [ 1 == 1 ]; then
+if [ 1 == 0 ]; then
 	ROMFILE_COMPARE=rom1541-05.bin
 
 	ROMFILE_TEMPLATE=rom1541-auto
@@ -56,7 +85,7 @@ if [ ! -e $ROMFILE_COMPARE ]; then
 	case "${REPLY,,}" in
 		"y"|"yes")
 			echo Creating file $ROMFILE_COMPARE
-			timeout 2m cbmctrl download 8 $ROM_START $ROM_LENGTH $ROMFILE_COMPARE; RET=$?
+			timeout 2m cbmctrl download $DEVICE $ROM_START $ROM_LENGTH $ROMFILE_COMPARE; RET=$?
 			echo
 			if [ $RET -gt 0 ]; then
 				echo Failed to create $ROMFILE_COMPARE, aborting.
@@ -78,7 +107,7 @@ for ((A=$FIRST; A<$LAST; A++)); do
 	ROMFILE_TO_CREATE=GENERATED/$ROMFILE_TEMPLATE-$A
 	date
 	date > $ROMFILE_TO_CREATE.time 2>&1
-	timeout 2m time -a -o $ROMFILE_TO_CREATE.time cbmctrl download 8 $ROM_START $ROM_LENGTH $ROMFILE_TO_CREATE.bin; RET=$?
+	timeout 2m time -a -o $ROMFILE_TO_CREATE.time cbmctrl download $DEVICE $ROM_START $ROM_LENGTH $ROMFILE_TO_CREATE.bin; RET=$?
 	[ $RET -gt 0 ] && echo $RET > $ROMFILE_TO_CREATE.wd
 	date >> $ROMFILE_TO_CREATE.time 2>&1
 	diff $ROMFILE_TO_CREATE.bin $ROMFILE_COMPARE > /dev/null 2>&1; RET=$?
