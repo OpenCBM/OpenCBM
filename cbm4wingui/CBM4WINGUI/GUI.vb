@@ -3,7 +3,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang 0.4.0
+' Copyright (C) 2006      Wolfgang Moser
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
@@ -40,7 +40,7 @@
 '                Fixed hardcoded reference to c:\ drive in two places
 '                Improved handling of default values when INI file has errors.
 '
-'   Additions by Wolfgang 0.4.0, based on Gui4Cbm4Win 0.0.9
+'   Additions by Wolfgang Moser, based on Gui4Cbm4Win 0.0.9
 '         0.40 - Renamed all "Warp"-Options into "No-Warp" ones
 '                Added "auto" transfer option
 '                Renamed the stdout and stderr log files to g4c4w*.log

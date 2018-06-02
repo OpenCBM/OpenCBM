@@ -12,7 +12,7 @@
 'GUI4CBM4WIN
 '
 ' Copyright (C) 2004-2005 Leif Bloomquist
-' Copyright (C) 2006      Wolfgang 0.4.0
+' Copyright (C) 2006      Wolfgang Moser
 ' Copyright (C) 2006      Spiro Trikaliotis
 ' Copyright (C) 2006-2007 Payton Byrd
 '
