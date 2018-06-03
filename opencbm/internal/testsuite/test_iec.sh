@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEVICE=9
+DEVICE=8
 
 if [ ! -z "$1" ]; then
 	COUNT=$1
@@ -28,7 +28,7 @@ if [ 1 == 0 ]; then
 	ROM_LENGTH=0x4000
 fi
 
-if [ 1 == 1 ]; then
+if [ 1 == 0 ]; then
 	ROMFILE_COMPARE=rom1001.bin
 
 	ROMFILE_TEMPLATE=rom1001-auto
@@ -46,7 +46,7 @@ if [ 1 == 0 ]; then
 	ROM_LENGTH=0x8000
 fi
 
-if [ 1 == 0 ]; then
+if [ 1 == 1 ]; then
 	ROMFILE_COMPARE=rom1541-05.bin
 
 	ROMFILE_TEMPLATE=rom1541-auto
