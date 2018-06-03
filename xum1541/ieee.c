@@ -658,6 +658,8 @@ static int8_t IeeeAtnOut(uint8_t by)
             IeeeByteOut(last_byte);
             IeeeEoi(1);
 
+            _delay_us(ATN_DELAY);
+
             last_byte = -1;
         }
         else
