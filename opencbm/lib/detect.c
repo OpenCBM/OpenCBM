@@ -111,6 +111,11 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                     unknownDevice[25] = (char)magic;
                     break;
 
+                case 0xfeb6:
+                    deviceType = cbm_dt_cbm2031;
+                    deviceString = "2031"; 
+                    break;
+
                 case 0xaaaa:
                     deviceType = cbm_dt_cbm1541;
                     deviceString = "1540 or 1541"; 
