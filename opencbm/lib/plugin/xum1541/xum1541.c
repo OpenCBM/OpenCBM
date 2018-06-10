@@ -74,6 +74,69 @@ xum1541_dbg(int level, char *msg, ...)
     }
 }
 
+/*! \internal \brief Output (start of) transferred data for debugging 
+
+ \param level
+   The output level; output will only be produced if this level is less or equal the debugging level
+
+ \param op
+   The operation performed ("read" or "write")
+
+ \param data
+   The data buffer
+
+ \param len
+   The length of the data in the buffer
+*/
+static void
+xum1541_print_data(int level, const char *op, const unsigned char *data, uint8_t len)
+{
+    // optimize for no debug output
+    if (level > debug_level) {
+	return;
+    }
+
+    switch (len) {
+    case 0:
+	return;
+    case 1:
+       	xum1541_dbg(level, "%s %d bytes (%02x)", op, len, 
+		data[0]);
+	break;
+    case 2:
+       	xum1541_dbg(level, "%s %d bytes (%02x %02x)", op, len, 
+		data[0], data[1]);
+	break;
+    case 3:
+       	xum1541_dbg(level, "%s %d bytes (%02x %02x %02x)", op, len, 
+		data[0], data[1], data[2]);
+	break;
+    case 4:
+       	xum1541_dbg(level, "%s %d bytes (%02x %02x %02x %02x)", op, len, 
+		data[0], data[1], data[2], data[3]);
+	break;
+    case 5:
+       	xum1541_dbg(level, "%s %d bytes (%02x %02x %02x %02x %02x)", op, len, 
+		data[0], data[1], data[2], data[3], data[4]);
+	break;
+    case 6:
+       	xum1541_dbg(level, "%s %d bytes (%02x %02x %02x %02x %02x %02x)", op, len, 
+		data[0], data[1], data[2], data[3], data[4], data[5]);
+	break;
+    case 7:
+       	xum1541_dbg(level, "%s %d bytes (%02x %02x %02x %02x %02x %02x %02x)", op, len, 
+		data[0], data[1], data[2], data[3], data[4], data[5], data[6]);
+	break;
+    case 8:
+       	xum1541_dbg(level, "%s %d bytes (%02x %02x %02x %02x %02x %02x %02x %02x)", op, len, 
+		data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+	break;
+    default:
+       	xum1541_dbg(level, "%s %d bytes (%02x %02x %02x %02x %02x %02x %02x %02x ...)", op, len, 
+		data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
+    }
+}
+
 /*! \internal \brief Get a char* string from the device's Unicode descriptors
     Some data will be lost in this conversion, but we are ok with that.
 
@@ -730,22 +793,9 @@ xum1541_write(usb_dev_handle *HandleXum1541, unsigned char modeFlags, const unsi
             fprintf(stderr, "USB error in write data: %s\n",
                 usb.strerror());
             return -1;
-        } else if (wr > 0) {
-	    // I'm lazy.
-	    switch (wr) {
-	    case 1:
-            	xum1541_dbg(2, "wrote %d bytes (%02x)", wr, data[0]);
-		break;
-	    case 2:
-            	xum1541_dbg(2, "wrote %d bytes (%02x %02x)", wr, data[0], data[1]);
-		break;
-	    case 3:
-            	xum1541_dbg(2, "wrote %d bytes (%02x %02x %02x)", wr, data[0], data[1], data[2]);
-		break;
-	    default:
-            	xum1541_dbg(2, "wrote %d bytes (%02x %02x %02x %02x ...)", wr, data[0], data[1], data[2], data[3]);
-	    }
-	}
+        } 
+
+	xum1541_print_data(2, "wrote", data, wr);
 
         data += wr;
         bytesWritten += wr;
@@ -883,22 +933,9 @@ xum1541_read(usb_dev_handle *HandleXum1541, unsigned char mode, unsigned char *d
             fprintf(stderr, "USB error in read data(%p, %d): %s\n",
                data, (int)size, usb.strerror());
             return -1;
-        } else if (rd > 0) {
-	    // I'm lazy.
-	    switch (rd) {
-	    case 1:
-            	xum1541_dbg(2, "read %d bytes (%02x)", rd, data[0]);
-		break;
-	    case 2:
-            	xum1541_dbg(2, "read %d bytes (%02x %02x)", rd, data[0], data[1]);
-		break;
-	    case 3:
-            	xum1541_dbg(2, "read %d bytes (%02x %02x %02x)", rd, data[0], data[1], data[2]);
-		break;
-	    default:
-            	xum1541_dbg(2, "read %d bytes (%02x %02x %02x %02x ...)", rd, data[0], data[1], data[2], data[3]);
-	    }
-	}
+        } 
+
+        xum1541_print_data(2, "read", data, rd);
 
         data += rd;
         bytesRead += rd;
