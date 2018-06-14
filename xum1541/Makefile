@@ -16,7 +16,11 @@
 # ZOOMFLOPPY: commercial board with 16 MHz ATmega32U2 cpu
 # BUMBLEB: Bumble-B with 16 MHz AT90USB162 cpu and IEC daughtercard
 # OLIMEX: Olimex dev board with 8 MHz AT90USB162 cpu and IEC daughtercard
-MODELS= USBKEY ZOOMFLOPPY BUMBLEB OLIMEX
+# TEENSY: Teensy 2.0 USB Development Board with 16 MHz ATMEGA32U4 cpu
+# PROMICRO: Arduino Pro Micro USB Development Board with 16 MHz ATMEGA32U4 cpu
+# PROMICRO_7406: Arduino Pro Micro USB Development Board with 16 MHz ATMEGA32U4 with a 7406
+
+MODELS= USBKEY ZOOMFLOPPY BUMBLEB OLIMEX TEENSY2 PROMICRO PROMICRO_7406
 .PHONY: $(MODELS)
 
 # Enable to get debug printing via the UART (port D)
@@ -56,6 +60,21 @@ CPUMODEL=	at90usb162
 CPURATE=	8000000
 BOARD=		BOARD_ZOOMFLOPPY
 BOARD_OBJS=	board-zoomfloppy.o
+else ifeq ($(MODEL),TEENSY2)
+CPUMODEL=	atmega32u4
+CPURATE=	16000000
+BOARD=		BOARD_TEENSY2
+BOARD_OBJS=	board-teensy2.o
+else ifeq ($(MODEL),PROMICRO)
+CPUMODEL=	atmega32u4
+CPURATE=	16000000
+BOARD=		BOARD_PROMICRO
+BOARD_OBJS=	board-promicro.o
+else ifeq ($(MODEL),PROMICRO_7406)
+CPUMODEL=	atmega32u4
+CPURATE=	16000000
+BOARD=		BOARD_PROMICRO_7406
+BOARD_OBJS=	board-promicro_7406.o
 endif
 
 # Final name for firmware hex file
@@ -69,7 +88,7 @@ REVISION=$(shell grep '\#define $(MODEL)' xum1541.h | sed 's/\#define $(MODEL)//
 #   --param inline-call-cost=2 -finline-limit=3 -fno-inline-small-functions
 CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
         -DF_CPU=$(CPURATE)UL -DF_CLOCK=F_CPU -mmcu=$(CPUMODEL) \
-        -Os -g -Werror -Wall -Wstrict-prototypes -Wundef \
+        -Os -g -Wall -Wstrict-prototypes -Wundef \
         -Winline -Wno-error=inline -std=gnu99 -I . \
         -DUSB_DEVICE_ONLY -DFIXED_CONTROL_ENDPOINT_SIZE=8 \
         -DINTERRUPT_CONTROL_ENDPOINT \

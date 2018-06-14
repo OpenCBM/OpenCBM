@@ -27,6 +27,9 @@
 #define BUMBLEB                 1
 #define ZOOMFLOPPY              2
 #define OLIMEX                  3
+#define TEENSY2                 4
+#define PROMICRO                5
+#define PROMICRO_7406           6
 
 #if MODEL == USBKEY
 #include "cpu-usbkey.h"
@@ -40,6 +43,15 @@
 #elif MODEL == ZOOMFLOPPY
 #include "cpu-zoomfloppy.h"
 #include "board-zoomfloppy.h"
+#elif MODEL == TEENSY2
+#include "cpu-teensy2.h"
+#include "board-teensy2.h"
+#elif MODEL == PROMICRO
+#include "cpu-promicro.h"
+#include "board-promicro.h"
+#elif MODEL == PROMICRO_7406
+#include "cpu-promicro_7406.h"
+#include "board-promicro_7406.h"
 #endif
 
 #include "xum1541_types.h"      // Version and protocol definitions
