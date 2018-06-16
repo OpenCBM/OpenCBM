@@ -36,7 +36,7 @@ INFODIR     = $(PREFIX)/info
 INCDIR      = $(PREFIX)/include
 MODDIR      = ${shell for d in /lib/modules/`uname -r`/extra /lib/modules/`uname -r`/misc /lib/modules/`uname -r`/kernel/drivers/char; do test -d $$d && echo $$d; done | head -n 1}
 PLUGINDIR   = $(PREFIX)/lib/opencbm/plugin/
-UDEV_RULES  = /etc/udev/rules.d/
+UDEVRULESDIR = /etc/udev/rules.d/
 
 #
 # Where to find the xum1541 and xu1541 firmware

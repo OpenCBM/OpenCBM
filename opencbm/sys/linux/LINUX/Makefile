@@ -27,9 +27,9 @@ install-files: all
 ifneq "$(MODDIR)" ""
 	install -m 644 `[ -f cbm.ko ] && echo cbm.ko || echo cbm.o` $(DESTDIR)$(MODDIR)
 endif
-ifneq ($(UDEV_RULES),)
-	install -d -m 755 $(DESTDIR)$(UDEV_RULES)
-	install -m 644 45-opencbm-xa1541.rules $(DESTDIR)$(UDEV_RULES)
+ifneq ($(UDEVRULESDIR),)
+	install -d -m 755 $(DESTDIR)$(UDEVRULESDIR)
+	install -m 644 45-opencbm-xa1541.rules $(DESTDIR)$(UDEVRULESDIR)
 endif
 
 install: install-files
@@ -40,8 +40,8 @@ uninstall:
 ifneq "$(MODDIR)" ""
 	rm -f $(DESTDIR)$(MODDIR)/cbm.o $(DESTDIR)$(MODDIR)/cbm.ko
 endif
-ifneq ($(UDEV_RULES),)
-	rm -f $(DESTDIR)$(UDEV_RULES)/45-opencbm-xa1541.rules
+ifneq ($(UDEVRULESDIR),)
+	rm -f $(DESTDIR)$(UDEVRULESDIR)/45-opencbm-xa1541.rules
 endif
 
 cbm.o: checksources cbm_module.c
