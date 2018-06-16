@@ -21,21 +21,21 @@ endif
 # mandatory if you want to hack any of the 6502 sources.
 #
 #XASS        = xa
-XASS        = cl65
+XASS         = cl65
 
 
 #
 # Default destination directories
 #
-PREFIX      = /usr/local
-ETCDIR      = $(PREFIX)/etc
-BINDIR      = $(PREFIX)/bin
-LIBDIR      = $(PREFIX)/lib
-MANDIR      = $(PREFIX)/man/man1
-INFODIR     = $(PREFIX)/info
-INCDIR      = $(PREFIX)/include
-MODDIR      = ${shell for d in /lib/modules/`uname -r`/extra /lib/modules/`uname -r`/misc /lib/modules/`uname -r`/kernel/drivers/char; do test -d $$d && echo $$d; done | head -n 1}
-PLUGINDIR   = $(PREFIX)/lib/opencbm/plugin/
+PREFIX       = /usr/local
+ETCDIR       = $(PREFIX)/etc
+BINDIR       = $(PREFIX)/bin
+LIBDIR       = $(PREFIX)/lib
+MANDIR       = $(PREFIX)/man/man1
+INFODIR      = $(PREFIX)/info
+INCDIR       = $(PREFIX)/include
+MODDIR       = ${shell for d in /lib/modules/`uname -r`/extra /lib/modules/`uname -r`/misc /lib/modules/`uname -r`/kernel/drivers/char; do test -d $$d && echo $$d; done | head -n 1}
+PLUGINDIR    = $(PREFIX)/lib/opencbm/plugin/
 UDEVRULESDIR = /etc/udev/rules.d/
 
 #
@@ -59,7 +59,7 @@ OS = $(shell uname -s)
 #
 # compiler/linker flags. Should be ok.
 #
-OS_ARCH     = linux
+OS_ARCH      = linux
 
 CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\" -DOPENCBM_CONFIG_FILE=\"$(OPENCBM_CONFIG_FILE)\"
 CFLAGS      += $(USER_CFLAGS)
