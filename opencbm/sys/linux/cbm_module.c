@@ -50,8 +50,10 @@
 #include <linux/kernel.h>
 #include <linux/miscdevice.h>
 #include <linux/sched.h>
-
-#include <asm/uaccess.h>
+#ifdef HAVE_LINUX_SCHED_SIGNAL_H
+#include <linux/sched/signal.h>
+#endif
+#include <linux/uaccess.h>
 
 #include "cbm_module.h"
 

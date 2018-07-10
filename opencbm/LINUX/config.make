@@ -90,6 +90,8 @@ KERNEL_SOURCE = ${shell for d in /lib/modules/`uname -r`/build /usr/src/linux; d
 #
 KERNEL_INCLUDE_CONFIG = ${shell for c in ${KERNEL_SOURCE}/include/linux/autoconf.h ${KERNEL_SOURCE}/include/linux/config.h; do test -f $$c && echo $$c; done | head -n 1}
 
+KERNEL_HAVE_LINUX_SCHED_SIGNAL_H = ${shell test -e ${KERNEL_SOURCE}/include/linux/sched/signal.h && echo -DHAVE_LINUX_SCHED_SIGNAL_H=1}
+
 #
 # kernel driver compile flags.
 #
@@ -100,7 +102,7 @@ KERNEL_INCLUDE_CONFIG = ${shell for c in ${KERNEL_SOURCE}/include/linux/autoconf
 #   XE1541-like cable. Don't to it. Upgrade to XM1541 instead.
 #
 #KERNEL_FLAGS = -DDIRECT_PORT_ACCESS
-KERNEL_FLAGS = ${KERNEL_DEFINE}
+KERNEL_FLAGS = "${KERNEL_DEFINE} ${KERNEL_HAVE_LINUX_SCHED_SIGNAL_H}"
 
 
 #
