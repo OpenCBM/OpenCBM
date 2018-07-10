@@ -17,11 +17,21 @@ endif
 
 SUBDIRS_DOC = opencbm/docs
 
+ifeq ($(strip $(HAVE_LIBUSB)),)
+SUBDIRS_PLUGIN_XU1541 =
+
+SUBDIRS_PLUGIN_XUM1541 =
+else
 SUBDIRS_PLUGIN_XU1541 = opencbm/lib/plugin/xu1541
 
 SUBDIRS_PLUGIN_XUM1541 = opencbm/lib/plugin/xum1541 xum1541cfg
+endif
 
+ifeq ($(strip $(HAVE_KERNEL_SOURCE)),)
+SUBDIRS_PLUGIN_XA1541 =
+else
 SUBDIRS_PLUGIN_XA1541 = opencbm/lib/plugin/xa1541 opencbm/sys/linux/
+endif
 
 SUBDIRS_OPTIONAL = opencbm/addon opencbm/nibtools opencbm/mnib36 opencbm/cbmrpm41 opencbm/cbmlinetester
 

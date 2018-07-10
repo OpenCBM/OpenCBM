@@ -88,9 +88,22 @@ KERNEL_SOURCE = ${shell for d in /lib/modules/`uname -r`/build /usr/src/linux; d
 #
 # Find out if we should include linux/autoconf.h or linux/conf.h in the kernel module
 #
-KERNEL_INCLUDE_CONFIG = ${shell for c in ${KERNEL_SOURCE}/include/linux/autoconf.h ${KERNEL_SOURCE}/include/linux/config.h; do test -f $$c && echo $$c; done | head -n 1}
+ifneq ($(strip $(KERNEL_SOURCE)),)
+  HAVE_KERNEL_SOURCE=-DHAVE_KERNEL_SOURCE=1
+  KERNEL_INCLUDE_CONFIG = ${shell for c in ${KERNEL_SOURCE}/include/linux/autoconf.h ${KERNEL_SOURCE}/include/linux/config.h; do test -f $$c && echo $$c; done | head -n 1}
+  KERNEL_HAVE_LINUX_SCHED_SIGNAL_H = ${shell test -e ${KERNEL_SOURCE}/include/linux/sched/signal.h && echo -DHAVE_LINUX_SCHED_SIGNAL_H=1}
+endif
 
-KERNEL_HAVE_LINUX_SCHED_SIGNAL_H = ${shell test -e ${KERNEL_SOURCE}/include/linux/sched/signal.h && echo -DHAVE_LINUX_SCHED_SIGNAL_H=1}
+HAVE_LIBUSB0_USB_H = ${shell test -e /usr/include/usb.h && echo -DHAVE_LIBUSB0_USB_H=1}
+HAVE_LIBUSB1_LIBUSB_H = ${shell test -e /usr/include/libusb-1.0/libusb.h && echo -DHAVE_LIBUSB1_LIBUSB_H=1}
+
+ifneq ($(strip $(HAVE_LIBUSB0_USB_H)),)
+  HAVE_LIBUSB=-DHAVE_LIBUSB=1
+endif
+
+ifneq ($(strip $(HAVE_LIBUSB1_LIBUSB_H)),)
+  HAVE_LIBUSB=-DHAVE_LIBUSB=1
+endif
 
 #
 # kernel driver compile flags.
