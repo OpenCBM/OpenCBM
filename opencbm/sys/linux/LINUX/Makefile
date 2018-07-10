@@ -1,5 +1,5 @@
 ifneq ($(KERNELRELEASE),)
-EXTRA_CFLAGS := $(CBM4LINUX_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
+EXTRA_CFLAGS := $(OPENCBM_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
 obj-m 	     := cbm.o
 cbm-objs     := cbm_module.o
 
@@ -46,7 +46,7 @@ endif
 
 cbm.o: checksources cbm_module.c
 	-ln -s LINUX/Makefile Makefile
-	$(MAKE) -C $(KERNEL_SOURCE) here=`pwd` CBM4LINUX_KERNEL_FLAGS=$(KERNEL_FLAGS) SUBDIRS=`pwd` modules
+	$(MAKE) -C $(KERNEL_SOURCE) here=`pwd` OPENCBM_KERNEL_FLAGS=$(KERNEL_FLAGS) SUBDIRS=`pwd` modules
 	-rm -f Makefile
 
 endif
