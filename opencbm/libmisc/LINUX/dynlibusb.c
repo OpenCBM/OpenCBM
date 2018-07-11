@@ -12,8 +12,7 @@
 ** \file libmisc/LINUX/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
 ** \n
-** \brief Allow for libusb (0.1) to be loaded dynamically
-**        (Currently, this is used on Windows only)
+** \brief Allow for libusb (0.1 or 1.0) to be loaded dynamically
 ****************************************************************/
 
 #include <stdio.h>
@@ -30,6 +29,26 @@
 
 usb_dll_t usb = {
     .shared_object_handle = NULL,
+#if HAVE_LIBUSB1
+    .open = libusb_open,
+    .close = libusb_close,
+    .bulk_transfer = libusb_bulk_transfer,
+    .control_transfer = libusb_control_transfer,
+    .set_configuration = libusb_set_configuration,
+    .claim_interface = libusb_claim_interface,
+    .release_interface = libusb_release_interface,
+    .clear_halt = libusb_clear_halt,
+    .error_name = libusb_error_name,
+    .init = libusb_init,
+    .exit = libusb_exit,
+    .get_device_descriptor = libusb_get_device_descriptor,
+    .get_string_descriptor_ascii = libusb_get_string_descriptor_ascii,
+    .get_device = libusb_get_device,
+    .get_device_list = libusb_get_device_list,
+    .free_device_list = libusb_free_device_list,
+    .get_bus_number = libusb_get_bus_number,
+    .get_device_address = libusb_get_device_address,
+#elif HAVE_LIBUSB0
     .open = usb_open, 
     .close = usb_close, 
     .bulk_write = usb_bulk_write,
@@ -45,6 +64,7 @@ usb_dll_t usb = {
     .find_devices = usb_find_devices, 
     .device = usb_device,
     .get_busses = usb_get_busses
+#endif
 };
 
 int dynlibusb_init(void) {

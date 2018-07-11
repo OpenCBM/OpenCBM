@@ -12,8 +12,7 @@
 ** \file libmisc/WINDOWS/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
 ** \n
-** \brief Allow for libusb (0.1) to be loaded dynamically
-**        (Currently, this is used on Windows only)
+** \brief Allow for libusb (0.1 or 1.0) to be loaded dynamically
 ****************************************************************/
 
 #include <stdio.h>
@@ -30,21 +29,57 @@
 
 usb_dll_t usb = { NULL };
 
+#if HAVE_LIBUSB1
+  #define LIBUSB_DLLNAME "libusb-1.0.dll"a
+  #define LIBUSB_DLLFUNCPREFIX "libusb"
+#elif HAVE_LIBUSB0
+  #define LIBUSB_DLLNAME "libusb0.dll"
+  #define LIBUSB_DLLFUNCPREFIX "usb"
+#endif
+
 int dynlibusb_init(void) {
     int error = 1;
 
     do {
-        usb.shared_object_handle = plugin_load("libusb0.dll");
+        usb.shared_object_handle = plugin_load(LIBUSB_DLLNAME);
         if ( ! usb.shared_object_handle ) {
             break;
         }
 
 #define READ(_x) \
-    usb._x = plugin_get_address(usb.shared_object_handle, "usb_" ## #_x); \
+    usb._x = plugin_get_address(usb.shared_object_handle, LIBUSB_DLLFUNCPREFIX "_" ## #_x); \
     if (usb._x == NULL) { \
         break; \
     }
 
+#if HAVE_LIBUSB1
+        READ(open);
+        READ(close);
+//        READ(get_string);
+//        READ(get_string_simple);
+//        READ(get_descriptor_by_endpoint);
+//        READ(get_descriptor);
+        READ(bulk_transfer);
+//        READ(interrupt_write);
+//        READ(interrupt_read);
+        READ(control_transfer);
+        READ(set_configuration);
+        READ(claim_interface);
+        READ(release_interface);
+//        READ(set_altinterface);
+//        READ(resetep);
+        READ(clear_halt);
+//        READ(reset);
+        READ(error_name);
+        READ(init);
+        READ(exit);
+//        READ(set_debug);
+        READ(get_device);
+        READ(get_device_list);
+        READ(free_device_list);
+        READ(get_bus_number);
+        READ(get_device_address);
+#elsif HAVE_LIBUSB0
         READ(open);
         READ(close);
 //        READ(get_string);
@@ -70,6 +105,7 @@ int dynlibusb_init(void) {
         READ(find_devices);
         READ(device);
         READ(get_busses);
+#endif
 
         error = 0;
     } while (0);

@@ -47,10 +47,14 @@ XUM1541DIR  = $(RELATIVEPATH)/../xum1541
 #
 # Where to find libusb (libusb.sf.net)
 #
-LIBUSB_CONFIG  = libusb-config
-LIBUSB_CFLAGS  = $(shell $(LIBUSB_CONFIG) --cflags)
-LIBUSB_LDFLAGS =
-LIBUSB_LIBS    = $(shell $(LIBUSB_CONFIG) --libs)
+LIBUSB0_CFLAGS  = -I/usr/include
+LIBUSB0_LDFLAGS =
+LIBUSB0_LIBS    = -L/usr/lib -lusb
+
+LIBUSB1_CFLAGS  = $(shell pkg-config --cflags libusb-1.0)
+LIBUSB1_LDFLAGS =
+LIBUSB1_LIBS    = $(shell pkg-config --libs libusb-1.0)
+
 
 #
 # define os name
@@ -112,15 +116,21 @@ ifneq ($(strip $(KERNEL_SOURCE)),)
   KERNEL_HAVE_LINUX_SCHED_SIGNAL_H = ${shell test -e ${KERNEL_SOURCE}/include/linux/sched/signal.h && echo -DHAVE_LINUX_SCHED_SIGNAL_H=1}
 endif
 
-HAVE_LIBUSB0_USB_H = ${shell test -e /usr/include/usb.h && echo -DHAVE_LIBUSB0_USB_H=1}
-HAVE_LIBUSB1_LIBUSB_H = ${shell test -e /usr/include/libusb-1.0/libusb.h && echo -DHAVE_LIBUSB1_LIBUSB_H=1}
+HAVE_LIBUSB0 = ${shell pkg-config libusb && echo 1} 
+HAVE_LIBUSB1 = ${shell pkg-config libusb-1.0 && echo 1} 
 
-ifneq ($(strip $(HAVE_LIBUSB0_USB_H)),)
-  HAVE_LIBUSB=-DHAVE_LIBUSB=1
+ifneq ($(strip $(HAVE_LIBUSB0)),)
+  HAVE_LIBUSB=1
+  LIBUSB_CFLAGS=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB0=1 $(LIBUSB0_CFLAGS)
+  LIBUSB_LDFLAGS=$(LIBUSB0_LDFLAGS)
+  LIBUSB_LIBS=$(LIBUSB0_LIBS)
 endif
 
-ifneq ($(strip $(HAVE_LIBUSB1_LIBUSB_H)),)
-  HAVE_LIBUSB=-DHAVE_LIBUSB=1
+ifneq ($(strip $(HAVE_LIBUSB1)),)
+  HAVE_LIBUSB=1
+  LIBUSB_CFLAGS=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB1=1 $(LIBUSB1_CFLAGS)
+  LIBUSB_LDFLAGS=$(LIBUSB1_LDFLAGS)
+  LIBUSB_LIBS=$(LIBUSB1_LIBS)
 endif
 
 #
@@ -149,6 +159,9 @@ endif
 ifeq "$(OS)" "FreeBSD"
 ETCDIR=$(PREFIX)/etc
 OD_FLAGS  = -txC -v -An
+ifneq "$(HAVE_LIBUSB1)" ""
+LIBUSB_LIBS    = -L/usr/local/lib -lusb
+endif
 endif
 
 #
