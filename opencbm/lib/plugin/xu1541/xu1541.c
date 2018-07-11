@@ -31,7 +31,6 @@
 #include "xu1541.h"
 
 static int debug_level = -10000; /*!< \internal \brief the debugging level for debugging output */
-static usb_dev_handle *xu1541_handle = NULL; /*!< \internal \brief handle to the xu1541 device */
 
 /*! \brief timeout value, used mainly after errors \todo What is the exact purpose of this? */
 #define TIMEOUT_DELAY  25000   // 25ms
@@ -115,6 +114,9 @@ static int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
 
   This function tries to find and identify the xu1541 device.
 
+  \param HandleXu1541_p
+    pointer to where to store the handle to the xu1541 device
+
   \return
     0 on success, -1 on error.
 
@@ -129,11 +131,15 @@ static int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
     xu1541_close() is not to be called.
 */
 /* try to find a xu1541 cable */
-int xu1541_init(void) {
+int xu1541_init(struct xu1541_usb_handle **HandleXu1541_p) {
+  struct xu1541_usb_handle *HandleXu1541;
   struct usb_bus      *bus;
   struct usb_device   *dev;
   unsigned char ret[4];
   int len;
+
+  *HandleXu1541_p = HandleXu1541 = malloc(sizeof(struct xu1541_usb_handle));
+  if (!HandleXu1541) return -1;
 
   xu1541_dbg(0, "Scanning usb ...");
 
@@ -146,10 +152,10 @@ int xu1541_init(void) {
   /* make lib ignore this as this has nothing to do with our device */
   errno = 0;
 
-  for(bus = usb.get_busses(); !xu1541_handle && bus; bus = bus->next) {
+  for(bus = usb.get_busses(); !HandleXu1541->devh && bus; bus = bus->next) {
     xu1541_dbg(1, "Scanning bus %s", bus->dirname);
 
-    for(dev = bus->devices; !xu1541_handle && dev; dev = dev->next) {
+    for(dev = bus->devices; !HandleXu1541->devh && dev; dev = dev->next) {
       xu1541_dbg(1, "Device %04x:%04x at %s", 
 		 dev->descriptor.idVendor, dev->descriptor.idProduct,
 		 dev->filename);
@@ -163,19 +169,19 @@ int xu1541_init(void) {
                bus->dirname, dev->filename);
 
         /* open device */
-        if(!(xu1541_handle = usb.open(dev)))
+        if(!(HandleXu1541->devh = usb.open(dev)))
           fprintf(stderr, "Error: Cannot open USB device: %s\n",
                   usb.strerror());
 	
 	/* get device name and make sure the name is "xu1541" meaning */
 	/* that the device is not in boot loader mode */
-	len = usbGetStringAscii(xu1541_handle, dev->descriptor.iProduct, 
+	len = usbGetStringAscii(HandleXu1541->devh, dev->descriptor.iProduct, 
 				0x0409, string, sizeof(string));
 	if(len < 0){
 	  fprintf(stderr, "warning: cannot query product "
 		  "name for device: %s\n", usb.strerror());
-	  if(xu1541_handle) usb.close(xu1541_handle);
-	  xu1541_handle = NULL;
+	  if(HandleXu1541->devh) usb.close(HandleXu1541->devh);
+	  HandleXu1541->devh = NULL;
 	}
 
 	/* make sure the name matches what we expect */
@@ -183,31 +189,31 @@ int xu1541_init(void) {
 	  fprintf(stderr, "Error: Found xu1541 in unexpected state,"
 		  " please make sure device is _not_ in bootloader mode!\n");
 	  
-	  if(xu1541_handle) usb.close(xu1541_handle);
-	  xu1541_handle = NULL;
+	  if(HandleXu1541->devh) usb.close(HandleXu1541->devh);
+	  HandleXu1541->devh = NULL;
 	}
       }
     }
   }
 
-  if(!xu1541_handle) {
+  if(!HandleXu1541->devh) {
       fprintf(stderr, "ERROR: No xu1541 device found\n");
       return -1;
   }
 
-  if (usb.set_configuration(xu1541_handle, 1) != 0) {
+  if (usb.set_configuration(HandleXu1541->devh, 1) != 0) {
       fprintf(stderr, "USB error: %s\n", usb.strerror());
       return -1;
   }
       
   /* Get exclusive access to interface 0. */
-  if (usb.claim_interface(xu1541_handle, 0) != 0) {
+  if (usb.claim_interface(HandleXu1541->devh, 0) != 0) {
       fprintf(stderr, "USB error: %s\n", usb.strerror());
       return -1;
   }
 
   /* check the devices version number as firmware x.06 changed everything */
-  len = usb.control_msg(xu1541_handle, 
+  len = usb.control_msg(HandleXu1541->devh, 
 	   USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 	   XU1541_INFO, 0, 0, (char*)ret, sizeof(ret), 1000);
 
@@ -237,20 +243,28 @@ int xu1541_init(void) {
 
 /*! \brief close the xu1541 device
 
+ \param HandleXu1541
+   handle to the xu1541 device
+
  \remark
     This function releases the interface and closes the xu1541 handle.
 */
-void xu1541_close(void)
+void xu1541_close(struct xu1541_usb_handle *HandleXu1541)
 {
     xu1541_dbg(0, "Closing USB link");
 
-    if(usb.release_interface(xu1541_handle, 0))
+    if(usb.release_interface(HandleXu1541->devh, 0))
       fprintf(stderr, "USB error: %s\n", usb.strerror());
 
-    usb.close(xu1541_handle);
+    usb.close(HandleXu1541->devh);
+
+    free(HandleXu1541);
 }
 
 /*! \brief perform an ioctl on the xu1541
+
+ \param HandleXu1541
+   handle to the xu1541 device
 
  \param cmd
    The IOCTL number
@@ -267,7 +281,7 @@ void xu1541_close(void)
  \todo
    Rework for cleaner structure. Currently, this is a mess!
 */
-int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
+int xu1541_ioctl(struct xu1541_usb_handle *HandleXu1541, unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
   int nBytes;
   char ret[4];
@@ -284,7 +298,7 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
       int link_ok = 0, err = 0;
 
       /* USB_TIMEOUT msec timeout required for reset */
-      if((nBytes = usb.control_msg(xu1541_handle, 
+      if((nBytes = usb.control_msg(HandleXu1541->devh, 
 				   USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				   cmd, (secaddr << 8) + addr, 0, 
 				   NULL, 0, 
@@ -302,7 +316,7 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 	  unsigned char rv[2];
 	  
 	  /* request async result code */
-	  if(usb.control_msg(xu1541_handle, 
+	  if(usb.control_msg(HandleXu1541->devh, 
 			     USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 			     XU1541_GET_RESULT, 0, 0, 
 			     (char*)rv, sizeof(rv), 
@@ -342,7 +356,7 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
   {
 
       /* sync transfer, read result directly */
-      if((nBytes = usb.control_msg(xu1541_handle, 
+      if((nBytes = usb.control_msg(HandleXu1541->devh, 
 		   USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 		   cmd, (secaddr << 8) + addr, 0, 
 		   ret, sizeof(ret), 
@@ -367,6 +381,9 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
 
 /*! \brief write data to the xu1541 device
 
+ \param HandleXu1541
+   handle to the xu1541 device
+
  \param data
     Pointer to buffer which contains the data to be written to the xu1541
 
@@ -376,7 +393,7 @@ int xu1541_ioctl(unsigned int cmd, unsigned int addr, unsigned int secaddr)
  \return
     The number of bytes written
 */
-int xu1541_write(const unsigned char *data, size_t len) 
+int xu1541_write(struct xu1541_usb_handle *HandleXu1541, const unsigned char *data, size_t len) 
 {
     int bytesWritten = 0;
 
@@ -390,7 +407,7 @@ int xu1541_write(const unsigned char *data, size_t len)
 	
 	/* the write itself moved the data into the buffer, the actual */
 	/* iec write is triggered _after_ this USB write is done */
-	if((wr = usb.control_msg(xu1541_handle, 
+	if((wr = usb.control_msg(HandleXu1541->devh, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_OUT, 
 				 XU1541_WRITE, bytes2write, 0, 
 				 (char*)data, bytes2write, 
@@ -414,7 +431,7 @@ int xu1541_write(const unsigned char *data, size_t len)
 	    unsigned char rv[2];
 
 	    /* request async result */
-	    if(usb.control_msg(xu1541_handle, 
+	    if(usb.control_msg(HandleXu1541->devh, 
 			       USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 			       XU1541_GET_RESULT, 0, 0, 
 			       (char*)rv, sizeof(rv), 
@@ -449,6 +466,9 @@ int xu1541_write(const unsigned char *data, size_t len)
 
 /*! \brief read data from the xu1541 device
 
+ \param HandleXu1541
+   handle to the xu1541 device
+
  \param data
     Pointer to a buffer which will contain the data read from the xu1541
 
@@ -458,7 +478,7 @@ int xu1541_write(const unsigned char *data, size_t len)
  \return
     The number of bytes read
 */
-int xu1541_read(unsigned char *data, size_t len) 
+int xu1541_read(struct xu1541_usb_handle *HandleXu1541, unsigned char *data, size_t len) 
 {
     int bytesRead = 0;
     
@@ -475,7 +495,7 @@ int xu1541_read(unsigned char *data, size_t len)
 
 	/* request async read, ignore errors as they happen due to */
 	/* link being disabled */
-	rd = usb.control_msg(xu1541_handle, 
+	rd = usb.control_msg(HandleXu1541->devh, 
 			USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 			XU1541_REQUEST_READ, bytes2read, 0, 
 			NULL, 0,
@@ -503,7 +523,7 @@ int xu1541_read(unsigned char *data, size_t len)
 	{
 	    /* get the result code which also contains the current state */
 	    /* the xu1541 is in so we know when it's done reading on IEC */
-	    if((rd = usb.control_msg(xu1541_handle, 
+	    if((rd = usb.control_msg(HandleXu1541->devh, 
 				     USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				     XU1541_GET_RESULT, 0, 0, 
 				     (char*)rv, sizeof(rv), 
@@ -539,7 +559,7 @@ int xu1541_read(unsigned char *data, size_t len)
 	while(!link_ok);
 	
 	/* finally read data itself */
-	if((rd = usb.control_msg(xu1541_handle, 
+	if((rd = usb.control_msg(HandleXu1541->devh, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				 XU1541_READ, bytes2read, 0, 
 				 (char*)data, bytes2read, 1000)) < 0) 
@@ -568,6 +588,9 @@ int xu1541_read(unsigned char *data, size_t len)
  \todo
     What is so special?
 
+ \param HandleXu1541
+   handle to the xu1541 device
+
  \param mode
     \todo ???
 
@@ -585,7 +608,7 @@ int xu1541_read(unsigned char *data, size_t len)
      that we can just handle them in the device at the same time as the USB
      transfers.
 */
-int xu1541_special_write(int mode, const unsigned char *data, size_t size) 
+int xu1541_special_write(struct xu1541_usb_handle *HandleXu1541, int mode, const unsigned char *data, size_t size) 
 {
     int bytesWritten = 0;
 
@@ -596,7 +619,7 @@ int xu1541_special_write(int mode, const unsigned char *data, size_t size)
     {
 	int wr, bytes2write = (size>128)?128:size;
 
-	if((wr = usb.control_msg(xu1541_handle, 
+	if((wr = usb.control_msg(HandleXu1541->devh, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_OUT, 
 				 mode, XU1541_WRITE, bytes2write, 
 				 (char*)data, bytes2write, 1000)) < 0) 
@@ -621,6 +644,9 @@ int xu1541_special_write(int mode, const unsigned char *data, size_t size)
  \todo
     What is so special?
 
+ \param HandleXu1541
+   handle to the xu1541 device
+
  \param mode
     \todo ???
 
@@ -633,7 +659,7 @@ int xu1541_special_write(int mode, const unsigned char *data, size_t size)
  \return
     The number of bytes read
 */
-int xu1541_special_read(int mode, unsigned char *data, size_t size) 
+int xu1541_special_read(struct xu1541_usb_handle *HandleXu1541, int mode, unsigned char *data, size_t size) 
 {
     int bytesRead = 0;
 
@@ -644,7 +670,7 @@ int xu1541_special_read(int mode, unsigned char *data, size_t size)
     {
 	int rd, bytes2read = (size>128)?128:size;
 	
-	if((rd = usb.control_msg(xu1541_handle, 
+	if((rd = usb.control_msg(HandleXu1541->devh, 
 				 USB_TYPE_CLASS | USB_ENDPOINT_IN, 
 				 mode, XU1541_READ, bytes2read, 
 				 (char*)data, bytes2read, 
