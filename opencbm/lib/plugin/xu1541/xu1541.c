@@ -140,6 +140,7 @@ int xu1541_init(struct xu1541_usb_handle **HandleXu1541_p) {
 
   *HandleXu1541_p = HandleXu1541 = malloc(sizeof(struct xu1541_usb_handle));
   if (!HandleXu1541) return -1;
+  HandleXu1541->devh = NULL;
 
   xu1541_dbg(0, "Scanning usb ...");
 
