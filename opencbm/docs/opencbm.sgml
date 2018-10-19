@@ -513,9 +513,9 @@ command assumes you are using <it/sudo/: <it>sudo make -f LINUX/Makefile
 install install-plugin-<em/XXX/</it>, with <it/XXX/ being the same one of
 <it/xa1541/, <it/xu1541/ or <it/xum1541/ as above:
       <itemize>
-      <item><bf/XUM1541 + Zoomfloppy only:/ <it>sudo make -f LINUX/Makefile opencbm install-plugin-xum1541</it>
-      <item><bf/XU1541 only:/ <it>sudo make -f LINUX/Makefile opencbm install-plugin-xu1541</it>
-      <item><bf/XA1541 + XM1541 only:/ <it>sudo make -f LINUX/Makefile opencbm install-plugin-xa1541</it>
+      <item><bf/XUM1541 + Zoomfloppy only:/ <it>sudo make -f LINUX/Makefile install install-plugin-xum1541</it>
+      <item><bf/XU1541 only:/ <it>sudo make -f LINUX/Makefile install install-plugin-xu1541</it>
+      <item><bf/XA1541 + XM1541 only:/ <it>sudo make -f LINUX/Makefile install install-plugin-xa1541</it>
       </itemize>
 <item>Connect your cable (XU1541, XUM1541, XA1541, XM1541) to your CBM IEC
 device:
