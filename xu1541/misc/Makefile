@@ -38,4 +38,4 @@ $(ECHO_TEST)$(EXE_SUFFIX): xu1541lib
 $(EVENT_LOG)$(EXE_SUFFIX): xu1541lib
 
 xu1541lib:
-	make -C ../lib/
+	$(MAKE) -C ../lib/
