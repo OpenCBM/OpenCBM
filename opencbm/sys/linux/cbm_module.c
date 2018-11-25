@@ -217,6 +217,9 @@ volatile static int cbm_irq_count;
 # define SA_INTERRUPT IRQF_DISABLED
 #endif
 
+#define BUFFER_SIZE = 0x2000
+static unsigned char *buf;
+
 /*
  *  dump input lines
  */
@@ -528,16 +531,23 @@ static ssize_t cbm_write(struct file *f, const char *buf, size_t cnt,
 static long cbm_unlocked_ioctl(struct file *f,
 		     unsigned int cmd, unsigned long arg)
 {
-	/* linux parallel burst */
-	PARBURST_RW_VALUE *user_val;
-	PARBURST_RW_VALUE kernel_val;
-	/* linux parallel burst end */
-
 	unsigned char buf[2], c, talk, mask, state, i;
 	int rv = 0;
+	int intarg = 0;
+	PARBURST_RW_VALUE val;
 
-	buf[0] = (arg >> 8) & 0x1f;	/* device */
-	buf[1] = arg & 0x0f;	/* secondary address */
+	if (cmd == CBMCTRL_TALK
+		|| cmd == CBMCTRL_LISTEN
+		|| cmd == CBMCTRL_OPEN
+		|| cmd == CBMCTRL_CLOSE
+		|| cmd == CBMCTRL_IEC_SET
+		|| cmd == CBMCTRL_IEC_RELEASE
+		|| cmd == CBMCTRL_IEC_WAIT
+		|| cmd == CBMCTRL_IEC_SETRELEASE)
+		get_user(intarg, (int *)arg);
+
+	buf[0] = (intarg >> 8) & 0x1f;	/* device */
+	buf[1] = intarg & 0x0f;	/* secondary address */
 
 	switch (cmd) {
 	case CBMCTRL_RESET:
@@ -571,14 +581,15 @@ static long cbm_unlocked_ioctl(struct file *f,
 		return rv > 0 ? 0 : rv;
 
 	case CBMCTRL_GET_EOI:
-		return eoi ? 1 : 0;
+		put_user(eoi ? 1 : 0, (int *)arg);
+		return 0;
 
 	case CBMCTRL_CLEAR_EOI:
 		eoi = 0;
 		return 0;
 
 	case CBMCTRL_IEC_WAIT:
-		switch (arg >> 8) {
+		switch (intarg >> 8) {
 		case IEC_DATA:
 			mask = DATA_IN;
 			break;
@@ -591,7 +602,7 @@ static long cbm_unlocked_ioctl(struct file *f,
 		default:
 			return -EINVAL;
 		}
-		state = (arg & 0xff) ? mask : 0;
+		state = (intarg & 0xff) ? mask : 0;
 		i = 0;
 		while ((POLL() & mask) == state) {
 			if (i >= 20) {
@@ -617,47 +628,47 @@ static long cbm_unlocked_ioctl(struct file *f,
 		return rv;
 
 	case CBMCTRL_IEC_SET:
-		if (arg & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)) {
+		if (intarg & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)) {
 			/*
 			 * there was some bit set that is not recognized, return
 			 * with an error
 			 */
 			return -EINVAL;
 		} else {
-			if (arg & IEC_DATA)
+			if (intarg & IEC_DATA)
 				SET(DATA_OUT);
-			if (arg & IEC_CLOCK)
+			if (intarg & IEC_CLOCK)
 				SET(CLK_OUT);
-			if (arg & IEC_ATN)
+			if (intarg & IEC_ATN)
 				SET(ATN_OUT);
-			if (arg & IEC_RESET)
+			if (intarg & IEC_RESET)
 				SET(RESET);
 		}
 		return 0;
 
 	case CBMCTRL_IEC_RELEASE:
-		if (arg & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)) {
+		if (intarg & ~(IEC_DATA | IEC_CLOCK | IEC_ATN | IEC_RESET)) {
 			/*
 			 * there was some bit set that is not recognized, return
 			 * with an error
 			 */
 			return -EINVAL;
 		} else {
-			if (arg & IEC_DATA)
+			if (intarg & IEC_DATA)
 				RELEASE(DATA_OUT);
-			if (arg & IEC_CLOCK)
+			if (intarg & IEC_CLOCK)
 				RELEASE(CLK_OUT);
-			if (arg & IEC_ATN)
+			if (intarg & IEC_ATN)
 				RELEASE(ATN_OUT);
-			if (arg & IEC_RESET)
+			if (intarg & IEC_RESET)
 				RELEASE(RESET);
 		}
 		return 0;
 
 	case CBMCTRL_IEC_SETRELEASE:
 		{
-			unsigned set = arg >> 8;
-			unsigned release = arg & 0xFF;
+			unsigned set = intarg >> 8;
+			unsigned release = intarg & 0xFF;
 			unsigned set_mask = 0;
 			unsigned release_mask = 0;
 
@@ -700,65 +711,47 @@ static long cbm_unlocked_ioctl(struct file *f,
 			XP_WRITE(0xff);
 			set_data_reverse();
 		}
-		return XP_READ();
+		put_user(XP_READ(), (int *)arg);
+		return 0;
 
 	case CBMCTRL_PP_WRITE:
 		if (data_reverse)
 			set_data_forward();
-		XP_WRITE(arg);
+		XP_WRITE(intarg);
 		return 0;
 
 /* and now the parallel burst-routines */
 
 	case CBMCTRL_PARBURST_READ:
-		return cbm_parallel_burst_read();
+		put_user(cbm_parallel_burst_read(), (int *)arg);
+		return 0;
 
 	case CBMCTRL_PARBURST_WRITE:
-		return cbm_parallel_burst_write(arg);
+		get_user(c, (unsigned char *)arg);
+		return cbm_parallel_burst_write(c);
 
 	case CBMCTRL_PARBURST_READ_TRACK:
-		/* cast arg to structure pointer */
-		user_val = (PARBURST_RW_VALUE *) arg;
-		/* copy the data to the kernel: */
-		if (copy_from_user(&kernel_val,	/* kernel buffer */
-				   user_val,	/* user buffer */
-				   sizeof(PARBURST_RW_VALUE)))
-			return -EFAULT;
-		/* verify if it's ok to write into the buffer */
-		if (access_ok(VERIFY_WRITE, kernel_val.buffer, 0x2000) == 0)
-			return -EFAULT;
-		/* and do it: */
-		return cbm_parallel_burst_read_track(kernel_val.buffer);
+		if (copy_from_user(&kernel_val, (PARBURST_RW_VALUE *) arg,
+			sizeof(PARBURST_RW_VALUE))) return -EFAULT;
+		if (val.length < BUFFER_SIZE) return -EFAULT;
+		rv = cbm_parallel_burst_read_track(buf);
+		if (copy_to_user(val.buffer, buf, BUFFER_SIZE)) return -EFAULT;
+		return rv;
 
 	case CBMCTRL_PARBURST_READ_TRACK_VAR:
-		/* cast arg to structure pointer */
-		user_val = (PARBURST_RW_VALUE *) arg;
-		/* copy the data to the kernel: */
-		if (copy_from_user(&kernel_val,	/* kernel buffer */
-				   user_val,	/* user buffer */
-				   sizeof(PARBURST_RW_VALUE)))
-			return -EFAULT;
-		/* verify if it's ok to write into the buffer */
-		if (access_ok(VERIFY_WRITE, kernel_val.buffer, 0x2000) == 0)
-			return -EFAULT;
-		/* and do it: */
-		return cbm_parallel_burst_read_track_var(kernel_val.buffer);
+		if (copy_from_user(&kernel_val, (PARBURST_RW_VALUE *) arg,
+			sizeof(PARBURST_RW_VALUE))) return -EFAULT;
+		if (val.length < BUFFER_SIZE) return -EFAULT;
+		rv = cbm_parallel_burst_read_track_var(buf);
+		if (copy_to_user(val.buffer, buf, BUFFER_SIZE)) return -EFAULT;
+		return rv;
 
 	case CBMCTRL_PARBURST_WRITE_TRACK:
-		/* cast arg to structure pointer */
-		user_val = (PARBURST_RW_VALUE *) arg;
-		/* copy the data to the kernel: */
-		if (copy_from_user(&kernel_val,	/* kernel buffer */
-				   user_val,	/* user buffer */
-				   sizeof(PARBURST_RW_VALUE)))
-			return -EFAULT;
-		/* verify if it's ok to read from the buffer */
-		if (access_ok(VERIFY_READ, (void *)kernel_val.buffer, 0x2000) ==
-		    0)
-			return -EFAULT;
-		/* and do it: */
-		return cbm_parallel_burst_write_track(kernel_val.buffer,
-						      kernel_val.length);
+		if (copy_from_user(&kernel_val, (PARBURST_RW_VALUE *) arg,
+			sizeof(PARBURST_RW_VALUE))) return -EFAULT;
+		if (val.length > BUFFER_SIZE) return -EFAULT;
+		if (copy_from_user(buf, val.buffer, val.length)) return -EFAULT;
+		return cbm_parallel_burst_write_track(buf, val.length);
 	}
 	return -EINVAL;
 }
@@ -840,6 +833,7 @@ static struct miscdevice cbm_dev = {
 
 void cbm_cleanup(void)
 {
+	kfree(buf);
 #ifdef DIRECT_PORT_ACCESS
 	free_irq(irq, NULL);
 	release_region(port, 3);
@@ -895,6 +889,7 @@ int cbm_init(void)
 	DPRINTK("parallel port is mine now\n");
 #endif
 	misc_register(&cbm_dev);
+	buf = kmalloc(BUFFER_SIZE, GFP_KERNEL);
 
 #ifdef DIRECT_PORT_ACCESS
 	in_port = port + 1;
