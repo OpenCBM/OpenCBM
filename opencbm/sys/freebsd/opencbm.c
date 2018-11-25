@@ -41,6 +41,7 @@
 #include "ppbus_if.h"
 #include <dev/ppbus/ppbio.h>
 
+#define BUILDING_FREEBSD_MODULE
 #include "../../include/LINUX/cbm_module.h"
 
 #define CBM_NAME "cbm"

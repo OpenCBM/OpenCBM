@@ -16,7 +16,9 @@
 #include <linux/types.h>
 #else
 #if defined(__FreeBSD__)
+#ifndef BUILDING_FREEBSD_MODULE
 #include <sys/ioctl.h>
+#endif
 #endif
 #endif
 
