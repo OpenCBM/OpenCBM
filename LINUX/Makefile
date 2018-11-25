@@ -30,7 +30,11 @@ endif
 ifeq ($(strip $(HAVE_KERNEL_SOURCE)),)
 SUBDIRS_PLUGIN_XA1541 =
 else
+ifeq "$(OS)" "FreeBSD"
+SUBDIRS_PLUGIN_XA1541 = opencbm/lib/plugin/xa1541 opencbm/sys/freebsd/
+else
 SUBDIRS_PLUGIN_XA1541 = opencbm/lib/plugin/xa1541 opencbm/sys/linux/
+endif
 endif
 
 SUBDIRS_OPTIONAL = opencbm/addon opencbm/nibtools opencbm/mnib36 opencbm/cbmrpm41 opencbm/cbmlinetester
@@ -44,13 +48,8 @@ ifeq "$(OS)" "Darwin"
 PLUGINS=plugin-xum1541 plugin-xu1541
 INSTALL_PLUGINS=install-plugin-xum1541 install-plugin-xu1541
 else
-ifeq "$(OS)" "FreeBSD"
-PLUGINS=plugin-xum1541 plugin-xu1541
-INSTALL_PLUGINS=install-plugin-xum1541 install-plugin-xu1541
-else
 PLUGINS=plugin-xum1541 plugin-xu1541 plugin-xa1541
 INSTALL_PLUGINS=install-plugin-xum1541 install-plugin-xu1541 install-plugin-xa1541
-endif
 endif
 
 .PHONY: all opencbm clean mrproper dist doc install-all install install-doc uninstall dev install-files install-files-doc all-doc plugin-xum1541 plugin-xu1541 plugin-xa1541 plugin install-plugin install-plugin-xum1541 install-plugin-xu1541 install-plugin-xa1541

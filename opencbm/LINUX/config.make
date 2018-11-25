@@ -75,6 +75,23 @@ AR           = ar
 LDCONFIG     = /sbin/ldconfig
 OD_FLAGS     = -w8 -txC -v -An
 
+ifeq "$(OS)" "FreeBSD"
+ifneq ($(strip $(SYSDIR)),)
+KERNEL_SOURCE=$(SYSDIR)
+else
+ifneq ($(strip $(SRCTOP)),)
+KERNEL_SOURCE=$(SRCTOP)/sys
+else
+KERNEL_SOURCE=/usr/src/sys
+endif
+endif
+ifneq ($(wildcard $(KERNEL_SOURCE)/Makefile),)
+HAVE_KERNEL_SOURCE=-DHAVE_KERNEL_SOURCE=1
+else
+KERNEL_SOURCE=
+endif
+
+else
 #
 # location of the kernel source directory
 # (removed, use the later implementation instead. I left them in in case the
@@ -116,7 +133,7 @@ endif
 #
 #KERNEL_FLAGS = -DDIRECT_PORT_ACCESS
 KERNEL_FLAGS = "${KERNEL_DEFINE} ${KERNEL_HAVE_LINUX_SCHED_SIGNAL_H}"
-
+endif
 
 #
 # Linux specific settings and modifications
