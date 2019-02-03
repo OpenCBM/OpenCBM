@@ -60,7 +60,7 @@ LDFLAGS_EXTRA+=-s
 # add libusb
 CFLAGS  = $(CFLAGS_EXTRA) -I$(LIBUSB_DIR)/include -I../include/ -Wall
 LDFLAGS = $(LDFLAGS_EXTRA) -L$(LIBUSB_DIR)/lib
-LIBS    = -L../lib -lxu1541$(LIB_WIN) -lusb
+LIBS    = -L../lib -lxu1541$(LIB_WIN)
 
 ECHO_TEST = usb_echo_test
 EVENT_LOG = read_event_log
