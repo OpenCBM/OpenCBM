@@ -1,8 +1,8 @@
 RELATIVEPATH=../opencbm/
 include ${RELATIVEPATH}LINUX/config.make
 
-CFLAGS+= -g -I /opt/local/include -I $(DFU_SRC) -Wall
-LINK_FLAGS= -L/opt/local/lib -lusb
+CFLAGS+= -g $(LIBUSB_CFLAGS) -I $(DFU_SRC) -Wall
+LINK_FLAGS= $(LIBUSB_LDFLAGS) $(LIBUSB_LIBS)
 
 DFU_SRC= dfu-programmer-0.5.4/src
 
