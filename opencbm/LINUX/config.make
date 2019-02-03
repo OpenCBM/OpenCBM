@@ -145,6 +145,9 @@ LIBUSB_CFLAGS  = $(shell $(LIBUSB_CONFIG) --cflags)
 LIBUSB_LDFLAGS =
 LIBUSB_LIBS    = $(shell $(LIBUSB_CONFIG) --libs)
 
+# We therefore definitely have a libusb
+HAVE_LIBUSB=-DHAVE_LIBUSB=1
+
 OD_FLAGS  = -txC -v -An
 SHLIB_EXT = dylib
 SHLIB_SWITCH = -dynamiclib -compatibility_version $(MAJ).$(MIN) -current_version $(MAJ).$(MIN).${OPENCBM_RELEASE}
