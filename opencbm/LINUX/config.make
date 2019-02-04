@@ -47,9 +47,10 @@ XUM1541DIR  = $(RELATIVEPATH)/../xum1541
 #
 # Where to find libusb (libusb.sf.net)
 #
-LIBUSB_CFLAGS  = -I/usr/include
+LIBUSB_CONFIG  = libusb-config
+LIBUSB_CFLAGS  = $(shell $(LIBUSB_CONFIG) --cflags)
 LIBUSB_LDFLAGS =
-LIBUSB_LIBS    = -L/usr/lib -lusb
+LIBUSB_LIBS    = $(shell $(LIBUSB_CONFIG) --libs)
 
 #
 # define os name
