@@ -25,7 +25,7 @@ MODELS= USBKEY ZOOMFLOPPY BUMBLEB OLIMEX
 ### Nothing user-configurable beyond this point ###
 
 # Firmware version. Bump when changing the firmware code.
-XUMFW_VERSION= 07
+XUMFW_VERSION= 08
 
 all: $(MODELS)
 
