@@ -9,9 +9,9 @@
  *  Copyright 1997-2005 Wolfgang Moser (http://d81.de)   (Device Detection Code)
  *  Copyright 2000-2005 Markus Brenner                   (Parallel Burst Routines)
  *  Copyright 2000-2005 Pete Rittwage                    (Parallel Burst Routines)
- *  Copyright 2005      Tim Schürmann                    (Parallel Burst Routines)
+ *  Copyright 2005      Tim SchÃ¼rmann                    (Parallel Burst Routines)
  *  Copyright 2005-2006,2009 Spiro Trikaliotis           (Parallel Burst Routines)
- *  Copyright 2007-2009 Frédéric Brière                  (Adjustments on newer Linux kernels, abstraction from real hardware)
+ *  Copyright 2007-2009 FrÃ©dÃ©ric BriÃ¨re                  (Adjustments on newer Linux kernels, abstraction from real hardware)
  *  Copyright 2009      Arnd Menge <arnd(at)jonnz(dot)de> (Parallel Burst Routines)
  *
  *
@@ -28,6 +28,10 @@
 #endif
 
 #include <linux/module.h>
+
+#include <linux/kernel.h>
+#include <linux/slab.h>
+
 
 /*
  * Starting with 2.3.10, the IRQ and bi-directional bits are uncoupled from
