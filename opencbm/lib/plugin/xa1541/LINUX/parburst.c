@@ -4,7 +4,7 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005      Tim Schürmann
+ *  Copyright 2005      Tim SchÃ¼rmann
  *  Copyright 2007,2009 Spiro Trikaliotis
  *  Copyright 2009      Arnd <arnd(at)jonnz(dot)de>
 */
@@ -21,10 +21,9 @@
 
 #if defined(__linux__)
 #include <linux/errno.h>  /* error codes */
-#else
-#include <errno.h>  /* error codes */
 #endif
 
+#include <errno.h>  /* error codes */
 
 /*linux functions needed by parallel burst */
 
