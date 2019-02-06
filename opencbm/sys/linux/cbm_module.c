@@ -221,8 +221,8 @@ volatile static int cbm_irq_count;
 # define SA_INTERRUPT IRQF_DISABLED
 #endif
 
-#define BUFFER_SIZE = 0x2000
-static unsigned char *buf;
+#define BUFFER_SIZE 0x2000
+static unsigned char *track_buffer;
 
 /*
  *  dump input lines
@@ -735,23 +735,23 @@ static long cbm_unlocked_ioctl(struct file *f,
 		return cbm_parallel_burst_write(c);
 
 	case CBMCTRL_PARBURST_READ_TRACK:
-		if (copy_from_user(&kernel_val, (PARBURST_RW_VALUE *) arg,
+		if (copy_from_user(&val, (PARBURST_RW_VALUE *) arg,
 			sizeof(PARBURST_RW_VALUE))) return -EFAULT;
 		if (val.length < BUFFER_SIZE) return -EFAULT;
-		rv = cbm_parallel_burst_read_track(buf);
-		if (copy_to_user(val.buffer, buf, BUFFER_SIZE)) return -EFAULT;
+		rv = cbm_parallel_burst_read_track(track_buffer);
+		if (copy_to_user(val.buffer, track_buffer, BUFFER_SIZE)) return -EFAULT;
 		return rv;
 
 	case CBMCTRL_PARBURST_READ_TRACK_VAR:
-		if (copy_from_user(&kernel_val, (PARBURST_RW_VALUE *) arg,
+		if (copy_from_user(&val, (PARBURST_RW_VALUE *) arg,
 			sizeof(PARBURST_RW_VALUE))) return -EFAULT;
 		if (val.length < BUFFER_SIZE) return -EFAULT;
-		rv = cbm_parallel_burst_read_track_var(buf);
-		if (copy_to_user(val.buffer, buf, BUFFER_SIZE)) return -EFAULT;
+		rv = cbm_parallel_burst_read_track_var(track_buffer);
+		if (copy_to_user(val.buffer, track_buffer, BUFFER_SIZE)) return -EFAULT;
 		return rv;
 
 	case CBMCTRL_PARBURST_WRITE_TRACK:
-		if (copy_from_user(&kernel_val, (PARBURST_RW_VALUE *) arg,
+		if (copy_from_user(&val, (PARBURST_RW_VALUE *) arg,
 			sizeof(PARBURST_RW_VALUE))) return -EFAULT;
 		if (val.length > BUFFER_SIZE) return -EFAULT;
 		if (copy_from_user(buf, val.buffer, val.length)) return -EFAULT;
@@ -837,7 +837,7 @@ static struct miscdevice cbm_dev = {
 
 void cbm_cleanup(void)
 {
-	kfree(buf);
+	kfree(track_buffer);
 #ifdef DIRECT_PORT_ACCESS
 	free_irq(irq, NULL);
 	release_region(port, 3);
@@ -893,7 +893,7 @@ int cbm_init(void)
 	DPRINTK("parallel port is mine now\n");
 #endif
 	misc_register(&cbm_dev);
-	buf = kmalloc(BUFFER_SIZE, GFP_KERNEL);
+	track_buffer = kmalloc(BUFFER_SIZE, GFP_KERNEL);
 
 #ifdef DIRECT_PORT_ACCESS
 	in_port = port + 1;
