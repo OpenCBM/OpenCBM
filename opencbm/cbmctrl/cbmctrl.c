@@ -1599,7 +1599,7 @@ static struct prog prog_table[] =
         "reset all drives on the IEC bus",
         "This command performs a (physical) reset of all drives on the IEC bus." },
 
-    {1, "detect"  , PA_UNSPEC,  do_detect  , "[-p|--parcheck] [<firstdevice> [<lastdevice]]",
+    {1, "detect"  , PA_UNSPEC,  do_detect  , "[-p|--parcheck] [-v|--verbose] [<firstdevice> [<lastdevice]]",
         "detect all drives on the IEC bus",
         "This command tries to detect all drives on the IEC bus.\n"
         "For this, this command accesses all possible drives and tries to read\n"
