@@ -1599,13 +1599,18 @@ static struct prog prog_table[] =
         "reset all drives on the IEC bus",
         "This command performs a (physical) reset of all drives on the IEC bus." },
 
-    {1, "detect"  , PA_UNSPEC,  do_detect  , "[-p|--parcheck] [-v|--verbose] [<firstdevice> [<lastdevice]]",
-        "detect all drives on the IEC bus",
+    {1, "detect"  , PA_UNSPEC,  do_detect  , "[-p|--parcheck] [-v|--verbose] [<device_start> [<device_end>]]",
+        "detect drives on the IEC bus\n",
         "This command tries to detect all drives on the IEC bus.\n"
-        "For this, this command accesses all possible drives and tries to read\n"
-        "some bytes from their memory. If a drive is detected, its name is output.\n"
+        "(or only some if them if <device_start> and <device_end> are given)\n"
+        "For this, this command accesses all possible drives in the range and tries\n"
+        "to read some bytes from their memory. If a drive is detected, its name is\n"
+        "output.\n"
         "Additionally, this routine determines if the drive is connected via a\n"
-        "parallel cable (XP1541 companion cable)." },
+        "parallel cable (XP1541 companion cable).\n"
+        "\n"
+        "Use option --verbose for verbose output.\n"
+        "Use option --parcheck for more thorough testing of the parallel cable.\n" },
 
     {1, "change"  , PA_UNSPEC,  do_change  , "<device>",
         "wait for a disk to be changed in the specified drive",
