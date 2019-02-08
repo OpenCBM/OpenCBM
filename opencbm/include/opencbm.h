@@ -184,6 +184,8 @@ EXTERN int CBMAPIDECL cbm_identify(CBM_FILE f, unsigned char drv,
                                    enum cbm_device_type_e *t,
                                    const char **type_str);
 
+EXTERN unsigned int CBMAPIDECL cbm_determine_pport_address(enum cbm_device_type_e CbmDeviceType);
+
 EXTERN int CBMAPIDECL cbm_identify_xp1541(CBM_FILE HandleDevice,
                                           unsigned char DeviceAddress,
                                           enum cbm_device_type_e *CbmDeviceType,

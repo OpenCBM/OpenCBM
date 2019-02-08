@@ -4,34 +4,29 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 2005 Spiro Trikaliotis
- *  Based on code by Wolfgang Moser
+ *  Copyright 2019 Spiro Trikaliotis
+ *
+ *  Based on code:
+ *  Copyright 1999-2004 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Modifications for cbm4win and general rework Copyright 2001-2007 Spiro Trikaliotis
+ *  Additions Copyright 2006,2011 Wolfgang Moser (http://d81.de)
+ *  Additions Copyright 2011      Thomas Winkler
  *
 */
 
 /*! ************************************************************** 
-** \file lib/detectxp1541.c \n
+** \file cbmctrl/pport.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
-** \brief Shared library / DLL for accessing the driver
-**        Detect an XP1541/XP1571 parallel cable
+** \brief Check XP1541/XP1571 (or similar XUM1541) parallel cable
 **
 ****************************************************************/
 
-/*! Mark: We are in user-space (for debug.h) */
-#define DBG_USERMODE
-
-/*! The name of the executable */
-#define DBG_PROGNAME "OPENCBM.DLL"
-
-#include "debug.h"
-
+#include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 
-//! mark: We are building the DLL */
-#define DLL
-#include "opencbm.h"
-#include "archlib.h"
+#include "cbmctrl.h"
 
 #include "arch.h"
 
@@ -68,17 +63,15 @@ pia_to_inputmode(CBM_FILE HandleDevice, unsigned char Drive, unsigned int PiaAdd
     int ret = -1;
     unsigned char byteval = 0x00;
 
-    FUNC_ENTER();
-
     if (cbm_upload(HandleDevice, Drive, PiaAddress + 2, &byteval, 1) == 1)
         ret = 0;
     else
         ret = 1;
 
-    FUNC_LEAVE_INT(ret);
+    return ret;
 }
 
-/*! \brief \internal Output via floppy PIA and check if that can be read back
+/*! \brief Output via floppy PIA and check if that can be read back
 
  This function outputs some byte via the floppy PIA and checks if
  that value can be read back using the parallel port of the PC.
@@ -100,7 +93,8 @@ pia_to_inputmode(CBM_FILE HandleDevice, unsigned char Drive, unsigned int PiaAdd
    The value to write into the parallel port for testing.
 
  \return
-   0 if the value could be set and read back.
+   -1 if there was an error setting the vlaue
+   Otherwise, the value that was read back.
 
  If cbm_driver_open() did not succeed, it is illegal to 
  call this function.
@@ -110,8 +104,6 @@ static int
 output_pia(CBM_FILE HandleDevice, unsigned char Drive, unsigned int PiaAddress, unsigned char Value)
 {
     int ret = -1;
-
-    FUNC_ENTER();
 
     do {
         unsigned char byteval = 0xff;
@@ -131,77 +123,56 @@ output_pia(CBM_FILE HandleDevice, unsigned char Drive, unsigned int PiaAddress, 
         /*
          * Give the drive time to be able to execute this command
          */
-        arch_usleep(10000);
+        arch_usleep(5000);
 
         /*
          * Read back the value. Hopefully, it is exactly what we just have written.
          */
-        ret = cbm_pp_read(HandleDevice) != Value;
-
-        if (ret)
-        {
-            /*
-             * The test was unsuccessfull. To make sure the PIA
-             * is not stuck at output mode, set it back to input mode.
-             */
-            pia_to_inputmode(HandleDevice, Drive, PiaAddress);
-        }
+        ret = cbm_pp_read(HandleDevice);
 
     } while (0);
 
-    FUNC_LEAVE_INT(ret);
+    return ret;
 }
 
-/*! \brief Identify the address of the PIA
-
- Given a device type, this function returns the address
- where the PIA that is resonsible for parallel connection
- is located.
-
- The address is determined just by looking at the device type.
- There is no test for additional hardware that might change the rules.
-
- \param CbmDeviceType
-   The type of the device.
-
- \return
-   0 if the drive type does not have a PIA for parallel connection,
-     otherwise the address of the PIA in the drive's address space.
-*/
-
-unsigned int CBMAPIDECL
-cbm_determine_pport_address(enum cbm_device_type_e CbmDeviceType)
+// @@@DUMMY
+static int
+input_pia(CBM_FILE HandleDevice, unsigned char Drive, unsigned int PiaAddress, unsigned char Value)
 {
-    unsigned int piaAddress;
+    int ret = -1;
 
-    FUNC_ENTER();
+    do {
+        unsigned char byteval = 0xff;
 
-    /*
-     * Now that we know the drive type, use this to find the PIA/VIA/CIA address
-     */
-    switch (CbmDeviceType)
-    {
-    case cbm_dt_cbm1541:
-        piaAddress = 0x1801;
-        break;
+        /*
+         * Output the value via the parallel port
+         */
+        cbm_pp_write(HandleDevice, Value);
 
-    case cbm_dt_cbm1570:
-    case cbm_dt_cbm1571:
-        piaAddress = 0x4001;
-        break;
+        /*
+         * Give the drive time to be able to execute this command
+         */
+        arch_usleep(5000);
 
-    default:
-        piaAddress = 0;
-        break;
-    }
+        /*
+         * Read back the value. Hopefully, it is exactly what we just have written.
+         */
+        if (cbm_download(HandleDevice, Drive, PiaAddress , &byteval, sizeof(byteval)) != sizeof(byteval))
+            break;
 
-    FUNC_LEAVE_UINT(piaAddress);
+        ret = byteval;
+
+    } while (0);
+
+    return ret;
 }
 
-/*! \brief Identify the cable connected to a specific floppy drive.
 
- This function tries to identify if the given floppy drive has an
- XP1541 cable connected.
+/*! \brief Check if XP1541 (or similar) cable is working
+
+ This function checks the XP1541 (or similar parallel cable)
+ if it works as expected. That is, the connections are tested
+ with some test patterns.
 
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
@@ -211,62 +182,52 @@ cbm_determine_pport_address(enum cbm_device_type_e CbmDeviceType)
    is known as primary address, too.
 
  \param CbmDeviceType
-   Pointer to an enum which holds the type of the device.
-   If this pointer is NULL or the device type is set to
-   unknown, this function calls cbm_identify itself to find
-   out the device type. If this pointer is not set to NULL,
-   this function will return the device type there.
+   An enum which holds the type of the device.
 
  \param CableType
-   Pointer to an enum which will hold the cable type of the 
-   device on return.
+   An enum which holds the cable type of the device
+
+ \param Verbose
+   set the != 0 if the output should be verbose
+
+ \remark
+   When calling this function, it must be sure that a parallel
+   cable exists, or this function will fail.
 
  \return
-   0 if the drive could be contacted. It does not mean that
-   the device could be identified.
-
- If cbm_driver_open() did not succeed, it is illegal to 
- call this function.
+   0 if the XP1541 cable works. Othersise, != 0
 */
 
-int CBMAPIDECL 
-cbm_identify_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
-                    enum cbm_device_type_e *CbmDeviceType,
-                    enum cbm_cable_type_e *CableType)
+int
+cbm_check_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
+                 enum cbm_device_type_e CbmDeviceType,
+                 enum cbm_cable_type_e CableType,
+                 int Verbose)
 {
     int ret = 0;
-    enum cbm_device_type_e localDummyDeviceType = cbm_dt_unknown;
 
-    FUNC_ENTER();
- 
+    if (CableType != cbm_ct_xp1541)
+        return -1;
+
     do
     {
         unsigned int piaAddress;
-        int value;
 
-        if (!CableType)
-        {
-            /*
-             * We do not have a possibility to send back the
-             * cable type: This is an error!
-             */
-            DBG_ASSERT(("CableType is NULL", 0));
-            ret = 1;
-            break;
-        }
-
-        *CableType = cbm_ct_none;
+        unsigned int pattern_index;
+        static const unsigned char testpattern[] =
+            {
+              0x55, 0xAA, 0x69, 0x96, 0x0f, 0xf0,
+              0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+              0xfe, 0xfd, 0xfb, 0xf7, 0xef, 0xdf, 0xbf, 0x7f
+            };
 
         /*
          * If needed, determine the type of the drive
          */
-        if (!CbmDeviceType)
-            CbmDeviceType = &localDummyDeviceType;
-
-        if (*CbmDeviceType == cbm_dt_unknown)
+        if (CbmDeviceType == cbm_dt_unknown)
         {
             ret = cbm_identify(HandleDevice, DeviceAddress,
-                 CbmDeviceType, NULL);
+                 &CbmDeviceType, NULL);
         }
 
         if (ret)
@@ -277,11 +238,10 @@ cbm_identify_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
              * type, as writing into wrong locations can
              * make the drive hang.
              */
-            *CableType = cbm_ct_unknown;
             break;
         }
 
-        piaAddress = cbm_determine_pport_address(*CbmDeviceType);
+        piaAddress = cbm_determine_pport_address(CbmDeviceType);
         /*
          * If we do not have a PIA address, we do not know where a parallel
          * cable could be located. This, report "no parallel cable".
@@ -293,22 +253,22 @@ cbm_identify_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
          * Set parallel port into input mode.
          * This prevents us (PC) and the drive driving the lines simultaneously.
          */
-        value = cbm_pp_read(HandleDevice);
-        DBG_PRINT((DBG_PREFIX "Setting Parport into input mode", value));
+        cbm_pp_read(HandleDevice);
 
-        /*
-         * Try to write some patterns and check if we see them:
-         */
-        if (output_pia(HandleDevice, DeviceAddress, piaAddress, 0x55))
-            break;
+        ret = 0;
 
-        if (output_pia(HandleDevice, DeviceAddress, piaAddress, 0xAA))
-            break;
-
-        /*
-         * Ok, it has worked: We have a parallel cable.
-         */
-        *CableType = cbm_ct_xp1541;
+        for (pattern_index = 0; pattern_index < sizeof(testpattern); pattern_index++) {
+            /*
+             * Try to write some patterns and check if we see them:
+             */
+            unsigned int value_set = testpattern[pattern_index];
+            unsigned int value_read = output_pia(HandleDevice, DeviceAddress, piaAddress, value_set);
+            if (value_set != value_read) {
+                fprintf(stderr, "error sending FLOPPY -> PC, pattern #%u = 0x%02X, but read back 0x%02X\n",
+                        pattern_index, value_set, value_read);
+                ++ret;
+            }
+        }
 
         /*
          * Set PIA back to input mode.
@@ -320,7 +280,20 @@ cbm_identify_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
             pia_to_inputmode(HandleDevice, DeviceAddress, piaAddress);
         }
 
+        for (pattern_index = 0; pattern_index < sizeof(testpattern); pattern_index++) {
+            /*
+             * Try to write some patterns and check if we see them:
+             */
+            unsigned int value_set = testpattern[pattern_index];
+            unsigned int value_read = input_pia(HandleDevice, DeviceAddress, piaAddress, value_set);
+            if (value_set != value_read) {
+                fprintf(stderr, "error sending PC -> FLOPPY, pattern #%u = 0x%02X, but read back 0x%02X\n",
+                        pattern_index, value_set, value_read);
+                ++ret;
+            }
+        }
+
     } while (0);
 
-    FUNC_LEAVE_INT(ret);
+    return ret;
 }
