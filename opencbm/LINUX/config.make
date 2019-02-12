@@ -157,8 +157,8 @@ endif
 ifeq "$(OS)" "Darwin"
 ETCDIR=$(PREFIX)/etc
 
-# Use MacPort's libusb-legacy for now
-LIBUSB_CONFIG  = /opt/local/bin/libusb-legacy-config
+# Use MacPort's libusb-compat for now
+LIBUSB_CONFIG  = /opt/local/bin/libusb-config
 LIBUSB_CFLAGS  = $(shell $(LIBUSB_CONFIG) --cflags)
 LIBUSB_LDFLAGS =
 LIBUSB_LIBS    = $(shell $(LIBUSB_CONFIG) --libs)
