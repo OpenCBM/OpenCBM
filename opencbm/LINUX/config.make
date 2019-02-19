@@ -44,17 +44,6 @@ UDEVRULESDIR = /etc/udev/rules.d/
 XU1541DIR   = $(RELATIVEPATH)/../xu1541
 XUM1541DIR  = $(RELATIVEPATH)/../xum1541
 
-#
-# Where to find libusb (libusb.sf.net)
-#
-LIBUSB0_CFLAGS  = -I/usr/include
-LIBUSB0_LDFLAGS =
-LIBUSB0_LIBS    = -L/usr/lib -lusb
-
-LIBUSB1_CFLAGS  = $(shell pkg-config --cflags libusb-1.0)
-LIBUSB1_LDFLAGS =
-LIBUSB1_LIBS    = $(shell pkg-config --libs libusb-1.0)
-
 
 #
 # define os name
@@ -121,16 +110,16 @@ HAVE_LIBUSB1 = ${shell pkg-config libusb-1.0 && echo 1}
 
 ifneq ($(strip $(HAVE_LIBUSB0)),)
   HAVE_LIBUSB=1
-  LIBUSB_CFLAGS=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB0=1 $(LIBUSB0_CFLAGS)
-  LIBUSB_LDFLAGS=$(LIBUSB0_LDFLAGS)
-  LIBUSB_LIBS=$(LIBUSB0_LIBS)
+  LIBUSB_CFLAGS=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB0=1 $(shell pkg-config --cflags libusb)
+  LIBUSB_LDFLAGS=
+  LIBUSB_LIBS=$(shell pkg-config --libs libusb)
 endif
 
 ifneq ($(strip $(HAVE_LIBUSB1)),)
   HAVE_LIBUSB=1
-  LIBUSB_CFLAGS=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB1=1 $(LIBUSB1_CFLAGS)
-  LIBUSB_LDFLAGS=$(LIBUSB1_LDFLAGS)
-  LIBUSB_LIBS=$(LIBUSB1_LIBS)
+  LIBUSB_CFLAGS=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB1=1 $(shell pkg-config --cflags libusb-1.0)
+  LIBUSB_LDFLAGS=
+  LIBUSB_LIBS=$(shell pkg-config --libs libusb-1.0)
 endif
 
 #
