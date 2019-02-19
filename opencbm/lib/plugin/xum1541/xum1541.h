@@ -26,6 +26,15 @@
 
 CTASSERT(sizeof(CBM_FILE) >= sizeof(usb_dev_handle *));
 
+struct xum1541_usb_handle {
+#if HAVE_LIBUSB1
+	libusb_context *ctx;
+	libusb_device_handle *devh;
+#elif HAVE_LIBUSB0
+        usb_dev_handle *devh; /*!< \internal \brief handle to the xu1541 device */
+#endif
+};
+
 /*
  * Make our control transfer timeout 10% later than the device itself
  * times out. This is used for both the INIT and RESET messages since
@@ -47,22 +56,22 @@ CTASSERT(sizeof(CBM_FILE) >= sizeof(usb_dev_handle *));
 #define DeviceDriveMode_Tape            2 // Tape drive mode (only communication to tape drive allowed)
 
 const char *xum1541_device_path(int PortNumber);
-int xum1541_init(usb_dev_handle **HandleXum1541, int PortNumber);
-void xum1541_close(usb_dev_handle *HandleXum1541);
-int xum1541_control_msg(usb_dev_handle *HandleXum1541, unsigned int cmd);
-int xum1541_ioctl(usb_dev_handle *HandleXum1541, unsigned int cmd,
+int xum1541_init(struct xum1541_usb_handle **HandleXum1541, int PortNumber);
+void xum1541_close(struct xum1541_usb_handle *HandleXum1541);
+int xum1541_control_msg(struct xum1541_usb_handle *HandleXum1541, unsigned int cmd);
+int xum1541_ioctl(struct xum1541_usb_handle *HandleXum1541, unsigned int cmd,
     unsigned int addr, unsigned int secaddr);
 
 // Read/write data in normal CBM and speeder protocol modes
-int xum1541_write(usb_dev_handle *HandleXum1541, unsigned char mode,
+int xum1541_write(struct xum1541_usb_handle *HandleXum1541, unsigned char mode,
     const unsigned char *data, size_t size);
-int xum1541_write_ext(usb_dev_handle *HandleXum1541, unsigned char mode,
+int xum1541_write_ext(struct xum1541_usb_handle *HandleXum1541, unsigned char mode,
     const unsigned char *data, size_t size, int *Status, int *BytesWritten);
-int xum1541_read(usb_dev_handle *HandleXum1541, unsigned char mode,
+int xum1541_read(struct xum1541_usb_handle *HandleXum1541, unsigned char mode,
     unsigned char *data, size_t size);
-int xum1541_read_ext(usb_dev_handle *HandleXum1541, unsigned char mode,
+int xum1541_read_ext(struct xum1541_usb_handle *HandleXum1541, unsigned char mode,
     unsigned char *data, size_t size, int *Status, int *BytesRead);
 
-int xum1541_tap_break(usb_dev_handle *HandleXum1541);
+int xum1541_tap_break(struct xum1541_usb_handle *HandleXum1541);
 
 #endif // XUM1541_H
