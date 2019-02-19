@@ -48,7 +48,7 @@ opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
 {
     unsigned char result;
 
-    result = (unsigned char)xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_PARBURST_READ, 0, 0);
+    result = (unsigned char)xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_PARBURST_READ, 0, 0);
     //printf("parburst read: %x\n", result);
     return result;
 }
@@ -73,7 +73,7 @@ opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
     int result;
 
-    result = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_PARBURST_WRITE, Value, 0);
+    result = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_PARBURST_WRITE, Value, 0);
     //printf("parburst write: %x, res %x\n", Value, result);
 }
 
@@ -83,7 +83,7 @@ opencbm_plugin_parallel_burst_read_n(CBM_FILE HandleDevice, unsigned char *Buffe
 {
     int result;
 
-    result = xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_NIB_COMMAND, Buffer, Length);
+    result = xum1541_read((struct opencbm_usb_handle *)HandleDevice, XUM1541_NIB_COMMAND, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_read_n: returned with error %d", result));
     }
@@ -97,7 +97,7 @@ opencbm_plugin_parallel_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buff
 {
     int result;
 
-    result = xum1541_write((usb_dev_handle *)HandleDevice, XUM1541_NIB_COMMAND, Buffer, Length);
+    result = xum1541_write((struct opencbm_usb_handle *)HandleDevice, XUM1541_NIB_COMMAND, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_write_n: returned with error %d", result));
     }
@@ -131,7 +131,7 @@ opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, unsigned char *B
 {
     int result;
 
-    result = xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_NIB, Buffer, Length);
+    result = xum1541_read((struct opencbm_usb_handle *)HandleDevice, XUM1541_NIB, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_read_track: returned with error %d", result));
     }
@@ -167,7 +167,7 @@ opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, unsigned cha
 
     // Add a flag to indicate this read terminates early after seeing 
     // an 0x55 byte.
-    result = xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_NIB, Buffer, Length | XUM1541_NIB_READ_VAR);
+    result = xum1541_read((struct opencbm_usb_handle *)HandleDevice, XUM1541_NIB, Buffer, Length | XUM1541_NIB_READ_VAR);
     if (result <= 0) {
         DBG_WARN((DBG_PREFIX "parallel_burst_read_track_var: returned with error %d", result));
     }
@@ -201,7 +201,7 @@ opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, unsigned char *
 {
     int result;
 
-    result = xum1541_write((usb_dev_handle *)HandleDevice, XUM1541_NIB, Buffer, Length);
+    result = xum1541_write((struct opencbm_usb_handle *)HandleDevice, XUM1541_NIB, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "parallel_burst_write_track: returned with error %d", result));
     }
@@ -231,7 +231,7 @@ opencbm_plugin_srq_burst_read(CBM_FILE HandleDevice)
 {
     unsigned char result;
 
-    result = (unsigned char)xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_SRQBURST_READ, 0, 0);
+    result = (unsigned char)xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_SRQBURST_READ, 0, 0);
     return result;
 }
 
@@ -255,7 +255,7 @@ opencbm_plugin_srq_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
     int result;
 
-    result = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_SRQBURST_WRITE, Value, 0);
+    result = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_SRQBURST_WRITE, Value, 0);
 }
 
 int CBMAPIDECL
@@ -264,7 +264,7 @@ opencbm_plugin_srq_burst_read_n(CBM_FILE HandleDevice, unsigned char *Buffer,
 {
     int result;
 
-    result = xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_NIB_SRQ_COMMAND, Buffer, Length);
+    result = xum1541_read((struct opencbm_usb_handle *)HandleDevice, XUM1541_NIB_SRQ_COMMAND, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "srq_burst_read_n: returned with error %d", result));
     }
@@ -278,7 +278,7 @@ opencbm_plugin_srq_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buffer,
 {
     int result;
 
-    result = xum1541_write((usb_dev_handle *)HandleDevice, XUM1541_NIB_SRQ_COMMAND, Buffer, Length);
+    result = xum1541_write((struct opencbm_usb_handle *)HandleDevice, XUM1541_NIB_SRQ_COMMAND, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "srq_burst_write_n: returned with error %d", result));
     }
@@ -312,7 +312,7 @@ opencbm_plugin_srq_burst_read_track(CBM_FILE HandleDevice, unsigned char *Buffer
 {
     int result;
 
-    result = xum1541_read((usb_dev_handle *)HandleDevice, XUM1541_NIB_SRQ, Buffer, Length);
+    result = xum1541_read((struct opencbm_usb_handle *)HandleDevice, XUM1541_NIB_SRQ, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "srq_read_track: returned with error %d", result));
     }
@@ -346,7 +346,7 @@ opencbm_plugin_srq_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffe
 {
     int result;
 
-    result = xum1541_write((usb_dev_handle *)HandleDevice, XUM1541_NIB_SRQ, Buffer, Length);
+    result = xum1541_write((struct opencbm_usb_handle *)HandleDevice, XUM1541_NIB_SRQ, Buffer, Length);
     if (result != Length) {
         DBG_WARN((DBG_PREFIX "srq_write_track: returned with error %d", result));
     }
@@ -376,7 +376,7 @@ opencbm_plugin_srq_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffe
 int CBMAPIDECL
 opencbm_plugin_tap_prepare_capture(CBM_FILE HandleDevice, int *Status)
 {
-    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_PREPARE_CAPTURE, 0, 0);
+    *Status = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP_PREPARE_CAPTURE, 0, 0);
     //printf("opencbm_plugin_tap_prepare_capture: %x\n", result);
     return 1;
 }
@@ -401,7 +401,7 @@ opencbm_plugin_tap_prepare_capture(CBM_FILE HandleDevice, int *Status)
 int CBMAPIDECL
 opencbm_plugin_tap_prepare_write(CBM_FILE HandleDevice, int *Status)
 {
-    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_PREPARE_WRITE, 0, 0);
+    *Status = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP_PREPARE_WRITE, 0, 0);
     //printf("opencbm_plugin_tap_prepare_write: %x\n", result);
     return 1;
 }
@@ -426,7 +426,7 @@ opencbm_plugin_tap_prepare_write(CBM_FILE HandleDevice, int *Status)
 int CBMAPIDECL
 opencbm_plugin_tap_get_sense(CBM_FILE HandleDevice, int *Status)
 {
-    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_GET_SENSE, 0, 0);
+    *Status = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP_GET_SENSE, 0, 0);
     //printf("opencbm_plugin_tap_get_sense: %x\n", result);
     return 1;
 }
@@ -451,7 +451,7 @@ opencbm_plugin_tap_get_sense(CBM_FILE HandleDevice, int *Status)
 int CBMAPIDECL
 opencbm_plugin_tap_wait_for_stop_sense(CBM_FILE HandleDevice, int *Status)
 {
-    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_WAIT_FOR_STOP_SENSE, 0, 0);
+    *Status = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP_WAIT_FOR_STOP_SENSE, 0, 0);
     //printf("opencbm_plugin_tap_wait_for_stop_sense: %x\n", result);
     return 1;
 }
@@ -476,7 +476,7 @@ opencbm_plugin_tap_wait_for_stop_sense(CBM_FILE HandleDevice, int *Status)
 int CBMAPIDECL
 opencbm_plugin_tap_wait_for_play_sense(CBM_FILE HandleDevice, int *Status)
 {
-    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_WAIT_FOR_PLAY_SENSE, 0, 0);
+    *Status = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP_WAIT_FOR_PLAY_SENSE, 0, 0);
     //printf("opencbm_plugin_tap_wait_for_play_sense: %x\n", result);
     return 1;
 }
@@ -501,7 +501,7 @@ opencbm_plugin_tap_wait_for_play_sense(CBM_FILE HandleDevice, int *Status)
 int CBMAPIDECL
 opencbm_plugin_tap_motor_on(CBM_FILE HandleDevice, int *Status)
 {
-    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_MOTOR_ON, 0, 0);
+    *Status = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP_MOTOR_ON, 0, 0);
     //printf("opencbm_plugin_tap_motor_on: %x\n", result);
     return 1;
 }
@@ -526,7 +526,7 @@ opencbm_plugin_tap_motor_on(CBM_FILE HandleDevice, int *Status)
 int CBMAPIDECL
 opencbm_plugin_tap_motor_off(CBM_FILE HandleDevice, int *Status)
 {
-    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_MOTOR_OFF, 0, 0);
+    *Status = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP_MOTOR_OFF, 0, 0);
     //printf("opencbm_plugin_tap_motor_off: %x\n", result);
     return 1;
 }
@@ -563,7 +563,7 @@ opencbm_plugin_tap_motor_off(CBM_FILE HandleDevice, int *Status)
 int CBMAPIDECL
 opencbm_plugin_tap_start_capture(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
 {
-    int result = xum1541_read_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP, Buffer, Buffer_Length, Status, BytesRead);
+    int result = xum1541_read_ext((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP, Buffer, Buffer_Length, Status, BytesRead);
     if (result <= 0) {
         DBG_WARN((DBG_PREFIX "opencbm_plugin_tap_start_capture: returned with error %d", result));
     }
@@ -602,7 +602,7 @@ opencbm_plugin_tap_start_capture(CBM_FILE HandleDevice, unsigned char *Buffer, u
 int CBMAPIDECL
 opencbm_plugin_tap_start_write(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
 {
-    int result = xum1541_write_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP, Buffer, Length, Status, BytesWritten);
+    int result = xum1541_write_ext((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP, Buffer, Length, Status, BytesWritten);
     if (result <= 0) {
         DBG_WARN((DBG_PREFIX "opencbm_plugin_tap_start_write: returned with error %d", result));
     }
@@ -629,7 +629,7 @@ opencbm_plugin_tap_start_write(CBM_FILE HandleDevice, unsigned char *Buffer, uns
 int CBMAPIDECL
 opencbm_plugin_tap_get_ver(CBM_FILE HandleDevice, int *Status)
 {
-    *Status = xum1541_ioctl((usb_dev_handle *)HandleDevice, XUM1541_TAP_GET_VER, 0, 0);
+    *Status = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP_GET_VER, 0, 0);
     //printf("opencbm_plugin_tap_get_ver: %x\n", result);
     return 1;
 }
@@ -637,7 +637,7 @@ opencbm_plugin_tap_get_ver(CBM_FILE HandleDevice, int *Status)
 int CBMAPIDECL
 opencbm_plugin_tap_break(CBM_FILE HandleDevice)
 {
-    return xum1541_tap_break((usb_dev_handle *)HandleDevice);
+    return xum1541_tap_break((struct opencbm_usb_handle *)HandleDevice);
     //printf("opencbm_plugin_tap_break: %x\n", result);
 }
 
@@ -673,7 +673,7 @@ opencbm_plugin_tap_break(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_tap_download_config(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Buffer_Length, int *Status, int *BytesRead)
 {
-    int result = xum1541_read_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP_CONFIG, Buffer, Buffer_Length, Status, BytesRead);
+    int result = xum1541_read_ext((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP_CONFIG, Buffer, Buffer_Length, Status, BytesRead);
     if (result <= 0) {
         DBG_WARN((DBG_PREFIX "opencbm_plugin_tap_download_config: returned with error %d", result));
     }
@@ -712,7 +712,7 @@ opencbm_plugin_tap_download_config(CBM_FILE HandleDevice, unsigned char *Buffer,
 int CBMAPIDECL
 opencbm_plugin_tap_upload_config(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int Length, int *Status, int *BytesWritten)
 {
-    int result = xum1541_write_ext((usb_dev_handle *)HandleDevice, XUM1541_TAP_CONFIG, Buffer, Length, Status, BytesWritten);
+    int result = xum1541_write_ext((struct opencbm_usb_handle *)HandleDevice, XUM1541_TAP_CONFIG, Buffer, Length, Status, BytesWritten);
     if (result <= 0) {
         DBG_WARN((DBG_PREFIX "opencbm_plugin_tap_upload_config: returned with error %d", result));
     }

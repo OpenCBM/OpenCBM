@@ -65,51 +65,6 @@ static void xu1541_dbg(int level, char *msg, ...)
     }
 }
 
-/*! \internal \brief @@@@@ \todo document
-
- \param dev
-
- \param index
-
- \param langid
-
- \param buf
-
- \param buflen
-
- \return
-*/
-static int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid, 
-			      char *buf, int buflen)
-{
-    char    buffer[256];
-    int     rval, i;
-
-    if((rval = usb.control_msg(dev, USB_ENDPOINT_IN, 
-			       USB_REQ_GET_DESCRIPTOR, 
-			       (USB_DT_STRING << 8) + index, 
-			       langid, buffer, sizeof(buffer), 1000)) < 0)
-        return rval;
-    
-    if(buffer[1] != USB_DT_STRING)
-        return 0;
-
-    if((unsigned char)buffer[0] < rval)
-        rval = (unsigned char)buffer[0];
-  
-    rval /= 2;
-    /* lossy conversion to ISO Latin1 */
-    for(i=1;i<rval;i++){
-        if(i > buflen)  /* destination buffer overflow */
-	    break;
-	buf[i-1] = buffer[2 * i];
-	if(buffer[2 * i + 1] != 0)  /* outside of ISO Latin1 range */
-	    buf[i-1] = '?';
-    }
-    buf[i-1] = 0;
-    return i-1;
-}
-
 /*! \brief initialise the xu1541 device
 
   This function tries to find and identify the xu1541 device.
@@ -131,14 +86,14 @@ static int  usbGetStringAscii(usb_dev_handle *dev, int index, int langid,
     xu1541_close() is not to be called.
 */
 /* try to find a xu1541 cable */
-int xu1541_init(struct xu1541_usb_handle **HandleXu1541_p) {
-  struct xu1541_usb_handle *HandleXu1541;
+int xu1541_init(struct opencbm_usb_handle **HandleXu1541_p) {
+  struct opencbm_usb_handle *HandleXu1541;
   struct usb_bus      *bus;
   struct usb_device   *dev;
   unsigned char ret[4];
   int len;
 
-  *HandleXu1541_p = HandleXu1541 = malloc(sizeof(struct xu1541_usb_handle));
+  *HandleXu1541_p = HandleXu1541 = malloc(sizeof(struct opencbm_usb_handle));
   if (!HandleXu1541) return -1;
   HandleXu1541->devh = NULL;
 
@@ -176,7 +131,7 @@ int xu1541_init(struct xu1541_usb_handle **HandleXu1541_p) {
 	
 	/* get device name and make sure the name is "xu1541" meaning */
 	/* that the device is not in boot loader mode */
-	len = usbGetStringAscii(HandleXu1541->devh, dev->descriptor.iProduct, 
+	len = usbGetStringAscii(HandleXu1541, dev->descriptor.iProduct, 
 				0x0409, string, sizeof(string));
 	if(len < 0){
 	  fprintf(stderr, "warning: cannot query product "
@@ -250,7 +205,7 @@ int xu1541_init(struct xu1541_usb_handle **HandleXu1541_p) {
  \remark
     This function releases the interface and closes the xu1541 handle.
 */
-void xu1541_close(struct xu1541_usb_handle *HandleXu1541)
+void xu1541_close(struct opencbm_usb_handle *HandleXu1541)
 {
     xu1541_dbg(0, "Closing USB link");
 
@@ -282,7 +237,7 @@ void xu1541_close(struct xu1541_usb_handle *HandleXu1541)
  \todo
    Rework for cleaner structure. Currently, this is a mess!
 */
-int xu1541_ioctl(struct xu1541_usb_handle *HandleXu1541, unsigned int cmd, unsigned int addr, unsigned int secaddr)
+int xu1541_ioctl(struct opencbm_usb_handle *HandleXu1541, unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
   int nBytes;
   char ret[4];
@@ -394,7 +349,7 @@ int xu1541_ioctl(struct xu1541_usb_handle *HandleXu1541, unsigned int cmd, unsig
  \return
     The number of bytes written
 */
-int xu1541_write(struct xu1541_usb_handle *HandleXu1541, const unsigned char *data, size_t len) 
+int xu1541_write(struct opencbm_usb_handle *HandleXu1541, const unsigned char *data, size_t len) 
 {
     int bytesWritten = 0;
 
@@ -479,7 +434,7 @@ int xu1541_write(struct xu1541_usb_handle *HandleXu1541, const unsigned char *da
  \return
     The number of bytes read
 */
-int xu1541_read(struct xu1541_usb_handle *HandleXu1541, unsigned char *data, size_t len) 
+int xu1541_read(struct opencbm_usb_handle *HandleXu1541, unsigned char *data, size_t len) 
 {
     int bytesRead = 0;
     
@@ -609,7 +564,7 @@ int xu1541_read(struct xu1541_usb_handle *HandleXu1541, unsigned char *data, siz
      that we can just handle them in the device at the same time as the USB
      transfers.
 */
-int xu1541_special_write(struct xu1541_usb_handle *HandleXu1541, int mode, const unsigned char *data, size_t size) 
+int xu1541_special_write(struct opencbm_usb_handle *HandleXu1541, int mode, const unsigned char *data, size_t size) 
 {
     int bytesWritten = 0;
 
@@ -660,7 +615,7 @@ int xu1541_special_write(struct xu1541_usb_handle *HandleXu1541, int mode, const
  \return
     The number of bytes read
 */
-int xu1541_special_read(struct xu1541_usb_handle *HandleXu1541, int mode, unsigned char *data, size_t size) 
+int xu1541_special_read(struct opencbm_usb_handle *HandleXu1541, int mode, unsigned char *data, size_t size) 
 {
     int bytesRead = 0;
 

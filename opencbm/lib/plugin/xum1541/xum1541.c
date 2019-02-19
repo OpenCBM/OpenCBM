@@ -137,62 +137,9 @@ xum1541_print_data(int level, const char *op, const unsigned char *data, uint8_t
     }
 }
 
-/*! \internal \brief Get a char* string from the device's Unicode descriptors
-    Some data will be lost in this conversion, but we are ok with that.
-
- \param dev
-    libusb device handle
-
- \param index
-    Descriptor string index
-
- \param langid
-    Language code
-
- \param buf
-    Where to store the string. The result is nul-terminated.
-
- \param buflen
-    Length of the output buffer.
-
- \return
-    Returns the length of the string read or 0 on error.
-*/
-static int
-usbGetStringAscii(struct xum1541_usb_handle *Xum1541Handle, int index, int langid,
-    char *buf, int buflen)
-{
-    char buffer[256];
-    int rval, i;
-    usb_dev_handle *dev = Xum1541Handle->devh;
-
-    rval = usb.control_msg(dev, USB_ENDPOINT_IN, USB_REQ_GET_DESCRIPTOR,
-        (USB_DT_STRING << 8) + index, langid,
-        buffer, sizeof(buffer), 1000);
-    if (rval < 0)
-        return rval;
-
-    if (buffer[1] != USB_DT_STRING)
-        return 0;
-    if ((unsigned char)buffer[0] < rval)
-        rval = (unsigned char)buffer[0];
-
-    rval /= 2;
-    /* lossy conversion to ISO Latin1 */
-    for (i = 1; i < rval; i++) {
-        if (i > buflen)  /* destination buffer overflow */
-            break;
-        buf[i-1] = buffer[2 * i];
-        if (buffer[2 * i + 1] != 0)  /* outside of ISO Latin1 range */
-            buf[i-1] = '?';
-    }
-    buf[i-1] = 0;
-    return i - 1;
-}
-
 // Cleanup after a failure
 static void
-xum1541_cleanup(struct xum1541_usb_handle **HandleXum1541, char *msg, ...)
+xum1541_cleanup(struct opencbm_usb_handle **HandleXum1541, char *msg, ...)
 {
     va_list args;
 
@@ -208,17 +155,17 @@ xum1541_cleanup(struct xum1541_usb_handle **HandleXum1541, char *msg, ...)
 
 // USB bus enumeration
 static int
-xum1541_enumerate(struct xum1541_usb_handle **HandleXum1541_p, int PortNumber)
+xum1541_enumerate(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
 {
     static char xumProduct[] = "xum1541"; // Start of USB product string id
     static int prodLen = sizeof(xumProduct) - 1;
-    struct xum1541_usb_handle *HandleXum1541;
+    struct opencbm_usb_handle *HandleXum1541;
     struct usb_bus *bus;
     struct usb_device *dev, *preferredDefaultHandle;
     char string[256];
     int len, serialnum, leastserial;
 
-    *HandleXum1541_p = HandleXum1541 = malloc(sizeof(struct xum1541_usb_handle));
+    *HandleXum1541_p = HandleXum1541 = malloc(sizeof(struct opencbm_usb_handle));
     if (!HandleXum1541) return -1;
     HandleXum1541->devh = NULL;
 
@@ -358,7 +305,7 @@ const char *
 xum1541_device_path(int PortNumber)
 {
 #define PREFIX_OFFSET   (sizeof("libusb/xum1541:") - 1)
-    struct xum1541_usb_handle *HandleXum1541;
+    struct opencbm_usb_handle *HandleXum1541;
     static char dev_path[PREFIX_OFFSET + LIBUSB_PATH_MAX] = "libusb/xum1541:";
 
     dev_path[PREFIX_OFFSET + 1] = '\0';
@@ -379,7 +326,7 @@ xum1541_device_path(int PortNumber)
 #undef PREFIX_OFFSET
 
 static int
-xum1541_clear_halt(struct xum1541_usb_handle *Xum1541Handle)
+xum1541_clear_halt(struct opencbm_usb_handle *Xum1541Handle)
 {
     int ret;
 
@@ -445,13 +392,13 @@ xum1541_clear_halt(struct xum1541_usb_handle *Xum1541Handle)
     with it.
 */
 int
-xum1541_init(struct xum1541_usb_handle **HandleXum1541_p, int PortNumber)
+xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
 {
-    struct xum1541_usb_handle *HandleXum1541;
+    struct opencbm_usb_handle *HandleXum1541;
     unsigned char devInfo[XUM_DEVINFO_SIZE], devStatus;
     int len;
 
-    // Place after "xum1541_usb_handle" allocation:
+    // Place after "opencbm_usb_handle" allocation:
     /*uh->*/DeviceDriveMode = DeviceDriveMode_Uninit;
 
     if (xum1541_enumerate(HandleXum1541_p, PortNumber) < 0) {
@@ -542,7 +489,7 @@ xum1541_init(struct xum1541_usb_handle **HandleXum1541_p, int PortNumber)
     This function releases the interface and closes the xum1541 handle.
 */
 void
-xum1541_close(struct xum1541_usb_handle *HandleXum1541)
+xum1541_close(struct opencbm_usb_handle *HandleXum1541)
 {
     int ret;
 
@@ -575,7 +522,7 @@ xum1541_close(struct xum1541_usb_handle *HandleXum1541)
    Returns the value the USB device sent back.
 */
 int
-xum1541_control_msg(struct xum1541_usb_handle *HandleXum1541, unsigned int cmd)
+xum1541_control_msg(struct opencbm_usb_handle *HandleXum1541, unsigned int cmd)
 {
     int nBytes;
 
@@ -593,7 +540,7 @@ xum1541_control_msg(struct xum1541_usb_handle *HandleXum1541, unsigned int cmd)
 }
 
 static int
-xum1541_wait_status(struct xum1541_usb_handle *HandleXum1541)
+xum1541_wait_status(struct opencbm_usb_handle *HandleXum1541)
 {
     int nBytes, deviceBusy, ret;
     unsigned char statusBuf[XUM_STATUSBUF_SIZE];
@@ -692,7 +639,7 @@ xum1541_wait_status(struct xum1541_usb_handle *HandleXum1541)
    info from the device such as the active IEC lines.
 */
 int
-xum1541_ioctl(struct xum1541_usb_handle *HandleXum1541, unsigned int cmd, unsigned int addr, unsigned int secaddr)
+xum1541_ioctl(struct opencbm_usb_handle *HandleXum1541, unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
     int nBytes, ret;
     unsigned char cmdBuf[XUM_CMDBUF_SIZE];
@@ -732,7 +679,7 @@ xum1541_ioctl(struct xum1541_usb_handle *HandleXum1541, unsigned int cmd, unsign
    Returns the value the USB device sent back.
 */
 int
-xum1541_tap_break(struct xum1541_usb_handle *HandleXum1541)
+xum1541_tap_break(struct opencbm_usb_handle *HandleXum1541)
 {
     BOOL isTapeCmd = TRUE;
     RefuseToWorkInWrongMode; // Check if command allowed in current disk/tape mode.
@@ -762,7 +709,7 @@ xum1541_tap_break(struct xum1541_usb_handle *HandleXum1541)
     fatal error, returns -1.
 */
 int
-xum1541_write(struct xum1541_usb_handle *HandleXum1541, unsigned char modeFlags, const unsigned char *data, size_t size)
+xum1541_write(struct opencbm_usb_handle *HandleXum1541, unsigned char modeFlags, const unsigned char *data, size_t size)
 {
     int wr, mode, ret;
     size_t bytesWritten, bytes2write;
@@ -852,7 +799,7 @@ xum1541_write(struct xum1541_usb_handle *HandleXum1541, unsigned char modeFlags,
 */
 
 int
-xum1541_write_ext(struct xum1541_usb_handle *HandleXum1541, unsigned char modeFlags, const unsigned char *data, size_t size, int *Status, int *BytesWritten)
+xum1541_write_ext(struct opencbm_usb_handle *HandleXum1541, unsigned char modeFlags, const unsigned char *data, size_t size, int *Status, int *BytesWritten)
 {
     xum1541_dbg(1, "[xum1541_write_ext]");
     *BytesWritten = xum1541_write(HandleXum1541, modeFlags, data, size);
@@ -878,7 +825,7 @@ xum1541_write_ext(struct xum1541_usb_handle *HandleXum1541, unsigned char modeFl
 */
 
 int
-xum1541_read_ext(struct xum1541_usb_handle *HandleXum1541, unsigned char mode, unsigned char *data, size_t size, int *Status, int *BytesRead)
+xum1541_read_ext(struct opencbm_usb_handle *HandleXum1541, unsigned char mode, unsigned char *data, size_t size, int *Status, int *BytesRead)
 {
     xum1541_dbg(1, "[xum1541_read_ext]");
     *BytesRead = xum1541_read(HandleXum1541, mode, data, size);
@@ -910,7 +857,7 @@ xum1541_read_ext(struct xum1541_usb_handle *HandleXum1541, unsigned char mode, u
     fatal error, returns -1.
 */
 int
-xum1541_read(struct xum1541_usb_handle *HandleXum1541, unsigned char mode, unsigned char *data, size_t size)
+xum1541_read(struct opencbm_usb_handle *HandleXum1541, unsigned char mode, unsigned char *data, size_t size)
 {
     int rd;
     size_t bytesRead, bytes2read;
