@@ -27,6 +27,10 @@
 #include "dynlibusb.h"
 #include "getpluginaddress.h"
 
+#if HAVE_LIBUSB0
+const char * libusb0_dummy_error_name(int error_code);
+#endif
+
 usb_dll_t usb = {
     .shared_object_handle = NULL,
 #if HAVE_LIBUSB1
@@ -59,6 +63,7 @@ usb_dll_t usb = {
     .release_interface = usb_release_interface,
     .clear_halt = usb_clear_halt,
     .strerror = usb_strerror, 
+    .error_name = libusb0_dummy_error_name,
     .init = usb_init, 
     .find_busses = usb_find_busses, 
     .find_devices = usb_find_devices, 
@@ -66,6 +71,14 @@ usb_dll_t usb = {
     .get_busses = usb_get_busses
 #endif
 };
+
+#if HAVE_LIBUSB0
+const char * libusb0_dummy_error_name(int error_code)
+{
+    return usb.strerror();
+}
+#endif
+
 
 int dynlibusb_init(void) {
     int error = 0;

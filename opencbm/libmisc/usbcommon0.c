@@ -23,6 +23,8 @@
 
 #include <stdlib.h>
 
+#if HAVE_LIBUSB0
+
 /*! \internal \brief Get a char* string from the device's Unicode descriptors
     Some data will be lost in this conversion, but we are ok with that.
 
@@ -46,7 +48,7 @@
 */
 int
 usbGetStringAscii(struct opencbm_usb_handle *Xum1541Handle, int index, int langid,
-    char *buf, int buflen)
+    unsigned char *buf, int buflen)
 {
     char buffer[256];
     int rval, i;
@@ -75,3 +77,5 @@ usbGetStringAscii(struct opencbm_usb_handle *Xum1541Handle, int index, int langi
     buf[i-1] = 0;
     return i - 1;
 }
+
+#endif /* #if HAVE_LIBUSB0 */

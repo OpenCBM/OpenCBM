@@ -37,7 +37,7 @@ else
    LIBUSB_DIR = $(shell libusb-config --prefix)
    LDFLAGS_EXTRA = $(shell libusb-config --libs)
    CFLAGS_EXTRA = $(shell libusb-config --cflags)
-   
+
  else
    ifeq "$(shell uname -o)" "Cygwin"
      # Cygwin compilation
@@ -58,9 +58,24 @@ else
      #
      CFLAGS_EXTRA=-mno-cygwin -DWIN
    else
-     LIBUSB_DIR = $(shell libusb-config --prefix)
-     LDFLAGS_EXTRA = $(shell libusb-config --libs)
-     CFLAGS_EXTRA = $(shell libusb-config --cflags)
+
+     ### LIBUSB_DIR is a dummy, not needed here
+     LIBUSB_DIR=../
+
+     HAVE_LIBUSB0 = ${shell pkg-config libusb && echo 1}
+     HAVE_LIBUSB1 = ${shell pkg-config libusb-1.0 && echo 1}
+
+     ifneq ($(strip $(HAVE_LIBUSB0)),)
+       HAVE_LIBUSB=1
+       CFLAGS_EXTRA=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB0=1 $(shell pkg-config --cflags libusb)
+       LDFLAGS_EXTRA=$(shell pkg-config --libs libusb)
+     endif
+
+     ifneq ($(strip $(HAVE_LIBUSB1)),)
+       HAVE_LIBUSB=1
+       CFLAGS_EXTRA=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB1=1 -DHAVE_LIBUSB_1_0=1 $(shell pkg-config --cflags libusb-1.0)
+       LDFLAGS_EXTRA=$(shell pkg-config --libs libusb-1.0)
+     endif
    endif
  endif
 endif

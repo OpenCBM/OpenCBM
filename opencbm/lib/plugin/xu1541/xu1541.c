@@ -9,7 +9,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xu1541/xu1541.c \n
 ** \author Till Harbaum \n
 ** \n
@@ -43,25 +43,25 @@ static int debug_level = -10000; /*!< \internal \brief the debugging level for d
  \param msg
    The printf() style message to be output
 */
-static void xu1541_dbg(int level, char *msg, ...) 
+static void xu1541_dbg(int level, char *msg, ...)
 {
     va_list argp;
-    
+
     /* determine debug mode if not yet known */
     if(debug_level == -10000)
     {
        char *val = getenv("XU1541_DEBUG");
        if(val)
-	   debug_level = atoi(val);
+           debug_level = atoi(val);
     }
 
-    if(level <= debug_level) 
+    if(level <= debug_level)
     {
         fprintf(stderr, "[XU1541] ");
         va_start(argp, msg);
-	vfprintf(stderr, msg, argp);
-	va_end(argp);
-	fprintf(stderr, "\n");
+        vfprintf(stderr, msg, argp);
+        va_end(argp);
+        fprintf(stderr, "\n");
     }
 }
 
@@ -88,10 +88,26 @@ static void xu1541_dbg(int level, char *msg, ...)
 /* try to find a xu1541 cable */
 int xu1541_init(struct opencbm_usb_handle **HandleXu1541_p) {
   struct opencbm_usb_handle *HandleXu1541;
+  unsigned char version[4];
+  int len;
+  int interface_claimed = 0;
+  int success = 0;
+  int err = 0;
+#if HAVE_LIBUSB0
   struct usb_bus      *bus;
   struct usb_device   *dev;
-  unsigned char ret[4];
-  int len;
+#elif HAVE_LIBUSB1
+  libusb_device **list;
+  struct libusb_device_descriptor descriptor;
+  ssize_t cnt;
+  ssize_t i = 0;
+  unsigned char string[256];
+#endif
+
+  if (HandleXu1541_p == NULL) {
+    perror("xu1541_init: HandleXu1541_p is NULL");
+    return -1;
+  }
 
   *HandleXu1541_p = HandleXu1541 = malloc(sizeof(struct opencbm_usb_handle));
   if (!HandleXu1541) return -1;
@@ -99,8 +115,9 @@ int xu1541_init(struct opencbm_usb_handle **HandleXu1541_p) {
 
   xu1541_dbg(0, "Scanning usb ...");
 
+#if HAVE_LIBUSB0
   usb.init();
-  
+
   usb.find_busses();
   usb.find_devices();
 
@@ -108,19 +125,24 @@ int xu1541_init(struct opencbm_usb_handle **HandleXu1541_p) {
   /* make lib ignore this as this has nothing to do with our device */
   errno = 0;
 
+#elif HAVE_LIBUSB1
+  usb.init(&HandleXu1541->ctx);
+#endif
+
+#if HAVE_LIBUSB0
   for(bus = usb.get_busses(); !HandleXu1541->devh && bus; bus = bus->next) {
     xu1541_dbg(1, "Scanning bus %s", bus->dirname);
 
     for(dev = bus->devices; !HandleXu1541->devh && dev; dev = dev->next) {
-      xu1541_dbg(1, "Device %04x:%04x at %s", 
-		 dev->descriptor.idVendor, dev->descriptor.idProduct,
-		 dev->filename);
+      xu1541_dbg(1, "Device %04x:%04x at %s",
+                 dev->descriptor.idVendor, dev->descriptor.idProduct,
+                 dev->filename);
 
       if((dev->descriptor.idVendor == XU1541_VID) &&
          (dev->descriptor.idProduct == XU1541_PID)) {
-	char    string[256];
-	int     len;
-	
+        char string[256];
+        int  len;
+
         xu1541_dbg(0, "Found xu1541 device on bus %s device %s.",
                bus->dirname, dev->filename);
 
@@ -128,73 +150,162 @@ int xu1541_init(struct opencbm_usb_handle **HandleXu1541_p) {
         if(!(HandleXu1541->devh = usb.open(dev)))
           fprintf(stderr, "Error: Cannot open USB device: %s\n",
                   usb.strerror());
-	
-	/* get device name and make sure the name is "xu1541" meaning */
-	/* that the device is not in boot loader mode */
-	len = usbGetStringAscii(HandleXu1541, dev->descriptor.iProduct, 
-				0x0409, string, sizeof(string));
-	if(len < 0){
-	  fprintf(stderr, "warning: cannot query product "
-		  "name for device: %s\n", usb.strerror());
-	  if(HandleXu1541->devh) usb.close(HandleXu1541->devh);
-	  HandleXu1541->devh = NULL;
-	}
 
-	/* make sure the name matches what we expect */
-	if(strcmp(string, "xu1541") != 0) {
-	  fprintf(stderr, "Error: Found xu1541 in unexpected state,"
-		  " please make sure device is _not_ in bootloader mode!\n");
-	  
-	  if(HandleXu1541->devh) usb.close(HandleXu1541->devh);
-	  HandleXu1541->devh = NULL;
-	}
+        /* get device name and make sure the name is "xu1541" meaning */
+        /* that the device is not in boot loader mode */
+        len = usbGetStringAscii(HandleXu1541, dev->descriptor.iProduct,
+                                0x0409, string, sizeof(string));
+        if(len < 0){
+          fprintf(stderr, "warning: cannot query product "
+                  "name for device: %s\n", usb.strerror());
+          if(HandleXu1541->devh) usb.close(HandleXu1541->devh);
+          HandleXu1541->devh = NULL;
+        }
+
+        /* make sure the name matches what we expect */
+        if(strcmp(string, "xu1541") != 0) {
+          fprintf(stderr, "Error: Found xu1541 in unexpected state,"
+                  " please make sure device is _not_ in bootloader mode!\n");
+
+          if(HandleXu1541->devh) usb.close(HandleXu1541->devh);
+          HandleXu1541->devh = NULL;
+        }
       }
     }
   }
+#elif HAVE_LIBUSB1
+  cnt = usb.get_device_list(HandleXu1541->ctx, &list);
+  if (cnt < 0) {
+    xu1541_dbg(0, "enumeration error: %s", usb.error_name(cnt));
+    usb.exit(HandleXu1541->ctx);
+    free(HandleXu1541);
+    HandleXu1541 = NULL;
+    return -1;
+  }
+
+  for (i = 0; i < cnt; i++) {
+    libusb_device *device = list[i];
+
+    if (usb.get_device_descriptor(device, &descriptor) != LIBUSB_SUCCESS)
+      continue;
+
+    xu1541_dbg(1, "Device %04x:%04x", descriptor.idVendor, descriptor.idProduct);
+
+    // First, find our vendor and product id
+    if (descriptor.idVendor != XU1541_VID || descriptor.idProduct != XU1541_PID)
+      continue;
+
+    xu1541_dbg(0, "Found xu1541 device on bus %s device %s.",
+      usb.get_bus_number(device), usb.get_device_address(device));
+
+    /* open device */
+    err = usb.open(device, &HandleXu1541->devh);
+    if (err != LIBUSB_SUCCESS) {
+      fprintf(stderr, "error: Cannot open USB device: %s\n", usb.error_name(err));
+      continue;
+    }
+
+    /* get device name and make sure the name is "xu1541" meaning */
+    /* that the device is not in boot loader mode */
+    len = usb.get_string_descriptor_ascii(HandleXu1541->devh, descriptor.iProduct,
+                            string, sizeof(string) - 1);
+    if (len < 0) {
+      fprintf(stderr, "warning: cannot query product "
+              "name for device: %s\n", usb.error_name(len));
+      if (HandleXu1541->devh)
+        usb.close(HandleXu1541->devh);
+      HandleXu1541->devh = NULL;
+    }
+
+    /* make sure the name matches what we expect */
+    if (strcmp((char*)string, "xu1541") != 0) {
+      fprintf(stderr, "Error: Found xu1541 in unexpected state,"
+              " please make sure device is _not_ in bootloader mode!\n");
+
+      if (HandleXu1541->devh)
+        usb.close(HandleXu1541->devh);
+      HandleXu1541->devh = NULL;
+    }
+  }
+
+  if (HandleXu1541->devh == NULL) {
+    fprintf(stderr, "error: no xu1541 device found\n");
+    usb.exit(HandleXu1541->ctx);
+    free(HandleXu1541);
+    HandleXu1541 = NULL;
+    return -1;
+  }
+
+#endif
 
   if(!HandleXu1541->devh) {
       fprintf(stderr, "ERROR: No xu1541 device found\n");
       return -1;
   }
 
-  if (usb.set_configuration(HandleXu1541->devh, 1) != 0) {
-      fprintf(stderr, "USB error: %s\n", usb.strerror());
-      return -1;
+  do {
+    err = usb.set_configuration(HandleXu1541->devh, 1);
+    if (err != LIBUSB_SUCCESS) {
+        fprintf(stderr, "USB error: %s\n", usb.error_name(err));
+        return -1;
+    }
+
+    /* Get exclusive access to interface 0. */
+    err = usb.claim_interface(HandleXu1541->devh, 0);
+    if (err != LIBUSB_SUCCESS) {
+        fprintf(stderr, "USB error: %s\n", usb.error_name(err));
+        return -1;
+    }
+
+    interface_claimed = 1;
+
+    /* check the devices version number as firmware x.06 changed everything */
+#if HAVE_LIBUSB0
+    len = usb.control_msg(HandleXu1541->devh,
+             USB_TYPE_CLASS | USB_ENDPOINT_IN,
+             XU1541_INFO, 0, 0, (char*)version, sizeof(version), 1000);
+#elif HAVE_LIBUSB1
+    len = usb.control_transfer(HandleXu1541->devh,
+             LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+             XU1541_INFO, 0, 0, version, sizeof(version), 1000);
+#endif
+
+    if(len < 0) {
+      fprintf(stderr, "USB request for XU1541 info failed: %s!\n",
+              usb.error_name(len));
+      break;
+    }
+
+    if(len != sizeof(version)) {
+      fprintf(stderr, "Unexpected number of bytes (%d) returned\n", len);
+      break;
+    }
+
+    xu1541_dbg(0, "firmware version %x.%02x", version[0], version[1]);
+
+    if(version[1] < 8) {
+      fprintf(stderr, "Device reports firmware version %x.%02x\n",
+              version[0], version[1]);
+      fprintf(stderr, "but this version of opencbm requires at least "
+              "version x.08\n");
+      break;
+    }
+
+    success = 1;
+
+  } while (0);
+
+  /* error cleanup */
+  if (!success) {
+    if (interface_claimed) {
+      usb.release_interface(HandleXu1541->devh, 0);
+    }
+
+    xu1541_close(HandleXu1541);
+    HandleXu1541 = NULL;
   }
-      
-  /* Get exclusive access to interface 0. */
-  if (usb.claim_interface(HandleXu1541->devh, 0) != 0) {
-      fprintf(stderr, "USB error: %s\n", usb.strerror());
-      return -1;
-  }
 
-  /* check the devices version number as firmware x.06 changed everything */
-  len = usb.control_msg(HandleXu1541->devh, 
-	   USB_TYPE_CLASS | USB_ENDPOINT_IN, 
-	   XU1541_INFO, 0, 0, (char*)ret, sizeof(ret), 1000);
-
-  if(len < 0) {
-    fprintf(stderr, "USB request for XU1541 info failed: %s!\n", 
-	    usb.strerror());
-    return -1;
-  }
-
-  if(len != sizeof(ret)) {
-    fprintf(stderr, "Unexpected number of bytes (%d) returned\n", len);
-    return -1;
-  }
-
-  xu1541_dbg(0, "firmware version %x.%02x", ret[0], ret[1]);
-
-  if(ret[1] < 8) {
-    fprintf(stderr, "Device reports firmware version %x.%02x\n", 
-	    ret[0], ret[1]);
-    fprintf(stderr, "but this version of opencbm requires at least "
-	    "version x.08\n");
-    return -1;
-  }
-
-  return 0;
+  return success ? 0 : -1;
 }
 
 /*! \brief close the xu1541 device
@@ -207,12 +318,19 @@ int xu1541_init(struct opencbm_usb_handle **HandleXu1541_p) {
 */
 void xu1541_close(struct opencbm_usb_handle *HandleXu1541)
 {
+    int ret;
+
     xu1541_dbg(0, "Closing USB link");
 
-    if(usb.release_interface(HandleXu1541->devh, 0))
-      fprintf(stderr, "USB error: %s\n", usb.strerror());
+    ret = usb.release_interface(HandleXu1541->devh, 0);
+    if(ret != LIBUSB_SUCCESS) {
+      fprintf(stderr, "USB error: %s\n", usb.error_name(ret));
+    }
 
     usb.close(HandleXu1541->devh);
+#if HAVE_LIBUSB1
+    usb.exit(HandleXu1541->ctx);
+#endif
 
     free(HandleXu1541);
 }
@@ -240,7 +358,7 @@ void xu1541_close(struct opencbm_usb_handle *HandleXu1541)
 int xu1541_ioctl(struct opencbm_usb_handle *HandleXu1541, unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
   int nBytes;
-  char ret[4];
+  unsigned char ret[4];
 
   xu1541_dbg(1, "ioctl %d for device %d, sub %d", cmd, addr, secaddr);
 
@@ -249,86 +367,107 @@ int xu1541_ioctl(struct opencbm_usb_handle *HandleXu1541, unsigned int cmd, unsi
   /* command */
   if((cmd == XU1541_TALK)   || (cmd == XU1541_UNTALK) ||
      (cmd == XU1541_LISTEN) || (cmd == XU1541_UNLISTEN) ||
-     (cmd == XU1541_OPEN)   || (cmd == XU1541_CLOSE)) 
+     (cmd == XU1541_OPEN)   || (cmd == XU1541_CLOSE))
   {
       int link_ok = 0, err = 0;
 
       /* USB_TIMEOUT msec timeout required for reset */
-      if((nBytes = usb.control_msg(HandleXu1541->devh, 
-				   USB_TYPE_CLASS | USB_ENDPOINT_IN, 
-				   cmd, (secaddr << 8) + addr, 0, 
-				   NULL, 0, 
-				   1000)) < 0) 
+#if HAVE_LIBUSB0
+      if((nBytes = usb.control_msg(HandleXu1541->devh,
+                                   USB_TYPE_CLASS | USB_ENDPOINT_IN,
+#elif HAVE_LIBUSB1
+      if ((nBytes = usb.control_transfer(HandleXu1541->devh,
+                                   LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+#endif
+                                   cmd, (secaddr << 8) + addr, 0,
+                                   NULL, 0,
+                                   1000)) < 0)
       {
-	  fprintf(stderr, "USB error in xu1541_ioctl(async): %s\n", 
-		  usb.strerror());
-	  exit(-1);
-	  return -1;
+          fprintf(stderr, "USB error in xu1541_ioctl(async): %s\n",
+                  usb.error_name(nBytes));
+          exit(-1);
+          return -1;
       }
 
       /* wait for USB to become available again by requesting the result */
-      do 
+      do
       {
-	  unsigned char rv[2];
-	  
-	  /* request async result code */
-	  if(usb.control_msg(HandleXu1541->devh, 
-			     USB_TYPE_CLASS | USB_ENDPOINT_IN, 
-			     XU1541_GET_RESULT, 0, 0, 
-			     (char*)rv, sizeof(rv), 
-			     1000) == sizeof(rv)) 
-	  {
-	      /* we got a valid result */
-	      if(rv[0] == XU1541_IO_RESULT) 
-	      {
-		  /* use that result */
-		  nBytes = sizeof(rv)-1;
-		  ret[0] = rv[1];
-		  /* a returned byte means that the USB link is fine */
-		  link_ok = 1;
-		  errno = 0;
-	      } 
-	      else 
-	      {
-		  xu1541_dbg(3, "unexpected result (%d/%d)", rv[0], rv[1]);
+          unsigned char rv[2];
 
-		  /* not the expected result */
-		  arch_usleep(TIMEOUT_DELAY);
-	      }
-	  } 
-	  else 
-	  {
-	      xu1541_dbg(3, "usb timeout");
+          /* request async result code */
+#if HAVE_LIBUSB0
+          if(usb.control_msg(HandleXu1541->devh,
+                             USB_TYPE_CLASS | USB_ENDPOINT_IN,
+                             XU1541_GET_RESULT, 0, 0,
+                             (char *)rv, sizeof(rv),
+                             1000) == sizeof(rv))
+#elif HAVE_LIBUSB1
+          if (usb.control_transfer(HandleXu1541->devh,
+                             LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+                             XU1541_GET_RESULT, 0, 0,
+                             rv, sizeof(rv),
+                             1000) == sizeof(rv))
+#endif
+          {
+              /* we got a valid result */
+              if(rv[0] == XU1541_IO_RESULT)
+              {
+                  /* use that result */
+                  nBytes = sizeof(rv)-1;
+                  ret[0] = rv[1];
+                  /* a returned byte means that the USB link is fine */
+                  link_ok = 1;
+                  errno = 0;
+              }
+              else
+              {
+                  xu1541_dbg(3, "unexpected result (%d/%d)", rv[0], rv[1]);
 
-	      /* count the error states (just out of couriosity) */
-	      err++;
+                  /* not the expected result */
+                  arch_usleep(TIMEOUT_DELAY);
+              }
+          }
+          else
+          {
+              xu1541_dbg(3, "usb timeout");
 
-	      arch_usleep(TIMEOUT_DELAY);
-	  }
-      } 
+              /* count the error states (just out of couriosity) */
+              err++;
+
+              arch_usleep(TIMEOUT_DELAY);
+          }
+      }
       while(!link_ok);
-  } 
-  else 
+  }
+  else
   {
 
       /* sync transfer, read result directly */
-      if((nBytes = usb.control_msg(HandleXu1541->devh, 
-		   USB_TYPE_CLASS | USB_ENDPOINT_IN, 
-		   cmd, (secaddr << 8) + addr, 0, 
-		   ret, sizeof(ret), 
-		   USB_TIMEOUT)) < 0) 
+#if HAVE_LIBUSB0
+      if((nBytes = usb.control_msg(HandleXu1541->devh,
+                   USB_TYPE_CLASS | USB_ENDPOINT_IN,
+                   cmd, (secaddr << 8) + addr, 0,
+                   (char *)ret, sizeof(ret),
+                   USB_TIMEOUT)) < 0)
+#elif HAVE_LIBUSB1
+      if ((nBytes = usb.control_transfer(HandleXu1541->devh,
+                   LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+                   cmd, (secaddr << 8) + addr, 0,
+                   ret, sizeof(ret),
+                   USB_TIMEOUT)) < 0)
+#endif
       {
-	  fprintf(stderr, "USB error in xu1541_ioctl(sync): %s\n", 
-		  usb.strerror());
-	  exit(-1);
-	  return -1;
+          fprintf(stderr, "USB error in xu1541_ioctl(sync): %s\n",
+                  usb.error_name(nBytes));
+          exit(-1);
+          return -1;
       }
   }
 
   xu1541_dbg(2, "returned %d bytes", nBytes);
 
   /* return ok(0) if command does not have a return value */
-  if(nBytes == 0) 
+  if(nBytes == 0)
       return 0;
 
   xu1541_dbg(2, "return val = %x", ret[0]);
@@ -349,73 +488,90 @@ int xu1541_ioctl(struct opencbm_usb_handle *HandleXu1541, unsigned int cmd, unsi
  \return
     The number of bytes written
 */
-int xu1541_write(struct opencbm_usb_handle *HandleXu1541, const unsigned char *data, size_t len) 
+int xu1541_write(struct opencbm_usb_handle *HandleXu1541, const unsigned char *data, size_t len)
 {
     int bytesWritten = 0;
 
     xu1541_dbg(1, "write %d bytes from address %p", len, data);
 
-    while(len) 
+    while(len)
     {
         int link_ok = 0, err = 0;
         int wr, bytes2write;
-	bytes2write = (len > XU1541_IO_BUFFER_SIZE)?XU1541_IO_BUFFER_SIZE:len;
-	
-	/* the write itself moved the data into the buffer, the actual */
-	/* iec write is triggered _after_ this USB write is done */
-	if((wr = usb.control_msg(HandleXu1541->devh, 
-				 USB_TYPE_CLASS | USB_ENDPOINT_OUT, 
-				 XU1541_WRITE, bytes2write, 0, 
-				 (char*)data, bytes2write, 
-				 USB_TIMEOUT)) < 0) 
-	{
-	    fprintf(stderr, "USB error xu1541_write(): %s\n", usb.strerror());
-	    exit(-1);
-	    return -1;
-	}
-	
-	len -= wr;
-	data += wr;
-	bytesWritten += wr;
+        bytes2write = (len > XU1541_IO_BUFFER_SIZE)?XU1541_IO_BUFFER_SIZE:len;
 
-	xu1541_dbg(2, "wrote chunk of %d bytes, total %d, left %d", 
-		   wr, bytesWritten, len);
- 
-	/* wait for USB to become available again by requesting the result */
-	do 
-	{
-	    unsigned char rv[2];
+        /* the write itself moved the data into the buffer, the actual */
+        /* iec write is triggered _after_ this USB write is done */
+#if HAVE_LIBUSB0
+        if ((wr = usb.control_msg(HandleXu1541->devh,
+                                 USB_TYPE_CLASS | USB_ENDPOINT_OUT,
+                                 XU1541_WRITE, bytes2write, 0,
+                                 (char*)data, bytes2write,
+                                 USB_TIMEOUT)) < 0)
+#elif HAVE_LIBUSB1
+        if ((wr = usb.control_transfer(HandleXu1541->devh,
+                                 LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_OUT,
+                                 XU1541_WRITE, bytes2write, 0, 
+                                 (unsigned char*)data, bytes2write,
+                                 USB_TIMEOUT)) < 0) 
+#endif
+        {
+            fprintf(stderr, "USB error xu1541_write(): %s\n", usb.error_name(wr));
+            exit(-1);
+            return -1;
+        }
 
-	    /* request async result */
-	    if(usb.control_msg(HandleXu1541->devh, 
-			       USB_TYPE_CLASS | USB_ENDPOINT_IN, 
-			       XU1541_GET_RESULT, 0, 0, 
-			       (char*)rv, sizeof(rv), 
-			       1000) == sizeof(rv)) 
-	    {
-	        /* the USB link is available again if we got a valid result */
-	        if(rv[0] == XU1541_IO_RESULT) {
-		    /* device reports failure, stop writing */
-		    if(!rv[1])
-		        len = 0;
 
-		    link_ok = 1;
-		    errno = 0;
-		} 
-		else
-		{
-		    xu1541_dbg(3, "unexpected result (%d/%d)", rv[0], rv[1]);
-		    arch_usleep(TIMEOUT_DELAY);
-		}
-	    } 
-	    else 
-	    {
-	        xu1541_dbg(3, "usb timeout");
-	        /* count the error states (just out of couriosity) */
-	        err++;
-	    }
-	} 
-	while(!link_ok);
+        len -= wr;
+        data += wr;
+        bytesWritten += wr;
+
+        xu1541_dbg(2, "wrote chunk of %d bytes, total %d, left %d",
+                   wr, bytesWritten, len);
+
+        /* wait for USB to become available again by requesting the result */
+        do
+        {
+            unsigned char rv[2];
+
+            /* request async result */
+#if HAVE_LIBUSB0
+            if(usb.control_msg(HandleXu1541->devh,
+                               USB_TYPE_CLASS | USB_ENDPOINT_IN,
+                               XU1541_GET_RESULT, 0, 0,
+                               (char*)rv, sizeof(rv),
+                               1000) == sizeof(rv))
+#elif HAVE_LIBUSB1
+            if (usb.control_transfer(HandleXu1541->devh,
+                               LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+                               XU1541_GET_RESULT, 0, 0, 
+                               rv, sizeof(rv),
+                               1000) == sizeof(rv)) 
+#endif
+            {
+                /* the USB link is available again if we got a valid result */
+                if(rv[0] == XU1541_IO_RESULT) {
+                    /* device reports failure, stop writing */
+                    if(!rv[1])
+                        len = 0;
+
+                    link_ok = 1;
+                    errno = 0;
+                }
+                else
+                {
+                    xu1541_dbg(3, "unexpected result (%d/%d)", rv[0], rv[1]);
+                    arch_usleep(TIMEOUT_DELAY);
+                }
+            }
+            else
+            {
+                xu1541_dbg(3, "usb timeout");
+                /* count the error states (just out of couriosity) */
+                err++;
+            }
+        }
+        while(!link_ok);
     }
     return bytesWritten;
 }
@@ -434,107 +590,127 @@ int xu1541_write(struct opencbm_usb_handle *HandleXu1541, const unsigned char *d
  \return
     The number of bytes read
 */
-int xu1541_read(struct opencbm_usb_handle *HandleXu1541, unsigned char *data, size_t len) 
+int xu1541_read(struct opencbm_usb_handle *HandleXu1541, unsigned char *data, size_t len)
 {
     int bytesRead = 0;
-    
+
     xu1541_dbg(1, "read %d bytes to address %p", len, data);
-    
-    while(len > 0) 
+
+    while(len > 0)
     {
-	int rd, bytes2read;
-	int link_ok = 0, err = 0;
-	unsigned char rv[2];
-	  
-	/* limit transfer size */
-	bytes2read = (len > XU1541_IO_BUFFER_SIZE)?XU1541_IO_BUFFER_SIZE:len;
+        int rd, bytes2read;
+        int link_ok = 0, err = 0;
+        unsigned char rv[2];
 
-	/* request async read, ignore errors as they happen due to */
-	/* link being disabled */
-	rd = usb.control_msg(HandleXu1541->devh, 
-			USB_TYPE_CLASS | USB_ENDPOINT_IN, 
-			XU1541_REQUEST_READ, bytes2read, 0, 
-			NULL, 0,
-			1000);
-	
-	if(rd < 0) {
-	    fprintf(stderr, "USB error in xu1541_request_read(): %s\n", 
-		    usb.strerror());
-	    exit(-1);
-	    return -1;
-	}
+        /* limit transfer size */
+        bytes2read = (len > XU1541_IO_BUFFER_SIZE)?XU1541_IO_BUFFER_SIZE:len;
 
-	/* since the xu1541 may disable interrupts and wouldn't be able */
-	/* to do proper USB communication we'd have to expect USB errors */
+        /* request async read, ignore errors as they happen due to */
+        /* link being disabled */
+#if HAVE_LIBUSB0
+        rd = usb.control_msg(HandleXu1541->devh,
+                        USB_TYPE_CLASS | USB_ENDPOINT_IN,
+#elif HAVE_LIBUSB1
+        rd = usb.control_transfer(HandleXu1541->devh,
+                        LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+#endif
+                        XU1541_REQUEST_READ, bytes2read, 0,
+                        NULL, 0,
+                        1000);
 
-	/* try to get result, to make sure usb link is working again */
-	/* we can't do this in the read itself since windows returns */
-	/* just 0 bytes while the USB link is down which we can't */
-	/* distinguish from a real 0 byte read event */
+        if(rd < 0) {
+            fprintf(stderr, "USB error in xu1541_request_read(): %s\n",
+                    usb.error_name(rd));
+            exit(-1);
+            return -1;
+        }
 
-	xu1541_dbg(2, "sent request for %d bytes, waiting for result", 
-		   bytes2read);
+        /* since the xu1541 may disable interrupts and wouldn't be able */
+        /* to do proper USB communication we'd have to expect USB errors */
 
-	do 
-	{
-	    /* get the result code which also contains the current state */
-	    /* the xu1541 is in so we know when it's done reading on IEC */
-	    if((rd = usb.control_msg(HandleXu1541->devh, 
-				     USB_TYPE_CLASS | USB_ENDPOINT_IN, 
-				     XU1541_GET_RESULT, 0, 0, 
-				     (char*)rv, sizeof(rv), 
-				     1000)) == sizeof(rv)) 
-	    {
-	        xu1541_dbg(2, "got result %d/%d", rv[0], rv[1]);
-	      
-		// if the first byte is still not XU1541_IO_READ_DONE,
-	        // then the device hasn't even entered the copy routine yet, 
-	        // so sleep to not slow it down by overloading it with USB 
-	        // requests
-	        if(rv[0] != XU1541_IO_READ_DONE) 
-		{
-		    xu1541_dbg(3, "unexpected result");
-		    arch_usleep(TIMEOUT_DELAY);
-		} 
-		else
-		{
-		    xu1541_dbg(3, "link ok");
+        /* try to get result, to make sure usb link is working again */
+        /* we can't do this in the read itself since windows returns */
+        /* just 0 bytes while the USB link is down which we can't */
+        /* distinguish from a real 0 byte read event */
 
-	            link_ok = 1;
-		    errno = 0;
-		}
-	    } 
-	    else 
-	    {
-		xu1541_dbg(3, "usb timeout");
+        xu1541_dbg(2, "sent request for %d bytes, waiting for result",
+                   bytes2read);
 
-		/* count the error states (just out of couriosity) */
-		err++;
-	    }
-	} 
-	while(!link_ok);
-	
-	/* finally read data itself */
-	if((rd = usb.control_msg(HandleXu1541->devh, 
-				 USB_TYPE_CLASS | USB_ENDPOINT_IN, 
-				 XU1541_READ, bytes2read, 0, 
-				 (char*)data, bytes2read, 1000)) < 0) 
-	{
-	    fprintf(stderr, "USB error in xu1541_read(): %s\n", 
-		    usb.strerror());
-	    return -1;
-	}
-	
-	len -= rd;
-	data += rd;
-	bytesRead += rd;
+        do
+        {
+            /* get the result code which also contains the current state */
+            /* the xu1541 is in so we know when it's done reading on IEC */
+#if HAVE_LIBUSB0
+            if((rd = usb.control_msg(HandleXu1541->devh,
+                                     USB_TYPE_CLASS | USB_ENDPOINT_IN,
+                                     XU1541_GET_RESULT, 0, 0,
+                                     (char*)rv, sizeof(rv),
+                                     1000)) == sizeof(rv))
+#elif HAVE_LIBUSB1
+            if ((rd = usb.control_transfer(HandleXu1541->devh,
+                                     LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+                                     XU1541_GET_RESULT, 0, 0,
+                                     rv, sizeof(rv),
+                                     1000)) == sizeof(rv))
+#endif
+            {
+                xu1541_dbg(2, "got result %d/%d", rv[0], rv[1]);
 
-	xu1541_dbg(2, "received chunk of %d bytes, total %d, left %d", 
-		   rd, bytesRead, len);
-	
-	/* force end of read */
-	if(rd < bytes2read) 
-	    len = 0;
+                // if the first byte is still not XU1541_IO_READ_DONE,
+                // then the device hasn't even entered the copy routine yet,
+                // so sleep to not slow it down by overloading it with USB
+                // requests
+                if(rv[0] != XU1541_IO_READ_DONE)
+                {
+                    xu1541_dbg(3, "unexpected result");
+                    arch_usleep(TIMEOUT_DELAY);
+                }
+                else
+                {
+                    xu1541_dbg(3, "link ok");
+
+                    link_ok = 1;
+                    errno = 0;
+                }
+            }
+            else
+            {
+                xu1541_dbg(3, "usb timeout");
+
+                /* count the error states (just out of couriosity) */
+                err++;
+            }
+        }
+        while(!link_ok);
+
+        /* finally read data itself */
+#if HAVE_LIBUSB0
+        if((rd = usb.control_msg(HandleXu1541->devh,
+                                 USB_TYPE_CLASS | USB_ENDPOINT_IN,
+                                 XU1541_READ, bytes2read, 0,
+                                 (char*)data, bytes2read, 1000)) < 0)
+#elif HAVE_LIBUSB1
+        if ((rd = usb.control_transfer(HandleXu1541->devh,
+                                  LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+                                  XU1541_READ, bytes2read, 0,
+                                  data, bytes2read, 1000)) < 0)
+#endif
+        {
+            fprintf(stderr, "USB error in xu1541_read(): %s\n",
+                    usb.error_name(rd));
+            return -1;
+        }
+
+        len -= rd;
+        data += rd;
+        bytesRead += rd;
+
+        xu1541_dbg(2, "received chunk of %d bytes, total %d, left %d",
+                   rd, bytesRead, len);
+
+        /* force end of read */
+        if(rd < bytes2read)
+            len = 0;
     }
     return bytesRead;
 }
@@ -564,32 +740,39 @@ int xu1541_read(struct opencbm_usb_handle *HandleXu1541, unsigned char *data, si
      that we can just handle them in the device at the same time as the USB
      transfers.
 */
-int xu1541_special_write(struct opencbm_usb_handle *HandleXu1541, int mode, const unsigned char *data, size_t size) 
+int xu1541_special_write(struct opencbm_usb_handle *HandleXu1541, int mode, const unsigned char *data, size_t size)
 {
     int bytesWritten = 0;
 
-    xu1541_dbg(1, "special write %d %d bytes from address %p", 
-	       mode, size, data);
+    xu1541_dbg(1, "special write %d %d bytes from address %p",
+               mode, size, data);
 
-    while(size > 0) 
+    while(size > 0)
     {
-	int wr, bytes2write = (size>128)?128:size;
+        int wr, bytes2write = (size>128)?128:size;
 
-	if((wr = usb.control_msg(HandleXu1541->devh, 
-				 USB_TYPE_CLASS | USB_ENDPOINT_OUT, 
-				 mode, XU1541_WRITE, bytes2write, 
-				 (char*)data, bytes2write, 1000)) < 0) 
-	{
-	    fprintf(stderr, "USB error in xu1541_special_write(): %s\n", 
-		    usb.strerror());
-	    return -1;
-	}
-	
-	xu1541_dbg(2, "special wrote %d bytes", wr);
+#if HAVE_LIBUSB0
+        if((wr = usb.control_msg(HandleXu1541->devh,
+                                 USB_TYPE_CLASS | USB_ENDPOINT_OUT,
+                                 mode, XU1541_WRITE, bytes2write,
+                                 (char*)data, bytes2write, 1000)) < 0)
+#elif HAVE_LIBUSB1
+        if ((wr = usb.control_transfer(HandleXu1541->devh,
+                                  LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_OUT,
+                                  mode, XU1541_WRITE, bytes2write,
+                                  (unsigned char*)data, bytes2write, 1000)) < 0)
+#endif
+        {
+            fprintf(stderr, "USB error in xu1541_special_write(): %s\n",
+                    usb.error_name(wr));
+            return -1;
+        }
 
-	size -= wr;
-	data += wr;
-	bytesWritten += wr;
+        xu1541_dbg(2, "special wrote %d bytes", wr);
+
+        size -= wr;
+        data += wr;
+        bytesWritten += wr;
     }
 
     return bytesWritten;
@@ -615,38 +798,46 @@ int xu1541_special_write(struct opencbm_usb_handle *HandleXu1541, int mode, cons
  \return
     The number of bytes read
 */
-int xu1541_special_read(struct opencbm_usb_handle *HandleXu1541, int mode, unsigned char *data, size_t size) 
+int xu1541_special_read(struct opencbm_usb_handle *HandleXu1541, int mode, unsigned char *data, size_t size)
 {
     int bytesRead = 0;
 
-    xu1541_dbg(1, "special read %d %d bytes to address %p", 
-	       mode, size, data);
+    xu1541_dbg(1, "special read %d %d bytes to address %p",
+               mode, size, data);
 
-    while(size > 0) 
+    while(size > 0)
     {
-	int rd, bytes2read = (size>128)?128:size;
-	
-	if((rd = usb.control_msg(HandleXu1541->devh, 
-				 USB_TYPE_CLASS | USB_ENDPOINT_IN, 
-				 mode, XU1541_READ, bytes2read, 
-				 (char*)data, bytes2read, 
-				 USB_TIMEOUT)) < 0) 
-	{
-	    fprintf(stderr, "USB error in xu1541_special_read(): %s\n", 
-		    usb.strerror());
-	    return -1;
-	}
-	
-	xu1541_dbg(2, "special read %d bytes", rd);
+        int rd, bytes2read = (size>128)?128:size;
 
-	size -= rd;
-	data += rd;
-	bytesRead += rd;
+#if HAVE_LIBUSB0
+        if((rd = usb.control_msg(HandleXu1541->devh,
+                                 USB_TYPE_CLASS | USB_ENDPOINT_IN,
+                                 mode, XU1541_READ, bytes2read,
+                                 (char*)data, bytes2read,
+                                 USB_TIMEOUT)) < 0)
+#elif HAVE_LIBUSB1
+        if ((rd = usb.control_transfer(HandleXu1541->devh,
+                                 LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+                                 mode, XU1541_READ, bytes2read,
+                                 data, bytes2read,
+                                 USB_TIMEOUT)) < 0)
+#endif
+        {
+            fprintf(stderr, "USB error in xu1541_special_read(): %s\n",
+                    usb.error_name(rd));
+            return -1;
+        }
 
-	/* stop if there's nothing more to read */
-	if(rd < bytes2read) 
-	  size = 0;
+        xu1541_dbg(2, "special read %d bytes", rd);
+
+        size -= rd;
+        data += rd;
+        bytesRead += rd;
+
+        /* stop if there's nothing more to read */
+        if(rd < bytes2read)
+          size = 0;
     }
-    
+
     return bytesRead;
 }

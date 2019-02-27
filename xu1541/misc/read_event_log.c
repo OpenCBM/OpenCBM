@@ -5,14 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <usb.h>
 
 #include "xu1541lib.h"
 
 #include "xu1541_types.h"
 #include "xu1541_event_log.h"
 
-usb_dev_handle      *handle = NULL;
+libusb_device_handle *handle = NULL;
 
 #ifdef WIN
 #define QUIT_KEY  { printf("Press return to quit\n"); getchar(); }
@@ -25,12 +24,12 @@ void dump_event_log(void) {
   int nBytes, i, log_len;
   unsigned char ret[2];
 
-  nBytes = usb_control_msg(handle,
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-	   XU1541_GET_EVENT, 0, 0, (char*)ret, sizeof(ret), 1000);
+  nBytes = libusb_control_transfer(handle,
+           LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN,
+           XU1541_GET_EVENT, 0, 0, ret, sizeof(ret), 1000);
 
   if(nBytes < 0) {
-    fprintf(stderr, "USB request failed: %s!\n", usb_strerror());
+    fprintf(stderr, "USB request failed: %s!\n", libusb_error_name(nBytes));
     return;
   } else if(nBytes != sizeof(ret)) {
     fprintf(stderr, "Unexpected number of bytes (%d) returned\n", nBytes);
@@ -43,12 +42,12 @@ void dump_event_log(void) {
   printf("Event log:\n");
 
   for(i=0;i<log_len;i++) {
-    nBytes = usb_control_msg(handle,
-		  USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-		  XU1541_GET_EVENT, i, 0, (char*)ret, sizeof(ret), 1000);
+    nBytes = libusb_control_transfer(handle,
+                  LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN,
+                  XU1541_GET_EVENT, i, 0, ret, sizeof(ret), 1000);
 
     if(nBytes < 0) {
-      fprintf(stderr, "USB request failed: %s!\n", usb_strerror());
+      fprintf(stderr, "USB request failed: %s!\n", libusb_error_name(nBytes));
       return;
     } else if(nBytes != sizeof(ret)) {
       fprintf(stderr, "Unexpected number of bytes (%d) returned\n", nBytes);
@@ -119,11 +118,14 @@ void dump_event_log(void) {
 }
 
 int main(int argc, char *argv[]) {
-  printf("--       XU1541 event log dumper       --\n");
-  printf("--      (c) 2007 by Till Harbaum       --\n");
-  printf("-- http://www.harbaum.org/till/xu1541  --\n");
+  libusb_context * usbContext = NULL;
 
-  usb_init();
+  printf("--        XU1541 event log dumper          --\n"
+         "--     (c) 2007, 2019 the opencbm team     --\n"
+         "--       https://github.com/OpenCBM        --\n"
+         "-- http://sourceforge.net/projects/opencbm --\n\n");
+
+  libusb_init(&usbContext);
 
   if (!(handle = xu1541lib_find())) {
     return 1;
@@ -134,6 +136,8 @@ int main(int argc, char *argv[]) {
   dump_event_log();
 
   xu1541lib_close(handle);
+
+  libusb_exit(usbContext);
 
   return 0;
 }

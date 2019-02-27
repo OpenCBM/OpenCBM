@@ -5,16 +5,15 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include <usb.h>
+#include "xu1541lib.h"
 
 #include "ihex.h"
 #include "flash.h"
 
 #include "xu1541_types.h"
-
-#include "xu1541lib.h"
 
 #ifdef WIN32
 #include <windows.h>
@@ -30,62 +29,62 @@
 #define WINKEY
 #endif
 
-int xu1541_write_page(usb_dev_handle *handle,
-		      char *data, int address, int len);
+int xu1541_write_page(libusb_device_handle *handle,
+                      unsigned char *data, int address, int len);
 
 static int usb_was_reset = 0;
 
 static unsigned char *page_for_address_0 = NULL;
 static unsigned int   page_for_address_0_is_valid = 0;
 
-void xu1541_close(usb_dev_handle *handle) {
+void xu1541_close(libusb_device_handle *handle) {
   if( ! usb_was_reset) {
     xu1541lib_close(handle);
   }
   else {
     /* close usb device */
-    usb_close(handle);
+    libusb_close(handle);
   }
 }
 
-int xu1541_start_application(usb_dev_handle *handle, int page_size) {
+int xu1541_start_application(libusb_device_handle *handle, int page_size) {
   if (page_for_address_0_is_valid) {
     /* page 0 was flashed 'invalidly', correct it now as last step */
     /* before rebooting. */
-    xu1541_write_page(handle, (char*)page_for_address_0, 0, page_size);
+    xu1541_write_page(handle, page_for_address_0, 0, page_size);
   }
 
-  usb_control_msg(handle,
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-	   USBBOOT_FUNC_LEAVE_BOOT, 0, 0,
-	   NULL, 0, 1000);
+  libusb_control_transfer(handle,
+           LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN,
+           USBBOOT_FUNC_LEAVE_BOOT, 0, 0,
+           NULL, 0, 1000);
 
 /*
  * This will always be an error, as the xu1541 just reboots, and does
  * not answer!
 
   if (nBytes != 0) {
-    fprintf(stderr, "Error starting application: %s\n", usb_strerror());
+    fprintf(stderr, "Error starting application: %s\n", libusb_error_name(nBytes));
     return -1;
   }
 */
-  usb_reset( handle ); /* re-enumerate that device */
+  libusb_reset_device( handle ); /* re-enumerate that device */
   usb_was_reset = 1;
 
   return 0;
 }
 
-int xu1541_write_page(usb_dev_handle *handle,
-		      char *data, int address, int len) {
+int xu1541_write_page(libusb_device_handle *handle,
+                      unsigned char *data, int address, int len) {
   int nBytes;
 
-  nBytes = usb_control_msg(handle,
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_OUT,
-	   USBBOOT_FUNC_WRITE_PAGE, address, 0,
-	   data, len, 1000);
+  nBytes = libusb_control_transfer(handle,
+           LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_OUT,
+           USBBOOT_FUNC_WRITE_PAGE, address, 0,
+           data, len, 1000);
 
   if(nBytes != len) {
-    fprintf(stderr, "Error uploading flash: %s\n", usb_strerror());
+    fprintf(stderr, "Error uploading flash: %s\n", libusb_error_name(nBytes));
     return -1;
   }
   return 0;
@@ -94,15 +93,17 @@ int xu1541_write_page(usb_dev_handle *handle,
 
 int main(int argc, char **argv) {
   ihex_file_t *ifile = NULL;
-  usb_dev_handle *handle = NULL;
+  libusb_device_handle *handle = NULL;
+  libusb_context *usbContext = NULL;
   int page_size, i;
   int start;
-  char *page = NULL;
+  unsigned char *page = NULL;
   unsigned int soft_bootloader_mode = 0;
 
-  printf("--        XU1541 flash updater        --\n");
-  printf("--    (c) 2007 by the opencbm team    --\n");
-  printf("-- http://www.harbaum.org/till/xu1541 --\n");
+  printf("--        XU1541 flash updater             --\n"
+         "--     (c) 2007, 2019 the opencbm team     --\n"
+         "--       https://github.com/OpenCBM        --\n"
+         "-- http://sourceforge.net/projects/opencbm --\n\n");
 
   if(argc < 2) {
     fprintf(stderr, "Usage: xu1541_update [-o OFFSET] <ihex_file> [[-o OFFSET] <ihex_file2> ...]\n");
@@ -110,11 +111,12 @@ int main(int argc, char **argv) {
     exit(-1);
   }
 
-  usb_init();
+  libusb_init(&usbContext);
 
   /* find required usb device */
   if(!(handle = xu1541lib_find_in_bootmode(&soft_bootloader_mode))) {
       WINKEY;
+      libusb_exit(usbContext);
       exit(1);
   }
 
@@ -122,18 +124,21 @@ int main(int argc, char **argv) {
   if((page_size = xu1541lib_get_pagesize(handle)) != FLASH_PAGE_SIZE) {
     fprintf(stderr, "Error: unexpected page size %d\n", page_size);
     xu1541_close(handle);
+    libusb_exit(usbContext);
     exit(-1);
   }
 
   if(!(page = malloc(page_size))) {
     fprintf(stderr, "Error: Out of memory allocating page buffer\n");
     xu1541_close(handle);
+    libusb_exit(usbContext);
     exit(-1);
   }
 
   if(!(page_for_address_0 = malloc(page_size))) {
     fprintf(stderr, "Error: Out of memory allocating page buffer\n");
     xu1541_close(handle);
+    libusb_exit(usbContext);
     exit(-1);
   }
 
@@ -173,6 +178,7 @@ int main(int argc, char **argv) {
             printf("Find xu1541 again...\n");
             if(!(handle = xu1541lib_find_in_bootmode(NULL))) {
               WINKEY;
+              libusb_exit(usbContext);
               exit(1);
             }
 
@@ -199,7 +205,7 @@ int main(int argc, char **argv) {
             for(i=0;i<flash_get_pages(ifile, page_size, NULL);i++) {
 
               /* fill page from ihex image */
-              flash_get_page(ifile, i, page, page_size);
+              flash_get_page(ifile, i, (char *) page, page_size);
 
               /* special handling of page 0: */
 
@@ -239,14 +245,17 @@ int main(int argc, char **argv) {
   xu1541_start_application(handle, page_size);
 
   printf(" done\n"
-	 "%s\n",
+         "%s\n",
          (soft_bootloader_mode
           ? "Rebooting the xu1541."
           : "If you had installed a jumper switch, please remove it and replug the USB cable\n"
-	    "to return to normal operation!\n"
+            "to return to normal operation!\n"
             "If not, the xu1541 will reboot itself automatically.\n"));
 
   free(page);
   xu1541_close(handle);
+
+  libusb_exit(usbContext);
+
   return 0;
 }

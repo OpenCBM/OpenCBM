@@ -35,6 +35,14 @@ struct opencbm_usb_handle {
 #endif
 };
 
-extern int usbGetStringAscii(struct opencbm_usb_handle *dev, int index, int langid, char *buf, int buflen);
+#if HAVE_LIBUSB0
+extern int usbGetStringAscii(struct opencbm_usb_handle *dev, int index, int langid, unsigned char *buf, int buflen);
+#endif
+
+#if HAVE_LIBUSB0
+#define LIBUSB_ENDPOINT_IN USB_ENDPOINT_IN
+
+#define LIBUSB_SUCCESS 0
+#endif
 
 #endif /* #ifndef CBM_USBCOMMON_H */

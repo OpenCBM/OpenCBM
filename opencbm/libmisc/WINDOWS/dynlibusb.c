@@ -79,7 +79,7 @@ int dynlibusb_init(void) {
         READ(free_device_list);
         READ(get_bus_number);
         READ(get_device_address);
-#elsif HAVE_LIBUSB0
+#elif HAVE_LIBUSB0
         READ(open);
         READ(close);
 //        READ(get_string);

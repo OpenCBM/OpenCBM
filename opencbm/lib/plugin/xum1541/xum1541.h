@@ -15,6 +15,7 @@
 
 #include "xum1541_types.h"
 
+#if HAVE_LIBUSB0
 /*
  * Compile-time assert to make sure CBM_FILE is large enough.
  * Perhaps this should be in the global opencbm.h
@@ -26,6 +27,7 @@
 #endif
 
 CTASSERT(sizeof(CBM_FILE) >= sizeof(usb_dev_handle *));
+#endif
 
 /*
  * Make our control transfer timeout 10% later than the device itself

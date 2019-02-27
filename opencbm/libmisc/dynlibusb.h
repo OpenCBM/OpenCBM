@@ -19,7 +19,11 @@
 #ifndef OPENCBM_LIBMISC_DYNLIBUSB_H
 #define OPENCBM_LIBMISC_DYNLIBUSB_H
 
+#if HAVE_LIBUSB0
 #include <usb.h>
+#elif HAVE_LIBUSB1
+#include <libusb.h>
+#endif
 
 #include "getpluginaddress.h"
 
@@ -89,6 +93,9 @@ struct usb_dll_s {
 //    int (LIBUSB_APIDECL *reset)(usb_dev_handle *dev);
 
     char * (LIBUSB_APIDECL *strerror)(void);
+
+    /* this is a dummy for libusb1 compatibility */
+    const char *(LIBUSB_APIDECL *error_name)(int error_code);
 
     void (LIBUSB_APIDECL *init)(void);
 //    void (LIBUSB_APIDECL *set_debug)(int level);

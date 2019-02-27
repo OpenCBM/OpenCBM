@@ -55,7 +55,12 @@ OS = $(shell uname -s)
 #
 OS_ARCH      = linux
 
-CFLAGS       = -O2 -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\" -DOPENCBM_CONFIG_FILE=\"$(OPENCBM_CONFIG_FILE)\"
+ifeq "$(OPENCBM_COMPILE_DEBUG)" ""
+CFLAGS_OC_DEBUG = -O2
+else
+CFLAGS_OC_DEBUG = -ggdb -O0
+endif
+CFLAGS       = $(CFLAGS_OC_DEBUG) -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\" -DOPENCBM_CONFIG_FILE=\"$(OPENCBM_CONFIG_FILE)\"
 CFLAGS      += $(USER_CFLAGS)
 
 LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
@@ -117,7 +122,7 @@ endif
 
 ifneq ($(strip $(HAVE_LIBUSB1)),)
   HAVE_LIBUSB=1
-  LIBUSB_CFLAGS=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB1=1 $(shell pkg-config --cflags libusb-1.0)
+  LIBUSB_CFLAGS=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB1=1 -DHAVE_LIBUSB_1_0=1 $(shell pkg-config --cflags libusb-1.0)
   LIBUSB_LDFLAGS=
   LIBUSB_LIBS=$(shell pkg-config --libs libusb-1.0)
 endif

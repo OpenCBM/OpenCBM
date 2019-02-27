@@ -1,14 +1,12 @@
 #include "xu1541lib.h"
 #include "xu1541_types.h"
 
-#include <usb.h>
-
 #include <stdio.h>
 #include <string.h>
 
 #include "arch.h"
 
-int xu1541lib_get_device_info(usb_dev_handle *handle, xu1541_device_info_t *device_info, unsigned int device_info_size) {
+int xu1541lib_get_device_info(libusb_device_handle *handle, xu1541_device_info_t *device_info, unsigned int device_info_size) {
   int nBytes;
   unsigned char reply[6];
 
@@ -19,13 +17,13 @@ int xu1541lib_get_device_info(usb_dev_handle *handle, xu1541_device_info_t *devi
 
   memset(device_info, 0, device_info_size);
 
-  nBytes = usb_control_msg(handle,
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-	   XU1541_INFO, 0, 0, (char*)reply, sizeof(reply), 1000);
+  nBytes = libusb_control_transfer(handle,
+           LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN,
+           XU1541_INFO, 0, 0, reply, sizeof(reply), 1000);
 
   if(nBytes < 0) {
     fprintf(stderr, "USB request for XU1541 info failed: %s!\n",
-	    usb_strerror());
+            libusb_error_name(nBytes));
     return 0;
   }
   else if((nBytes != sizeof(reply)) && (nBytes != 4)) {

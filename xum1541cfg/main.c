@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "usb.h"
+#include "usbcommon.h"
 
 #include "util.h"
 
@@ -70,12 +70,22 @@ static int ParseFirmwareFile(char *firmwareFile, int *fileModel,
 static int LoadIhex(char *firmwareFile, int16_t **buf, int *bufSize);
 static int GetFileVersion(int16_t *buf, int bufSize, int *modelNum,
     int *versionNum);
+#if HAVE_LIBUSB0
 static int GetXumDevice(char *deviceType, usb_dev_handle **usbHandle);
 static int SetDFUMode(usb_dev_handle *usbHandle);
+#elif HAVE_LIBUSB1
+static int GetXumDevice(char *deviceType, libusb_device_handle **usbHandle, libusb_device **usbDevice);
+static int SetDFUMode(libusb_device_handle *usbHandle);
+#endif
 static int GetDFUDevice(char *deviceType, dfu_device_t *devHandle,
     struct programmer_arguments *args);
+#if HAVE_LIBUSB0
 static int CheckFirmwareVersion(usb_dev_handle *usbHandle, int fileModel,
     int fileVersion);
+#elif HAVE_LIBUSB1
+static int CheckFirmwareVersion(libusb_device_handle *usbHandle, libusb_device *usbDevice,
+    int fileModel, int fileVersion);
+#endif
 static int EraseFlash(dfu_device_t *dev, struct programmer_arguments *args);
 static int UpdateFlash(dfu_device_t *dev, struct programmer_arguments *args,
     char *firmwareFile);
@@ -87,6 +97,10 @@ static int16_t *ihex_search(int16_t *buf, int bufSize,
 int verbose;
 int debug;  // Used by dfu-programmer
 
+#ifdef HAVE_LIBUSB_1_0
+libusb_context *usbcontext;
+#endif
+
 
 // Update a device with new firmware from a file
 static int
@@ -94,7 +108,12 @@ RunUpdate(dfu_device_t *devHandle, char *firmwareFile, char *deviceType,
     int forceFlag)
 {
     int ret, fileModel, fileVersion;
+#if HAVE_LIBUSB0
     usb_dev_handle *usbHandle;
+#elif HAVE_LIBUSB1
+    libusb_device_handle *usbHandle;
+    libusb_device *usbDevice;
+#endif
     struct programmer_arguments args;
 
     // phase 1: prepare
@@ -108,10 +127,18 @@ RunUpdate(dfu_device_t *devHandle, char *firmwareFile, char *deviceType,
 
     // Find an xum1541 device and verify the firmware matches
     fprintf(stderr, "finding and preparing device for update...\n");
+#if HAVE_LIBUSB0
     ret = GetXumDevice(deviceType, &usbHandle);
+#elif HAVE_LIBUSB1
+    ret = GetXumDevice(deviceType, &usbHandle, &usbDevice);
+#endif
     if (ret == 0) {
         // Verify firmware version is older and put it in DFU mode
+#if HAVE_LIBUSB0
         ret = CheckFirmwareVersion(usbHandle, fileModel, fileVersion);
+#elif HAVE_LIBUSB1
+        ret = CheckFirmwareVersion(usbHandle, usbDevice, fileModel, fileVersion);
+#endif
         if (ret != 0) {
             // Fatal error or version mismatch but user specified override.
             if (ret < 0)
@@ -259,13 +286,22 @@ GetFileVersion(int16_t *buf, int bufSize, int *modelNum, int *versionNum)
 
 // Find xum1541 device or Atmel DFU device
 static int
+#if HAVE_LIBUSB0
 GetXumDevice(char *deviceType, usb_dev_handle **usbHandle)
+#elif HAVE_LIBUSB1
+GetXumDevice(char *deviceType, libusb_device_handle **usbHandle, libusb_device **usbDevice)
+#endif
 {
     char devNameBuf[128];
 
     // Find xum1541 device or Atmel DFU device.
+#if HAVE_LIBUSB0
     *usbHandle = xum1541_find_device(0/*serial*/, devNameBuf,
         sizeof(devNameBuf));
+#elif HAVE_LIBUSB1
+    *usbHandle = xum1541_find_device(usbDevice, 0/*serial*/, devNameBuf,
+        sizeof(devNameBuf));
+#endif
     if (*usbHandle == NULL)
         return -1;
 
@@ -281,17 +317,31 @@ GetXumDevice(char *deviceType, usb_dev_handle **usbHandle)
 
 // Put xum1541 in DFU mode with a private control msg
 static int
+#if HAVE_LIBUSB0
 SetDFUMode(usb_dev_handle *usbHandle)
+#elif HAVE_LIBUSB1
+SetDFUMode(libusb_device_handle *usbHandle)
+#endif
 {
     int nBytes;
 
+#if HAVE_LIBUSB0
     nBytes = usb_control_msg(usbHandle, USB_TYPE_CLASS | USB_ENDPOINT_OUT,
         XUM1541_ENTER_BOOTLOADER, 0, 0, NULL, 0, 1000);
+#elif HAVE_LIBUSB1
+    nBytes = libusb_control_transfer(usbHandle, LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_OUT,
+        XUM1541_ENTER_BOOTLOADER, 0, 0, NULL, 0, 1000);
+#endif
     if (nBytes < 0) {
         fprintf(stderr, "could not put device into DFU mode: %s\n",
+#if HAVE_LIBUSB0
             usb_strerror());
+#elif HAVE_LIBUSB1
+            libusb_error_name(nBytes));
+#endif
         return -1;
     }
+#if HAVE_LIBUSB0
     if (usb_close(usbHandle) != 0)
         fprintf(stderr, "USB close error: %s\n", usb_strerror());
 
@@ -301,6 +351,9 @@ SetDFUMode(usb_dev_handle *usbHandle)
      */
     usb_find_busses();
     usb_find_devices();
+#elif HAVE_LIBUSB1
+    libusb_close(usbHandle);
+#endif
 
     return 0;
 }
@@ -362,12 +415,20 @@ GetDFUDevice(char *deviceType, dfu_device_t *devHandle,
 }
 
 static int
+#if HAVE_LIBUSB0
 CheckFirmwareVersion(usb_dev_handle *usbHandle, int fileModel, int fileVersion)
+#elif HAVE_LIBUSB1
+CheckFirmwareVersion(libusb_device_handle *usbHandle, libusb_device *usbDevice, int fileModel, int fileVersion)
+#endif
 {
     int devModel, devVersion, ret;
 
     // Download the current version info
+#if HAVE_LIBUSB0
     ret = xum1541_get_model_version(usbHandle, &devModel, &devVersion);
+#elif HAVE_LIBUSB1
+    ret = xum1541_get_model_version(usbHandle, usbDevice, &devModel, &devVersion);
+#endif
     if (ret != 0) {
         fprintf(stderr, "failed to retrieve device version\n");
         return -1;
@@ -506,8 +567,15 @@ main(int argc, char *argv[])
     struct XumDevice *devPtr;
     dfu_device_t dfuDevice;
 #ifdef HAVE_LIBUSB_1_0
-#error libusb 1.0 not yet tested
     libusb_context *usbContext;
+#endif
+
+#if HAVE_LIBUSB0
+    fprintf(stderr, "*** Using libusb-0.1\n\n");
+#elif HAVE_LIBUSB1
+    fprintf(stderr, "*** Using libusb-1.0\n\n");
+#else
+    fprintf(stderr, "*** UNKNOWN libusb VERSION***\n\n");
 #endif
 
     // Parse command line flags

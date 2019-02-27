@@ -20,10 +20,22 @@
 
 #include "usb.h"
 
+#if HAVE_LIBUSB0
 int xum1541_get_model_version(usb_dev_handle *handle, int *model,
     int *version);
-usb_dev_handle *xum1541_find_device(int PortNumber, char *devNameBuf,
+usb_dev_handle *
+#elif HAVE_LIBUSB1
+int xum1541_get_model_version(libusb_device_handle *handle, libusb_device *dev,
+    int *model, int *version);
+libusb_device_handle *
+#endif
+#if HAVE_LIBUSB0
+xum1541_find_device(int PortNumber, char *devNameBuf,
     int devNameBufSize);
+#elif HAVE_LIBUSB1
+xum1541_find_device(libusb_device **usbDevice, int PortNumber, char *devNameBuf,
+    int devNameBufSize);
+#endif
 void verbose_print(char *msg, ...);
 
 extern int verbose;

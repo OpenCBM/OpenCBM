@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <usb.h>
 
 #include "xu1541lib.h"
 
@@ -19,7 +18,7 @@
 
 #include "xu1541_types.h"
 
-usb_dev_handle      *handle = NULL;
+libusb_device_handle *handle = NULL;
 
 #ifdef WIN
 #define QUIT_KEY  { printf("Press return to quit\n"); getchar(); }
@@ -55,10 +54,10 @@ void usb_echo(void) {
     val[0] = rand() & 0xffff;
     val[1] = rand() & 0xffff;
 
-    nBytes = usb_control_msg(handle,
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-			     XU1541_ECHO, val[0], val[1],
-			     (char*)ret, sizeof(ret), 1000);
+    nBytes = libusb_control_transfer(handle,
+                 LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN,
+                 XU1541_ECHO, val[0], val[1],
+                 (unsigned char*)ret, sizeof(ret), 1000);
 
     /* the val[x] values are sent through a control message which */
     /* causes libusb to convert their endianess to little endian */
@@ -70,21 +69,21 @@ void usb_echo(void) {
     USB_LE16_TO_CPU(ret[1]);
 
     if(nBytes < 0) {
-      fprintf(stderr, "USB request failed: %s!\n", usb_strerror());
+      fprintf(stderr, "USB request failed: %s!\n", libusb_error_name(nBytes));
       return;
     } else if(nBytes != sizeof(ret)) {
       fprintf(stderr, "Unexpected number of bytes (%d) returned\n", nBytes);
       errors++;
     } else if((val[0] != ret[0]) || (val[1] != ret[1])) {
       fprintf(stderr, "Echo payload mismatch (%x/%x -> %x/%x)\n",
-	      val[0], val[1], ret[0], ret[1]);
+              val[0], val[1], ret[0], ret[1]);
       errors++;
     }
   }
 
   if(errors)
     fprintf(stderr, "ERROR: %d out of %d echo transfers failed!\n",
-	    errors, ECHO_NUM);
+            errors, ECHO_NUM);
   else
     printf("%d echo test transmissions successful!\n", ECHO_NUM);
 }
@@ -97,18 +96,18 @@ void usb_no_irq(void) {
   printf("=== Running irq disabled echo test ===\n");
 
   /* disable IRQs for one second (100 * 10ms) */
-  nBytes = usb_control_msg(handle,
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-	   XU1541_IRQ_PAUSE, 100, 0, NULL, 0, 1000);
+  nBytes = libusb_control_transfer(handle,
+           LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN,
+           XU1541_IRQ_PAUSE, 100, 0, NULL, 0, 1000);
 
   if(nBytes < 0) {
-    fprintf(stderr, "ERROR: %s!\n", usb_strerror());
+    fprintf(stderr, "ERROR: %s!\n", libusb_error_name(nBytes));
   } else if(nBytes == 0) {
     fprintf(stderr, "GOOD: No error sending control message.\n");
   }
 
   printf("USB errors may (and even should) be reported in the "
-	 "following lines.\n");
+         "following lines.\n");
 
   /* now wait for the device to repond again */
 
@@ -116,26 +115,26 @@ void usb_no_irq(void) {
     val[0] = rand() & 0xffff;
     val[1] = rand() & 0xffff;
 
-    nBytes = usb_control_msg(handle,
-	   USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-			     XU1541_ECHO, val[0], val[1],
-			     (char*)ret, sizeof(ret), 1000);
+    nBytes = libusb_control_transfer(handle,
+           LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE | LIBUSB_ENDPOINT_IN,
+                             XU1541_ECHO, val[0], val[1],
+                             (unsigned char*)ret, sizeof(ret), 1000);
 
     USB_LE16_TO_CPU(ret[0]);
     USB_LE16_TO_CPU(ret[1]);
 
     if(nBytes < 0) {
-      fprintf(stderr, "Expected error: %s!\n", usb_strerror());
+      fprintf(stderr, "Expected error: %s!\n", libusb_error_name(nBytes));
       failed = 1;
       tos++;
     } else if(nBytes != sizeof(ret)) {
       fprintf(stderr, "Expected error: Wrong number of %d bytes returned, "
-	      "expected %d\n", nBytes, (int)sizeof(ret));
+              "expected %d\n", nBytes, (int)sizeof(ret));
       failed = 1;
       tos++;
     } else if((val[0] != ret[0]) || (val[1] != ret[1])) {
       fprintf(stderr, "Echo payload mismatch (%x/%x -> %x/%x)\n",
-	      val[0], val[1], ret[0], ret[1]);
+              val[0], val[1], ret[0], ret[1]);
       errors++;
     } else {
       if(failed) recovered = 1;
@@ -155,7 +154,7 @@ void usb_no_irq(void) {
       fprintf(stderr, "ERROR: Device did not recover!!!\n");
     else {
       printf("GOOD: Device/USB link successfully recovered from disabled "
-	     "target irq\n");
+             "target irq\n");
     }
   }
 
@@ -164,13 +163,14 @@ void usb_no_irq(void) {
 }
 
 int main(int argc, char *argv[]) {
+  libusb_context * usbContext;
 
-  printf("--      XU1541 USB test application        --\n");
-  printf("--       (c) 2007 the opencbm team         --\n");
-  printf("--   http://www.harbaum.org/till/xu1541    --\n");
-  printf("-- http://sourceforge.net/projects/opencbm --\n");
+  printf("--      XU1541 USB test application        --\n"
+         "--     (c) 2007, 2019 the opencbm team     --\n"
+         "--       https://github.com/OpenCBM        --\n"
+         "-- http://sourceforge.net/projects/opencbm --\n\n");
 
-  usb_init();
+  libusb_init(&usbContext);
 
   if(!(handle=xu1541lib_find())) {
     return 1;
@@ -184,6 +184,8 @@ int main(int argc, char *argv[]) {
   usb_no_irq();
 
   xu1541lib_close(handle);
+
+  libusb_exit(usbContext);
 
   return 0;
 }

@@ -1,14 +1,12 @@
 #include "xu1541lib.h"
 #include "xu1541_types.h"
 
-#include <usb.h>
-
 #include <stdio.h>
 #include <string.h>
 
 #include "arch.h"
 
-void xu1541lib_display_device_info(usb_dev_handle *handle) {
+void xu1541lib_display_device_info(libusb_device_handle *handle) {
   xu1541_device_info_t device_info;
 
   if (xu1541lib_get_device_info(handle, &device_info, sizeof device_info)) {
