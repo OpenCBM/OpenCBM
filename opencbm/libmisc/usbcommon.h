@@ -28,10 +28,12 @@
 
 struct opencbm_usb_handle {
 #if HAVE_LIBUSB1
-	libusb_context *ctx;
-	libusb_device_handle *devh;
+        libusb_context *ctx;
+        libusb_device_handle *devh;
 #elif HAVE_LIBUSB0
         usb_dev_handle *devh; /*!< \internal \brief handle to the xu1541 device */
+#else
+#error Nothing defined!
 #endif
 };
 

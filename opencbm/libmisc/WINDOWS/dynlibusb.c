@@ -30,7 +30,7 @@
 usb_dll_t usb = { NULL };
 
 #if HAVE_LIBUSB1
-  #define LIBUSB_DLLNAME "libusb-1.0.dll"a
+  #define LIBUSB_DLLNAME "libusb-1.0.dll"
   #define LIBUSB_DLLFUNCPREFIX "libusb"
 #elif HAVE_LIBUSB0
   #define LIBUSB_DLLNAME "libusb0.dll"

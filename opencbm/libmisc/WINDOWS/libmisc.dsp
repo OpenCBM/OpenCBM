@@ -115,6 +115,10 @@ SOURCE=.\registry.c
 
 SOURCE=..\statedebug.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\usbcommon0.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

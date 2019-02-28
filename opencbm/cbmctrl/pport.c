@@ -261,7 +261,7 @@ cbm_check_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
             /*
              * Try to write some patterns and check if we see them:
              */
-            unsigned int value_set = testpattern[pattern_index];
+            unsigned char value_set = testpattern[pattern_index];
             unsigned int value_read = output_pia(HandleDevice, DeviceAddress, piaAddress, value_set);
             if (value_set != value_read) {
                 fprintf(stderr, "error sending FLOPPY -> PC, pattern #%u = 0x%02X, but read back 0x%02X\n",
@@ -284,7 +284,7 @@ cbm_check_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
             /*
              * Try to write some patterns and check if we see them:
              */
-            unsigned int value_set = testpattern[pattern_index];
+            unsigned char value_set = testpattern[pattern_index];
             unsigned int value_read = input_pia(HandleDevice, DeviceAddress, piaAddress, value_set);
             if (value_set != value_read) {
                 fprintf(stderr, "error sending PC -> FLOPPY, pattern #%u = 0x%02X, but read back 0x%02X\n",

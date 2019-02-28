@@ -176,7 +176,7 @@ int xu1541_init(struct opencbm_usb_handle **HandleXu1541_p) {
 #elif HAVE_LIBUSB1
   cnt = usb.get_device_list(HandleXu1541->ctx, &list);
   if (cnt < 0) {
-    xu1541_dbg(0, "enumeration error: %s", usb.error_name(cnt));
+    xu1541_dbg(0, "enumeration error: %s", usb.error_name((int)cnt));
     usb.exit(HandleXu1541->ctx);
     free(HandleXu1541);
     HandleXu1541 = NULL;
@@ -379,7 +379,7 @@ int xu1541_ioctl(struct opencbm_usb_handle *HandleXu1541, unsigned int cmd, unsi
       if ((nBytes = usb.control_transfer(HandleXu1541->devh,
                                    LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
 #endif
-                                   cmd, (secaddr << 8) + addr, 0,
+                                   (uint8_t) cmd, (secaddr << 8) + addr, 0,
                                    NULL, 0,
                                    1000)) < 0)
       {
@@ -451,8 +451,8 @@ int xu1541_ioctl(struct opencbm_usb_handle *HandleXu1541, unsigned int cmd, unsi
                    USB_TIMEOUT)) < 0)
 #elif HAVE_LIBUSB1
       if ((nBytes = usb.control_transfer(HandleXu1541->devh,
-                   LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
-                   cmd, (secaddr << 8) + addr, 0,
+                   (uint8_t) LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+                   (uint8_t) cmd, (secaddr << 8) + addr, 0,
                    ret, sizeof(ret),
                    USB_TIMEOUT)) < 0)
 #endif
@@ -497,7 +497,8 @@ int xu1541_write(struct opencbm_usb_handle *HandleXu1541, const unsigned char *d
     while(len)
     {
         int link_ok = 0, err = 0;
-        int wr, bytes2write;
+        int wr;
+        uint16_t bytes2write;
         bytes2write = (len > XU1541_IO_BUFFER_SIZE)?XU1541_IO_BUFFER_SIZE:len;
 
         /* the write itself moved the data into the buffer, the actual */
@@ -598,7 +599,8 @@ int xu1541_read(struct opencbm_usb_handle *HandleXu1541, unsigned char *data, si
 
     while(len > 0)
     {
-        int rd, bytes2read;
+        int rd;
+        uint16_t bytes2read;
         int link_ok = 0, err = 0;
         unsigned char rv[2];
 
@@ -749,7 +751,8 @@ int xu1541_special_write(struct opencbm_usb_handle *HandleXu1541, int mode, cons
 
     while(size > 0)
     {
-        int wr, bytes2write = (size>128)?128:size;
+        int wr;
+        uint16_t bytes2write = (size>128)?128:size;
 
 #if HAVE_LIBUSB0
         if((wr = usb.control_msg(HandleXu1541->devh,
@@ -758,8 +761,8 @@ int xu1541_special_write(struct opencbm_usb_handle *HandleXu1541, int mode, cons
                                  (char*)data, bytes2write, 1000)) < 0)
 #elif HAVE_LIBUSB1
         if ((wr = usb.control_transfer(HandleXu1541->devh,
-                                  LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_OUT,
-                                  mode, XU1541_WRITE, bytes2write,
+                                  (uint8_t) LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_OUT,
+                                  (uint8_t) mode, XU1541_WRITE, bytes2write,
                                   (unsigned char*)data, bytes2write, 1000)) < 0)
 #endif
         {
@@ -807,7 +810,8 @@ int xu1541_special_read(struct opencbm_usb_handle *HandleXu1541, int mode, unsig
 
     while(size > 0)
     {
-        int rd, bytes2read = (size>128)?128:size;
+        int rd;
+        uint16_t bytes2read = (size>128)?128:size;
 
 #if HAVE_LIBUSB0
         if((rd = usb.control_msg(HandleXu1541->devh,
@@ -818,7 +822,7 @@ int xu1541_special_read(struct opencbm_usb_handle *HandleXu1541, int mode, unsig
 #elif HAVE_LIBUSB1
         if ((rd = usb.control_transfer(HandleXu1541->devh,
                                  LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
-                                 mode, XU1541_READ, bytes2read,
+                                 (uint8_t) mode, XU1541_READ, bytes2read,
                                  data, bytes2read,
                                  USB_TIMEOUT)) < 0)
 #endif

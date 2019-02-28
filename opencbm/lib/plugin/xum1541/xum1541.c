@@ -84,7 +84,7 @@ xum1541_dbg(int level, char *msg, ...)
    The length of the data in the buffer
 */
 static void
-xum1541_print_data(int level, const char *op, const unsigned char *data, uint8_t len)
+xum1541_print_data(int level, const char *op, const unsigned char *data, unsigned int len)
 {
     // optimize for no debug output
     if (level > debug_level) {
@@ -270,7 +270,7 @@ xum1541_enumerate(struct opencbm_usb_handle *HandleXum1541, int PortNumber)
     cnt = usb.get_device_list(HandleXum1541->ctx, &list);
     if (cnt < 0)
     {
-        xum1541_dbg(0, "enumeration error: %s", usb.error_name(cnt));
+        xum1541_dbg(0, "enumeration error: %s", usb.error_name((int)cnt));
         return -1;
     }
 
@@ -403,7 +403,7 @@ xum1541_device_path(int PortNumber)
 
     HandleXum1541.devh = NULL;
 
-    snprintf(dev_path, sizeof(dev_path), XUM1541_PREFIX);
+    arch_snprintf(dev_path, sizeof(dev_path), XUM1541_PREFIX);
 
     if (xum1541_enumerate(&HandleXum1541, PortNumber) < 0) {
         return NULL;
@@ -417,7 +417,7 @@ xum1541_device_path(int PortNumber)
             strcpy(dev_path, dev->filename);
         }
 #elif HAVE_LIBUSB1
-        snprintf(dev_path, sizeof(dev_path), XUM1541_PREFIX "%d/%d",
+        arch_snprintf(dev_path, sizeof(dev_path), XUM1541_PREFIX "%d/%d",
             usb.get_bus_number(usb.get_device(HandleXum1541.devh)),
             usb.get_device_address(usb.get_device(HandleXum1541.devh)));
 #endif
@@ -696,7 +696,7 @@ xum1541_control_msg(struct opencbm_usb_handle *HandleXum1541, unsigned int cmd)
         cmd, 0, 0, NULL, 0, USB_TIMEOUT);
 #elif HAVE_LIBUSB1
     nBytes = usb.control_transfer(HandleXum1541->devh, LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_OUT,
-        cmd, 0, 0, NULL, 0, USB_TIMEOUT);
+        (uint8_t) cmd, 0, 0, NULL, 0, USB_TIMEOUT);
 #endif
     if (nBytes < 0) {
         fprintf(stderr, "USB error in xum1541_control_msg: %s\n",
@@ -710,7 +710,7 @@ xum1541_control_msg(struct opencbm_usb_handle *HandleXum1541, unsigned int cmd)
 static int
 xum1541_wait_status(struct opencbm_usb_handle *HandleXum1541)
 {
-    int nBytes, deviceBusy, ret;
+    int nBytes, deviceBusy, ret=0;
     unsigned char statusBuf[XUM_STATUSBUF_SIZE];
 
     xum1541_dbg(2, "xum1541_wait_status checking for status");
@@ -816,7 +816,7 @@ xum1541_wait_status(struct opencbm_usb_handle *HandleXum1541)
 int
 xum1541_ioctl(struct opencbm_usb_handle *HandleXum1541, unsigned int cmd, unsigned int addr, unsigned int secaddr)
 {
-    int nBytes, ret;
+    int nBytes, ret = 0;
     unsigned char cmdBuf[XUM_CMDBUF_SIZE];
     BOOL isTapeCmd = ((XUM1541_TAP_MOTOR_ON <= cmd) && (cmd <= XUM1541_TAP_MOTOR_OFF));
 
@@ -897,7 +897,7 @@ xum1541_tap_break(struct opencbm_usb_handle *HandleXum1541)
 int
 xum1541_write(struct opencbm_usb_handle *HandleXum1541, unsigned char modeFlags, const unsigned char *data, size_t size)
 {
-    int wr, mode, ret;
+    int wr, mode, ret=0;
     size_t bytesWritten, bytes2write;
     unsigned char cmdBuf[XUM_CMDBUF_SIZE];
     BOOL isTapeCmd = ((modeFlags == XUM1541_TAP) || (modeFlags == XUM1541_TAP_CONFIG));

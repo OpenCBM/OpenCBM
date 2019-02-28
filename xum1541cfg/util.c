@@ -54,7 +54,7 @@ usbGetStringAsciiU(libusb_device_handle *dev, int index, int langid,
         (char*)buffer, sizeof(buffer), 1000);
 #elif HAVE_LIBUSB1
     rval = libusb_control_transfer(dev, LIBUSB_ENDPOINT_IN, LIBUSB_REQUEST_GET_DESCRIPTOR,
-        (USB_DT_STRING << 8) + index, langid,
+        (uint16_t) ((USB_DT_STRING << 8) + index), (uint16_t) langid,
         buffer, sizeof(buffer), 1000);
 #endif
     if (rval < 0)
@@ -310,7 +310,7 @@ xum1541_enumerate(libusb_device_handle **usbHandle, libusb_device **usbDevice, D
 
     cnt = libusb_get_device_list(NULL, &list);
     if (cnt < 0) {
-        fprintf(stderr, "error: enumeration: %s", libusb_error_name(cnt));
+        fprintf(stderr, "error: enumeration: %s", libusb_error_name((int)cnt));
         return -1;
     }
 

@@ -672,7 +672,8 @@ static int32_t dfu_find_interface( struct libusb_device *device,
                                    const dfu_bool honor_interfaceclass,
                                    const uint8_t bNumConfigurations)
 {
-    int32_t c,i,s;
+    int32_t i,s;
+    uint8_t c;
     
     TRACE( "%s()\n", __FUNCTION__ );
 
@@ -842,10 +843,10 @@ static int32_t dfu_transfer_out( dfu_device_t *device,
     return libusb_control_transfer( device->handle,
                 /* bmRequestType */ LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
                 /* bRequest      */ request,
-                /* wValue        */ value,
-                /* wIndex        */ device->interface,
+                /* wValue        */ (uint16_t) value,
+                /* wIndex        */ (uint16_t) device->interface,
                 /* Data          */ data,
-                /* wLength       */ length,
+                /* wLength       */ (uint16_t) length,
                                     DFU_TIMEOUT );
 #else
     return usb_control_msg( device->handle,
@@ -869,10 +870,10 @@ static int32_t dfu_transfer_in( dfu_device_t *device,
     return libusb_control_transfer( device->handle,
                 /* bmRequestType */ LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
                 /* bRequest      */ request,
-                /* wValue        */ value,
-                /* wIndex        */ device->interface,
+                /* wValue        */ (uint16_t) value,
+                /* wIndex        */ (uint16_t) device->interface,
                 /* Data          */ data,
-                /* wLength       */ length,
+                /* wLength       */ (uint16_t) length,
                                     DFU_TIMEOUT );
 #else
     return usb_control_msg( device->handle,
