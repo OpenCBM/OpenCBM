@@ -28,7 +28,11 @@
 #include "getpluginaddress.h"
 
 #ifndef LIBUSB_APIDECL
-# define LIBUSB_APIDECL
+# ifndef LIBUSB_CALL
+#  define LIBUSB_APIDECL
+# else
+#  define LIBUSB_APIDECL LIBUSB_CALL
+# endif
 #endif
 
 typedef

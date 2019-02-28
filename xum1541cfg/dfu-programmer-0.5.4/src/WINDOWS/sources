@@ -6,7 +6,9 @@ TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib
 
-INCLUDES=../../../WINDOWS
+INCLUDES=../../../WINDOWS;../../../../opencbm/libmisc/WINDOWS/
+
+C_DEFINES=$(C_DEFINES) -DHAVE_LIBUSB0=0 -DHAVE_LIBUSB1=1 -DHAVE_LIBUSB_1_0=1
 
 SOURCES=../arguments.c ../atmel.c ../commands.c \
         ../dfu.c ../intel_hex.c ../util.c

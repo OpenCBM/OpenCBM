@@ -14,6 +14,8 @@ DLLBASE=0x71000000
 
 INCLUDES=../../../../libmisc/WINDOWS;../;../../../../include;../../../../include/WINDOWS;../../..;../../../WINDOWS;../../../../arch/windows;../../../../libmisc;$(XUM1541DIR)
 
+C_DEFINES=$(C_DEFINES) -DHAVE_LIBUSB0=0 -DHAVE_LIBUSB1=1 -DHAVE_LIBUSB_1_0=1
+
 SOURCES=../archlib.c \
 	../xum1541.c \
 	../s1_s2_pp.c \

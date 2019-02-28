@@ -14,6 +14,7 @@ INCLUDES=../../include;../../include/WINDOWS;../../arch/windows/
 
 
 SOURCES=../cbmctrl.c \
+        pport.c \
         cbmctrl.rc
 
 UMTYPE=console

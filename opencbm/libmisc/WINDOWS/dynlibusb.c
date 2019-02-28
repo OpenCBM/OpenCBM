@@ -35,6 +35,8 @@ usb_dll_t usb = { NULL };
 #elif HAVE_LIBUSB0
   #define LIBUSB_DLLNAME "libusb0.dll"
   #define LIBUSB_DLLFUNCPREFIX "usb"
+#else
+  #error Neither HAVE_LIBUSB0 nor HAVE_LIBUSB1 defined!
 #endif
 
 int dynlibusb_init(void) {
@@ -73,6 +75,8 @@ int dynlibusb_init(void) {
         READ(error_name);
         READ(init);
         READ(exit);
+        READ(get_device_descriptor);
+        READ(get_string_descriptor_ascii);
 //        READ(set_debug);
         READ(get_device);
         READ(get_device_list);

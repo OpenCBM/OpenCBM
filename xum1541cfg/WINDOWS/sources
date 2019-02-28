@@ -5,10 +5,13 @@ TARGETTYPE=PROGRAM
 TARGETLIBS=$(SDK_LIB_PATH)/kernel32.lib \
            $(SDK_LIB_PATH)/user32.lib   \
            $(SDK_LIB_PATH)/advapi32.lib \
-           */libusb.lib \
+           */libusb-1.0.lib \
            $(TARGETPATH)/*/dfu-programmer.lib
 
-INCLUDES=../dfu-programmer-0.5.4/src;$(XUM1541DIR)
+
+INCLUDES=../dfu-programmer-0.5.4/src;$(XUM1541DIR);../../opencbm/libmisc;../../opencbm/include;../../opencbm/libmisc/WINDOWS/
+
+C_DEFINES=$(C_DEFINES) -DHAVE_LIBUSB0=0 -DHAVE_LIBUSB1=1 -DHAVE_LIBUSB_1_0=1
 
 SOURCES=../main.c ../util.c \
         getopt.c \

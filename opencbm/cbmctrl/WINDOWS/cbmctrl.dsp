@@ -88,6 +88,10 @@ LINK32=link.exe
 
 SOURCE=..\cbmctrl.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\pport.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
