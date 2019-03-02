@@ -58,7 +58,7 @@ LINK32=link.exe
 OutDir=.\../../../../Release
 SOURCE="$(InputPath)"
 PreLink_Cmds=del "$(OutDir)\opencbm-xu1541.dll"
-PostBuild_Cmds=copy "$(OutDir)\opencbmxu1541.dll" "$(OutDir)\opencbm-xu1541.dll"
+PostBuild_Cmds=copy "$(OutDir)\opencbmxu1541.dll" "$(OutDir)\opencbm-xu1541.dll"	copy "$(OutDir)\..\..\windrv\x86\libusb-1.0.dll" "$(OutDir)\libusb-1.0.dll"
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "opencbmxu1541 - Win32 Debug"
@@ -90,7 +90,7 @@ LINK32=link.exe
 OutDir=.\../../../../Debug
 SOURCE="$(InputPath)"
 PreLink_Cmds=del "$(OutDir)\opencbm-xu1541.dll"
-PostBuild_Cmds=copy "$(OutDir)\opencbmxu1541.dll" "$(OutDir)\opencbm-xu1541.dll"
+PostBuild_Cmds=copy "$(OutDir)\opencbmxu1541.dll" "$(OutDir)\opencbm-xu1541.dll"	copy "$(OutDir)\..\..\windrv\x86\libusb-1.0.dll" "$(OutDir)\libusb-1.0.dll"
 # End Special Build Tool
 
 !ENDIF 

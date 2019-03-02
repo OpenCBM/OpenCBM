@@ -97,12 +97,14 @@ rem	set DDKBUILD_PLATFORM_OPTION=XP
 	set DDKBUILD_PLATFORM_OPTION=
 )
 
+set DDKBUILD_PLATFORM_DIR_FROM_WINDRV=x86
 
 if /I "%0" EQU "-i386" (
 	shift
 ) else if /I "%0" EQU "-ia64" (
 	set DDKBUILD_PLATFORM=ia64
 	set DDKBUILD_PLATFORM_OPTION=64
+	set DDKBUILD_PLATFORM_DIR_FROM_WINDRV=
 	set OPTIONAL_DIRS=
 	shift
 ) else if /I "%0" EQU "-amd64" (
@@ -113,6 +115,7 @@ if /I "%0" EQU "-i386" (
 		set DDKBUILD_PLATFORM_OPTION=A64
 	)
 	set OPTIONAL_DIRS=xu1541 xum1541
+	set DDKBUILD_PLATFORM_DIR_FROM_WINDRV=amd64
 	shift
 )
 
@@ -149,6 +152,12 @@ call %DDKBUILD% %CMDLINE%
 
 rem Copy the INF file into the bin directory
 copy %OPENCBM_SRC_HOME%\opencbm\sys\wdm\*.inf %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%
+
+if exist %OPENCBM_SRC_HOME%\windrv\%DDKBUILD_PLATFORM_DIR_FROM_WINDRV%\libusb-1.0.dll (
+	rem Copy libusb-1.0.dll into destination
+	copy %OPENCBM_SRC_HOME%\windrv\%DDKBUILD_PLATFORM_DIR_FROM_WINDRV%\libusb-1.0.dll %OPENCBM_SRC_HOME%\bin\%DDKBUILD_PLATFORM%
+)
+
 
 if not exist %OPENCBM_SRC_HOME%\build*.err (
 
