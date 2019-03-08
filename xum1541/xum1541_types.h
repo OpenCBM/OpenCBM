@@ -16,6 +16,7 @@
 
 // XUM1541_INIT reports this versions
 #define XUM1541_VERSION             8
+#define XUM1541_MINIMUM_COMPATIBLE_VERSION 7
 
 // USB parameters for descriptor configuration
 #define XUM_BULK_IN_ENDPOINT        3

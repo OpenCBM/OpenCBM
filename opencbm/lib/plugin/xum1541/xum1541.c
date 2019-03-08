@@ -364,9 +364,9 @@ xum1541_check_version(int version)
 {
     xum1541_dbg(0, "firmware version %d, library version %d", version,
         XUM1541_VERSION);
-    if (version < XUM1541_VERSION) {
+    if (version < XUM1541_MINIMUM_COMPATIBLE_VERSION) {
         fprintf(stderr, "xum1541 firmware version too low (%d < %d)\n",
-            version, XUM1541_VERSION);
+            version, XUM1541_MINIMUM_COMPATIBLE_VERSION);
         fprintf(stderr, "please update your xum1541 firmware\n");
         return -1;
     } else if (version > XUM1541_VERSION) {
