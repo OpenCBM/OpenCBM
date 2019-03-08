@@ -8,11 +8,11 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file arch/linux/ctrlbreak.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
-** \brief Helper function for setting a handler for Ctrl+C 
+** \brief Helper function for setting a handler for Ctrl+C
 ** and Ctrl+Break
 **
 ****************************************************************/

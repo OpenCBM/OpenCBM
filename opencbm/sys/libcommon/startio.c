@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/startio.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -31,7 +31,7 @@
  \param Irp:
    Pointer to the IRP to be executed.
 
- \return 
+ \return
    If everything works as expected, this function returns
    STATUS_SUCCESS. If not, it returns an appropriate error value.
 */
@@ -79,7 +79,7 @@ cbm_startio(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
             break;
 
         default:
-            DBG_ERROR((DBG_PREFIX "THIS SHOULD NOT HAPPEN: UNKNOWN MAJORFUNCTION %08x", 
+            DBG_ERROR((DBG_PREFIX "THIS SHOULD NOT HAPPEN: UNKNOWN MAJORFUNCTION %08x",
                 irpSp->MajorFunction));
             DBG_ASSERT(1==0);
             ntStatus = STATUS_NOT_SUPPORTED;

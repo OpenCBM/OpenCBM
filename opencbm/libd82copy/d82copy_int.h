@@ -34,7 +34,7 @@
    trks 65-77:   23 sectors/trk   "     "       "  "
    trks 78-116:  29 sectors/trk  (on physical side 2)
    trks 117-130: 27 sectors/trk   "     "       "  "
-   trks 131-141: 25 sectors/trk   "     "       "  "  
+   trks 131-141: 25 sectors/trk   "     "       "  "
    trks 142-154: 23 sectors/trk   "     "       "  "
  Directory header at ?
  BAM starts at t38 s?
@@ -64,8 +64,8 @@
 #define NEED_SECTOR(b) ((((b)==bs_error)||((b)==bs_must_copy))?1:0)
 
 
-#define CAT_TRACK  		39							// catalog
-#define BAM_TRACK  	38							// BAM
+#define CAT_TRACK   39              // catalog
+#define BAM_TRACK   38              // BAM
 
 
 
@@ -86,61 +86,61 @@ typedef struct {
 
 
 
-typedef	unsigned char	uint8_t;
-typedef	signed char		int8_t;
+typedef unsigned char  uint8_t;
+typedef signed char    int8_t;
 
-typedef	unsigned short	uint16_t	;
-typedef	signed short		int16_t;
-
-
+typedef unsigned short uint16_t;
+typedef signed short   int16_t;
 
 
-typedef struct 
+
+
+typedef struct
 {
-	// ON TRACK 39/0 
-	uint8_t			trkBAM;				// track of BAM
-	uint8_t			secBAM;			// sector of BAM
-	uint8_t			dos;				// $43 ("C") - DOS format version
-	uint8_t			fil02;				// reserved
-	uint16_t		fil03;					// unused
-	uint8_t			diskName[16];		// disk name (in PETASCII, padded with $A0)
-	uint8_t			fil05;				// $A0
-	uint16_t		id;						// disk ID
-	uint8_t			fil06;				// $A0
-	uint16_t		ver;						// DOS version "2C"
-	uint8_t			fil07[4];				// $A0
+  // ON TRACK 39/0
+  uint8_t     trkBAM;         // track of BAM
+  uint8_t     secBAM;         // sector of BAM
+  uint8_t     dos;            // $43 ("C") - DOS format version
+  uint8_t     fil02;          // reserved
+  uint16_t    fil03;          // unused
+  uint8_t     diskName[16];   // disk name (in PETASCII, padded with $A0)
+  uint8_t     fil05;          // $A0
+  uint16_t    id;             // disk ID
+  uint8_t     fil06;          // $A0
+  uint16_t    ver;            // DOS version "2C"
+  uint8_t     fil07[4];       // $A0
 } st_d82_header;
 
 
-typedef struct 
+typedef struct
 {
-	uint8_t			trkNx;				// next track
-	uint8_t			secNx;				// next sector 
-	uint8_t			ver;					// DOS version "C"
-	uint8_t			fil01;				// reserved
-	uint8_t			trkLow;				// lowest track for this BAM		(1)
-	uint8_t			trkHigh;				// highest track +1 for this BAM	(51)
-	uint8_t			bam[5*50];			// 50 tracks	(1 .. 50)
+  uint8_t     trkNx;        // next track
+  uint8_t     secNx;        // next sector
+  uint8_t     ver;          // DOS version "C"
+  uint8_t     fil01;        // reserved
+  uint8_t     trkLow;       // lowest track for this BAM    (1)
+  uint8_t     trkHigh;      // highest track +1 for this BAM  (51)
+  uint8_t     bam[5*50];    // 50 tracks  (1 .. 50)
 } st_d82_BAM;
 
 
 // DIRECTORY ENTRY
 
-typedef struct 
+typedef struct
 {
-	uint8_t			trkNx;				// next track
-	uint8_t			secNx;				// next sector 
-	uint8_t			fileType;			// 00=Scratched,80=DEL,81=SEQ,82=PRG,83=USR,84=REL
-										// Bit 0-3:filetype,Bit 6:Locked flag (">"),
-										// Bit 7:Closed flag  (produces  "*", or "splat")
-	uint8_t			trkFil;				// file 1. blk track
-	uint8_t			secFil;				// file 1. blk sector 
-	uint8_t			fileName[16];		// file name (in PETASCII, padded with $A0)
-	uint8_t			trkSide;				// track side blk	(REL files)
-	uint8_t			secSide;			// sector side blk 	(REL files)
-	uint8_t			recLen;				// record length 	(REL files)
-	uint8_t			fil01[6];				// unused
-	uint16_t		size;					// File size in sectors, low/high byte  order
+  uint8_t     trkNx;        // next track
+  uint8_t     secNx;        // next sector
+  uint8_t     fileType;     // 00=Scratched,80=DEL,81=SEQ,82=PRG,83=USR,84=REL
+                            // Bit 0-3:filetype,Bit 6:Locked flag (">"),
+                            // Bit 7:Closed flag  (produces  "*", or "splat")
+  uint8_t     trkFil;       // file 1. blk track
+  uint8_t     secFil;       // file 1. blk sector
+  uint8_t     fileName[16]; // file name (in PETASCII, padded with $A0)
+  uint8_t     trkSide;      // track side blk (REL files)
+  uint8_t     secSide;      // sector side blk  (REL files)
+  uint8_t     recLen;       // record length    (REL files)
+  uint8_t     fil01[6];     // unused
+  uint16_t    size;         // File size in sectors, low/high byte  order
 } st_dirEntry;
 
 

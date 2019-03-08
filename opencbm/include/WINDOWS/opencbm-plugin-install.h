@@ -29,7 +29,7 @@
 
     // int (*p_opencbm_install_getopt)(int argc, char * const argv[], const char *optstring);
 
-    
+
 
     /*! \brief @@@@@ \todo document
 
@@ -67,7 +67,7 @@
 
     /*! \brief describe a plugin */
     typedef
-    struct cbm_install_parameter_plugin_s 
+    struct cbm_install_parameter_plugin_s
     {
         struct cbm_install_parameter_plugin_s *Next;        /*!< pointer to the next plugin */
         char * FileName;                                    /*!< file name of the plugin. This is a decorated plugin name (Name). */
@@ -175,16 +175,16 @@
 
     } CbmPluginInstallProcessCommandlineData_t;
 
-    
+
     /*! \brief @@@@@ \todo document
 
      \param ProcessCommandlineData
 
      \return
     */
-    typedef unsigned int CBMAPIDECL opencbm_plugin_install_process_commandline_t(CbmPluginInstallProcessCommandlineData_t * ProcessCommandlineData); 
+    typedef unsigned int CBMAPIDECL opencbm_plugin_install_process_commandline_t(CbmPluginInstallProcessCommandlineData_t * ProcessCommandlineData);
 
-    
+
     /*! \brief @@@@@ \todo document
 
      \param OptionMemory
@@ -225,12 +225,12 @@
     {
         opencbm_plugin_install_location_t FileLocation;       /*!< the location of the file */
         const char                        Filename[100];      /*!< the file name */
-        const char                      * FileLocationString; /*!< the location where the file is copied. 
+        const char                      * FileLocationString; /*!< the location where the file is copied.
                                                                    This is set to NULL by the plugin.
                                                                    instcbm uses it to keep track where the file resides. */
     } opencbm_plugin_install_neededfiles_t;
 
-    
+
     /*! \brief @@@@@ \todo document
 
      \param Data

@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/install.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -38,10 +38,10 @@
    on entry, and which will contain the length of the written
    ReturnBuffer on exit.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
- 
+
  If ReturnLength is smaller then the length of CBMT_I_INSTALL_OUT,
  then only the the first settings are copied there. This way, a caller
  can get information even if newer versions have more informations to
@@ -58,11 +58,11 @@ cbm_install(IN PDEVICE_EXTENSION Pdx, OUT PCBMT_I_INSTALL_OUT ReturnBuffer, IN O
 
     // Set the driver version
 
-    result.DriverVersion = 
-        CBMT_I_INSTALL_OUT_MAKE_VERSION(OPENCBM_VERSION_MAJOR, OPENCBM_VERSION_MINOR, 
+    result.DriverVersion =
+        CBMT_I_INSTALL_OUT_MAKE_VERSION(OPENCBM_VERSION_MAJOR, OPENCBM_VERSION_MINOR,
                                         OPENCBM_VERSION_SUBMINOR, OPENCBM_VERSION_DEVEL);
 
-    result.DriverVersionEx = 
+    result.DriverVersionEx =
         CBMT_I_INSTALL_OUT_MAKE_VERSION_EX(OPENCBM_VERSION_PATCHLEVEL);
 
     // first of all, assume there is nothing to report

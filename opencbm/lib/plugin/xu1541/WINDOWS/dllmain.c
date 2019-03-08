@@ -8,7 +8,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xu1541/WINDOWS/dllmain.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
 ** \n
@@ -51,7 +51,7 @@
    A handle to the DLL.
 
  \param Reason
-   Specifies a flag indicating why the DLL entry-point function is being called. 
+   Specifies a flag indicating why the DLL entry-point function is being called.
 
  \param Reserved
    Specifies further aspects of DLL initialization and cleanup

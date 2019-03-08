@@ -78,4 +78,3 @@ uchar s1_read(uchar *data, uchar len) {
 
   return len;
 }
-

@@ -90,7 +90,7 @@ static int s2_write_byte_nohs(CBM_FILE fd, unsigned char c)
 }
 
 /* read_n redirects USB reads to the external reader if required */
-static void read_n(unsigned char *data, int size) 
+static void read_n(unsigned char *data, int size)
 {
     int i;
 
@@ -101,7 +101,7 @@ static void read_n(unsigned char *data, int size)
     }
 
     for(i=0;i<size;i++)
-	s2_read_byte(fd_cbm, data++);
+        s2_read_byte(fd_cbm, data++);
 }
 
 static int s2_write_byte(CBM_FILE fd, unsigned char c)
@@ -121,7 +121,7 @@ static int s2_write_byte(CBM_FILE fd, unsigned char c)
 }
 
 /* write_n redirects USB writes to the external reader if required */
-static void write_n(const unsigned char *data, int size) 
+static void write_n(const unsigned char *data, int size)
 {
     int i;
 
@@ -132,7 +132,7 @@ static void write_n(const unsigned char *data, int size)
     }
 
     for(i=0;i<size;i++)
-	s2_write_byte(fd_cbm, *data++);
+        s2_write_byte(fd_cbm, *data++);
 }
 
 static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
@@ -200,7 +200,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_set(fd_cbm, IEC_ATN);
     arch_usleep(20000);
-    
+
                                                                         SETSTATEDEBUG((void)0);
     return 0;
 }
@@ -240,8 +240,8 @@ static int send_track_map(unsigned char tr, const char *trackmap, unsigned char 
 
     /* build track map */
     for(i = 0; i < size; i++)
-	data[2+i] = !NEED_SECTOR(trackmap[i]);
-    
+        data[2+i] = !NEED_SECTOR(trackmap[i]);
+
     write_n(data, size+2);
     free(data);
                                                                         SETSTATEDEBUG((void)0);
@@ -262,7 +262,7 @@ static int read_gcr_block(unsigned char *se, unsigned char *gcrbuf)
         return s;
     }
                                                                         SETSTATEDEBUG(DebugByteCount=0);
-    read_n(gcrbuf, GCRBUFSIZE);									
+    read_n(gcrbuf, GCRBUFSIZE);
                                                                         SETSTATEDEBUG(DebugByteCount=-1);
     return 0;
 }

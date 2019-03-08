@@ -15,15 +15,15 @@
 
 void usage(void)
 {
-	printf("\nUsage:   tap2cap <input.tap> <output.cap>\n\n");
-	printf("Example: tap2cap myfile.tap myfile.cap\n");
+    printf("\nUsage:   tap2cap <input.tap> <output.cap>\n\n");
+    printf("Example: tap2cap myfile.tap myfile.cap\n");
 }
 
 
 __int32 Evaluate_Commandline_Params(__int32 argc, __int8 *argv[])
 {
-	if (argc == 3) return 0;
-	else return -1;
+    if (argc == 3) return 0;
+    else return -1;
 }
 
 
@@ -33,62 +33,62 @@ __int32 Evaluate_Commandline_Params(__int32 argc, __int8 *argv[])
 //   -1: an error occurred
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
-	HANDLE  hCAP, hTAP;
-	__int32 FuncRes, RetVal = -1;
+    HANDLE  hCAP, hTAP;
+    __int32 FuncRes, RetVal = -1;
 
-	printf("\nTAP2CAP v1.00 - TAP image to ZoomTape CAP image conversion\n");
-	printf("Copyright 2012 Arnd Menge\n\n");
+    printf("\nTAP2CAP v1.00 - TAP image to ZoomTape CAP image conversion\n");
+    printf("Copyright 2012 Arnd Menge\n\n");
 
-	if (Evaluate_Commandline_Params(argc, argv) == -1)
-	{
-		usage();
-		goto exit;
-	}
+    if (Evaluate_Commandline_Params(argc, argv) == -1)
+    {
+        usage();
+        goto exit;
+    }
 
-	// Open specified TAP image file for reading.
-	FuncRes = TAP_CBM_OpenFile(&hTAP, argv[1]);
-	if (FuncRes != TAP_CBM_Status_OK)
-	{
-		TAP_CBM_OutputError(FuncRes);
-		goto exit;
-	}
+    // Open specified TAP image file for reading.
+    FuncRes = TAP_CBM_OpenFile(&hTAP, argv[1]);
+    if (FuncRes != TAP_CBM_Status_OK)
+    {
+        TAP_CBM_OutputError(FuncRes);
+        goto exit;
+    }
 
-	// Check if specified CAP image file is already existing.
-	if (CAP_isFilePresent(argv[2]) == CAP_Status_OK)
-	{
-		printf("Overwrite existing file? (y/N)");
-		if (getchar() != 'y')
-		{
-			TAP_CBM_CloseFile(&hTAP);
-			goto exit;
-		}
-		printf("\n");
-	}
+    // Check if specified CAP image file is already existing.
+    if (CAP_isFilePresent(argv[2]) == CAP_Status_OK)
+    {
+        printf("Overwrite existing file? (y/N)");
+        if (getchar() != 'y')
+        {
+            TAP_CBM_CloseFile(&hTAP);
+            goto exit;
+        }
+        printf("\n");
+    }
 
-	// Create specified CAP image file for writing.
-	FuncRes = CAP_CreateFile(&hCAP, argv[2]);
-	if (FuncRes != CAP_Status_OK)
-	{
-		CAP_OutputError(FuncRes);
-		TAP_CBM_CloseFile(&hTAP);
-		goto exit;
-	}
+    // Create specified CAP image file for writing.
+    FuncRes = CAP_CreateFile(&hCAP, argv[2]);
+    if (FuncRes != CAP_Status_OK)
+    {
+        CAP_OutputError(FuncRes);
+        TAP_CBM_CloseFile(&hTAP);
+        goto exit;
+    }
 
-	printf("Converting: %s -> %s\n\n", argv[1], argv[2]);
+    printf("Converting: %s -> %s\n\n", argv[1], argv[2]);
 
-	// Convert CBM TAP to CAP format.
-	RetVal = CBMTAP2CAP(hCAP, hTAP);
+    // Convert CBM TAP to CAP format.
+    RetVal = CBMTAP2CAP(hCAP, hTAP);
 
-	TAP_CBM_CloseFile(&hTAP);
+    TAP_CBM_CloseFile(&hTAP);
 
-	FuncRes = CAP_CloseFile(&hCAP);
-	if (FuncRes != CAP_Status_OK)
-		CAP_OutputError(FuncRes);
+    FuncRes = CAP_CloseFile(&hCAP);
+    if (FuncRes != CAP_Status_OK)
+        CAP_OutputError(FuncRes);
 
-	if (RetVal == 0)
-		printf("Conversion successful.");
+    if (RetVal == 0)
+        printf("Conversion successful.");
 
     exit:
-   	printf("\n");
-   	return RetVal;
+    printf("\n");
+    return RetVal;
 }

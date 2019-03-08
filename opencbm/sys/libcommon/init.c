@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/init.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -68,14 +68,14 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx)
 
         // Allocate memory for the registry path
 
-        ServiceKeyRegistryPath.Buffer = ExAllocatePoolWithTag(PagedPool, 
+        ServiceKeyRegistryPath.Buffer = ExAllocatePoolWithTag(PagedPool,
             RegistryPath->Length, MTAG_SERVKEY);
 
         // Copy the registry path into the variable
 
         if (ServiceKeyRegistryPath.Buffer)
         {
-            ServiceKeyRegistryPath.MaximumLength = 
+            ServiceKeyRegistryPath.MaximumLength =
             ServiceKeyRegistryPath.Length = RegistryPath->Length;
 
             RtlCopyUnicodeString(&ServiceKeyRegistryPath, RegistryPath);
@@ -85,7 +85,7 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx)
             // No memory could be allocateed, mark the
             // length of the string appropriately
 
-            ServiceKeyRegistryPath.MaximumLength = 
+            ServiceKeyRegistryPath.MaximumLength =
             ServiceKeyRegistryPath.Length = 0;
         }
     }
@@ -144,7 +144,7 @@ cbm_init_registry(IN PUNICODE_STRING RegistryPath, IN PDEVICE_EXTENSION Pdx)
         }
         else
         {
-            // An error occured. 
+            // An error occured.
             // In this case, initialize the libiec with defaults
 
             cbmiec_global_init(NULL);
@@ -307,8 +307,8 @@ InitializeCableTimerRoutine(PDEVICE_OBJECT Fdo, PVOID Context)
    Pointer to a UNICODE_STRING containing the name of the
    registry path from which to get the information.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it returns one of the error status values.
 */
 NTSTATUS
@@ -360,7 +360,7 @@ DriverCommonUninit(VOID)
     if (ServiceKeyRegistryPath.Buffer)
     {
         ExFreePool(ServiceKeyRegistryPath.Buffer);
-        DBGDO(ServiceKeyRegistryPath.Buffer = NULL; 
+        DBGDO(ServiceKeyRegistryPath.Buffer = NULL;
         ServiceKeyRegistryPath.MaximumLength = ServiceKeyRegistryPath.Length = 0);
     }
 
@@ -369,13 +369,13 @@ DriverCommonUninit(VOID)
 
 /*! \brief Initialize device object, common to WDM and NT4 driver
 
- This function initializes the device object, as done in 
+ This function initializes the device object, as done in
  AddDevice() of a WDM driver, or in DriverEntry() for an NT4
  driver.
 
  \param Fdo
-   Pointer to a DEVICE_OBJECT structure. 
-   This is the device object for the target device, 
+   Pointer to a DEVICE_OBJECT structure.
+   This is the device object for the target device,
    previously created by the driver.
 
  \param DeviceName
@@ -385,21 +385,21 @@ DriverCommonUninit(VOID)
    Pointer to the name of the parallel port driver which this
    device will use.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 
  This function performs the following steps:
  \n 1. Initialize the Pdx
  \n 2. Initialize the Queue inside of the Pdx
- \n 3. Initialize the operating mode of the Fdo 
+ \n 3. Initialize the operating mode of the Fdo
        (Buffered, Direct, Neither)
  \n 4. Get the information from the parallel port
  \n 5. Start the Worker Thread
  \n 6. Log either success or failure
 */
 NTSTATUS
-AddDeviceCommonInit(IN PDEVICE_OBJECT Fdo, IN PUNICODE_STRING DeviceName, 
+AddDeviceCommonInit(IN PDEVICE_OBJECT Fdo, IN PUNICODE_STRING DeviceName,
                     IN PCWSTR ParallelPortName)
 {
     PDEVICE_EXTENSION pdx;

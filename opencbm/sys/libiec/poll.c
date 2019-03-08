@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/poll.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -31,7 +31,7 @@
  \param Result
    Pointer to a variable which will hold the value of the IEC bus
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */

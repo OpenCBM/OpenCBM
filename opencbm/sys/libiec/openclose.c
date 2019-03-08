@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/openclose.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -36,7 +36,7 @@
  \param Secaddr
    Secondary address
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */
@@ -73,7 +73,7 @@ cbmiec_open(IN PDEVICE_EXTENSION Pdx, IN UCHAR Device, IN UCHAR Secaddr)
  \param Secaddr
    Secondary address
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */

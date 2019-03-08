@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/queue.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -33,7 +33,7 @@
 
  \param Irp
    Pointer to the IRP to be inserted.
-   
+
   The cancel-safe queue object calls this function
   whenever it wants to insert an IRP into the queue.
   On entry, all necessary locks are held, so we can just
@@ -77,10 +77,10 @@ InsertIrp(IN PIO_CSQ Csq, IN PIRP Irp)
 
  \param Irp
    Pointer to the IRP to be removed.
-   
+
   The cancel-safe queue object calls this function
   whenever it wants to remove an IRP from the queue.
-  On entry, all necessary locks are held, so we can just 
+  On entry, all necessary locks are held, so we can just
   remove the IRP and exit.
 
   This function assumes the CSQ is part of a QUEUE object.
@@ -116,8 +116,8 @@ RemoveIrp(IN PIO_CSQ Csq, IN PIRP Irp)
    Pointer to the CSQ object
 
  \param Irp
-   Pointer to a IRP which is the predecessor of 
-   the first IRP to be checked against. If the 
+   Pointer to a IRP which is the predecessor of
+   the first IRP to be checked against. If the
    whole queue is to be searched, this can be
    NULL.
 
@@ -130,7 +130,7 @@ RemoveIrp(IN PIO_CSQ Csq, IN PIRP Irp)
   The cancel-safe queue object calls this function
   whenever it wants to find a specific IRP from the queue
   .
-  On entry, all necessary locks are held, so we can just 
+  On entry, all necessary locks are held, so we can just
   search on the list, without worrying about race
   conditions.
 
@@ -158,8 +158,8 @@ PeekNextIrp(IN PIO_CSQ Csq, IN PIRP Irp, IN PVOID FileObject)
 
     // no IRQL restrictions apply
     queue = CONTAINING_RECORD(Csq, QUEUE, IrpQueue);
-    
-    // Get the list entry of the first IRP to be checked 
+
+    // Get the list entry of the first IRP to be checked
     // into currentListEntry
 
     if (Irp == NULL)
@@ -209,7 +209,7 @@ PeekNextIrp(IN PIO_CSQ Csq, IN PIRP Irp, IN PVOID FileObject)
 
                 // no IRQL restrictions apply
                 irpStack = IoGetCurrentIrpStackLocation(currentIrp);
-    
+
                 if (irpStack->FileObject == (PFILE_OBJECT) FileObject)
                 {
                     found = TRUE;
@@ -221,7 +221,7 @@ PeekNextIrp(IN PIO_CSQ Csq, IN PIRP Irp, IN PVOID FileObject)
                     currentListEntry = currentListEntry->Flink;
 
                     // no IRQL restrictions apply
-                    currentIrp = CONTAINING_RECORD(currentListEntry, IRP, 
+                    currentIrp = CONTAINING_RECORD(currentListEntry, IRP,
                         Tail.Overlay.ListEntry);
                 }
             }
@@ -332,7 +332,7 @@ ReleaseLock(IN PIO_CSQ Csq, IN KIRQL Irql)
 
 /*! \internal \brief Complete a cancelled IRP
 
- This function completes a IRP which is part of a 
+ This function completes a IRP which is part of a
  cancel-safe queue (CSQ), which is part of a QUEUE
  object.
 
@@ -450,7 +450,7 @@ QueueInit(PQUEUE Queue, PCBMDRIVER_STARTIO DriverStartIo)
    Pointer to the DEVICE_OBJECT. This is only needed if
    FastStart is TRUE.
 
- \return 
+ \return
    If the IRP has been successfully inserted into the QUEUE,
    this function returns STATUS_PENDING. If the IRP could
    not be inserted, it returns the status code given by the
@@ -460,7 +460,7 @@ QueueInit(PQUEUE Queue, PCBMDRIVER_STARTIO DriverStartIo)
  not insert the IRP into the queue, but it immediately completes
  the IRP with the given abortion status.
 
- The return value can be directly used in the dispatch function 
+ The return value can be directly used in the dispatch function
  which calls QueueStartPacket() as the return status.
 */
 NTSTATUS
@@ -508,8 +508,8 @@ QueueStartPacket(PQUEUE Queue, PIRP Irp, BOOLEAN FastStart, PDEVICE_OBJECT Fdo)
             }
             else
             {
-                // There is an IRP being processed. 
-                // Unfortunately, this means that a fast 
+                // There is an IRP being processed.
+                // Unfortunately, this means that a fast
                 // start is not possible.
 
                 FastStart = FALSE;
@@ -666,13 +666,13 @@ QueueUnstall(PQUEUE Queue)
  \param Queue
    Pointer to the QUEUE object.
 
- \return 
+ \return
     TRUE if the QUEUE is currently stalled, FALSE else.
 
  Without any further protection, the state which is reported
  could have changed at the time this function returns! Thus,
- handle with care. 
- This means, the caller has to make sure that QueueIsStalled() 
+ handle with care.
+ This means, the caller has to make sure that QueueIsStalled()
  cannot compete with QueueStall() and/or QueueUnstall().
 */
 BOOLEAN
@@ -695,7 +695,7 @@ QueueIsStalled(PQUEUE Queue)
  \param Queue
    Pointer to the QUEUE object.
 
- \return 
+ \return
     TRUE if the QUEUE is currently dropping, FALSE else.
 
  A QUEUE is in the DROPPING state if it does not take
@@ -733,7 +733,7 @@ QueueIsDropping(PQUEUE Queue)
  This function completes an IRP which is on a QUEUE object
 
  \param Queue
-   Pointer to the QUEUE object, or NULL if the IRP is on 
+   Pointer to the QUEUE object, or NULL if the IRP is on
    no QUEUE at all.
 
  \param Irp
@@ -745,7 +745,7 @@ QueueIsDropping(PQUEUE Queue)
  \param Information
    The value to give the Information field of the IRP
 
- \return 
+ \return
     Returns the given NtStatus
 
  Without any further protection, the state which is reported
@@ -793,8 +793,8 @@ QueueCompleteIrp(PQUEUE Queue, PIRP Irp, NTSTATUS NtStatus, ULONG_PTR Informatio
 
 /*! \brief Poll the QUEUE
 
- This function polls the QUEUE object. 
- If there is an IRP in there, the IRP is executed by 
+ This function polls the QUEUE object.
+ If there is an IRP in there, the IRP is executed by
  calling the specified DriverStartIo() function.
 
  If there is no IRP, this function just sleeps until
@@ -1026,7 +1026,7 @@ QueueCleanup(PQUEUE Queue, PFILE_OBJECT FileObject)
 
 /*! \brief Should the current IRP be cancelled?
 
- Find out if the caller of the current IRP is not interested 
+ Find out if the caller of the current IRP is not interested
  anymore in the result.
 
  \param Queue

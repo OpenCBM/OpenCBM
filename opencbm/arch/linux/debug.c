@@ -1,4 +1,4 @@
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file arch/windows/debug.c \n
 ** \author Spiro Trikaliotis \n
 ** \version $Id: debug.c,v 1.4 2006-04-08 13:41:14 strik Exp $ \n
@@ -101,10 +101,10 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
 
     // If there is some space left in the DebugBuffer, append the contents
 
-    if ((DBG_MAX_BUFFERLEN - DbgBufferPos[BufferNumber] - 1) > 0) 
+    if ((DBG_MAX_BUFFERLEN - DbgBufferPos[BufferNumber] - 1) > 0)
     {
         int n;
-        
+
         // Output at most the number of bytes which are left in the DebugBuffer
 
         n = vsnprintf(buffer, DBG_MAX_BUFFERLEN - DbgBufferPos[BufferNumber] - 1,
@@ -114,7 +114,7 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
         // inserted is the size of the remaining buffer, so, set
         // this value
 
-        if (n<0) 
+        if (n<0)
         {
             n = DBG_MAX_BUFFERLEN - DbgBufferPos[BufferNumber] - 1;
         }

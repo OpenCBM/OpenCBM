@@ -47,7 +47,7 @@ static int move(SHORT _y, SHORT _x)
 static int arch_getch(void)
 {
     int ch = -1;
-    
+
     if (_kbhit()) {
         ch = _getch();
     }
@@ -215,7 +215,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                                    "i"
 #endif // #ifdef HAVE_NCURSES
                                    ;
- 
+
     while ((option = getopt_long(argc, argv, shortopts, longopts, NULL)) != -1)
     {
         switch(option)

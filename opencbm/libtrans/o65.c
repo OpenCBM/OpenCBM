@@ -418,7 +418,7 @@ o65_file_load_header(uint8 *Buffer, unsigned Length, unsigned *Ptr, o65_file_t *
     DBG_ASSERT(Length != 0);
     DBG_ASSERT(O65file != NULL);
 
-    error = o65_read_byte(Buffer, Length, Ptr, "o65 file header", 
+    error = o65_read_byte(Buffer, Length, Ptr, "o65 file header",
         &O65file->header, sizeof(O65file->header));
 
     FUNC_LEAVE_INT(error);
@@ -447,7 +447,7 @@ o65_file_load_header_dump(o65_file_t *O65file)
     DBG_O65_SHOW((DBG_PREFIX "- o65 mark = $%02X $%02X $%02X.",
         O65file->header.o65[0], O65file->header.o65[1], O65file->header.o65[2]));
 
-    if (   (O65file->header.o65[0] != 'o') 
+    if (   (O65file->header.o65[0] != 'o')
         || (O65file->header.o65[1] != '6')
         || (O65file->header.o65[2] != '5'))
     {
@@ -685,7 +685,7 @@ o65_file_load_oheader_dump(o65_file_t *O65file, o65_file_header_oheader_t *po65_
     case O65_FILE_HEADER_OHEADER_TYPE_OS_SYSTEM:
         if (po65_file_header_oheader->optionlength < sizeof(*po65_file_header_oheader))
         {
-            DBG_ERROR((DBG_PREFIX 
+            DBG_ERROR((DBG_PREFIX
                 "- optional OS SYSTEM HEADER too short!"));
             error = O65ERR_OPTIONAL_SYSTEM_TOO_SHORT;
         }
@@ -741,7 +741,7 @@ o65_file_load_oheader_dump(o65_file_t *O65file, o65_file_header_oheader_t *po65_
 
         if (po65_file_header_oheader->optionlength < sizeof(*po65_file_header_oheader))
         {
-            DBG_ERROR((DBG_PREFIX 
+            DBG_ERROR((DBG_PREFIX
                 "- optional %s header too short!", stringType));
             error = O65ERR_OPTIONAL_HEADER_TOO_SHORT;
         }
@@ -752,13 +752,13 @@ o65_file_load_oheader_dump(o65_file_t *O65file, o65_file_header_oheader_t *po65_
                (see above), we can output this without
                problems. */
             DBG_O65_SHOW((DBG_PREFIX
-                "- %s: %s", 
+                "- %s: %s",
                 stringType, po65_file_header_oheader->data));
         }
 
         if (!error)
         {
-            if (po65_file_header_oheader->data[po65_file_header_oheader->optionlength 
+            if (po65_file_header_oheader->data[po65_file_header_oheader->optionlength
                 - sizeof(*po65_file_header_oheader)]
                 != 0)
             {
@@ -797,7 +797,7 @@ o65_file_load_oheader(uint8 *Buffer, unsigned Length, unsigned *Ptr, o65_file_t 
         if (!error && length != 0)
         {
             po65_file_header_oheader = malloc(length+1);
-    
+
             if (!po65_file_header_oheader)
             {
                 DBG_ERROR((DBG_PREFIX "Not enough memory for malloc() "
@@ -817,7 +817,7 @@ o65_file_load_oheader(uint8 *Buffer, unsigned Length, unsigned *Ptr, o65_file_t 
                 error = o65_read_byte(Buffer, Length, Ptr, "O65 option (remaining)",
                     ((unsigned char*)po65_file_header_oheader)
                       + sizeof(po65_file_header_oheader->optionlength),
-                    length 
+                    length
                       - sizeof(po65_file_header_oheader->optionlength));
             }
 

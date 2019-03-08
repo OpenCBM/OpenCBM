@@ -7,7 +7,7 @@
  *  Copyright 2008 Spiro Trikaliotis
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/install.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -60,7 +60,7 @@ struct xa1541_parameter_s
 
     /*! the IEC cable type was specified */
     IEC_CABLETYPE IecCableType;
-    
+
     /*! It was specified that the driver is to be permanently locked */
     ULONG PermanentlyLock;
 
@@ -114,7 +114,7 @@ static const char usagetext[] =
             "  -L, --lock=WHAT automatically lock the driver 'yes' or not 'no'.\n"
             "                  If not specified, --lock=yes is assumed.\n"
 #ifdef _X86_
-            "  -F, --forcent4  force NT4 driver on a Win 2000, XP, or newer systems\n" 
+            "  -F, --forcent4  force NT4 driver on a Win 2000, XP, or newer systems\n"
             "                  (NOT RECOMMENDED!)\n"
 #endif // #ifdef _X86_
             "  -A, --automatic (default) automatically start the driver on system boot.\n"
@@ -126,7 +126,7 @@ static const char usagetext[] =
             "\n";
 
 
-static opencbm_plugin_install_neededfiles_t NeededFilesXA1541[] = 
+static opencbm_plugin_install_neededfiles_t NeededFilesXA1541[] =
 {
     { SYSTEM_DIR, "opencbm-xa1541.dll", NULL },
     { DRIVER_DIR, "cbm4wdm.sys",        NULL },  /* this MUST be the same index as driver_cbm4wdm is defined */
@@ -548,7 +548,7 @@ opencbm_plugin_install_do_uninstall(void * Context)
     do {
         cbm_install_parameter_plugin_t * pluginInstallParameter = Context;
         xa1541_parameter_t *parameter;
-        
+
         if (pluginInstallParameter == NULL || pluginInstallParameter->OptionMemory == NULL) {
             break;
         }

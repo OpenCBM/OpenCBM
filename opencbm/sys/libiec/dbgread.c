@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/dbgread.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -36,7 +36,7 @@
  \param Return
    Pointer to an UCHAR where the read byte is written to.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 

@@ -43,10 +43,10 @@ void opencbm_plugin_driver_close(CBM_FILE f)
  no other program or driver can allocate the parallel port and
  interfere with the communication.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call cbm_driver_close().
 
  \remark
@@ -54,7 +54,7 @@ void opencbm_plugin_driver_close(CBM_FILE f)
 
  Note that it is *not* necessary to call this function
  (or cbm_unlock()) when all communication is done with
- the handle to opencbm open (that is, between 
+ the handle to opencbm open (that is, between
  cbm_driver_open() and cbm_driver_close(). You only
  need this function to pin the driver to the port even
  when cbm_driver_close() is to be executed (for example,
@@ -73,10 +73,10 @@ opencbm_plugin_lock(CBM_FILE f)
  parallel port and do their own communication with
  whatever device they use.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call cbm_driver_close().
 
  \remark

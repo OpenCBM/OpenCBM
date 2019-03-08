@@ -59,4 +59,3 @@ uchar p2_read(uchar *data, uchar len) {
 
   return len;
 }
-

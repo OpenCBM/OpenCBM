@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/perfeval.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -25,7 +25,7 @@
 #ifdef PERFEVAL
 
 /*! define PERFEVAL_DEBUG if this file should be debugged */
-#undef PERFEVAL_DEBUG 
+#undef PERFEVAL_DEBUG
 
 /*! define PERFEVAL_WRITE_TO_MEMORY if the performance values should
  * not be written to a file, but to memory only. */
@@ -52,7 +52,7 @@
 static PPERFORMANCE_EVAL_ENTRY PerformanceEvalEntries = NULL;
 
 /*! The current entry to be written. This variable is
- * incremented *before* a value is written, thus, we 
+ * incremented *before* a value is written, thus, we
  * start with -1. */
 static ULONG CurrentPerformanceEvalEntry = -1;
 
@@ -66,7 +66,7 @@ static ULONG ProcessorFrequency = -1;
  This function reads the time stamp counter of pentium-class
  processors (and above).
 
- \return 
+ \return
    This function returns the number of ticks since the
    processor has been started.
 
@@ -116,7 +116,7 @@ PerfInit(VOID)
 
     // Allocate memory for the entries
 
-    PerformanceEvalEntries = (PPERFORMANCE_EVAL_ENTRY) ExAllocatePoolWithTag(NonPagedPool, 
+    PerformanceEvalEntries = (PPERFORMANCE_EVAL_ENTRY) ExAllocatePoolWithTag(NonPagedPool,
         MAX_PERFORMANCE_EVAL_ENTRIES * sizeof(*PerformanceEvalEntries), MTAG_PERFEVAL);
 
     if (PerformanceEvalEntries)
@@ -131,7 +131,7 @@ PerfInit(VOID)
         // already tried to calculate the frequency, do not try to
         // calculate it on my own, but rely on this.
 
-        RtlInitUnicodeString(&registryPath, 
+        RtlInitUnicodeString(&registryPath,
             L"\\REGISTRY\\MACHINE\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0");
 
         DBG_PRINT_REG((DBG_PREFIX "trying to open %wZ", &registryPath));
@@ -141,7 +141,7 @@ PerfInit(VOID)
         if (NT_SUCCESS(ntStatus))
         {
             ntStatus = cbm_registry_read_ulong(handleRegistry, L"~MHz", &ProcessorFrequency);
-            DBG_PRINT_REG((DBG_PREFIX "cbm_registry_read() returned %s, value = %u", 
+            DBG_PRINT_REG((DBG_PREFIX "cbm_registry_read() returned %s, value = %u",
                 DebugNtStatus(ntStatus), ProcessorFrequency));
 
             ntStatus = cbm_registry_close(handleRegistry);
@@ -208,7 +208,7 @@ PerfEvent(IN ULONG_PTR Event, IN ULONG_PTR Data)
     if (PerformanceEvalEntries)
     {
         // first of all, increment the entry number of the event
-        // This makes sure that we are multiprocessor-safe, as 
+        // This makes sure that we are multiprocessor-safe, as
         // we only write to the log after we have successfully
         // incremented the value.
 
@@ -237,7 +237,7 @@ PerfEvent(IN ULONG_PTR Event, IN ULONG_PTR Data)
 
 /*! The file header of the performance entries in a file
 */
-typedef 
+typedef
 struct PERFEVAL_FILE_HEADER
 {
     /*! The version of this file */
@@ -282,7 +282,7 @@ PerfSynchronize(VOID)
 
         FirstTimestamp = PerformanceEvalEntries[0].Timestamp;
         LastTimestamp = FirstTimestamp;
-        
+
         for (i = 0; i < CurrentPerformanceEvalEntry; i++)
         {
             __int64 tempTimeAbs;
@@ -300,7 +300,7 @@ PerfSynchronize(VOID)
             msTime = (ULONG) ((tempTimeAbs / 1000) % 1000);
             sTime = (ULONG) ((tempTimeAbs / 1000000) % 1000);
 
-            DBG_PRINT((DBG_PREFIX 
+            DBG_PRINT((DBG_PREFIX
                 "%6u - Time: %3u.%03u.%03u us (+%7I64u us) - Event = %08x, Data = %08x"
                 " on processur %u in thread %p",
                 i,
@@ -312,7 +312,7 @@ PerfSynchronize(VOID)
                 PerformanceEvalEntries[i].PeThread));
         }
 
-        // make sure we start storing the performance values 
+        // make sure we start storing the performance values
         // at the beginning again
 
         InterlockedExchange(&CurrentPerformanceEvalEntry, -1);
@@ -343,7 +343,7 @@ PerfSynchronize(VOID)
                 &ioStatusBlock,
                 NULL,
                 FILE_ATTRIBUTE_NORMAL,
-                0, 
+                0,
                 FILE_OPEN_IF,
                 FILE_NON_DIRECTORY_FILE | FILE_SEQUENTIAL_ONLY | FILE_SYNCHRONOUS_IO_NONALERT,
                 NULL,
@@ -367,7 +367,7 @@ PerfSynchronize(VOID)
 
             // the file has been opened; now, we can write to it
 
-            ntStatus = ZwWriteFile(fileHandle, 
+            ntStatus = ZwWriteFile(fileHandle,
                 NULL, // event
                 NULL, // ApcRoutine
                 NULL, // ApcContext
@@ -380,7 +380,7 @@ PerfSynchronize(VOID)
             DBG_PRINT_FILE((DBG_PREFIX "ZwWriteFile (header) returned %s",
                 DebugNtStatus(ntStatus)));
 
-            ntStatus = ZwWriteFile(fileHandle, 
+            ntStatus = ZwWriteFile(fileHandle,
                 NULL, // event
                 NULL, // ApcRoutine
                 NULL, // ApcContext
@@ -398,7 +398,7 @@ PerfSynchronize(VOID)
             DBG_PRINT_FILE((DBG_PREFIX "ZwCloseFile returned %s",
                 DebugNtStatus(ntStatus)));
 
-            // make sure we start storing the performance values 
+            // make sure we start storing the performance values
             // at the beginning again
 
             InterlockedExchange(&CurrentPerformanceEvalEntry, -1);
@@ -417,7 +417,7 @@ PerfSynchronize(VOID)
  it writes out everything that is already sampled, and then
  undoes the initialization.
 
- \warning 
+ \warning
  Make sure that his function does not compete with PerfEvent,
  as there is no protection at all against race conditions!
 */

@@ -211,7 +211,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         fprintf(stderr, "Invalid drive number (%s)\n", arg);
         return 1;
     }
-    
+
     arg      = argv[optind++];
     name_len = 0;
     while(*arg)

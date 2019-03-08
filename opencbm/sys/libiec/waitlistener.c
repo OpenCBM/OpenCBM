@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/waitlistener.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -207,7 +207,7 @@ cbmiec_wait_for_listener(IN PDEVICE_EXTENSION Pdx, IN BOOLEAN SendEoi)
                     CBMIEC_SET(PP_CLK_OUT);
                     DBG_SUCCESS((DBG_PREFIX "continue to send%s EOI", SendEoi ? "" : " no"));
                 }
-                else 
+                else
                 {
                     while (!QueueShouldCancelCurrentIrp(&Pdx->IrpQueue) && !CBMIEC_GET(PP_DATA_IN))
                     {

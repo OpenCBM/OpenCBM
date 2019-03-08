@@ -8,11 +8,11 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file arch/windows/ctrlbreak.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
-** \brief Helper function for setting a handler for Ctrl+C 
+** \brief Helper function for setting a handler for Ctrl+C
 ** and Ctrl+Break
 **
 ****************************************************************/
@@ -51,7 +51,7 @@ ControlHandler(DWORD dwCtrlType)
 
 /*! \brief Set the Ctrl+C / Ctrl+Break handler
 
- This function sets the Ctrl+C (Ctrl+Break) handler. 
+ This function sets the Ctrl+C (Ctrl+Break) handler.
  This handler is a function which is called whenever Ctrl+C
  is pressed.
 
@@ -62,5 +62,5 @@ void
 arch_set_ctrlbreak_handler(ARCH_CTRLBREAK_HANDLER Handler)
 {
     handler = Handler;
-    SetConsoleCtrlHandler(ControlHandler, TRUE); 
+    SetConsoleCtrlHandler(ControlHandler, TRUE);
 }

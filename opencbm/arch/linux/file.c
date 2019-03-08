@@ -35,7 +35,7 @@ int arch_filesize(const char *Filename, off_t *Filesize)
     size_t ret;
 
     ret = stat(Filename, &statrec);
-    
+
     if (ret == 0)
     {
         *Filesize = statrec.st_size;

@@ -7,7 +7,7 @@
  *  Copyright 2004 Spiro Trikaliotis
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/vdd/dll/execute.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -127,7 +127,7 @@ release_vdm_address(WORD Offset, WORD Length, PVOID Buffer)
    The port number of the driver to open. 0 means "default" driver, while
    values != 0 enumerate each driver.
 
- \return AX: 
+ \return AX:
    ==0: This function completed successfully\n
    !=0: otherwise
 
@@ -143,7 +143,7 @@ vdd_driver_open(VOID)
     CBM_FILE cbmfile;
     USHORT translatedhandle;
     int retValue;
- 
+
     FUNC_ENTER();
 
     retValue = cbm_driver_open(&cbmfile, getDH());
@@ -176,9 +176,9 @@ vdd_driver_open(VOID)
    A CBM_FILE which contains the file handle of the driver.
 
  vdd_driver_close() should be called to balance a previous call to
- vdd_driver_open(). 
- 
- If vdd_driver_open() did not succeed, it is illegal to 
+ vdd_driver_open().
+
+ If vdd_driver_open() did not succeed, it is illegal to
  call vdd_driver_close().
 */
 
@@ -202,18 +202,18 @@ vdd_driver_close(CBM_FILE HandleDevice)
    values != 0 enumerate each driver.
 
  \param Buffer (ES:SI)
-   Buffer which will hold a string which tells the name 
+   Buffer which will hold a string which tells the name
    of the device.
- 
+
  \param Length (CX)
    Length of the buffer at ES:SI
 
- \return 
+ \return
    Returns a pointer to a null-terminated string containing the
    driver name, or NULL if an error occurred.
 
  \bug
-   PortNumber is not allowed to exceed 10. 
+   PortNumber is not allowed to exceed 10.
 */
 
 BOOLEAN
@@ -224,7 +224,7 @@ vdd_get_driver_name(VOID)
     FUNC_CHECKEDBUFFERACCESS(getSI(), getCX());
 
     CHECKEDBUFFERACCESS_PROLOG();
-    
+
     returned_string = cbm_get_driver_name(getDH());
 
     strncpy(buffer, returned_string, length);
@@ -258,7 +258,7 @@ vdd_get_driver_name(VOID)
  This function tries to write Count bytes. Anyway, if an error
  occurs, this function can stop prematurely.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -290,7 +290,7 @@ vdd_raw_write(CBM_FILE HandleDevice)
 
  At most Count bytes are read.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -321,7 +321,7 @@ vdd_raw_read(CBM_FILE HandleDevice)
  \return (AX)
    0 means success, else failure
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -354,7 +354,7 @@ vdd_listen(CBM_FILE HandleDevice)
  \return (AX)
    0 means success, else failure
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -392,7 +392,7 @@ vdd_talk(CBM_FILE HandleDevice)
  \return (AX)
    0 means success, else failure
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -421,7 +421,7 @@ vdd_open(CBM_FILE HandleDevice)
  \return (AX)
    0 on success, else failure
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -440,7 +440,7 @@ vdd_close(CBM_FILE HandleDevice)
  This function sends an UNLISTEN on the IEC serial bus.
  Other than LISTEN and TALK, an UNLISTEN is not directed
  to just one device, but to all devices on that IEC
- serial bus. 
+ serial bus.
 
  \param HandleDevice (BX)
    A CBM_FILE which contains the file handle of the driver.
@@ -451,7 +451,7 @@ vdd_close(CBM_FILE HandleDevice)
  At least on a 1541 floppy drive, an UNLISTEN also undoes
  a previous TALK.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -470,7 +470,7 @@ vdd_unlisten(CBM_FILE HandleDevice)
  This function sends an UNTALK on the IEC serial bus.
  Other than LISTEN and TALK, an UNTALK is not directed
  to just one device, but to all devices on that IEC
- serial bus. 
+ serial bus.
 
  \param HandleDevice (BX)
    A CBM_FILE which contains the file handle of the driver.
@@ -481,7 +481,7 @@ vdd_unlisten(CBM_FILE HandleDevice)
  At least on a 1541 floppy drive, an UNTALK also undoes
  a previous LISTEN.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -498,7 +498,7 @@ vdd_untalk(CBM_FILE HandleDevice)
 
 /*! \brief Get EOI flag after bus read
 
- This function gets the EOI ("End of Information") flag 
+ This function gets the EOI ("End of Information") flag
  after reading the IEC serial bus.
 
  \param HandleDevice (BX)
@@ -512,7 +512,7 @@ vdd_untalk(CBM_FILE HandleDevice)
  occurred on the IEC serial bus, or an EOI was signalled.
  To find out the cause, check with this function.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -537,7 +537,7 @@ vdd_get_eoi(CBM_FILE HandleDevice)
  \return (AX)
    0 on success, != 0 means an error has occured.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -568,7 +568,7 @@ vdd_clear_eoi(CBM_FILE HandleDevice)
  Control is returned after a delay which ensures that all
  devices are ready again.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -588,7 +588,7 @@ vdd_reset(CBM_FILE HandleDevice)
 
 /*! \brief Read a byte from a XP1541/XP1571 cable
 
- This function reads a single byte from the parallel portion of 
+ This function reads a single byte from the parallel portion of
  an XP1541/1571 cable.
 
  \param HandleDevice (BX)
@@ -601,7 +601,7 @@ vdd_reset(CBM_FILE HandleDevice)
  This function reads the current state of the port. No handshaking
  is performed at all.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -620,7 +620,7 @@ vdd_pp_read(CBM_FILE HandleDevice)
 
 /*! \brief Write a byte to a XP1541/XP1571 cable
 
- This function writes a single byte to the parallel portion of 
+ This function writes a single byte to the parallel portion of
  a XP1541/1571 cable.
 
  \param HandleDevice (BX)
@@ -632,7 +632,7 @@ vdd_pp_read(CBM_FILE HandleDevice)
  This function just writes on the port. No handshaking
  is performed at all.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -663,7 +663,7 @@ vdd_pp_write(CBM_FILE HandleDevice)
  This function just reads the port. No handshaking
  is performed at all.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -692,7 +692,7 @@ vdd_iec_poll(CBM_FILE HandleDevice)
    The line to be activated. This must be exactly one of
    IEC_DATA, IEC_CLOCK, or IEC_ATN.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -720,7 +720,7 @@ vdd_iec_set(CBM_FILE HandleDevice)
    The line to be deactivated. This must be exactly one of
    IEC_DATA, IEC_CLOCK, or IEC_ATN.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -739,7 +739,7 @@ vdd_iec_release(CBM_FILE HandleDevice)
 
 /*! \brief Activate and deactive a line on the IEC serial bus
 
- This function activates (sets to 0V, L) and deactivates 
+ This function activates (sets to 0V, L) and deactivates
  (set to 5V, H) lines on the IEC serial bus.
 
  \param HandleDevice (BX)
@@ -753,7 +753,7 @@ vdd_iec_release(CBM_FILE HandleDevice)
    The mask of which lines should be released. This has to be a bitwise
    OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -793,7 +793,7 @@ vdd_iec_setrelease(CBM_FILE HandleDevice)
  \return (AX)
    The state of the IEC bus on return (like vdd_iec_poll).
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -824,7 +824,7 @@ vdd_iec_wait(CBM_FILE HandleDevice)
  \return (AX)
    1 if the line is set, 0 if it is not
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -861,9 +861,9 @@ vdd_iec_get(CBM_FILE HandleDevice)
  \param DriveMemAddress (DI)
    The address in the drive's memory where the program is to be
    stored.
-   
+
  \param Program (ES:SI)
-   Pointer to a byte buffer which holds the program in the 
+   Pointer to a byte buffer which holds the program in the
    caller's address space.
 
  \param Size (CX)
@@ -873,7 +873,7 @@ vdd_iec_get(CBM_FILE HandleDevice)
    Returns the number of bytes written into program memory.
    If it does not equal Size, than an error occurred.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -916,7 +916,7 @@ vdd_upload(CBM_FILE HandleDevice)
  If an error occurs, this function returns a
  "99, DRIVER ERROR,00,00\r" and the value 99.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -949,7 +949,7 @@ vdd_device_status(CBM_FILE HandleDevice)
  \return (AX)
    0 on success.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -974,9 +974,9 @@ vdd_exec_command(CBM_FILE HandleDevice)
    is known as primary address, too.
 
  \param CbmDeviceString (ES:SI)
-   Buffer which will hold a string which tells the name 
+   Buffer which will hold a string which tells the name
    of the device.
- 
+
  \param Length (CX)
    Length of the buffer at ES:SI
 
@@ -987,7 +987,7 @@ vdd_exec_command(CBM_FILE HandleDevice)
  \return CbmDeviceType (DI)
    Pointer to an enum which will hold the type of the device.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -1000,7 +1000,7 @@ vdd_identify(CBM_FILE HandleDevice)
     FUNC_CHECKEDBUFFERACCESS(getSI(), getCX());
 
     CHECKEDBUFFERACCESS_PROLOG();
-    
+
     ret = cbm_identify(HandleDevice, getDH(), &devicetype, &string);
 
     setDI(devicetype);
@@ -1033,7 +1033,7 @@ vdd_identify(CBM_FILE HandleDevice)
    Carry is clear iff the drive could be contacted.
    It does not mean that the device could be identified.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -1054,7 +1054,7 @@ vdd_identify_xp1541(CBM_FILE HandleDevice)
     setDI(devicetype);
     retAX(error);
 
-    FUNC_LEAVE_BOOLEAN(error); 
+    FUNC_LEAVE_BOOLEAN(error);
 }
 
 /*-------------------------------------------------------------------*/
@@ -1277,7 +1277,7 @@ vdd_iohook_outb(WORD iport,BYTE data)
    Returns the I/O base address on which the I/O hook has been installed.\n
    If the hook could not be installed, this return value is zero.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -1375,7 +1375,7 @@ vdd_install_iohook(CBM_FILE HandleDevice)
    before.\n
    If no hook was installed, this return value is zero.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -1414,7 +1414,7 @@ vdd_uninstall_iohook_internal(VOID)
    before.\n
    If no hook was installed, this return value is zero.
 
- If vdd_driver_open() did not succeed, it is illegal to 
+ If vdd_driver_open() did not succeed, it is illegal to
  call this function.
 */
 

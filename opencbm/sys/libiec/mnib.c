@@ -12,7 +12,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/mnib.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis, Arnd M. \n
 ** \authors Based on code from
@@ -30,7 +30,7 @@
 #include "i_iec.h"
 
 #define PERF_EVENT_PARBURST_PAR_READ_ENTER()           PERF_EVENT(0x5000, 0)      /*!< Mark performance event: @@@@@ */
-#define PERF_EVENT_PARBURST_PAR_READ_DELAY1(_x_)       PERF_EVENT(0x5001, _x_)    /*!< Mark performance event: @@@@@ */ 
+#define PERF_EVENT_PARBURST_PAR_READ_DELAY1(_x_)       PERF_EVENT(0x5001, _x_)    /*!< Mark performance event: @@@@@ */
 #define PERF_EVENT_PARBURST_PAR_READ_PP_READ()         PERF_EVENT(0x5002, 0)      /*!< Mark performance event: @@@@@ */
 #define PERF_EVENT_PARBURST_PAR_READ_RELEASED(_x_)     PERF_EVENT(0x5003, _x_)    /*!< Mark performance event: @@@@@ */
 #define PERF_EVENT_PARBURST_PAR_READ_DELAY2(_x_)       PERF_EVENT(0x5004, _x_)    /*!< Mark performance event: @@@@@ */
@@ -198,7 +198,7 @@ cbm_handshaked_read(PDEVICE_EXTENSION Pdx, int Toggle)
     PERF_EVENT_PARBURST_NREAD_RELEASE();
     CBMIEC_RELEASE(PP_DATA_OUT); // @@@ DATA_IN ???
 
-    cbmiec_udelay(2); 
+    cbmiec_udelay(2);
     PERF_EVENT_PARBURST_NREAD_AFTERDELAY();
 
     if (!Toggle)
@@ -253,7 +253,7 @@ cbm_handshaked_write(PDEVICE_EXTENSION Pdx, char Data, int Toggle)
     PERF_EVENT_PARBURST_NWRITE_RELEASE();
     CBMIEC_RELEASE(PP_CLK_IN);
 
-    do 
+    do
     {
         retval = 1;
 

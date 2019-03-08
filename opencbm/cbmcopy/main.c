@@ -446,7 +446,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
          * If the user specified auto transfer mode, find out
          * which transfer mode to use.
          */
-        settings->transfer_mode = 
+        settings->transfer_mode =
             cbmcopy_check_auto_transfer_mode(fd_cbm,
                 settings->transfer_mode,
                 drive);
@@ -510,7 +510,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
                                 filedata[0] = address % 0x100;
                                 filedata[1] = address / 0x100;
 
-                                my_message_cb( sev_debug, 
+                                my_message_cb( sev_debug,
                                                "override address: $%02x%02x",
                                                filedata[1], filedata[0] );
 
@@ -614,7 +614,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
                                 filedata[0] = address % 0x100;
                                 filedata[1] = address / 0x100;
 
-                                my_message_cb( sev_debug, 
+                                my_message_cb( sev_debug,
                                                "override address: $%02x%02x",
                                                filedata[1], filedata[0] );
                             }

@@ -8,7 +8,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/WINDOWS/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -94,12 +94,12 @@ get_userdir()
 
  This function returns the possible filenames for the configuration
  file, one after the other.
- 
- For this, the function is called with an index, starting with zero, 
+
+ For this, the function is called with an index, starting with zero,
  being incremented with every call. If the list is exhaused, the function
  returns NULL.
 
- \return 
+ \return
    pointer to a newly allocated memory area which contains the
    candidate for the given index. If there is no candidate with
    the given index, the returned value is NULL.
@@ -166,7 +166,7 @@ FileExists(const char * filename)
 
  \return
    Returns the index of the configuration file candidate, or -1 if none was found.
- 
+
  \remark
    The memory returned in *pstring_candidate must be free()d be the caller.
 */
@@ -193,7 +193,7 @@ DBG_PRINT((DBG_PREFIX "Candidate #%u '%s' does exist, DONE!", index, *pstring_ca
 
  Get the default filename of the configuration file.
 
- \return 
+ \return
    Returns a newly allocated memory area with the default file name.
 */
 const char *
@@ -217,7 +217,7 @@ configuration_get_default_filename(void)
    In case a new file has to be created, give the preference of one of
    the locations to use.
 
- \return 
+ \return
    Returns a newly allocated memory area with the default file name.
 */
 const char *
@@ -225,5 +225,3 @@ configuration_get_default_filename_for_install(unsigned int DefaultLocation)
 {
     return configuration_get_default_filename_candidate(DefaultLocation);
 }
-
-

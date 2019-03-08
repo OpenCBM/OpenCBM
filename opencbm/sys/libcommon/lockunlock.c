@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/lockunlock.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -30,7 +30,7 @@
  \param Pdx
    Pointer to the device extension.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */
@@ -119,7 +119,7 @@ cbm_lock_parport(IN PDEVICE_EXTENSION Pdx)
  \param Pdx
    Pointer to the device extension.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */
@@ -159,16 +159,16 @@ cbm_unlock_parport(IN PDEVICE_EXTENSION Pdx)
  \param Pdx
    Pointer to the device extension.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
- 
+
  \remark
  A call to cbm_lock() is undone with a call to cbm_unlock().
 
  Note that it is *not* necessary to call this function
  (or cbm_unlock()) when all communication is done with
- the handle to opencbm open (that is, between 
+ the handle to opencbm open (that is, between
  cbm_driver_open() and cbm_driver_close(). You only
  need this function to pin the driver to the port even
  when cbm_driver_close() is to be executed (for example,
@@ -196,10 +196,10 @@ cbm_lock(IN PDEVICE_EXTENSION Pdx)
  \param Pdx
    Pointer to the device extension.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
- 
+
  \remark
  Look at cbm_lock() for an explanation of this function.
 */

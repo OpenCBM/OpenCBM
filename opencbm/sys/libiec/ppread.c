@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/ppread.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -71,7 +71,7 @@ cbmiec_i_pp_read_debounced(IN PDEVICE_EXTENSION Pdx)
  \param Return
    Pointer to an UCHAR where the read byte is written to.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */

@@ -134,7 +134,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         fprintf(stderr, "Invalid drive number (%s)\n", arg);
         return 1;
     }
-    
+
     arg      = argv[optind++];
     name_len = 0;
     while(*arg)
@@ -163,7 +163,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     if(cbm_driver_open_ex(&fd, adapter) == 0)
     {
         cbm_upload(fd, drive, 0x0500, dskfrmt, sizeof(dskfrmt));
-        sprintf(cmd, "M-E%c%c%c%c%c%c%c%c0:%s", 3, 5, tracks + 1, 
+        sprintf(cmd, "M-E%c%c%c%c%c%c%c%c0:%s", 3, 5, tracks + 1,
             orig, bump, show_progress, demagnetize, verify, name);
         cbm_exec_command(fd, drive, cmd, 13+strlen(name));
 

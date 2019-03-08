@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/setrelease.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -33,7 +33,7 @@
 
 /*! \brief Activate and deactive a line on the IEC serial bus
 
- This function activates (sets to 0V, L) and deactivates 
+ This function activates (sets to 0V, L) and deactivates
  (set to 5V, H) lines on the IEC serial bus.
 
  \param Pdx
@@ -47,7 +47,7 @@
    The mask of which lines should be released. This has to be a bitwise
    OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 

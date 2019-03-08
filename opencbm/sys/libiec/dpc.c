@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/dpc.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -36,11 +36,11 @@
  \param Context
    Caller-supplied Context. UNUSED.
 
- \param Result 
+ \param Result
    Pointer to the variable which will hold the return value.
    After return, it will contain 1 if there was an EOI, 0 otherwise.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */

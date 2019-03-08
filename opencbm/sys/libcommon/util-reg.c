@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/util-reg.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -21,7 +21,7 @@
 
 /*! \brief Open a registry path for reading
 
- This function opens a registry key ("path"). This way, its entries 
+ This function opens a registry key ("path"). This way, its entries
  can be read afterwards.
 
  \param HandleKey
@@ -32,8 +32,8 @@
    Pointer to a UNICODE_STRING which points to the registry key
    to be opened.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 
  A call to this function must be balanced with a call to
@@ -79,8 +79,8 @@ cbm_registry_open_for_read(OUT PHANDLE HandleKey, IN PUNICODE_STRING Path)
  \param Pdx
    The PDX of the driver which is calling this function
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 
  A call to this function must be balanced with a call to
@@ -88,7 +88,7 @@ cbm_registry_open_for_read(OUT PHANDLE HandleKey, IN PUNICODE_STRING Path)
 
  Thanks to Doron Holan [MS] for pointing out how to do it
  (MsgId:<O6weQL8qEHA.3428@TK2MSFTNGP11.phx.gbl>
- on microsoft.public.development.device.drivers, 
+ on microsoft.public.development.device.drivers,
  http://groups.google.com/groups?selm=O6weQL8qEHA.3428%40TK2MSFTNGP11.phx.gbl
 */
 NTSTATUS
@@ -217,8 +217,8 @@ cbm_registry_open_hardwarekey(OUT PHANDLE HandleKey, OUT PDEVICE_OBJECT *Pdo,
  \param HandleKey
    The HANDLE of the registry path.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 
  If the registry key was obtained with a call to
@@ -252,8 +252,8 @@ cbm_registry_close(IN HANDLE HandleKey)
  \param Pdo
    Pointer to the DEVICE_OBJECT for which we found the hardware key.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 */
 NTSTATUS
@@ -289,8 +289,8 @@ cbm_registry_close_hardwarekey(IN HANDLE HandleKey, IN PDEVICE_OBJECT Pdo)
  \param Value
    Pointer to a memory location which will hold the return value.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 
  If the value cannot be read, the return value in *Value will not be changed.
@@ -312,8 +312,8 @@ cbm_registry_read_ulong(IN HANDLE HandleKey, IN PCWSTR KeyName, OUT PULONG Value
 
     RtlInitUnicodeString(&keyNameUnicode, KeyName);
 
-    ntStatus = ZwQueryValueKey(HandleKey, &keyNameUnicode, 
-        KeyValuePartialInformation, 
+    ntStatus = ZwQueryValueKey(HandleKey, &keyNameUnicode,
+        KeyValuePartialInformation,
         buffer, sizeof(buffer), &retValueSize);
 
     if (NT_SUCCESS(ntStatus))
@@ -348,8 +348,8 @@ cbm_registry_read_ulong(IN HANDLE HandleKey, IN PCWSTR KeyName, OUT PULONG Value
  \param Value
    The value to be written to that memory entry.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 */
 NTSTATUS

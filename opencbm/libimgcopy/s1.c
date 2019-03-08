@@ -95,7 +95,7 @@ static int s1_write_byte(CBM_FILE fd, unsigned char c)
 }
 
 /* write_n redirects USB writes to the external reader if required */
-static void write_n(const unsigned char *data, int size) 
+static void write_n(const unsigned char *data, int size)
 {
     int i;
 
@@ -106,7 +106,7 @@ static void write_n(const unsigned char *data, int size)
     }
 
     for(i=0;i<size;i++)
-	s1_write_byte(fd_cbm, *data++);
+        s1_write_byte(fd_cbm, *data++);
 }
 
 static int s1_read_byte(CBM_FILE fd, unsigned char *c)
@@ -117,7 +117,7 @@ static int s1_read_byte(CBM_FILE fd, unsigned char *c)
                                                                         SETSTATEDEBUG(DebugBitCount=i);
 #ifndef USE_CBM_IEC_WAIT
         while(cbm_iec_get(fd, IEC_DATA));
-#else        
+#else
         cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
                                                                         SETSTATEDEBUG((void)0);
@@ -130,7 +130,7 @@ static int s1_read_byte(CBM_FILE fd, unsigned char *c)
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
         while(b == cbm_iec_get(fd, IEC_CLOCK));
-#else        
+#else
         cbm_iec_wait(fd, IEC_CLOCK, !b);
 #endif
                                                                         SETSTATEDEBUG((void)0);
@@ -138,7 +138,7 @@ static int s1_read_byte(CBM_FILE fd, unsigned char *c)
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
         while(!cbm_iec_get(fd, IEC_DATA));
-#else        
+#else
         cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
                                                                         SETSTATEDEBUG((void)0);
@@ -149,7 +149,7 @@ static int s1_read_byte(CBM_FILE fd, unsigned char *c)
 }
 
 /* read_n redirects USB reads to the external reader if required */
-static void read_n(unsigned char *data, int size) 
+static void read_n(unsigned char *data, int size)
 {
     int i;
 
@@ -160,7 +160,7 @@ static void read_n(unsigned char *data, int size)
     }
 
     for(i=0;i<size;i++)
-	s1_read_byte(fd_cbm, data++);
+        s1_read_byte(fd_cbm, data++);
 }
 
 static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
@@ -172,9 +172,9 @@ static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
                                                                         SETSTATEDEBUG((void)0);
     write_n(&se, 1);
                                                                         SETSTATEDEBUG((void)0);
-#ifndef USE_CBM_IEC_WAIT    
+#ifndef USE_CBM_IEC_WAIT
     arch_usleep(20000);
-#endif    
+#endif
                                                                         SETSTATEDEBUG((void)0);
     read_n(&status, 1);
                                                                         SETSTATEDEBUG(DebugByteCount=0);
@@ -198,12 +198,12 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
     // removed from loop: SETSTATEDEBUG(DebugByteCount++);
     write_n(blk, size);
                                                                         SETSTATEDEBUG(DebugByteCount=-1);
-#ifndef USE_CBM_IEC_WAIT    
+#ifndef USE_CBM_IEC_WAIT
     if(size == BLOCKSIZE) {
                                                                         SETSTATEDEBUG((void)0);
         arch_usleep(20000);
     }
-#endif    
+#endif
                                                                         SETSTATEDEBUG((void)0);
     read_n(&status, 1);
                                                                         SETSTATEDEBUG((void)0);
@@ -227,31 +227,31 @@ static int open_disk(CBM_FILE fd, imgcopy_settings *settings,
     opencbm_plugin_s1_write_n = cbm_get_plugin_function_address("opencbm_plugin_s1_write_n");
 
                                                                         SETSTATEDEBUG((void)0);
-	switch(settings->drive_type)
-	{
-	   case cbm_dt_cbm1541:
-	   case cbm_dt_cbm1570:
-	   case cbm_dt_cbm1571:
-		cbm_upload(fd_cbm, d, 0x700, s1_drive_prog_1541, sizeof(s1_drive_prog_1541));
-		break;
+    switch(settings->drive_type)
+    {
+        case cbm_dt_cbm1541:
+        case cbm_dt_cbm1570:
+        case cbm_dt_cbm1571:
+            cbm_upload(fd_cbm, d, 0x700, s1_drive_prog_1541, sizeof(s1_drive_prog_1541));
+            break;
 
-	   case cbm_dt_cbm1581:
-		cbm_upload(fd_cbm, d, 0x700, s1_drive_prog_1581, sizeof(s1_drive_prog_1581));
-		break;
+        case cbm_dt_cbm1581:
+            cbm_upload(fd_cbm, d, 0x700, s1_drive_prog_1581, sizeof(s1_drive_prog_1581));
+            break;
 
-           case cbm_dt_cbm2040:
-	   case cbm_dt_cbm2031:
-	   case cbm_dt_cbm3040:
-	   case cbm_dt_cbm4040:
-	   case cbm_dt_cbm4031:
-	   case cbm_dt_cbm8050:
-	   case cbm_dt_cbm8250:
-	   case cbm_dt_sfd1001:
-	   case cbm_dt_unknown:
-	   default:
-		// drive type not allowed
-		return -1;
-	}
+        case cbm_dt_cbm2040:
+        case cbm_dt_cbm2031:
+        case cbm_dt_cbm3040:
+        case cbm_dt_cbm4040:
+        case cbm_dt_cbm4031:
+        case cbm_dt_cbm8050:
+        case cbm_dt_cbm8250:
+        case cbm_dt_sfd1001:
+        case cbm_dt_unknown:
+        default:
+            // drive type not allowed
+            return -1;
+    }
                                                                         SETSTATEDEBUG((void)0);
     start(fd, d);
                                                                         SETSTATEDEBUG((void)0);
@@ -288,7 +288,7 @@ static int send_track_map(imgcopy_settings *settings, unsigned char tr, const ch
 
     /* build track map */
     for(i = 0; i < size; i++)
-	data[2+i] = !NEED_SECTOR(trackmap[i]);
+        data[2+i] = !NEED_SECTOR(trackmap[i]);
                                                                         SETSTATEDEBUG((void)0);
     write_n(data, size+2);
     free(data);

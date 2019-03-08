@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/wdm/PortEnum.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -45,11 +45,11 @@ struct ENUMERATE_WDM
  This function starts the enumeration process of the parallel port drivers
 
  \param EnumStruct
-   Pointer to a pointer to hold an ENUMERATE structure. 
+   Pointer to a pointer to hold an ENUMERATE structure.
    This is internal storage for these functions, and it is allocated
    by this function.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 
@@ -71,7 +71,7 @@ ParPortEnumerateOpen(PENUMERATE *EnumStruct)
     // Allocate memory for the enumStruct
 
     DBG_IRQL( < DISPATCH_LEVEL);
-    enumStruct = ExAllocatePoolWithTag(PagedPool, 
+    enumStruct = ExAllocatePoolWithTag(PagedPool,
         sizeof(ENUMERATE), MTAG_SENUMERATE);
 
     if (enumStruct)
@@ -88,14 +88,14 @@ ParPortEnumerateOpen(PENUMERATE *EnumStruct)
             0,
             &enumStruct->SymbolicLinkList);
     }
-    else 
+    else
     {
         ntStatus = STATUS_INSUFFICIENT_RESOURCES;
     }
 
     // didn't we succeed? Then return with the correct value
 
-    if (!NT_SUCCESS(ntStatus))  
+    if (!NT_SUCCESS(ntStatus))
     {
         // We had a problem obtaining the devices which implement the
         // parallel port interface, thus, fail this function
@@ -128,7 +128,7 @@ ParPortEnumerateOpen(PENUMERATE *EnumStruct)
    Pointer to a storage area which will contain the next
    driver implementing this interface.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 
@@ -206,10 +206,10 @@ ParPortEnumerateClose(PENUMERATE EnumStruct)
 /*! \brief Stub for a function
 
  This function is not available on NT4, and it is not
- needed there, but it is needed for WDM. Because of this, we define 
+ needed there, but it is needed for WDM. Because of this, we define
  it here for cbm4wdm.sys, so that the driver works in either case.
 */
-NTSTATUS 
+NTSTATUS
 CbmOpenDeviceRegistryKey(IN PDEVICE_OBJECT a, IN ULONG b, IN ACCESS_MASK c, OUT PHANDLE d)
 {
     FUNC_ENTER();

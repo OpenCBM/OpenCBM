@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/wdm/PortAccessWdm.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -26,7 +26,7 @@
  This function sets the operational mode of the parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  This function has to be balanced with a corresponding ParPortUnsetMode()
@@ -46,7 +46,7 @@ ParPortSetMode(PDEVICE_EXTENSION Pdx)
  This function unsets the operational mode of the parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  This function mustn't be called without a prior call to

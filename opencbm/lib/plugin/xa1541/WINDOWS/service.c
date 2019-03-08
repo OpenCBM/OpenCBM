@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/service.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -69,7 +69,7 @@ RegSetDWORD(HKEY RegKey, char *SubKey, DWORD Value)
 
 /*! \internal \brief Set an EXPANDSZ value in the registry
 
- This function sets an EXPANDSZ value in the registry. 
+ This function sets an EXPANDSZ value in the registry.
  It is a simple wrapper for convenience.
 
  \param RegKey
@@ -125,7 +125,7 @@ CreateLogRegistryKeys(IN LPCTSTR ServiceExe)
 
         // Open a registry key to HKLM\<%REGKEY_EVENTLOG%>
 
-        if (RegCreateKeyEx(HKEY_LOCAL_MACHINE,                         
+        if (RegCreateKeyEx(HKEY_LOCAL_MACHINE,
                            REGKEY_EVENTLOG,
                            0,
                            NULL,
@@ -139,7 +139,7 @@ CreateLogRegistryKeys(IN LPCTSTR ServiceExe)
         {
             RegKey = NULL;
             break;
-        }  
+        }
 
         // Store the path to the file which contains the event service entries
 
@@ -213,7 +213,7 @@ CreateDefaultRegistryKeys(IN ULONG DefaultLpt,
                      CBM_REGKEY_SERVICE,
                      0,
                      KEY_ALL_ACCESS,
-                     &RegKey) 
+                     &RegKey)
         != ERROR_SUCCESS)
 
     {
@@ -308,10 +308,10 @@ CbmInstall(IN LPCTSTR DriverName, IN LPCTSTR ServiceExe, IN BOOL AutomaticStart)
     {
         // Create the service
 
-        scService = CreateService(scManager, DriverName, DriverName, 
-           SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER, 
+        scService = CreateService(scManager, DriverName, DriverName,
+           SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER,
            AutomaticStart ? SERVICE_AUTO_START : SERVICE_DEMAND_START,
-           SERVICE_ERROR_NORMAL, ServiceExe, 
+           SERVICE_ERROR_NORMAL, ServiceExe,
            "Extended base", NULL, "+Parallel arbitrator\0Parport\0",
            NULL, NULL);
 

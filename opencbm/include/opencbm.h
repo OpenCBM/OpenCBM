@@ -121,7 +121,7 @@ enum cbm_device_type_e
     cbm_dt_cbm2040,      /*!< The device is a CBM-2040 DOS1 or 2   */
     cbm_dt_cbm2031,      /*!< The device is a CBM-2031 DOS2.6      */
     cbm_dt_cbm3040,      /*!< The device is a CBM-3040 DOS1 or 2   */
-    cbm_dt_cbm4040,      /*!< The device is a CBM-4040 DOS2        */ 
+    cbm_dt_cbm4040,      /*!< The device is a CBM-4040 DOS2        */
     cbm_dt_cbm4031,      /*!< The device is a CBM-4031 DOS2.6      */
     cbm_dt_cbm8050,      /*!< The device is a CBM-8050             */
     cbm_dt_cbm8250,      /*!< The device is a CBM-8250 or SFD-1001 */

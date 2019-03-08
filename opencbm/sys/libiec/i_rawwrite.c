@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/i_rawwrite.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -41,10 +41,10 @@
    If true: Sent the bytes with set ATN; else, with released ATN
 
  \param Talk
-   If true: A talk command is to be sent (some special care has to 
+   If true: A talk command is to be sent (some special care has to
    be taken at the end of the transmission).
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 
@@ -151,7 +151,7 @@ cbmiec_i_raw_write(PDEVICE_EXTENSION Pdx, const UCHAR *Buffer, ULONG Count, ULON
 
             PERF_EVENT_VERBOSE(0x1018, sent);
 
-            cbmiec_wait_for_listener(Pdx, 
+            cbmiec_wait_for_listener(Pdx,
                 ((sent == (Count-1)) && (Atn == 0)) ? TRUE : FALSE);
 
             PERF_EVENT_VERBOSE(0x1019, sent);

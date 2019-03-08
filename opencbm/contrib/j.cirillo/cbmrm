@@ -51,4 +51,3 @@ cbmctrl unlisten
 cbmctrl status $drive
 
 exit 0
-

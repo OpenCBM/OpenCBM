@@ -55,7 +55,7 @@ static unsigned char read_byte(CBM_FILE);
 
 /*! \brief write a data block of a file to the OpenCBM backend
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param Buffer
@@ -94,7 +94,7 @@ static int write_blk(CBM_FILE HandleDevice, const void *Buffer, unsigned char Co
 
 #ifdef LIBCBMCOPY_DEBUG
         msg_cb( sev_debug, "send block data" );
-#endif 
+#endif
         return opencbm_plugin_s2_write_n( HandleDevice, Buffer, Count );
     }
     else
@@ -107,11 +107,11 @@ static int write_blk(CBM_FILE HandleDevice, const void *Buffer, unsigned char Co
 
 /*! \brief read a data block of a file from the OpenCBM backend
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param Buffer
-    Pointer to a buffer to store the bytes read from  the OpenCBM backend 
+    Pointer to a buffer to store the bytes read from  the OpenCBM backend
 
  \param Count
     The maximum size of the buffer
@@ -139,7 +139,7 @@ static int read_blk(CBM_FILE HandleDevice, void *Buffer, size_t Count, cbmcopy_m
         }
 #ifdef LIBCBMCOPY_DEBUG
         msg_cb( sev_debug, "received byte count: %d", c );
-#endif 
+#endif
         SETSTATEDEBUG((void)0);
         rv = c;
 
@@ -158,7 +158,7 @@ static int read_blk(CBM_FILE HandleDevice, void *Buffer, size_t Count, cbmcopy_m
         }
 #ifdef LIBCBMCOPY_DEBUG
         msg_cb( sev_debug, "receive block data (%d)", c );
-#endif 
+#endif
         return (opencbm_plugin_s2_read_n(HandleDevice, Buffer, c) != c )? -1 : rv;
         /* (drive is busy now) */
     }
@@ -223,12 +223,12 @@ static unsigned char read_byte(CBM_FILE fd)
 #ifndef USE_CBM_IEC_WAIT
         while(!cbm_iec_get(fd,IEC_CLOCK));
         c = (c>>1) | (cbm_iec_get(fd, IEC_DATA) ? 0x80 : 0);
-#else   
-        c = (c>>1) | ((cbm_iec_wait(fd, IEC_CLOCK, 1) & IEC_DATA) ? 0x80 : 0 );    
-#endif  
+#else
+        c = (c>>1) | ((cbm_iec_wait(fd, IEC_CLOCK, 1) & IEC_DATA) ? 0x80 : 0 );
+#endif
                                                                         SETSTATEDEBUG((void)0);
         cbm_iec_set(fd, IEC_ATN);
-    }   
+    }
 
                                                                         SETSTATEDEBUG(DebugBitCount=-1);
     return c;

@@ -18,7 +18,7 @@
 
 /*! \brief write a data block of a file to the OpenCBM backend
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param Buffer
@@ -47,11 +47,11 @@ static int write_blk(CBM_FILE HandleDevice, const void *Buffer, unsigned char Co
 
 /*! \brief read a data block of a file from the OpenCBM backend
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param Buffer
-    Pointer to a buffer to store the bytes read from  the OpenCBM backend 
+    Pointer to a buffer to store the bytes read from  the OpenCBM backend
 
  \param Count
     The maximum size of the buffer

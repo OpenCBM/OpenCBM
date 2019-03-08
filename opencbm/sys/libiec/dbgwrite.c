@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/dbgwrite.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -36,7 +36,7 @@
  \param Value
    The value to set the control port to
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 
@@ -59,7 +59,7 @@ cbmiec_iec_dbg_write(IN PDEVICE_EXTENSION Pdx, IN UCHAR Value)
 
     FUNC_ENTER();
 
-    valueToSet = (Value & PARALLEL_CONTROL_PORT_MASK_VALUES) 
+    valueToSet = (Value & PARALLEL_CONTROL_PORT_MASK_VALUES)
                  | ((Pdx->IecOutEor ^ Pdx->IecOutBits) & ~ PARALLEL_CONTROL_PORT_MASK_VALUES);
 
     DBG_PRINT((DBG_PREFIX "Value to set: %02x, modified to %02x", Value, valueToSet));

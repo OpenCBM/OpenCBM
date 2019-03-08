@@ -12,7 +12,7 @@
  *      Andreas Boose <boose(at)linux(dot)rz(dot)fh-hannover(dot)de>
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/petscii.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
 ** \n
@@ -38,7 +38,7 @@
 /*-------------------------------------------------------------------*/
 /*--------- ASCII <-> PETSCII CONVERSION FUNCTIONS ------------------*/
 /*
- * 
+ *
  *  These functions are taken from VICE's charset.c,
  *  Copyright
  *      Jouko Valta <jopi(at)stekt(dot)oulu(dot)fi>
@@ -60,7 +60,7 @@
    can be displayed, a dot (".") otherwise.
 */
 
-char CBMAPIDECL 
+char CBMAPIDECL
 cbm_petscii2ascii_c(char Character)
 {
     switch (Character & 0xff) {
@@ -136,7 +136,7 @@ char * CBMAPIDECL
 cbm_petscii2ascii(char *Str)
 {
     char *p;
-    for (p = Str; *p; p++) 
+    for (p = Str; *p; p++)
     {
         *p = cbm_petscii2ascii_c(*p);
     }
@@ -156,7 +156,7 @@ cbm_petscii2ascii(char *Str)
    Returns a pointer to the Str itself, converted to PETSCII.
 */
 
-char * CBMAPIDECL 
+char * CBMAPIDECL
 cbm_ascii2petscii(char *Str)
 {
     char *p;

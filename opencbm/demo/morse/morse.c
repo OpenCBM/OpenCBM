@@ -22,7 +22,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 {
     unsigned char drv = argc > 1 ? arch_atoc(argv[1]) : 8;
     CBM_FILE fd;
-    
+
     if(cbm_driver_open_ex(&fd, NULL) == 0)
     {
         cbm_upload(fd, drv, 0x0500, morse, sizeof(morse));

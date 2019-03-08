@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/thread.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -24,10 +24,10 @@
  This function start the worker thread.
 
  \param Pdx
-   Pointer to a DEVICE_EXTENSION structure. 
+   Pointer to a DEVICE_EXTENSION structure.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 */
 NTSTATUS
@@ -107,10 +107,10 @@ cbm_start_thread(IN PDEVICE_EXTENSION Pdx)
  This function stops the worker thread.
 
  \param Pdx
-   Pointer to a DEVICE_EXTENSION structure. 
+   Pointer to a DEVICE_EXTENSION structure.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 */
 VOID

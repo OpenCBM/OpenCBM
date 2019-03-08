@@ -37,7 +37,7 @@ static int probe(FILE *file, const char *fname, cbmcopy_message_cb msg_cb)
 
     size_t i;
     int used_entries;
-    
+
     msg_cb( sev_debug, "checking for t64" );
 
     if(fread( &t64header, sizeof(t64header), 1, file) == 1)

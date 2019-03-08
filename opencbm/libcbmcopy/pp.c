@@ -55,7 +55,7 @@ static unsigned char read_byte(CBM_FILE);
 
 /*! \brief write a data block of a file to the OpenCBM backend
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param Buffer
@@ -94,7 +94,7 @@ static int write_blk(CBM_FILE HandleDevice, const void *Buffer, unsigned char Co
 
 #ifdef LIBCBMCOPY_DEBUG
         msg_cb( sev_debug, "send block data" );
-#endif 
+#endif
         return opencbm_plugin_pp_cc_write_n( HandleDevice, Buffer, Count );
     }
     else
@@ -107,11 +107,11 @@ static int write_blk(CBM_FILE HandleDevice, const void *Buffer, unsigned char Co
 
 /*! \brief read a data block of a file from the OpenCBM backend
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param Buffer
-    Pointer to a buffer to store the bytes read from  the OpenCBM backend 
+    Pointer to a buffer to store the bytes read from  the OpenCBM backend
 
  \param Count
     The maximum size of the buffer
@@ -139,7 +139,7 @@ static int read_blk(CBM_FILE HandleDevice, void *Buffer, size_t Count, cbmcopy_m
         }
 #ifdef LIBCBMCOPY_DEBUG
         msg_cb( sev_debug, "received byte count: %d", c );
-#endif 
+#endif
         SETSTATEDEBUG((void)0);
         rv = c;
 
@@ -158,7 +158,7 @@ static int read_blk(CBM_FILE HandleDevice, void *Buffer, size_t Count, cbmcopy_m
         }
 #ifdef LIBCBMCOPY_DEBUG
         msg_cb( sev_debug, "receive block data (%d)", c );
-#endif 
+#endif
         return (opencbm_plugin_pp_cc_read_n(HandleDevice, Buffer, c) != c )? -1 : rv;
         /* (drive is busy now) */
     }
@@ -236,13 +236,13 @@ static int check_error(CBM_FILE fd, int write)
                                                                         SETSTATEDEBUG((void)0);
         cbm_iec_set(fd, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
-        cbm_iec_wait(fd, IEC_CLOCK, 0); 
+        cbm_iec_wait(fd, IEC_CLOCK, 0);
                                                                         SETSTATEDEBUG((void)0);
         cbm_iec_release(fd, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
         cbm_iec_set(fd, IEC_CLOCK);
     }
-    
+
                                                                         SETSTATEDEBUG((void)0);
     return error;
 }
@@ -256,7 +256,7 @@ static int upload_turbo(CBM_FILE fd, unsigned char drive,
     opencbm_plugin_pp_cc_read_n = cbm_get_plugin_function_address("opencbm_plugin_pp_cc_read_n");
 
     opencbm_plugin_pp_cc_write_n = cbm_get_plugin_function_address("opencbm_plugin_pp_cc_write_n");
-    
+
     switch(drive_type)
     {
         case cbm_dt_cbm1541:
@@ -273,7 +273,7 @@ static int upload_turbo(CBM_FILE fd, unsigned char drive,
     }
 
     p = &drive_progs[dt * 2 + (write != 0)];
-    
+
                                                                         SETSTATEDEBUG((void)0);
     cbm_upload(fd, drive, 0x680, p->prog, p->size);
                                                                         SETSTATEDEBUG((void)0);

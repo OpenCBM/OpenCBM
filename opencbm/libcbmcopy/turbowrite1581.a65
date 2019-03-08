@@ -111,4 +111,3 @@ bufx2	ldx #$00
 	jmp $99bf	; close and exit
 
 error	jmp $ff2d
-

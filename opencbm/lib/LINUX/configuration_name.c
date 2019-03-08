@@ -8,7 +8,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/LINUX/configuration_name.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -25,9 +25,9 @@
 #include <string.h>
 
 /*! \brief The name (including path) of the configuration file.
-  
+
   This defines the name of the configuration file for this platform.
-  
+
   \remark
     OPENCBM_CONFIG_FILE is defined in LINUX/config.make, and it
     is given to the compiler via the command line!
@@ -43,7 +43,7 @@
 
  Get the default filename of the configuration file.
 
- \return 
+ \return
    Returns a newly allocated memory area with the default file name.
 */
 const char *

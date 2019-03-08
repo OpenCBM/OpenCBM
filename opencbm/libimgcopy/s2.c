@@ -99,7 +99,7 @@ static int s2_write_byte_nohs(CBM_FILE fd, unsigned char c)
 }
 
 /* read_n redirects USB reads to the external reader if required */
-static void read_n(unsigned char *data, int size) 
+static void read_n(unsigned char *data, int size)
 {
     int i;
 
@@ -130,7 +130,7 @@ static int s2_write_byte(CBM_FILE fd, unsigned char c)
 }
 
 /* write_n redirects USB writes to the external reader if required */
-static void write_n(const unsigned char *data, int size) 
+static void write_n(const unsigned char *data, int size)
 {
     int i;
 
@@ -233,7 +233,7 @@ static int open_disk(CBM_FILE fd, imgcopy_settings *settings,
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_set(fd_cbm, IEC_ATN);
     arch_usleep(20000);
-    
+
                                                                         SETSTATEDEBUG((void)0);
     return 0;
 }
@@ -274,7 +274,7 @@ static int send_track_map(imgcopy_settings *settings, unsigned char tr, const ch
     /* build track map */
     for(i = 0; i < size; i++)
         data[2+i] = !NEED_SECTOR(trackmap[i]);
-    
+
     write_n(data, size+2);
     free(data);
                                                                         SETSTATEDEBUG((void)0);

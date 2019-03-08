@@ -22,7 +22,7 @@
 #ifndef IEEE_H
 #define IEEE_H
 
-#ifdef IEEE_EOI_IO    
+#ifdef IEEE_EOI_IO
   #define IEEE_EOI_I    IEEE_EOI_IO
   #define IEEE_EOI_O    IEEE_EOI_IO
 #endif

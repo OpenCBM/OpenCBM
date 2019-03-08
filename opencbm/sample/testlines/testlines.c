@@ -36,7 +36,7 @@ typedef struct {
     int help;    //!< option: the user requested help for the specified command
     int version; //!< option: print version information
     char *adapter; //!< option: an explicit adapter was specified
-    PETSCII_RAW petsciiraw; //!< option: The user requested PETSCII or RAW, or nothing 
+    PETSCII_RAW petsciiraw; //!< option: The user requested PETSCII or RAW, or nothing
 } OPTIONS;
 
 typedef int (*mainfunc)(CBM_FILE fd, OPTIONS * const options);
@@ -252,8 +252,8 @@ static int hex2val(const char ch)
     if (ch>='a' && ch<='f')
         return ch - 'a' + 10;
 
-    fprintf(stderr, 
-        (ch==0) ? "Not enough digits for hex value given\n" 
+    fprintf(stderr,
+        (ch==0) ? "Not enough digits for hex value given\n"
                 : "Unknown hex character '%c'.\n", ch);
     return -1;
 }
@@ -333,7 +333,7 @@ string_concat(const char *string1, int len1, const char *string2, int len2)
 }
 
 static int
-get_extended_argument_string(int extended, 
+get_extended_argument_string(int extended,
                              OPTIONS * const options,
                              char *string[], unsigned int *stringlen)
 {
@@ -435,7 +435,7 @@ get_extended_argument_string(int extended,
 static int do_lock(CBM_FILE fd, OPTIONS * const options)
 {
     int rv = skip_options(options);
-    
+
     rv = rv || check_if_parameters_ok(options);
 
     if (rv == 0)
@@ -450,7 +450,7 @@ static int do_lock(CBM_FILE fd, OPTIONS * const options)
 static int do_unlock(CBM_FILE fd, OPTIONS * const options)
 {
     int rv = skip_options(options);
-    
+
     rv = rv || check_if_parameters_ok(options);
 
     if (rv == 0)
@@ -465,7 +465,7 @@ static int do_unlock(CBM_FILE fd, OPTIONS * const options)
 static int do_reset(CBM_FILE fd, OPTIONS * const options)
 {
     int rv = skip_options(options);
-    
+
     rv = rv || check_if_parameters_ok(options);
 
     if (rv == 0)
@@ -514,7 +514,7 @@ static int do_listen(CBM_FILE fd, OPTIONS * const options)
     unsigned char secondary;
 
     rv = skip_options(options);
-    
+
     rv = rv || get_argument_char(options, &unit);
     rv = rv || get_argument_char(options, &secondary);
 
@@ -534,7 +534,7 @@ static int do_talk(CBM_FILE fd, OPTIONS * const options)
     unsigned char secondary;
 
     rv = skip_options(options);
-    
+
     rv = rv || get_argument_char(options, &unit);
     rv = rv || get_argument_char(options, &secondary);
 
@@ -550,7 +550,7 @@ static int do_talk(CBM_FILE fd, OPTIONS * const options)
 static int do_unlisten(CBM_FILE fd, OPTIONS * const options)
 {
     int rv = skip_options(options);
-    
+
     rv = rv || check_if_parameters_ok(options);
 
     if (rv == 0)
@@ -565,7 +565,7 @@ static int do_unlisten(CBM_FILE fd, OPTIONS * const options)
 static int do_untalk(CBM_FILE fd, OPTIONS * const options)
 {
     int rv = skip_options(options);
-    
+
     rv = rv || check_if_parameters_ok(options);
 
     if (rv == 0)
@@ -633,7 +633,7 @@ static int do_close(CBM_FILE fd, OPTIONS * const options)
     unsigned char secondary;
 
     rv = skip_options(options);
-    
+
     rv = rv || get_argument_char(options, &unit);
     rv = rv || get_argument_char(options, &secondary);
 
@@ -654,7 +654,7 @@ static int do_read(CBM_FILE fd, OPTIONS * const options)
 
     if (skip_options(options))
         return 1;
-    
+
     if (get_argument_file_for_write(options, &f))
         return 1;
 
@@ -697,7 +697,7 @@ static int do_write(CBM_FILE fd, OPTIONS * const options)
 
     if (skip_options(options))
         return 1;
-    
+
     if (get_argument_file_for_read(options, &f, &fn))
         return 1;
 
@@ -710,7 +710,7 @@ static int do_write(CBM_FILE fd, OPTIONS * const options)
         if(f != stdin) fclose(f);
         return 1;
     }
-    
+
     /* as long as no error occurred */
     while( ! ferror(f))
     {
@@ -745,7 +745,7 @@ static int do_write(CBM_FILE fd, OPTIONS * const options)
         arch_error(0, 0, "could not read %s", fn);
     }
     /* else : size number of bytes could not be written to IEC bus */
-    
+
     if(f != stdin) fclose(f);
     return 1;
 }
@@ -826,7 +826,7 @@ static int do_status(CBM_FILE fd, OPTIONS * const options)
     int rv;
 
     rv = skip_options(options);
-    
+
     rv = rv || get_argument_char(options, &unit);
 
     if (rv || check_if_parameters_ok(options))
@@ -917,7 +917,7 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
     unsigned char unit;
 
     rv = skip_options(options);
-    
+
     rv = rv || get_argument_char(options, &unit);
     /* default is drive '0' */
     if (options->argc > 0)
@@ -1000,7 +1000,7 @@ static int do_download(CBM_FILE fd, OPTIONS * const options)
 
     if (skip_options(options))
         return 1;
-    
+
     // process the drive number (unit)
 
     if (get_argument_char(options, &unit))
@@ -1096,7 +1096,7 @@ static int do_upload(CBM_FILE fd, OPTIONS * const options)
 
     if (skip_options(options))
         return 1;
-    
+
     // process the drive number (unit)
 
     if (get_argument_char(options, &unit))
@@ -1203,7 +1203,7 @@ static int do_detect(CBM_FILE fd, OPTIONS * const options)
 
     if (skip_options(options))
         return 1;
-    
+
     if (check_if_parameters_ok(options))
         return 1;
 
@@ -1216,7 +1216,7 @@ static int do_detect(CBM_FILE fd, OPTIONS * const options)
         {
             enum cbm_cable_type_e cable_type;
             const char *cable_str = "(cannot determine cable type)";
- 
+
             num_devices++;
 
             if ( cbm_identify_xp1541( fd, device, &device_type, &cable_type ) == 0 )
@@ -1252,7 +1252,7 @@ static int do_change(CBM_FILE fd, OPTIONS * const options)
     int rv;
 
     rv = skip_options(options);
-    
+
     rv = rv || get_argument_char(options, &unit);
 
     if (rv || check_if_parameters_ok(options))

@@ -83,7 +83,7 @@ static int s1_read_byte(CBM_FILE fd, unsigned char *c)
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
         while(cbm_iec_get(fd, IEC_DATA));
-#else 
+#else
         cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
                                                                         SETSTATEDEBUG((void)0);

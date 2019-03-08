@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/rawread.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -25,7 +25,7 @@
 
 /*! \brief Read some bytes from the IEC bus
 
- This function reads some bytes from the IEC bus. 
+ This function reads some bytes from the IEC bus.
  If debugging of function parameters is defined, output the
  given parameters and the returned values.
 
@@ -41,12 +41,12 @@
  \param Read
    Pointer to the variable which will hold the read bytes.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */
-NTSTATUS cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx, 
-                         OUT PUCHAR Buffer, IN ULONG Size, 
+NTSTATUS cbmiec_raw_read(IN PDEVICE_EXTENSION Pdx,
+                         OUT PUCHAR Buffer, IN ULONG Size,
                          OUT ULONG* Read)
 {
     NTSTATUS ntStatus;

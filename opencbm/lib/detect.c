@@ -11,7 +11,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/detect.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
 ** \n
@@ -58,13 +58,13 @@
    0 if the drive could be contacted. It does not mean that
    the device could be identified.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
-int CBMAPIDECL 
+int CBMAPIDECL
 cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
-             enum cbm_device_type_e *CbmDeviceType, 
+             enum cbm_device_type_e *CbmDeviceType,
              const char **CbmDeviceString)
 {
     enum cbm_device_type_e deviceType = cbm_dt_unknown;
@@ -78,7 +78,7 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
     FUNC_ENTER();
 
     /* get footprint from 0xFF40 */
-    if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0 
+    if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0
         && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
     {
         if (cbm_raw_read(HandleDevice, buf, 3) == 3)
@@ -89,7 +89,7 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
             {
                 cbm_untalk(HandleDevice);
                 command[3] = (char) 0xFE; /* get footprint from 0xFFFE, IRQ vector */
-                if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0 
+                if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0
                     && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
                 {
                     if (cbm_raw_read(HandleDevice, buf, 3) == 3
@@ -113,12 +113,12 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
                 case 0xfeb6:
                     deviceType = cbm_dt_cbm2031;
-                    deviceString = "2031"; 
+                    deviceString = "2031";
                     break;
 
                 case 0xaaaa:
                     deviceType = cbm_dt_cbm1541;
-                    deviceString = "1540 or 1541"; 
+                    deviceString = "1540 or 1541";
                     break;
 
                 case 0xf00f:
@@ -171,13 +171,13 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                     deviceString = "1581";
                     break;
 
-                case 0x32f0: 
+                case 0x32f0:
                     deviceType = cbm_dt_cbm3040;
                     deviceString = "3040";
                     break;
 
-                case 0xc320: 
-                case 0x20f8: 
+                case 0xc320:
+                case 0x20f8:
                     deviceType = cbm_dt_cbm4040;
                     deviceString = "4040";
                     break;
@@ -203,7 +203,7 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
         *CbmDeviceType = deviceType;
     }
 
-    if(CbmDeviceString) 
+    if(CbmDeviceString)
     {
         *CbmDeviceString = deviceString;
     }

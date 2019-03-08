@@ -8,35 +8,35 @@
  *  Copyright 2004-2007 Spiro Trikaliotis
  *  Copyright 2011-2011 Thomas Winkler
 */
- 
+
 #ifdef SAVE_RCSID
 static char *rcsid =
-    "@(#) $Id: main.c,v 1.13 2011-04-11 17:51:38 strik Exp $";  
+    "@(#) $Id: main.c,v 1.13 2011-04-11 17:51:38 strik Exp $";
 #endif
-  
-#include "opencbm.h" 
-#include "imgcopy.h"     
-   
-#include "arch.h"    
-#include "libmisc.h" 
-   
-#include <getopt.h>       
-#include <stdarg.h>  
-#include <stdio.h>      
-#include <stdlib.h>      
-#include <string.h>    
 
- 
-/* setable via command line */   
-static imgcopy_severity_e verbosity = sev_warning;    
-static int no_progress = 0; 
-  
+#include "opencbm.h"
+#include "imgcopy.h"
+
+#include "arch.h"
+#include "libmisc.h"
+
+#include <getopt.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+/* setable via command line */
+static imgcopy_severity_e verbosity = sev_warning;
+static int no_progress = 0;
+
 /* other globals */
-static CBM_FILE fd_cbm;  
+static CBM_FILE fd_cbm;
 
 
-static int is_cbm(char *name) 
-{  
+static int is_cbm(char *name)
+{
     return((strcmp(name, "8" ) == 0) || (strcmp(name, "9" ) == 0) ||
            (strcmp(name, "10") == 0) || (strcmp(name, "11") == 0) );
 }
@@ -62,7 +62,7 @@ static void help(void)
 "  -s, --start-track=TRACK  set start track\n"
 "  -e, --end-track=TRACK    set end track (start <= end <= 77 / 154)\n"
 "\n"
-"  -t, --transfer=TRANSFER  set transfermode; valid modes:\n" 
+"  -t, --transfer=TRANSFER  set transfermode; valid modes:\n"
 "                             auto (default)\n"
 "                             original       (slowest)\n"
 "                           'auto' tries to determine the best option.\n"
@@ -184,8 +184,8 @@ static int my_status_cb(imgcopy_status status)
         last_track = status.track;
     }
 
-    trackmap[status.sector] = 
-        bs2char[(status.read_result || 
+    trackmap[status.sector] =
+        bs2char[(status.read_result ||
                  status.write_result) ? bs_error : bs_copied];
 
     printf("\r%2d: %-24s%3d%%  %4d/%d", status.track, trackmap,
@@ -223,7 +223,7 @@ static void ARCH_SIGNALDECL reset(int dummy)
 }
 
 //
-// main function 
+// main function
 //
 int ARCH_MAINDECL main(int argc, char *argv[])
 {
@@ -390,24 +390,24 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         }
     }
 
-	//printf("transfermode: %s\n", tm);
-	settings->transfer_mode = imgcopy_get_transfer_mode_index(tm);
-	if(settings->transfer_mode < 0)
-	{
-	    char *modes = imgcopy_get_transfer_modes();
-	    char *m;
+    //printf("transfermode: %s\n", tm);
+    settings->transfer_mode = imgcopy_get_transfer_mode_index(tm);
+    if(settings->transfer_mode < 0)
+    {
+        char *modes = imgcopy_get_transfer_modes();
+        char *m;
 
-	    fprintf(stderr, "Unknown transfer mode: %s\nAvailable modes:\n", tm);
+        fprintf(stderr, "Unknown transfer mode: %s\nAvailable modes:\n", tm);
 
-	    for(m = modes; *m; m+=(strlen(m)+1))
-	    {
-	        fprintf(stderr, "  %s\n", m);
-	    }
+        for(m = modes; *m; m+=(strlen(m)+1))
+        {
+            fprintf(stderr, "  %s\n", m);
+        }
 
-	    free(modes);
-	    return 1;
-	}
-	my_message_cb(3, "transfer mode is %d", settings->transfer_mode );
+        free(modes);
+        return 1;
+    }
+    my_message_cb(3, "transfer mode is %d", settings->transfer_mode );
 
     if(optind + 2 != argc)
     {
@@ -434,7 +434,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
          * If the user specified auto transfer mode, find out
          * which transfer mode to use.
          */
-        settings->transfer_mode = 
+        settings->transfer_mode =
             imgcopy_check_auto_transfer_mode(fd_cbm,
                 settings->transfer_mode,
                 atoi(src_is_cbm ? src_arg : dst_arg));
@@ -469,7 +469,6 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     cbmlibmisc_strfree(adapter);
     free(settings);
-    
+
     return rv;
 }
-

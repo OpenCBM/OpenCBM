@@ -8,7 +8,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file libmisc/WINDOWS/formaterrormessage.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
 ** \n
@@ -27,7 +27,7 @@
  \param Error
    The error number to be formatted.
 
- \return 
+ \return
    The string describing the error given by the error code.
 */
 

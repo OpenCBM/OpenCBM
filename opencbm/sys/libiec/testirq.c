@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/testirq.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -143,7 +143,7 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
                 ? "TRUE"
                 : "FALSE"));
 
-            WRITE_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET, 
+            WRITE_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET,
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET) & ~0x04);
 
             DBG_CABLE((DBG_PREFIX "Interrupt bit ECR = %s",
@@ -155,14 +155,14 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
             DBG_CABLE((DBG_PREFIX ""));
 
             DBG_CABLE((DBG_PREFIX "Before: ECR (%p) = %02x",
-                Pdx->ParPortEcpPortAddress + ECR_OFFSET, 
+                Pdx->ParPortEcpPortAddress + ECR_OFFSET,
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET)));
 
             WRITE_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET,
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET) | 0x10);
 
             DBG_CABLE((DBG_PREFIX "After:  ECR (%p) = %02x",
-                Pdx->ParPortEcpPortAddress + ECR_OFFSET, 
+                Pdx->ParPortEcpPortAddress + ECR_OFFSET,
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET)));
         }
 
@@ -199,14 +199,14 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
         if (Pdx->ParPortEcpPortAddress)
         {
             DBG_CABLE((DBG_PREFIX "Before: ECR (%p) = %02x",
-                Pdx->ParPortEcpPortAddress + ECR_OFFSET, 
+                Pdx->ParPortEcpPortAddress + ECR_OFFSET,
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET)));
 
             WRITE_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET,
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET) & ~0x10);
 
-            DBG_CABLE((DBG_PREFIX "After:  ECR (%p) = %02x", 
-                Pdx->ParPortEcpPortAddress + ECR_OFFSET, 
+            DBG_CABLE((DBG_PREFIX "After:  ECR (%p) = %02x",
+                Pdx->ParPortEcpPortAddress + ECR_OFFSET,
                 READ_PORT_UCHAR(Pdx->ParPortEcpPortAddress + ECR_OFFSET)));
         }
 
@@ -216,7 +216,7 @@ cbmiec_test_irq(IN PDEVICE_EXTENSION Pdx, OUT PVOID Buffer, IN ULONG BufferLengt
         /*
          * Check if an interrupt occurred
          *
-         * Note: Check for > 99 (and not !=99) because the 1581 issues 
+         * Note: Check for > 99 (and not !=99) because the 1581 issues
          *       two IRQs in this short test!
          */
 

@@ -9,7 +9,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/detectxp1541.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -58,7 +58,7 @@
  \return
    0 if the drive could be contacted.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -102,7 +102,7 @@ pia_to_inputmode(CBM_FILE HandleDevice, unsigned char Drive, unsigned int PiaAdd
  \return
    0 if the value could be set and read back.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -218,18 +218,18 @@ cbm_determine_pport_address(enum cbm_device_type_e CbmDeviceType)
    this function will return the device type there.
 
  \param CableType
-   Pointer to an enum which will hold the cable type of the 
+   Pointer to an enum which will hold the cable type of the
    device on return.
 
  \return
    0 if the drive could be contacted. It does not mean that
    the device could be identified.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
-int CBMAPIDECL 
+int CBMAPIDECL
 cbm_identify_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                     enum cbm_device_type_e *CbmDeviceType,
                     enum cbm_cable_type_e *CableType)
@@ -238,7 +238,7 @@ cbm_identify_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
     enum cbm_device_type_e localDummyDeviceType = cbm_dt_unknown;
 
     FUNC_ENTER();
- 
+
     do
     {
         unsigned int piaAddress;

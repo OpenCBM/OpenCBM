@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file plugin.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -101,7 +101,7 @@ malloc_plugin_file_name(const char *PluginName)
 
     do {
         filename = cbmlibmisc_stralloc( sizeof(PLUGIN_PREFIX) - 1
-                                        + strlen(PluginName) 
+                                        + strlen(PluginName)
                                         + sizeof(PLUGIN_SUFFIX) - 1 );
 
         if (filename == NULL)
@@ -468,7 +468,7 @@ ProcessPluginCommandlineAndAddIt(cbm_install_parameter_t * InstallParameter,
 
 /*! \brief Get all the plugins
 
- This function searches for all plugins available 
+ This function searches for all plugins available
  and adds an entry for that plugin to the plugin list.
 
  \param InstallParameter
@@ -489,7 +489,7 @@ get_all_plugins(cbm_install_parameter_t * InstallParameter)
     WIN32_FIND_DATA finddata;
     HANDLE findhandle;
 
-    const char *findfilename = NULL; 
+    const char *findfilename = NULL;
 
     FUNC_ENTER();
 
@@ -568,7 +568,7 @@ get_all_plugins(cbm_install_parameter_t * InstallParameter)
 
  \remark
     This function is called for every installed plugin
-    from the call to opencbm_plugin_get_all_plugin_names() 
+    from the call to opencbm_plugin_get_all_plugin_names()
     in get_all_installed_plugins().
 */
 static BOOL CBMAPIDECL
@@ -579,7 +579,7 @@ get_all_installed_plugins_callback(cbm_install_parameter_t * InstallParameter, c
 
 /*! \brief Get all the installed plugins
 
- This function searches all installed plugins 
+ This function searches all installed plugins
  and adds an entry for that plugin to the plugin list.
 
  \param InstallParameter
@@ -612,7 +612,7 @@ get_all_installed_plugins(cbm_install_parameter_t * InstallParameter)
             break;
         }
 
-        opencbm_plugin_get_all_plugin_names = (opencbm_plugin_get_all_plugin_names_t *) 
+        opencbm_plugin_get_all_plugin_names = (opencbm_plugin_get_all_plugin_names_t *)
             GetProcAddress(openCbmDllHandle, "opencbm_plugin_get_all_plugin_names");
 
         if ( ! opencbm_plugin_get_all_plugin_names ) {

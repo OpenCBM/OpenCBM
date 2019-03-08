@@ -60,4 +60,3 @@ cbmctrl close $drive 2
 cbmctrl status $drive
 
 exit 0
-

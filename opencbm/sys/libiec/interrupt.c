@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/interrupt.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -47,7 +47,7 @@ cbmiec_interrupt(IN PDEVICE_EXTENSION Pdx)
     PERF_EVENT_VERBOSE(0x2010, 0);
 
     /* acknowledge the interrupt */
-    irqResult = READ_PORT_UCHAR(IN_PORT); 
+    irqResult = READ_PORT_UCHAR(IN_PORT);
     DBG_PPORT((DBG_PREFIX "irqResult before:     %02x", irqResult));
 
     DBG_IRQ(("Interrupt occurred"));
@@ -55,7 +55,7 @@ cbmiec_interrupt(IN PDEVICE_EXTENSION Pdx)
 /*! \bug this does not work. At least my parallel port card does not
     change bit 2 in any way! */
 
-/*   
+/*
     if ((irqResult & 0x04) == 0)
 
     Thus, we check DATA_IN directly:
@@ -106,7 +106,7 @@ cbmiec_interrupt(IN PDEVICE_EXTENSION Pdx)
         DBG_WARN((DBG_PREFIX "********************************************"));
     }
 
-    irqResult = READ_PORT_UCHAR(IN_PORT); 
+    irqResult = READ_PORT_UCHAR(IN_PORT);
     DBG_PPORT((DBG_PREFIX "irqResult afterwards: %02x", irqResult));
 
     PERF_EVENT_VERBOSE(0x2015, 0);

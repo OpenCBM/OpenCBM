@@ -7,7 +7,7 @@
  *  Copyright 2009-2010 Nate Lawson
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xum1541/WINDOWS/parburst.c \n
 ** \author Nate Lawson \n
 ** \n
@@ -39,7 +39,7 @@
  \return
    The value read from the parallel port
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -64,7 +64,7 @@ opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
  \param Value
    The value to be written to the parallel port
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -122,7 +122,7 @@ opencbm_plugin_parallel_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buff
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -156,7 +156,7 @@ opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, unsigned char *B
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -165,7 +165,7 @@ opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, unsigned cha
 {
     int result;
 
-    // Add a flag to indicate this read terminates early after seeing 
+    // Add a flag to indicate this read terminates early after seeing
     // an 0x55 byte.
     result = xum1541_read((struct opencbm_usb_handle *)HandleDevice, XUM1541_NIB, Buffer, Length | XUM1541_NIB_READ_VAR);
     if (result <= 0) {
@@ -192,7 +192,7 @@ opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, unsigned cha
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -222,7 +222,7 @@ opencbm_plugin_parallel_burst_write_track(CBM_FILE HandleDevice, unsigned char *
  \return
    The value read from the fast serial port
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -246,7 +246,7 @@ opencbm_plugin_srq_burst_read(CBM_FILE HandleDevice)
  \param Value
    The value to be written to the fast serial port
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -303,7 +303,7 @@ opencbm_plugin_srq_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buffer,
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -337,7 +337,7 @@ opencbm_plugin_srq_burst_read_track(CBM_FILE HandleDevice, unsigned char *Buffer
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -367,7 +367,7 @@ opencbm_plugin_srq_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffe
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -392,7 +392,7 @@ opencbm_plugin_tap_prepare_capture(CBM_FILE HandleDevice, int *Status)
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -417,7 +417,7 @@ opencbm_plugin_tap_prepare_write(CBM_FILE HandleDevice, int *Status)
  \return
    The tape sense state
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -442,7 +442,7 @@ opencbm_plugin_tap_get_sense(CBM_FILE HandleDevice, int *Status)
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -467,7 +467,7 @@ opencbm_plugin_tap_wait_for_stop_sense(CBM_FILE HandleDevice, int *Status)
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -492,7 +492,7 @@ opencbm_plugin_tap_wait_for_play_sense(CBM_FILE HandleDevice, int *Status)
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -517,7 +517,7 @@ opencbm_plugin_tap_motor_on(CBM_FILE HandleDevice, int *Status)
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -554,7 +554,7 @@ opencbm_plugin_tap_motor_off(CBM_FILE HandleDevice, int *Status)
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -593,7 +593,7 @@ opencbm_plugin_tap_start_capture(CBM_FILE HandleDevice, unsigned char *Buffer, u
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -620,7 +620,7 @@ opencbm_plugin_tap_start_write(CBM_FILE HandleDevice, unsigned char *Buffer, uns
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -664,7 +664,7 @@ opencbm_plugin_tap_break(CBM_FILE HandleDevice)
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.
@@ -703,7 +703,7 @@ opencbm_plugin_tap_download_config(CBM_FILE HandleDevice, unsigned char *Buffer,
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  Note that a plugin is not required to implement this function.

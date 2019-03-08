@@ -24,8 +24,8 @@
 
 /* all values needed by PARBURST_READ_TRACK and PARBURST_WRITE_TRACK */
 typedef struct PARBURST_RW_VALUE {
-	unsigned char *buffer;
-	int length;
+    unsigned char *buffer;
+    int length;
 } PARBURST_RW_VALUE;
 
 #define CBMCTRL_BASE        0xcb

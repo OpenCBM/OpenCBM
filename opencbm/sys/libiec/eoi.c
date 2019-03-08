@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/eoi.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -27,12 +27,12 @@
 
  \param Pdx
    Pointer to the device extension.
- 
- \param Result 
+
+ \param Result
    Pointer to the variable which will hold the return value.
    After return, it will contain 1 if there was an EOI, 0 otherwise.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */
@@ -52,8 +52,8 @@ cbmiec_get_eoi(IN PDEVICE_EXTENSION Pdx, OUT PBOOLEAN Result)
 
  \param Pdx
    Pointer to the device extension.
- 
- \return 
+
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */

@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/ppwrite.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -34,7 +34,7 @@
  \param Value
    Value to be written on the bus
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */

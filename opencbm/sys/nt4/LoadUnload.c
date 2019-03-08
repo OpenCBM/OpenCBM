@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/nt4/LoadUnload.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -30,9 +30,9 @@
 
  \param DriverObject
    Pointer to a DRIVER_OBJECT structure. This is the driver's driver object.
- 
+
  \param PdoUNUSED
-   Pointer to a DEVICE_OBJECT structure representing a physical device object 
+   Pointer to a DEVICE_OBJECT structure representing a physical device object
    (PDO) created by a lower-level driver.
    \todo Parameter is currently unused
 
@@ -40,11 +40,11 @@
    Pointer to the name of the parallel port to attach to
    \todo Will be removed for WDM
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 
- A driver's AddDevice routine executes in a system thread context 
+ A driver's AddDevice routine executes in a system thread context
  at IRQL PASSIVE_LEVEL.
 
  As long as we are an NT4 style device driver, AddDevice is not automatically
@@ -94,7 +94,7 @@ AddDevice(IN PDRIVER_OBJECT DriverObject, IN PDEVICE_OBJECT PdoUNUSED, IN PCWSTR
     // and deviceNameNumber
 
     deviceName.MaximumLength = deviceNamePrefix.Length + deviceNameNumber.Length;
-    deviceName.Buffer = (PWCHAR) ExAllocatePoolWithTag(NonPagedPool, 
+    deviceName.Buffer = (PWCHAR) ExAllocatePoolWithTag(NonPagedPool,
         deviceName.MaximumLength, MTAG_DEVNAME);
 
     if (!deviceName.Buffer)
@@ -166,12 +166,12 @@ static KMUTEX MutexDriverLoadUnload;
 
  DriverUnload performs any operations that are necessary before the system unloads the driver.
 
- \param 
-   DriverObject Caller-supplied pointer to a DRIVER_OBJECT structure. 
-   This is the driver's driver object. 
+ \param
+   DriverObject Caller-supplied pointer to a DRIVER_OBJECT structure.
+   This is the driver's driver object.
 
  A driver's Unload routine executes in a system thread context at IRQL PASSIVE_LEVEL.
- The driver's DriverEntry routine must store the Unload routine's address in 
+ The driver's DriverEntry routine must store the Unload routine's address in
  DriverObject->DriverUnload. (If no routine is supplied, this pointer must be NULL.)
 */
 VOID
@@ -189,7 +189,7 @@ DriverUnload(IN PDRIVER_OBJECT DriverObject)
 
     // Make sure every device object is deleted
 
-    while (currentDevice = DriverObject->DeviceObject) 
+    while (currentDevice = DriverObject->DeviceObject)
     {
         PDEVICE_EXTENSION pdx = currentDevice->DeviceExtension;
 
@@ -263,7 +263,7 @@ DriverUnload(IN PDRIVER_OBJECT DriverObject)
    must return one of the error status values defined in ntstatus.h.
 
  The DriverObject parameter supplies the DriverEntry routine with a
- pointer to the driver's driver object, which is allocated by the I/O 
+ pointer to the driver's driver object, which is allocated by the I/O
  Manager. The DriverEntry routine must fill in the driver object with
  entry points for the driver's standard routines.
 */
@@ -311,7 +311,7 @@ DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegistryPath)
     {
         PCWSTR DriverName;
 
-        do 
+        do
         {
             ntStatus = ParPortEnumerate(enumerate,&DriverName);
 

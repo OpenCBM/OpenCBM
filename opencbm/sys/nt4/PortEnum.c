@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/nt4/PortEnum.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -55,11 +55,11 @@ struct ENUMERATE_NT4
  This function starts the enumeration process of the parallel port drivers
 
  \param EnumStruct
-   Pointer to a pointer to hold an ENUMERATE structure. 
+   Pointer to a pointer to hold an ENUMERATE structure.
    This is internal storage for these functions, and it is allocated
    by this function.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 
@@ -81,7 +81,7 @@ ParPortEnumerateOpen(PENUMERATE *EnumStruct)
     // Allocate memory for the enumStruct
 
     DBG_IRQL( < DISPATCH_LEVEL);
-    enumStruct = ExAllocatePoolWithTag(PagedPool, 
+    enumStruct = ExAllocatePoolWithTag(PagedPool,
         sizeof(ENUMERATE), MTAG_SENUMERATE);
 
     if (enumStruct)
@@ -117,7 +117,7 @@ ParPortEnumerateOpen(PENUMERATE *EnumStruct)
         // Allocate memory for storing the number
         // Assume the number is < 999, that is, not more than 3 digits big
         // If it is bigger, make the numbers 3 and 4 greater
-        // The length has to be set here because the allocation for 
+        // The length has to be set here because the allocation for
         // enumStruct->CompleteDriverName below depends upon the length!
 
         enumStruct->DriverNumber.Length = 3*sizeof(wchar_t);
@@ -128,7 +128,7 @@ ParPortEnumerateOpen(PENUMERATE *EnumStruct)
         // allocate memory for the complete name
 
         enumStruct->CompleteDriverName.Length = 0;
-        enumStruct->CompleteDriverName.MaximumLength = 
+        enumStruct->CompleteDriverName.MaximumLength =
             enumStruct->DriverPrefix.Length + enumStruct->DriverNumber.Length;
 
         enumStruct->CompleteDriverName.Buffer = ExAllocatePoolWithTag(PagedPool,
@@ -136,7 +136,7 @@ ParPortEnumerateOpen(PENUMERATE *EnumStruct)
 
         // Test if both above allocations were successfull:
 
-        if (enumStruct->DriverNumber.Buffer != NULL 
+        if (enumStruct->DriverNumber.Buffer != NULL
             && enumStruct->CompleteDriverName.Buffer != NULL)
         {
             ntStatus = STATUS_SUCCESS;
@@ -181,7 +181,7 @@ ParPortEnumerateOpen(PENUMERATE *EnumStruct)
    Pointer to a storage area which will contain the next
    driver implementing this interface.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 
@@ -214,10 +214,10 @@ ParPortEnumerate(PENUMERATE EnumStruct, PCWSTR *DriverName)
         // Counvert EnumStruct->Count to a UNICODE_STRING
 
         DBG_IRQL( == PASSIVE_LEVEL);
-        ntStatus = RtlIntegerToUnicodeString(EnumStruct->Count, 10, 
+        ntStatus = RtlIntegerToUnicodeString(EnumStruct->Count, 10,
             &EnumStruct->DriverNumber);
 
-        if (NT_SUCCESS(ntStatus)) 
+        if (NT_SUCCESS(ntStatus))
         {
             // Copy the parts to form the full name:
 
@@ -299,7 +299,7 @@ ParPortEnumerateClose(PENUMERATE EnumStruct)
  needed. Because of this, we define it here for cbm4nt.sys,
  so that the driver successfully loads
 */
-NTSTATUS 
+NTSTATUS
 CbmOpenDeviceRegistryKey(IN PDEVICE_OBJECT a, IN ULONG b, IN ACCESS_MASK c, OUT PHANDLE d)
 {
     FUNC_ENTER();

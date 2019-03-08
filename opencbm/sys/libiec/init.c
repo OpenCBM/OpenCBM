@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/init.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -76,7 +76,7 @@ cbmiec_timeouts_init(IN PHANDLE HKey)
     READ_TIMEOUT_VALUE(T_8_IEC_WAIT_LONG_DELAY,                     20); // us
     READ_TIMEOUT_VALUE(T_8_IEC_WAIT_SHORT_DELAY,                    10); // us
 
-    // send related 
+    // send related
 
     READ_TIMEOUT_VALUE(T_9_Times,                                  100); // x T_9
     READ_TIMEOUT_VALUE(T_9_SEND_WAIT_DEVICES_T_AT,                  10); // us
@@ -108,7 +108,7 @@ cbmiec_timeouts_init(IN PHANDLE HKey)
  \param Pdx
    Pointer to the device extension.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */
@@ -191,7 +191,7 @@ cbm_check_irq_availability(IN PDEVICE_EXTENSION Pdx)
  \param Pdx
    Pointer to the device extension.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */
@@ -243,7 +243,7 @@ cbmiec_init(IN PDEVICE_EXTENSION Pdx)
    Pointer to a handle with holds a registry key.
    If this is NULL, no access to the registry is performed.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */

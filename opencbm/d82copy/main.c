@@ -10,15 +10,15 @@
 */
 
 #include "opencbm.h"
-#include "d82copy.h" 
-  
-#include "arch.h" 
+#include "d82copy.h"
+
+#include "arch.h"
 #include "libmisc.h"
 
 #include <getopt.h>
 #include <stdarg.h>
-#include <stdio.h> 
-#include <stdlib.h> 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 
@@ -54,7 +54,7 @@ static void help()
 "  -s, --start-track=TRACK   set start track\n"
 "  -e, --end-track=TRACK     set end track (start <= end <= 77 / 154)\n"
 "\n"
-"  -t, --transfer=TRANSFER   set transfermode; valid modes:\n" 
+"  -t, --transfer=TRANSFER   set transfermode; valid modes:\n"
 "                              auto (default)\n"
 "                              original       (slowest)\n"
 "                            `auto' tries to determine the best option.\n"
@@ -166,8 +166,8 @@ static int my_status_cb(d82copy_status status)
         last_track = status.track;
     }
 
-    trackmap[status.sector] = 
-        bs2char[(status.read_result || 
+    trackmap[status.sector] =
+        bs2char[(status.read_result ||
                  status.write_result) ? bs_error : bs_copied];
 
     printf("\r%2d: %-24s%3d%%  %4d/%d", status.track, trackmap,
@@ -373,7 +373,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
          * If the user specified auto transfer mode, find out
          * which transfer mode to use.
          */
-        settings->transfer_mode = 
+        settings->transfer_mode =
             d82copy_check_auto_transfer_mode(fd_cbm,
                 settings->transfer_mode,
                 atoi(src_is_cbm ? src_arg : dst_arg));
@@ -408,6 +408,6 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     cbmlibmisc_strfree(adapter);
     free(settings);
-    
+
     return rv;
 }

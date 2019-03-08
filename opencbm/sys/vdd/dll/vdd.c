@@ -7,7 +7,7 @@
  *  Copyright 2004 Spiro Trikaliotis
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/vdd/dll/vdd.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -43,7 +43,7 @@
 
 /*! we are exporting the functions */
 #undef EXTERN
-#define EXTERN __declspec(dllexport) 
+#define EXTERN __declspec(dllexport)
 
 EXTERN BOOL VDDInitialize(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved);
 EXTERN VOID VDDRegisterInit(VOID);
@@ -86,7 +86,7 @@ VDDBlockHandler(VOID)
  \param Reserved
    Not used.
 
- \return 
+ \return
    Returns TRUE on success, else FALSE.
 */
 
@@ -97,7 +97,7 @@ VDDInitialize(IN HANDLE Module, IN DWORD Reason, IN LPVOID Reserved)
 
     DBG_PRINT((DBG_PREFIX "OpencbmVDD.Entry: " __DATE__ " " __TIME__));
 
-    switch (Reason) 
+    switch (Reason)
     {
         case DLL_PROCESS_ATTACH:
             vdd_handle = Module;
@@ -204,7 +204,7 @@ VDDDispatch(VOID)
         case FC_IEC_SETRELEASE:  error = vdd_iec_setrelease(cbmfile); break;
         case FC_IEC_WAIT:        error = vdd_iec_wait(cbmfile);      break;
         case FC_UPLOAD:          error = vdd_upload(cbmfile);        break;
-        case FC_DEVICE_STATUS:   error = vdd_device_status(cbmfile); break; 
+        case FC_DEVICE_STATUS:   error = vdd_device_status(cbmfile); break;
         case FC_EXEC_COMMAND:    error = vdd_exec_command(cbmfile);  break;
         case FC_IDENTIFY:        error = vdd_identify(cbmfile);      break;
         case FC_IDENTIFY_XP1541: error = vdd_identify_xp1541(cbmfile); break;

@@ -35,4 +35,3 @@ br1     sei
         jmp $0506
         lda #$66
         jmp $ff3f
-

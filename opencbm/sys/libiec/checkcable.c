@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/checkcable.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -134,14 +134,14 @@ cbmiec_set_cablevalues(IN PDEVICE_EXTENSION Pdx)
 
     /* remember the current state of the output bits */
 
-    Pdx->IecOutBits = (READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor) 
+    Pdx->IecOutBits = (READ_PORT_UCHAR(OUT_PORT) ^ Pdx->IecOutEor)
                       & (PP_DATA_OUT|PP_CLK_OUT|PP_ATN_OUT|PP_RESET_OUT);
 
     DBG_CABLE((DBG_PREFIX "IecAtnOut = %02x IecAtnIn = %02x", Pdx->IecAtnOut, Pdx->IecAtnIn));
     DBG_CABLE((DBG_PREFIX "IecClkOut = %02x IecClkIn = %02x", Pdx->IecClkOut, Pdx->IecClkIn));
     DBG_CABLE((DBG_PREFIX "IecDataOut = %02x IecDataIn = %02x", Pdx->IecDataOut, Pdx->IecDataIn));
     DBG_CABLE((DBG_PREFIX "IecResetOut = %02x IecResetIn = %02x", Pdx->IecResetOut, Pdx->IecResetIn));
-    DBG_CABLE((DBG_PREFIX "EOR     Out = %02x EOR     In = %02x - outbits = %02x", Pdx->IecOutEor, 
+    DBG_CABLE((DBG_PREFIX "EOR     Out = %02x EOR     In = %02x - outbits = %02x", Pdx->IecOutEor,
         Pdx->IecInEor, Pdx->IecOutBits));
 
     FUNC_LEAVE();
@@ -162,7 +162,7 @@ cbmiec_set_cablevalues(IN PDEVICE_EXTENSION Pdx)
  \param _y
 
 */
-#define SHOW(_x, _y) 
+#define SHOW(_x, _y)
     // DBG_CABLE((DBG_PREFIX "CBMIEC_GET(" #_x ") = $%02x, READ(" #_y ") = $%02x", CBMIEC_GET(_x), READ(_y) ));
 
 /*! \brief @@@@@ \todo document */
@@ -181,7 +181,7 @@ cbmiec_set_cablevalues(IN PDEVICE_EXTENSION Pdx)
  \param Pdx
    Pointer to the device extension.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 
@@ -189,7 +189,7 @@ cbmiec_set_cablevalues(IN PDEVICE_EXTENSION Pdx)
    Do a more sophisticated test
 */
 static NTSTATUS
-cbmiec_testcable(PDEVICE_EXTENSION Pdx) 
+cbmiec_testcable(PDEVICE_EXTENSION Pdx)
 {
     NTSTATUS ntStatus = STATUS_PORT_DISCONNECTED;
     UCHAR ch;
@@ -204,7 +204,7 @@ cbmiec_testcable(PDEVICE_EXTENSION Pdx)
         READ_PORT_UCHAR(OUT_PORT), ch, ch ^ Pdx->IecOutEor, Pdx->IecOutEor));
 
     do {
-        /* 
+        /*
          * Do some tests
          */
 
@@ -326,12 +326,12 @@ SHOW1();
  \param Pdx
    Pointer to the device extension.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */
 NTSTATUS
-cbmiec_checkcable(PDEVICE_EXTENSION Pdx) 
+cbmiec_checkcable(PDEVICE_EXTENSION Pdx)
 {
     NTSTATUS ntStatus = STATUS_SUCCESS;
     const wchar_t *msgAuto = L"";
@@ -363,7 +363,7 @@ DBG_CABLE((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSe
 
         case IEC_CABLETYPE_XA:
 
-            /* the user specified a cable type, use this 
+            /* the user specified a cable type, use this
              * without questioning:
              */
 
@@ -452,7 +452,7 @@ DBG_CABLE((DBG_PREFIX "IecCableUserSet = %d, IecCable = %d", Pdx->IecCableUserSe
             DBG_SUCCESS((DBG_PREFIX "using %ws cable%ws%s",
                 msgCable, msgAuto, msgExtra));
 
-            LogErrorString(Pdx->Fdo, 
+            LogErrorString(Pdx->Fdo,
                 (Pdx->IecCable == IEC_CABLETYPE_XE) ? CBM_IEC_INIT_XE1541 : CBM_IEC_INIT,
                 msgCable, msgAuto);
 

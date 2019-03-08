@@ -9,7 +9,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file libmisc/LINUX/getpluginaddress.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
 ** \n
@@ -28,7 +28,7 @@
 
  \return
 */
-SHARED_OBJECT_HANDLE 
+SHARED_OBJECT_HANDLE
 plugin_load(const char * name)
 {
     void * ret = NULL;

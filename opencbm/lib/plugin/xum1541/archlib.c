@@ -13,7 +13,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xum1541/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
 ** \n
@@ -59,19 +59,19 @@
    The port specification for the driver to open. If not set (== NULL),
    the "default" driver is used. The exact meaning depends upon the plugin.
 
- \return 
+ \return
    Returns a pointer to a null-terminated string containing the
    driver name, or NULL if an error occurred.
 
  \bug
-   PortNumber is not allowed to exceed 255. 
+   PortNumber is not allowed to exceed 255.
 */
 
 const char * CBMAPIDECL
 opencbm_plugin_get_driver_name(const char * const Port)
 {
     int portNumber = 0;
-    
+
     if(Port != NULL) {
         portNumber = strtoul(Port, NULL, 10);
     }
@@ -83,18 +83,18 @@ opencbm_plugin_get_driver_name(const char * const Port)
 
  This function Opens the driver.
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the driver.
 
  \param Port
    The port specification for the driver to open. If not set (== NULL),
    the "default" driver is used. The exact meaning depends upon the plugin.
 
- \return 
+ \return
    ==0: This function completed successfully
    !=0: otherwise
 
- PortNumber is not allowed to exceed 10. 
+ PortNumber is not allowed to exceed 10.
 
  cbm_driver_open() should be balanced with cbm_driver_close().
 */
@@ -103,7 +103,7 @@ int CBMAPIDECL
 opencbm_plugin_driver_open(CBM_FILE *HandleDevice, const char * const Port)
 {
     int portNumber = 0;
-    
+
     if(Port != NULL) {
         portNumber = strtoul(Port, NULL, 10);
     }
@@ -119,9 +119,9 @@ opencbm_plugin_driver_open(CBM_FILE *HandleDevice, const char * const Port)
    A CBM_FILE which contains the file handle of the driver.
 
  cbm_driver_close() should be called to balance a previous call to
- cbm_driver_open(). 
- 
- If cbm_driver_open() did not succeed, it is illegal to 
+ cbm_driver_open().
+
+ If cbm_driver_open() did not succeed, it is illegal to
  call cbm_driver_close().
 */
 
@@ -138,10 +138,10 @@ opencbm_plugin_driver_close(CBM_FILE HandleDevice)
  no other program or driver can allocate the parallel port and
  interfere with the communication.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call cbm_driver_close().
 
  \remark
@@ -149,7 +149,7 @@ opencbm_plugin_driver_close(CBM_FILE HandleDevice)
 
  Note that it is *not* necessary to call this function
  (or cbm_unlock()) when all communication is done with
- the handle to opencbm open (that is, between 
+ the handle to opencbm open (that is, between
  cbm_driver_open() and cbm_driver_close(). You only
  need this function to pin the driver to the port even
  when cbm_driver_close() is to be executed (for example,
@@ -168,10 +168,10 @@ opencbm_plugin_lock(CBM_FILE HandleDevice)
  parallel port and do their own communication with
  whatever device they use.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call cbm_driver_close().
 
  \remark
@@ -187,7 +187,7 @@ opencbm_plugin_unlock(CBM_FILE HandleDevice)
 
  This function sends data after a cbm_listen().
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \param Buffer
@@ -197,13 +197,13 @@ opencbm_plugin_unlock(CBM_FILE HandleDevice)
    Number of bytes to be written.
 
  \return
-   >= 0: The actual number of bytes written. 
+   >= 0: The actual number of bytes written.
    <0  indicates an error.
 
  This function tries to write Count bytes. Anyway, if an error
  occurs, this function can stop prematurely.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -217,7 +217,7 @@ opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count
 
  This function retrieves data after a cbm_talk().
 
- \param HandleDevice 
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \param Buffer
@@ -227,12 +227,12 @@ opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count
    Number of bytes to be read at most.
 
  \return
-   >= 0: The actual number of bytes read. 
+   >= 0: The actual number of bytes read.
    <0  indicates an error.
 
  At most Count bytes are read.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -250,7 +250,7 @@ opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
  This prepares a LISTENer, so that it will wait for our
  bytes we will write in the future.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
@@ -263,7 +263,7 @@ opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
  \return
    0 means success, else failure
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -284,7 +284,7 @@ opencbm_plugin_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsign
  This prepares a TALKer, so that it will prepare to send
  us some bytes in the future.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
@@ -297,7 +297,7 @@ opencbm_plugin_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsign
  \return
    0 means success, else failure
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -316,7 +316,7 @@ opencbm_plugin_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned
 
  This function opens a file on the IEC serial bus.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
@@ -329,7 +329,7 @@ opencbm_plugin_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned
  \return
    0 means success, else failure
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -348,7 +348,7 @@ opencbm_plugin_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned
 
  This function closes a file on the IEC serial bus.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
@@ -361,7 +361,7 @@ opencbm_plugin_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned
  \return
    0 on success, else failure
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -381,9 +381,9 @@ opencbm_plugin_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigne
  This function sends an UNLISTEN on the IEC serial bus.
  Other than LISTEN and TALK, an UNLISTEN is not directed
  to just one device, but to all devices on that IEC
- serial bus. 
+ serial bus.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \return
@@ -392,7 +392,7 @@ opencbm_plugin_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigne
  At least on a 1541 floppy drive, an UNLISTEN also undoes
  a previous TALK.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -411,9 +411,9 @@ opencbm_plugin_unlisten(CBM_FILE HandleDevice)
  This function sends an UNTALK on the IEC serial bus.
  Other than LISTEN and TALK, an UNTALK is not directed
  to just one device, but to all devices on that IEC
- serial bus. 
+ serial bus.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \return
@@ -422,7 +422,7 @@ opencbm_plugin_unlisten(CBM_FILE HandleDevice)
  At least on a 1541 floppy drive, an UNTALK also undoes
  a previous LISTEN.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -439,10 +439,10 @@ opencbm_plugin_untalk(CBM_FILE HandleDevice)
 
 /*! \brief Get EOI flag after bus read
 
- This function gets the EOI ("End of Information") flag 
+ This function gets the EOI ("End of Information") flag
  after reading the IEC serial bus.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \return
@@ -453,7 +453,7 @@ opencbm_plugin_untalk(CBM_FILE HandleDevice)
  occurred on the IEC serial bus, or an EOI was signalled.
  To find out the cause, check with this function.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -468,13 +468,13 @@ opencbm_plugin_get_eoi(CBM_FILE HandleDevice)
  This function resets the EOI ("End of Information") flag
  which might be still set after reading the IEC serial bus.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \return
    0 on success, != 0 means an error has occured.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -489,7 +489,7 @@ opencbm_plugin_clear_eoi(CBM_FILE HandleDevice)
  This function performs a hardware RESET of all devices on
  the IEC serial bus.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \return
@@ -501,7 +501,7 @@ opencbm_plugin_clear_eoi(CBM_FILE HandleDevice)
  Control is returned after a delay which ensures that all
  devices are ready again.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -517,7 +517,7 @@ opencbm_plugin_reset(CBM_FILE HandleDevice)
 
 /*! \brief Read a byte from a XP1541/XP1571 cable
 
- This function reads a single byte from the parallel portion of 
+ This function reads a single byte from the parallel portion of
  an XP1541/1571 cable.
 
  \param HandleDevice
@@ -529,7 +529,7 @@ opencbm_plugin_reset(CBM_FILE HandleDevice)
  This function reads the current state of the port. No handshaking
  is performed at all.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -544,7 +544,7 @@ opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 
 /*! \brief Write a byte to a XP1541/XP1571 cable
 
- This function writes a single byte to the parallel portion of 
+ This function writes a single byte to the parallel portion of
  a XP1541/1571 cable.
 
  \param HandleDevice
@@ -558,7 +558,7 @@ opencbm_plugin_pp_read(CBM_FILE HandleDevice)
  This function just writes on the port. No handshaking
  is performed at all.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -585,7 +585,7 @@ opencbm_plugin_pp_write(CBM_FILE HandleDevice, unsigned char Byte)
  This function just reads the port. No handshaking
  is performed at all.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -610,7 +610,7 @@ opencbm_plugin_iec_poll(CBM_FILE HandleDevice)
    The line to be activated. This must be exactly one of
    IEC_DATA, IEC_CLOCK, IEC_ATN, or IEC_RESET.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -634,7 +634,7 @@ opencbm_plugin_iec_set(CBM_FILE HandleDevice, int Line)
    The line to be deactivated. This must be exactly one of
    IEC_DATA, IEC_CLOCK, IEC_ATN, or IEC_RESET.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -649,7 +649,7 @@ opencbm_plugin_iec_release(CBM_FILE HandleDevice, int Line)
 
 /*! \brief Activate and deactive a line on the IEC serial bus
 
- This function activates (sets to 0V, L) and deactivates 
+ This function activates (sets to 0V, L) and deactivates
  (set to 5V, H) lines on the IEC serial bus.
 
  \param HandleDevice
@@ -663,7 +663,7 @@ opencbm_plugin_iec_release(CBM_FILE HandleDevice, int Line)
    The mask of which lines should be released. This has to be a bitwise
    OR between the constants IEC_DATA, IEC_CLOCK, IEC_ATN, and IEC_RESET
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug
@@ -699,7 +699,7 @@ opencbm_plugin_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
  \return
    The state of the IEC bus on return (like cbm_iec_poll).
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 
  \bug

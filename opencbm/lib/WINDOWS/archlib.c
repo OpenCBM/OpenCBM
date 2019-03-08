@@ -9,7 +9,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/WINDOWS/archlib.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
 ** \n
@@ -58,7 +58,7 @@
  \param Reserved
    Not used.
 
- \return 
+ \return
    Returns TRUE on success, else FALSE.
 
  If this function returns FALSE, windows reports that loading the DLL
@@ -123,7 +123,7 @@ BOOL CBMAPIDECL opencbm_plugin_install_generic(const char * DefaultPluginname, u
         }
 
         if (DefaultPluginname != NULL) {
-            error = opencbm_configuration_set_data(configuration_handle, 
+            error = opencbm_configuration_set_data(configuration_handle,
                        "plugins", "default", DefaultPluginname);
         }
         else {
@@ -194,7 +194,7 @@ BOOL CBMAPIDECL opencbm_plugin_install_plugin_data(const char * Pluginname, cons
 
     opencbm_configuration_handle configuration_handle;
 
-    const char * configurationFilename = NULL; 
+    const char * configurationFilename = NULL;
 
     FUNC_ENTER();
 
@@ -213,7 +213,7 @@ BOOL CBMAPIDECL opencbm_plugin_install_plugin_data(const char * Pluginname, cons
             break;
         }
 
-        error = opencbm_configuration_set_data(configuration_handle, 
+        error = opencbm_configuration_set_data(configuration_handle,
                    Pluginname, "location", Filepath);
 
         if (error == 0) {

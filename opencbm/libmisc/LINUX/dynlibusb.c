@@ -8,7 +8,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file libmisc/LINUX/dynlibusb.h \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -53,8 +53,8 @@ usb_dll_t usb = {
     .get_bus_number = libusb_get_bus_number,
     .get_device_address = libusb_get_device_address,
 #elif HAVE_LIBUSB0
-    .open = usb_open, 
-    .close = usb_close, 
+    .open = usb_open,
+    .close = usb_close,
     .bulk_write = usb_bulk_write,
     .bulk_read = usb_bulk_read,
     .control_msg = usb_control_msg,
@@ -62,11 +62,11 @@ usb_dll_t usb = {
     .claim_interface = usb_claim_interface,
     .release_interface = usb_release_interface,
     .clear_halt = usb_clear_halt,
-    .strerror = usb_strerror, 
+    .strerror = usb_strerror,
     .error_name = libusb0_dummy_error_name,
-    .init = usb_init, 
-    .find_busses = usb_find_busses, 
-    .find_devices = usb_find_devices, 
+    .init = usb_init,
+    .find_busses = usb_find_busses,
+    .find_devices = usb_find_devices,
     .device = usb_device,
     .get_busses = usb_get_busses
 #endif

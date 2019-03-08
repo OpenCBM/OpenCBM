@@ -258,7 +258,7 @@ static int cbmcopy_read(CBM_FILE fd,
 
             SETSTATEDEBUG(DebugBlockCount++);    // preset condition
 
-            /* @SRT: FIXME! the next statement is dangerous: If there 
+            /* @SRT: FIXME! the next statement is dangerous: If there
              * is no memory block large enough for reallocating, the
              * memory block is not freed, but realloc() returns NULL,
              * thus, we have a memory leak.
@@ -710,11 +710,11 @@ int cbmcopy_read_file(CBM_FILE fd,
 
 /*! \brief write a data block of a file with a sequence of byte transfers
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param wb_func
-    Callback to the write_byte function 
+    Callback to the write_byte function
 
  \param data
     Pointer to buffer which contains the data to be written to the OpenCBM backend
@@ -753,7 +753,7 @@ int write_block_generic(CBM_FILE HandleDevice, const void *data, unsigned char s
 
 #ifdef LIBCBMCOPY_DEBUG
     msg_cb( sev_debug, "send block data" );
-#endif 
+#endif
     while( size>0 )
     {
         SETSTATEDEBUG(DebugByteCount++);
@@ -773,7 +773,7 @@ int write_block_generic(CBM_FILE HandleDevice, const void *data, unsigned char s
 
 /*! \brief read a data block of a file with a sequence of byte transfers
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
@@ -783,7 +783,7 @@ int write_block_generic(CBM_FILE HandleDevice, const void *data, unsigned char s
     The maximum size of the buffer
 
  \param rb_func
-    Callback to the read_byte function 
+    Callback to the read_byte function
 
  \param msg_cb
     Handle to cbmcopy's log message handler
@@ -805,7 +805,7 @@ int read_block_generic(CBM_FILE HandleDevice, void *data, size_t size, read_byte
     SETSTATEDEBUG((void)0);
 #ifdef LIBCBMCOPY_DEBUG
     msg_cb( sev_debug, "received byte count: %d", c );
-#endif 
+#endif
 
     rv = c;
     if( c == 0xff )
@@ -826,7 +826,7 @@ int read_block_generic(CBM_FILE HandleDevice, void *data, size_t size, read_byte
     SETSTATEDEBUG(DebugByteCount=0);
 #ifdef LIBCBMCOPY_DEBUG
     msg_cb( sev_debug, "receive block data (%d)", c );
-#endif 
+#endif
     while( c>0 )
     {
         SETSTATEDEBUG(DebugByteCount++);

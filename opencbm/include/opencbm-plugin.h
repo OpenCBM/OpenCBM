@@ -25,13 +25,13 @@
 
 \return
 */
-typedef int CBMAPIDECL opencbm_plugin_init_t(void); 
+typedef int CBMAPIDECL opencbm_plugin_init_t(void);
 
 /*! \brief @@@@@ \todo document
 
 \return
 */
-typedef void CBMAPIDECL opencbm_plugin_uninit_t(void); 
+typedef void CBMAPIDECL opencbm_plugin_uninit_t(void);
 
 /*! \brief @@@@@ \todo document
 
@@ -344,7 +344,7 @@ typedef int CBMAPIDECL opencbm_plugin_tap_break_t(CBM_FILE HandleDevice);
 
 /*! \brief read a block of data from the OpenCBM backend with protocol serial-1
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
@@ -361,7 +361,7 @@ typedef int CBMAPIDECL opencbm_plugin_s1_read_n_t (CBM_FILE HandleDevice,       
 
 /*! \brief write a block of data to the OpenCBM backend with protocol serial-1
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
@@ -378,7 +378,7 @@ typedef int CBMAPIDECL opencbm_plugin_s1_write_n_t(CBM_FILE HandleDevice, const 
 
 /*! \brief read a block of data from the OpenCBM backend with protocol serial-2
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
@@ -395,7 +395,7 @@ typedef int CBMAPIDECL opencbm_plugin_s2_read_n_t (CBM_FILE HandleDevice,       
 
 /*! \brief write a block of data to the OpenCBM backend with protocol serial-2
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
@@ -412,7 +412,7 @@ typedef int CBMAPIDECL opencbm_plugin_s2_write_n_t(CBM_FILE HandleDevice, const 
 
 /*! \brief read a block of data from the OpenCBM backend with protocol parallel/d64copy
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
@@ -428,10 +428,10 @@ typedef int CBMAPIDECL opencbm_plugin_s2_write_n_t(CBM_FILE HandleDevice, const 
 typedef int CBMAPIDECL opencbm_plugin_s3_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
 
 /*! \brief write a block of data to the OpenCBM backend with protocol serial-3
- 
+
  \param HandleDevice
     Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
- 
+
  \param data
     Pointer to buffer which contains the data to be written to the OpenCBM backend
 
@@ -448,7 +448,7 @@ typedef int CBMAPIDECL opencbm_plugin_s3_write_n_t(CBM_FILE HandleDevice, const 
 
  \param HandleDevice
     Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
- 
+
  \param data
     Pointer to a buffer which will contain the data read from the OpenCBM backend
 
@@ -463,7 +463,7 @@ typedef int CBMAPIDECL opencbm_plugin_pp_dc_read_n_t (CBM_FILE HandleDevice,    
 
 /*! \brief write a block of data to the OpenCBM backend with protocol parallel/d64copy
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
@@ -480,7 +480,7 @@ typedef int CBMAPIDECL opencbm_plugin_pp_dc_write_n_t(CBM_FILE HandleDevice, con
 
 /*! \brief read a block of data from the OpenCBM backend with protocol parallel/cbmcopy
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data
@@ -497,7 +497,7 @@ typedef int CBMAPIDECL opencbm_plugin_pp_cc_read_n_t (CBM_FILE HandleDevice,    
 
 /*! \brief write a block of data to the OpenCBM backend with protocol parallel/cbmcopy
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param data

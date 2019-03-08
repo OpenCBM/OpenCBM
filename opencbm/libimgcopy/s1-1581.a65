@@ -97,4 +97,3 @@ read3   bit $4001
 sub1    lda #$12
         sta $4001
         rts
-

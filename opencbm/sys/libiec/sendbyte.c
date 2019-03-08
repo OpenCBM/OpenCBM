@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/sendbyte.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -31,8 +31,8 @@
  \param Byte
    The byte to be output
 
- \return 
-   If the routine succeeds - that is, the listener acknowledged 
+ \return
+   If the routine succeeds - that is, the listener acknowledged
    the byte -, it returns TRUE. Otherwise, it returns FALSE.
 */
 BOOLEAN
@@ -46,7 +46,7 @@ cbmiec_send_byte(IN PDEVICE_EXTENSION Pdx, IN UCHAR Byte)
     PERF_EVENT_VERBOSE(0x1050, 0);
 
     DBG_SUCCESS((DBG_PREFIX "send_byte %02x", Byte));
-    
+
     PERF_EVENT_VERBOSE(0x1051, 0);
 
     ack = FALSE;

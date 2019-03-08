@@ -10,7 +10,7 @@
  *  This file is heavily based on LPTDTC by Wolfgang Moser.
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/nt4/PortAccessNt4.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -273,7 +273,7 @@ EPPcontrol(PUCHAR port){
             {
                 if(EPPctrl&mask)
                     done1[i]++;
-                else 
+                else
                     done0[i]++;
             }
         }
@@ -434,7 +434,7 @@ prport(PUCHAR port)
  This function sets the operational mode of the parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  This function has to be balanced with a corresponding ParPortUnsetModeNt4()
@@ -484,7 +484,7 @@ ParPortSetModeNt4(PDEVICE_EXTENSION Pdx)
  This function unsets the operational mode of the parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  This function mustn't be called without a prior call to
@@ -521,7 +521,7 @@ cbmiec_udelay(IN ULONG howlong); // howlong in ms!
  This function sets the operational mode of the parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  This function has to be balanced with a corresponding ParPortUnsetMode()
@@ -556,7 +556,7 @@ ParPortSetMode(PDEVICE_EXTENSION Pdx)
  This function unsets the operational mode of the parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  This function mustn't be called without a prior call to

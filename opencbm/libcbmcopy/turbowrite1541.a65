@@ -199,4 +199,3 @@ nobcinc	lda #$02
 	.byte $2c
 full	lda #$01
 	jmp $f969	; terminate job
-

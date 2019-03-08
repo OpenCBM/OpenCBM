@@ -33,9 +33,9 @@
  #define PIND       PINdef
 #endif
 
-#define IeeeGetPort(a)  (a & 0xf0) 
-#define IeeeGetBit(a)   (a & 0xf) 
-#define IeeeIsPort(a,b) ((a & 0xf0) == b) 
+#define IeeeGetPort(a)  (a & 0xf0)
+#define IeeeGetBit(a)   (a & 0xf)
+#define IeeeIsPort(a,b) ((a & 0xf0) == b)
 
 #define IeeeDdr(a)      (IeeeIsPort(a,0xA0) ? &DDRA  : \
     IeeeIsPort(a,0xC0) ? &DDRC  : IeeeIsPort(a,0xD0) ? &DDRD  : &DDRB)
@@ -65,7 +65,7 @@
 #define IeeeSetPullup(state,in,out)   {if(IeeeIsSame(in,out)) {IeeeSetPullupSame(state,in);} else {IeeeSetPort(state,in);}}
 
 // set IEEE pin to input
-#define IeeeSetInp(in,out)            {IeeeSet(1,in,out);} 
+#define IeeeSetInp(in,out)            {IeeeSet(1,in,out);}
 
 // set direction register and pullup
 #define IeeeInitIO(in,out)            {if(IeeeIsSame(in,out)) {IeeeSetSame(1,in);} else {IeeeSetSame(0,out);IeeeSetSame(1,in);}}
@@ -77,7 +77,7 @@
 #define IeeeGet(port)                 (IeeePin(port) & (1<<IeeeGetBit(port)))
 
 // IEEE data lines
-#define IeeeDataDdr(port, ddr)  *(IeeeDdr(port)) = ddr 
+#define IeeeDataDdr(port, ddr)  *(IeeeDdr(port)) = ddr
 #define IeeeDataPort(port, by)  *(IeeePort(port)) = by
 #define IeeeDataOut(by)         IeeeDataDdr(IEEE_DATA_IO, 0x00); \
     IeeeDataPort(IEEE_DATA_IO, by);IeeeDataDdr(IEEE_DATA_IO, ~by);
@@ -116,7 +116,7 @@
 // STATICS
 //static uint8_t ieee_device;             // current device#
 //static uint8_t ieee_devtyp;             // DT_2030,DT_4040,DT_8050,DT_8250
-static uint8_t ieee_status;             // bit0=timeout out; bit1=timeout in; 
+static uint8_t ieee_status;             // bit0=timeout out; bit1=timeout in;
                                         // bit6=EOI, bit7=device not present
 static volatile uint16_t ieee_timer;
 static int16_t last_byte;               // -1=kein byte
@@ -152,7 +152,7 @@ static struct ProtocolFunctions ieeeFunctions = {
 };
 
 //
-// IEEE timer solution without interrupt 
+// IEEE timer solution without interrupt
 //
 static bool IsTimeout(void)
 {
@@ -210,7 +210,7 @@ static void IeeeInitLines(void)
     IeeeInitIO(IEEE_IFC_I, IEEE_IFC_O);
     IeeeInitIO(IEEE_SRQ_I, IEEE_SRQ_O);
     IeeeInitIO(IEEE_REN_I, IEEE_REN_O);
-    IeeeInitIO(IEEE_NDAC_I, IEEE_NDAC_O); 
+    IeeeInitIO(IEEE_NDAC_I, IEEE_NDAC_O);
     IeeeInitIO(IEEE_NRFD_I, IEEE_NRFD_O);
 
     ieee_status = 0;
@@ -400,11 +400,11 @@ static void ieee_setrelease(uint8_t set, uint8_t release)
     // not supported yet
 }
 
-/* 
+/*
  * Write bytes to the drive via the CBM default protocol.
  * Returns number of successful written bytes or 0 on error.
  */
-static uint16_t 
+static uint16_t
 ieee_raw_write(uint16_t len, uint8_t flags)
 {
     uint8_t atn, talk, data, device, sa;
@@ -421,8 +421,8 @@ ieee_raw_write(uint16_t len, uint8_t flags)
 
     if(atn && len >= 1)
     {
-        // get device# from USB 
-        if (usbRecvByte(&device) != 0) 
+        // get device# from USB
+        if (usbRecvByte(&device) != 0)
         {
             return 0;
         }
@@ -430,11 +430,11 @@ ieee_raw_write(uint16_t len, uint8_t flags)
         if(len == 0 || ((device & 0x1f) == 0x1f))
         {
             // unlisten, untalk
-            if (device & 0x40) 
+            if (device & 0x40)
             {
                 IeeeUntalk();
             }
-            if (device & 0x20) 
+            if (device & 0x20)
             {
                 IeeeUnlisten();
             }
@@ -442,13 +442,13 @@ ieee_raw_write(uint16_t len, uint8_t flags)
         else
         {
             // get secondary-address from USB
-            if (usbRecvByte(&sa) != 0) 
+            if (usbRecvByte(&sa) != 0)
             {
                 return 0;
             }
             len--;
 
-            if (talk) 
+            if (talk)
             {
                 IeeeTalk(device, sa);
                 len = 0;
@@ -483,16 +483,16 @@ ieee_raw_write(uint16_t len, uint8_t flags)
     //
     while (len != 0) {
         // Get a data byte from host, quitting if it signalled an abort.
-        if (usbRecvByte(&data) != 0) 
+        if (usbRecvByte(&data) != 0)
         {
             rv = 0;
             break;
         }
-        if (IeeeBsout(data)) 
+        if (IeeeBsout(data))
         {
             rv = 0;
             break;
-        } 
+        }
         len--;
 
         // watchdog
@@ -503,7 +503,7 @@ ieee_raw_write(uint16_t len, uint8_t flags)
     return rv;
 }
 
-/* 
+/*
  * Reads bytes from the drive via the CBM default protocol.
  * Returns number of successful written bytes or 0 on error.
  */
@@ -531,7 +531,7 @@ ieee_raw_read(uint16_t len)
             if(!(ieee_status & IEEE_ST_RDTO))
                 break;
 
-            if(to >= 20 || !TimerWorker()) 
+            if(to >= 20 || !TimerWorker())
             {
                 /* 1.3 (20 * 65ms) sec timeout */
                 usbIoDone();
@@ -540,7 +540,7 @@ ieee_raw_read(uint16_t len)
             to++;
         }
 
- 
+
         // Send the data byte to host, quitting if it signalled an abort.
         if (usbSendByte(by))
             break;
@@ -554,17 +554,17 @@ ieee_raw_read(uint16_t len)
 }
 
 //----------------------------------------------------------------------
-// IEEE SEND BYTE 
+// IEEE SEND BYTE
 static int8_t IeeeByteOut(uint8_t by)
 {
     int8_t     rc=0;
 
     IeeeDav(1);
 
-    if(IEEE_NRFD && IEEE_NDAC) 
+    if(IEEE_NRFD && IEEE_NDAC)
     {
         ieee_status |= IEEE_ST_DNP;                    // !!DEVICE NOT PRESENT
-        return 1;            
+        return 1;
     }
 
     while(!IEEE_NRFD)                                // WAIT WHILE NRFD
@@ -593,7 +593,7 @@ static int8_t IeeeByteOut(uint8_t by)
 }
 
 //----------------------------------------------------------------------
-// IEEE GET BYTE 
+// IEEE GET BYTE
 static uint8_t IeeeIn(void)
 {
     uint8_t     rc=0;
@@ -605,12 +605,12 @@ static uint8_t IeeeIn(void)
 
     IeeeNdac(0);                    // NDAC low
     IeeeNrfd(1);                    // ready for data!
-    
+
     ieee_timer = 65;                // 65ms timeout
 
     while(1)                        // WAIT FOR DAV
     {
-        if(!IEEE_DAV) 
+        if(!IEEE_DAV)
         {
             break;
         }
@@ -646,7 +646,7 @@ static uint8_t IeeeIn(void)
 // IEEE SEND ATN
 static int8_t IeeeAtnOut(uint8_t by)
 {
-    while(1) 
+    while(1)
     {
         IeeeNrfd(1);
         IeeeNdac(1);
@@ -724,13 +724,13 @@ static int8_t IeeeSecTalk(uint8_t sa)
 }
 
 //----------------------------------------------------------------------
-// IEEE SEND BYTE 
+// IEEE SEND BYTE
 static int8_t IeeeBsout(uint8_t by)
 {
     if(last_byte >= 0)
     {
         // SEND BYTE IN BUFFER
-        if(IeeeByteOut(last_byte)) 
+        if(IeeeByteOut(last_byte))
             return 1;
     }
     last_byte = by;
@@ -738,7 +738,7 @@ static int8_t IeeeBsout(uint8_t by)
 }
 
 //----------------------------------------------------------------------
-// IEEE GET BYTE 
+// IEEE GET BYTE
 static uint8_t IeeeBasin()
 {
     if(!(eoi))
@@ -816,14 +816,14 @@ static int8_t IeeeOpen(uint8_t dev, uint8_t sa, char *s)
         rc = 1;
     else if(IeeeSecListen(0xf0 | (sa & 0x0f)))
         rc = 1;
-    else 
+    else
     {
         //debug_LED_blink(1);
         if(s != NULL)
         {
             while(*s)
             {
-                if(IeeeBsout(*s)) 
+                if(IeeeBsout(*s))
                 {
                     rc = 1;
                     break;

@@ -13,7 +13,7 @@
 
 //#define LIBD82COPY_DEBUG    /* enable state logging and debugging */
 
- 
+
 /* standard .d80 track count */
 #define D80_TRACKS   77
 /* standard .d82 track count */
@@ -26,7 +26,7 @@
 #define D80_BLOCKS  (STD_BLOCKS)
 #define D82_BLOCKS  (STD_BLOCKS *2)
 
- 
+
 #define MAX_SECTORS  29
 #define MAX_TRACKS   D82_TRACKS
 

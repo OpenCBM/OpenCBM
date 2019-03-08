@@ -15,7 +15,7 @@
 
 //#define LIBIMGCOPY_DEBUG    /* enable state logging and debugging */
 
- 
+
 /* standard .d80 track count */
 #define D80_TRACKS   77
 /* standard .d82 track count */
@@ -33,13 +33,13 @@
 
 #define D81_BLOCKS  (40 * D81_TRACKS)
 
- 
+
 #define D80_MAX_SECTORS  29
 #define D81_MAX_SECTORS  40
 
 
-#define MAX_SECTORS		D81_MAX_SECTORS
-#define MAX_TRACKS		D82_TRACKS
+#define MAX_SECTORS     D81_MAX_SECTORS
+#define MAX_TRACKS      D82_TRACKS
 
 
 
@@ -53,60 +53,60 @@ extern "C" {
  */
 typedef enum
 {
-	bm_ignore = 0,      		/* all sectors                    			*/
-	bm_allocated = 1,   		/* allocated sectors              		*/
-	bm_save = 2         		/* allocated sectors + BAM track  	*/
+    bm_ignore = 0,              /* all sectors                      */
+    bm_allocated = 1,           /* allocated sectors                */
+    bm_save = 2                 /* allocated sectors + BAM track    */
 } imgcopy_bam_mode;
 
 
 //
 // supported types of image file
-//	
+//
 typedef enum
 {
-	cbm_it_unknown = -1,    
-	D64 = 0,      				/* all D64 types                			*/
-	D71 = 1,   				/* D71				             		*/
-	D80 = 2,   				/* D80				             		*/
-	D81 = 3,   				/* D81				             		*/
-	D82 = 4   				/* D82				             		*/
+    cbm_it_unknown = -1,
+    D64 = 0,                /* all D64 types                        */
+    D71 = 1,                /* D71                                  */
+    D80 = 2,                /* D80                                  */
+    D81 = 3,                /* D81                                  */
+    D82 = 4                 /* D82                                  */
 } imgcopy_image_type;
 
 
 typedef enum
 {
-	em_always,
-	em_on_error,
-	em_never
+    em_always,
+    em_on_error,
+    em_never
 } imgcopy_error_mode;
 
 typedef enum
 {
-	bs_invalid = 0,
-	bs_dont_copy = 1,
-	bs_must_copy = 2,
-	bs_error = 3,
-	bs_copied = 4
+    bs_invalid = 0,
+    bs_dont_copy = 1,
+    bs_must_copy = 2,
+    bs_error = 3,
+    bs_copied = 4
 } imgcopy_bam_status;
 
 typedef struct
 {
-	int warp;
-	int retries;
-	int interleave;
-	int start_track;
-	int end_track;
-	int two_sided;
-	int transfer_mode;
-	int cat_track;
-	int bam_track;
-	int max_tracks;
-	int block_count;
-	imgcopy_image_type image_type;								// selected imagetype cause image filename extension
-	imgcopy_image_type image_type_std;							// standard imagetype for drive type
-	enum cbm_device_type_e drive_type;
-	imgcopy_bam_mode bam_mode;
-	imgcopy_error_mode error_mode;
+    int warp;
+    int retries;
+    int interleave;
+    int start_track;
+    int end_track;
+    int two_sided;
+    int transfer_mode;
+    int cat_track;
+    int bam_track;
+    int max_tracks;
+    int block_count;
+    imgcopy_image_type image_type;                              // selected imagetype cause image filename extension
+    imgcopy_image_type image_type_std;                          // standard imagetype for drive type
+    enum cbm_device_type_e drive_type;
+    imgcopy_bam_mode bam_mode;
+    imgcopy_error_mode error_mode;
 } imgcopy_settings;
 
 typedef struct

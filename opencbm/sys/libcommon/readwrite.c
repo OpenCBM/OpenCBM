@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/readwrite.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -24,10 +24,10 @@
 
  Check the buffer of an read or write IRP
 
- \param IrpSp: 
+ \param IrpSp:
    Pointer to the IO_STACK_LOCATION of the IRP which contains the input buffer.
 
- \return 
+ \return
    If the provided buffer is valid, this function returns
    STATUS_SUCCESS. If not, it returns an appropriate error value.
 */
@@ -45,11 +45,11 @@ cbm_checkbuffer(IN PIO_STACK_LOCATION IrpSp)
     DBG_ASSERT(&IrpSp->Parameters.Read.ByteOffset == &IrpSp->Parameters.Write.ByteOffset);
 
     if ((IrpSp->Parameters.Write.ByteOffset.HighPart != 0) ||
-        (IrpSp->Parameters.Write.ByteOffset.LowPart != 0)) 
+        (IrpSp->Parameters.Write.ByteOffset.LowPart != 0))
     {
         ntStatus = STATUS_INVALID_PARAMETER;
-    } 
-    else 
+    }
+    else
     {
         ntStatus = STATUS_SUCCESS;
     }
@@ -62,22 +62,22 @@ cbm_checkbuffer(IN PIO_STACK_LOCATION IrpSp)
  Services reads from or writes to the driver
 
  \param Fdo
-   Pointer to a DEVICE_OBJECT structure. 
-   This is the device object for the target device, 
+   Pointer to a DEVICE_OBJECT structure.
+   This is the device object for the target device,
    previously created by the driver's AddDevice routine.
 
  \param Irp
-   Pointer to an IRP structure that describes the requested I/O operation. 
+   Pointer to an IRP structure that describes the requested I/O operation.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 
- The driver's DriverEntry routine stored this routine's address in 
+ The driver's DriverEntry routine stored this routine's address in
  DriverObject->MajorFunction[IRP_MJ_READ] and
  DriverObject->MajorFunction[IRP_MJ_WRITE].
 
- Generally, all Dispatch routines execute in an arbitrary thread context 
+ Generally, all Dispatch routines execute in an arbitrary thread context
  at IRQL PASSIVE_LEVEL, but there are exceptions.
 */
 NTSTATUS
@@ -165,13 +165,13 @@ cbm_readwrite(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
    Pointer to the DEVICE_EXTENSION structure.
 
  \param Irp
-   Pointer to an IRP structure that describes the requested I/O operation. 
+   Pointer to an IRP structure that describes the requested I/O operation.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 
- This function does not perform any validity checks on the input and 
+ This function does not perform any validity checks on the input and
  output buffer! This should already been done in cbm_readwrite.
 */
 NTSTATUS
@@ -229,7 +229,7 @@ cbm_execute_readwrite(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
 
         switch (irpSp->MajorFunction)
         {
-        case IRP_MJ_READ: 
+        case IRP_MJ_READ:
             ntStatus = cbmiec_raw_read(Pdx, readWriteBuffer, readWriteLength,
                 &readWriteBytesProcessed);
             break;

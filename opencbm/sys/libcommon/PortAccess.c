@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/PortAccess.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -36,7 +36,7 @@
    This can be NULL.
 
  \param InBufferLength
-   Length of the buffer pointed to by InBuffer. 
+   Length of the buffer pointed to by InBuffer.
    Must be 0 if InBuffer == NULL.
 
  \param OutBuffer
@@ -44,14 +44,14 @@
    This can be NULL.
 
  \param OutBufferLength
-   Length of the buffer pointed to by OutBuffer. 
+   Length of the buffer pointed to by OutBuffer.
    Must be 0 if OutBuffer == NULL.
 
  This function must be run at IRQL == PASSIVE_LEVEL.
 */
 static NTSTATUS
-ParPortIoctlInOut(IN PDEVICE_EXTENSION Pdx, IN ULONG Ioctl, 
-                  IN PVOID InBuffer, IN ULONG InBufferLength, 
+ParPortIoctlInOut(IN PDEVICE_EXTENSION Pdx, IN ULONG Ioctl,
+                  IN PVOID InBuffer, IN ULONG InBufferLength,
                   OUT PVOID OutBuffer, IN ULONG OutBufferLength)
 {
     IO_STATUS_BLOCK ioStatusBlock;
@@ -119,19 +119,19 @@ ParPortIoctlInOut(IN PDEVICE_EXTENSION Pdx, IN ULONG Ioctl,
         {
             DBG_WARN((DBG_PREFIX "IoCallDriver FAILED!"));
         }
-        else 
+        else
         {
             // wait for the IRP to be completed
 
             DBG_IRQL( <= DISPATCH_LEVEL /* = only if timeout of NULL */);
             ntStatus = KeWaitForSingleObject(
-               &event, 
-               Executive, 
-               KernelMode, 
+               &event,
+               Executive,
+               KernelMode,
                FALSE, // we are not alertable
                NULL);
 
-            if (!NT_SUCCESS(ntStatus)) 
+            if (!NT_SUCCESS(ntStatus))
             {
                 DBG_WARN((DBG_PREFIX "KeWaitForSingleObject FAILED!"));
             }
@@ -147,7 +147,7 @@ ParPortIoctlInOut(IN PDEVICE_EXTENSION Pdx, IN ULONG Ioctl,
  drivers from accessing it.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  This function has to be balanced with a corresponding ParPortFree()
@@ -183,10 +183,10 @@ ParPortAllocate(PDEVICE_EXTENSION Pdx)
  This function frees a previously allocated parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
- If the parallel port has not been already allocated, 
+ If the parallel port has not been already allocated,
  this function just returns.
 
  This function must be run at IRQL == PASSIVE_LEVEL.
@@ -207,7 +207,7 @@ ParPortFree(PDEVICE_EXTENSION Pdx)
         // Free the parallel port. An old implementation (v0.03) used
         // IOCTL_INTERNAL_PARALLEL_PORT_FREE. But this is available only
         // on WDM, that is, W2000, WXP, and above. In fact, MS specifically
-        // discourages using that IOCTL, and tells us to use FreePort() 
+        // discourages using that IOCTL, and tells us to use FreePort()
         // instead.
         // Anyway, since I don't know what Microsoft will think in the future,
         // I decided to keep the old implementation, too.
@@ -240,11 +240,11 @@ ParPortFree(PDEVICE_EXTENSION Pdx)
    knowledge on the parallel port.
 
  This function should be called before any other parallel port
- function is called. Usually, it is done in the driver's 
+ function is called. Usually, it is done in the driver's
  AddDevice (WDM) or DriverEntry (WKM, WDM) function.
 
  One of the purposes of this function is to make sure the
- parallel port driver is not unloaded from memory (via 
+ parallel port driver is not unloaded from memory (via
  IoGetDeviceObjectPointer()).
 
  This function must be run at IRQL == PASSIVE_LEVEL.
@@ -262,7 +262,7 @@ ParPortInit(PUNICODE_STRING ParallelPortName, PDEVICE_EXTENSION Pdx)
     // First of all, get the PDEVICE_OBJECT of the parallel port driver
 
     DBG_IRQL( == PASSIVE_LEVEL);
-    ntStatus = IoGetDeviceObjectPointer(ParallelPortName, 
+    ntStatus = IoGetDeviceObjectPointer(ParallelPortName,
                                         FILE_READ_ATTRIBUTES,
                                         &Pdx->ParallelPortFileObject,
                                         &Pdx->ParallelPortFdo);
@@ -276,7 +276,7 @@ ParPortInit(PUNICODE_STRING ParallelPortName, PDEVICE_EXTENSION Pdx)
     // Allocate memory to hold to parallel port info
 
     DBG_IRQL( == PASSIVE_LEVEL);
-    Pdx->PortInfo = (PPARALLEL_PORT_INFORMATION) ExAllocatePoolWithTag(NonPagedPool, 
+    Pdx->PortInfo = (PPARALLEL_PORT_INFORMATION) ExAllocatePoolWithTag(NonPagedPool,
         sizeof(*Pdx->PortInfo), MTAG_PPINFO);
 
     // If we got memory, get the info out of the parallel port driver
@@ -329,8 +329,8 @@ ParPortInit(PUNICODE_STRING ParallelPortName, PDEVICE_EXTENSION Pdx)
  This function should be called as part of the unloading process
  of the driver
 
- One of the purposes of this function is to allow the 
- parallel port driver to be unloaded from memory (via 
+ One of the purposes of this function is to allow the
+ parallel port driver to be unloaded from memory (via
  calling ObDereferenceObject()).
 
  This function must be run at IRQL <= DISPATCH_LEVEL.
@@ -372,7 +372,7 @@ ParPortDeinit(PDEVICE_EXTENSION Pdx)
 /*! \internal \brief Get the PNP, ECP and EPP information of the parallel port
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  \param PnpInfo
@@ -450,7 +450,7 @@ ParPortGetPnpInformation(PDEVICE_EXTENSION Pdx, PPARALLEL_PNP_INFORMATION PnpInf
  This function sets the operational mode of the parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  This function has to be balanced with a corresponding ParPortUnsetModeWdm()
@@ -537,7 +537,7 @@ ParPortSetModeWdm(PDEVICE_EXTENSION Pdx)
  This function unsets the operational mode of the parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  This function mustn't be called without a prior call to
@@ -580,7 +580,7 @@ ParPortUnsetModeWdm(PDEVICE_EXTENSION Pdx)
 
             DBG_IRQL( <= DISPATCH_LEVEL);
             ntStatus = pnpInformation.ClearChipMode(
-                pnpInformation.Context, 
+                pnpInformation.Context,
                 (UCHAR) pnpInformation.CurrentMode);
 
             DBG_PPORT((DBG_PREFIX " --- ClearChipMode returned with %s", DebugNtStatus(ntStatus)));
@@ -611,9 +611,9 @@ ParPortUnsetModeWdm(PDEVICE_EXTENSION Pdx)
  This function allocates an interrupt service routine for a parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
-   
+
  \param Isr
   Pointer to the interrupt service routine (ISR) which the caller
   wants to be installed.
@@ -668,10 +668,10 @@ ParPortAllocInterrupt(PDEVICE_EXTENSION Pdx, PKSERVICE_ROUTINE Isr)
  This function frees a previously allocated parallel port.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
- If the parallel port interrupt has not been already allocated, 
+ If the parallel port interrupt has not been already allocated,
  this function just returns.
 
  This function must be run at IRQL == PASSIVE_LEVEL.
@@ -710,14 +710,14 @@ ParPortFreeInterrupt(PDEVICE_EXTENSION Pdx)
 
 /*! \brief Set registry key such that we can get the interrupt of a parallel port
 
- This function sets some specific registry key which allows us to allocate an 
+ This function sets some specific registry key which allows us to allocate an
  interrupt service routine for a parallel port. Without this key, allocating
  the interrupt is forbidden for Win 2000, XP, and above.
 
  This is not true for NT4.
 
  \param Pdx
-   Pointer to a device extension which contains the DEVICE_OBJECT 
+   Pointer to a device extension which contains the DEVICE_OBJECT
    of the parallel port driver.
 
  This function must be run at IRQL == PASSIVE_LEVEL.

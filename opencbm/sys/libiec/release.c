@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/release.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -34,7 +34,7 @@
    Which line has to be released (an OR between IEC_DATA, IEC_CLOCK, IEC_ATN,
    and IEC_RESET)
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */

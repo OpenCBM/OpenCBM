@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/util.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -24,10 +24,10 @@
  Log an error entry in the system log.
 
  \param Fdo
-   Pointer to a DEVICE_OBJECT structure. 
-   This is the device object for the target device, 
+   Pointer to a DEVICE_OBJECT structure.
+   This is the device object for the target device,
    previously created by the driver's AddDevice routine.
- 
+
  \param ErrorCode
    The NTSTATUS code which should be reported on behalf of
    this error log entry
@@ -99,7 +99,7 @@ LogError(IN PDEVICE_OBJECT Fdo,
 
     DBG_ASSERT(size <= ERROR_LOG_MAXIMUM_SIZE);
 
-    if (size <= ERROR_LOG_MAXIMUM_SIZE) 
+    if (size <= ERROR_LOG_MAXIMUM_SIZE)
     {
         PIO_ERROR_LOG_PACKET pentry;
 

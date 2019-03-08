@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file instcbm.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -76,7 +76,7 @@ SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname,
    Pointer to parameter_t struct which contains the
    description of the parameters given on the command-line.
 
- \return 
+ \return
    Return value which will be given on return from main()
    That is, 0 on success, everything else indicates an error.
 */
@@ -106,7 +106,7 @@ NeededAccessRights(VOID)
  wProcessorArchitecture is a SYSTEM_INFO member, determined by
  GetNativeSystemInfo or GetSystemInfo.
 
- \return 
+ \return
    Returns the current processor architecture as string.
 */
 void GetProcessorArchitecture(WORD wProcessorArchitecture, char szOS[])
@@ -126,7 +126,7 @@ void GetProcessorArchitecture(WORD wProcessorArchitecture, char szOS[])
  This function checks out the operating system version we are
  running on.
 
- \return 
+ \return
    The operating system version.
 */
 static osversion_t
@@ -511,7 +511,7 @@ processNumber(const PCHAR Argument, PCHAR *NextChar, PBOOL ParameterGiven, PULON
 
   Running the program with colliding parameters (for example, install und remove)
   is not possible. When processing this parameters, this function is called.
-  
+
   This function ensures that it can be called only once without an error
   (returning FALSE).
 
@@ -552,7 +552,7 @@ enforceOnlyOneExecutingCommand(cbm_install_parameter_t *Parameter, const char *E
    Pointer to parameter_t struct which will contain the
    description of the parameters on return
 
- \return 
+ \return
    TRUE on error, else FALSE.
 */
 static BOOL
@@ -678,8 +678,8 @@ processargs(int Argc, char **Argv, cbm_install_parameter_t *Parameter)
                     }
                 }
                 DBG_PRINT((DBG_PREFIX "error = %s, 1st = %08x (%s), 2nd = %08x (%s), 3rd = %08x (%s)",
-                    error ? "TRUE" : "FALSE", 
-                    Parameter->DebugFlagsDriver, Parameter->DebugFlagsDriverWereGiven ? "TRUE" : "FALSE", 
+                    error ? "TRUE" : "FALSE",
+                    Parameter->DebugFlagsDriver, Parameter->DebugFlagsDriverWereGiven ? "TRUE" : "FALSE",
                     Parameter->DebugFlagsDll, Parameter->DebugFlagsDllWereGiven ? "TRUE" : "FALSE",
                     Parameter->DebugFlagsInstall, Parameter->DebugFlagsInstallWereGiven ? "TRUE" : "FALSE"));
             }
@@ -794,7 +794,7 @@ CopyFileToNewPath(const char *SourcePath, const char *DestPath, const char *File
     int error = 0;
 
     FUNC_ENTER();
-    
+
     sourceFile = cbmlibmisc_strcat(SourcePath, Filename);
     destFile = cbmlibmisc_strcat(DestPath, Filename);
 
@@ -1007,7 +1007,7 @@ GetWindowsDriverDirectory(void)
    Pointer to parameter_t struct which contains the
    description of the parameters given on the command-line.
 
- \return 
+ \return
    Return value which will be given on return from main()
    That is, 0 on success, everything else indicates an error.
 */
@@ -1044,7 +1044,7 @@ UpdateOpenCBM(cbm_install_parameter_t *Parameter)
 }
 
 /*! \brief @@@@@ \todo document */
-static opencbm_plugin_install_neededfiles_t NeededFilesGeneric[] = 
+static opencbm_plugin_install_neededfiles_t NeededFilesGeneric[] =
 {
     { SYSTEM_DIR, "opencbm.dll" },
 #ifdef _X86_
@@ -1166,7 +1166,7 @@ GetFilenameForNeededFile(opencbm_plugin_install_neededfiles_t * NeededFile, cons
 
     path = GetPathForNeededFile(NeededFile, PluginName, WorkingDirectory, SystemDirectory, DriverDirectory);
 
-    if (NULL != path) 
+    if (NULL != path)
     {
         filename = cbmlibmisc_strcat(path, NeededFile->Filename);
         cbmlibmisc_strfree(path);
@@ -1227,7 +1227,7 @@ AreNeededFilesPresent(opencbm_plugin_install_neededfiles_t NeededFiles[])
         for (neededfiles = NeededFiles; neededfiles->FileLocation != LIST_END; neededfiles++)
         {
             char * filename;
-            
+
             filename = GetFilenameForNeededFile(neededfiles, NULL, workingDirectory, systemDirectory, driverDirectory);
 
             fileattributes = GetFileAttributes(filename);
@@ -1417,14 +1417,14 @@ LoadOpenCBMDll(BOOL AtSystemDirectory)
 
     do {
         if (AtSystemDirectory) {
-            /* 
+            /*
              * make sure to load the right DLL in the system directory
              */
 
             systemDirectory = GetWindowsSystemDirectory();
         }
         else {
-            /* 
+            /*
              * make sure to load the local DLL
              */
 
@@ -1507,7 +1507,7 @@ SelfInitGenericOpenCBM(HMODULE OpenCbmDllHandle, const char * DefaultPluginname,
     do {
         /* ... get the address of opencbm_plugin_install_generic() ... */
 
-        opencbm_plugin_install_generic = (void *) GetProcAddress(OpenCbmDllHandle, 
+        opencbm_plugin_install_generic = (void *) GetProcAddress(OpenCbmDllHandle,
             "opencbm_plugin_install_generic");
 
         if (opencbm_plugin_install_generic == NULL) {
@@ -1760,7 +1760,7 @@ InstallPluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, v
             break;
         }
 
-        opencbm_plugin_install_plugin_data = (void *) GetProcAddress(context->OpenCbmDllHandle, 
+        opencbm_plugin_install_plugin_data = (void *) GetProcAddress(context->OpenCbmDllHandle,
             "opencbm_plugin_install_plugin_data");
 
         if (opencbm_plugin_install_plugin_data == NULL) {
@@ -1782,7 +1782,7 @@ InstallPluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, v
          */
 
         error = PluginExecuteFunction(PluginInstallParameter->Name,
-            pathToInstalledPluginFile, 
+            pathToInstalledPluginFile,
             "opencbm_plugin_install_do_install",
             perform_opencbm_plugin_install_do_install,
             PluginInstallParameter);
@@ -1805,7 +1805,7 @@ InstallPluginCallback(cbm_install_parameter_plugin_t * PluginInstallParameter, v
    Pointer to parameter_t struct which contains the
    description of the parameters given on the command-line.
 
- \return 
+ \return
    Return value which will be given on return from main()
    That is, 0 on success, everything else indicates an error.
 */
@@ -2019,7 +2019,7 @@ RemoveGenericOpenCBM(HMODULE OpenCbmDllHandle)
    Pointer to parameter_t struct which contains the
    description of the parameters given on the command-line.
 
- \return 
+ \return
    Return value which will be given on return from main()
    That is, 0 on success, everything else indicates an error.
 */
@@ -2097,7 +2097,7 @@ RemoveOpenCBM(cbm_install_parameter_t *Parameter)
     Array of pointers to strings which holds the names of all plugins to process.
     This array has to be finished by a NULL pointer.
 
- \return 
+ \return
    Return value which will be given on return from main().
    That is, 0 on success, everything else indicates an error.
 */
@@ -2127,7 +2127,7 @@ CheckOpenCBM(cbm_install_parameter_t *Parameter)
  \param Argv
    The arguments vector, as given to main().
 
- \return 
+ \return
    0 on success, everything else indicated an error.
 */
 int __cdecl
@@ -2165,7 +2165,7 @@ main(int Argc, char **Argv)
         }
 
         if (parameter.AdminNeeded && !NeededAccessRights()) {
-            DBG_PRINT((DBG_PREFIX "You do not have necessary privileges. " 
+            DBG_PRINT((DBG_PREFIX "You do not have necessary privileges. "
                 "Please try installing only as administrator."));
             printf("You do not have necessary privileges.\n"
                 "Please try installing only as administrator.\n");

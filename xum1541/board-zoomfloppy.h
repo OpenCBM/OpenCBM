@@ -86,16 +86,16 @@ void board_init_iec(void);
 #define IEEE_EOI_IO     0xc5 // input, output
 #define IEEE_ATN_I      0xc6 // input only
 #define IEEE_ATN_O      0xc7 // output only
-#define IEEE_DAV_IO     0xc4 // 
-#define IEEE_IFC_I      0xd7 // 
-#define IEEE_IFC_O      0xd6 // 
-#define IEEE_SRQ_I      0xd5 // 
-#define IEEE_SRQ_O      0xd4 // 
-#define IEEE_NDAC_I     0xd2 // 
-#define IEEE_NDAC_O     0xd3 // 
-#define IEEE_NRFD_I     0xd1 // 
-#define IEEE_NRFD_O     0xd0 // 
-#define IEEE_REN_IO     0xc2 // 
+#define IEEE_DAV_IO     0xc4 //
+#define IEEE_IFC_I      0xd7 //
+#define IEEE_IFC_O      0xd6 //
+#define IEEE_SRQ_I      0xd5 //
+#define IEEE_SRQ_O      0xd4 //
+#define IEEE_NDAC_I     0xd2 //
+#define IEEE_NDAC_O     0xd3 //
+#define IEEE_NRFD_I     0xd1 //
+#define IEEE_NRFD_O     0xd0 //
+#define IEEE_REN_IO     0xc2 //
 #define IEEE_DATA_IO    0xb0 // Port B - Data
 
 /*

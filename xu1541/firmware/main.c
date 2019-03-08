@@ -61,7 +61,7 @@ static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL,
 
 /* ------------------------------------------------------------------------- */
 
-uchar	usbFunctionSetup(uchar data[8], byte_t *replyBuf) {
+uchar   usbFunctionSetup(uchar data[8], byte_t *replyBuf) {
 /*  static uchar replyBuf[4]; */
   char talk;
   uchar len = data[2];
@@ -380,7 +380,7 @@ uchar usbFunctionWrite( uchar *data, uchar len )
 /* ------------------------------------------------------------------------- */
 
 #if 0
-int	main(void) {
+int     main(void) {
 
   wdt_enable(WDTO_1S);
 
@@ -453,7 +453,7 @@ int	main(void) {
 
   LED_OFF();
 
-  for(;;) {	/* main event loop */
+  for(;;) {     /* main event loop */
 /* @@@    extern byte_t usb_idle(void); */
     wdt_reset();
     usbPoll();

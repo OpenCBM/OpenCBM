@@ -78,7 +78,7 @@ static int pp_write(CBM_FILE fd, char c1, char c2)
 }
 
 /* write_n redirects USB writes to the external reader if required */
-static void write_n(const unsigned char *data, int size) 
+static void write_n(const unsigned char *data, int size)
 {
     int i;
 
@@ -89,7 +89,7 @@ static void write_n(const unsigned char *data, int size)
     }
 
     for(i=0;i<size/2;i++,data+=2)
-	pp_write(fd_cbm, data[0], data[1]);
+        pp_write(fd_cbm, data[0], data[1]);
 }
 
 static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
@@ -123,7 +123,7 @@ static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 }
 
 /* read_n redirects USB reads to the external reader if required */
-static void read_n(unsigned char *data, int size) 
+static void read_n(unsigned char *data, int size)
 {
     int i;
 
@@ -134,7 +134,7 @@ static void read_n(unsigned char *data, int size)
     }
 
     for(i=0;i<size/2;i++,data+=2)
-	pp_read(fd_cbm, data, data+1);
+        pp_read(fd_cbm, data, data+1);
 }
 
 static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
@@ -145,7 +145,7 @@ static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
     status[0] = tr; status[1] = se;
     write_n(status, 2);
 
-#ifndef USE_CBM_IEC_WAIT    
+#ifndef USE_CBM_IEC_WAIT
     arch_usleep(20000);
 #endif
                                                                         SETSTATEDEBUG((void)0);
@@ -178,7 +178,7 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
     write_n(blk+i, size-i);
 
                                                                         SETSTATEDEBUG(debugLibImgByteCount=-1);
-#ifndef USE_CBM_IEC_WAIT    
+#ifndef USE_CBM_IEC_WAIT
     if(size == BLOCKSIZE) {
         arch_usleep(20000);
     }
@@ -266,8 +266,8 @@ static int send_track_map(imgcopy_settings *settings, unsigned char tr, const ch
 
     /* build track map */
     for(i = 0; i < size; i++)
-	data[2+2*i] = data[2+2*i+1] = !NEED_SECTOR(trackmap[i]);
-    
+        data[2+2*i] = data[2+2*i+1] = !NEED_SECTOR(trackmap[i]);
+
     write_n(data, 2*size+2);
     free(data);
                                                                         SETSTATEDEBUG((void)0);

@@ -139,16 +139,16 @@ static ihex_line_t *ihex_parse_line(char *line, int line_num) {
     /* allocate space for data */
     if(!(iline->data = malloc(iline->length))) {
       fprintf(stderr, "ERROR: Out of memory allocating data for line %d\n",
-	      line_num);
+              line_num);
       ihex_free_line(iline);
       return NULL;
     }
 
     for(i=0;i<iline->length;i++) {
       if(!(line = ihex_parse_byte(line, &iline->crc, &tmp))) {
-	fprintf(stderr, "ERROR: Illegal data in line %d\n", line_num);
-	ihex_free_line(iline);
-	return NULL;
+        fprintf(stderr, "ERROR: Illegal data in line %d\n", line_num);
+        ihex_free_line(iline);
+        return NULL;
       }
 
       /* store byte */
@@ -176,7 +176,7 @@ static ihex_line_t *ihex_parse_line(char *line, int line_num) {
   /* ... and verify it */
   if(iline->crc) {
     fprintf(stderr, "ERROR: CRC (%x) mismatch in line %d\n",
-	    iline->crc, line_num);
+            iline->crc, line_num);
     ihex_free_line(iline);
     return NULL;
   }
@@ -199,7 +199,7 @@ static ihex_chunk_t *ihex_new_chunk(ihex_line_t *iline) {
 
   if(!(ichunk = malloc(sizeof(ihex_chunk_t)))) {
     fprintf(stderr, "ERROR: Out of memory allocating %zu bytes chunk\n",
-	    sizeof(ihex_chunk_t));
+            sizeof(ihex_chunk_t));
     return NULL;
   }
 
@@ -209,7 +209,7 @@ static ihex_chunk_t *ihex_new_chunk(ihex_line_t *iline) {
   if(iline->length) {
     if(!(ichunk->data = malloc(iline->length))) {
       fprintf(stderr, "ERROR: Out of memory allocating %d bytes chunk data\n",
-	      iline->length);
+              iline->length);
       return NULL;
     }
 
@@ -236,7 +236,7 @@ static int ihex_insert(ihex_file_t *ifile, ihex_line_t *iline) {
     if((iline->address >= (*ichunk)->address) &&
        (iline->address  < (*ichunk)->address + (*ichunk)->length)) {
       fprintf(stderr, "ERROR: data overlap at address 0x%04x!\n",
-	      iline->address);
+              iline->address);
       return -1;
     }
 
@@ -246,9 +246,9 @@ static int ihex_insert(ihex_file_t *ifile, ihex_line_t *iline) {
 
       (*ichunk)->data = malloc((*ichunk)->length + iline->length);
       if(!((*ichunk)->data)) {
-	fprintf(stderr, "ERROR: Out of memory increasing chunk to %d bytes!\n",
-		(*ichunk)->length + iline->length);
-	return -1;
+        fprintf(stderr, "ERROR: Out of memory increasing chunk to %d bytes!\n",
+                (*ichunk)->length + iline->length);
+        return -1;
       }
 
       /* copy old data */
@@ -263,33 +263,33 @@ static int ihex_insert(ihex_file_t *ifile, ihex_line_t *iline) {
 
       /* check if the following chunk can be attached as well */
       if(next) {
-	if(next->address  == (*ichunk)->address + (*ichunk)->length) {
-	  unsigned char *old_data = (*ichunk)->data;
+        if(next->address  == (*ichunk)->address + (*ichunk)->length) {
+          unsigned char *old_data = (*ichunk)->data;
 
-	  (*ichunk)->data = malloc((*ichunk)->length + next->length);
-	  if(!((*ichunk)->data)) {
-	    fprintf(stderr, "ERROR: Out of memory increasing chunk to "
-		    "%d bytes!\n", (*ichunk)->length + next->length);
-	    return -1;
-	  }
+          (*ichunk)->data = malloc((*ichunk)->length + next->length);
+          if(!((*ichunk)->data)) {
+            fprintf(stderr, "ERROR: Out of memory increasing chunk to "
+                    "%d bytes!\n", (*ichunk)->length + next->length);
+            return -1;
+          }
 
-	  /* copy old data */
-	  memcpy((*ichunk)->data, old_data, (*ichunk)->length);
-	  free(old_data);
+          /* copy old data */
+          memcpy((*ichunk)->data, old_data, (*ichunk)->length);
+          free(old_data);
 
-	  /* and new data */
-	  memcpy((*ichunk)->data+(*ichunk)->length, next->data, next->length);
+          /* and new data */
+          memcpy((*ichunk)->data+(*ichunk)->length, next->data, next->length);
 
-	  /* and adjust new size */
-	  (*ichunk)->length += next->length;
+          /* and adjust new size */
+          (*ichunk)->length += next->length;
 
-	  /* adjust next pointer */
-	  (*ichunk)->next = next->next;
+          /* adjust next pointer */
+          (*ichunk)->next = next->next;
 
-	  /* free old chunk */
-	  free(next->data);
-	  free(next);
-	}
+          /* free old chunk */
+          free(next->data);
+          free(next);
+        }
       }
       return 0;
     }
@@ -299,16 +299,16 @@ static int ihex_insert(ihex_file_t *ifile, ihex_line_t *iline) {
 
       /* check if chunk overlaps next one */
       if(iline->address+iline->length-1  >= next->address) {
-	fprintf(stderr, "ERROR: data overlap at address 0x%04x!\n",
-		iline->address);
-	return -1;
+        fprintf(stderr, "ERROR: data overlap at address 0x%04x!\n",
+                iline->address);
+        return -1;
       }
 
       ichunk = &(*ichunk)->next;
 
       if(!((*ichunk) = ihex_new_chunk(iline))) {
-	fprintf(stderr, "ERROR: Error appending new chunk\n");
-	return -1;
+        fprintf(stderr, "ERROR: Error appending new chunk\n");
+        return -1;
       }
 
       /* close chain again */
@@ -316,31 +316,31 @@ static int ihex_insert(ihex_file_t *ifile, ihex_line_t *iline) {
 
       /* check if the following chunk can be attached as well */
       if(next->address  == (*ichunk)->address + (*ichunk)->length) {
-	unsigned char *old_data = (*ichunk)->data;
+        unsigned char *old_data = (*ichunk)->data;
 
-	(*ichunk)->data = malloc((*ichunk)->length + next->length);
-	if(!((*ichunk)->data)) {
-	  fprintf(stderr, "ERROR: Out of memory increasing chunk to "
-		  "%d bytes!\n", (*ichunk)->length + next->length);
-	  return -1;
-	}
+        (*ichunk)->data = malloc((*ichunk)->length + next->length);
+        if(!((*ichunk)->data)) {
+          fprintf(stderr, "ERROR: Out of memory increasing chunk to "
+                  "%d bytes!\n", (*ichunk)->length + next->length);
+          return -1;
+        }
 
-	/* copy old data */
-	memcpy((*ichunk)->data, old_data, (*ichunk)->length);
-	free(old_data);
+        /* copy old data */
+        memcpy((*ichunk)->data, old_data, (*ichunk)->length);
+        free(old_data);
 
-	/* and new data */
-	memcpy((*ichunk)->data+(*ichunk)->length, next->data, next->length);
+        /* and new data */
+        memcpy((*ichunk)->data+(*ichunk)->length, next->data, next->length);
 
-	/* and adjust new size */
-	(*ichunk)->length += next->length;
+        /* and adjust new size */
+        (*ichunk)->length += next->length;
 
-	/* adjust next pointer */
-	(*ichunk)->next = next->next;
+        /* adjust next pointer */
+        (*ichunk)->next = next->next;
 
-	/* free old chunk */
-	free(next->data);
-	free(next);
+        /* free old chunk */
+        free(next->data);
+        free(next);
       }
 
       return 0;
@@ -409,33 +409,33 @@ ihex_file_t *ihex_parse_file(char *filename) {
 
       /* parse line */
       if(!(iline = ihex_parse_line(line, ifile->lines))) {
-	fprintf(stderr, "ERROR: Hex parsing failed\n");
-	ihex_free_file(ifile);
-	fclose(file);
-	return(NULL);
+        fprintf(stderr, "ERROR: Hex parsing failed\n");
+        ihex_free_file(ifile);
+        fclose(file);
+        return(NULL);
       }
 
       /* data must not occur after and marker */
       if(ifile->ended) {
-	fprintf(stderr, "ERROR: Data after end marker\n");
-	ihex_free_file(ifile);
-	fclose(file);
-	return(NULL);
+        fprintf(stderr, "ERROR: Data after end marker\n");
+        ihex_free_file(ifile);
+        fclose(file);
+        return(NULL);
       }
 
       /* remember that the end marker has been found */
       if(iline->type == RECORD_END)
-	ifile->ended = 1;
+        ifile->ended = 1;
 
       /* insert data chunks into structure */
       if(iline->type == RECORD_DATA) {
-	/* integrate line into file structure */
-	if(ihex_insert(ifile, iline) != 0) {
-	  fprintf(stderr, "ERROR: Insertion failed\n");
-	  ihex_free_file(ifile);
-	  fclose(file);
-	  return(NULL);
-	}
+        /* integrate line into file structure */
+        if(ihex_insert(ifile, iline) != 0) {
+          fprintf(stderr, "ERROR: Insertion failed\n");
+          ihex_free_file(ifile);
+          fclose(file);
+          return(NULL);
+        }
       }
 
       ihex_free_line(iline);
@@ -506,17 +506,17 @@ int ihex_file_get_mem(ihex_file_t *ifile, int start, int len, char *data) {
 
       /* calculate source and destination offset */
       if(start > (*ichunk)->address) {
-	/* shift beginning of area to be copied */
-	soffset = start - (*ichunk)->address;
-	bytes2copy -= soffset;
+        /* shift beginning of area to be copied */
+        soffset = start - (*ichunk)->address;
+        bytes2copy -= soffset;
       }
 
       if((*ichunk)->address > start)
-	doffset = (*ichunk)->address - start;
+        doffset = (*ichunk)->address - start;
 
       /* calculate number of bytes to be copied */
       if(bytes2copy > len-doffset)
-	bytes2copy = len-doffset;
+        bytes2copy = len-doffset;
 
       /* and finally copy ... */
       memcpy(data + doffset, (*ichunk)->data + soffset, bytes2copy);

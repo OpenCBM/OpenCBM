@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/openclose.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -25,22 +25,22 @@
  Services IRPs containing the IRP_MJ_CREATE or IRP_MJ_CLOSE I/O function code.
 
  \param Fdo
-   Pointer to a DEVICE_OBJECT structure. 
-   This is the device object for the target device, 
+   Pointer to a DEVICE_OBJECT structure.
+   This is the device object for the target device,
    previously created by the driver's AddDevice routine.
 
  \param Irp
-   Pointer to an IRP structure that describes the requested I/O operation. 
+   Pointer to an IRP structure that describes the requested I/O operation.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it returns one of the error status values.
 
- The driver's DriverEntry routine has stored this routine's address 
+ The driver's DriverEntry routine has stored this routine's address
  in DriverObject->MajorFunction[IRP_MJ_CREATE] and
  DriverObject->MajorFunction[IRP_MJ_CLOSE].
 
- Generally, all Dispatch routines execute in an arbitrary thread 
+ Generally, all Dispatch routines execute in an arbitrary thread
  context at IRQL PASSIVE_LEVEL, but there are exceptions.
 */
 NTSTATUS
@@ -64,7 +64,7 @@ cbm_createopenclose(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
 
 
     if (irpSp->MajorFunction == IRP_MJ_CREATE
-        && irpSp->Parameters.Create.Options & FILE_DIRECTORY_FILE) 
+        && irpSp->Parameters.Create.Options & FILE_DIRECTORY_FILE)
     {
         // The caller wants to open a directory.
         // As we do not support directories, fail that request!
@@ -95,7 +95,7 @@ cbm_createopenclose(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
 
         ntStatus = QueueStartPacket(&pdx->IrpQueue, Irp, FALSE, Fdo);
     }
-    
+
     FUNC_LEAVE_NTSTATUS(ntStatus);
 }
 
@@ -107,10 +107,10 @@ cbm_createopenclose(IN PDEVICE_OBJECT Fdo, IN PIRP Irp)
    Pointer to a DEVICE_EXTENSION structure.
 
  \param Irp
-   Pointer to an IRP structure that describes the requested I/O operation. 
+   Pointer to an IRP structure that describes the requested I/O operation.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it returns one of the error status values.
 */
 NTSTATUS
@@ -132,7 +132,7 @@ cbm_execute_createopen(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
         // do not lock it now.
         ntStatus = STATUS_SUCCESS;
 
-        // \todo: try workaround: As the machine might have been 
+        // \todo: try workaround: As the machine might have been
         // suspended or hibernated without knowing it, test if
         // all lines are exactly as expected. If not, lock und unlock
         // the parallel port again
@@ -170,10 +170,10 @@ cbm_execute_createopen(IN PDEVICE_EXTENSION Pdx, IN PIRP Irp)
    Pointer to a DEVICE_EXTENSION structure.
 
  \param Irp
-   Pointer to an IRP structure that describes the requested I/O operation. 
+   Pointer to an IRP structure that describes the requested I/O operation.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it returns one of the error status values.
 */
 NTSTATUS

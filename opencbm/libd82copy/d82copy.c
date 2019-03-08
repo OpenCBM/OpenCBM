@@ -12,8 +12,8 @@
 #include "d82copy_int.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
-#include <assert.h> 
+#include <string.h>
+#include <assert.h>
 
 #include "arch.h"
 
@@ -28,7 +28,7 @@
 
 
 static const char d80_sector_map[D80_TRACKS+1] =
-{ 0,							 //11
+{ 0,                                                     //11
   29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,29,
   27,27,27,27,27,27,27,27,27,27,27,27,27,27,
   25,25,25,25,25,25,25,25,25,25,25,
@@ -52,7 +52,7 @@ static const unsigned char warp_read_1541[] =
 {
 #include "warpread1541.inc"
 };
-*/ 
+*/
 
 
 static const struct drive_prog
@@ -157,80 +157,80 @@ static int start_turbo(CBM_FILE fd, unsigned char drive)
 
 void DumpBlock(unsigned char *buffer)
 {
-	char buf[128];
-	char buf2[6];
-	int i;
+    char buf[128];
+    char buf2[6];
+    int i;
 
-	for(i =0; i<256; ++i)
-	{
-		if((i % 16) == 0)
-			sprintf(buf, "%04x  ", i);
+    for(i =0; i<256; ++i)
+    {
+        if((i % 16) == 0)
+            sprintf(buf, "%04x  ", i);
 
-		sprintf(buf2, "%02x ", buffer[i]);
-		strcat(buf, buf2);
+        sprintf(buf2, "%02x ", buffer[i]);
+        strcat(buf, buf2);
 
-		if((i % 16) == 15)
-			message_cb(2, buf);
-	}
+        if((i % 16) == 15)
+            message_cb(2, buf);
+    }
 }
 
 int ReadBAM(d82copy_settings *settings, const transfer_funcs *src, unsigned char *buffer, int *bam_count)
 {
-	int cnt;
-	int st;
-	uint8_t track, sector;
+    int cnt;
+    int st;
+    uint8_t track, sector;
 
-	message_cb(2, "reading BAM ...");
-				
-	track = CAT_TRACK;
-	sector = 0;
-	*bam_count = 0;
+    message_cb(2, "reading BAM ...");
 
-	cnt = 0;
-	while(1)
-	{
-		//message_cb(2, "reading sector: %d / %d", track, sector);
+    track = CAT_TRACK;
+    sector = 0;
+    *bam_count = 0;
 
-		st = src->read_block(track, sector, buffer);
-		if (st) break;
+    cnt = 0;
+    while(1)
+    {
+        //message_cb(2, "reading sector: %d / %d", track, sector);
 
-		//DumpBlock(buffer);
+        st = src->read_block(track, sector, buffer);
+        if (st) break;
 
-		if(cnt++ >= 4)
-			break;
+        //DumpBlock(buffer);
 
-		track = buffer[0];
-		sector = buffer[1];
-		if(track == CAT_TRACK) 
-		{
-			if(cnt == 3) 
-			{
-				// 2 BAM blocks --- suppose a single sided (8050)
-				if(settings->two_sided)
-				{
-					message_cb(0, "double sided expected, but only 2 BAM blocks?!");
-					st = 1;
-				}
-				break;
-			}
-			message_cb(0, "directory track isn't expected track for BAM: (track %d)", track);
-			break;
-		}
-		if(track != BAM_TRACK) 
-		{
-			message_cb(1, "BAM not at expected track: (%d)", track);
-		}
-		else if(cnt == 3 && !settings->two_sided)
-		{
-			message_cb(1, "single sided expected, but more than 2 BAM blocks?!");
-			st = 1;
-			break;
-		}
+        if(cnt++ >= 4)
+            break;
 
-		buffer += BLOCKSIZE;
-	}
-	*bam_count = cnt;
-	return st;
+        track = buffer[0];
+        sector = buffer[1];
+        if(track == CAT_TRACK)
+        {
+            if(cnt == 3)
+            {
+                // 2 BAM blocks --- suppose a single sided (8050)
+                if(settings->two_sided)
+                {
+                    message_cb(0, "double sided expected, but only 2 BAM blocks?!");
+                    st = 1;
+                }
+                break;
+            }
+            message_cb(0, "directory track isn't expected track for BAM: (track %d)", track);
+            break;
+        }
+        if(track != BAM_TRACK)
+        {
+            message_cb(1, "BAM not at expected track: (%d)", track);
+        }
+        else if(cnt == 3 && !settings->two_sided)
+        {
+            message_cb(1, "single sided expected, but more than 2 BAM blocks?!");
+            st = 1;
+            break;
+        }
+
+        buffer += BLOCKSIZE;
+    }
+    *bam_count = cnt;
+    return st;
 }
 
 static int copy_disk(CBM_FILE fd_cbm, d82copy_settings *settings,
@@ -288,20 +288,20 @@ static int copy_disk(CBM_FILE fd_cbm, d82copy_settings *settings,
         }
     }
 
-	if(settings->two_sided < 0)
-	{
-		switch( settings->drive_type )
-		{
-		  case cbm_dt_cbm8050:
-			settings->two_sided = 0;
-			break;
-		    case cbm_dt_cbm8250:
-		    case cbm_dt_sfd1001:
-		    default:
-			settings->two_sided = 1;
-			break;
-		}
-	}
+    if(settings->two_sided < 0)
+    {
+        switch( settings->drive_type )
+        {
+            case cbm_dt_cbm8050:
+                settings->two_sided = 0;
+                break;
+            case cbm_dt_cbm8250:
+            case cbm_dt_sfd1001:
+            default:
+                settings->two_sided = 1;
+                break;
+        }
+    }
 
 
     if(settings->two_sided)
@@ -328,7 +328,7 @@ static int copy_disk(CBM_FILE fd_cbm, d82copy_settings *settings,
         return -1;
     }
 
-    if(settings->end_track != -1 && 
+    if(settings->end_track != -1 &&
        (settings->end_track < settings->start_track ||
         settings->end_track > max_tracks))
     {
@@ -359,8 +359,7 @@ static int copy_disk(CBM_FILE fd_cbm, d82copy_settings *settings,
             case cbm_dt_cbm8050: type_str = "CBM-8050"; break;
             case cbm_dt_cbm8250: type_str = "CBM-8250"; break;
             case cbm_dt_sfd1001: type_str = "SFD-1001"; break;
-                break;
-	     default: /* impossible */ break;
+            default: /* impossible */ break;
     }
 
     message_cb(cnt != 0 ? 0 : 2, "drive %02d (%s): %s",
@@ -413,7 +412,7 @@ static int copy_disk(CBM_FILE fd_cbm, d82copy_settings *settings,
     {
         if(settings->end_track == -1)
         {
-            settings->end_track = 
+            settings->end_track =
                 settings->two_sided ? D82_TRACKS : D80_TRACKS;
         }
         SETSTATEDEBUG((void)0);
@@ -434,12 +433,12 @@ static int copy_disk(CBM_FILE fd_cbm, d82copy_settings *settings,
 
     if(settings->bam_mode != bm_ignore)
     {
-	st = ReadBAM(settings, src, bam, &bam_count);
-	if(st)
-	{
-		message_cb(1, "failed to read BAM (%d), reading whole disk", st);
-		settings->bam_mode = bm_ignore;
-	}
+        st = ReadBAM(settings, src, bam, &bam_count);
+        if(st)
+        {
+            message_cb(1, "failed to read BAM (%d), reading whole disk", st);
+            settings->bam_mode = bm_ignore;
+        }
     }
     SETSTATEDEBUG((void)0);
 
@@ -455,25 +454,25 @@ static int copy_disk(CBM_FILE fd_cbm, d82copy_settings *settings,
         else if(settings->bam_mode == bm_allocated ||
                 (settings->bam_mode == bm_save && (tr != CAT_TRACK && tr != BAM_TRACK )))
         {
-		int offs = ((tr -1) /50 +1) * BLOCKSIZE;
-		offs += ((tr -1) %50) * 5 + 6;
-		//bam_ptr = &bam[offs];
-		//message_cb(2, "offsets into BAM for track: tr: %d:0-%d, offs:%d  ptr=%p", tr, sector_map[tr], offs, bam_ptr);
+                int offs = ((tr -1) /50 +1) * BLOCKSIZE;
+                offs += ((tr -1) %50) * 5 + 6;
+                //bam_ptr = &bam[offs];
+                //message_cb(2, "offsets into BAM for track: tr: %d:0-%d, offs:%d  ptr=%p", tr, sector_map[tr], offs, bam_ptr);
 
-		for(se = 0; se < sector_map[tr]; se++)
-		{
-			int offs2 = offs + se/8 +1;
-			if(bam[offs2]&(1<<(se&0x07)))
-			{
-				status.bam[tr-1][se] = bs_dont_copy;
-			}
-			else
-			{
-				//printf("track: %d, sector: %d, offs: %d, bam: %2x\n", tr, se, offs2, (int)(bam[offs2]));
-				status.bam[tr-1][se] = bs_must_copy;
-				status.total_sectors++;
-			}
-		}
+                for(se = 0; se < sector_map[tr]; se++)
+                {
+                        int offs2 = offs + se/8 +1;
+                        if(bam[offs2]&(1<<(se&0x07)))
+                        {
+                                status.bam[tr-1][se] = bs_dont_copy;
+                        }
+                        else
+                        {
+                                //printf("track: %d, sector: %d, offs: %d, bam: %2x\n", tr, se, offs2, (int)(bam[offs2]));
+                                status.bam[tr-1][se] = bs_must_copy;
+                                status.total_sectors++;
+                        }
+                }
         }
         else
         {
@@ -533,8 +532,8 @@ static int copy_disk(CBM_FILE fd_cbm, d82copy_settings *settings,
                         }
                         else
                         {
-                            // mark all sectors not received so far 
-                            // ugly 
+                            // mark all sectors not received so far
+                            // ugly
                             errors = 0;
                             for(scnt = 0; scnt < sector_map[tr]; scnt++)
                             {
@@ -562,14 +561,14 @@ static int copy_disk(CBM_FILE fd_cbm, d82copy_settings *settings,
                         SETSTATEDEBUG((void)0);
                         gcr_encode(block, gcr);
                         SETSTATEDEBUG(debugLibD82BlockCount++);
-                        status.write_result = 
+                        status.write_result =
                             dst->write_block(tr, se, gcr, GCRBUFSIZE-1,
                                              status.read_result);
                     }
                     else  */
                     {
                         SETSTATEDEBUG(debugLibD82BlockCount++);
-                        status.write_result = 
+                        status.write_result =
                             dst->write_block(tr, se, block, BLOCKSIZE,
                                              status.read_result);
                     }
@@ -752,20 +751,20 @@ int d82copy_get_transfer_mode_index(const char *name)
 
 int d82copy_check_auto_transfer_mode(CBM_FILE cbm_fd, int auto_transfermode, int drive)
 {
-	int transfermode = auto_transfermode;
+        int transfermode = auto_transfermode;
 
-	assert(strcmp(transfers[0].name, "auto") == 0);
+        assert(strcmp(transfers[0].name, "auto") == 0);
 
-	if (auto_transfermode == 0)
-	{
-	        SETSTATEDEBUG((void)0);
+        if (auto_transfermode == 0)
+        {
+                SETSTATEDEBUG((void)0);
 
-	        if (transfermode == 0)
-	            transfermode = d82copy_get_transfer_mode_index("original");
+                if (transfermode == 0)
+                    transfermode = d82copy_get_transfer_mode_index("original");
 
-	        SETSTATEDEBUG((void)0);
-	}
-	return transfermode;
+                SETSTATEDEBUG((void)0);
+        }
+        return transfermode;
 }
 
 

@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/debug.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -42,7 +42,7 @@ cbmiec_show_port(IN UCHAR *Str)
 
     DBG_ASSERT(Str != 0);
 
-    DBG_PORT((DBG_PREFIX 
+    DBG_PORT((DBG_PREFIX
         "%s: 0x%p = 0x%02x, 0x%p = 0x%02x, 0x%p = 0x%02x",
         Str,
         parportBase,   READ_PORT_UCHAR(parportBase),
@@ -55,14 +55,14 @@ cbmiec_show_port(IN UCHAR *Str)
 
  \param Port
    The port address to be written.
- 
+
  \param Value
    The value to be written.
 */
 VOID
 DbgWp(IN PUCHAR Port, IN UCHAR Value)
 {
-    FUNC_DEF 
+    FUNC_DEF
 
     DBG_PORT((DBG_PREFIX "WRITE_PORT_UCHAR(0x%p, 0x%02x)", Port, (int)Value));
 
@@ -77,7 +77,7 @@ DbgWp(IN PUCHAR Port, IN UCHAR Value)
 
  \param Port
    The port address to be written.
- 
+
  \return
    The read value.
 */
@@ -115,7 +115,7 @@ cbmiec_show_state(IN PDEVICE_EXTENSION Pdx, IN UCHAR *Str)
     DBG_ASSERT(Pdx != 0);
     DBG_ASSERT(Str != 0);
 
-    DBG_SUCCESS((DBG_PREFIX "%s: data=%d, clk=%d, atn=%d", Str, 
+    DBG_SUCCESS((DBG_PREFIX "%s: data=%d, clk=%d, atn=%d", Str,
         CBMIEC_GET(PP_DATA_IN), CBMIEC_GET(PP_CLK_IN), CBMIEC_GET(PP_ATN_IN)));
 }
 

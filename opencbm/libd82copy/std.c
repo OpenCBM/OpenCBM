@@ -72,7 +72,7 @@ static int open_disk(CBM_FILE fd, d82copy_settings *settings,
 
     if(settings->end_track > D82_TRACKS && !settings->two_sided)
     {
-        message_cb(0, 
+        message_cb(0,
                    "standard transfer doesn't handle extended track images");
         return 99;
     }

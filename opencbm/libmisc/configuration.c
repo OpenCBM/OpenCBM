@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file libmisc/configuration.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -27,8 +27,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*! \brief the maximum line length we expect in a configuration file 
- * \remark: 
+/*! \brief the maximum line length we expect in a configuration file
+ * \remark:
  *   If a line is longer, it will still be processed. The only
  *   drawback is that the line is read in with multiple fgets()
  *   calls. Thus, it is slower and produces more work and possibly
@@ -110,7 +110,7 @@ struct opencbm_configuration_s {
    The (optional) comment on this line. All characters (including
    whitespace and the comment delimiter '#') are included.
 
- \return 
+ \return
    Pointer to the new configuration entry.
    NULL if we run out of memory.
 
@@ -211,7 +211,7 @@ configuration_entry_free(opencbm_configuration_entry_t * Entry)
    The (optional) comment on this line. All characters (including
    whitespace and the comment delimiter '#') are included.
 
- \return 
+ \return
    Pointer to the new configuration section.
    NULL if we run out of memory.
 
@@ -304,7 +304,7 @@ configuration_section_free(opencbm_configuration_section_t * Section)
    Pointer to the configuration file structure to which this
    section is to be added.
 
- \return 
+ \return
    1 if there was a comment on that line and it has been handled,
    0 otherwise.
 */
@@ -429,7 +429,7 @@ read_a_complete_line(FILE * File)
  \param ConfigFile
    Pointer to an opened FILE structure for the file to be read.
 
- \return 
+ \return
    Returns a (static) buffer which holds the current line.
 
  \remark
@@ -527,7 +527,7 @@ configuration_read_line(opencbm_configuration_handle Handle, char ** Comment, FI
  \param ConfigFile
    Pointer to an opened FILE structure for the file to be read.
 
- \return 
+ \return
    0 if the parsing succeeded,
    1 otherwise.
 */
@@ -688,7 +688,7 @@ opencbm_configuration_parse_file(opencbm_configuration_handle Handle, FILE * Con
  \param Handle
    Handle to the configuration file.
 
- \return 
+ \return
    0 if the writing succeeded,
    1 otherwise.
 */
@@ -718,8 +718,8 @@ opencbm_configuration_write_file(opencbm_configuration_handle Handle)
 
         fseek(configfile, 0, SEEK_SET);
 
-        for (currentSection = Handle->Sections; 
-             (currentSection != NULL) && (error == 0); 
+        for (currentSection = Handle->Sections;
+             (currentSection != NULL) && (error == 0);
              currentSection = currentSection->Next) {
 
             opencbm_configuration_entry_t * currentEntry;
@@ -736,11 +736,11 @@ opencbm_configuration_write_file(opencbm_configuration_handle Handle)
                 }
             }
 
-            for (currentEntry = currentSection->Entries; 
+            for (currentEntry = currentSection->Entries;
                  (currentEntry != NULL) && (error == 0);
                  currentEntry = currentEntry->Next)
             {
-                if (fprintf(configfile, "%s%s%s%s\n", 
+                if (fprintf(configfile, "%s%s%s%s\n",
                         (currentEntry->Name ? currentEntry->Name : ""),
                         (currentEntry->Name && *(currentEntry->Name)) ? "=" : "",
                         (currentEntry->Value ? currentEntry->Value : ""),
@@ -990,7 +990,7 @@ opencbm_configuration_close(opencbm_configuration_handle Handle)
  \param Handle
    Handle to the opened configuration file, as obtained from
    opencbm_configuration_open().
- 
+
  \param Section
    A string which holds the name of the section from where to get the data.
 
@@ -1044,7 +1044,7 @@ opencbm_configuration_find_section(opencbm_configuration_handle Handle,
         if (Create && currentSection == NULL) {
 
             /* there was no section with that name, generate a new one */
-            
+
             currentSection = section_alloc_new(Handle, lastSection, Section, NULL);
         }
 
@@ -1061,7 +1061,7 @@ opencbm_configuration_find_section(opencbm_configuration_handle Handle,
  \param Handle
    Handle to the opened configuration file, as obtained from
    opencbm_configuration_open().
- 
+
  \param Section
    A string which holds the name of the section from where to get the data.
 
@@ -1146,7 +1146,7 @@ opencbm_configuration_find_data_ex(opencbm_configuration_handle Handle,
         if (currentSection == NULL) {
 
             /* there was no section with that name, generate a new one */
-            
+
             currentSection = section_alloc_new(Handle, lastSection, Section, NULL);
         }
 
@@ -1165,7 +1165,7 @@ opencbm_configuration_find_data_ex(opencbm_configuration_handle Handle,
  \param Handle
    Handle to the opened configuration file, as obtained from
    opencbm_configuration_open().
- 
+
  \param Section
    A string which holds the name of the section from where to get the data.
 
@@ -1200,7 +1200,7 @@ opencbm_configuration_find_data(opencbm_configuration_handle Handle,
  \param Handle
    Handle to the opened configuration file, as obtained from
    opencbm_configuration_open().
- 
+
  \param Section
    A string which holds the name of the section from where to get the data.
 
@@ -1237,7 +1237,7 @@ opencbm_configuration_get_data(opencbm_configuration_handle Handle,
             break;
         }
 
-        /* If ReturnBufferLength is 0, we only wanted to find out if 
+        /* If ReturnBufferLength is 0, we only wanted to find out if
          * that entry existed. Thus, report "no error" and quit.
          */
 
@@ -1265,7 +1265,7 @@ opencbm_configuration_get_data(opencbm_configuration_handle Handle,
  \param Handle
    Handle to the opened configuration file, as obtained from
    opencbm_configuration_open().
- 
+
  \param Callback
    The callback function to call with the section name
 
@@ -1312,7 +1312,7 @@ opencbm_configuration_enum_sections(opencbm_configuration_handle Handle,
  \param Handle
    Handle to the opened configuration file, as obtained from
    opencbm_configuration_open().
- 
+
  \param Section
    A string which holds the name of the section from where to get the data.
 
@@ -1372,7 +1372,7 @@ opencbm_configuration_enum_data(opencbm_configuration_handle Handle,
  \param Handle
    Handle to the opened configuration file, as obtained from
    opencbm_configuration_open().
- 
+
  \param Section
    A string which holds the name of the section where to set the data.
 
@@ -1384,7 +1384,7 @@ opencbm_configuration_enum_data(opencbm_configuration_handle Handle,
 
  \return
    0 if the data could be written,
-   1 otherwise 
+   1 otherwise
 */
 int
 opencbm_configuration_set_data(opencbm_configuration_handle Handle,
@@ -1429,7 +1429,7 @@ opencbm_configuration_set_data(opencbm_configuration_handle Handle,
  \param Handle
    Handle to the opened configuration file, as obtained from
    opencbm_configuration_open().
- 
+
  \param Section
    A string which holds the name of the section to remove.
 
@@ -1480,7 +1480,7 @@ opencbm_configuration_section_remove(opencbm_configuration_handle Handle,
  \param Handle
    Handle to the opened configuration file, as obtained from
    opencbm_configuration_open().
- 
+
  \param Section
    A string which holds the name of the section from which to remove.
 
@@ -1567,7 +1567,7 @@ EnableCrtDebug(void)
 
 static unsigned int started_an_op = 0;
 
-static void 
+static void
 OpSuccess(void)
 {
     fprintf(stderr, "success.\n\n");
@@ -1575,7 +1575,7 @@ OpSuccess(void)
     started_an_op = 0;
 }
 
-static void 
+static void
 OpFail(void)
 {
     fprintf(stderr, "FAILED!\n\n");
@@ -1590,7 +1590,7 @@ OpEnd(void)
         OpSuccess();
 }
 
-static void 
+static void
 OpStart(const char * const Operation)
 {
     OpEnd();

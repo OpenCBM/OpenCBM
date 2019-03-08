@@ -300,7 +300,7 @@ int main(void)
 
 void main_poll(void)
 {
-  for(;;) {	/* main event loop */
+  for(;;) {     /* main event loop */
     extern byte_t usb_idle(void);
     wdt_reset();
     usbPoll();

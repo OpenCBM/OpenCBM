@@ -52,7 +52,7 @@ static unsigned char read_byte(CBM_FILE);
 
 /*! \brief write a data block of a file to the OpenCBM backend
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param Buffer
@@ -91,7 +91,7 @@ static int write_blk(CBM_FILE HandleDevice, const void *Buffer, unsigned char Co
 
 #ifdef LIBCBMCOPY_DEBUG
         msg_cb( sev_debug, "send block data" );
-#endif 
+#endif
         return opencbm_plugin_s1_write_n( HandleDevice, Buffer, Count );
     }
     else
@@ -104,11 +104,11 @@ static int write_blk(CBM_FILE HandleDevice, const void *Buffer, unsigned char Co
 
 /*! \brief read a data block of a file from the OpenCBM backend
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
 
  \param Buffer
-    Pointer to a buffer to store the bytes read from  the OpenCBM backend 
+    Pointer to a buffer to store the bytes read from  the OpenCBM backend
 
  \param Count
     The maximum size of the buffer
@@ -136,7 +136,7 @@ static int read_blk(CBM_FILE HandleDevice, void *Buffer, size_t Count, cbmcopy_m
         }
 #ifdef LIBCBMCOPY_DEBUG
         msg_cb( sev_debug, "received byte count: %d", c );
-#endif 
+#endif
         SETSTATEDEBUG((void)0);
         rv = c;
 
@@ -155,7 +155,7 @@ static int read_blk(CBM_FILE HandleDevice, void *Buffer, size_t Count, cbmcopy_m
         }
 #ifdef LIBCBMCOPY_DEBUG
         msg_cb( sev_debug, "receive block data (%d)", c );
-#endif 
+#endif
         return (opencbm_plugin_s1_read_n(HandleDevice, Buffer, c) != c )? -1 : rv;
         /* (drive is busy now) */
     }
@@ -215,7 +215,7 @@ static unsigned char read_byte(CBM_FILE fd)
                                                                         SETSTATEDEBUG(DebugBitCount=i);
 #ifndef USE_CBM_IEC_WAIT
         while(cbm_iec_get(fd, IEC_DATA));
-#else        
+#else
         cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
                                                                         SETSTATEDEBUG((void)0);
@@ -228,7 +228,7 @@ static unsigned char read_byte(CBM_FILE fd)
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
         while(b == cbm_iec_get(fd, IEC_CLOCK));
-#else        
+#else
         cbm_iec_wait(fd, IEC_CLOCK, !b);
 #endif
                                                                         SETSTATEDEBUG((void)0);
@@ -236,7 +236,7 @@ static unsigned char read_byte(CBM_FILE fd)
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
         while(!cbm_iec_get(fd, IEC_DATA));
-#else        
+#else
         cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
                                                                         SETSTATEDEBUG((void)0);

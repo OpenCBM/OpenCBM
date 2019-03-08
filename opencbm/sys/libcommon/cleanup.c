@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/cleanup.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -25,18 +25,18 @@
  Services IRPs containing the IRP_MJ_CREATE I/O function code.
 
  \param Fdo
-   Pointer to a DEVICE_OBJECT structure. 
-   This is the device object for the target device, 
+   Pointer to a DEVICE_OBJECT structure.
+   This is the device object for the target device,
    previously created by the driver's AddDevice routine.
 
  \param Irp
-   Pointer to an IRP structure that describes the requested I/O operation. 
+   Pointer to an IRP structure that describes the requested I/O operation.
 
- \return 
-   If the routine succeeds, it returns STATUS_SUCCESS. 
+ \return
+   If the routine succeeds, it returns STATUS_SUCCESS.
    Otherwise, it return one of the error status values.
 
- The driver's DriverEntry routine has stored this routine's address 
+ The driver's DriverEntry routine has stored this routine's address
  in DriverObject->MajorFunction[IRP_MJ_CLEANUP].
 */
 

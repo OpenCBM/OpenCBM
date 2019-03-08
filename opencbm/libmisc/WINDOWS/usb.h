@@ -438,4 +438,3 @@ extern "C" {
 #endif
 
 #endif /* __USB_H__ */
-

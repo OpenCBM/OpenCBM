@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libcommon/isr.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -28,9 +28,9 @@
    Pointer to the interrupt object.
 
  \param Pdx:
-   The device extension 
+   The device extension
 
- \return 
+ \return
    If we are responsible for this interrupt, we return TRUE.
    If not, we return FALSE and let Windows try other ISRs (if there are any).
 */

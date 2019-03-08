@@ -61,4 +61,3 @@ case "$#" in
 	echo -e \\ndirectory  - start directory for the recursive search for addresses to obfuscate
 	;;
 esac
-

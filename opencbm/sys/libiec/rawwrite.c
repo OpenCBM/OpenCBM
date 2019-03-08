@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/rawwrite.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -37,15 +37,15 @@
  \param Written
    Pointer to the variable which will hold the number of written bytes.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 
  ATN is released on return of this routine
 */
 NTSTATUS
-cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx, 
-                 IN const PUCHAR Buffer, IN ULONG Size, 
+cbmiec_raw_write(IN PDEVICE_EXTENSION Pdx,
+                 IN const PUCHAR Buffer, IN ULONG Size,
                  OUT ULONG *Written)
 {
     NTSTATUS ntStatus;

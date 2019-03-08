@@ -237,7 +237,7 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
         return -1;
     }
 
-    if(settings->end_track != -1 && 
+    if(settings->end_track != -1 &&
        (settings->end_track < settings->start_track ||
         settings->end_track > max_tracks))
     {
@@ -347,7 +347,7 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
     {
         if(settings->end_track == -1)
         {
-            settings->end_track = 
+            settings->end_track =
                 settings->two_sided ? D71_TRACKS : STD_TRACKS;
         }
         SETSTATEDEBUG((void)0);
@@ -519,14 +519,14 @@ static int copy_disk(CBM_FILE fd_cbm, d64copy_settings *settings,
                         SETSTATEDEBUG((void)0);
                         gcr_encode(block, gcr);
                         SETSTATEDEBUG(DebugBlockCount++);
-                        status.write_result = 
+                        status.write_result =
                             dst->write_block(tr, se, gcr, GCRBUFSIZE-1,
                                              status.read_result);
                     }
                     else
                     {
                         SETSTATEDEBUG(DebugBlockCount++);
-                        status.write_result = 
+                        status.write_result =
                             dst->write_block(tr, se, block, BLOCKSIZE,
                                              status.read_result);
                     }

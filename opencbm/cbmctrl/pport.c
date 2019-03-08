@@ -14,7 +14,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file cbmctrl/pport.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -53,7 +53,7 @@
  \return
    0 if the drive could be contacted.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -96,7 +96,7 @@ pia_to_inputmode(CBM_FILE HandleDevice, unsigned char Drive, unsigned int PiaAdd
    -1 if there was an error setting the vlaue
    Otherwise, the value that was read back.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 

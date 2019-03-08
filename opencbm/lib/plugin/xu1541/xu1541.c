@@ -512,9 +512,9 @@ int xu1541_write(struct opencbm_usb_handle *HandleXu1541, const unsigned char *d
 #elif HAVE_LIBUSB1
         if ((wr = usb.control_transfer(HandleXu1541->devh,
                                  LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_OUT,
-                                 XU1541_WRITE, bytes2write, 0, 
+                                 XU1541_WRITE, bytes2write, 0,
                                  (unsigned char*)data, bytes2write,
-                                 USB_TIMEOUT)) < 0) 
+                                 USB_TIMEOUT)) < 0)
 #endif
         {
             fprintf(stderr, "USB error xu1541_write(): %s\n", usb.error_name(wr));
@@ -545,9 +545,9 @@ int xu1541_write(struct opencbm_usb_handle *HandleXu1541, const unsigned char *d
 #elif HAVE_LIBUSB1
             if (usb.control_transfer(HandleXu1541->devh,
                                LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
-                               XU1541_GET_RESULT, 0, 0, 
+                               XU1541_GET_RESULT, 0, 0,
                                rv, sizeof(rv),
-                               1000) == sizeof(rv)) 
+                               1000) == sizeof(rv))
 #endif
             {
                 /* the USB link is available again if we got a valid result */

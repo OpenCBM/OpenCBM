@@ -31,9 +31,9 @@ extern transfer_funcs d64copy_pp_transfer,
                       d64copy_s2_transfer;
 
 const unsigned char weakstart[] = {
-    	0x55, 0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01, 0x00, 0xff, 0x7f, 0xbf, 0xdf, 0xef, 0xf7 };
+      0x55, 0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01, 0x00, 0xff, 0x7f, 0xbf, 0xdf, 0xef, 0xf7 };
 const unsigned char syncmark[] = {
-    	0x99, 0x99, 0x99, 0x99, 0x99, 0x99, 0x99, 0x9a, 0xff, 0x59, 0x99, 0x99, 0x99, 0x99, 0x99, 0x99 };
+      0x99, 0x99, 0x99, 0x99, 0x99, 0x99, 0x99, 0x9a, 0xff, 0x59, 0x99, 0x99, 0x99, 0x99, 0x99, 0x99 };
 
 /* setable via command line */
 static d64copy_severity_e verbosity = sev_warning;
@@ -207,14 +207,14 @@ static void printGcrBuffer(unsigned char* data, int omitzeroes)
 
 static void xorBufferWithTestpattern(unsigned char buffer[])
 {
-	  int i, j;
+    int i, j;
     for(i=0; i<sizeof(weakstart); i++)
     {
-        buffer[i] ^= weakstart[i];	// copy over the weak bit area start sequence
+        buffer[i] ^= weakstart[i];  // copy over the weak bit area start sequence
     }
     for(i=16; i<(GCRBUFSIZE-64); i++)
     {
-        buffer[i] ^= 0;	// follow with weak bits only
+        buffer[i] ^= 0; // follow with weak bits only
     }
     for(; i<(GCRBUFSIZE-22); i++)
     {
@@ -265,7 +265,7 @@ static int testLastDirectorySectorWithWeakBits(
             my_message_cb(1, "failed to write block (%d)", st);
             // return -1;
         }
- 
+
         SETSTATEDEBUG((void)0);
 
         // warp read
@@ -290,7 +290,7 @@ static int testLastDirectorySectorWithWeakBits(
                 my_message_cb(1, "failed to read back block (%d)", st);
                 return -1;
             }
-    
+
             // print the buffer
             printf("\nRead back weak bit area");
             printGcrBuffer(gcr, 0);
@@ -454,15 +454,15 @@ int ARCH_MAINDECL main(int argc, char *argv[])
          * If the user specified auto transfer mode, find out
          * which transfer mode to use.
          */
-        settings->transfer_mode = 
+        settings->transfer_mode =
             d64copy_check_auto_transfer_mode(fd_cbm, 0, drive);
 
         my_message_cb(3, "decided to use transfer mode %d", settings->transfer_mode );
 
         arch_set_ctrlbreak_handler(reset);
 
-				rv = testWeakBitsBehavior(
-				    drive, *settings);
+        rv = testWeakBitsBehavior(
+            drive, *settings);
 
         cbm_driver_close(fd_cbm);
         // rv = 0;
@@ -475,6 +475,6 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     cbmlibmisc_strfree(adapter);
     free(settings);
-    
+
     return rv;
 }

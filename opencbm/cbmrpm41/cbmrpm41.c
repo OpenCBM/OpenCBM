@@ -454,7 +454,7 @@ do_RPMregression(unsigned char start, unsigned char end, int sec, unsigned char 
 
         printf(" | %10.3f | %8.3f", meanTime, variance);
 
-        
+
         variance /= meanTime;   // relativate variance
         meanTime  = 60e6 / meanTime;
         variance *= meanTime;  // and accomodate it to the new meanTime again
@@ -508,15 +508,15 @@ do_RPMadjustment(unsigned char track, unsigned char dummy, int sec, unsigned cha
             if( measure_2cyleJitter(fd, drive, track, limitSectorNo41(track, sec), 0,
                 &measureGroup, 0
                 ) != 0) return 1;
-    
+
             delta = measureGroup.startValue - delta;
-    
+
             // overflow correction, needs integer division
             delta /= (delta + 100000) / 200000;
-    
+
             RPM = 60000000.0f / delta;
             printf("\r%5d | %6d | %7.3f |", i*100+j, delta, RPM);
-    
+
             // Exponential moving average:
             // see: http://en.wikipedia.org/wiki/Weighted_moving_average
             // and: http://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm

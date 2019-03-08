@@ -90,5 +90,3 @@ cpp:
 
 disasm:	firmware.bin
 	avr-objdump -d $<
-
-

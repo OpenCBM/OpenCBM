@@ -179,8 +179,8 @@ static int my_status_cb(d64copy_status status)
         last_track = status.track;
     }
 
-    trackmap[status.sector] = 
-        bs2char[(status.read_result || 
+    trackmap[status.sector] =
+        bs2char[(status.read_result ||
                  status.write_result) ? bs_error : bs_copied];
 
     printf("\r%2d: %-24s%3d%%  %4d/%d", status.track, trackmap,
@@ -383,7 +383,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
          * If the user specified auto transfer mode, find out
          * which transfer mode to use.
          */
-        settings->transfer_mode = 
+        settings->transfer_mode =
             d64copy_check_auto_transfer_mode(fd_cbm,
                 settings->transfer_mode,
                 atoi(src_is_cbm ? src_arg : dst_arg));
@@ -418,6 +418,6 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
     cbmlibmisc_strfree(adapter);
     free(settings);
-    
+
     return rv;
 }

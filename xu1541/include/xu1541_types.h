@@ -36,8 +36,8 @@
 #define XU1541_IOCTL                 3
 
 /* constants for valid ioctl commands */
-#define XU1541_TALK	             (XU1541_IOCTL + 0)
-#define XU1541_LISTEN	             (XU1541_IOCTL + 1)
+#define XU1541_TALK                  (XU1541_IOCTL + 0)
+#define XU1541_LISTEN                (XU1541_IOCTL + 1)
 #define XU1541_UNTALK                (XU1541_IOCTL + 2)
 #define XU1541_UNLISTEN              (XU1541_IOCTL + 3)
 #define XU1541_OPEN                  (XU1541_IOCTL + 4)

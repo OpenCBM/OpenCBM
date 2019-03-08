@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/parport.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -136,7 +136,7 @@ GetDynamicalAddresses(PSETUPAPI SetupApi)
 
 /*! \brief Restart the parallel port
 
- This function tries to restart the parallel port, so that registry 
+ This function tries to restart the parallel port, so that registry
  changes can take effect.
 */
 VOID
@@ -178,8 +178,8 @@ CbmParportRestart(VOID)
                 {
                     DBG_ERROR((DBG_PREFIX "SetupDiGetDeviceInfoListDetail FAILED!"));
                     printf("SetupDiGetDeviceInfoListDetail FAILED!\n");
-                }       
-            
+                }
+
 
                 sdd.cbSize = sizeof(sdd);
 

@@ -313,10 +313,10 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
 
       /* release clock and wait for listener to release data */
       if(!wait_for_listener()) {
-	DEBUGF("w4l to\n");
-	EVENT(EVENT_TIMEOUT_LISTENER);
-	iec_release(CLK | ATN);
-	return 0;
+        DEBUGF("w4l to\n");
+        EVENT(EVENT_TIMEOUT_LISTENER);
+        iec_release(CLK | ATN);
+        return 0;
       }
 
       /* this is timing critical and if we are not sending an eoi */
@@ -325,14 +325,14 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
       /* should not interfere */
 
       if((len == 1) && !atn) {
-	/* signal eoi by waiting so long (>200us) that listener */
-	/* pulls data */
+        /* signal eoi by waiting so long (>200us) that listener */
+        /* pulls data */
 
-	/* wait 2ms for data to be pulled */
-	iec_wait_timeout_2ms(DATA, DATA);
+        /* wait 2ms for data to be pulled */
+        iec_wait_timeout_2ms(DATA, DATA);
 
-	/* wait 2ms for data to be release */
-	iec_wait_timeout_2ms(DATA, 0);
+        /* wait 2ms for data to be release */
+        iec_wait_timeout_2ms(DATA, 0);
       }
 
       /* wait 10 us, why 10?? This delay is the most likely to be hit */
@@ -342,12 +342,12 @@ uchar cbm_raw_write(const uchar *buf, uchar len, uchar atn, uchar talk) {
       iec_set(CLK);
 
       if(send_byte(*buf++)) {
-	len--;
-	DELAY_US(100);
+        len--;
+        DELAY_US(100);
       } else {
-	EVENT(EVENT_WRITE_FAILED);
-	DEBUGF("write: io err\n");
-	rv = 0;
+        EVENT(EVENT_WRITE_FAILED);
+        DEBUGF("write: io err\n");
+        rv = 0;
       }
     } else {
       EVENT(EVENT_WRITE_DEV_NOT_PRESENT);
@@ -395,7 +395,7 @@ void xu1541_handle(void) {
     LED_ON();
     /* write async cmd byte(s) used for (un)talk/(un)listen, open and close */
     io_result = !cbm_raw_write(io_buffer+2, io_buffer_fill,
-			       io_buffer[0], io_buffer[1]);
+                               io_buffer[0], io_buffer[1]);
     LED_OFF();
 
     io_request = XU1541_IO_RESULT;
@@ -427,20 +427,20 @@ void xu1541_handle(void) {
       /* wait for clock to be released. typically times out during: */
       /* directory read */
       while(iec_get(CLK)) {
-	if( to >= 50000 ) {
-	  /* 1.0 (50000 * 20us) sec timeout */
-	  EVENT(EVENT_READ_TIMEOUT);
-	  DEBUGF("rd to\n");
+        if( to >= 50000 ) {
+          /* 1.0 (50000 * 20us) sec timeout */
+          EVENT(EVENT_READ_TIMEOUT);
+          DEBUGF("rd to\n");
 
-	  io_request = XU1541_IO_READ_DONE;
-	  io_buffer_fill = 0;
+          io_request = XU1541_IO_READ_DONE;
+          io_buffer_fill = 0;
 
-	  LED_OFF();
-	  return;
-	} else {
-	  to++;
-	  DELAY_US(20);
-	}
+          LED_OFF();
+          return;
+        } else {
+          to++;
+          DELAY_US(20);
+        }
       }
 
       if (eoi) {
@@ -468,11 +468,11 @@ void xu1541_handle(void) {
 
 
       if(!iec_get(CLK)) {
-	/* device signals eoi */
-	eoi = 1;
-	iec_set(DATA);
-	DELAY_US(70);
-	iec_release(DATA);
+        /* device signals eoi */
+        eoi = 1;
+        iec_set(DATA);
+        DELAY_US(70);
+        iec_release(DATA);
       }
 
       cli();
@@ -483,26 +483,26 @@ void xu1541_handle(void) {
       /* read all bits of byte */
       for(bit = b = 0; (bit < 8) && ok; bit++) {
 
-	/* wait 2ms for clock to be released */
-	if((ok = iec_wait_timeout_2ms(CLK, 0))) {
-	  b >>= 1;
-	  if(!iec_get(DATA))
-	    b |= 0x80;
+        /* wait 2ms for clock to be released */
+        if((ok = iec_wait_timeout_2ms(CLK, 0))) {
+          b >>= 1;
+          if(!iec_get(DATA))
+            b |= 0x80;
 
-	  /* wait 2ms for clock to be asserted */
-	  ok = iec_wait_timeout_2ms(CLK, CLK);
-	}
+          /* wait 2ms for clock to be asserted */
+          ok = iec_wait_timeout_2ms(CLK, CLK);
+        }
       }
 
       sei();
 
       /* acknowledge byte */
       if(ok)
-	iec_set(DATA);
+        iec_set(DATA);
 
       if(ok) {
-	io_buffer[received++] = b;
-	DELAY_US(50);
+        io_buffer[received++] = b;
+        DELAY_US(50);
       }
 
     } while(received < io_buffer_fill && ok && !eoi);
@@ -599,7 +599,7 @@ void xu1541_get_result(unsigned char *data) {
 }
 
 void xu1541_request_async(const uchar *buf, uchar cnt,
-			   uchar atn, uchar talk) {
+                           uchar atn, uchar talk) {
 
   io_request = XU1541_IO_ASYNC;
   memcpy(io_buffer+2, buf, cnt);
@@ -621,9 +621,9 @@ uchar xu1541_wait(uchar line, uchar state) {
   while((iec_poll() & hw_mask) == hw_state) {
     if(i >= 1000) {
       if(j++ > XU1541_W4L_TIMEOUT * 100) {
-	EVENT(EVENT_TIMEOUT_IEC_WAIT);
-	DEBUGF("iec_wait to\n");
-	return 0xff;
+        EVENT(EVENT_TIMEOUT_IEC_WAIT);
+        DEBUGF("iec_wait to\n");
+        return 0xff;
       }
 
       i = 0;

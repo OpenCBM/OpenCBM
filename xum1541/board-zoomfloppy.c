@@ -121,7 +121,7 @@ board_update_display()
         PORTC ^= LED_MASK;
 }
 
-/* 
+/*
  * Signal that the board_update_display() should be called if the timer
  * has fired (every ~100 ms).
  */

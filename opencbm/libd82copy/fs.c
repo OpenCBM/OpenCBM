@@ -17,7 +17,7 @@
 #include "arch.h"
 
 #if ! (defined(_OFF_T) || defined(_OFF_T_DECLARED))
-typedef long off_t ;
+typedef long off_t;
 #endif
 
 static d82copy_settings *fs_settings;
@@ -266,7 +266,7 @@ static void close_disk(void)
     int i, has_errors = 0;
 
     /* if writing the block was interrupted, make sure it is
-     * redone before closing the disk 
+     * redone before closing the disk
      */
 
     if (the_file && atom_execute)
@@ -305,7 +305,7 @@ static void close_disk(void)
             {
                 fwrite(error_map, block_count, 1, the_file);
             }
-        } 
+        }
         else
         {
             arch_ftruncate(arch_fileno(the_file), block_count * BLOCKSIZE);

@@ -10,7 +10,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/parburst.c \n
 ** \author Tim Schürmann, Spiro Trikaliotis, Arnd \n
 ** \n
@@ -55,7 +55,7 @@
  \return
    The value read from the parallel port
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -82,7 +82,7 @@ opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
  \param Value
    The value to be written to the parallel port
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -117,7 +117,7 @@ opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, unsigned char Value)
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -157,7 +157,7 @@ opencbm_plugin_parallel_burst_read_track(CBM_FILE HandleDevice, unsigned char *B
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
@@ -197,7 +197,7 @@ opencbm_plugin_parallel_burst_read_track_var(CBM_FILE HandleDevice, unsigned cha
  \return
    != 0 on success.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 

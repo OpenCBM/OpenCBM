@@ -8,7 +8,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file libmisc/libstring.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -49,7 +49,7 @@ cbmlibmisc_stralloc(unsigned int Length)
             break;
         }
 
-        /* make sure the string is empty, and that the byte after 
+        /* make sure the string is empty, and that the byte after
          * the "usable" space is an end marker, too.
          */
         buffer[0] = 0;
@@ -104,7 +104,7 @@ cbmlibmisc_strdup(const char * const OldString)
 /*! \brief Duplicate a prefix of a given string
 
  This function allocates memory for a string.
- This string is initialised with a copy of a 
+ This string is initialised with a copy of a
  prefix of the given parameter string.
 
  \param OldString

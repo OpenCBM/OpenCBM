@@ -9,4 +9,3 @@ make_device ()
 		chmod 660 /dev/cbm
 	fi
 }
-

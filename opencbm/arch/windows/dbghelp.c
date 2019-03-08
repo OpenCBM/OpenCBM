@@ -8,7 +8,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file arch/windows/dbghelp.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -60,7 +60,7 @@
    as dumping memory is used regularly when debugging,
    we give a debug helper function for this
 */
-void 
+void
 dbg_memdump(const char *Where, const unsigned char *InputBuffer, const unsigned int Count)
 {
     unsigned i;
@@ -72,7 +72,7 @@ dbg_memdump(const char *Where, const unsigned char *InputBuffer, const unsigned 
 
     DBG_PRINT((DBG_PREFIX "%s: (0x%04x)", Where, Count));
 
-    for (i=0; i<Count; i++) 
+    for (i=0; i<Count; i++)
     {
         p += sprintf(p, "%02x ", (unsigned int) InputBuffer[i]);
 

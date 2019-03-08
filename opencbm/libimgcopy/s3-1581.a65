@@ -114,4 +114,3 @@ br4     bit $4001
         ora $45
         sta $4001
         rts
-

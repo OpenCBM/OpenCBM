@@ -9,7 +9,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/upload.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
 ** \n
@@ -86,7 +86,7 @@ static __inline void StoreInt16IntoBuffer(unsigned char * Buffer, unsigned int V
  \param DriveMemAddress
    The address in the drive's memory where the program is to be
    stored.
-   
+
  \param ByteCount
    The number of bytes to be transferred.
 */
@@ -112,9 +112,9 @@ static __inline void StoreAddressAndCount(unsigned char * Buffer, unsigned int D
  \param DriveMemAddress
    The address in the drive's memory where the program is to be
    stored.
-   
+
  \param Program
-   Pointer to a byte buffer which holds the program in the 
+   Pointer to a byte buffer which holds the program in the
    caller's address space.
 
  \param Size
@@ -125,12 +125,12 @@ static __inline void StoreAddressAndCount(unsigned char * Buffer, unsigned int D
    If it does not equal Size, than an error occurred.
    Specifically, -1 is returned on transfer errors.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
 int CBMAPIDECL
-cbm_upload(CBM_FILE HandleDevice, unsigned char DeviceAddress, 
+cbm_upload(CBM_FILE HandleDevice, unsigned char DeviceAddress,
            int DriveMemAddress, const void *Program, size_t Size)
 {
     const char *bufferToProgram = Program;
@@ -193,7 +193,7 @@ cbm_upload(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
         rv += c;
 
-        // The UNLISTEN is the signal for the drive 
+        // The UNLISTEN is the signal for the drive
         // to start execution of the command
 
         if ( cbm_unlisten(HandleDevice) ) {
@@ -220,7 +220,7 @@ cbm_upload(CBM_FILE HandleDevice, unsigned char DeviceAddress,
  \param DriveMemAddress
    The address in the drive's memory where the program is to be
    stored.
-   
+
  \param Buffer
    Pointer to a byte buffer where the data from the drive's
    memory is stored.
@@ -233,14 +233,14 @@ cbm_upload(CBM_FILE HandleDevice, unsigned char DeviceAddress,
    If it does not equal Size, than an error occurred.
    Specifically, -1 is returned on transfer errors.
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
 enum { TRANSFER_SIZE_DOWNLOAD = 0x100u };
 
 int CBMAPIDECL
-cbm_download(CBM_FILE HandleDevice, unsigned char DeviceAddress, 
+cbm_download(CBM_FILE HandleDevice, unsigned char DeviceAddress,
              int DriveMemAddress, void *const Buffer, size_t Size)
 {
     unsigned char command[] = { 'M', '-', 'R', ' ', ' ', '\0', '\r' };

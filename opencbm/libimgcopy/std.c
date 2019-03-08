@@ -72,7 +72,7 @@ static int open_disk(CBM_FILE fd, imgcopy_settings *settings,
 
     if(settings->end_track > settings->max_tracks)
     {
-        message_cb(0, 
+        message_cb(0,
                    "standard transfer doesn't handle extended track images");
         return 99;
     }

@@ -7,7 +7,7 @@
  *  Copyright 2004 Spiro Trikaliotis
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/vdd/dll/cbmfile.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -99,7 +99,7 @@ vdd_cbmfile_store(CBM_FILE cbmfile)
 
     if (i < MAX_CBMFILE_VALUES && CbmFile[i] == INVALID_HANDLE_VALUE)
     {
-        CbmFile[i] = cbmfile; 
+        CbmFile[i] = cbmfile;
     }
     else
     {

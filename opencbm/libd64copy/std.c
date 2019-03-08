@@ -71,7 +71,7 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
 
     if(settings->end_track > STD_TRACKS && !settings->two_sided)
     {
-        message_cb(0, 
+        message_cb(0,
                    "standard transfer doesn't handle extended track images");
         return 99;
     }

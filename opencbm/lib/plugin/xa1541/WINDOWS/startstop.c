@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/startstop.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -89,7 +89,7 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
 
         if (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) != 0)
         {
-            patchlevelVersion[2] = 
+            patchlevelVersion[2] =
                 (char) (CBMT_I_INSTALL_OUT_GET_VERSION_EX_BUGFIX(VersionEx) + '0');
         }
         else
@@ -98,8 +98,8 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
         }
 
         _snprintf(buffer2, sizeof(buffer)-1,
-            (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version) 
-                ? "%u.%u.%u.%u" 
+            (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version)
+                ? "%u.%u.%u.%u"
                 : "%u.%u.%u"),
             (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_MAJOR(Version),
             (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_MINOR(Version),
@@ -107,8 +107,8 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
             (unsigned int) CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version));
 
         _snprintf(buffer, sizeof(buffer)-1,
-            (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version) 
-                ? "%s%s (Development)" 
+            (CBMT_I_INSTALL_OUT_GET_VERSION_DEVEL(Version)
+                ? "%s%s (Development)"
                 : "%s%s"),
             buffer2,
             patchlevelVersion);
@@ -127,7 +127,7 @@ OutputVersionString(IN PCHAR Text, IN ULONG Version, IN ULONG VersionEx)
 
 /*! \internal \brief Read parameters of the driver
 
- This function determines the path of the driver as well as some 
+ This function determines the path of the driver as well as some
  basic configuration parameters of it
 
  \param DriverPath
@@ -184,7 +184,7 @@ ReadDriverData(char *DriverPath, ULONG DriverPathLen, DWORD *StartMode, DWORD *L
 
         regLength = sizeof(driverPathFromRegistry);
 
-        regReturn = RegQueryValueEx(regKey, "ImagePath", NULL, &regType, 
+        regReturn = RegQueryValueEx(regKey, "ImagePath", NULL, &regType,
             (LPBYTE)driverPathFromRegistry, &regLength);
 
         if (regReturn != ERROR_SUCCESS)
@@ -441,7 +441,7 @@ CompleteDriverInstallation(HMODULE HandleDll)
 
     memset(&dllInstallOutBuffer, 0, sizeof(dllInstallOutBuffer));
 
-    p_cbm_install_complete = 
+    p_cbm_install_complete =
         (cbm_install_complete_t *) GetProcAddress(HandleDll, "cbm_install_complete");
 
     if (p_cbm_install_complete) {
@@ -457,7 +457,7 @@ CompleteDriverInstallation(HMODULE HandleDll)
 
  This function checks if the driver was correctly installed.
 
- \return 
+ \return
    Return value which will be given on return from main().
    That is, 0 on success, everything else indicates an error.
 */
@@ -677,7 +677,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
         {
             case -1:
                 startModeName = "NO ENTRY FOUND!";
-                break; 
+                break;
 
             case SERVICE_BOOT_START:
                 startModeName = "boot";
@@ -719,7 +719,7 @@ CheckVersions(PCBMT_I_INSTALL_OUT InstallOutBuffer)
         {
             case -1:
                 cableTypeName = "auto";
-                break; 
+                break;
 
             case 0:
                 cableTypeName = "xm1541";

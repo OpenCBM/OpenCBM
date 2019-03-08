@@ -7,7 +7,7 @@
  *  Copyright 2008 Spiro Trikaliotis
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xu1541/WINDOWS/install.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -74,7 +74,7 @@ static const char usagetext[] =
             "\n";
 
 
-static opencbm_plugin_install_neededfiles_t NeededFilesXU1541[] = 
+static opencbm_plugin_install_neededfiles_t NeededFilesXU1541[] =
 {
     { SYSTEM_DIR, "opencbm-xu1541.dll", NULL },
     { LIST_END,   "",                   NULL }

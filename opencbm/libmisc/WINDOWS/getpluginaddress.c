@@ -9,7 +9,7 @@
  *
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file libmisc/WINDOWS/getpluginaddress.c \n
 ** \author Michael Klein, Spiro Trikaliotis \n
 ** \n

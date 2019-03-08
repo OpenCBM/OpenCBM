@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/gcr_4b5b.c \n
 ** \author Wolfgang Moser \n
 ** \n
@@ -36,7 +36,7 @@
  This function decodes a buffer of 5 GCR bytes into a buffer
  of 4 plain bytes
 
- \param source  
+ \param source
    The pointer to the source buffer of 5 read-only GCR bytes
 
  \param dest
@@ -162,7 +162,7 @@ gcr_5_to_4_decode(const unsigned char *source, unsigned char *dest,
  This function encodes a buffer of 4 plain bytes into a buffer
  of 5 GCR bytes
 
- \param source  
+ \param source
    The pointer to the source buffer of 4 read-only plain bytes
 
  \param dest

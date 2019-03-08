@@ -27,5 +27,3 @@
 #   define SETSTATEDEBUG(_x) do { } while (0)
 #   define DEBUG_PRINTDEBUGCOUNTERS()
 #endif
-
-

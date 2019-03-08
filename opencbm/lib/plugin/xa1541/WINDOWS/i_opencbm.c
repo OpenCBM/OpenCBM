@@ -12,7 +12,7 @@
  *      Andreas Boose <boose(at)linux(dot)rz(dot)fh-hannover(dot)de>
 */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file lib/plugin/xa1541/WINDOWS/i_opencbm.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -56,10 +56,10 @@
 
 /*! \internal \brief Get the number of the parallel port to open
 
- This function checks the registry for the number of the parallel port 
+ This function checks the registry for the number of the parallel port
  to be opened as default.
 
- \return 
+ \return
    Returns the number of the parallel port to be opened as default,
    starting with 0.
 
@@ -94,7 +94,7 @@ cbm_get_default_port(VOID)
 
     if (RegGetDWORD(regKey, CBM_REGKEY_SERVICE_DEFAULTLPT, &ret) != ERROR_SUCCESS)
     {
-        DBG_WARN((DBG_PREFIX "No " CBM_REGKEY_SERVICE "\\" CBM_REGKEY_SERVICE_DEFAULTLPT 
+        DBG_WARN((DBG_PREFIX "No " CBM_REGKEY_SERVICE "\\" CBM_REGKEY_SERVICE_DEFAULTLPT
             " value, setting 0."));
         ret = 0;
     }
@@ -120,7 +120,7 @@ static ULONG  InCancellableState  = 0;
 
 /*! \brief Initialize WaitForIoCompletion()
 
- This function initializes everything needed for the 
+ This function initializes everything needed for the
  WaitForIoCompletion...() functions. It has to be called
  exactly once for each program start.
 */
@@ -145,7 +145,7 @@ WaitForIoCompletionInit(VOID)
 
 /*! \brief Uninitialize WaitForIoCompletion()
 
- This function uninitializes everything needed for the 
+ This function uninitializes everything needed for the
  WaitForIoCompletion...() functions. It has to be called
  exactly once for each program stop.
 
@@ -160,7 +160,7 @@ WaitForIoCompletionDeinit(VOID)
     FUNC_ENTER();
 
     //
-    // Delete the event which is used for prematurely 
+    // Delete the event which is used for prematurely
     // cancelling I/O request
     //
     if (CancelEvent != NULL)
@@ -183,7 +183,7 @@ WaitForIoCompletionCancelAll(VOID)
     if (InterlockedExchange(&InCancellableState, 0) != 0)
     {
         //
-        // signal the event which is used for prematurely 
+        // signal the event which is used for prematurely
         // cancelling I/O request
         //
 
@@ -202,7 +202,7 @@ WaitForIoCompletionCancelAll(VOID)
 
 /*! \brief Boilerplate code for asynchronous I/O requests
 
- This function initializes 
+ This function initializes
 
  \param Overlapped
    Pointer to an OVERLAPPED structure that will be initialized.
@@ -232,7 +232,7 @@ WaitForIoCompletionConstruct(LPOVERLAPPED Overlapped)
  or cancelled.
 
  \param Result
-   The result of the previous I/O operation 
+   The result of the previous I/O operation
    (ReadFile(), WriteFile(), DeviceIoControl())
 
  \param HandleDevice
@@ -246,7 +246,7 @@ WaitForIoCompletionConstruct(LPOVERLAPPED Overlapped)
    Pointer to a DWORD which will contain the number of bytes
    transferred in this asynchronous I/O operation.
 
- \return 
+ \return
    FALSE if a failure occurred, TRUE if success.
 
  \remark
@@ -267,9 +267,9 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
 
     if (!Result)
     {
-        // deal with the error code 
-        switch (GetLastError()) 
-        { 
+        // deal with the error code
+        switch (GetLastError())
+        {
             case ERROR_IO_PENDING:
             {
                 int tmp;
@@ -303,16 +303,16 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
                     if (InterlockedExchange(&InCancellableState, 0) == 0)
                     {
                         //
-                        // In case we were signalled, make sure 
+                        // In case we were signalled, make sure
                         // WaitForIoCompletionCancelAll() does not hang
                         //
 
                         SetEvent(CancelCallbackEvent);
                     }
 
-                    // check on the results of the asynchronous read 
-                    result = GetOverlappedResult(HandleDevice, Overlapped, 
-                        BytesTransferred, FALSE) ; 
+                    // check on the results of the asynchronous read
+                    result = GetOverlappedResult(HandleDevice, Overlapped,
+                        BytesTransferred, FALSE);
                 }
                 break;
             }
@@ -335,12 +335,12 @@ WaitForIoCompletion(BOOL Result, CBM_FILE HandleDevice, LPOVERLAPPED Overlapped,
    The port specification for the driver to open. If not set (== NULL),
    the "default" driver is used. The exact meaning depends upon the plugin.
 
- \return 
+ \return
    Returns a pointer to a null-terminated string containing the
    driver name, or NULL if an error occurred.
 
  \bug
-   Port is not allowed to exceed 10. 
+   Port is not allowed to exceed 10.
 */
 
 const char * CBMAPIDECL
@@ -361,8 +361,8 @@ opencbm_plugin_get_driver_name(const char * const Port)
         portNumber = strtoul(Port, NULL, 10);
     }
 
-    /*! \bug 
-     * the logic does not allow more than 10 entries, 
+    /*! \bug
+     * the logic does not allow more than 10 entries,
      * thus, fail this call if we want to use a port > 10!  */
 
     if (portNumber <= 10)
@@ -385,18 +385,18 @@ opencbm_plugin_get_driver_name(const char * const Port)
 
  This function Opens the driver.
 
- \param HandleDevice  
+ \param HandleDevice
    Pointer to a CBM_FILE which will contain the file handle of the driver.
 
  \param Port
    The port specification for the driver to open. If not set (== NULL),
    the "default" driver is used. The exact meaning depends upon the plugin.
 
- \return 
+ \return
    ==0: This function completed successfully
    !=0: otherwise
 
- Port is not allowed to exceed 10. 
+ Port is not allowed to exceed 10.
 
  cbm_driver_open() should be balanced with cbm_driver_close().
 */
@@ -418,7 +418,7 @@ opencbm_plugin_driver_open(CBM_FILE *HandleDevice, const char * const Port)
 
         *HandleDevice = INVALID_HANDLE_VALUE;
     }
-    else 
+    else
     {
         // Open the device
 
@@ -444,9 +444,9 @@ opencbm_plugin_driver_open(CBM_FILE *HandleDevice, const char * const Port)
    A CBM_FILE which contains the file handle of the driver.
 
  cbm_driver_close() should be called to balance a previous call to
- cbm_driver_open(). 
- 
- If cbm_driver_open() did not succeed, it is illegal to 
+ cbm_driver_open().
+
+ If cbm_driver_open() did not succeed, it is illegal to
  call cbm_driver_close().
 */
 
@@ -464,7 +464,7 @@ opencbm_plugin_driver_close(CBM_FILE HandleDevice)
 
 /*! \brief Perform an ioctl on the driver
 
- This function performs an ioctl on the driver. 
+ This function performs an ioctl on the driver.
  It is used internally only.
 
  \param HandleDevice
@@ -498,14 +498,14 @@ opencbm_plugin_driver_close(CBM_FILE HandleDevice)
    TRUE: IOCTL succeeded, else
    FALSE  an error occurred processing the IOCTL
 
- If cbm_driver_open() did not succeed, it is illegal to 
+ If cbm_driver_open() did not succeed, it is illegal to
  call this function.
 */
 
-BOOL 
-cbm_ioctl(IN CBM_FILE HandleDevice, IN DWORD ControlCode, 
+BOOL
+cbm_ioctl(IN CBM_FILE HandleDevice, IN DWORD ControlCode,
 #if DBG
-          IN char *TextControlCode, 
+          IN char *TextControlCode,
 #endif // #if DBG
           IN PVOID InBuffer, IN ULONG InBufferSize, OUT PVOID OutBuffer, IN ULONG OutBufferSize)
 {
@@ -535,7 +535,7 @@ cbm_ioctl(IN CBM_FILE HandleDevice, IN DWORD ControlCode,
     {
         // Check if the number of bytes returned equals the wanted number
 
-        if (dwBytesReturned != OutBufferSize) 
+        if (dwBytesReturned != OutBufferSize)
         {
             DBG_WARN((DBG_PREFIX "%s: OutBufferSize = %u, but dwBytesReturned = %u",
                 TextControlCode, OutBufferSize, dwBytesReturned));
@@ -755,7 +755,7 @@ cbm_driver_install(OUT PULONG Buffer, IN ULONG BufferLen)
  This function finds out if the driver is started automatically
  or manually.
 
- \return 
+ \return
    Returns TRUE if driver is started automatically, FALSE if not.
 */
 

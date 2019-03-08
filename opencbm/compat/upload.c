@@ -16,7 +16,7 @@ int cbm_upload(int f, unsigned char dev, int adr, unsigned char *prog, int size)
 {
     int c, i, rv = 0;
     char cmd[40];
-    
+
     for(i = 0; i < size; i+=32) {
         cbm_listen(f, dev, 15);
         c = size - i;

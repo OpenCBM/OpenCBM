@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/i_rawread.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -37,7 +37,7 @@
  \param Received
    Pointer to the variable which will hold the read bytes.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */
@@ -131,7 +131,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
             CBMIEC_RELEASE(PP_DATA_OUT);
         }
 
-        // Now, wait up to 2 ms for the TALKer 
+        // Now, wait up to 2 ms for the TALKer
         // If we did an non-EOI answer, this loop will not be executed at all
 
         for (i = 0; (i < libiec_global_timeouts.T_4_Times) && !(ok=CBMIEC_GET(PP_CLK_IN)); i++)
@@ -151,7 +151,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
         {
             PERF_EVENT_READ_BIT_NO(bit);
 
-            // Wait for CLK to be activated 
+            // Wait for CLK to be activated
             // For this to occur, wait up to 200*T_5 (=2ms)
 
             for (i = 0; (i < libiec_global_timeouts.T_5_Times) && !(ok=(CBMIEC_GET(PP_CLK_IN)==0)); i++)
@@ -192,7 +192,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
             }
             else
             {
-                // An error occurred, it does not make sense to get more bits 
+                // An error occurred, it does not make sense to get more bits
                 DBG_ERROR((DBG_PREFIX "BREAKING OUT OF BIT-LOOP, no CLK pulse received. Bit %u, Value = %u", (unsigned int) bit, (unsigned int) b));
                 break;
             }
@@ -246,7 +246,7 @@ cbmiec_i_raw_read(IN PDEVICE_EXTENSION Pdx, OUT UCHAR *Buffer, ULONG Count, OUT 
     } while(received < Count && ok && !Pdx->Eoi);
 
 
-    if (ok) 
+    if (ok)
     {
         DBG_SUCCESS((DBG_PREFIX "received=%d, count=%d, ok=%d, eoi=%d",
             received, Count, ok, Pdx->Eoi));

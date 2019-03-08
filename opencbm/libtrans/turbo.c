@@ -56,14 +56,14 @@ libopencbmtransfer_set_transfer(opencbm_transfer_t TransferType)
  This functions installs the turbo routines for later
  use in the drive.
 
- \param HandleDevice  
+ \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \param DeviceAddress
    The address of the device on the IEC serial bus. This
    is known as primary address, too.
 
- \return 
+ \return
    0 means turbo routines have been installed successfully.
    Every other value denotes an error
 
@@ -100,7 +100,7 @@ libopencbmtransfer_install(CBM_FILE HandleDevice, unsigned char DeviceAddress)
 
         // Now, upload the main loop into the drive
 
-        bytesWritten = cbm_upload(HandleDevice, DeviceAddress, 0x500, 
+        bytesWritten = cbm_upload(HandleDevice, DeviceAddress, 0x500,
             turbomain_drive_prog, sizeof(turbomain_drive_prog));
 
         if (bytesWritten != sizeof(turbomain_drive_prog))
@@ -134,8 +134,8 @@ libopencbmtransfer_execute_command(CBM_FILE HandleDevice, unsigned char DeviceAd
                                    unsigned int ExecutionAddress)
 {
     current_transfer_funcs->write1byte(HandleDevice, 0x80);
-    current_transfer_funcs->write2byte(HandleDevice, 
-        (unsigned char) (ExecutionAddress & 0xFF), 
+    current_transfer_funcs->write2byte(HandleDevice,
+        (unsigned char) (ExecutionAddress & 0xFF),
         (unsigned char) (ExecutionAddress >> 8));
 
     return 0;

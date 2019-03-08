@@ -10,10 +10,10 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/checkdevice.c \n
 ** \author Spiro Trikaliotis \n
-** \authors Based on code from SC written by 
+** \authors Based on code from SC written by
 **    Joe Forster & Wolfgang Moser
 ** \n
 ** \brief Fast IEC drive detection: Check if there is some device
@@ -34,14 +34,14 @@
 
  \param Pdx
    Pointer to the device extension.
- 
+
  \param CheckDevice:
    Pointer to a IEC_CHECKDEVICE variable which will contain the status of the
    bus: IEC_CHECKDEVICE_NODEVICE indicates that there is no device attached,
    IEC_CHECKDEVICE_BUSBUSY indicates that the bus is still busy, and
    IEC_CHECKDEVICE_BUSFREE indicates we are free to use the bus.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */

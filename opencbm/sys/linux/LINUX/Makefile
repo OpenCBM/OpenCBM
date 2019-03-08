@@ -54,5 +54,3 @@ endif
 checksources:
 	# check if KERNEL_SOURCE is set
 	if [ -z "${KERNEL_SOURCE}" ]; then echo "No KERNEL_SOURCE found, aborting!"; exit 1; fi
-
-

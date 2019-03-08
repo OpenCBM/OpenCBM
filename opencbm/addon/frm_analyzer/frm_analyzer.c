@@ -10,7 +10,7 @@
 /*
  * patched version: Wolfgang Moser, 20050508-19:24
  */
- 
+
 #include "opencbm.h"
 
 #include <ctype.h>
@@ -134,7 +134,7 @@ orig=arch_atoc(optarg);
         fprintf(stderr, "Invalid drive number (%s)\n", arg);
         return 1;
     }
-    
+
     arg      = argv[optind++];
     name_len = 0;
     while(*arg)
@@ -163,7 +163,7 @@ orig=arch_atoc(optarg);
     if(cbm_driver_open_ex(&fd, adapter) == 0)
     {
         cbm_upload(fd, drive, 0x0300, dskfrmt, sizeof(dskfrmt));
-        sprintf(cmd, "M-E%c%c%c%c%c%c0:%s", 3, 3, tracks + 1, 
+        sprintf(cmd, "M-E%c%c%c%c%c%c0:%s", 3, 3, tracks + 1,
                 orig, bump, show_progress, name);
         cbm_exec_command(fd, drive, cmd, 11+strlen(name));
 #if 0
@@ -228,7 +228,7 @@ orig=arch_atoc(optarg);
                 // TODO, Pattern analyzer, get the lenght of the PLL synchronization period
                 //
                     // search the last byte triple consisting of: 0x49, 0x24, 0x92
-                    // 
+                    //
                 int k;
                 const unsigned char pattern[]={0x49, 0x24, 0x92};
                 // const unsigned char pattern[]={0xdb, 0x6d, 0xb6};
@@ -243,14 +243,14 @@ orig=arch_atoc(optarg);
                     k=sizeof(data);
                 }
                 else
-                {    
+                {
                         // now search the beginning of that "010010010010010010010010..." bit stream
                     while(k>=0 && data[k]==pattern[0] && data[k+1]==pattern[1] && data[k+2]==pattern[2])
                     {
                         k-=3;
                     }
                     k+=3;
-    
+
                         // do single byte decreases
                     if(k>=1 && data[k-1]==pattern[2]) --k;
                     if(k>=1 && data[k-1]==pattern[1]) --k;

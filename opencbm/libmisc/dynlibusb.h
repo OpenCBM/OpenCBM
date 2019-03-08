@@ -42,7 +42,7 @@ struct usb_dll_s {
 #if HAVE_LIBUSB1
 
     /*
-     * these definitions are taken directly from libusb.h. 
+     * these definitions are taken directly from libusb.h.
      * commented out entries are not currently unused.
      */
 
@@ -71,7 +71,7 @@ struct usb_dll_s {
 #elif HAVE_LIBUSB0
 
     /*
-     * these definitions are taken directly from usb.h. 
+     * these definitions are taken directly from usb.h.
      * commented out entries are not currently unused.
      */
 

@@ -1,4 +1,3 @@
 BSDMAKE?=make
 .DEFAULT:
 	MAKEFLAGS= ${BSDMAKE} $@
-

@@ -116,4 +116,3 @@ br6     lda #$00            ; $07eb
 br7     lda #$08            ; $07f1
         sta $1800
         rts
-

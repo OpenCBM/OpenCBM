@@ -9,7 +9,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libiec/reset.c \n
 ** \author Spiro Trikaliotis \n
 ** \authors Based on code from
@@ -31,7 +31,7 @@
  \param Pdx
    Pointer to the device extension.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */
@@ -95,7 +95,7 @@ cbmiec_wait_for_drives_ready(IN PDEVICE_EXTENSION Pdx)
  \param Pdx
    Pointer to the device extension.
 
- \return 
+ \return
    If the routine succeeds, it returns STATUS_SUCCESS. Otherwise, it
    returns one of the error status values.
 */

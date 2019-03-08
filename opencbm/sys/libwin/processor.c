@@ -8,7 +8,7 @@
  *
  */
 
-/*! ************************************************************** 
+/*! **************************************************************
 ** \file sys/libwin/processor.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
@@ -22,7 +22,7 @@
 /*! \brief Wrapper for KeGetCurrentProcessorNumber()
 
  See KeGetCurrentProcessorNumber()
- 
+
  This function is needed as KeGetCurrentProcessorNumber() is
  only defined in NTDDK.H, not in WDM.H. Anyway, for debugging
  purposes, we need to access it from anywhere..
@@ -38,7 +38,7 @@ CbmGetCurrentProcessorNumber(VOID)
 }
 
 /*! \brief Get the number of processors in the system
- 
+
  This function returns the count of processors available in the
  current system.
 
