@@ -16,6 +16,7 @@ Or the xum1541 web page:
 
 Revisions
 =========
+0.8 (2019/2/9) - Fix IEEE-488 timing for 2031 drive (thanks to André Fachat).
 0.7 (2011/5/10) - Add IEEE-488 support (thanks to Tommy Winkler).
 0.6 (2010/7/5) - New protocol (version 6) with reduced latency and
     support for indefinite waiting, better reset when the previous command
