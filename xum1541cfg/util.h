@@ -18,7 +18,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */
 
-#include "usb.h"
+#include "usbcommon.h"
+
+#if HAVE_LIBUSB1
+#define USB_DT_STRING LIBUSB_DT_STRING
+#endif
 
 #if HAVE_LIBUSB0
 int xum1541_get_model_version(usb_dev_handle *handle, int *model,
