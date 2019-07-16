@@ -2,7 +2,7 @@ Source: opencbm
 Section: misc
 Priority: extra
 Maintainer: Spiro Trikaliotis <spiro.trikaliotis@gmx.de>
-Build-Depends: debhelper (>= 9), pkg-config, linuxdoc-tools, libusb-dev, libusb-1.0-0, libusb-1.0-0-dev, libusb-0.1-4, linuxdoc-tools-latex, linuxdoc-tools-text, libncurses5-dev, cc65, texlive-fonts-recommended, texinfo, ghostscript
+Build-Depends: debhelper (>= 9), linuxdoc-tools-latex, linuxdoc-tools-text, libusb-1.0-0-dev, pkg-config, cc65, libncurses5-dev, texlive-fonts-recommended, texinfo, ghostscript
 Homepage: http://opencbm.trikaliotis.net/
 Standards-Version: 3.9.8
 
