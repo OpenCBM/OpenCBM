@@ -60,7 +60,7 @@ install: build
 	dh_prep
 	dh_installdirs
 
-	mkdir -p $(CURDIR)/debian/tmp/etc $(CURDIR)/debian/tmp/lib/udev/rules.d
+	mkdir -p $(CURDIR)/debian/tmp/etc $(CURDIR)/debian/tmp/etc/udev/rules.d
 	touch $(CURDIR)/debian/tmp/etc/ld.so.conf
 
 	# Add here commands to install the package into debian/tmp
@@ -71,7 +71,7 @@ install: build
 		PLUGINDIR=/usr/lib/opencbm/plugin \
 		MANDIR=/usr/share/man/man1 \
 		INFODIR=/usr/share/info \
-		UDEVRULESDIR=/lib/udev/rules.d/ \
+		UDEVRULESDIR=/etc/udev/rules.d/ \
 		install-all
 
 	install -D -o root -g root -m 644 debian/opencbm-xa1541-modules-source.conf.h \
