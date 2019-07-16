@@ -122,6 +122,9 @@ endif
 $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XUM1541),install):: plugin-xum1541
 
 install-plugin-xa1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),install)
+ifeq "$(OS)" "Linux"
+	install -m 644 opencbm/sys/linux/45-opencbm-xa1541.rules ${DESTDIR}$(UDEVRULESDIR)
+endif
 
 $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),install):: plugin-xa1541
 
