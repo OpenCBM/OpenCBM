@@ -28,7 +28,7 @@ mrproper: clean
 	rm -f $(ECHO_TEST) $(EVENT_LOG) $(ECHO_TEST).exe $(EVENT_LOG).exe
 
 %: %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LIBS)
+	$(CC) -o $@ $< $(LIBS) $(CFLAGS) $(LDFLAGS) 
 
 %.exe: %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LIBS)
