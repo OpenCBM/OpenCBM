@@ -23,14 +23,14 @@ Description: Commodore serial IEC bus utilities
 
 Package: opencbm-xu1541
 Architecture: any
-Depends: ${shlibs:Depends}, debconf (>= 0.5.00), libusb-0.1-4, opencbm
+Depends: ${shlibs:Depends}, debconf (>= 0.5.00), libusb-1.0-0, opencbm
 Provides: opencbm-plugin
 Description: Commodore serial IEC bus utilities
  This package contains the XU1541 plugin.
 
 Package: opencbm-xum1541
 Architecture: any
-Depends: ${shlibs:Depends}, debconf (>= 0.5.00), libusb-0.1-4, opencbm
+Depends: ${shlibs:Depends}, debconf (>= 0.5.00), libusb-1.0-0, opencbm
 Provides: opencbm-plugin
 Description: Commodore serial IEC bus utilities
  This package contains the XUM1541 (a.k.a. ZoomFloppy) plugin.
