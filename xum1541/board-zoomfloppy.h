@@ -218,21 +218,33 @@ iec_srq_read(void)
    return data;
 }
 
+/*
+ * Write out a byte by sending each bit on the DATA line (inverted) and
+ * clocking the CIA with SRQ. We don't want clock jitter so the body of
+ * the loop must not have any branches. At 500 Kbit/sec, each loop iteration
+ * should take 2 us or 32 clocks per bit at 16 MHz.
+ */
 INLINE void
 iec_srq_write(uint8_t data)
 {
     uint8_t i;
 
     for (i = 8; i != 0; --i) {
-        if ((data & 0x80))   // send MSB
-            iec_release(IO_DATA);
-        else
-            iec_set(IO_DATA);
-        iec_set(IO_SRQ);     // set SRQ
-        data <<= 1;          // next bit
+        /*
+         * Take the high bit of the data byte. Shift it down to the IO_DATA
+         * pin for the ZF board. Combine it (inverted) with the IO_SRQ line
+         * being set. Write both of these to port D at the same time.
+         *
+         * This is 7 clock cycles with gcc 9.1.0 at both -Os and -O2.
+         */
+        PORTD = (((data >> 4) & IO_DATA) ^ IO_DATA) | IO_SRQ;
+        data <<= 1;          // get next bit: 1 clock
         DELAY_US(0.3);       // (nibtools relies on this timing, do not change)
-        iec_release(IO_SRQ); // release SRQ
+        iec_release(IO_SRQ); // release SRQ: 2 clocks
         DELAY_US(0.935);     // (nibtools relies on this timing, do not change)
+
+        // Decrement i and loop: 3 clock cycles when branch taken
+        // Total: 13 clocks per loop (minus delays); 19 clocks left.
     }
 }
 
