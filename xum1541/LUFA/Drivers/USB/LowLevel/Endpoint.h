@@ -498,7 +498,11 @@
 			static inline void Endpoint_Discard_Byte(void) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Discard_Byte(void)
 			{
-				(void) UEDATX; /* dummy read access */
+				uint8_t Dummy;
+
+				Dummy = UEDATX;
+
+				(void)Dummy;
 			}
 			
 			/** Reads two bytes from the currently selected endpoint's bank in little endian format, for OUT
@@ -580,8 +584,12 @@
 			static inline void Endpoint_Discard_Word(void) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Discard_Word(void)
 			{
-				(void) UEDATX; /* dummy read access */
-				(void) UEDATX; /* dummy read access */
+				uint8_t Dummy;
+
+				Dummy = UEDATX;
+				Dummy = UEDATX;
+
+				(void)Dummy;
 			}
 
 			/** Reads four bytes from the currently selected endpoint's bank in little endian format, for OUT
@@ -671,10 +679,14 @@
 			static inline void Endpoint_Discard_DWord(void) ATTR_ALWAYS_INLINE;
 			static inline void Endpoint_Discard_DWord(void)
 			{
-				(void) UEDATX; /* dummy read access */
-				(void) UEDATX; /* dummy read access */
-				(void) UEDATX; /* dummy read access */
-				(void) UEDATX; /* dummy read access */
+				uint8_t Dummy;
+
+				Dummy = UEDATX;
+				Dummy = UEDATX;
+				Dummy = UEDATX;
+				Dummy = UEDATX;
+
+				(void)Dummy;
 			}
 
 		/* External Variables: */
