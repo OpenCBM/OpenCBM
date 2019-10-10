@@ -19,8 +19,9 @@ long_description    The opencbm (cbm4linux) package contains user space \
 platforms           darwin
 homepage            https://sourceforge.net/projects/opencbm/
 
-depends_build       port:cc65
-depends_lib         port:libusb-compat
+depends_build       port:cc65 \
+                    port:pkgconfig
+depends_lib         port:libusb
 
 fetch.type          git
 git.url             https://github.com/OpenCBM/OpenCBM.git
