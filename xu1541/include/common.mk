@@ -31,51 +31,42 @@ else
  CFLAGS_EXTRA =
  # determine libusb location
  OS=$(shell uname -s)
- ifeq "$(OS)" "Darwin"
-   # MacOS compilation:
+ ifeq "$(shell uname -o)" "Cygwin"
+   # Cygwin compilation
 
-   LIBUSB_DIR = $(shell libusb-config --prefix)
-   LDFLAGS_EXTRA = $(shell libusb-config --libs)
-   CFLAGS_EXTRA = $(shell libusb-config --cflags)
+   # Tell, where your libusb-win32 installation resides
+   # (if not part of Cygwin in the latest version)
+   #
+   # LIBUSB_DIR=/cygdrive/c/drivers/LibUSB
+#   LIBUSB_DIR=/cygdrive/n/Programme/LibUSB
+   LIBUSB_DIR=$(HOME)/LibUSB
+   LIB_WIN = .lib
+   EXE_SUFFIX = .exe
 
+   LDFLAGS_EXTRA=-mno-cygwin -L $(LIBUSB_DIR)/lib/gcc
+   CYGWIN=1
+
+   # For compiling for MinGw32 target
+   #
+   CFLAGS_EXTRA=-mno-cygwin -DWIN
  else
-   ifeq "$(shell uname -o)" "Cygwin"
-     # Cygwin compilation
 
-     # Tell, where your libusb-win32 installation resides
-     # (if not part of Cygwin in the latest version)
-     #
-     # LIBUSB_DIR=/cygdrive/c/drivers/LibUSB
-#     LIBUSB_DIR=/cygdrive/n/Programme/LibUSB
-     LIBUSB_DIR=$(HOME)/LibUSB
-     LIB_WIN = .lib
-     EXE_SUFFIX = .exe
+   ### LIBUSB_DIR is a dummy, not needed here
+   LIBUSB_DIR=../
 
-     LDFLAGS_EXTRA=-mno-cygwin -L $(LIBUSB_DIR)/lib/gcc
-     CYGWIN=1
+   HAVE_LIBUSB0 = ${shell pkg-config libusb && echo 1}
+   HAVE_LIBUSB1 = ${shell pkg-config libusb-1.0 && echo 1}
 
-     # For compiling for MinGw32 target
-     #
-     CFLAGS_EXTRA=-mno-cygwin -DWIN
-   else
+   ifneq ($(strip $(HAVE_LIBUSB0)),)
+     HAVE_LIBUSB=1
+     CFLAGS_EXTRA=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB0=1 $(shell pkg-config --cflags libusb)
+     LDFLAGS_EXTRA=$(shell pkg-config --libs libusb)
+   endif
 
-     ### LIBUSB_DIR is a dummy, not needed here
-     LIBUSB_DIR=../
-
-     HAVE_LIBUSB0 = ${shell pkg-config libusb && echo 1}
-     HAVE_LIBUSB1 = ${shell pkg-config libusb-1.0 && echo 1}
-
-     ifneq ($(strip $(HAVE_LIBUSB0)),)
-       HAVE_LIBUSB=1
-       CFLAGS_EXTRA=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB0=1 $(shell pkg-config --cflags libusb)
-       LDFLAGS_EXTRA=$(shell pkg-config --libs libusb)
-     endif
-
-     ifneq ($(strip $(HAVE_LIBUSB1)),)
-       HAVE_LIBUSB=1
-       CFLAGS_EXTRA=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB1=1 -DHAVE_LIBUSB_1_0=1 $(shell pkg-config --cflags libusb-1.0)
-       LDFLAGS_EXTRA=$(shell pkg-config --libs libusb-1.0)
-     endif
+   ifneq ($(strip $(HAVE_LIBUSB1)),)
+     HAVE_LIBUSB=1
+     CFLAGS_EXTRA=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB1=1 -DHAVE_LIBUSB_1_0=1 $(shell pkg-config --cflags libusb-1.0)
+     LDFLAGS_EXTRA=$(shell pkg-config --libs libusb-1.0)
    endif
  endif
 endif
