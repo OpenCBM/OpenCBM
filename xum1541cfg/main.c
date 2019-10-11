@@ -235,7 +235,7 @@ PrintDeviceInfo(char *deviceType)
         if (ret != 0)
         {
             fprintf(stderr, "failed to retrieve device version\n");
-            return -1;
+            return ret;
         }
 
         printf("xum1541 device, model %d firmware version %d\n", devModel, devVersion);
@@ -244,7 +244,7 @@ PrintDeviceInfo(char *deviceType)
     else
     {
         fprintf(stderr, "error: no xum1541 found\n");
-        return -1;
+        return ret;
     }
 
 }
