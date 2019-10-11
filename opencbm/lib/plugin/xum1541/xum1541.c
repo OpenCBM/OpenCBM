@@ -398,10 +398,15 @@ const char *
 xum1541_device_path(int PortNumber)
 {
 #define XUM1541_PREFIX "libusb/xum1541:"
+
     struct opencbm_usb_handle HandleXum1541;
     static char dev_path[sizeof(XUM1541_PREFIX) + 3 + 1 + 3 + 1];
 
     HandleXum1541.devh = NULL;
+
+#if HAVE_LIBUSB1
+    usb.init(HandleXum1541.ctx);
+#endif
 
     arch_snprintf(dev_path, sizeof(dev_path), XUM1541_PREFIX);
 
@@ -425,6 +430,10 @@ xum1541_device_path(int PortNumber)
     } else {
         fprintf(stderr, "error: no xum1541 device found\n");
     }
+
+#if HAVE_LIBUSB1
+    usb.exit(HandleXum1541.ctx);
+#endif
 
     return dev_path;
 }
