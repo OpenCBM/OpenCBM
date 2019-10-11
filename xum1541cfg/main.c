@@ -206,6 +206,49 @@ PrintFirmwareInfo(char *firmwareFile)
     return 0;
 }
 
+static int
+PrintDeviceInfo(char *deviceType)
+{
+#if HAVE_LIBUSB0
+    usb_dev_handle *usbHandle;
+#elif HAVE_LIBUSB1
+    libusb_device_handle *usbHandle;
+    libusb_device *usbDevice;
+#endif
+    int devModel, devVersion, ret;
+
+    // Find an xum1541 device and verify the firmware matches
+    fprintf(stderr, "finding device...\n");
+#if HAVE_LIBUSB0
+    ret = GetXumDevice(deviceType, &usbHandle);
+#elif HAVE_LIBUSB1
+    ret = GetXumDevice(deviceType, &usbHandle, &usbDevice);
+#endif
+    if (ret == 0)
+    {
+        // Download the current version info
+#if HAVE_LIBUSB0
+        ret = xum1541_get_model_version(usbHandle, &devModel, &devVersion);
+#elif HAVE_LIBUSB1
+        ret = xum1541_get_model_version(usbHandle, usbDevice, &devModel, &devVersion);
+#endif
+        if (ret != 0)
+        {
+            fprintf(stderr, "failed to retrieve device version\n");
+            return -1;
+        }
+
+        printf("xum1541 device, model %d firmware version %d\n", devModel, devVersion);
+        return 0;
+    }
+    else
+    {
+        fprintf(stderr, "error: no xum1541 found\n");
+        return -1;
+    }
+
+}
+
 // Set the serial so that multiple xum1541 devices can be addressed.
 static int
 SetSerial(int newSerial)
@@ -538,6 +581,8 @@ usage(void)
 "    -f: force update to given firmware. USE WITH CAUTION!\n"
 "* info xum1541-firmware.hex\n"
 "  Prints info extracted from the firmware file argument.\n"
+"* devinfo\n"
+"  Prints info extracted from the device\n"
 "* list (NOT YET IMPLEMENTED)\n"
 "  Prints info about all attached xum1541 devices.\n"
 "* set-serial 0-255 (NOT YET IMPLEMENTED)\n"
@@ -630,6 +675,10 @@ main(int argc, char *argv[])
     } else if (!strcmp(*argv, "info")) {
         if (PrintFirmwareInfo(argv[1]) != 0)
             goto error;
+    } else if (!strcmp(*argv, "devinfo")) {
+        if (PrintDeviceInfo(deviceType) !=0) {
+            goto error;
+        }
     } else if (!strcmp(*argv, "set-serial")) {
         fprintf(stderr, "command not yet supported, sorry\n");
 #if 0
