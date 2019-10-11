@@ -264,7 +264,7 @@ xum1541_enumerate(libusb_device_handle **usbHandle, libusb_device **usbDevice, D
     struct usb_bus *bus;
     struct usb_device *dev, *preferredDefaultHandle;
 #elif HAVE_LIBUSB1
-    libusb_device *preferredDefaultHandle;
+    libusb_device *preferredDefaultHandle = NULL;
     libusb_device **list;
     struct libusb_device_descriptor descriptor;
     ssize_t cnt;
