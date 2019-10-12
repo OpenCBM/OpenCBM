@@ -32,7 +32,6 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 
-
 /*
  * Starting with 2.3.10, the IRQ and bi-directional bits are uncoupled from
  * the control byte.
@@ -54,7 +53,7 @@
 #include <linux/kernel.h>
 #include <linux/miscdevice.h>
 #include <linux/sched.h>
-#ifdef HAVE_LINUX_SCHED_SIGNAL_H
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #include <linux/sched/signal.h>
 #endif
 #include <linux/uaccess.h>
