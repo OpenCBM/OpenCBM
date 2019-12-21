@@ -46,7 +46,7 @@ endif
 
 cbm.o: checksources cbm_module.c
 	-ln -s LINUX/Makefile Makefile
-	$(MAKE) -C $(KERNEL_SOURCE) here=`pwd` OPENCBM_KERNEL_FLAGS=$(KERNEL_FLAGS) SUBDIRS=`pwd` modules
+	$(MAKE) -C $(KERNEL_SOURCE) here=`pwd` OPENCBM_KERNEL_FLAGS=$(KERNEL_FLAGS) M=`pwd` modules
 	-rm -f Makefile
 
 endif
