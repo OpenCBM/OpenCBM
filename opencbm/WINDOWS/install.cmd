@@ -34,6 +34,7 @@ if [%PROCESSOR_ARCHITECTURE%] == [AMD64] (
 set OC_INSTALL_DRIVER_ZOOMFLOPPY=0
 set OC_INSTALL_DRIVER_XUM1541=0
 set OC_INSTALL_DRIVER_XU1541=0
+set OC_INSTALL_DRIVER_XA1541=0
  
 rem Process command line parameter
 
@@ -53,6 +54,7 @@ for /d %%p in (%*) do (
 	) else if [%%~p] == [xa1541] (
 		set OC_VARIANT_DISPLAY=!OC_VARIANT_DISPLAY! xa1541
 		set OC_VARIANT=!OC_VARIANT! xa1541
+		set OC_INSTALL_DRIVER_XA1541=1
 	) else (
 		echo Unknown parameter %%~p, ignoring ...
 		pause
@@ -78,6 +80,10 @@ rem xcopy opencbm.conf %SystemRoot%\System32\ /i /q
 xcopy %OC_BINDIR_LOCAL%\*.exe "%OC_DESTINATION%\"     /q /i
 xcopy %OC_BINDIR_LOCAL%\*.dll "%OC_DESTINATION%\"     /q /i
 xcopy                   *.pdf "%OC_DESTINATION%\doc\" /q /i
+
+if [%OC_INSTALL_DRIVER_XA1541%] == [1] (
+	xcopy %OC_BINDIR_LOCAL%\*.sys "%OC_DESTINATION%\" /q /i
+)
 
 pushd "%OC_DESTINATION%"
 instcbm.exe %OC_VARIANT%
