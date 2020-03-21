@@ -29,13 +29,19 @@ void
 board_init(void)
 {
 #ifdef DEBUG
+#define BAUD 115200
+#include <util/setbaud.h>
     /*
      * Initialize the UART baud rate at 115200 8N1 and select it for
      * printf() output.
      */
+#if USE_2X
     UCSR1A |= _BV(U2X1);
+#else
+    UCSR1A &= ~(_BV(U2X1));
+#endif
     UCSR1B |= _BV(TXEN1);
-    UBRR1 = 8;
+    UBRR1 = UBRR_VALUE;
     stdout = &mystdout;
 #endif
 
