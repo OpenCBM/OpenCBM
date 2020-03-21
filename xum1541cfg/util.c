@@ -104,7 +104,7 @@ xum1541_cleanup(libusb_device_handle **usbHandle, char *msg, ...)
 
     if (msg != NULL) {
         va_start(args, msg);
-        fprintf(stderr, msg, args);
+        vfprintf(stderr, msg, args);
         va_end(args);
     }
     if (*usbHandle != NULL) {
