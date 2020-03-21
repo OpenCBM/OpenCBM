@@ -140,7 +140,7 @@ xum1541_cleanup(struct opencbm_usb_handle *HandleXum1541, char *msg, ...)
 
     if (msg != NULL) {
         va_start(args, msg);
-        fprintf(stderr, msg, args);
+        vfprintf(stderr, msg, args);
         va_end(args);
     }
     if (HandleXum1541 != NULL) {
