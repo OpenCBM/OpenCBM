@@ -10,20 +10,23 @@ Arnd Menge <htmlurl url="mailto:arnd(at)jonnz(dot)de" name="arnd(at)jonnz(dot)de
 
 <abstract>
 This document describes the opencbm package, which can be used to control and
-use serial devices as userd by most Commodore (CBM) 8-bit machines.
+use serial devices as used by most Commodore (CBM) 8-bit machines.
 
 The latest version of the document can be found online at <htmlurl
-url="http://opencbm.trikaliotis.net/" name="http://opencbm,trikaliotis.net/">.
+url="http://opencbm.trikaliotis.net/" name="http://opencbm.trikaliotis.net/">.
 
 OpenCBM consists of a kernel module ("driver") for Linux and Windows for cables
 connected via the parallel port, which is almost obsolete on modern PC
-hardware. Additionally, it has support software and tools to access these old
-parallel port based cables as well as more modern USB replacements.
+hardware. Thus, it also includes support for USB based devices, the so-called
+XU1541 and XUM1541 adapters. Additionally, it has support software and tools
+to access these old parallel port based cables as well as the more modern USB
+replacements.
 
 On top of that, a few user space support programs to control and use serial
 devices as used by most Commodore (CBM) 8-bit machines are included.
 
-The document also contains descriptions for the corresponding cables, namely,
+The contains descriptions for the support programs, as well as for the
+corresponding cables, namely,
 the XU1541 adapter, the XUM1541 adapter (a.k.a. "ZoomFloppy"), and the
 XA1541/XM1541 adapter.
 </abstract>
@@ -122,7 +125,7 @@ damage or data loss caused by it or by any use of it.
 
 <itemize>
 <item>For USB based cables: Any Linux, FreeBSD or MacOS X variant that
-      support libusb-0.1 should be supported. Linux, FreeBSD and Mac OS X
+      support libusb-1.0 should be supported. Linux, FreeBSD and Mac OS X
       have been explicitly tested.
 <item>For parallel port based cables:
       Linux 3.x and 2.6 variants. 2.0, 2.2 and 2.4 might still work, but have
@@ -682,9 +685,9 @@ some cable types.
 
 <p>
 These two cables are rather easy. In order to compile them, you need the libusb
-packages (libusb 0.1, <it/not/ 1.0) and the corresponding libusb development
+packages (libusb 1.0, <it/not/ 0.1) and the corresponding libusb development
 package. For Debian based systems, it is enough to install the package
-`libusb-dev'.
+`libusb-1.0-0-dev'.
 
 <sect3>XA1541 cable or XM1541 cable
 
@@ -823,8 +826,9 @@ following tips might help you:
 
 <item>For XU1541 and XUM1541 cable:
 <itemize>
-<item>Did you install libusb? You need v0.1, a v1.0 libusb will not work unless
-you install the v0.1 compatibility layer, too.
+<item>Did you install libusb? You need v1.0; a v0.1 libusb will still work
+for the moment, but it is not recommended and will be removed from future
+releases.
 </itemize>
 
 <item>For XA1541 and XM1541 cable:
