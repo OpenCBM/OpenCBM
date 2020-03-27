@@ -586,10 +586,10 @@ especially true if you installed the drivers for the USB device before.
 <item>Now, adjust some settings.
       <itemize>
       <item><bf/XUM1541 + ZoomFloppy only:/ Make sure that zadig tells you it found the "xum1541 floppy adapter", and that it
-      wants to install the libusb-win32 driver. The USB id is 16D0 (vendor) and 0504 (product). 
+      wants to install the WinUSB driver. The USB id is 16D0 (vendor) and 0504 (product). 
       Your screen should look like figure <ref id="zadig-xum1541">.
       <item><bf/XU1541 only:/ Make sure that zadig tells you it found the "xu1541", and that it
-      wants to install the libusb-win32 driver. The USB id is 0403 (vendor) and C632 (product).
+      wants to install the WinUSB driver. The USB id is 0403 (vendor) and C632 (product).
       Your screen should look like figure <ref id="zadig-xu1541">.
       </itemize>
 <item>Now, press "install driver".
