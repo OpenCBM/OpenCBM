@@ -86,7 +86,7 @@ listen commands of the CBM IEC bus. It has been tested with several 1541,
 1541-II, 1570, 1571 and 1581 drives, and a MPS-1200 printer. 1541 clones like
 the Oceanic OC-118 have also been reported to work.
 
-The following cable types are supported: 
+The following cable types are supported:
 
 <p>
 <itemize>
@@ -312,7 +312,7 @@ This is the XM1541 (pins 5 & 6 on the CBM end exchanged)
                        +->|-- 1  Strobe
         4  Clk --------+---- 12  PaperEnd
                        +->|- 14  AutoFeed
-        6  Reset ------+---- 11  Busy	
+        6  Reset ------+---- 11  Busy
                        +->|- 17  SelectIn
         5  Data -------+---- 10  Ack
                        +->|- 16  Init
@@ -389,7 +389,7 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
   <item>Added ECP and EPP support into NT4 driver (allowing XP1541 cable to be used there)
   <item>On reset, do not wait a fixed timeout anymore, just wait until all drives are ready again
   </itemize>
- 
+
  <item>instcbm:
   <itemize>
   <item><it/--lock/, <it/--cabletype/: New options
@@ -586,7 +586,7 @@ especially true if you installed the drivers for the USB device before.
 <item>Now, adjust some settings.
       <itemize>
       <item><bf/XUM1541 + ZoomFloppy only:/ Make sure that zadig tells you it found the "xum1541 floppy adapter", and that it
-      wants to install the WinUSB driver. The USB id is 16D0 (vendor) and 0504 (product). 
+      wants to install the WinUSB driver. The USB id is 16D0 (vendor) and 0504 (product).
       Your screen should look like figure <ref id="zadig-xum1541">.
       <item><bf/XU1541 only:/ Make sure that zadig tells you it found the "xu1541", and that it
       wants to install the WinUSB driver. The USB id is 0403 (vendor) and C632 (product).
@@ -1242,7 +1242,7 @@ display version information about OpenCBM.
 remove (uninstall) the driver.
 
 <tag/-u, --update/
-update parameters if driver is already installed. 
+update parameters if driver is already installed.
 
 <tag/-n, --nocopy/
 do not copy the driver files into the system directory. This is not recommended.
@@ -1875,7 +1875,7 @@ until the drive has finished formatting and prints the drive status after
 initializing the BAM on standard out.
 
 <tag/-p, --progress/
-Display a hash mark ('#') for each formatted track. Slows formatting down a 
+Display a hash mark ('#') for each formatted track. Slows formatting down a
 bit.
 </descrip>
 
@@ -2129,12 +2129,12 @@ Set transfermode. Valid modes are:
 </itemize>
 <tt/original/ and <tt/serial1/ should work in any case.
 <tt/serial2/ won't work with more than one device
-connected to the IEC bus, 
+connected to the IEC bus,
 <tt/parallel/ requires an additional XP1541/XP1571 cable.
 
 <p>
 If <tt/auto/ is used, d64copy itself determines the best transfer mode usable
-with the current setup, and uses that one. Thus, you will seldom want to 
+with the current setup, and uses that one. Thus, you will seldom want to
 manually overdrive the <it>transfer mode</it> option.
 
 <tag>-i, --interleave=<it/interleave/</tag>
@@ -2222,7 +2222,7 @@ d64copy -2 -B --transfer=serial1 9 image.d64
 
 <p>
 <it/d82copy/ is a fast disk image transfer (both read and write) program for
-the 8050, 8250 and SFD 1001. 
+the 8050, 8250 and SFD 1001.
 
 <p>
 See also <ref id="d64copy" name="d64copy"> and <ref id="imgcopy"
@@ -2279,7 +2279,7 @@ Set transfermode. Valid modes are:
 
 <p>
 If <tt/auto/ is used, d82copy itself determines the best transfer mode usable
-with the current setup, and uses that one. Thus, you will seldom want to 
+with the current setup, and uses that one. Thus, you will seldom want to
 manually overdrive the <it>transfer mode</it> option.
 
 <p>
@@ -2451,7 +2451,7 @@ Not all modes are supported with all drives!
 
 <p>
 If <tt/auto/ is used, imgcopy itself determines the best transfer mode usable
-with the current setup, and uses that one. Thus, you will seldom want to 
+with the current setup, and uses that one. Thus, you will seldom want to
 manually overdrive the <it>transfer mode</it> option.
 
 <tag>-i, --interleave=<it/interleave/</tag>
@@ -2521,7 +2521,7 @@ Synopsis: <tt/cbmcopy [OPTION]... DEVICE# FILE.../
 <p>
 DEVICE# specifies the drive number for file copy.
 The remaining arguments specify the files to be sent to/read from the disk
-drive. This version supports 
+drive. This version supports
 Raw, PC64 (P00) and T64 files. They are recognized when sending files to the
 disk drive, files read from external devices are always stored as raw binary
 data.
@@ -2572,7 +2572,7 @@ Set transfermode. Valid modes are:
 </itemize>
 <tt/serial1/ should work in any case.
 <tt/serial2/ won't work with more than one device
-connected to the IEC bus, 
+connected to the IEC bus,
 <tt/parallel/ requires a XP1541/XP1571 cable in addition to the XM/XA1541.
 If <tt/auto/ is given, or this option is completely omitted, cbmcopy
 will automatically determine the fastest transfer method possible with the
@@ -2904,7 +2904,7 @@ Read byte from XP1541/XP1571 bus. No handshaking or such involved.
 Write byte to XP1541/XP1571 bus. No handshaking or such involved.
 
 <tag/int cbm_iec_poll(CBM_FILE f);/
-Read status of all bus lines. Return value is a combination of 
+Read status of all bus lines. Return value is a combination of
 <tt/IEC_ATN/, <tt/IEC_CLOCK/ and <tt/IEC_DATA/.
 
 <tag/int cbm_iec_get(CBM_FILE f, int line);/
