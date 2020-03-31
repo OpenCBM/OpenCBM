@@ -536,7 +536,7 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
         usb.exit(HandleXum1541->ctx);
 #endif
         free(HandleXum1541);
-        HandleXum1541 = NULL;
+        *HandleXum1541_p = NULL;
         return -1;
     }
 
@@ -616,6 +616,7 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
     /* error cleanup */
     if (!success) {
         xum1541_close(HandleXum1541);
+        *HandleXum1541_p = NULL;
     }
 
     return success ? 0 : -1;
