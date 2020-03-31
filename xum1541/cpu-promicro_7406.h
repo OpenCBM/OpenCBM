@@ -32,7 +32,7 @@ cpu_bootloader_start(void)
 
     // Jump to Caterina bootloader
 	// nisam siguran za ovo
-    __asm__ __volatile__ ("jmp 0x3F00" "\n\t");
+    __asm__ __volatile__ ("jmp 0x3800" "\n\t");
 }
 
 // Timer and delay functions
