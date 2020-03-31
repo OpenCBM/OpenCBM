@@ -514,7 +514,6 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
     struct opencbm_usb_handle *HandleXum1541;
     unsigned char devInfo[XUM_DEVINFO_SIZE], devStatus;
     int len, ret;
-    int interface_claimed = 0;
     int success = 0;
 
     if (HandleXum1541_p == NULL) {
@@ -569,10 +568,6 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
             xum1541_cleanup(HandleXum1541, "USB error: %s\n", usb.error_name(ret));
             break;
         }
-
-#if HAVE_LIBUSB1
-        interface_claimed = 1;
-#endif
 
         // Check the basic device info message for firmware version
         memset(devInfo, 0, sizeof(devInfo));
@@ -630,10 +625,6 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
 
     /* error cleanup */
     if (!success) {
-        if (interface_claimed) {
-            usb.release_interface(HandleXum1541->devh, 0);
-        }
-
         xum1541_close(HandleXum1541);
     }
 
@@ -668,14 +659,18 @@ xum1541_close(struct opencbm_usb_handle *HandleXum1541)
                 usb.error_name(ret));
         }
         ret = usb.release_interface(HandleXum1541->devh, 0);
-        if (ret != LIBUSB_SUCCESS)
-            fprintf(stderr, "USB release intf error: %s\n", usb.error_name(ret));
 
     usb.set_configuration(HandleXum1541->devh, -1);
 #if HAVE_LIBUSB0
+        // ENOENT could mean the interface was never claimed
+        if (ret != LIBUSB_SUCCESS && ret != -ENOENT)
+        fprintf(stderr, "USB release intf error: %d %s\n", ret, usb.error_name(ret));
         if (usb.close(HandleXum1541->devh) != LIBUSB_SUCCESS)
             fprintf(stderr, "USB close error: %s\n", usb.strerror());
 #elif HAVE_LIBUSB1
+        // LIBUSB_ERROR_NOT_FOUND means the interface was never claimed
+        if (ret != LIBUSB_SUCCESS && ret != LIBUSB_ERROR_NOT_FOUND)
+            fprintf(stderr, "USB release intf error: %d %s\n", ret, usb.error_name(ret));
         usb.close(HandleXum1541->devh);
     }
 #endif
