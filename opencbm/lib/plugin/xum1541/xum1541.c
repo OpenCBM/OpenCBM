@@ -426,14 +426,11 @@ xum1541_device_path(int PortNumber)
             usb.get_bus_number(usb.get_device(HandleXum1541.devh)),
             usb.get_device_address(usb.get_device(HandleXum1541.devh)));
 #endif
-        xum1541_close(&HandleXum1541);
     } else {
         fprintf(stderr, "error: no xum1541 device found\n");
     }
 
-#if HAVE_LIBUSB1
-    usb.exit(HandleXum1541.ctx);
-#endif
+    xum1541_close(&HandleXum1541);
 
     return dev_path;
 }
