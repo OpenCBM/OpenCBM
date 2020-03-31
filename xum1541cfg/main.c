@@ -48,18 +48,21 @@ struct XumDevice {
 };
 
 static struct XumDevice validDeviceTypes[] = {
-    { "ZOOMFLOPPY", "atmega32u2", },
-    { "USBKEY", "at90usb1287", },
-    { "BUMBLEB", "at90usb162", },
-    { "OLIMEX", "at90usb162", },
-    { "TEENSY2", "atmega32u4", },
-    { "PROMICRO", "atmega32u4", },
-    { "PROMICRO_7406", "atmega32u4", },
-    { NULL, NULL, },
+    /* the order follows the order in xum1541.h */
+
+    { "USBKEY",        "at90usb1287" },
+    { "BUMBLEB",       "at90usb162" },
+    { "ZOOMFLOPPY",    "atmega32u2" },
+    { "OLIMEX",        "at90usb162" },
+    { "TEENSY2",       "atmega32u4" },
+    { "PROMICRO",      "atmega32u4" },
+    { "PROMICRO_7406", "atmega32u4" },
+    { NULL,            NULL }
 };
+#define NO_OF_DEVICE_TYPES (sizeof(validDeviceTypes) / sizeof(struct XumDevice) - 1)
 
 // The index of the default CPU we'll use (above)
-#define DEFAULT_TYPE_IDX    0
+#define DEFAULT_TYPE_IDX    2
 
 // Maximum size the firmware could be
 #define AVR_MAX_FW_SIZE     262144
@@ -74,9 +77,11 @@ static int LoadIhex(char *firmwareFile, int16_t **buf, int *bufSize);
 static int GetFileVersion(int16_t *buf, int bufSize, int *modelNum,
     int *versionNum);
 #if HAVE_LIBUSB0
+static int GetXumDeviceAndVariant(char *deviceType, usb_dev_handle **usbHandle, char * devNameBuf, size_t devNameBufLen);
 static int GetXumDevice(char *deviceType, usb_dev_handle **usbHandle);
 static int SetDFUMode(usb_dev_handle *usbHandle);
 #elif HAVE_LIBUSB1
+static int GetXumDeviceAndVariant(char *deviceType, libusb_device_handle **usbHandle, libusb_device **usbDevice, char * devNameBuf, size_t devNameBufLen);
 static int GetXumDevice(char *deviceType, libusb_device_handle **usbHandle, libusb_device **usbDevice);
 static int SetDFUMode(libusb_device_handle *usbHandle);
 #endif
@@ -212,6 +217,8 @@ PrintFirmwareInfo(char *firmwareFile)
 static int
 PrintDeviceInfo(char *deviceType)
 {
+    char devNameBuf[128];
+
 #if HAVE_LIBUSB0
     usb_dev_handle *usbHandle;
 #elif HAVE_LIBUSB1
@@ -223,12 +230,14 @@ PrintDeviceInfo(char *deviceType)
     // Find an xum1541 device and verify the firmware matches
     fprintf(stderr, "finding device...\n");
 #if HAVE_LIBUSB0
-    ret = GetXumDevice(deviceType, &usbHandle);
+    ret = GetXumDeviceAndVariant(deviceType, &usbHandle, devNameBuf, sizeof(devNameBuf));
 #elif HAVE_LIBUSB1
-    ret = GetXumDevice(deviceType, &usbHandle, &usbDevice);
+    ret = GetXumDeviceAndVariant(deviceType, &usbHandle, &usbDevice, devNameBuf, sizeof(devNameBuf));
 #endif
     if (ret == 0)
     {
+        char * deviceName = NULL;
+
         // Download the current version info
 #if HAVE_LIBUSB0
         ret = xum1541_get_model_version(usbHandle, &devModel, &devVersion);
@@ -240,8 +249,17 @@ PrintDeviceInfo(char *deviceType)
             fprintf(stderr, "failed to retrieve device version\n");
             return ret;
         }
+        if (devModel < NO_OF_DEVICE_TYPES) {
+            deviceName = validDeviceTypes[devModel].commonName;
+        }
+        else {
+            deviceName = "UNKNOWN";
+        }
+        printf("xum1541 device, model %d (%s), firmware version %d\n", devModel, deviceName, devVersion);
 
-        printf("xum1541 device, model %d firmware version %d\n", devModel, devVersion);
+        if (devModel >= NO_OF_DEVICE_TYPES) {
+            printf("  device reports itself as: '%s'\n", devNameBuf);
+        }
         return 0;
     }
     else
@@ -330,6 +348,31 @@ GetFileVersion(int16_t *buf, int bufSize, int *modelNum, int *versionNum)
     return 0;
 }
 
+// Find xum1541 device or Atmel DFU device, and do NOT check that we have the "right" variant
+// Instead, return the name reported by the device
+static int
+#if HAVE_LIBUSB0
+GetXumDeviceAndVariant(char *deviceType, usb_dev_handle **usbHandle, char * devNameBuf, size_t devNameBufLen)
+#elif HAVE_LIBUSB1
+GetXumDeviceAndVariant(char *deviceType, libusb_device_handle **usbHandle, libusb_device **usbDevice, char * devNameBuf, size_t devNameBufLen)
+#endif
+{
+    devNameBuf[0] = 0;
+    if (devNameBufLen > 0)
+        devNameBuf[devNameBufLen - 1] = 0;
+
+    // Find xum1541 device or Atmel DFU device.
+#if HAVE_LIBUSB0
+    *usbHandle = xum1541_find_device(0/*serial*/, devNameBuf, devNameBufLen);
+#elif HAVE_LIBUSB1
+    *usbHandle = xum1541_find_device(usbDevice, 0/*serial*/, devNameBuf, devNameBufLen);
+#endif
+    if (*usbHandle == NULL)
+        return -1;
+
+    return 0;
+}
+
 // Find xum1541 device or Atmel DFU device
 static int
 #if HAVE_LIBUSB0
@@ -340,16 +383,13 @@ GetXumDevice(char *deviceType, libusb_device_handle **usbHandle, libusb_device *
 {
     char devNameBuf[128];
 
-    // Find xum1541 device or Atmel DFU device.
 #if HAVE_LIBUSB0
-    *usbHandle = xum1541_find_device(0/*serial*/, devNameBuf,
-        sizeof(devNameBuf));
+    int ret = GetXumDeviceAndVariant(deviceType, usbHandle, devNameBuf, sizeof(devNameBuf));
 #elif HAVE_LIBUSB1
-    *usbHandle = xum1541_find_device(usbDevice, 0/*serial*/, devNameBuf,
-        sizeof(devNameBuf));
+    int ret = GetXumDeviceAndVariant(deviceType, usbHandle, usbDevice, devNameBuf, sizeof(devNameBuf));
 #endif
-    if (*usbHandle == NULL)
-        return -1;
+    if (ret < 0)
+        return ret;
 
     // If valid but mismatches desired xum1541 hardware type, abort
     if (strstr(devNameBuf, deviceType) == NULL) {
@@ -573,32 +613,36 @@ static void
 usage(void)
 {
     struct XumDevice *devPtr;
+    int deviceNo = 0;
 
     fprintf(stderr, "usage: xum1541cfg [flags] command [args]\n\n"
 "Flags:\n"
 "  -v: enable verbose status messages\n\n"
 "Commands:\n"
 "* update xum1541-firmware.hex\n"
-"  Updates the firmware of an xum1541 device. Optional flags:\n"
-"    -t type: specify the device type (defaults to \"ZOOMFLOPPY\")\n"
-"    -f: force update to given firmware. USE WITH CAUTION!\n"
+"    Updates the firmware of an xum1541 device. Optional flags:\n"
+"      -t type: specify the device type (defaults to \"ZOOMFLOPPY\")\n"
+"      -f: force update to given firmware. USE WITH CAUTION!\n"
 "* info xum1541-firmware.hex\n"
-"  Prints info extracted from the firmware file argument.\n"
+"    Prints info extracted from the firmware file argument.\n"
 "* devinfo\n"
-"  Prints info extracted from the device\n"
+"    Prints info extracted from the device\n"
 "* list (NOT YET IMPLEMENTED)\n"
-"  Prints info about all attached xum1541 devices.\n"
+"    Prints info about all attached xum1541 devices.\n"
 "* set-serial 0-255 (NOT YET IMPLEMENTED)\n"
-"  Sets the firmware serial number so multiple devices can be used.\n"
-"  Changes the first device found so only one xum1541 device should\n"
-"  be plugged in when running this command.\n\n"
+"    Sets the firmware serial number so multiple devices can be used.\n"
+"    Changes the first device found so only one xum1541 device should\n"
+"    be plugged in when running this command.\n\n"
         );
     fprintf(stderr, "Supported device types (case-insensitive):\n");
     fprintf(stderr, "  %s (default)",
         validDeviceTypes[DEFAULT_TYPE_IDX].commonName);
-    devPtr = &validDeviceTypes[1];
-    for (; devPtr->commonName; devPtr++)
+    devPtr = &validDeviceTypes[0];
+    for (deviceNo = 0; devPtr->commonName; devPtr++, deviceNo++) {
+        if (deviceNo == DEFAULT_TYPE_IDX)
+            continue;
         fprintf(stderr, ", %s", devPtr->commonName);
+    }
     fprintf(stderr, "\n");
     exit(1);
 }
