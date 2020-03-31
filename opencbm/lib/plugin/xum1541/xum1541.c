@@ -654,31 +654,35 @@ xum1541_close(struct opencbm_usb_handle *HandleXum1541)
 
     xum1541_dbg(0, "Closing USB link");
 
+    if (HandleXum1541->devh != NULL) {
 #if HAVE_LIBUSB0
-    ret = usb.control_msg(HandleXum1541->devh, USB_TYPE_CLASS | USB_ENDPOINT_OUT,
-        XUM1541_SHUTDOWN, 0, 0, NULL, 0, 1000);
+        ret = usb.control_msg(HandleXum1541->devh, USB_TYPE_CLASS | USB_ENDPOINT_OUT,
+            XUM1541_SHUTDOWN, 0, 0, NULL, 0, 1000);
 #elif HAVE_LIBUSB1
-    ret = usb.control_transfer(HandleXum1541->devh, LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_OUT,
-        XUM1541_SHUTDOWN, 0, 0, NULL, 0, 1000);
+        ret = usb.control_transfer(HandleXum1541->devh, LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_OUT,
+            XUM1541_SHUTDOWN, 0, 0, NULL, 0, 1000);
 #endif
-    if (ret < 0) {
-        fprintf(stderr,
-            "USB request for XUM1541 close failed, continuing: %s\n",
-            usb.error_name(ret));
-    }
-    ret = usb.release_interface(HandleXum1541->devh, 0);
-    if (ret != LIBUSB_SUCCESS)
-        fprintf(stderr, "USB release intf error: %s\n", usb.error_name(ret));
+        if (ret < 0) {
+            fprintf(stderr,
+                "USB request for XUM1541 close failed, continuing: %s\n",
+                usb.error_name(ret));
+        }
+        ret = usb.release_interface(HandleXum1541->devh, 0);
+        if (ret != LIBUSB_SUCCESS)
+            fprintf(stderr, "USB release intf error: %s\n", usb.error_name(ret));
 
     ret = usb.set_configuration(HandleXum1541->devh, -1);
     if (ret != LIBUSB_SUCCESS) {
         fprintf(stderr, "USB deconfig device error: %d %s\n", ret, usb.error_name(ret));
     }
 #if HAVE_LIBUSB0
-    if (usb.close(HandleXum1541->devh) != LIBUSB_SUCCESS)
-        fprintf(stderr, "USB close error: %s\n", usb.strerror());
+        if (usb.close(HandleXum1541->devh) != LIBUSB_SUCCESS)
+            fprintf(stderr, "USB close error: %s\n", usb.strerror());
 #elif HAVE_LIBUSB1
-    usb.close(HandleXum1541->devh);
+        usb.close(HandleXum1541->devh);
+    }
+#endif
+#if HAVE_LIBUSB1
     usb.exit(HandleXum1541->ctx);
 #endif
 
