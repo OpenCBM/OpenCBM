@@ -385,14 +385,7 @@ xum1541_check_version(int version)
    The device's serial number to search for also. It is not considered, if set to 0.
 
   \return
-    0 on success, -1 on error. On error, the handle is cleaned up if it
-    was already active.
-
-  \remark
-    On success, xum1541_handle contains a valid handle to the xum1541 device.
-    In this case, the device configuration has been set and the interface
-    been claimed. xum1541_close() should be called when the user is done
-    with it.
+    device identifier string on success, NULL on error.
 */
 const char *
 xum1541_device_path(int PortNumber)
