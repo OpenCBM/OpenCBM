@@ -52,6 +52,9 @@ static struct XumDevice validDeviceTypes[] = {
     { "USBKEY", "at90usb1287", },
     { "BUMBLEB", "at90usb162", },
     { "OLIMEX", "at90usb162", },
+    { "TEENSY2", "atmega32u4", },
+    { "PROMICRO", "atmega32u4", },
+    { "PROMICRO_7406", "atmega32u4", },
     { NULL, NULL, },
 };
 
