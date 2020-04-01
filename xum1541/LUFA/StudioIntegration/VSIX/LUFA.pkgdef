@@ -1,0 +1,24 @@
+[$RootKey$\Packages\{2cfcbce0-84cb-45dc-8315-cad3f82b9467}]
+@="FourWalledCubicle.LUFA.LUFAPackage, LUFA, Version=1.0.0.0, Culture=neutral, PublicKeyToken=ebec6a8900a85cb9"
+"InprocServer32"="$WinDir$\SYSTEM32\MSCOREE.DLL"
+"Class"="FourWalledCubicle.LUFA.LUFAPackage"
+"CodeBase"="$PackageFolder$\LUFA.dll"
+[$RootKey$\AutoLoadPackages\{adfc4e64-0397-11d1-9f4e-00a0c911004f}]
+"{2cfcbce0-84cb-45dc-8315-cad3f82b9467}"=dword:00000000
+[$RootKey$\Menus]
+"{2cfcbce0-84cb-45dc-8315-cad3f82b9467}"=", Menus.ctmenu, 1"
+[$RootKey$\ToolsOptionsPages\Extensions]
+@="#15600"
+"Package"="{2cfcbce0-84cb-45dc-8315-cad3f82b9467}"
+[$RootKey$\ToolsOptionsPages\Extensions\LUFA Library]
+@="#1912"
+"Package"="{2cfcbce0-84cb-45dc-8315-cad3f82b9467}"
+"Page"="{0ee222a9-d385-3f59-8c25-9fb234552eb8}"
+[$RootKey$\AutomationProperties\Extensions\LUFA Library]
+"Name"="Extensions.LUFA Library"
+"Package"="{2cfcbce0-84cb-45dc-8315-cad3f82b9467}"
+[$RootKey$\ToolWindows\{c02047b1-fd51-456b-95d1-6ff77a2a1894}]
+@="{2cfcbce0-84cb-45dc-8315-cad3f82b9467}"
+"Name"="FourWalledCubicle.LUFA.GettingStartedPageToolWindow"
+"Style"="MDI"
+

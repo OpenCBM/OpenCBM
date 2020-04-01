@@ -89,9 +89,9 @@ usbInitIo(uint16_t len, uint8_t dir)
 
     // Select the proper endpoint for this direction
     if (dir == ENDPOINT_DIR_IN) {
-        Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT);
+        Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT | ENDPOINT_DIR_IN);
     } else if (dir == ENDPOINT_DIR_OUT) {
-        Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
+        Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT | ENDPOINT_DIR_OUT);
     } else {
         DEBUGF(DBG_ERROR, "ERR: usbInitIo bad dir %d\n");
         return;
@@ -124,14 +124,22 @@ usbIoDone(void)
             Endpoint_ClearIN();
         }
     } else if (usbDataDir == ENDPOINT_DIR_OUT) {
+        uint16_t BytesProcessed;
+        uint8_t ErrorCode;
         /*
          * If we didn't consume all data from the host, then discard it now.
          * Just clearing the endpoint (below) works fine if the remaining
          * data is less than the endpoint size, but would leave data in
          * the buffer if there was more.
          */
-        if (usbDataLen != 0)
-            Endpoint_Discard_Stream(usbDataLen, AbortOnReset);
+        if (usbDataLen != 0) {
+            BytesProcessed = 0;
+            while ((ErrorCode = Endpoint_Discard_Stream(usbDataLen, &BytesProcessed)) == ENDPOINT_RWSTREAM_IncompleteTransfer) {
+                // Check if the current command is being aborted by the host
+                if (doDeviceReset)
+                    return;
+                }
+        }
 
         /*
          * Request another buffer from the host. If it has one, it will
@@ -158,7 +166,7 @@ usbSendByte(uint8_t data)
 #endif
 
     // Write data back to the host buffer for USB transfer
-    Endpoint_Write_Byte(data);
+    Endpoint_Write_8(data);
     usbDataLen--;
 
     // If the endpoint is now full, flush the block to the host
@@ -206,7 +214,7 @@ usbRecvByte(uint8_t *data)
     }
 
     // Read data from the host buffer, received via USB
-    *data = Endpoint_Read_Byte();
+    *data = Endpoint_Read_8();
     usbDataLen--;
 
     return 0;
@@ -568,7 +576,7 @@ enterBootLoader(void)
     // Now shut things down and jump to the bootloader.
     DELAY_MS(100);
     wdt_disable();
-    USB_ShutDown();
+    USB_Disable();
     cli();
     cpu_bootloader_start();
 }

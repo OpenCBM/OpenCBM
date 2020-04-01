@@ -169,7 +169,6 @@ void SetAbortState(void);
 void USB_ResetConfig(void);
 bool USB_ReadBlock(uint8_t *buf, uint8_t len);
 bool USB_WriteBlock(uint8_t *buf, uint8_t len);
-uint8_t AbortOnReset(void);
 void usbInitIo(uint16_t len, uint8_t dir);
 void usbIoDone(void);
 int8_t usbSendByte(uint8_t data);

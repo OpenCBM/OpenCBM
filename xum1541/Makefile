@@ -87,7 +87,7 @@ REVISION=$(shell grep '\#define $(MODEL)' xum1541.h | sed 's/\#define $(MODEL)//
 # good start:
 #   --param inline-call-cost=2 -finline-limit=3 -fno-inline-small-functions
 CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
-        -DF_CPU=$(CPURATE)UL -DF_CLOCK=F_CPU -mmcu=$(CPUMODEL) \
+        -DF_CPU=$(CPURATE)UL -DF_USB=F_CPU -mmcu=$(CPUMODEL) \
         -Os -g -Wall -Wstrict-prototypes -Wundef \
         -Winline -Wno-error=inline -std=gnu99 -I . \
         -DUSB_DEVICE_ONLY -DFIXED_CONTROL_ENDPOINT_SIZE=8 \
@@ -105,19 +105,22 @@ CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
 # --relax: use relative calls when functions are nearby
 LDFLAGS+= -Wl,--gc-sections -Wl,--relax
 
-MYUSB_OBJS= \
-        LUFA/Drivers/USB/LowLevel/DevChapter9.o \
-        LUFA/Drivers/USB/LowLevel/Endpoint.o \
-        LUFA/Drivers/USB/LowLevel/LowLevel.o \
-        LUFA/Drivers/USB/HighLevel/Events.o \
-        LUFA/Drivers/USB/HighLevel/USBTask.o \
-        LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+#ifneq ($(CPUMODEL),)
+LUFA_PATH=LUFA/
+ARCH=AVR8
+F_USB=$(CPURATE)
+
+include $(LUFA_PATH)/Build/LUFA/lufa-sources.mk
+
+#endif
+
+MYUSB_OBJS=$(sort $(LUFA_SRC_USB_COMMON) $(LUFA_SRC_USB_DEVICE) $(LUFA_SRC_USBCLASS_DEVICE))
 
 IEC_OBJS= iec.o s1.o s2.o pp.o p2.o nib.o
 
 OBJS=   $(addprefix obj/$(MODEL)/,              \
         main.o commands.o descriptor.o          \
-        $(BOARD_OBJS) $(MYUSB_OBJS) $(IEC_OBJS))
+        $(BOARD_OBJS) $(IEC_OBJS)) $(MYUSB_OBJS)
 
 CC=     avr-gcc
 OBJCOPY=avr-objcopy

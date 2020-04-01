@@ -22,7 +22,7 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
         Type: DTYPE_Device,
     },
 
-    USBSpecification:       VERSION_BCD(01.10),
+    USBSpecification:       VERSION_BCD(01, 10, 0),
     Class:                  0xff,
     SubClass:               0x00,
     Protocol:               0x00,
@@ -60,7 +60,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
         TotalInterfaces:        1,
         ConfigurationNumber:    1,
         ConfigurationStrIndex:  NO_DESCRIPTOR,
-        ConfigAttributes:       USB_CONFIG_ATTR_BUSPOWERED,
+        ConfigAttributes:       USB_CONFIG_ATTR_RESERVED,
         MaxPowerConsumption:    USB_CONFIG_POWER_MA(100),
     },
 
@@ -85,7 +85,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
             Type: DTYPE_Endpoint,
         },
 
-        EndpointAddress:  (ENDPOINT_DESCRIPTOR_DIR_IN | XUM_BULK_IN_ENDPOINT),
+        EndpointAddress:  (ENDPOINT_DIR_IN | XUM_BULK_IN_ENDPOINT),
         Attributes:        EP_TYPE_BULK,
         EndpointSize:      XUM_ENDPOINT_BULK_SIZE,
         PollingIntervalMS: 0x00,
@@ -97,7 +97,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
             Type: DTYPE_Endpoint,
         },
 
-        EndpointAddress:  (ENDPOINT_DESCRIPTOR_DIR_OUT | XUM_BULK_OUT_ENDPOINT),
+        EndpointAddress:  (ENDPOINT_DIR_OUT | XUM_BULK_OUT_ENDPOINT),
         Attributes:        EP_TYPE_BULK,
         EndpointSize:      XUM_ENDPOINT_BULK_SIZE,
         PollingIntervalMS: 0x00,
@@ -131,8 +131,8 @@ const USB_Descriptor_String_t PROGMEM ProductString = {
 };
 
 uint16_t
-CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint8_t wIndex,
-  void **const DescriptorAddress, uint8_t *MemoryAddressSpace)
+CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint16_t wIndex,
+  const void **const DescriptorAddress, uint8_t *MemoryAddressSpace)
 {
     void*    Address = NULL;
     uint16_t Size    = NO_DESCRIPTOR;

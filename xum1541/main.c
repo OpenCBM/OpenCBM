@@ -14,6 +14,8 @@
 
 #include "xum1541.h"
 
+#define ENDPOINT_BANK_DOUBLE 2
+
 // Flag indicating we should abort any in-progress data transfers
 volatile bool doDeviceReset;
 
@@ -118,10 +120,10 @@ EVENT_USB_Device_ConfigurationChanged(void)
      * increasing order of endpoints (3, 4) to avoid fragmentation of
      * the USB RAM.
      */
-    Endpoint_ConfigureEndpoint(XUM_BULK_IN_ENDPOINT, EP_TYPE_BULK,
-        ENDPOINT_DIR_IN, XUM_ENDPOINT_BULK_SIZE, ENDPOINT_BANK_DOUBLE);
-    Endpoint_ConfigureEndpoint(XUM_BULK_OUT_ENDPOINT, EP_TYPE_BULK,
-        ENDPOINT_DIR_OUT, XUM_ENDPOINT_BULK_SIZE, ENDPOINT_BANK_DOUBLE);
+    Endpoint_ConfigureEndpoint(XUM_BULK_IN_ENDPOINT | ENDPOINT_DIR_IN, EP_TYPE_BULK,
+        XUM_ENDPOINT_BULK_SIZE, ENDPOINT_BANK_DOUBLE);
+    Endpoint_ConfigureEndpoint(XUM_BULK_OUT_ENDPOINT | ENDPOINT_DIR_OUT, EP_TYPE_BULK,
+        XUM_ENDPOINT_BULK_SIZE, ENDPOINT_BANK_DOUBLE);
 
     // Indicate USB connected and ready to start event loop in main()
     board_set_status(STATUS_READY);
@@ -294,7 +296,7 @@ USB_ResetConfig()
 
     for (endp = endpoints; *endp != 0; endp++) {
         Endpoint_SelectEndpoint(*endp);
-        Endpoint_ResetFIFO(*endp);
+        Endpoint_ResetEndpoint(*endp);
         Endpoint_ResetDataToggle();
         if (Endpoint_IsStalled())
             Endpoint_ClearStall();
@@ -309,16 +311,21 @@ USB_ResetConfig()
 bool
 USB_ReadBlock(uint8_t *buf, uint8_t len)
 {
+    uint16_t BytesProcessed;
+    uint8_t ErrorCode;
+
     // Get the requested data from the host
     Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
-    Endpoint_Read_Stream_LE(buf, len, AbortOnReset);
 
-    // Check if the current command is being aborted by the host
-    if (doDeviceReset)
-        return false;
+    BytesProcessed = 0;
+    while ((ErrorCode = Endpoint_Read_Stream_LE(buf, len, &BytesProcessed)) == ENDPOINT_RWSTREAM_IncompleteTransfer) {
+        // Check if the current command is being aborted by the host
+        if (doDeviceReset)
+            return false;
+    }
 
     Endpoint_ClearOUT();
-    return true;
+    return ErrorCode == ENDPOINT_RWSTREAM_NoError;
 }
 
 /*
@@ -327,25 +334,19 @@ USB_ReadBlock(uint8_t *buf, uint8_t len)
 bool
 USB_WriteBlock(uint8_t *buf, uint8_t len)
 {
+    uint16_t BytesProcessed;
+    uint8_t ErrorCode;
+
     // Get the requested data from the host
     Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT);
-    Endpoint_Write_Stream_LE(buf, len, AbortOnReset);
 
-    // Check if the current command is being aborted by the host
-    if (doDeviceReset)
-        return false;
+    BytesProcessed = 0;
+    while ((ErrorCode = Endpoint_Write_Stream_LE(buf, len, &BytesProcessed)) == ENDPOINT_RWSTREAM_IncompleteTransfer) {
+        // Check if the current command is being aborted by the host
+        if (doDeviceReset)
+            return false;
+    }
 
     Endpoint_ClearIN();
-    return true;
-}
-
-/*
- * Callback for the Endpoint_Read/Write_Stream functions. We abort the
- * current stream transfer if the user sent a reset message to the
- * control endpoint.
- */
-uint8_t
-AbortOnReset()
-{
-    return doDeviceReset ? STREAMCALLBACK_Abort : STREAMCALLBACK_Continue;
+    return ErrorCode == ENDPOINT_RWSTREAM_NoError;
 }
