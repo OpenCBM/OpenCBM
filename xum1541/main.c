@@ -47,6 +47,8 @@ main(void)
      */
     cpu_init();
     USB_Init();
+    GlobalInterruptEnable();
+
     while (!usb_connected)
         wdt_reset();
 

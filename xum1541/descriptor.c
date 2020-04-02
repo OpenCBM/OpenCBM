@@ -22,7 +22,7 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
         Type: DTYPE_Device,
     },
 
-    USBSpecification:       VERSION_BCD(01, 10, 0),
+    USBSpecification:       VERSION_BCD(1, 1, 0),
     Class:                  0xff,
     SubClass:               0x00,
     Protocol:               0x00,
