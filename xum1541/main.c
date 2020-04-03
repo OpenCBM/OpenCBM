@@ -133,7 +133,7 @@ EVENT_USB_Device_ConfigurationChanged(void)
 }
 
 void
-EVENT_USB_Device_UnhandledControlRequest(void)
+EVENT_USB_Device_ControlRequest(void)
 {
     uint8_t replyBuf[XUM_DEVINFO_SIZE];
     int8_t len;
@@ -185,19 +185,20 @@ USB_BulkWorker()
      */
     if (USB_DeviceState != DEVICE_STATE_Configured)
         return false;
-    Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
+
+    Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT | ENDPOINT_DIR_OUT);
     if (!Endpoint_IsReadWriteAllowed())
         return false;
 
 #ifdef DEBUG
     // Dump the status of both endpoints before getting the command
-    Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT);
+    Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT | ENDPOINT_DIR_IN);
     DEBUGF(DBG_INFO, "bsti %x %x %x %x %x %x %x %x\n",
         Endpoint_GetCurrentEndpoint(),
         Endpoint_BytesInEndpoint(), Endpoint_IsEnabled(),
         Endpoint_IsReadWriteAllowed(), Endpoint_IsConfigured(),
         Endpoint_IsINReady(), Endpoint_IsOUTReceived(), Endpoint_IsStalled());
-    Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
+    Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT | ENDPOINT_DIR_OUT);
     DEBUGF(DBG_INFO, "bsto %x %x %x %x %x %x %x %x\n",
         Endpoint_GetCurrentEndpoint(),
         Endpoint_BytesInEndpoint(), Endpoint_IsEnabled(),
@@ -248,9 +249,9 @@ SetAbortState()
     uint8_t origEndpoint = Endpoint_GetCurrentEndpoint();
 
     doDeviceReset = true;
-    Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
+    Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT | ENDPOINT_DIR_OUT);
     Endpoint_StallTransaction();
-    Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT);
+    Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT | ENDPOINT_DIR_IN);
     Endpoint_StallTransaction();
 
     Endpoint_SelectEndpoint(origEndpoint);
@@ -290,7 +291,7 @@ void
 USB_ResetConfig()
 {
     static uint8_t endpoints[] = {
-        XUM_BULK_IN_ENDPOINT, XUM_BULK_OUT_ENDPOINT, 0,
+        XUM_BULK_IN_ENDPOINT | ENDPOINT_DIR_IN, XUM_BULK_OUT_ENDPOINT | ENDPOINT_DIR_OUT, 0,
     };
     uint8_t lastEndpoint, *endp;
 
@@ -317,7 +318,7 @@ USB_ReadBlock(uint8_t *buf, uint8_t len)
     uint8_t ErrorCode;
 
     // Get the requested data from the host
-    Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT);
+    Endpoint_SelectEndpoint(XUM_BULK_OUT_ENDPOINT | ENDPOINT_DIR_OUT);
 
     BytesProcessed = 0;
     while ((ErrorCode = Endpoint_Read_Stream_LE(buf, len, &BytesProcessed)) == ENDPOINT_RWSTREAM_IncompleteTransfer) {
@@ -340,7 +341,7 @@ USB_WriteBlock(uint8_t *buf, uint8_t len)
     uint8_t ErrorCode;
 
     // Get the requested data from the host
-    Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT);
+    Endpoint_SelectEndpoint(XUM_BULK_IN_ENDPOINT | ENDPOINT_DIR_IN);
 
     BytesProcessed = 0;
     while ((ErrorCode = Endpoint_Write_Stream_LE(buf, len, &BytesProcessed)) == ENDPOINT_RWSTREAM_IncompleteTransfer) {
