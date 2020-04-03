@@ -23,9 +23,9 @@ const USB_Descriptor_Device_t PROGMEM DeviceDescriptor =
     },
 
     USBSpecification:       VERSION_BCD(1, 1, 0),
-    Class:                  0xff,
-    SubClass:               0x00,
-    Protocol:               0x00,
+    Class:                  USB_CSCP_NoDeviceClass,
+    SubClass:               USB_CSCP_NoDeviceSubclass,
+    Protocol:               USB_CSCP_NoDeviceProtocol,
 
     Endpoint0Size:          XUM_ENDPOINT_0_SIZE,
 
@@ -74,8 +74,8 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
         AlternateSetting:  0,
         TotalEndpoints:    2,
         Class:             0xff,
-        SubClass:          0x00,
-        Protocol:          0x00,
+        SubClass:          0xff,
+        Protocol:          0xff,
         InterfaceStrIndex: NO_DESCRIPTOR,
     },
 
@@ -86,7 +86,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
         },
 
         EndpointAddress:  (ENDPOINT_DIR_IN | XUM_BULK_IN_ENDPOINT),
-        Attributes:        EP_TYPE_BULK,
+        Attributes:        EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA,
         EndpointSize:      XUM_ENDPOINT_BULK_SIZE,
         PollingIntervalMS: 0x00,
     },
@@ -98,7 +98,7 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor =
         },
 
         EndpointAddress:  (ENDPOINT_DIR_OUT | XUM_BULK_OUT_ENDPOINT),
-        Attributes:        EP_TYPE_BULK,
+        Attributes:        EP_TYPE_BULK | ENDPOINT_ATTR_NO_SYNC | ENDPOINT_USAGE_DATA,
         EndpointSize:      XUM_ENDPOINT_BULK_SIZE,
         PollingIntervalMS: 0x00,
     },
@@ -134,34 +134,34 @@ uint16_t
 CALLBACK_USB_GetDescriptor(const uint16_t wValue, const uint16_t wIndex,
   const void **const DescriptorAddress, uint8_t *MemoryAddressSpace)
 {
-    void*    Address = NULL;
-    uint16_t Size    = NO_DESCRIPTOR;
-    wchar_t* ucdBuf;
+    const void* Address = NULL;
+    uint16_t    Size    = NO_DESCRIPTOR;
+    wchar_t*    ucdBuf;
 
     /* generally assume Flash memory access unless specified otherwise */
     *MemoryAddressSpace = MEMSPACE_FLASH;
 
     switch (wValue >> 8) {
     case DTYPE_Device:
-        Address = (void *)&DeviceDescriptor;
+        Address = &DeviceDescriptor;
         Size    = sizeof(USB_Descriptor_Device_t);
         break;
     case DTYPE_Configuration:
-        Address = (void *)&ConfigurationDescriptor;
+        Address = &ConfigurationDescriptor;
         Size    = sizeof(USB_Descriptor_Configuration_t);
         break;
     case DTYPE_String:
         switch (wValue & 0xff) {
         case 0x00:
-            Address = (void *)&LanguageString;
+            Address = &LanguageString;
             Size    = pgm_read_byte(&LanguageString.Header.Size);
             break;
         case 0x01:
-            Address = (void *)&ManufacturerString;
+            Address = &ManufacturerString;
             Size    = pgm_read_byte(&ManufacturerString.Header.Size);
             break;
         case 0x02:
-            Address = (void *)&ProductString;
+            Address = &ProductString;
             Size    = pgm_read_byte(&ProductString.Header.Size);
             break;
         case 0x03:
