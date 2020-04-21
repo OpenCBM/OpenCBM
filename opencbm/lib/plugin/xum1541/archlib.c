@@ -275,7 +275,7 @@ opencbm_plugin_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsign
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x20 | DeviceAddress;
     dataBuf[1] = 0x60 | SecondaryAddress;
-    return !xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf));
+    return xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf)) <= 0;
 }
 
 /*! \brief Send a TALK on the IEC serial bus
@@ -309,7 +309,7 @@ opencbm_plugin_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned
     proto = XUM1541_CBM | XUM_WRITE_ATN | XUM_WRITE_TALK;
     dataBuf[0] = 0x40 | DeviceAddress;
     dataBuf[1] = 0x60 | SecondaryAddress;
-    return !xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf));
+    return xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf)) <= 0;
 }
 
 /*! \brief Open a file on the IEC serial bus
@@ -341,7 +341,7 @@ opencbm_plugin_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x20 | DeviceAddress;
     dataBuf[1] = 0xf0 | SecondaryAddress;
-    return !xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf));
+    return xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf)) <= 0;
 }
 
 /*! \brief Close a file on the IEC serial bus
@@ -373,7 +373,7 @@ opencbm_plugin_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigne
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x20 | DeviceAddress;
     dataBuf[1] = 0xe0 | SecondaryAddress;
-    return !xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf));
+    return xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf)) <= 0;
 }
 
 /*! \brief Send an UNLISTEN on the IEC serial bus
@@ -403,7 +403,7 @@ opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x3f;
-    return !xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf));
+    return xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf)) <= 0;
 }
 
 /*! \brief Send an UNTALK on the IEC serial bus
@@ -433,7 +433,7 @@ opencbm_plugin_untalk(CBM_FILE HandleDevice)
 
     proto = XUM1541_CBM | XUM_WRITE_ATN;
     dataBuf[0] = 0x5f;
-    return !xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf));
+    return xum1541_write((struct opencbm_usb_handle *)HandleDevice, proto, dataBuf, sizeof(dataBuf)) <= 0;
 }
 
 
