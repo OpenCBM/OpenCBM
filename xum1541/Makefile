@@ -88,7 +88,7 @@ REVISION=$(shell grep '\#define $(MODEL)' xum1541.h | sed 's/\#define $(MODEL)//
 #   --param inline-call-cost=2 -finline-limit=3 -fno-inline-small-functions
 CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
         -DF_CPU=$(CPURATE)UL -DF_CLOCK=F_CPU -mmcu=$(CPUMODEL) \
-        -Os -g -Wall -Wstrict-prototypes -Wundef \
+        -Os -g -Werror -Wall -Wstrict-prototypes -Wundef \
         -Winline -Wno-error=inline -std=gnu99 -I . \
         -DUSB_DEVICE_ONLY -DFIXED_CONTROL_ENDPOINT_SIZE=8 \
         -DINTERRUPT_CONTROL_ENDPOINT \
