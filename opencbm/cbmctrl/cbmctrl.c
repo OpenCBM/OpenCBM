@@ -70,13 +70,24 @@ static int check_if_parameters_ok(OPTIONS * const options)
     return 0;
 }
 
-static int get_argument_char(OPTIONS * const options, unsigned char *where)
+static int
+get_argument_int_as_uchar(OPTIONS * const options, unsigned char *where, unsigned int min, unsigned int max)
 {
     if (options->argc > 0)
     {
-        *where = arch_atoc(options->argv[0]);
+        char ch;
+
+        ch = arch_atoc(options->argv[0]);
+
         options->argv++;
         options->argc--;
+
+        if (ch < min || ch > max) {
+            return 1;
+        }
+
+        *where = ch;
+
         return 0;
     }
     else
@@ -84,6 +95,24 @@ static int get_argument_char(OPTIONS * const options, unsigned char *where)
         fprintf(stderr, "Not enough parameters, aborting!\n");
         return 1;
     }
+}
+
+static int
+get_argument_int_as_primary_address(OPTIONS * const options, unsigned char *where)
+{
+    return get_argument_int_as_uchar(options, where, 1, 30);
+}
+
+static int
+get_argument_int_as_secondary_address(OPTIONS * const options, unsigned char *where)
+{
+    return get_argument_int_as_uchar(options, where, 0x00, 0xff);
+}
+
+static int
+get_argument_int_as_unitno(OPTIONS * const options, unsigned char *where)
+{
+    return get_argument_int_as_uchar(options, where, 0, 9);
 }
 
 static int
@@ -518,8 +547,8 @@ static int do_listen(CBM_FILE fd, OPTIONS * const options)
 
     rv = skip_options(options);
 
-    rv = rv || get_argument_char(options, &unit);
-    rv = rv || get_argument_char(options, &secondary);
+    rv = rv || get_argument_int_as_primary_address(options, &unit);
+    rv = rv || get_argument_int_as_secondary_address(options, &secondary);
 
     if (rv || check_if_parameters_ok(options))
         return 1;
@@ -538,8 +567,8 @@ static int do_talk(CBM_FILE fd, OPTIONS * const options)
 
     rv = skip_options(options);
 
-    rv = rv || get_argument_char(options, &unit);
-    rv = rv || get_argument_char(options, &secondary);
+    rv = rv || get_argument_int_as_primary_address(options, &unit);
+    rv = rv || get_argument_int_as_secondary_address(options, &secondary);
 
     if (rv || check_if_parameters_ok(options))
         return 1;
@@ -612,8 +641,8 @@ static int do_open(CBM_FILE fd, OPTIONS * const options)
         }
     }
 
-    rv = get_argument_char(options, &unit);
-    rv = rv || get_argument_char(options, &secondary);
+    rv = get_argument_int_as_primary_address(options, &unit);
+    rv = rv || get_argument_int_as_secondary_address(options, &secondary);
     rv = rv || get_extended_argument_string(extended, options, &filename, &filenamelen);
 
     if (rv)
@@ -637,8 +666,8 @@ static int do_close(CBM_FILE fd, OPTIONS * const options)
 
     rv = skip_options(options);
 
-    rv = rv || get_argument_char(options, &unit);
-    rv = rv || get_argument_char(options, &secondary);
+    rv = rv || get_argument_int_as_primary_address(options, &unit);
+    rv = rv || get_argument_int_as_secondary_address(options, &secondary);
 
     if (rv || check_if_parameters_ok(options))
         return 1;
@@ -830,7 +859,7 @@ static int do_status(CBM_FILE fd, OPTIONS * const options)
 
     rv = skip_options(options);
 
-    rv = rv || get_argument_char(options, &unit);
+    rv = rv || get_argument_int_as_primary_address(options, &unit);
 
     if (rv || check_if_parameters_ok(options))
         return 1;
@@ -880,7 +909,7 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
         }
     }
 
-    rv = get_argument_char(options, &unit);
+    rv = get_argument_int_as_primary_address(options, &unit);
     rv = rv || get_extended_argument_string(extended, options, &commandline, &commandlinelen);
 
     if (rv)
@@ -921,11 +950,14 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
 
     rv = skip_options(options);
 
-    rv = rv || get_argument_char(options, &unit);
+    rv = rv || get_argument_int_as_primary_address(options, &unit);
     /* default is drive '0' */
     if (options->argc > 0)
     {
-        rv = rv || get_argument_char(options, command+1);
+        rv = rv || get_argument_int_as_unitno(options, command+1);
+
+        /* convert the unit number to ASCII, as this is what the floppy expects */
+        if ( ! rv ) command[1] += '0';
     }
 
     if (rv || check_if_parameters_ok(options))
@@ -1006,7 +1038,7 @@ static int do_download(CBM_FILE fd, OPTIONS * const options)
 
     // process the drive number (unit)
 
-    if (get_argument_char(options, &unit))
+    if (get_argument_int_as_primary_address(options, &unit))
         return 1;
 
 
@@ -1102,7 +1134,7 @@ static int do_upload(CBM_FILE fd, OPTIONS * const options)
 
     // process the drive number (unit)
 
-    if (get_argument_char(options, &unit))
+    if (get_argument_int_as_primary_address(options, &unit))
         return 1;
 
 
@@ -1239,12 +1271,12 @@ static int do_detect(CBM_FILE fd, OPTIONS * const options)
     /* default is 'all' */
     if (options->argc > 0)
     {
-        get_argument_char(options, &device_min);
+        get_argument_int_as_primary_address(options, &device_min);
     }
 
     if (options->argc > 0)
     {
-        get_argument_char(options, &device_max);
+        get_argument_int_as_primary_address(options, &device_max);
     }
 
     if (check_if_parameters_ok(options))
@@ -1318,7 +1350,7 @@ static int do_change(CBM_FILE fd, OPTIONS * const options)
 
     rv = skip_options(options);
 
-    rv = rv || get_argument_char(options, &unit);
+    rv = rv || get_argument_int_as_primary_address(options, &unit);
 
     if (rv || check_if_parameters_ok(options))
         return 1;
