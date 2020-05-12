@@ -992,7 +992,7 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
     if (rv || check_if_parameters_ok(options))
         return 1;
 
-    rv = cbm_open(fd, command.device, 0, command.str, sizeof(command.str));
+    rv = cbm_open(fd, command.device, 0, command.str, strlen(command.str));
     if(rv == 0)
     {
         if(cbm_device_status(fd, command.device, buf, sizeof(buf)) == 0)
