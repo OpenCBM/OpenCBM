@@ -104,15 +104,35 @@ get_argument_int_as_primary_address(OPTIONS * const options, unsigned char *wher
 }
 
 static int
-get_argument_int_as_secondary_address(OPTIONS * const options, unsigned char *where)
+get_argument_device(OPTIONS * const options, unsigned char *drive, unsigned char *unit)
 {
-    return get_argument_int_as_uchar(options, where, 0x00, 0xff);
+    int rv;
+    char * str_unit = 0;
+
+    if (options->argc > 0) {
+        str_unit = strchr(options->argv[0], ':');
+    }
+
+    rv = get_argument_int_as_primary_address(options, drive);
+
+    if ( ! rv && str_unit ) {
+        /* handle the unit number */
+        unsigned char local_unit = arch_atoc(str_unit + 1);
+        if (local_unit > 9) {
+            rv = 1;
+        }
+        else {
+            *unit = local_unit + '0';
+        }
+    }
+
+    return rv;
 }
 
 static int
-get_argument_int_as_unitno(OPTIONS * const options, unsigned char *where)
+get_argument_int_as_secondary_address(OPTIONS * const options, unsigned char *where)
 {
-    return get_argument_int_as_uchar(options, where, 0, 9);
+    return get_argument_int_as_uchar(options, where, 0x00, 0xff);
 }
 
 static int
@@ -944,31 +964,40 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
 static int do_dir(CBM_FILE fd, OPTIONS * const options)
 {
     char c, buf[40];
-    unsigned char command[] = { '$', '0' };
+    struct command_spec  {
+        char * str;
+        unsigned char   device;       /* device no. 8, 9, 10, 11, ... */
+        unsigned char   dir;          /* '$' */
+        unsigned char   unit;         /* '0' */
+        unsigned char   colon;        /* ':' */
+        unsigned char   filespec[17]; /* 16 byte char + nul */
+    } command = { (char *) &command.dir, 8, '$', '0', ':', "" };
+
+    command.filespec[sizeof(command.filespec)-1] = 0;
+
     int rv;
-    unsigned char unit;
 
     rv = skip_options(options);
 
-    rv = rv || get_argument_int_as_primary_address(options, &unit);
-    /* default is drive '0' */
-    if (options->argc > 0)
-    {
-        rv = rv || get_argument_int_as_unitno(options, command+1);
+    rv = rv || get_argument_device(options, &command.device, &command.unit);
 
-        /* convert the unit number to ASCII, as this is what the floppy expects */
-        if ( ! rv ) command[1] += '0';
+    if ( !rv && options->argc > 0) {
+        strncpy((char*)(command.filespec), options->argv[0], sizeof(command.filespec)-1);
+        --options->argc;
+    }
+    else {
+        command.colon = 0;
     }
 
     if (rv || check_if_parameters_ok(options))
         return 1;
 
-    rv = cbm_open(fd, unit, 0, command, sizeof(command));
+    rv = cbm_open(fd, command.device, 0, command.str, sizeof(command.str));
     if(rv == 0)
     {
-        if(cbm_device_status(fd, unit, buf, sizeof(buf)) == 0)
+        if(cbm_device_status(fd, command.device, buf, sizeof(buf)) == 0)
         {
-            cbm_talk(fd, unit, 0);
+            cbm_talk(fd, command.device, 0);
             if(cbm_raw_read(fd, buf, 2) == 2)
             {
                 while(cbm_raw_read(fd, buf, 2) == 2)
@@ -987,7 +1016,7 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
                     }
                 }
                 cbm_untalk(fd);
-                cbm_device_status(fd, unit, buf, sizeof(buf));
+                cbm_device_status(fd, command.device, buf, sizeof(buf));
                 printf("%s", cbm_petscii2ascii(buf));
             }
             else
@@ -1000,7 +1029,7 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
         {
             printf("%s", cbm_petscii2ascii(buf));
         }
-        cbm_close(fd, unit, 0);
+        cbm_close(fd, command.device, 0);
     }
     return rv;
 }
@@ -1583,11 +1612,13 @@ static struct prog prog_table[] =
         "NOTE: You have to give the commands in lower-case letters.\n"
         "      Upper case will NOT work!\n" },
 
-    {1, "dir"     , PA_PETSCII, do_dir     , "<device> [<drive>]",
+    {1, "dir"     , PA_PETSCII, do_dir     , "<device>[:<drive>] [<filespec>]",
         "output the directory of the disk in the specified drive",
         "This command gets the directory of a disk in the drive.\n\n"
-        "<device> is the device number of the drive (bus ID).\n"
-        "<drive> is the drive number of a dual drive (LUN), default is 0." },
+        "<device>   is the device number of the drive (bus ID).\n"
+        "<drive>    is the drive number of a dual drive (LUN), default is 0.\n"
+        "<filespec> can be used to restrict the number of files. wildcards\n"
+        "           are allowed, but drive limitations apply." },
 
     {1, "download", PA_RAW,     do_download, "<device> <adr> <count> [<file>]",
         "download memory contents from the floppy drive",
