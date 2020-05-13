@@ -18,6 +18,8 @@
 
 #include "arch.h"
 
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 /*! \brief allocate memory for a string of a given size
@@ -225,4 +227,51 @@ cbmlibmisc_strcat(const char * First, const char * Second)
     } while(0);
 
     return ret;
+}
+
+/*! \brief sprintf() for dynamic buffer
+
+ This function is a safe sprintf() and snprintf() replacement.
+ It malloc()s a memory region that is big enought to hold
+ the result.
+
+ \param Format
+   printf() format specifier
+   If this pointer is NULL, an empty string is assumed.
+
+ \param ...
+   What to output; look at your sprintf() documentation
+   for a detailed description.
+
+ \return
+   The malloc()ed memory for the resulting string, or NULL
+   if there was not enough memory.
+
+ \remark
+   The string must be freed with cbmlibmisc_strfree().
+*/
+char *
+cbmlibmisc_sprintf(const char * const Format, ...)
+{
+    va_list arg_ptr;
+    va_start(arg_ptr, Format);
+
+    size_t nbytes = vsnprintf(NULL, 0, Format, arg_ptr) + 1; /* +1 for the '\0' */
+
+    char *str = cbmlibmisc_stralloc(nbytes);
+
+    if (str) {
+        va_end(arg_ptr);
+        va_start(arg_ptr, Format);
+
+        size_t written = vsnprintf(str, nbytes, Format, arg_ptr) + 1; /* +1 for the '\0' */
+        if ( (written < 0) || (written > nbytes)) {
+            fprintf(stderr, "possible memory corruption in cbmlibmisc_sprintf(), aborting!\n");
+            exit(1);
+        }
+    }
+
+    va_end(arg_ptr);
+
+    return str;
 }

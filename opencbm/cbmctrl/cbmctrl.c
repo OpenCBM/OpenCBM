@@ -23,6 +23,16 @@
 #include "arch.h"
 #include "libmisc.h"
 
+#define DEVICE_UNIT_MAX 255
+#define PRIMARY_ADDRESS_MIN 1
+#define PRIMARY_ADDRESS_MAX 30
+#define SECONDARY_ADDRESS_MIN 0
+#define SECONDARY_ADDRESS_MAX 30
+#define FILENAME_LENGTH_MAX 16
+
+#define STRINGIFY_HELPER(_x) #_x
+#define STRINGIFY(_x) STRINGIFY_HELPER(_x)
+
 typedef
 enum {
     PA_UNSPEC = 0,
@@ -71,18 +81,18 @@ static int check_if_parameters_ok(OPTIONS * const options)
 }
 
 static int
-get_argument_int_as_uchar(OPTIONS * const options, unsigned char *where, unsigned int min, unsigned int max)
+get_argument_int_as_uchar(OPTIONS * const options, unsigned char *where, unsigned int min, unsigned int max, const char * const errortext)
 {
     if (options->argc > 0)
     {
-        char ch;
-
-        ch = arch_atoc(options->argv[0]);
+        int ch;
+        ch = atoi(options->argv[0]);
 
         options->argv++;
         options->argc--;
 
         if (ch < min || ch > max) {
+            fprintf(stderr, "%s: value %u out of range, allowed range: %u .. %u\n", errortext, ch, min, max);
             return 1;
         }
 
@@ -100,7 +110,7 @@ get_argument_int_as_uchar(OPTIONS * const options, unsigned char *where, unsigne
 static int
 get_argument_int_as_primary_address(OPTIONS * const options, unsigned char *where)
 {
-    return get_argument_int_as_uchar(options, where, 1, 30);
+    return get_argument_int_as_uchar(options, where, PRIMARY_ADDRESS_MIN, PRIMARY_ADDRESS_MAX, "primary address (device)");
 }
 
 static int
@@ -117,12 +127,13 @@ get_argument_device(OPTIONS * const options, unsigned char *drive, unsigned char
 
     if ( ! rv && str_unit ) {
         /* handle the unit number */
-        unsigned char local_unit = arch_atoc(str_unit + 1);
-        if (local_unit > 9) {
+        int local_unit = atoi(str_unit + 1);
+        if (local_unit < 0 || local_unit > DEVICE_UNIT_MAX) {
             rv = 1;
+            fprintf(stderr, "Device unit %d is not possible, allowed range 0 .. " STRINGIFY(DEVICE_UNIT_MAX) "\n", local_unit);
         }
         else {
-            *unit = local_unit + '0';
+            *unit = local_unit;
         }
     }
 
@@ -132,7 +143,7 @@ get_argument_device(OPTIONS * const options, unsigned char *drive, unsigned char
 static int
 get_argument_int_as_secondary_address(OPTIONS * const options, unsigned char *where)
 {
-    return get_argument_int_as_uchar(options, where, 0x00, 0xff);
+    return get_argument_int_as_uchar(options, where, SECONDARY_ADDRESS_MIN, SECONDARY_ADDRESS_MAX, "secondary address");
 }
 
 static int
@@ -964,16 +975,12 @@ static int do_command(CBM_FILE fd, OPTIONS * const options)
 static int do_dir(CBM_FILE fd, OPTIONS * const options)
 {
     char c, buf[40];
-    struct command_spec  {
+    struct command_spec {
         char * str;
-        unsigned char   device;       /* device no. 8, 9, 10, 11, ... */
-        unsigned char   dir;          /* '$' */
-        unsigned char   unit;         /* '0' */
-        unsigned char   colon;        /* ':' */
-        unsigned char   filespec[17]; /* 16 byte char + nul */
-    } command = { (char *) &command.dir, 8, '$', '0', ':', "" };
-
-    command.filespec[sizeof(command.filespec)-1] = 0;
+        char * filename;
+        unsigned char device; /* device no. 8, 9, 10, 11, ... */
+        unsigned char unit;   /* 0, 1, ... */
+    } command = { NULL, NULL, 0, 0 };
 
     int rv;
 
@@ -982,15 +989,29 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
     rv = rv || get_argument_device(options, &command.device, &command.unit);
 
     if ( !rv && options->argc > 0) {
-        strncpy((char*)(command.filespec), options->argv[0], sizeof(command.filespec)-1);
+        command.filename = options->argv[0];
         --options->argc;
-    }
-    else {
-        command.colon = 0;
+
+        if (strlen(command.filename) > FILENAME_LENGTH_MAX) {
+            fprintf(stderr, "filename length is %u, maximum of "
+                            STRINGIFY(FILENAME_LENGTH_MAX) " exceeded!\n",
+                            (unsigned) strlen(command.filename));
+            return 1;
+        }
     }
 
     if (rv || check_if_parameters_ok(options))
         return 1;
+
+    if (command.filename) {
+        command.str = cbmlibmisc_sprintf("$%u:%s", command.unit, command.filename);
+        if (options->petsciiraw == PA_PETSCII) {
+            cbm_ascii2petscii(command.str);
+        }
+    }
+    else {
+        command.str = cbmlibmisc_sprintf("$%u", command.unit);
+    }
 
     rv = cbm_open(fd, command.device, 0, command.str, strlen(command.str));
     if(rv == 0)
@@ -1031,6 +1052,9 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
         }
         cbm_close(fd, command.device, 0);
     }
+
+    cbmlibmisc_strfree(command.str);
+
     return rv;
 }
 

@@ -28,6 +28,8 @@ extern char * cbmlibmisc_strndup(const char * const OldString, size_t Length);
 extern void   cbmlibmisc_strfree(const char * String);
 extern char * cbmlibmisc_strcat(const char * first, const char * second);
 
+extern char * cbmlibmisc_sprintf(const char * const format, ...);
+
 /* Windows only: */
 extern char * cbmlibmisc_format_error_message(unsigned int ErrorNumber);
 
