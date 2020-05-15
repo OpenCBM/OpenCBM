@@ -23,7 +23,6 @@
 #include "arch.h"
 #include "libmisc.h"
 
-#define DEVICE_UNIT_MAX 255
 #define PRIMARY_ADDRESS_MIN 1
 #define PRIMARY_ADDRESS_MAX 30
 #define SECONDARY_ADDRESS_MIN 0
@@ -111,33 +110,6 @@ static int
 get_argument_int_as_primary_address(OPTIONS * const options, unsigned char *where)
 {
     return get_argument_int_as_uchar(options, where, PRIMARY_ADDRESS_MIN, PRIMARY_ADDRESS_MAX, "primary address (device)");
-}
-
-static int
-get_argument_device(OPTIONS * const options, unsigned char *drive, unsigned char *unit)
-{
-    int rv;
-    char * str_unit = 0;
-
-    if (options->argc > 0) {
-        str_unit = strchr(options->argv[0], ':');
-    }
-
-    rv = get_argument_int_as_primary_address(options, drive);
-
-    if ( ! rv && str_unit ) {
-        /* handle the unit number */
-        int local_unit = atoi(str_unit + 1);
-        if (local_unit < 0 || local_unit > DEVICE_UNIT_MAX) {
-            rv = 1;
-            fprintf(stderr, "Device unit %d is not possible, allowed range 0 .. " STRINGIFY(DEVICE_UNIT_MAX) "\n", local_unit);
-        }
-        else {
-            *unit = local_unit;
-        }
-    }
-
-    return rv;
 }
 
 static int
@@ -986,7 +958,7 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
 
     rv = skip_options(options);
 
-    rv = rv || get_argument_device(options, &command.device, &command.unit);
+    rv = rv || get_argument_int_as_primary_address(options, &command.device);
 
     if ( !rv && options->argc > 0) {
         command.filename = options->argv[0];
@@ -1003,14 +975,9 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
     if (rv || check_if_parameters_ok(options))
         return 1;
 
-    if (command.filename) {
-        command.str = cbmlibmisc_sprintf("$%u:%s", command.unit, command.filename);
-        if (options->petsciiraw == PA_PETSCII) {
-            cbm_ascii2petscii(command.str);
-        }
-    }
-    else {
-        command.str = cbmlibmisc_sprintf("$%u", command.unit);
+    command.str = cbmlibmisc_sprintf("$%s", (command.filename ? command.filename : ""));
+    if (options->petsciiraw == PA_PETSCII) {
+        cbm_ascii2petscii(command.str);
     }
 
     rv = cbm_open(fd, command.device, 0, command.str, strlen(command.str));
@@ -1636,11 +1603,10 @@ static struct prog prog_table[] =
         "NOTE: You have to give the commands in lower-case letters.\n"
         "      Upper case will NOT work!\n" },
 
-    {1, "dir"     , PA_PETSCII, do_dir     , "<device>[:<drive>] [<filespec>]",
+    {1, "dir"     , PA_PETSCII, do_dir     , "<device> [<filespec>]",
         "output the directory of the disk in the specified drive",
         "This command gets the directory of a disk in the drive.\n\n"
         "<device>   is the device number of the drive (bus ID).\n"
-        "<drive>    is the drive number of a dual drive (LUN), default is 0.\n"
         "<filespec> can be used to restrict the number of files. wildcards\n"
         "           are allowed, but drive limitations apply." },
 

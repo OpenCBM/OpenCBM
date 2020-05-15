@@ -1719,25 +1719,28 @@ Like <it/command/, but converts the data from ASCII to PetSCII before sending
 it. Its use is deprecated, use <it/command/ with <it/--petscii/ instead.
 
 <label id="action-dir">
-<tag>dir <it/device[:unit]/ <it/[filespec]/ </tag>
+<tag>dir <it/device [filespec]/ </tag>
 Read directory from disk in device <it/device/, print on standard out.
 
 The output depends upon if <it/--petscii/ or <it/--raw/ is specified.
 
-You can also specifiy a unit, that is, the drive to use on a dual-drive floppy
-(i.e., 8050, 8250), and a filespec that filters out what you want to show.
+You can also specifiy a filespec that filters out what you want to show.
 Note that the filter is sent to the device and processed there. It's use
 of wildcards is limited. Please note also that the command-line processes
 wildcards on its own. Thus, to be sure that the filespec is processed correctly,
 include it in quotation marks!
 
+In order to specify the drive to use on a dual-drive floppy (i.e., 8050, 8250),
+you can append the number as file spec.
+
 Examples:
 <code>
 cbmctrl dir 8
-cbmctrl dir 8:0
-cbmctrl dir 8:1
+cbmctrl dir 8 0
+cbmctrl dir 8 1
 cbmctrl dir 8 "ABC*"
-cbmctrl dir 8:1 "ABC*"
+cbmctrl dir 8 "1:ABC*"
+cbmctrl dir 8 "250/cmd_dir/:ABC*"
 </code>
 
 <label id="action-download">
