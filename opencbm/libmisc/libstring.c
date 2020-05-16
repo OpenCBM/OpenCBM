@@ -22,10 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef WIN32
-# define vsnprintf _vsnprintf
-#endif
-
 /*! \brief allocate memory for a string of a given size
 
  This function allocates memory for a string with
@@ -263,7 +259,7 @@ cbmlibmisc_sprintf(const char * const Format, ...)
 
     va_start(arg_ptr, Format);
 
-    nbytes = vsnprintf(NULL, 0, Format, arg_ptr) + 1; /* +1 for the '\0' */
+    nbytes = arch_vsnprintf(NULL, 0, Format, arg_ptr) + 1; /* +1 for the '\0' */
 
     str = cbmlibmisc_stralloc(nbytes);
 
@@ -273,8 +269,8 @@ cbmlibmisc_sprintf(const char * const Format, ...)
         va_end(arg_ptr);
         va_start(arg_ptr, Format);
 
-        written = vsnprintf(str, nbytes, Format, arg_ptr) + 1; /* +1 for the '\0' */
-        if ( (written < 0) || (written > nbytes)) {
+        written = arch_vsnprintf(str, nbytes, Format, arg_ptr) + 1; /* +1 for the '\0' */
+        if (written > nbytes) {
             fprintf(stderr, "possible memory corruption in cbmlibmisc_sprintf(), aborting!\n");
             exit(1);
         }

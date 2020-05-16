@@ -122,6 +122,7 @@ int arch_filesize(const char *Filename, off_t *Filesize);
 #define arch_fdopen(_x, _y) ARCH_CBM_LINUX_WIN(fdopen(_x, _y), _fdopen(_x, _y))
 
 #define arch_snprintf ARCH_CBM_LINUX_WIN(snprintf, _snprintf)
+#define arch_vsnprintf ARCH_CBM_LINUX_WIN(vsnprintf, _vsnprintf)
 
 #define ARCH_MAINDECL   ARCH_CBM_LINUX_WIN(ARCH_EMPTY, __cdecl)
 #define ARCH_SIGNALDECL ARCH_CBM_LINUX_WIN(ARCH_EMPTY, __cdecl)
