@@ -80,7 +80,7 @@ static int check_if_parameters_ok(OPTIONS * const options)
 }
 
 static int
-get_argument_int_as_uchar(OPTIONS * const options, unsigned char *where, unsigned int min, unsigned int max, const char * const errortext)
+get_argument_int_as_uchar(OPTIONS * const options, unsigned char *where, int min, int max, const char * const errortext)
 {
     if (options->argc > 0)
     {
