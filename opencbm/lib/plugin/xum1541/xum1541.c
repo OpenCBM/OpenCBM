@@ -405,7 +405,7 @@ xum1541_device_path(int PortNumber)
     HandleXum1541.devh = NULL;
 
 #if HAVE_LIBUSB1
-    usb.init(HandleXum1541.ctx);
+    usb.init(&HandleXum1541.ctx);
 #endif
 
     arch_snprintf(dev_path, sizeof(dev_path), XUM1541_PREFIX);
