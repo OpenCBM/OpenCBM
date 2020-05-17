@@ -714,7 +714,7 @@ static long cbm_unlocked_ioctl(struct file *f,
             XP_WRITE(0xff);
             set_data_reverse();
         }
-        put_user(XP_READ(), (int *)arg);
+        put_user(XP_READ(), (unsigned char *)arg);
         return 0;
 
     case CBMCTRL_PP_WRITE:
