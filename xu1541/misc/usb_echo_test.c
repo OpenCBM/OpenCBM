@@ -8,13 +8,7 @@
 
 #include "xu1541lib.h"
 
-#ifdef WIN32
-#include <windows.h>
-#include <winbase.h>
-#define MSLEEP(a) Sleep(a)
-#else
-#define MSLEEP(a) usleep(a*1000)
-#endif
+#include "arch.h"
 
 #include "xu1541_types.h"
 

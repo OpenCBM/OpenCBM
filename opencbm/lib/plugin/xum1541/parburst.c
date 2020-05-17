@@ -71,10 +71,7 @@ opencbm_plugin_parallel_burst_read(CBM_FILE HandleDevice)
 void CBMAPIDECL
 opencbm_plugin_parallel_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
-    int result;
-
-    result = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_PARBURST_WRITE, Value, 0);
-    //printf("parburst write: %x, res %x\n", Value, result);
+    xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_PARBURST_WRITE, Value, 0);
 }
 
 int CBMAPIDECL
@@ -253,9 +250,7 @@ opencbm_plugin_srq_burst_read(CBM_FILE HandleDevice)
 void CBMAPIDECL
 opencbm_plugin_srq_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
-    int result;
-
-    result = xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_SRQBURST_WRITE, Value, 0);
+    xum1541_ioctl((struct opencbm_usb_handle *)HandleDevice, XUM1541_SRQBURST_WRITE, Value, 0);
 }
 
 int CBMAPIDECL

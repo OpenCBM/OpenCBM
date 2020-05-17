@@ -44,7 +44,7 @@ main(int argc, char **argv)
     };
 
     unsigned long  int count;
-    unsigned short int currpm, tsize;
+    unsigned short int currpm;
     struct
     {
       unsigned short int rpm;
@@ -78,7 +78,6 @@ main(int argc, char **argv)
     cbm_upload(fd, drive, 0x0500, rpm_prog, sizeof(rpm_prog));
 
     count = 1ul;
-    tsize = 0;
     for (i = 0; i < OCCSZ; ++i)
     {
         occtable[i].rpm=occtable[i].occurence=0;

@@ -528,7 +528,6 @@ int cbmcopy_write_file(CBM_FILE fd,
     int i;
     int turbo_size;
     unsigned char drive = (unsigned char) drivei; //! \todo Find better solution
-    int error;
     unsigned char buf[48];
     const unsigned char *turbo;
     const transfer_funcs *trf;
@@ -591,7 +590,6 @@ int cbmcopy_write_file(CBM_FILE fd,
     }
 
     blocks_written = 0;
-    error = 0;
 
     SETSTATEDEBUG((void)0);    // pre send_turbo condition
     if(send_turbo(fd, drive, 1, settings,

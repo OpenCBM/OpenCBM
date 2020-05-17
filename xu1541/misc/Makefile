@@ -12,7 +12,7 @@ LDFLAGS_EXTRA+=-s
 .PHONY: all clean mrproper xu1541lib
 
 # add libusb
-CFLAGS  = $(CFLAGS_EXTRA) -I$(LIBUSB_DIR)/include -I../include/ -Wall
+CFLAGS  = $(CFLAGS_EXTRA) -I$(LIBUSB_DIR)/include -I ../lib/ -I../include/ -Wall
 LDFLAGS = $(LDFLAGS_EXTRA) -L$(LIBUSB_DIR)/lib
 LIBS    = -L../lib -lxu1541$(LIB_WIN)
 

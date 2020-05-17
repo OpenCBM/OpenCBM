@@ -15,13 +15,7 @@
 
 #include "xu1541_types.h"
 
-#ifdef WIN32
-#include <windows.h>
-#include <winbase.h>
-#define MSLEEP(a) Sleep(a)
-#else
-#define MSLEEP(a) usleep(a*1000)
-#endif
+#include "arch.h"
 
 #ifdef WIN
 #define WINKEY { printf("Press return to quit\n"); getchar(); }

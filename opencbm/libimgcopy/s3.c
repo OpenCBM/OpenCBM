@@ -218,7 +218,7 @@ static int send_track_map(imgcopy_settings *settings, unsigned char tr, const ch
 
 static int read_gcr_block(unsigned char *se, unsigned char *gcrbuf)
 {
-    unsigned char s;
+    unsigned char s = 0;
 
 #ifdef DEBUG
     printf("s3_read_gcr_block() \n");
