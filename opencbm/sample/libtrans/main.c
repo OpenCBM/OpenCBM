@@ -75,7 +75,10 @@ read_from_file(unsigned char Buffer[], const unsigned int BufferSize, const char
 
     if (f)
     {
-        fread(Buffer, 1, BufferSize, f);
+        if ( ! (fread(Buffer, 1, BufferSize, f) == BufferSize) )
+        {
+            /*! \bug cannot return error code */
+        }
         fclose(f);
     }
 }
@@ -307,15 +310,19 @@ main_testtransfer(int argc, char **argv)
 static void
 read_line_status(CBM_FILE fd)
 {
-    int data, clock, atn, reset, pp;
+    DBGDO(int data;)
+    DBGDO(int clock;)
+    DBGDO(int atn;)
+    DBGDO(int reset;)
+    DBGDO(int pp;)
 
     FUNC_ENTER();
 
-    data = cbm_iec_get(fd, IEC_DATA);
-    clock = cbm_iec_get(fd, IEC_CLOCK);
-    atn = cbm_iec_get(fd, IEC_ATN);
-    reset = cbm_iec_get(fd, IEC_RESET);
-    pp = cbm_pp_read(fd);
+    DBGDO(data  = cbm_iec_get(fd, IEC_DATA);)
+    DBGDO(clock = cbm_iec_get(fd, IEC_CLOCK);)
+    DBGDO(atn   = cbm_iec_get(fd, IEC_ATN);)
+    DBGDO(reset = cbm_iec_get(fd, IEC_RESET);)
+    DBGDO(pp    = cbm_pp_read(fd));
 
     DBG_PRINT((DBG_PREFIX
         "READ: DATA = %s, CLOCK = %s, ATN = %s, RESET = %s, PP = $%02x",
@@ -413,24 +420,38 @@ main_testlines(int argc, char **argv)
     FUNC_LEAVE_INT(0);
 }
 
-// #define TEST_LINES
-#define TEST_TRANSFER
-// #define TEST_O65
+// #define TEST_DEFAULT_LINES
+#define TEST_DEFAULT_TRANSFER
+// #define TEST_DEFAULT_O65
 
 int
 ARCH_MAINDECL main(int argc, char **argv)
 {
     arch_set_ctrlbreak_handler(handle_CTRL_C);
 
-#ifdef TEST_LINES
+    if (argc > 1) {
+        if (strcmp(argv[1], "--lines")==0) {
+            return main_testlines(argc, argv);
+        }
+        if (strcmp(argv[1], "--transfer")==0) {
+            return main_testtransfer(argc, argv);
+        }
+#if 0
+        if (strcmp(argv[1], "--o65")==0) {
+            return main_o65(argc, argv);
+        }
+#endif
+    }
+
+#ifdef TEST_DEFAULT_LINES
     return main_testlines(argc, argv);
 #endif
 
-#ifdef TEST_TRANSFER
+#ifdef TEST_DEFAULT_TRANSFER
     return main_testtransfer(argc, argv);
 #endif
 
-#ifdef TEST_O65
+#ifdef TEST_DEFAULT_O65
     return main_o65(argc, argv);
 #endif
 }

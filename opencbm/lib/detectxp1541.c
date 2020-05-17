@@ -242,7 +242,7 @@ cbm_identify_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
     do
     {
         unsigned int piaAddress;
-        int value;
+        DBGDO(int value);
 
         if (!CableType)
         {
@@ -293,7 +293,7 @@ cbm_identify_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
          * Set parallel port into input mode.
          * This prevents us (PC) and the drive driving the lines simultaneously.
          */
-        value = cbm_pp_read(HandleDevice);
+        DBGDO(value =) cbm_pp_read(HandleDevice);
         DBG_PRINT((DBG_PREFIX "Setting Parport into input mode", value));
 
         /*

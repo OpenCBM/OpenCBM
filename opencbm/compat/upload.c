@@ -23,8 +23,16 @@ int cbm_upload(int f, unsigned char dev, int adr, unsigned char *prog, int size)
         if(c > 32) c = 32;
         sprintf(cmd, "M-W%c%c%c", adr%256, adr/256, c);
         adr += c;
-        write(f, cmd, 6);
-        write(f, prog, c);
+        if (write(f, cmd, 6) < 0)
+        {
+            cbm_unlisten(f);
+            break;
+        }
+        if (write(f, prog, c) < 0)
+        {
+            cbm_unlisten(f);
+            break;
+        }
         prog += c;
         rv   += c;
         cbm_unlisten(f);

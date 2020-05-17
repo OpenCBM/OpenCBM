@@ -304,7 +304,10 @@ static void close_disk(void)
         }
         else
         {
-            arch_ftruncate(arch_fileno(the_file), block_count * BLOCKSIZE);
+            if (arch_ftruncate(arch_fileno(the_file), block_count * BLOCKSIZE) < 0)
+            {
+                /* ignore it */
+            }
         }
     }
 

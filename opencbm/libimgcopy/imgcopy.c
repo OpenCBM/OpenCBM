@@ -377,6 +377,11 @@ static int imgcopy_set_image_type(imgcopy_settings *settings, const char *filena
         settings->cat_track = D81_CAT_TRACK;
         settings->bam_track = D81_BAM_TRACK;
         break;
+
+       case D64: /* FALL THROUGH */
+       case D71: /* FALL THROUGH */
+       case cbm_it_unknown:
+        break;
     }
 
     settings->block_count = 0;
@@ -407,6 +412,11 @@ int imgcopy_sector_count(imgcopy_settings *setting, int track)
 
        case D81:
         return 40;
+
+       case D64: /* FALL THROUGH */
+       case D71: /* FALL THROUGH */
+       case cbm_it_unknown:
+        break;
     }
     return -1;
 }
@@ -666,6 +676,11 @@ int ReadBAM(imgcopy_settings *settings, const transfer_funcs *src, unsigned char
 
        case D81:
         return ReadBAM_81(settings, src, buffer, bam_count);
+
+       case D64: /* FALL THROUGH */
+       case D71: /* FALL THROUGH */
+       case cbm_it_unknown:
+        break;
     }
     return -1;
 }

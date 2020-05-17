@@ -728,12 +728,10 @@ main(int argc, char *argv[])
         }
     } else if (!strcmp(*argv, "set-serial")) {
         fprintf(stderr, "command not yet supported, sorry\n");
-#if 0
         if (argc != 2)
             usage();
         if (SetSerial(atoi(argv[1])) != 0)
             goto error;
-#endif
     } else {
         fprintf(stderr, "unknown command: %s\n", *argv);
     }

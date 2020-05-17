@@ -195,7 +195,7 @@ measure_2cyleJitter(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                     GroupOfMeasurements *pDeltaGroup,
                     int printDeltas)
 {
-    char cmd[10];
+    char cmd[11];
     unsigned char insts[40];
     unsigned int mNo, timerValue, lastTvalue;
 #if _MINMAX_VALUES_PRINTOUT

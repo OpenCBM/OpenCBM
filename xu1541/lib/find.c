@@ -28,7 +28,7 @@ static int usb_get_string_ascii(libusb_device_handle *handle, int index,
   if((len = libusb_control_transfer(handle, LIBUSB_ENDPOINT_IN,
                                     LIBUSB_REQUEST_GET_DESCRIPTOR, index, 0x0409,
                                     buffer, sizeof(buffer), 1000)) < 0)
-    return 0;
+    return len;
 
   /* string is shorter than the number of bytes returned? */
   if(buffer[0] < len)
@@ -95,9 +95,9 @@ static libusb_device_handle *find_internal(unsigned int displaydeviceinfo, unsig
           continue;
         }
 
-        if(!usb_get_string_ascii(handle,
+        if(usb_get_string_ascii(handle,
                  (USB_DT_STRING << 8) | dev->descriptor.iProduct,
-                 string, sizeof(string))) {
+                 string, sizeof(string)) <= 0) {
           fprintf(stderr, "Error: Cannot query product name "
                   "for device: %s\n", usb_strerror());
           if(handle) usb_close(handle);
@@ -190,9 +190,9 @@ static libusb_device_handle *find_internal(unsigned int displaydeviceinfo, unsig
                             descriptor.idProduct)) {
         char string[32];
 
-        if(!usb_get_string_ascii(handle,
+        if((ret = usb_get_string_ascii(handle,
                  (LIBUSB_DT_STRING << 8) | descriptor.iProduct,
-                 string, sizeof(string))) {
+                 string, sizeof(string))) <= 0) {
           fprintf(stderr, "Error: Cannot query product name "
                   "for device: %s\n", libusb_error_name(ret));
           if(handle) libusb_close(handle);
