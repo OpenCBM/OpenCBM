@@ -726,7 +726,7 @@ static long cbm_unlocked_ioctl(struct file *f,
 /* and now the parallel burst-routines */
 
     case CBMCTRL_PARBURST_READ:
-        put_user(cbm_parallel_burst_read(), (int *)arg);
+        put_user(cbm_parallel_burst_read(), (unsigned char *)arg);
         return 0;
 
     case CBMCTRL_PARBURST_WRITE:
