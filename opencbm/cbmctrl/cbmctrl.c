@@ -95,7 +95,7 @@ get_argument_int_as_uchar(OPTIONS * const options, unsigned char *where, int min
             return 1;
         }
 
-        *where = ch;
+        *where = (unsigned char) ch;
 
         return 0;
     }
