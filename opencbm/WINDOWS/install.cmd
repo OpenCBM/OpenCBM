@@ -11,7 +11,7 @@ rem ---------------------------------------
 
 setlocal enabledelayedexpansion
 
-@cd /d "%~dp0"
+set OC_SOURCE_PATH="%~dp0"
 
 set OC_VERSION=0.4.99.99
 set OC_INSTALLED_SIZE_IN_KB_AMD64=1500
@@ -35,6 +35,7 @@ set OC_INSTALL_DRIVER_ZOOMFLOPPY=0
 set OC_INSTALL_DRIVER_XUM1541=0
 set OC_INSTALL_DRIVER_XU1541=0
 set OC_INSTALL_DRIVER_XA1541=0
+set OC_INSTALL_ELEVATED=0
  
 rem Process command line parameter
 
@@ -55,11 +56,50 @@ for /d %%p in (%*) do (
 		set OC_VARIANT_DISPLAY=!OC_VARIANT_DISPLAY! xa1541
 		set OC_VARIANT=!OC_VARIANT! xa1541
 		set OC_INSTALL_DRIVER_XA1541=1
+	) else if [%%~p] == [--internal_call_elevated] (
+		set OC_INSTALL_ELEVATED=1
 	) else (
 		echo Unknown parameter %%~p, ignoring ...
 		pause
 	)
 )
+
+if %OC_INSTALL_ELEVATED% EQU 0 (
+	rem Check if we already have administrative rights.
+	rem Idea taken from https://stackoverflow.com/questions/4051883/batch-script-how-to-check-for-admin-rights
+	rem and https://stackoverflow.com/questions/4051883/batch-script-how-to-check-for-admin-rights#21295806
+	rem
+	rem fsutil should work on XP onwards, but not PE
+	rem fsutil dirty query %SYSTEMDRIVE% >nul 2>&1
+	rem
+	rem sfc should work up to 2000, and also on PE
+	sfc 2>nul | find /i "/" >nul
+
+	if !errorlevel! EQU 0 (
+		echo We have administrative rights
+		set OC_INSTALL_ELEVATED=1
+	) else (
+		echo We do not have administrative rights
+	)
+)
+
+rem Check if we are running elevated. If not, restart after elevating privileges
+if %OC_INSTALL_ELEVATED% == 0 (
+	echo OpenCBM installation script
+	echo ===========================
+	echo.
+	echo Elevating privileges in order to install OpenCBM.
+	echo Please grant the rights on the UAC prompt,
+	echo or I will not be able to continue!
+	echo.
+	powershell -Command "Start-Process -FilePath \"%~dpnx0\" -ArgumentList \"--internal_call_elevated %*\" -Verb runAs"
+	echo.
+	echo If you granted UAC rights, your installation will continue
+	echo in another window.
+	goto EXIT
+)
+
+echo Continuing...
 
 rem If no variant was given, use default
 
@@ -77,12 +117,12 @@ rem
 rem echo Copying opencbm.conf...
 rem xcopy opencbm.conf %SystemRoot%\System32\ /i /q
 
-xcopy %OC_BINDIR_LOCAL%\*.exe "%OC_DESTINATION%\"     /q /i
-xcopy %OC_BINDIR_LOCAL%\*.dll "%OC_DESTINATION%\"     /q /i
-xcopy                   *.pdf "%OC_DESTINATION%\doc\" /q /i
+xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.exe" "%OC_DESTINATION%\"     /q /i
+xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.dll" "%OC_DESTINATION%\"     /q /i
+xcopy "%OC_SOURCE_PATH%\*.pdf"                   "%OC_DESTINATION%\doc\" /q /i
 
 if [%OC_INSTALL_DRIVER_XA1541%] == [1] (
-	xcopy %OC_BINDIR_LOCAL%\*.sys "%OC_DESTINATION%\" /q /i
+	xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.sys" "%OC_DESTINATION%\" /q /i
 )
 
 pushd "%OC_DESTINATION%"
@@ -125,10 +165,12 @@ echo === Add %OC_DESTINATION% to your PATH to use the command line tools there.
 echo =================================================
 echo.
 
-if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_DRIVER_XU1541%" == "0 0 0" (
-	cd "%~dp0"
+set ZADIC_EXE="%OC_SOURCE_PATH%\zadic.exe"
 
-	If exist zadic.exe (
+if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_DRIVER_XU1541%" == "0 0 0" (
+
+	echo Searching zadic at %ZADIC_EXE%
+	If exist "%ZADIC_EXE%" (
 
 		echo.
 		echo I could install the necessary USB drivers if you like.
@@ -148,17 +190,19 @@ if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_D
 			echo.
 			if [%OC_INSTALL_DRIVER_ZOOMFLOPPY%] == [1] (
 				echo INSTALL ZoomFloppy driver
-				zadic.exe --vid=0x16D0 --pid=0x0504 --usealldevices
+				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504 --usealldevices
+				rem also give the DFU device a driver so we can update the device
+				"%ZADIC_EXE%" --vid=0x03eb --pid=0x2ff0 --usealldevices
 			)
 
 			if [%OC_INSTALL_DRIVER_XUM1541%] == [1] (
 				echo INSTALL xum1541 driver
-				zadic.exe --vid=0x16D0 --pid=0x0504 --usealldevices
+				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504 --usealldevices
 			)
 
 			if [%OC_INSTALL_DRIVER_XU1541%] == [1] (
 				echo INSTALL xu1541 driver
-				zadic.exe --vid=0x0403 --pid=0xC632 --usealldevices
+				"%ZADIC_EXE%" --vid=0x0403 --pid=0xC632 --usealldevices
 			)
 		)
 		else (
@@ -169,3 +213,5 @@ if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_D
 
 echo That's it, I am finished.
 pause
+
+:EXIT
