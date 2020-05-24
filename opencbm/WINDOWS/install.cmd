@@ -204,8 +204,7 @@ if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_D
 				echo INSTALL xu1541 driver
 				"%ZADIC_EXE%" --vid=0x0403 --pid=0xC632 --usealldevices
 			)
-		)
-		else (
+		) else (
 			echo You answered NO.
 		)
 	)
