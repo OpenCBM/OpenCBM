@@ -119,7 +119,8 @@ rem xcopy opencbm.conf %SystemRoot%\System32\ /i /q
 
 xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.exe" "%OC_DESTINATION%\"     /q /i
 xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.dll" "%OC_DESTINATION%\"     /q /i
-xcopy "%OC_SOURCE_PATH%\*.pdf"                   "%OC_DESTINATION%\doc\" /q /i
+rem The \.\ is needed, or cmd.exe will not process the '*' correctly. Don't ask me why...
+xcopy "%OC_SOURCE_PATH%\.\*.pdf"                 "%OC_DESTINATION%\doc\" /q /i
 
 if [%OC_INSTALL_DRIVER_XA1541%] == [1] (
 	xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.sys" "%OC_DESTINATION%\" /q /i
@@ -169,7 +170,6 @@ set ZADIC_EXE="%OC_SOURCE_PATH%\zadic.exe"
 
 if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_DRIVER_XU1541%" == "0 0 0" (
 
-	echo Searching zadic at %ZADIC_EXE%
 	If exist "%ZADIC_EXE%" (
 
 		echo.
@@ -190,19 +190,19 @@ if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_D
 			echo.
 			if [%OC_INSTALL_DRIVER_ZOOMFLOPPY%] == [1] (
 				echo INSTALL ZoomFloppy driver
-				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504 --usealldevices
+				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504 --usealldevices --create "XUM1541 USB floppy adapter (ZOOMFLOPPY)"
 				rem also give the DFU device a driver so we can update the device
-				"%ZADIC_EXE%" --vid=0x03eb --pid=0x2ff0 --usealldevices
+				"%ZADIC_EXE%" --vid=0x03eb --pid=0x2ff0 --usealldevices --create "XUM1541 USB floppy adapter (ZOOMFLOPPY) DFU Mode"
 			)
 
 			if [%OC_INSTALL_DRIVER_XUM1541%] == [1] (
 				echo INSTALL xum1541 driver
-				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504 --usealldevices
+				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504 --usealldevices --create "XUM1541 USB floppy adapter (Generic)"
 			)
 
 			if [%OC_INSTALL_DRIVER_XU1541%] == [1] (
 				echo INSTALL xu1541 driver
-				"%ZADIC_EXE%" --vid=0x0403 --pid=0xC632 --usealldevices
+				"%ZADIC_EXE%" --vid=0x0403 --pid=0xC632 --usealldevices --create "xu1541 USB floppy adapter"
 			)
 		) else (
 			echo You answered NO.
