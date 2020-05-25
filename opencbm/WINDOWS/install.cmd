@@ -36,7 +36,7 @@ set OC_INSTALL_DRIVER_XUM1541=0
 set OC_INSTALL_DRIVER_XU1541=0
 set OC_INSTALL_DRIVER_XA1541=0
 set OC_INSTALL_ELEVATED=0
- 
+
 rem Process command line parameter
 
 for /d %%p in (%*) do (
@@ -94,8 +94,19 @@ if %OC_INSTALL_ELEVATED% == 0 (
 	echo.
 	powershell -Command "Start-Process -FilePath \"%~dpnx0\" -ArgumentList \"--internal_call_elevated %*\" -Verb runAs"
 	echo.
-	echo If you granted UAC rights, your installation will continue
-	echo in another window.
+	if errorlevel 1 (
+		echo ERROR
+		echo =====
+		echo.
+		echo I could not get administrative rights - aborting!
+		echo.
+		pause
+	) else (
+		echo Your installation will continue in another window.
+
+		rem create Shortcut
+		.\tools\genShortCut.vbs "%USERPROFILE%" "%OC_DESTINATION%" "%OC_VERSION%"
+	)
 	goto EXIT
 )
 
@@ -121,6 +132,7 @@ xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.exe" "%OC_DESTINATION%\"     /q /i
 xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.dll" "%OC_DESTINATION%\"     /q /i
 rem The \.\ is needed, or cmd.exe will not process the '*' correctly. Don't ask me why...
 xcopy "%OC_SOURCE_PATH%\.\*.pdf"                 "%OC_DESTINATION%\doc\" /q /i
+xcopy "%OC_SOURCE_PATH%\tools"                   "%OC_DESTINATION%\tools\" /q /i
 
 if [%OC_INSTALL_DRIVER_XA1541%] == [1] (
 	xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.sys" "%OC_DESTINATION%\" /q /i
@@ -149,7 +161,7 @@ set year=%date:~6%
 %SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "Comments"        /d "OpenCBM v%OC_VERSION% %OC_VARIANT_DISPLAY%" > NUL
 %SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "DisplayName"     /d "OpenCBM v%OC_VERSION%" > NUL
 %SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "DisplayVersion"  /d "%OC_VERSION%" > NUL
-%SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "InstallDate"     /d "%year%%month%%day%" > NUL 
+%SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "InstallDate"     /d "%year%%month%%day%" > NUL
 %SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "Publisher"       /d "The OpenCBM team" > NUL
 %SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "HelpLink"        /d "http://opencbm.sourceforge.net/" > NUL
 %SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_DWORD /v "NoModify"        /d 1 > NUL
@@ -166,7 +178,7 @@ echo === Add %OC_DESTINATION% to your PATH to use the command line tools there.
 echo =================================================
 echo.
 
-set ZADIC_EXE="%OC_SOURCE_PATH%\zadic.exe"
+set ZADIC_EXE="%OC_SOURCE_PATH%\tools\zadic.exe"
 
 if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_DRIVER_XU1541%" == "0 0 0" (
 
@@ -186,30 +198,36 @@ if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_D
 		if [!OC_INSTALL_USB!] == [Y] set OC_INSTALL_USB_RESULT=1
 
 		if [!OC_INSTALL_USB_RESULT!] == [1] (
-			echo You answered YES.
 			echo.
 			if [%OC_INSTALL_DRIVER_ZOOMFLOPPY%] == [1] (
-				echo INSTALL ZoomFloppy driver
-				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504 --usealldevices --create "XUM1541 USB floppy adapter (ZOOMFLOPPY)"
+				echo INSTALLing ZoomFloppy driver
+				echo Please be patient, that may take some time!
+				echo.
+				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504
 				rem also give the DFU device a driver so we can update the device
-				"%ZADIC_EXE%" --vid=0x03eb --pid=0x2ff0 --usealldevices --create "XUM1541 USB floppy adapter (ZOOMFLOPPY) DFU Mode"
+				"%ZADIC_EXE%" --vid=0x03eb --pid=0x2ff0
 			)
 
 			if [%OC_INSTALL_DRIVER_XUM1541%] == [1] (
-				echo INSTALL xum1541 driver
-				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504 --usealldevices --create "XUM1541 USB floppy adapter (Generic)"
+				echo INSTALLing xum1541 driver
+				echo Please be patient, that may take some time!
+				echo.
+				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504
 			)
 
 			if [%OC_INSTALL_DRIVER_XU1541%] == [1] (
-				echo INSTALL xu1541 driver
-				"%ZADIC_EXE%" --vid=0x0403 --pid=0xC632 --usealldevices --create "xu1541 USB floppy adapter"
+				echo INSTALLing xu1541 driver
+				echo Please be patient, that may take some time!
+				echo.
+				"%ZADIC_EXE%" --vid=0x0403 --pid=0xC632
 			)
 		) else (
-			echo You answered NO.
+			echo NO.
 		)
 	)
 )
 
+echo.
 echo That's it, I am finished.
 pause
 
