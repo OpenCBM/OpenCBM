@@ -178,11 +178,11 @@ echo === Add %OC_DESTINATION% to your PATH to use the command line tools there.
 echo =================================================
 echo.
 
-set ZADIC_EXE="%OC_SOURCE_PATH%\tools\zadic.exe"
+set INFER_EXE="%OC_SOURCE_PATH%\tools\INFer.exe"
 
 if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_DRIVER_XU1541%" == "0 0 0" (
 
-	If exist "%ZADIC_EXE%" (
+	If exist "%INFER_EXE%" (
 
 		echo.
 		echo I could install the necessary USB drivers if you like.
@@ -199,28 +199,7 @@ if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_D
 
 		if [!OC_INSTALL_USB_RESULT!] == [1] (
 			echo.
-			if [%OC_INSTALL_DRIVER_ZOOMFLOPPY%] == [1] (
-				echo INSTALLing ZoomFloppy driver
-				echo Please be patient, that may take some time!
-				echo.
-				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504
-				rem also give the DFU device a driver so we can update the device
-				"%ZADIC_EXE%" --vid=0x03eb --pid=0x2ff0
-			)
-
-			if [%OC_INSTALL_DRIVER_XUM1541%] == [1] (
-				echo INSTALLing xum1541 driver
-				echo Please be patient, that may take some time!
-				echo.
-				"%ZADIC_EXE%" --vid=0x16D0 --pid=0x0504
-			)
-
-			if [%OC_INSTALL_DRIVER_XU1541%] == [1] (
-				echo INSTALLing xu1541 driver
-				echo Please be patient, that may take some time!
-				echo.
-				"%ZADIC_EXE%" --vid=0x0403 --pid=0xC632
-			)
+			%INFER_EXE% tools\opencbm.inf tools\usb_driver
 		) else (
 			echo NO.
 		)
