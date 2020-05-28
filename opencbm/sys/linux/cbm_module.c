@@ -622,12 +622,19 @@ static long cbm_unlocked_ioctl(struct file *f,
 
     case CBMCTRL_IEC_POLL:
         c = POLL();
+
+        rv = 0;
         if ((c & DATA_IN) == 0)
             rv |= IEC_DATA;
         if ((c & CLK_IN) == 0)
             rv |= IEC_CLOCK;
         if ((c & ATN_IN) == 0)
             rv |= IEC_ATN;
+
+        put_user(rv, (int *)arg);
+
+        /* we always report success */
+        rv = 0;
         return rv;
 
     case CBMCTRL_IEC_SET:
