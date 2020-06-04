@@ -60,6 +60,46 @@
 
 #include "cbm_module.h"
 
+/*! \brief
+ * If DBG_IMPLANT_FAIL is defined, then there is a machinsm so we can fail some
+ * communication calls.  That is, we can emulate the failure of the
+ * communication and see how the higher-level functions behave.
+ *
+ * \note Handle with care, and do NOT activate it on end-users machines!
+ */
+#ifdef DBG_IMPLANT_FAIL
+
+#include <linux/random.h>
+
+#define IMPLANT_FAIL_DEF(_x) static int implant_fail_counter = (_x)
+
+#define IMPLANT_FAIL_RANDOM(_rand_min, _rand_range, _text, _code) \
+    do { \
+        if ( (implant_fail_counter != -1) && (implant_fail_counter-- == 0) ) \
+        { \
+            unsigned int randomnumber = 0; \
+            if ( (_rand_range) != 0) { \
+                unsigned int canary; \
+                get_random_bytes(&canary, sizeof(canary)); \
+                randomnumber = canary % (_rand_range); \
+            } \
+            \
+            implant_fail_counter = randomnumber + (_rand_min); \
+            \
+            printk("%s: Implanted failing%s, new counter = %u\n", __func__, _text, implant_fail_counter); \
+            _code \
+        } \
+    } while (0);
+
+#else
+
+#define IMPLANT_FAIL_DEF(_x)
+#define IMPLANT_FAIL_RANDOM(_rand_min, _rand_range, _text, _code)
+
+#endif
+
+#define IMPLANT_FAIL(_count, _text, _code) IMPLANT_FAIL_RANDOM(_count, 1, _text, _code)
+
 /* forward references for parallel burst routines */
 int cbm_parallel_burst_read_track(unsigned char *buffer);
 int cbm_parallel_burst_read_track_var(unsigned char *buffer);
@@ -378,6 +418,8 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
     int ok = 0;
     unsigned long flags;
 
+    IMPLANT_FAIL_DEF(-1);
+
     DPRINTK("cbm_read: %zu bytes\n", count);
 
     if (eoi)
@@ -425,6 +467,9 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
             SET(DATA_OUT);
         local_irq_restore(flags);
         if (ok) {
+
+            IMPLANT_FAIL_RANDOM(150, 500, "", { ok = 0; continue; })
+
             received++;
             put_user((char)b, buf++);
 
@@ -454,6 +499,8 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
     int rv = 0;
     size_t sent = 0;
     unsigned long flags;
+
+    IMPLANT_FAIL_DEF(-1);
 
     eoi = cbm_irq_count = 0;
 
@@ -500,6 +547,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
             printk("cbm_write: device not present\n");
             rv = -ENODEV;
         }
+        IMPLANT_FAIL_RANDOM(150, 800, "", { rv = -EIO; continue; })
     }
     DPRINTK("%zu bytes sent, rv=%d\n", sent, rv);
 
