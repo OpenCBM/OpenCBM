@@ -5,7 +5,7 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005,2008 Spiro Trikaliotis
+ *  Copyright 2001-2005,2008,2020 Spiro Trikaliotis
  *
 */
 
@@ -32,6 +32,20 @@
 #include "opencbm.h"
 #include "archlib.h"
 
+enum { RETRIES_UPLOAD   = 5 }; //!< \brief how many retries to do when communication errors occur on upload
+enum { RETRIES_DOWNLOAD = 5 }; //!< \brief how many retries to do when communication errors occur on download
+
+/*! \brief maximum number of byte to upload via M-W (due to floppy buffer size restrictions)
+ * The floppy input buffer is located at $0200 - $0229. Thus, the maximum command size is $2A byte.
+ * This includes the M-W plus address (2 byte) plus size (1 byte).
+ *
+ * While one might be tempted do increase the number in order to reduce the number of M-W commands,
+ * this is contraproductive: As the 154x/157x cannot cross a page boundary, the number of commands
+ * would be the same, but the calculation is more complex.
+ *
+ * Thus, leave it at 32.
+ */
+enum { MAX_BYTE_UPLOAD = 32 };
 
 /*-------------------------------------------------------------------*/
 /*--------- HELPER FUNCTIONS ----------------------------------------*/
@@ -97,6 +111,73 @@ static __inline void StoreAddressAndCount(unsigned char * Buffer, unsigned int D
     StoreInt8IntoBuffer(Buffer + 2, ByteCount);
 }
 
+/*! \internal \brief Invalidate M-W command
+
+ When an M-W command is sent, but there is a transfer error,
+ we cannot just repeat the command, or there will be erroneous
+ data written.
+
+ Because of this, this function is used to "invalidate" the
+ command in the Floppy RAM before it is executed.
+
+ This is done by flooding the input buffer, which is from $0200-$0229,
+ with nonsense data. Because of this, the floppy will reject the command.
+
+ \param HandleDevice
+   A CBM_FILE which contains the file handle of the driver.
+
+ \return
+   0  on success.
+   -1 if the command could not execute because there were subsequent
+      transfer errors.
+
+ This function assumes that the cbm_raw_write() failed, but the
+ cbm_unlisten() was not executed yet. The unlisten is the trigger for
+ the floppy to execute this command. Afterwards, there is nothing we can
+ done.
+*/
+
+static int
+invalidateMWCommand(CBM_FILE HandleDevice)
+{
+    /* the M-W command was aborted because of an error.
+     * It is critical to "invalidate" it, or we will write garbage into
+     * the RAM.
+     * Because of this, we "flood" the 1541 input buffer, making sure
+     * the command is bigger than 0x29 byte, which will result in an error from
+     * the floppy, before trying to continue.
+     */
+
+    static const unsigned char dummydata[41] = { 0 };
+    int retrycounter = RETRIES_UPLOAD;
+    int rv = 0;
+
+    do {
+        if ( cbm_raw_write(HandleDevice, dummydata, sizeof dummydata) != sizeof dummydata) {
+            if (retrycounter-- > 0) {
+                continue;
+            }
+            rv = -1;
+        }
+        break;
+    } while (1);
+
+    retrycounter = RETRIES_UPLOAD;
+
+    if (rv == 0) do {
+        if ( cbm_unlisten(HandleDevice) ) {
+            if (retrycounter-- > 0) {
+                continue;
+            }
+            rv = -1;
+            break;
+        }
+        break;
+    } while (1);
+
+    return rv;
+}
+
 /*! \brief Upload a program into a floppy's drive memory.
 
  This function writes a program into the drive's memory
@@ -140,13 +221,19 @@ cbm_upload(CBM_FILE HandleDevice, unsigned char DeviceAddress,
     int rv = 0;
     int c;
 
+    int retrycounter = RETRIES_UPLOAD;
+
     FUNC_ENTER();
 
     DBG_ASSERT(sizeof(command) == 6);
 
-    for(i = 0; i < Size; i += 32)
+    for(i = 0; i < Size; i += c)
     {
         if ( cbm_listen(HandleDevice, DeviceAddress, 15) ) {
+            if (retrycounter-- > 0) {
+                c = 0;
+                continue;
+            }
             return -1;
         }
 
@@ -154,11 +241,11 @@ cbm_upload(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
         c = Size - i;
 
-        // Do we have more than 32? Then, restrict to 32
+        // Do we have more than the maximum number? Then, restrict to maximum
 
-        if (c > 32)
+        if (c > MAX_BYTE_UPLOAD)
         {
-            c = 32;
+            c = MAX_BYTE_UPLOAD;
         }
 
         // The command M-W consists of:
@@ -170,18 +257,41 @@ cbm_upload(CBM_FILE HandleDevice, unsigned char DeviceAddress,
         // Write the M-W command to the drive...
 
         if ( cbm_raw_write(HandleDevice, command, sizeof(command)) != sizeof command) {
+            if (retrycounter-- > 0) {
+                if ( ! invalidateMWCommand(HandleDevice) ) {
+                    c = 0;
+                    continue;
+                }
+            }
             rv = -1;
             break;
         }
 
 
-        // ... as well as the (up to 32) data bytes
+        // ... as well as the (up to MAX_BYTE_UPLOAD) data bytes
 
         if ( cbm_raw_write(HandleDevice, bufferToProgram, c) != c ) {
+            if (retrycounter-- > 0) {
+                if ( ! invalidateMWCommand(HandleDevice) ) {
+                    c = 0;
+                    continue;
+                }
+            }
             rv = -1;
             break;
         }
 
+        // The UNLISTEN is the signal for the drive
+        // to start execution of the command
+
+        if ( cbm_unlisten(HandleDevice) ) {
+            if (retrycounter-- > 0) {
+                c = 0;
+                continue;
+            }
+            rv = -1;
+            break;
+        }
         // Now, advance the pointer into drive memory
         // as well to the program in PC's memory in case we
         // might need to use it again for another M-W command
@@ -193,13 +303,7 @@ cbm_upload(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
         rv += c;
 
-        // The UNLISTEN is the signal for the drive
-        // to start execution of the command
-
-        if ( cbm_unlisten(HandleDevice) ) {
-            rv = -1;
-            break;
-        }
+        retrycounter = RETRIES_UPLOAD;
     }
 
     FUNC_LEAVE_INT(rv);
@@ -251,6 +355,7 @@ cbm_download(CBM_FILE HandleDevice, unsigned char DeviceAddress,
     int readbytes = 0;
     int c;
     int page2workaround = 0;
+    int retrycounter = RETRIES_DOWNLOAD;
 
     FUNC_ENTER();
 
@@ -286,19 +391,42 @@ cbm_download(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
         // Write the M-R command to the drive...
         if ( cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) ) {
-            rv = -1;
-            break;
+            if (retrycounter-- > 0) {
+                c = 0;
+                continue;
+            }
+            else {
+                rv = -1;
+                break;
+            }
         }
 
 
         if ( cbm_talk(HandleDevice, DeviceAddress, 15) ) {
-            rv = -1;
-            break;
+            if (retrycounter-- > 0) {
+                c = 0;
+                continue;
+            }
+            else {
+                rv = -1;
+                break;
+            }
         }
 
         // now read the (up to 256) data bytes
         // and advance the return value of send bytes, too.
         readbytes = cbm_raw_read(HandleDevice, StoreBuffer, c);
+
+        if (readbytes != c) {
+            if (retrycounter-- > 0) {
+                c = 0;
+                continue;
+            }
+            else {
+                rv = -1;
+                break;
+            }
+        }
 
         // Now, advance the pointer into drive memory
         // as well to the program in PC's memory in case we
@@ -335,16 +463,33 @@ cbm_download(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                 continue;
             }
             else {
-                rv = -1;
-                break;
+                if (retrycounter-- > 0) {
+                    continue;
+                }
+                else {
+                    rv = -1;
+                    break;
+                }
             }
         }
 
         // The UNTALK is the signal for end of transmission
         if ( cbm_untalk(HandleDevice) ) {
-            rv = -1;
-            break;
+            if (retrycounter-- > 0) {
+                /*
+                 * do NOT set c to 0! We already incremented that 
+                 * pointers. Thus, setting it to 0 and re-reading
+                 * would result in a buffer overflow!
+                 */
+                continue;
+            }
+            else {
+                rv = -1;
+                break;
+            }
         }
+
+        retrycounter = RETRIES_DOWNLOAD;
     }
 
     FUNC_LEAVE_INT(rv);
