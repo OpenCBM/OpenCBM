@@ -1559,7 +1559,14 @@ cbm_device_status(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
             // make sure we have a trailing zero at the end of the status:
 
-            bufferToWrite[bytesRead] = '\0';
+            if (bytesRead < BufferLength) {
+                bufferToWrite[bytesRead] = '\0';
+            }
+            else {
+                /* cbm_raw_read() returned an error */
+                strncpy(bufferToWrite, "99, DRIVER ERROR,01,00\r", BufferLength);
+                retValue = 99;
+            }
 
             cbm_untalk(HandleDevice);
         }
