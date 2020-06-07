@@ -1040,6 +1040,52 @@ static void show_monkey(unsigned int c)
     fflush(stderr);
 }
 
+#ifdef DBG_TEST_UPDOWN
+static int do_test_updown(CBM_FILE fd, OPTIONS * const options)
+{
+    char buf_rom[256 * 2];
+    char buf[sizeof(buf_rom)];
+    int rv;
+    unsigned int run;
+
+    rv = cbm_download(fd, 8, 0xc100, buf_rom, sizeof(buf_rom));
+
+    if (rv == sizeof(buf_rom)) {
+        for (run = 0; run < 1000; run++) {
+            rv = cbm_upload(fd, 8, 0x300, buf_rom, sizeof(buf_rom));
+            if (rv == sizeof(buf_rom)) {
+                memset(buf, 0, sizeof(buf));
+                rv = cbm_download(fd, 8, 0x300, buf, sizeof(buf));
+                if (rv == sizeof(buf_rom)) {
+                    if (memcmp(buf, buf_rom, sizeof(buf_rom)) == 0) {
+                        printf("equal %u\n", run);
+                    }
+                    else {
+                        printf("*** DO NOT COMPARE EQUAL %u ***\n", run);
+                        return -1;
+                    }
+                }
+                else {
+                    printf("2nd download failed, rv = %d! %u\n", rv, run);
+                    return rv;
+                }
+            }
+            else
+            {
+                printf("upload failed, rv=%d! %u\n", rv, run);
+                return rv;
+            }
+        }
+    }
+    else {
+       printf("1st download failed, rv = %d! %u\n", rv, run);
+       return rv;
+    }
+
+    return 0;
+}
+#endif // #ifdef DBG_TEST_UPDOWN
+
 /*
  * read device memory, dump to stdout or a file
  */
@@ -1466,6 +1512,9 @@ struct prog
 
 static struct prog prog_table[] =
 {
+#ifdef DBG_TEST_UPDOWN
+    {1, "testupdown", PA_UNSPEC, do_test_updown, "", "test up- and download" },
+#endif
     {1, "lock"    , PA_UNSPEC,  do_lock    , "",
         "Lock the parallel port for the use by cbm4win/cbm4linux.",
         "This command locks the parallel port for the use by cbm4win/cbm4linux,\n"
