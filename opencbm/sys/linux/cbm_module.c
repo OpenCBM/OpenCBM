@@ -86,7 +86,6 @@ unsigned int failcounter[FAILCOUNTER_LAST];
 
 
 #define IMPLANT_FAIL(_counter, _text, _code) \
-    do { \
         if ( (failcounter[_counter] != 0) && (failcounter[_counter]-- == 1) ) \
         { \
             unsigned int randomnumber = 0; \
@@ -102,7 +101,6 @@ unsigned int failcounter[FAILCOUNTER_LAST];
             printk("%s: Implanted failing%s, new counter = %u\n", __func__, _text, failcounter[_counter]); \
             _code \
         } \
-    } while (0);
 
 #else
 
@@ -603,7 +601,7 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
         local_irq_restore(flags);
         if (ok) {
 
-            IMPLANT_FAIL(FAILCOUNTER_READ, "", { ok = 0; continue; })
+            IMPLANT_FAIL(FAILCOUNTER_READ, " cbm_read", { ok = 0; continue; })
 
             received++;
             put_user((char)b, buf++);
@@ -680,7 +678,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
             printk("cbm_write: device not present\n");
             rv = -ENODEV;
         }
-        IMPLANT_FAIL(FAILCOUNTER_WRITE, "raw_write", { rv = -EIO; printk("redoing: talk = %d, rv = %d, sent = %d", talk, rv, sent); continue; })
+        IMPLANT_FAIL(FAILCOUNTER_WRITE, " cbm_raw_write", { rv = -EIO; printk("redoing: talk = %d, rv = %d, sent = %d", talk, rv, sent); break; })
     }
     DPRINTK("%zu bytes sent, rv=%d\n", sent, rv);
 
