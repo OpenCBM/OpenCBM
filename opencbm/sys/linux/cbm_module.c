@@ -71,34 +71,171 @@
 
 #include <linux/random.h>
 
-#define IMPLANT_FAIL_DEF(_x) static int implant_fail_counter = (_x)
+enum {
+    FAILCOUNTER_READ,
+    FAILCOUNTER_READ_MIN,
+    FAILCOUNTER_READ_RANGE,
+    FAILCOUNTER_WRITE,
+    FAILCOUNTER_WRITE_MIN,
+    FAILCOUNTER_WRITE_RANGE,
+    FAILCOUNTER_LAST
+};
 
-#define IMPLANT_FAIL_RANDOM(_rand_min, _rand_range, _text, _code) \
+unsigned int failcounter[FAILCOUNTER_LAST];
+
+
+
+#define IMPLANT_FAIL(_counter, _text, _code) \
     do { \
-        if ( (implant_fail_counter != -1) && (implant_fail_counter-- == 0) ) \
+        if ( (failcounter[_counter] != 0) && (failcounter[_counter]-- == 1) ) \
         { \
             unsigned int randomnumber = 0; \
-            if ( (_rand_range) != 0) { \
+            if (failcounter[_counter + 2] != 0) { \
                 unsigned int canary; \
                 get_random_bytes(&canary, sizeof(canary)); \
-                randomnumber = canary % (_rand_range); \
+                randomnumber = canary % failcounter[_counter + 2]; \
             } \
             \
-            implant_fail_counter = randomnumber + (_rand_min); \
+            if (failcounter[_counter + 1] == 0) failcounter[_counter + 1] = 10000; \
+            failcounter[_counter] = randomnumber + failcounter[_counter + 1]; \
             \
-            printk("%s: Implanted failing%s, new counter = %u\n", __func__, _text, implant_fail_counter); \
+            printk("%s: Implanted failing%s, new counter = %u\n", __func__, _text, failcounter[_counter]); \
             _code \
         } \
     } while (0);
 
 #else
 
-#define IMPLANT_FAIL_DEF(_x)
-#define IMPLANT_FAIL_RANDOM(_rand_min, _rand_range, _text, _code)
+#define IMPLANT_FAIL(_counter, _text, _code)
 
 #endif
 
-#define IMPLANT_FAIL(_count, _text, _code) IMPLANT_FAIL_RANDOM(_count, 1, _text, _code)
+#ifdef DBG_PROCFS
+
+#include <linux/proc_fs.h>
+
+static struct proc_dir_entry * cbmprocfs_dir_opencbm = NULL;
+static struct proc_dir_entry * cbmprocfs_dir_xa1541  = NULL;
+
+struct opencbm_procfs_table {
+    const char   * name;
+    unsigned int * value;
+    int            stop;
+};
+
+struct opencbm_procfs_table procfs_table[] =
+{
+#ifdef DBG_IMPLANT_FAIL
+    { "fail_read",        &failcounter[FAILCOUNTER_READ]        },
+    { "fail_read_min",    &failcounter[FAILCOUNTER_READ_MIN]    },
+    { "fail_read_range",  &failcounter[FAILCOUNTER_READ_RANGE]  },
+    { "fail_write",       &failcounter[FAILCOUNTER_WRITE]       },
+    { "fail_write_min",   &failcounter[FAILCOUNTER_WRITE_MIN]   },
+    { "fail_write_range", &failcounter[FAILCOUNTER_WRITE_RANGE] },
+#endif
+};
+
+#define ARRAYSIZE(_x) ( sizeof (_x) / sizeof (_x)[0] )
+
+static ssize_t read_proc(struct file *filp, char *buf, size_t count, loff_t *offp )
+{
+    char out[20];
+    int rv;
+
+    struct opencbm_procfs_table *data;
+    data=PDE_DATA(file_inode(filp));
+    if(!(data)){
+        printk(KERN_INFO "Null data");
+        return 0;
+    }
+
+    if (data->stop) {
+        data->stop = 0;
+        return 0;
+    }
+
+    rv = snprintf(out, sizeof out, "%u\n", *(data->value));
+    if (rv < 0) {
+        return rv;
+    }
+
+    if (rv >= count) {
+        return -ERANGE;
+    }
+
+    if (copy_to_user(buf, out, rv)) {
+        return -EFAULT;
+    }
+
+    data->stop = 1;
+
+    return rv;
+}
+
+static ssize_t write_proc(struct file *filp, const char *buf, size_t count, loff_t *offp)
+{
+    int rv;
+
+    struct opencbm_procfs_table *data;
+    data=PDE_DATA(file_inode(filp));
+    if(!(data)){
+        printk(KERN_INFO "Null data");
+        return 0;
+    }
+
+    if ( (rv = kstrtouint_from_user(buf, count, 10, data->value)) != 0) {
+        return rv;
+    }
+
+    return count;
+}
+
+struct file_operations proc_fops ={
+    read:  read_proc,
+    write: write_proc
+};
+
+static void cbmprocfs_init(void)
+{
+    static char cbmprocfs_dir_opencbm_name[] = "opencbm";
+    static char cbmprocfs_dir_xa1541_name[] = "xa1541";
+    cbmprocfs_dir_opencbm = proc_mkdir(cbmprocfs_dir_opencbm_name, NULL);
+    if (cbmprocfs_dir_opencbm) {
+        cbmprocfs_dir_xa1541 = proc_mkdir(cbmprocfs_dir_xa1541_name, cbmprocfs_dir_opencbm);
+    }
+
+    if (cbmprocfs_dir_xa1541) {
+        int i;
+
+        for (i = 0; i < ARRAYSIZE(procfs_table); i++) {
+            proc_create_data(procfs_table[i].name, 0644, cbmprocfs_dir_xa1541, &proc_fops, (void*) &procfs_table[i]);
+        }
+    }
+}
+
+static void cbmprocfs_cleanup(void)
+{
+    int i;
+
+    for (i = 0; i < ARRAYSIZE(procfs_table); i++) {
+        remove_proc_entry(procfs_table[i].name, cbmprocfs_dir_xa1541);
+    }
+    proc_remove(cbmprocfs_dir_xa1541);
+    proc_remove(cbmprocfs_dir_opencbm);
+
+    cbmprocfs_dir_xa1541 = NULL;
+    cbmprocfs_dir_opencbm = NULL;
+}
+
+#define CBMPROCFS_INIT    cbmprocfs_init();
+#define CBMPROCFS_CLEANUP cbmprocfs_cleanup();
+
+#else
+
+#define CBMPROCFS_INIT
+#define CBMPROCFS_CLEANUP
+
+#endif
 
 /* forward references for parallel burst routines */
 int cbm_parallel_burst_read_track(unsigned char *buffer);
@@ -418,8 +555,6 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
     int ok = 0;
     unsigned long flags;
 
-    IMPLANT_FAIL_DEF(-1);
-
     DPRINTK("cbm_read: %zu bytes\n", count);
 
     if (eoi)
@@ -468,7 +603,7 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
         local_irq_restore(flags);
         if (ok) {
 
-            IMPLANT_FAIL_RANDOM(150, 500, "", { ok = 0; continue; })
+            IMPLANT_FAIL(FAILCOUNTER_READ, "", { ok = 0; continue; })
 
             received++;
             put_user((char)b, buf++);
@@ -499,8 +634,6 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
     int rv = 0;
     size_t sent = 0;
     unsigned long flags;
-
-    IMPLANT_FAIL_DEF(-1);
 
     eoi = cbm_irq_count = 0;
 
@@ -547,7 +680,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
             printk("cbm_write: device not present\n");
             rv = -ENODEV;
         }
-        IMPLANT_FAIL_RANDOM(150, 800, "", { rv = -EIO; continue; })
+        IMPLANT_FAIL(FAILCOUNTER_WRITE, "raw_write", { rv = -EIO; printk("redoing: talk = %d, rv = %d, sent = %d", talk, rv, sent); continue; })
     }
     DPRINTK("%zu bytes sent, rv=%d\n", sent, rv);
 
@@ -901,12 +1034,21 @@ void cbm_cleanup(void)
     parport_unregister_device(cbm_device);
 #endif
     misc_deregister(&cbm_dev);
+
+    CBMPROCFS_CLEANUP
 }
 
 int cbm_init(void)
 {
     unsigned char in, out;
     char *msg;
+
+#ifdef DIRECT_PORT_ACCESS
+#else
+    struct parport *pp;
+#endif
+
+    CBMPROCFS_INIT
 
 #ifdef DIRECT_PORT_ACCESS
     if (check_region(port, 3)) {
@@ -919,7 +1061,6 @@ int cbm_init(void)
     }
     request_region(port, 3, NAME);
 #else
-    struct parport *pp;
     pp = parport_find_number(lp);
 
     if (pp == NULL) {
