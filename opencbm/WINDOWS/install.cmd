@@ -178,7 +178,9 @@ echo === Add %OC_DESTINATION% to your PATH to use the command line tools there.
 echo =================================================
 echo.
 
-set INFER_EXE="%OC_SOURCE_PATH%\tools\INFer.exe"
+set INFER_PATH="%OC_SOURCE_PATH%\tools"
+set INFER_EXENAME=INFer.exe
+set INFER_EXE="%INFER_PATH%\%INFER_EXENAME%"
 
 if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_DRIVER_XU1541%" == "0 0 0" (
 
@@ -199,7 +201,9 @@ if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_D
 
 		if [!OC_INSTALL_USB_RESULT!] == [1] (
 			echo.
-			%INFER_EXE% tools\opencbm.inf tools\usb_driver
+			pushd "%INFER_PATH%"
+			"%INFER_EXENAME%" opencbm.inf
+			popd
 		) else (
 			echo NO.
 		)
