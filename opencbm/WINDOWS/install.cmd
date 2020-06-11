@@ -13,7 +13,7 @@ setlocal enabledelayedexpansion
 
 set OC_SOURCE_PATH="%~dp0"
 
-set OC_VERSION=0.4.99.99
+set OC_VERSION=0.4.99.100
 set OC_INSTALLED_SIZE_IN_KB_AMD64=1500
 set OC_INSTALLED_SIZE_IN_KB_I386=2000
 
