@@ -392,38 +392,44 @@ xum1541_device_path(int PortNumber)
 {
 #define XUM1541_PREFIX "libusb/xum1541:"
 
-    struct opencbm_usb_handle HandleXum1541;
+    struct opencbm_usb_handle *HandleXum1541;
     static char dev_path[sizeof(XUM1541_PREFIX) + 3 + 1 + 3 + 1];
 
-    HandleXum1541.devh = NULL;
+    HandleXum1541 = malloc(sizeof(struct opencbm_usb_handle));
+    if (HandleXum1541 == NULL) {
+        perror("xum1541_device_path: malloc failed");
+        return NULL;
+    }
+    HandleXum1541->devh = NULL;
 
 #if HAVE_LIBUSB1
-    usb.init(&HandleXum1541.ctx);
+    usb.init(&HandleXum1541->ctx);
 #endif
 
     arch_snprintf(dev_path, sizeof(dev_path), XUM1541_PREFIX);
 
-    if (xum1541_enumerate(&HandleXum1541, PortNumber) < 0) {
+    if (xum1541_enumerate(HandleXum1541, PortNumber) < 0) {
+        free(HandleXum1541);
         return NULL;
     }
 
 
-    if (HandleXum1541.devh != NULL) {
+    if (HandleXum1541->devh != NULL) {
 #if HAVE_LIBUSB0
-        struct usb_device * dev = usb.device(HandleXum1541.devh);
+        struct usb_device * dev = usb.device(HandleXum1541->devh);
         if (dev != NULL) {
             strcpy(dev_path, dev->filename);
         }
 #elif HAVE_LIBUSB1
         arch_snprintf(dev_path, sizeof(dev_path), XUM1541_PREFIX "%d/%d",
-            usb.get_bus_number(usb.get_device(HandleXum1541.devh)),
-            usb.get_device_address(usb.get_device(HandleXum1541.devh)));
+            usb.get_bus_number(usb.get_device(HandleXum1541->devh)),
+            usb.get_device_address(usb.get_device(HandleXum1541->devh)));
 #endif
     } else {
         fprintf(stderr, "error: no xum1541 device found\n");
     }
 
-    xum1541_close(&HandleXum1541);
+    xum1541_close(HandleXum1541);
 
     return dev_path;
 }
