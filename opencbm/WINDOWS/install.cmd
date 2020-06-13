@@ -83,6 +83,10 @@ if %OC_INSTALL_ELEVATED% EQU 0 (
 	)
 )
 
+if not exist "%OC_SOURCE_PATH%\uninstall.cmd.add" (
+	echo del "%USERPROFILE%\Desktop\OpenCBM.lnk" > "%OC_SOURCE_PATH%\uninstall.cmd.add"
+)
+
 rem Check if we are running elevated. If not, restart after elevating privileges
 if %OC_INSTALL_ELEVATED% == 0 (
 	echo OpenCBM installation script
@@ -100,6 +104,7 @@ if %OC_INSTALL_ELEVATED% == 0 (
 		echo.
 		echo I could not get administrative rights - aborting!
 		echo.
+		del "%OC_SOURCE_PATH%\uninstall.cmd.add"
 		pause
 	) else (
 		echo Your installation will continue in another window.
@@ -128,6 +133,8 @@ rem The \.\ is needed, or cmd.exe will not process the '*' correctly. Don't ask 
 xcopy "%OC_SOURCE_PATH%\.\*.pdf"                 "%OC_DESTINATION%\doc\" /q /i /y /c
 xcopy "%OC_SOURCE_PATH%\tools"                   "%OC_DESTINATION%\tools\" /q /i /y /c
 
+mkdir "%OC_DESTINATION%\installer"
+
 if [%OC_INSTALL_DRIVER_XA1541%] == [1] (
 	xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.sys" "%OC_DESTINATION%\" /q /i /y /c
 )
@@ -136,14 +143,18 @@ pushd "%OC_DESTINATION%"
 instcbm.exe %OC_VARIANT%
 popd
 
-echo @echo off> "%OC_DESTINATION%\uninstall.cmd"
-echo @cd /d "%OC_DESTINATION%">> "%OC_DESTINATION%\uninstall.cmd"
-echo echo Removing %OC_VARIANT%>> "%OC_DESTINATION%\uninstall.cmd"
-echo instcbm --remove %OC_VARIANT%>> "%OC_DESTINATION%\uninstall.cmd"
-echo del "%SystemRoot%\System32\opencbm.conf">> "%OC_DESTINATION%\uninstall.cmd"
-echo cd ..>> "%OC_DESTINATION%\uninstall.cmd"
-echo %%SYSTEMROOT%%\System32\reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /f>> "%OC_DESTINATION%\uninstall.cmd"
-echo rd /s /q "%OC_DESTINATION%">> "%OC_DESTINATION%\uninstall.cmd"
+echo @echo off> "%OC_DESTINATION%\installer\uninstall.cmd"
+echo @cd /d "%OC_DESTINATION%">> "%OC_DESTINATION%\installer\uninstall.cmd"
+echo echo Removing %OC_VARIANT%>> "%OC_DESTINATION%\installer\uninstall.cmd"
+echo instcbm --remove %OC_VARIANT%>> "%OC_DESTINATION%\installer\uninstall.cmd"
+echo del "%SystemRoot%\System32\opencbm.conf">> "%OC_DESTINATION%\installer\uninstall.cmd"
+echo cd ..>> "%OC_DESTINATION%\installer\uninstall.cmd"
+IF EXIST "%OC_SOURCE_PATH%\uninstall.cmd.add" (
+	type "%OC_SOURCE_PATH%\uninstall.cmd.add" >> "%OC_DESTINATION%\installer\uninstall.cmd"
+	del "%OC_SOURCE_PATH%\uninstall.cmd.add"
+)
+echo %%SYSTEMROOT%%\System32\reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /f>> "%OC_DESTINATION%\installer\uninstall.cmd"
+echo rd /s /q "%OC_DESTINATION%">> "%OC_DESTINATION%\installer\uninstall.cmd"
 
 set day=%date:~0,2%
 set month=%date:~3,2%
@@ -151,7 +162,7 @@ set year=%date:~6%
 
 %SYSTEMROOT%\System32\reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /f > NUL 2> NUL
 
-%SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "UninstallString" /d "%SYSTEMROOT%\System32\cmd.exe /c \"%OC_DESTINATION%\uninstall.cmd\"" > NUL
+%SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "UninstallString" /d "%SYSTEMROOT%\System32\cmd.exe /c \"%OC_DESTINATION%\installer\uninstall.cmd\"" > NUL
 %SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "Comments"        /d "OpenCBM v%OC_VERSION% %OC_VARIANT_DISPLAY%" > NUL
 %SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "DisplayName"     /d "OpenCBM v%OC_VERSION%" > NUL
 %SYSTEMROOT%\System32\reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\OpenCBM" /t REG_SZ    /v "DisplayVersion"  /d "%OC_VERSION%" > NUL
