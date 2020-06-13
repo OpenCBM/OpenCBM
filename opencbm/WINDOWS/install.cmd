@@ -13,7 +13,7 @@ setlocal enabledelayedexpansion
 
 set OC_SOURCE_PATH="%~dp0"
 
-set OC_VERSION=0.4.99.100
+set OC_VERSION=0.4.99.101
 set OC_INSTALLED_SIZE_IN_KB_AMD64=1500
 set OC_INSTALLED_SIZE_IN_KB_I386=2000
 
@@ -122,20 +122,14 @@ if "%OC_VARIANT_DISPLAY%" == "" (
 
 rem Install by copying everything in place
 
-rem The current version should not exhibit the opencbm.conf problem anymore.
-rem (https://sourceforge.net/p/opencbm/bugs/60/)
-rem
-rem echo Copying opencbm.conf...
-rem xcopy opencbm.conf %SystemRoot%\System32\ /i /q
-
-xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.exe" "%OC_DESTINATION%\"     /q /i
-xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.dll" "%OC_DESTINATION%\"     /q /i
+xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.exe" "%OC_DESTINATION%\"     /q /i /y /c
+xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.dll" "%OC_DESTINATION%\"     /q /i /y /c
 rem The \.\ is needed, or cmd.exe will not process the '*' correctly. Don't ask me why...
-xcopy "%OC_SOURCE_PATH%\.\*.pdf"                 "%OC_DESTINATION%\doc\" /q /i
-xcopy "%OC_SOURCE_PATH%\tools"                   "%OC_DESTINATION%\tools\" /q /i
+xcopy "%OC_SOURCE_PATH%\.\*.pdf"                 "%OC_DESTINATION%\doc\" /q /i /y /c
+xcopy "%OC_SOURCE_PATH%\tools"                   "%OC_DESTINATION%\tools\" /q /i /y /c
 
 if [%OC_INSTALL_DRIVER_XA1541%] == [1] (
-	xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.sys" "%OC_DESTINATION%\" /q /i
+	xcopy "%OC_SOURCE_PATH%\%OC_BINDIR_LOCAL%\*.sys" "%OC_DESTINATION%\" /q /i /y /c
 )
 
 pushd "%OC_DESTINATION%"
