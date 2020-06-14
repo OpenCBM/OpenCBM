@@ -154,11 +154,11 @@ AddReg    = CoInstallers_AddReg
 CopyFiles = CoInstallers_CopyFiles
 
 [CoInstallers_AddReg]
-HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01011.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
+HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01009.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
 
 [CoInstallers_CopyFiles]
 WinUSBCoInstaller2.dll
-WdfCoInstaller01011.dll
+WdfCoInstaller01009.dll
 
 [DestinationDirs]
 CoInstallers_CopyFiles = 11
@@ -168,12 +168,12 @@ CoInstallers_CopyFiles = 11
 
 [SourceDisksFiles.x86]
 WinUSBCoInstaller2.dll = 1,x86
-WdfCoInstaller01011.dll = 1,x86
+WdfCoInstaller01009.dll = 1,x86
 
 [SourceDisksFiles.amd64]
 WinUSBCoInstaller2.dll = 1,amd64
-WdfCoInstaller01011.dll = 1,amd64
+WdfCoInstaller01009.dll = 1,amd64
 
 [SourceDisksFiles.arm]
 WinUSBCoInstaller2.dll = 1,arm
-WdfCoInstaller01011.dll = 1,arm
+WdfCoInstaller01009.dll = 1,arm
