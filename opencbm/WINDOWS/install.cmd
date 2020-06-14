@@ -6,6 +6,7 @@ set OC_DESTINATION=%ProgramFiles%\opencbm
 set OC_VARIANT_DISPLAY_DEFAULT=ZoomFloppy
 set OC_VARIANT_DEFAULT=xum1541
 set OC_VARIANT_DEFAULT_INSTALL_DRIVER=OC_INSTALL_DRIVER_ZOOMFLOPPY
+set OC_VARIANT_DEFAULT_INSTALL_IS_USB=1
 
 rem ---------------------------------------
 
@@ -125,6 +126,15 @@ for /d %%p in (%*) do (
 	)
 )
 
+rem If no variant was given, use default
+
+if "%OC_VARIANT_DISPLAY%" == "" (
+	set OC_VARIANT_DISPLAY=%OC_VARIANT_DISPLAY_DEFAULT%
+	set OC_VARIANT=%OC_VARIANT_DEFAULT%
+	set %OC_VARIANT_DEFAULT_INSTALL_DRIVER%=1
+	set OC_INSTALL_DRIVER_USB=%OC_VARIANT_DEFAULT_INSTALL_IS_USB%
+)
+
 if %OC_INSTALL_ELEVATED% EQU 0 (
 	rem Check if we already have administrative rights.
 	rem Idea taken from https://stackoverflow.com/questions/4051883/batch-script-how-to-check-for-admin-rights
@@ -191,14 +201,6 @@ if %OC_INSTALL_ELEVATED% == 0 (
 )
 
 echo Continuing...
-
-rem If no variant was given, use default
-
-if "%OC_VARIANT_DISPLAY%" == "" (
-	set OC_VARIANT_DISPLAY=%OC_VARIANT_DISPLAY_DEFAULT%
-	set OC_VARIANT=%OC_VARIANT_DEFAULT%
-	set %OC_VARIANT_DEFAULT_INSTALL_DRIVER%=1
-)
 
 rem Install by copying everything in place
 
