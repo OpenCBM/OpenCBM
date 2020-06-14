@@ -31,11 +31,67 @@ if [%PROCESSOR_ARCHITECTURE%] == [AMD64] (
 	exit
 )
 
+
 set OC_INSTALL_DRIVER_ZOOMFLOPPY=0
+set OC_INSTALL_DRIVER_USB=0
 set OC_INSTALL_DRIVER_XUM1541=0
 set OC_INSTALL_DRIVER_XU1541=0
 set OC_INSTALL_DRIVER_XA1541=0
 set OC_INSTALL_ELEVATED=0
+set OC_IS_XP_OR_OLDER=0
+
+
+rem Check Windows version
+
+for /f "tokens=4-5 delims=. " %%i in ('ver') do set VERSION=%%i.%%j
+for /f "tokens=5-6 delims=. " %%i in ('ver') do set VERSION2=%%i.%%j
+
+rem echo.
+
+if "%version%" == "10.0" (
+	rem echo Windows 10
+	set OC_INSTALL_WIN=10
+)
+if "%version%" == "6.3" (
+	rem echo Windows 8.1
+	set OC_INSTALL_WIN=8.1
+)
+if "%version%" == "6.2" (
+	rem echo Windows 8
+	set OC_INSTALL_WIN=8
+)
+if "%version%" == "6.1" (
+	rem echo Windows 7
+	if "%version2%" == "1.7600]" (
+		rem echo . Windows 7 w/o SP
+		set OC_INSTALL_WIN=7
+	)
+	if "%version2%" == "1.7601]" (
+		rem echo . Windows 7 SP1
+		set OC_INSTALL_WIN=7SP1
+	)
+)
+if "%version%" == "6.0" (
+	rem echo Windows Vista.
+	set OC_INSTALL_WIN=Vista
+	echo I do not know how to install on Windows Vista. If this fails, try again with --xp as option.
+	pause
+)
+if "%version2%" == "5.1" (
+	rem echo Windows XP
+	set OC_INSTALL_WIN=XP
+	set OC_IS_XP_OR_OLDER=1
+)
+if "%version2%" == "5.0" (
+	rem echo Windows 2000
+	set OC_INSTALL_WIN=2000
+	set OC_IS_XP_OR_OLDER=1
+)
+if "%version2%" == "4.0" (
+	rem echo Windows NT 4.0
+	set OC_INSTALL_WIN=4
+	set OC_IS_XP_OR_OLDER=1
+)
 
 rem Process command line parameter
 
@@ -44,18 +100,23 @@ for /d %%p in (%*) do (
 		set OC_VARIANT_DISPLAY=!OC_VARIANT_DISPLAY! ZoomFloppy
 		set OC_VARIANT=!OC_VARIANT! xum1541
 		set OC_INSTALL_DRIVER_ZOOMFLOPPY=1
+		set OC_INSTALL_DRIVER_USB=1
 	) else if [%%~p] == [xum1541] (
 		set OC_VARIANT_DISPLAY=!OC_VARIANT_DISPLAY! xum1541
 		set OC_VARIANT=!OC_VARIANT! xum1541
 		set OC_INSTALL_DRIVER_XUM1541=1
+		set OC_INSTALL_DRIVER_USB=1
 	) else if [%%~p] == [xu1541] (
 		set OC_VARIANT_DISPLAY=!OC_VARIANT_DISPLAY! xu1541
 		set OC_VARIANT=!OC_VARIANT! xu1541
 		set OC_INSTALL_DRIVER_XU1541=1
+		set OC_INSTALL_DRIVER_USB=1
 	) else if [%%~p] == [xa1541] (
 		set OC_VARIANT_DISPLAY=!OC_VARIANT_DISPLAY! xa1541
 		set OC_VARIANT=!OC_VARIANT! xa1541
 		set OC_INSTALL_DRIVER_XA1541=1
+	) else if [%%~p] == [--xp] (
+		set OC_IS_XP_OR_OLDER=1
 	) else if [%%~p] == [--internal_call_elevated] (
 		set OC_INSTALL_ELEVATED=1
 	) else (
@@ -76,10 +137,10 @@ if %OC_INSTALL_ELEVATED% EQU 0 (
 	sfc 2>nul | find /i "/" >nul
 
 	if !errorlevel! EQU 0 (
-		echo We have administrative rights
+		rem echo We have administrative rights
 		set OC_INSTALL_ELEVATED=1
 	) else (
-		echo We do not have administrative rights
+		rem echo We do not have administrative rights
 	)
 )
 
@@ -96,7 +157,11 @@ if %OC_INSTALL_ELEVATED% == 0 (
 	echo Please grant the rights on the UAC prompt,
 	echo or I will not be able to continue!
 	echo.
-	powershell -Command "Start-Process -FilePath \"%~dpnx0\" -ArgumentList \"--internal_call_elevated %*\" -Verb runAs"
+	if %OC_IS_XP_OR_OLDER% EQU 0 (
+		powershell -Command "Start-Process -FilePath \"%~dpnx0\" -ArgumentList \"--internal_call_elevated %*\" -Verb runAs"
+	) else (
+		runas /user:administrator "\"%~dpnx0\" --internal_call_elevated %*"
+	)
 	echo.
 	if errorlevel 1 (
 		echo ERROR
@@ -105,13 +170,20 @@ if %OC_INSTALL_ELEVATED% == 0 (
 		echo I could not get administrative rights - aborting!
 		echo.
 		del "%OC_SOURCE_PATH%\uninstall.cmd.add"
-		pause
 	) else (
 		echo Your installation will continue in another window.
 
+		if %OC_IS_XP_OR_OLDER% EQU 1 if %OC_INSTALL_DRIVER_USB% EQU 1 (
+			echo.
+			echo ===========================================================
+			echo = Please do not forget to install the drivers for OpenCBM =
+			echo ===========================================================
+			echo.
+		)
 		rem create Shortcut
 		.\tools\genShortCut.vbs "%USERPROFILE%" "%OC_DESTINATION%" "%OC_VERSION%"
 	)
+	pause
 	goto EXIT
 )
 
@@ -182,6 +254,8 @@ echo ===
 echo === Add %OC_DESTINATION% to your PATH to use the command line tools there.
 echo =================================================
 echo.
+
+if %OC_IS_XP_OR_OLDER% EQU 1 goto EXIT
 
 set INFER_PATH="%OC_SOURCE_PATH%\tools"
 set INFER_EXENAME=INFer.exe
