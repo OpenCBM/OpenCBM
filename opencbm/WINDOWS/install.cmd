@@ -179,6 +179,9 @@ if %OC_INSTALL_ELEVATED% == 0 (
 			echo = Please do not forget to install the drivers for OpenCBM =
 			echo ===========================================================
 			echo.
+			echo I am opening the path to them, so you know from where to install.
+			echo.
+			start xp_drv
 		)
 		rem create Shortcut
 		.\tools\genShortCut.vbs "%USERPROFILE%" "%OC_DESTINATION%" "%OC_VERSION%"
