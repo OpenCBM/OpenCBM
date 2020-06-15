@@ -2026,6 +2026,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             break;
         }
 
+        arch_set_errno(0);
+
         rv = pprog->prog(fd, &options) != 0;
         if (rv && arch_get_errno())
         {
