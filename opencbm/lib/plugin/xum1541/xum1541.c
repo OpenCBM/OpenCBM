@@ -667,8 +667,8 @@ xum1541_close(struct opencbm_usb_handle *HandleXum1541)
         if (ret != LIBUSB_SUCCESS && ret != LIBUSB_ERROR_NOT_FOUND)
             fprintf(stderr, "USB release intf error: %d %s\n", ret, usb.error_name(ret));
         usb.close(HandleXum1541->devh);
-    }
 #endif
+    }
 #if HAVE_LIBUSB1
     usb.exit(HandleXum1541->ctx);
 #endif
