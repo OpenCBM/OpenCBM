@@ -107,6 +107,7 @@ install-all: install install-plugin
 
 install-plugin-xu1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XU1541),install)
 ifeq "$(OS)" "Linux"
+	install -d $(DESTDIR)$(UDEVRULESDIR)
 	install -m 644 xu1541/udev/45-opencbm-xu1541.rules ${DESTDIR}$(UDEVRULESDIR)
 endif
 	install -d $(DESTDIR)$(PLUGINDIR)/xu1541
@@ -116,6 +117,7 @@ $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XU1541),install):: plugin-xu1541
 
 install-plugin-xum1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XUM1541),install)
 ifeq "$(OS)" "Linux"
+	install -d $(DESTDIR)$(UDEVRULESDIR)
 	install -m 644 xum1541/udev/45-opencbm-xum1541.rules ${DESTDIR}$(UDEVRULESDIR)
 endif
 
@@ -123,6 +125,7 @@ $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XUM1541),install):: plugin-xum1541
 
 install-plugin-xa1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),install)
 ifeq "$(OS)" "Linux"
+	install -d $(DESTDIR)$(UDEVRULESDIR)
 	install -m 644 opencbm/sys/linux/45-opencbm-xa1541.rules ${DESTDIR}$(UDEVRULESDIR)
 endif
 
@@ -164,9 +167,7 @@ uninstall: $(call CREATE_TARGET,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),
 	ldconfig || /bin/true
 
 ldconfig:
-	if [ ! -d "${DESTDIR}/etc/ld.so.conf.d" ]; then \
-	   mkdir -p "${DESTDIR}/etc/ld.so.conf.d"; \
-	fi
+	install -d ${DESTDIR}/etc/ld.so.conf.d
 	echo "${LIBDIR}" > ${DESTDIR}/etc/ld.so.conf.d/99-opencbm.conf
 	ldconfig
 
