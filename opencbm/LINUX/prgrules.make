@@ -42,7 +42,7 @@ install: install-files
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/$(PROG)
 ifneq "$(words $(MAN1))" "0"
-	rm -f $(DESTDIR)$(MANDIR)/$(MAN1){,.gz}
+	rm -f $(DESTDIR)$(MANDIR)/$(MAN1) $(DESTDIR)$(MANDIR)/$(MAN1).gz
 endif
 ifneq "$(words $(LINKS))" "0"	
 	for l in $(LINKS); do rm -f $(DESTDIR)$(BINDIR)/$$l $(DESTDIR)$(MANDIR)/$$l.1{,.gz}; done
