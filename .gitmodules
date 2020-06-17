@@ -1,3 +1,4 @@
 [submodule "opencbm/nibtools"]
 	path = opencbm/nibtools
-	url = git@github.com:OpenCBM/nibtools.git
+#	url = git@github.com:OpenCBM/nibtools.git
+	url = https://github.com/OpenCBM/nibtools.git
