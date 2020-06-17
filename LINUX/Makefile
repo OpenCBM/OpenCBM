@@ -164,6 +164,9 @@ uninstall: $(call CREATE_TARGET,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),
 	ldconfig || /bin/true
 
 ldconfig:
+	if [ ! -d "${DESTDIR}/etc/ld.so.conf.d" ]; then \
+	   mkdir ${DESTDIR}/etc/ld.so.conf.d; \
+	fi
 	echo "${LIBDIR}" > ${DESTDIR}/etc/ld.so.conf.d/99-opencbm.conf
 	ldconfig
 
