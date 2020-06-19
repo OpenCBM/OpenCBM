@@ -1,0 +1,82 @@
+; vim: set filetype=a65 noexpandtab tabstop=4 shiftwidth=4 autoindent smartindent:
+
+	*= $0500
+
+	.include "common.i65"
+
+	.export Start
+
+oldCIA = $0300
+
+oldCIAcounter = $0301
+
+
+Start:
+
+	; save irq vector
+	ldax IRQ_VEC
+	stax irq_save
+
+	sei
+
+mainloop:
+
+	lda #$7f
+	sta CIA_BASE + CIA::ICR		; $400D
+
+	; test CIA
+
+	; Set IRQ vector
+	ldaxi continue1
+	stax IRQ_VEC
+
+	lda #%10001000
+	sta CIA_BASE + CIA::CRA		; 400e
+	lda CIA_BASE + CIA::ICR		; 400d
+
+	lda #$81
+	sta CIA_BASE + CIA::ICR		; 400d
+	cli
+
+	; Set timer to 5 cycles
+	ldax 4
+	stax CIA_BASE + CIA::TA		; 4004/4005
+
+	; Clear the detection flag
+	; X is zero (high byte of 4 above)
+	stx oldCIA
+
+	ldx #$7f
+
+.ifdef ONESHOT
+	lda #%10011001 ; Fire a 1-shot timer
+.else
+	lda #%10010001 ; normal timer
+.endif
+	sta CIA_BASE + CIA::CRA		; 400e
+
+	; This should be interrupted before the INC
+	; only if it's a newer chip.
+	lda CIA_BASE + CIA::ICR		; 400d
+	lda $d020
+	inc oldCIA
+	; we should not come here
+@lp:
+	inc oldCIAcounter
+	jmp @lp
+
+continue1:
+	stx CIA_BASE + CIA::ICR		; 400d
+	lda CIA_BASE + CIA::ICR		; 400d
+	pla
+	pla
+	pla
+
+	; restore irq vector
+	ldax irq_save
+	stax IRQ_VEC
+
+	rts
+
+irq_save:
+	.word 0

@@ -1,0 +1,7 @@
+; vim: set filetype=a65 noexpandtab tabstop=4 shiftwidth=4 autoindent smartindent:
+
+ONESHOT=1
+
+	.include "1571.i65"
+
+	.include "irqdelay-15x1.a65"

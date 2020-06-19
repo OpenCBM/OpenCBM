@@ -1,0 +1,35 @@
+; vim: set filetype=a65 noexpandtab tabstop=4 shiftwidth=4 autoindent smartindent:
+
+CIA_BASE = $4000	; CIA base address
+
+.struct CIA
+	PRA  .byte
+	PRB  .byte
+	DDRA .byte
+	DDRB .byte
+	TA   .word
+	TB   .word
+	TODT .byte
+	TODS .byte
+	TODM .byte
+	TODH .byte
+	SDR  .byte
+	ICR  .byte
+	CRA  .byte
+	CRB  .byte
+.endstruct
+
+.macro ldaxi addr
+	lda #<addr
+	ldx #>addr
+.endmacro
+
+.macro ldax addr
+	lda addr
+	ldx addr+1
+.endmacro
+
+.macro stax addr
+	sta addr
+	stx addr+1
+.endmacro

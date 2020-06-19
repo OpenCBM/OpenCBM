@@ -1,0 +1,4 @@
+; vim: set filetype=a65 noexpandtab tabstop=4 shiftwidth=4 autoindent smartindent:
+
+IRQ_VEC = $02a9		; $02a9/02aa: IRQ vector
+NMI_VEC = $0065		; $0065/0067: NMI vector
