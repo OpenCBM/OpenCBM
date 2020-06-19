@@ -9,7 +9,7 @@ SUBDIRS  = opencbm/include opencbm/arch/$(OS_ARCH) opencbm/libmisc opencbm/lib \
 	   opencbm/libtrans \
            opencbm/cbmctrl opencbm/cbmformat opencbm/cbmforng opencbm/d64copy opencbm/cbmcopy \
 	   opencbm/d82copy opencbm/imgcopy \
-           opencbm/demo/flash opencbm/demo/morse opencbm/demo/rpm1541 \
+           opencbm/demo/flash opencbm/demo/morse opencbm/demo/rpm1541 opencbm/demo/irqtest15x1 \
 	   opencbm/sample/libtrans opencbm/sample/testlines
 ifeq "$(OS)" "Linux"
 SUBDIRS += opencbm/compat
