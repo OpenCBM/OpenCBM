@@ -1,4 +1,5 @@
 DIRS= \
+	irqtest15x1 \
 	rpm1541 \
 	flash \
 	morse
