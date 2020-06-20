@@ -7,7 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef ARRAYSIZE
 #define ARRAYSIZE(_x) ( sizeof (_x) / sizeof ((_x)[0]) )
+#endif
 
 static const unsigned char irqdelay_1571[] = {
 #include "irqdelay-1571.inc"
@@ -127,6 +129,8 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
     static unsigned char result[1000] = { 0 };
     static unsigned char result2[1000] = { 0 };
 
+    unsigned int baudindex;
+
     printf("\n\nTest CIA SDR:\n");
 
     execute_command[3] = drvaddress_start & 0xFFu;
@@ -159,7 +163,7 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
                 drive_functions->cia_sdr_icr_contaddress);
     }
 
-    for (unsigned int baudindex = 0; baudindex < ARRAYSIZE(test_baudrates); baudindex++) {
+    for (baudindex = 0; baudindex < ARRAYSIZE(test_baudrates); baudindex++) {
         unsigned char baudrate[2];
 
         printf("\n- Test baudrate %u:\n", test_baudrates[baudindex]);

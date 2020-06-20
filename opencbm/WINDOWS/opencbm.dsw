@@ -297,6 +297,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "democia_irq"=..\demo\irqtest15x1\WINDOWS\democia_irq.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "demoflash"=..\demo\flash\WINDOWS\demoflash.dsp - Package Owner=<4>
 
 Package=<5>
