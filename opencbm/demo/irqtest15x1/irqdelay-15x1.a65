@@ -27,7 +27,7 @@ mainloop:
 	; test CIA
 
 	; Set IRQ vector
-	ldaxi continue1
+	ldax #continue1
 	stax IRQ_VEC
 
 	lda #%10001000
@@ -39,7 +39,7 @@ mainloop:
 	cli
 
 	; Set timer to 5 cycles
-	ldax 4
+	ldax #4
 	stax CIA_BASE + CIA::TA		; 4004/4005
 
 	; Clear the detection flag

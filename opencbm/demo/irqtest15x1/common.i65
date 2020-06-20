@@ -19,17 +19,53 @@ CIA_BASE = $4000	; CIA base address
 	CRB  .byte
 .endstruct
 
-.macro ldaxi addr
-	lda #<addr
-	ldx #>addr
+.macro FillCount count
+	.repeat count
+		.byte 0
+	.endrep
 .endmacro
 
-.macro ldax addr
-	lda addr
-	ldx addr+1
+.macro FillUntil address
+	FillCount address-*
 .endmacro
 
+
+;; -------------------------------------------------------------------------------
+;; taken from: https://github.com/demesos/LAMAlib/blob/master/LAMAlib-macros16.inc
+;; -------------------------------------------------------------------------------
+
+;; ldax addr, ldax #arg
+;; Loads a 16-bit value into A/X, either from an address or as immediate value
+;; Note that the zero flag is not indicating 0 but indicating a value <256
+;; Supports zero page addressing mode
+;; Registers modified: A,X
+.macro ldax arg
+.scope
+        .if (.match (.left (1, {arg}), #))
+            ; immediate mode
+	    iarg=(.right (.tcount ({arg})-1, {arg}))
+            .if .const(iarg) .and (<iarg = >iarg)
+               lda     #<iarg
+               tax
+            .else
+               lda     #<iarg
+               ldx     #>iarg
+            .endif
+        .else
+            ; absolute or zero page
+            lda arg
+            ldx     1+(arg)
+        .endif
+.endscope
+.endmacro
+
+;; stax addr
+;; Stores the value in registers A and X to addr and addr+1
+;; Supports zero page addressing mode
+;; Registers modified: none
 .macro stax addr
-	sta addr
-	stx addr+1
+.scope
+        sta addr
+        stx 1+(addr)
+.endscope
 .endmacro
