@@ -563,6 +563,17 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
             break;
         }
 
+        // Set interface to make sure data toggles are reset
+#if HAVE_LIBUSB0
+        ret = usb.set_altinterface(HandleXum1541->devh, 0);
+#elif HAVE_LIBUSB1
+        ret = usb.set_interface_alt_setting(HandleXum1541->devh, 0, 0);
+#endif
+        if (ret != LIBUSB_SUCCESS) {
+            fprintf(stderr, "USB error: %s\n", usb.error_name(ret));
+            break;
+        }
+
         // Check the basic device info message for firmware version
         memset(devInfo, 0, sizeof(devInfo));
 #if HAVE_LIBUSB0
@@ -655,7 +666,6 @@ xum1541_close(struct opencbm_usb_handle *HandleXum1541)
         }
         ret = usb.release_interface(HandleXum1541->devh, 0);
 
-    usb.set_configuration(HandleXum1541->devh, -1);
 #if HAVE_LIBUSB0
         // ENOENT could mean the interface was never claimed
         if (ret != LIBUSB_SUCCESS && ret != -ENOENT)

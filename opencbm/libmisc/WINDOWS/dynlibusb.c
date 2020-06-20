@@ -68,7 +68,7 @@ int dynlibusb_init(void) {
         READ(set_configuration);
         READ(claim_interface);
         READ(release_interface);
-//        READ(set_altinterface);
+        READ(set_interface_alt_setting);
 //        READ(resetep);
         READ(clear_halt);
 //        READ(reset);
@@ -98,7 +98,7 @@ int dynlibusb_init(void) {
         READ(set_configuration);
         READ(claim_interface);
         READ(release_interface);
-//        READ(set_altinterface);
+        READ(set_altinterface);
         READ(resetep);
         READ(clear_halt);
 //        READ(reset);

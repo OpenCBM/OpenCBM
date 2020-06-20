@@ -54,6 +54,7 @@ struct usb_dll_s {
     int (LIBUSB_APIDECL *set_configuration)(libusb_device_handle *dev, int configuration);
     int (LIBUSB_APIDECL *claim_interface)(libusb_device_handle *dev, int interface);
     int (LIBUSB_APIDECL *release_interface)(libusb_device_handle *dev, int interface);
+    int (LIBUSB_APIDECL *set_interface_alt_setting)(libusb_device_handle *dev, int interface, int alternate);
     int (LIBUSB_APIDECL *clear_halt)(libusb_device_handle *dev, unsigned char ep);
     const char *(LIBUSB_APIDECL *error_name)(int error_code);
     int (LIBUSB_APIDECL *init)(libusb_context **ctx);
@@ -91,7 +92,7 @@ struct usb_dll_s {
     int (LIBUSB_APIDECL *set_configuration)(usb_dev_handle *dev, int configuration);
     int (LIBUSB_APIDECL *claim_interface)(usb_dev_handle *dev, int interface);
     int (LIBUSB_APIDECL *release_interface)(usb_dev_handle *dev, int interface);
-//    int (LIBUSB_APIDECL *set_altinterface)(usb_dev_handle *dev, int alternate);
+    int (LIBUSB_APIDECL *set_altinterface)(usb_dev_handle *dev, int alternate);
     int (LIBUSB_APIDECL *resetep)(usb_dev_handle *dev, unsigned int ep);
     int (LIBUSB_APIDECL *clear_halt)(usb_dev_handle *dev, unsigned int ep);
 //    int (LIBUSB_APIDECL *reset)(usb_dev_handle *dev);
