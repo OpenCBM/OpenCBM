@@ -1,0 +1,162 @@
+; vim: set filetype=a65 noexpandtab tabstop=4 shiftwidth=4 autoindent smartindent:
+
+	.include "common.i65"
+
+	.export Start
+
+.if DRIVE=1571
+tottests = 457
+.else
+tottests = 1000 - 1
+.endif
+
+.if DRIVE=1571
+	*= $0146
+	; this is an extra buffer for BAM for the second side.
+	; as we do not use any disk, we can freely use it.
+	; make sure we do not have any disk inside while running this program!
+extra:
+
+.else
+	*= $0401
+.endif
+
+baudrate .res 2
+
+;status	 .res 1
+;testflag .res 1
+
+Start
+    sei
+
+    jsr initclockslide
+
+    lda #<tottests
+    sta dl+1
+    lda #<results
+    sta sr+1
+    lda #>results
+    sta sr+2
+    lda #<results2
+    sta sr2+1
+    lda #>results2
+    sta sr2+2
+;    lda #>tottests
+;    sta testflag
+
+;    lda #$00
+;    sta status
+    lda #0
+    sta delay256+1
+
+    lda CIA_BASE + CIA::CRA
+    and #%10000000
+    sta CIA_BASE + CIA::CRA	; stop TA (keep 50Hz flag)
+    lda #%00000000
+    sta CIA_BASE + CIA::CRB	; stop TB
+
+	ldax baudrate
+	stax CIA_BASE + CIA::TA
+
+	jmp loop
+
+initclockslide
+	lda #$c9
+	ldx #0
+	sta clockslide,x
+	inx
+	bne *-4
+	lda #$c5
+	ldx #$ea
+	ldy #$60
+	sta clockslide+254
+	stx clockslide+255
+	sty clockslide+256
+	rts
+
+
+clockslide = $0300   ; jsr clockslide+(255-x) = 14+x cycles  257 bytes total
+;	.word $fce6,$fce7,$fce8,$fce9,$fcea,$fce4,$fce5
+
+.if DRIVE=1571
+	*= $0401
+.endif
+
+loop
+;    sei
+
+    ; setup ICR and CRx
+    lda #%0111111
+    sta CIA_BASE + CIA::ICR	; disable interrupts
+
+
+    ldy CIA_BASE + CIA::ICR	; clear ICR
+    ldy #$55
+    ; setup SDR
+    lda #%01010001    ; TA started, force load, SDR output
+    sta CIA_BASE + CIA::CRA
+    sty CIA_BASE + CIA::SDR	; send
+    ldy CIA_BASE + CIA::ICR	; clear ICR
+dl
+    jsr clockslide
+
+delay256
+    ldx #0
+    beq c1          ;2                    (  2)
+    jsr clockslide+(255-(249-14)) ;249  (251)
+    dex             ;2                    (253)
+    jmp delay256+2  ;3                  (256)
+c1
+    lda CIA_BASE + CIA::ICR	; clear ICR
+
+    jsr sr
+    jsr sr2
+l1
+    and #8
+    beq next
+    lda CIA_BASE + CIA::ICR
+    jmp l1
+
+next
+    lda CIA_BASE + CIA::CRA
+    and #%10000000
+    sta CIA_BASE + CIA::CRA	; stop TA (keep 50Hz flag)
+;    cli
+
+    ldx dl+1
+    dex
+    stx dl+1
+    cpx #$ff
+    bne loop
+
+    inc delay256+1
+    lda #>tottests
+    cmp delay256+1
+    bcs loop
+
+	rts
+
+sr
+    sta results
+    inc sr+1
+    bne endsr
+    inc sr+2
+endsr
+    rts
+
+sr2
+    sty results2
+    inc sr2+1
+    bne endsr2
+    inc sr2+2
+endsr2
+    rts
+
+;------------------------------------------------------------------------------
+
+results
+		.res tottests
+results2
+		.res tottests
+
+dummy	.res 0

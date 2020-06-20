@@ -12,6 +12,8 @@ INC= \
 	irqdelay-1571-oneshot.inc \
 	irqdelay-1581.inc \
 	irqdelay-1581-oneshot.inc \
+	cia-sdr-icr-1571.inc \
+	cia-sdr-icr-1581.inc \
 
 
 all: $(PROGS)

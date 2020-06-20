@@ -1,0 +1,5 @@
+; vim: set filetype=a65 noexpandtab tabstop=4 shiftwidth=4 autoindent smartindent:
+
+DRIVE=1571
+
+	.include "cia-sdr-icr.a65"

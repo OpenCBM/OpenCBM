@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define ARRAYSIZE(_x) ( sizeof (_x) / sizeof ((_x)[0]) )
+
 static const unsigned char irqdelay_1571[] = {
 #include "irqdelay-1571.inc"
 };
@@ -23,28 +25,159 @@ static const unsigned char irqdelay_1581_oneshot[] = {
 #include "irqdelay-1581-oneshot.inc"
 };
 
-static const unsigned char * irqdelay_func             = 0;
-static       unsigned int    irqdelay_func_len         = 0;
+static const unsigned char cia_sdr_icr_1571[] = {
+#include "cia-sdr-icr-1571.inc"
+};
 
-static const unsigned char * irqdelay_oneshot_func     = 0;
-static       unsigned int    irqdelay_oneshot_func_len = 0;
+static const unsigned char cia_sdr_icr_1581[] = {
+#include "cia-sdr-icr-1581.inc"
+};
+
+struct drive_functions_s {
+    const unsigned char * irqdelay;
+    const unsigned int    irqdelay_len;
+
+    const unsigned char * irqdelay_oneshot;
+    const unsigned int    irqdelay_oneshot_len;
+
+    const unsigned char * cia_sdr_icr;
+    const unsigned int    cia_sdr_icr_len;
+
+    const unsigned int    cia_sdr_icr_startaddress;
+    const unsigned int    cia_sdr_icr_startaddress_len;
+
+    const unsigned int    cia_sdr_icr_contaddress;
+    const unsigned int    cia_sdr_icr_contaddress_len;
+
+    const unsigned int    cia_sdr_result_address;
+    const unsigned int    cia_sdr_result2_address;
+    const unsigned int    cia_sdr_tottest;
+};
+
+static struct drive_functions_s drive_functions[] = {
+    {
+        irqdelay_1571,
+        sizeof irqdelay_1571,
+        irqdelay_1571_oneshot,
+        sizeof irqdelay_1571_oneshot,
+        cia_sdr_icr_1571,
+        sizeof cia_sdr_icr_1571,
+        0x0146,             // start of first block
+        0x01A0 - 0x0146,    // length of first block
+        0x0401,             // start of second block
+        0x046d - 0x0401,    // length of second block
+        0x046d,             // results are found here
+        0x0636,             // results2 are found here
+        457                 // tottests
+    },
+    {
+        irqdelay_1581,
+        sizeof irqdelay_1581,
+        irqdelay_1581_oneshot,
+        sizeof irqdelay_1581_oneshot,
+        cia_sdr_icr_1581,
+        sizeof cia_sdr_icr_1581,
+        0x0401,             // start of first block
+        0x04C7 - 0x0401,    // length of first block
+        0x0,                // start of second block (none)
+        0,                  // length of second block (none)
+        0x04c7,             // results are found here
+        0x08ae,             // results2 are found here
+        1000 - 1            // tottests
+    },
+};
+
+static unsigned int test_baudrates[] = { 4, 5, 6, 7, 8, 50, 51, 64 };
+
+static unsigned int current_drive = 0;
 
 void set_1571()
 {
-    irqdelay_func             = irqdelay_1571;
-    irqdelay_func_len         = sizeof(irqdelay_1571);
-
-    irqdelay_oneshot_func     = irqdelay_1571_oneshot;
-    irqdelay_oneshot_func_len = sizeof(irqdelay_1571_oneshot);
+    current_drive = 0;
 }
 
 void set_1581()
 {
-    irqdelay_func             = irqdelay_1581;
-    irqdelay_func_len         = sizeof(irqdelay_1581);
+    current_drive = 1;
+}
 
-    irqdelay_oneshot_func     = irqdelay_1581_oneshot;
-    irqdelay_oneshot_func_len = sizeof(irqdelay_1581_oneshot);
+#define DUMP_BYTE_PER_ROW 16
+
+void memdump(const char * text, const unsigned char * buffer, unsigned int bufferlen, unsigned int offset)
+{
+    unsigned int row, col;
+    printf("DUMP of %s:", text);
+
+    for (row = 0; row < bufferlen; row += DUMP_BYTE_PER_ROW) {
+        printf("\n%04X: ", offset + row);
+        for (col = row; (col < bufferlen) && (col < row + DUMP_BYTE_PER_ROW); col++) {
+            printf("%02X ", buffer[col]);
+        }
+    }
+    printf("\n");
+}
+
+
+void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *drive_functions)
+{
+    char execute_command[] = "M-E  ";
+    const unsigned int drvaddress_baudrate = drive_functions->cia_sdr_icr_startaddress;
+    const unsigned int drvaddress_start    = drvaddress_baudrate + 2;
+
+    static unsigned char result[1000] = { 0 };
+    static unsigned char result2[1000] = { 0 };
+
+    printf("\n\nTest CIA SDR:\n");
+
+    execute_command[3] = drvaddress_start & 0xFFu;
+    execute_command[4] = (drvaddress_start >> 8) & 0xFFu;
+
+    // initial upload of the program
+    cbm_upload(
+            fd,
+            drv,
+            drive_functions->cia_sdr_icr_startaddress,
+            drive_functions->cia_sdr_icr,
+            drive_functions->cia_sdr_icr_startaddress_len
+            );
+    memdump("up1",
+            drive_functions->cia_sdr_icr,
+            drive_functions->cia_sdr_icr_startaddress_len,
+            drive_functions->cia_sdr_icr_startaddress);
+
+    if (drive_functions->cia_sdr_icr_contaddress_len) {
+        cbm_upload(
+                fd,
+                drv,
+                drive_functions->cia_sdr_icr_contaddress,
+                drive_functions->cia_sdr_icr + drive_functions->cia_sdr_icr_startaddress_len,
+                drive_functions->cia_sdr_icr_contaddress_len
+                );
+        memdump("up2",
+                drive_functions->cia_sdr_icr + drive_functions->cia_sdr_icr_startaddress_len,
+                drive_functions->cia_sdr_icr_contaddress_len,
+                drive_functions->cia_sdr_icr_contaddress);
+    }
+
+    for (unsigned int baudindex = 0; baudindex < ARRAYSIZE(test_baudrates); baudindex++) {
+        unsigned char baudrate[2];
+
+        printf("\n- Test baudrate %u:\n", test_baudrates[baudindex]);
+
+        baudrate[0] = test_baudrates[baudindex] & 0xFFu;
+        baudrate[1] = (test_baudrates[baudindex] >> 8) & 0xFFu;
+
+        cbm_upload(fd, drv, drvaddress_baudrate, baudrate, sizeof baudrate);
+
+        cbm_exec_command(fd, drv, execute_command, 5);
+
+        // now, get the results from the drive
+        cbm_download(fd, drv, drive_functions->cia_sdr_result_address,  result,  drive_functions->cia_sdr_tottest);
+        cbm_download(fd, drv, drive_functions->cia_sdr_result2_address, result2, drive_functions->cia_sdr_tottest);
+
+        memdump("result",  result,  drive_functions->cia_sdr_tottest, 0);
+        memdump("result2", result2, drive_functions->cia_sdr_tottest, 0);
+    }
 }
 
 void test_irqdelay(CBM_FILE fd, unsigned char drv, const unsigned char * func, unsigned int func_len, char * str)
@@ -70,8 +203,13 @@ void test_irqdelay(CBM_FILE fd, unsigned char drv, const unsigned char * func, u
 
 void testdrive(CBM_FILE fd, unsigned char drv)
 {
-    test_irqdelay(fd, drv, irqdelay_func,         irqdelay_func_len,         "irqdelay");
-    test_irqdelay(fd, drv, irqdelay_oneshot_func, irqdelay_oneshot_func_len, "irqdelay_oneshot");
+    test_irqdelay(fd, drv, drive_functions[current_drive].irqdelay,         drive_functions[current_drive].irqdelay_len,         "irqdelay");
+    test_irqdelay(fd, drv, drive_functions[current_drive].irqdelay_oneshot, drive_functions[current_drive].irqdelay_oneshot_len, "irqdelay_oneshot");
+
+    test_cia_sdr(fd, drv, &drive_functions[current_drive]);
+
+    // reset the drive
+    cbm_exec_command(fd, drv, "UJ:", 0);
 }
 
 
