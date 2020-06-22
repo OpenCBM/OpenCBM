@@ -11,6 +11,8 @@
 #define ARRAYSIZE(_x) ( sizeof (_x) / sizeof ((_x)[0]) )
 #endif
 
+#define IGNORE_MASK 0xEFu
+
 static const unsigned char irqdelay_1571[] = {
 #include "irqdelay-1571.inc"
 };
@@ -33,6 +35,128 @@ static const unsigned char cia_sdr_icr_1571[] = {
 
 static const unsigned char cia_sdr_icr_1581[] = {
 #include "cia-sdr-icr-1581.inc"
+};
+
+
+static const unsigned char dump1_4[] = {
+#include "dumps/dump1-4.ibin"
+};
+
+static const unsigned char dump1_5[] = {
+#include "dumps/dump1-5.ibin"
+};
+
+static const unsigned char dump1_6[] = {
+#include "dumps/dump1-6.ibin"
+};
+
+static const unsigned char dump1_7[] = {
+#include "dumps/dump1-7.ibin"
+};
+
+static const unsigned char dump1_8[] = {
+#include "dumps/dump1-8.ibin"
+};
+
+static const unsigned char dump1_50[] = {
+#include "dumps/dump1-50.ibin"
+};
+
+static const unsigned char dump1_51[] = {
+#include "dumps/dump1-51.ibin"
+};
+
+static const unsigned char dump1_64[] = {
+#include "dumps/dump1-64.ibin"
+};
+
+static const unsigned char dump2_4[] = {
+#include "dumps/dump2-4.ibin"
+};
+
+static const unsigned char dump2_5[] = {
+#include "dumps/dump2-5.ibin"
+};
+
+static const unsigned char dump2_6[] = {
+#include "dumps/dump2-6.ibin"
+};
+
+static const unsigned char dump2_7[] = {
+#include "dumps/dump2-7.ibin"
+};
+
+static const unsigned char dump2_8[] = {
+#include "dumps/dump2-8.ibin"
+};
+
+static const unsigned char dump2_50[] = {
+#include "dumps/dump2-50.ibin"
+};
+
+static const unsigned char dump2_51[] = {
+#include "dumps/dump2-51.ibin"
+};
+
+static const unsigned char dump2_64[] = {
+#include "dumps/dump2-64.ibin"
+};
+
+static const unsigned char dump2_4485_7[] = {
+#include "dumps/dump2-4485-7.ibin"
+};
+
+static const unsigned char dump2_4485_8[] = {
+#include "dumps/dump2-4485-8.ibin"
+};
+
+static const unsigned char dump2_4485_50[] = {
+#include "dumps/dump2-4485-50.ibin"
+};
+
+static const unsigned char dump2_4485_51[] = {
+#include "dumps/dump2-4485-51.ibin"
+};
+
+static const unsigned char dump2_4485_64[] = {
+#include "dumps/dump2-4485-64.ibin"
+};
+
+static const struct dump_s {
+    const unsigned int    baudrate;
+    const unsigned char * dump;
+} dumps[3][8] =
+{
+    {
+        {  4, dump1_4  },
+        {  5, dump1_5  },
+        {  6, dump1_6  },
+        {  7, dump1_7  },
+        {  8, dump1_8  },
+        { 50, dump1_50 },
+        { 51, dump1_51 },
+        { 64, dump1_64 },
+    },
+    {
+        {  4, dump2_4  },
+        {  5, dump2_5  },
+        {  6, dump2_6  },
+        {  7, dump2_7  },
+        {  8, dump2_8  },
+        { 50, dump2_50 },
+        { 51, dump2_51 },
+        { 64, dump2_64 },
+    },
+    {
+        {  4, NULL          },
+        {  5, NULL          },
+        {  6, NULL          },
+        {  7, dump2_4485_7  },
+        {  8, dump2_4485_8  },
+        { 50, dump2_4485_50 },
+        { 51, dump2_4485_51 },
+        { 64, dump2_4485_64 },
+    }
 };
 
 struct drive_functions_s {
@@ -130,6 +254,34 @@ void mod_and(unsigned char * buffer, unsigned int bufferlen, unsigned char mask)
     }
 }
 
+unsigned int check_result(const unsigned char * buffer_in, unsigned int len, unsigned int baudrate, unsigned int index)
+{
+    unsigned int match = 0;
+
+    unsigned int i;
+
+    unsigned int baudrate_index = 0;
+
+    for (baudrate_index = 0; baudrate_index < ARRAYSIZE(dumps[0]); baudrate_index++) {
+        if (dumps[index][baudrate_index].baudrate == baudrate) {
+            break;
+        }
+    }
+
+    if (baudrate_index == ARRAYSIZE(dumps[0])) return match;
+
+    if (dumps[index][baudrate_index].dump == NULL) return match;
+
+    for (i = 0; i < len; i++) {
+        if ( (dumps[index][baudrate_index].dump[i] & IGNORE_MASK) != ( buffer_in[i] & IGNORE_MASK) ) {
+            return match;
+        }
+    }
+
+    match = 1;
+
+    return match;
+}
 
 void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *drive_functions)
 {
@@ -160,9 +312,11 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
         jsrfunc_swapped[4] = jsrfunc_orig[1];
         jsrfunc_swapped[5] = jsrfunc_orig[2];
 
+#if DBG_PROGRAM
         memdump("orig jsrfunc", jsrfunc_orig, 6, drive_functions->cia_sdr_icr_jsr_swap_address);
         memdump("mod. jsrfunc", jsrfunc_swapped, 6, drive_functions->cia_sdr_icr_jsr_swap_address);
         printf("\n");
+#endif
     }
 
     // initial upload of the program
@@ -173,10 +327,12 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
             drive_functions->cia_sdr_icr,
             drive_functions->cia_sdr_icr_startaddress_len
             );
+#if DBG_PROGRAM
     memdump("up1",
             drive_functions->cia_sdr_icr,
             drive_functions->cia_sdr_icr_startaddress_len,
             drive_functions->cia_sdr_icr_startaddress);
+#endif
 
     if (drive_functions->cia_sdr_icr_contaddress_len) {
         cbm_upload(
@@ -186,10 +342,12 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
                 drive_functions->cia_sdr_icr + drive_functions->cia_sdr_icr_startaddress_len,
                 drive_functions->cia_sdr_icr_contaddress_len
                 );
+#if DBG_PROGRAM
         memdump("up2",
                 drive_functions->cia_sdr_icr + drive_functions->cia_sdr_icr_startaddress_len,
                 drive_functions->cia_sdr_icr_contaddress_len,
                 drive_functions->cia_sdr_icr_contaddress);
+#endif
     }
 
     for (baudindex = 0; baudindex < ARRAYSIZE(test_baudrates); baudindex++) {
@@ -210,8 +368,14 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
         // now, get the results from the drive
         cbm_download(fd, drv, drive_functions->cia_sdr_result_address,  result,  drive_functions->cia_sdr_tottest);
 
-        mod_and(result, drive_functions->cia_sdr_tottest, 0xef);
-        memdump("result",  result,  drive_functions->cia_sdr_tottest, 0);
+
+        if (check_result(result, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], 0)) {
+            printf("result for normal CIA\n");
+        }
+        else {
+//          mod_and(result, drive_functions->cia_sdr_tottest, IGNORE_MASK);
+            memdump("result",  result,  drive_functions->cia_sdr_tottest, 0);
+        }
 
         if (drive_functions->cia_sdr_icr_jsr_swap_address) {
             cbm_upload(fd, drv, drive_functions->cia_sdr_icr_jsr_swap_address, jsrfunc_orig, sizeof jsrfunc_orig);
@@ -220,8 +384,20 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
 
         if (drive_functions->cia_sdr_result2_address) {
             cbm_download(fd, drv, drive_functions->cia_sdr_result2_address, result2, drive_functions->cia_sdr_tottest);
-            mod_and(result2, drive_functions->cia_sdr_tottest, 0xef);
-            memdump("result2", result2, drive_functions->cia_sdr_tottest, 0);
+
+
+            if (check_result(result2, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], 1)) {
+                printf("result2 for normal CIA\n");
+            }
+            else {
+                if (check_result(result, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], 2)) {
+                    printf("result2 for 4485 CIA\n");
+                }
+                else {
+//                  mod_and(result2, drive_functions->cia_sdr_tottest, IGNORE_MASK);
+                    memdump("result2", result2, drive_functions->cia_sdr_tottest, 0);
+                }
+            }
         }
 
     }

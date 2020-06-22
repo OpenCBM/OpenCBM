@@ -86,7 +86,7 @@ loop
 ;    sei
 
     ; setup ICR and CRx
-    lda #%0111111
+    lda #%01111111
     sta CIA_BASE + CIA::ICR	; disable interrupts
 
 
