@@ -50,6 +50,7 @@ struct drive_functions_s {
 
     const unsigned int    cia_sdr_icr_contaddress;
     const unsigned int    cia_sdr_icr_contaddress_len;
+    const unsigned int    cia_sdr_icr_jsr_swap_address;
 
     const unsigned int    cia_sdr_result_address;
     const unsigned int    cia_sdr_result2_address;
@@ -68,9 +69,10 @@ static struct drive_functions_s drive_functions[] = {
         0x01A0 - 0x0146,    // length of first block
         0x0401,             // start of second block
         0x046d - 0x0401,    // length of second block
-        0x046d,             // results are found here
-        0x0636,             // results2 are found here
-        457                 // tottests
+        0x0427,             // where are the JSR to change between results and results2
+        0x0500,             // results are found here
+        0x0500,             // results2 are found here
+        767                 // tottests
     },
     {
         irqdelay_1581,
@@ -83,8 +85,9 @@ static struct drive_functions_s drive_functions[] = {
         0x04C7 - 0x0401,    // length of first block
         0x0,                // start of second block (none)
         0,                  // length of second block (none)
-        0x04c7,             // results are found here
-        0x08ae,             // results2 are found here
+        0,                  // where are the JSR to change between results and results2
+        0x0500,             // results are found here
+        0x0900,             // results2 are found here
         1000 - 1            // tottests
     },
 };
@@ -119,6 +122,14 @@ void memdump(const char * text, const unsigned char * buffer, unsigned int buffe
     printf("\n");
 }
 
+void mod_and(unsigned char * buffer, unsigned int bufferlen, unsigned char mask)
+{
+    unsigned int i;
+    for (i = 0; i < bufferlen; i++) {
+        buffer[i] &= mask;
+    }
+}
+
 
 void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *drive_functions)
 {
@@ -129,12 +140,30 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
     static unsigned char result[1000] = { 0 };
     static unsigned char result2[1000] = { 0 };
 
+    static unsigned char jsrfunc_orig[6];
+    static unsigned char jsrfunc_swapped[6];
+
     unsigned int baudindex;
 
     printf("\n\nTest CIA SDR:\n");
 
     execute_command[3] = drvaddress_start & 0xFFu;
     execute_command[4] = (drvaddress_start >> 8) & 0xFFu;
+
+    if (drive_functions->cia_sdr_icr_jsr_swap_address) {
+        unsigned int offset = drive_functions->cia_sdr_icr_jsr_swap_address - drive_functions->cia_sdr_icr_contaddress + drive_functions->cia_sdr_icr_startaddress_len;
+        memcpy(jsrfunc_orig, &drive_functions->cia_sdr_icr[offset], 6);
+        jsrfunc_swapped[0] = jsrfunc_orig[0];
+        jsrfunc_swapped[1] = jsrfunc_orig[4];
+        jsrfunc_swapped[2] = jsrfunc_orig[5];
+        jsrfunc_swapped[3] = jsrfunc_orig[3];
+        jsrfunc_swapped[4] = jsrfunc_orig[1];
+        jsrfunc_swapped[5] = jsrfunc_orig[2];
+
+        memdump("orig jsrfunc", jsrfunc_orig, 6, drive_functions->cia_sdr_icr_jsr_swap_address);
+        memdump("mod. jsrfunc", jsrfunc_swapped, 6, drive_functions->cia_sdr_icr_jsr_swap_address);
+        printf("\n");
+    }
 
     // initial upload of the program
     cbm_upload(
@@ -173,14 +202,28 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
 
         cbm_upload(fd, drv, drvaddress_baudrate, baudrate, sizeof baudrate);
 
-        cbm_exec_command(fd, drv, execute_command, 5);
+        if (drive_functions->cia_sdr_icr_jsr_swap_address) {
+            cbm_upload(fd, drv, drive_functions->cia_sdr_icr_jsr_swap_address, jsrfunc_swapped, sizeof jsrfunc_swapped);
+            cbm_exec_command(fd, drv, execute_command, 5);
+        }
 
         // now, get the results from the drive
         cbm_download(fd, drv, drive_functions->cia_sdr_result_address,  result,  drive_functions->cia_sdr_tottest);
-        cbm_download(fd, drv, drive_functions->cia_sdr_result2_address, result2, drive_functions->cia_sdr_tottest);
 
+        mod_and(result, drive_functions->cia_sdr_tottest, 0xef);
         memdump("result",  result,  drive_functions->cia_sdr_tottest, 0);
-        memdump("result2", result2, drive_functions->cia_sdr_tottest, 0);
+
+        if (drive_functions->cia_sdr_icr_jsr_swap_address) {
+            cbm_upload(fd, drv, drive_functions->cia_sdr_icr_jsr_swap_address, jsrfunc_orig, sizeof jsrfunc_orig);
+            cbm_exec_command(fd, drv, execute_command, 5);
+        }
+
+        if (drive_functions->cia_sdr_result2_address) {
+            cbm_download(fd, drv, drive_functions->cia_sdr_result2_address, result2, drive_functions->cia_sdr_tottest);
+            mod_and(result2, drive_functions->cia_sdr_tottest, 0xef);
+            memdump("result2", result2, drive_functions->cia_sdr_tottest, 0);
+        }
+
     }
 }
 

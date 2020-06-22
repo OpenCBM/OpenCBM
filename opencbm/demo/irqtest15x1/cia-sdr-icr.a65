@@ -5,7 +5,7 @@
 	.export Start
 
 .if DRIVE=1571
-tottests = 457
+tottests = 768 - 1; 457
 .else
 tottests = 1000 - 1
 .endif
@@ -154,9 +154,16 @@ endsr2
 
 ;------------------------------------------------------------------------------
 
+	*= $0500
+
 results
 		.res tottests
+.if DRIVE=1571
+results2 = results
+.else
+	*= $0900
 results2
 		.res tottests
+.endif
 
 dummy	.res 0
