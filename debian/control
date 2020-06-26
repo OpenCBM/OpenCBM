@@ -35,6 +35,29 @@ Provides: opencbm-plugin
 Description: Commodore serial IEC bus utilities
  This package contains the XUM1541 (a.k.a. ZoomFloppy) plugin.
 
+Package: nibtools
+Architecture: any
+Depends: ${shlibs:Depends}, debconf (>= 0.5.00), libusb-1.0-0, opencbm, opencbm-plugin
+Description: Commodore serial IEC bus utilities
+ NIBTOOLS is a disk transfer program designed for copying original disks
+ and converting into the G64 and D64 disk image formats. These disk images
+ may be used on C64 emulators like VICE or CCS64 [2,3] and can be transferred
+ back to real disks.
+ .
+ Requirements:
+ - Commodore Disk Drive model 1541, 1541-II or 1571, modified to support the parallel XP1541 or XP1571 interface
+ - XP1541 or XP1571 cable
+ *AND*
+ XE1541, XA1541, or XM1541 cable
+ .
+ *OR*
+ .
+ XEP1541, XAP1541, or XMP1541 combination cable
+ .
+ *OR*
+ .
+ XUM1541 (ZoomFloppy) with OpenCBM 0.5+
+
 Package: libopencbm0-dev
 Section: devel
 Architecture: any

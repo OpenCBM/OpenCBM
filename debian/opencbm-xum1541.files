@@ -1,2 +1,3 @@
+usr/bin/xum1541cfg
 usr/lib/opencbm/plugin/libopencbm-xum1541*
 lib/udev/rules.d/45-opencbm-xum1541.rules

@@ -1,3 +1,15 @@
+opencbm (0.4.99.102.git.1593016058.07635d9e) unstable; urgency=low
+
+  * Compile latest version.
+
+ -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Wed, 24 Jun 2020 20:51:00 +0200
+
+opencbm (0.4.99.101) unstable; urgency=low
+
+  * Compile latest version.
+
+ -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Mon, 15 Jun 2020 21:40:00 +0200
+
 opencbm (0.4.99.99a) unstable; urgency=low
 
   * Compile latest version.

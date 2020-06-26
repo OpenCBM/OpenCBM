@@ -1,4 +1,16 @@
-usr/bin/*
+usr/bin/cbmcopy
+usr/bin/cbmctrl
+usr/bin/cbmformat
+usr/bin/cbmforng
+usr/bin/cbmlinetester
+usr/bin/cbmread
+usr/bin/cbmrpm41
+usr/bin/cbmwrite
+usr/bin/d64copy
+usr/bin/d82copy
+usr/bin/frm_analyzer
+usr/bin/imgcopy
+usr/bin/opencbm_plugin_helper_tools
 etc/devfs/*/opencbm
 etc/modutils/opencbm
 usr/lib/opencbm/install_plugin.sh
