@@ -14,7 +14,7 @@ setlocal enabledelayedexpansion
 
 set OC_SOURCE_PATH=%~dp0
 
-set OC_VERSION=0.4.99.101
+set OC_VERSION=0.4.99.102
 set OC_INSTALLED_SIZE_IN_KB_AMD64=1500
 set OC_INSTALLED_SIZE_IN_KB_I386=2000
 
@@ -83,7 +83,7 @@ if "%version2%" == "5.1" (
 	set OC_INSTALL_WIN=XP
 	set OC_IS_XP_OR_OLDER=1
 )
-if "%version2%" == "5.0" (
+if "%version2%" == "5.00" (
 	rem echo Windows 2000
 	set OC_INSTALL_WIN=2000
 	set OC_IS_XP_OR_OLDER=1
@@ -117,6 +117,8 @@ for /d %%p in (%*) do (
 		set OC_VARIANT=!OC_VARIANT! xa1541
 		set OC_INSTALL_DRIVER_XA1541=1
 	) else if [%%~p] == [--xp] (
+		set OC_IS_XP_OR_OLDER=1
+	) else if [%%~p] == [--admin] (
 		set OC_IS_XP_OR_OLDER=1
 	) else if [%%~p] == [--internal_call_elevated] (
 		set OC_INSTALL_ELEVATED=1
