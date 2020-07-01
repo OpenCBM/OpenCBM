@@ -547,11 +547,27 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
     }
 
     do {
-        // Select first and only device configuration.
-        ret = usb.set_configuration(HandleXum1541->devh, 1);
-        if (ret != LIBUSB_SUCCESS) {
-            fprintf(stderr, "USB error: %s\n", usb.error_name(ret));
-            break;
+        // Check if device is already configured.
+#if HAVE_LIBUSB0
+        char config = 0;
+
+        // libusb0 has no get_configuration() api call, so try to get the
+        // active configuration directly from the device via control message
+        usb.control_msg(HandleXum1541->devh, USB_TYPE_STANDARD | USB_ENDPOINT_IN,
+            USB_REQ_GET_CONFIGURATION, 0, 0, &config, sizeof(config), USB_TIMEOUT);
+#elif HAVE_LIBUSB1
+        int config = 0;
+
+        usb.get_configuration(HandleXum1541->devh, &config);
+#endif
+
+        if (config != 1) {
+            // Select first and only device configuration.
+            ret = usb.set_configuration(HandleXum1541->devh, 1);
+            if (ret != LIBUSB_SUCCESS) {
+                fprintf(stderr, "USB error: %s\n", usb.error_name(ret));
+                break;
+            }
         }
 
         /*
@@ -563,12 +579,6 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
             break;
         }
 
-        // Set interface to make sure data toggles are reset
-#if HAVE_LIBUSB0
-        ret = usb.set_altinterface(HandleXum1541->devh, 0);
-#elif HAVE_LIBUSB1
-        ret = usb.set_interface_alt_setting(HandleXum1541->devh, 0, 0);
-#endif
         if (ret != LIBUSB_SUCCESS) {
             fprintf(stderr, "USB error: %s\n", usb.error_name(ret));
             break;

@@ -39,6 +39,7 @@ usb_dll_t usb = {
     .bulk_transfer = libusb_bulk_transfer,
     .control_transfer = libusb_control_transfer,
     .set_configuration = libusb_set_configuration,
+    .get_configuration = libusb_get_configuration,
     .claim_interface = libusb_claim_interface,
     .release_interface = libusb_release_interface,
     .set_interface_alt_setting = libusb_set_interface_alt_setting,

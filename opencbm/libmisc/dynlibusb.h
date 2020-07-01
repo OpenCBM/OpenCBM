@@ -52,6 +52,7 @@ struct usb_dll_s {
     int (LIBUSB_APIDECL *control_transfer)(libusb_device_handle *dev_handle, uint8_t request_type, uint8_t bRequest, uint16_t wValue, uint16_t wIndex, unsigned char *data, uint16_t wLength, unsigned int timeout);
 
     int (LIBUSB_APIDECL *set_configuration)(libusb_device_handle *dev, int configuration);
+    int (LIBUSB_APIDECL *get_configuration)(libusb_device_handle *dev, int *configuration);
     int (LIBUSB_APIDECL *claim_interface)(libusb_device_handle *dev, int interface);
     int (LIBUSB_APIDECL *release_interface)(libusb_device_handle *dev, int interface);
     int (LIBUSB_APIDECL *set_interface_alt_setting)(libusb_device_handle *dev, int interface, int alternate);
