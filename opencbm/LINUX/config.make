@@ -110,6 +110,19 @@ ifneq ($(strip $(KERNEL_SOURCE)),)
   KERNEL_INCLUDE_CONFIG = ${shell for c in ${KERNEL_SOURCE}/include/linux/autoconf.h ${KERNEL_SOURCE}/include/linux/config.h; do test -f $$c && echo $$c; done | head -n 1}
 endif
 
+#
+# kernel driver compile flags.
+#
+# add `-DDIRECT_PORT_ACCESS' to avoid usage of the generic parport module
+#   (pre-0.3.0 behaviour, definitely needed for kernel 2.0.x)
+#
+# add `-DOLD_C4L_CABLE' if you want to use your old (cbm4linux <= 0.2.0)
+#   XE1541-like cable. Don't to it. Upgrade to XM1541 instead.
+#
+#KERNEL_FLAGS = -DDIRECT_PORT_ACCESS
+KERNEL_FLAGS = "${KERNEL_DEFINE}"
+endif
+
 HAVE_LIBUSB0 = ${shell pkg-config libusb && echo 1} 
 HAVE_LIBUSB1 = ${shell pkg-config libusb-1.0 && echo 1} 
 
@@ -125,19 +138,6 @@ ifneq ($(strip $(HAVE_LIBUSB1)),)
   LIBUSB_CFLAGS=-DHAVE_LIBUSB=1 -DHAVE_LIBUSB1=1 -DHAVE_LIBUSB_1_0=1 $(shell pkg-config --cflags libusb-1.0)
   LIBUSB_LDFLAGS=
   LIBUSB_LIBS=$(shell pkg-config --libs libusb-1.0)
-endif
-
-#
-# kernel driver compile flags.
-#
-# add `-DDIRECT_PORT_ACCESS' to avoid usage of the generic parport module
-#   (pre-0.3.0 behaviour, definitely needed for kernel 2.0.x)
-#
-# add `-DOLD_C4L_CABLE' if you want to use your old (cbm4linux <= 0.2.0)
-#   XE1541-like cable. Don't to it. Upgrade to XM1541 instead.
-#
-#KERNEL_FLAGS = -DDIRECT_PORT_ACCESS
-KERNEL_FLAGS = "${KERNEL_DEFINE}"
 endif
 
 #
