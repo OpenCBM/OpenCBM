@@ -22,8 +22,12 @@ libusb_device_handle *handle = NULL;
 
 // Linux: newer usb.h does not have USB_LE16_TO_CPU() macro anymore
 #ifndef USB_LE16_TO_CPU
+#if defined(__linux__) || defined(__FreeBSD__)
 #ifdef __linux__
 #include <endian.h>
+#else
+#include <sys/endian.h>
+#endif
 #define USB_LE16_TO_CPU(x) x=le16toh(x);
 #elif defined(__APPLE__)
 #include <libkern/OSByteOrder.h>
