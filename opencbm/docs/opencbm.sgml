@@ -67,8 +67,8 @@ id="cable" name="cable">.
 opencbm has a plugin concept which allows to additionally add custom build
 cables.
 
-opencbm can be used on PCs on Linux and Windows (all cables). Additioanlly, USB
-based cables are supported on FreeBSD and on Mac OS X.
+opencbm can be used on PCs on Linux, Windows and FreeBSD (all cables).
+Additioanlly, USB based cables are supported on Mac OS X.
 
 <sect1>Introduction to opencbm<label id="introduction">
 
@@ -128,9 +128,9 @@ damage or data loss caused by it or by any use of it.
       support libusb-1.0 should be supported. Linux, FreeBSD and Mac OS X
       have been explicitly tested.
 <item>For parallel port based cables:
-      Linux 3.x and 2.6 variants. 2.0, 2.2 and 2.4 might still work, but have
-      not been tested for ages. For Linux, i386 and AMD64 architectures are
-      supported.
+      Linux 3.x and 2.6 variants, FreeBSD 11.x and newer. Linux 2.0, 2.2 and
+      2.4 might still work, but have not been tested for ages. For Linux,
+      i386 and AMD64 architectures are supported.
 <item>For parallel port based as well as USB based cables:
       Windows NT 4.0, 2000, XP and Server 2003, Vista, 7 and 8. For USB based
       cables, NT 4.0 is not supported, though.
@@ -692,14 +692,15 @@ package. For Debian based systems, it is enough to install the package
 <sect3>XA1541 cable or XM1541 cable
 
 <p>
-The XA1541 cable and the XM1541 cable need a kernel module (cbm.o) which acts
-as a driver for the parallel port based cables.
+The XA1541 cable and the XM1541 cable need a kernel module (cbm.o on Linux,
+opencbm.ko on FreeBSD) which acts as a driver for the parallel port based
+cables.
 
 <p>
-The kernel module (cbm.o) does not require any kernel patches and should
-compile right out of the box, at least with kernel 3.x and 2.6.x, but 2.0.x,
-2.2.x and 2.4.x might still work as well. They have not been tested in ages,
-though, thus, you are on your own.
+The kernel module on Linux (cbm.o) does not require any kernel patches and
+should compile right out of the box, at least with kernel 3.x and 2.6.x, but
+2.0.x, 2.2.x and 2.4.x might still work as well. They have not been tested in
+ages, though, thus, you are on your own.
 
 <p>
 In order to compile the kernel module, you will need the headers that
@@ -707,6 +708,14 @@ correspond to your current running kernel. For debian-based systems, you can
 accomplish this by running <it/aptitude install linux-headers-`uname -r`/ as
 root.
 
+<p>
+The kernel module on FreeBSD (opencbm.ko) should compile out of the box as
+well; to compile it, you will need to have the FreeBSD source installed in
+/usr/src. This can be selected in the FreeBSD installer. For FreeBSD, it is
+recommended to build from the official ports found in comms/opencbm,
+comms/opencbm-kmod and comms/opencbm-plugin-xa1541 instead. If you prefer
+not to use these ports, note that for FreeBSD, you will still have to use
+the LINUX/Makefile, see below.
 
 <sect3>Any cable type
 <p>
@@ -765,7 +774,7 @@ This will  install  all  necessary  stuff  to  /usr/local/...  (can be
 changed in `opencbm/LINUX/config.make')
 </itemize>
 
-<sect2>Loading the module (XA1541/XM1541 only)
+<sect2>Loading the Linux module (XA1541/XM1541 only)
 
 <p>
 <bf/This is only needed if you are using the XA1541 or XM1541 cables. Otherwise, skip this section/
