@@ -18,7 +18,7 @@ OpenCBM can be used on PCs on Linux and Windows (all cables). Additioanlly, USB 
 OpenCBM supports the following operating systems:
 
 * For USB based cables: Any Linux, FreeBSD or MacOS X variant that support libusb-0.1 should be supported. Linux, FreeBSD and Mac OS X have been explicitly tested.
-* For parallel port based cables: Linux 3.x and 2.6 variants. 2.0, 2.2 and 2.4 might still work, but have not been tested for ages. For Linux, i386 and AMD64 architectures are supported.
+* For parallel port based cables: Linux 3.x and 2.6 variants, FreeBSD 11.x and newer. Linux 2.0, 2.2 and 2.4 might still work, but have not been tested for ages. For Linux, i386 and AMD64 architectures are supported.
 * For parallel port based as well as USB based cables: Windows NT 4.0, 2000, XP and Server 2003, Vista, 7 and 8. For USB based cables, NT 4.0 is not supported, though. The i386 architecture a.k.a "x86" ("32 bit") is fully supported; additionally, 64 bit Windows ("x64", "x86_64") versions are supported. Itanium-based Windows ("iA64") are not supported, though.
 
 ##  Supported CBM hardware
