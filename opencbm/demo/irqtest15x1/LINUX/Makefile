@@ -13,28 +13,7 @@ INC= \
 	irqdelay-1581.inc \
 	irqdelay-1581-oneshot.inc \
 	cia-sdr-icr-1571.inc \
-	cia-sdr-icr-1581.inc \
-	dumps/dump1-4.ibin \
-	dumps/dump1-50.ibin \
-	dumps/dump1-51.ibin \
-	dumps/dump1-5.ibin \
-	dumps/dump1-64.ibin \
-	dumps/dump1-6.ibin \
-	dumps/dump1-7.ibin \
-	dumps/dump1-8.ibin \
-	dumps/dump2-4485-50.ibin \
-	dumps/dump2-4485-51.ibin \
-	dumps/dump2-4485-64.ibin \
-	dumps/dump2-4485-7.ibin \
-	dumps/dump2-4485-8.ibin \
-	dumps/dump2-4.ibin \
-	dumps/dump2-50.ibin \
-	dumps/dump2-51.ibin \
-	dumps/dump2-5.ibin \
-	dumps/dump2-64.ibin \
-	dumps/dump2-6.ibin \
-	dumps/dump2-7.ibin \
-	dumps/dump2-8.ibin
+	cia-sdr-icr-1581.inc
 
 all: $(PROGS)
 
