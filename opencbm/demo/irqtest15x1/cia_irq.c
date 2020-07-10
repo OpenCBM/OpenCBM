@@ -258,9 +258,11 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
 #endif
 
     if (drive_functions->cia_sdr_icr_jsr_swap_offset) {
+        unsigned int offset;
+
         jsr_swap_address = drive_functions->cia_sdr_icr[drive_functions->cia_sdr_icr_jsr_swap_offset] + (drive_functions->cia_sdr_icr[drive_functions->cia_sdr_icr_jsr_swap_offset + 1] << 8);
 
-        unsigned int offset = jsr_swap_address - drive_functions->cia_sdr_icr_startaddress;
+        offset = jsr_swap_address - drive_functions->cia_sdr_icr_startaddress;
         memcpy(jsrfunc_orig, &drive_functions->cia_sdr_icr[offset], 6);
         jsrfunc_swapped[0] = jsrfunc_orig[0];
         jsrfunc_swapped[1] = jsrfunc_orig[4];
