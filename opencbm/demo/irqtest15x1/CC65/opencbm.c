@@ -2,42 +2,41 @@
 
 #include <cbm.h>
 
-int  cbm_driver_open_ex(CBM_FILE *f, char * adapter)
+int cbm_driver_open_ex(CBM_FILE *, char * adapter)
 {
-  *f = 1;
   *adapter;
   return 0;
 }
 
-void cbm_driver_close(CBM_FILE f)
+void cbm_driver_close(CBM_FILE)
 {
-  f = f;
 }
 
-static void cbm_listen(unsigned char dev, unsigned char secondary)
+int cbm_listen(CBM_FILE, unsigned char dev, unsigned char secondary)
 {
   cbm_k_listen(dev | 0x20);
   cbm_k_second(secondary | 0x60);
+  return 0;
 }
 
-static void cbm_unlisten()
+void cbm_unlisten(CBM_FILE)
 {
   cbm_k_unlsn();
 }
 
-static int cbm_talk(unsigned char dev, unsigned char secondary)
+int cbm_talk(CBM_FILE, unsigned char dev, unsigned char secondary)
 {
   cbm_k_talk(dev | 0x40);
   cbm_k_tksa(secondary | 0x60);
   return 0;
 }
 
-static void cbm_untalk()
+void cbm_untalk(CBM_FILE, )
 {
   cbm_k_untlk();
 }
 
-static int cbm_raw_write(unsigned char *buffer, size_t len)
+int cbm_raw_write(CBM_FILE, unsigned char *buffer, size_t len)
 {
   unsigned int i;
 
@@ -48,29 +47,36 @@ static int cbm_raw_write(unsigned char *buffer, size_t len)
   return i;
 }
 
-static int cbm_raw_read(unsigned char *buffer, size_t len)
+int cbm_raw_read(CBM_FILE, unsigned char *buffer, size_t len)
 {
   unsigned int i;
 
   for (i = 0; i < len; i++) {
     *buffer++ = cbm_k_acptr();
-    if (cbm_k_readst() & 0x40) break;
+    if (cbm_k_readst() & 0x40) {
+#if 0
+      if (i < len) {
+        *buffer++ = cbm_k_acptr();
+        i++;
+      }
+#endif
+      break;
+    }
   }
 
   return i;
 }
 
 
-int  cbm_exec_command(CBM_FILE f, unsigned char dev, unsigned char *cmd, size_t len)
+int  cbm_exec_command(CBM_FILE, unsigned char dev, unsigned char *cmd, size_t len)
 {
-  f=f;
-  cbm_listen(dev, 15);
+  cbm_listen(0, dev, 15);
 
   if (len == 0) len = strlen(cmd);
 
-  cbm_raw_write(cmd, len);
+  cbm_raw_write(0, cmd, len);
 
-  cbm_unlisten();
+  cbm_unlisten(0);
   return 0;
 }
 
@@ -146,13 +152,13 @@ int cbm_upload(CBM_FILE c, unsigned char DeviceAddress,
 {
     unsigned char *bufferToProgram = Program;
 
-    unsigned char command[] = { 'M', '-', 'W', ' ', ' ', ' ' };
+    unsigned char command[] = { 'm', '-', 'w', ' ', ' ', ' ' };
     size_t i;
     int rv = 0;
 
     for(i = 0; i < Size; i += c)
     {
-        cbm_listen(DeviceAddress, 15);
+        cbm_listen(0, DeviceAddress, 15);
 
         // Calculate how many bytes are left
 
@@ -173,7 +179,7 @@ int cbm_upload(CBM_FILE c, unsigned char DeviceAddress,
 
         // Write the M-W command to the drive...
 
-        if ( cbm_raw_write(command, sizeof(command)) != sizeof command) {
+        if ( cbm_raw_write(0, command, sizeof(command)) != sizeof command) {
             rv = -1;
             break;
         }
@@ -181,7 +187,7 @@ int cbm_upload(CBM_FILE c, unsigned char DeviceAddress,
 
         // ... as well as the (up to MAX_BYTE_UPLOAD) data bytes
 
-        if ( cbm_raw_write(bufferToProgram, c) != c ) {
+        if ( cbm_raw_write(0, bufferToProgram, c) != c ) {
             rv = -1;
             break;
         }
@@ -189,7 +195,7 @@ int cbm_upload(CBM_FILE c, unsigned char DeviceAddress,
         // The UNLISTEN is the signal for the drive
         // to start execution of the command
 
-        cbm_unlisten();
+        cbm_unlisten(0);
 
         // Now, advance the pointer into drive memory
         // as well to the program in PC's memory in case we
@@ -242,7 +248,7 @@ enum { TRANSFER_SIZE_DOWNLOAD = 0x100u };
 
 int cbm_download(CBM_FILE HandleDevice, unsigned char DeviceAddress, int DriveMemAddress, void * Buffer, size_t Size)
 {
-    unsigned char command[] = { 'M', '-', 'R', ' ', ' ', '\0', '\r' };
+    unsigned char command[] = { 'm', '-', 'r', ' ', ' ', '\0', '\r' };
     unsigned char *StoreBuffer = Buffer;
 
     size_t i;
@@ -252,8 +258,6 @@ int cbm_download(CBM_FILE HandleDevice, unsigned char DeviceAddress, int DriveMe
 
     for(i = 0; i < Size; i += c)
     {
-        char dummy;
-
         // Calculate how much bytes are left
         c = Size - i;
 
@@ -284,18 +288,16 @@ int cbm_download(CBM_FILE HandleDevice, unsigned char DeviceAddress, int DriveMe
             break;
         }
 
-
-        cbm_talk(DeviceAddress, 15);
+        cbm_talk(0, DeviceAddress, 15);
 
         // now read the (up to 256) data bytes
         // and advance the return value of send bytes, too.
-        readbytes = cbm_raw_read(StoreBuffer, c);
+        readbytes = cbm_raw_read(0, StoreBuffer, c);
 
         if (readbytes != c) {
             rv = -1;
             break;
         }
-
         // Now, advance the pointer into drive memory
         // as well to the program in PC's memory in case we
         // might need to use it again for another M-W command
@@ -304,45 +306,51 @@ int cbm_download(CBM_FILE HandleDevice, unsigned char DeviceAddress, int DriveMe
 
         rv              += readbytes;
 
+#if 0
+        {
+        char dummy;
+
         // skip the trailing CR
-        if ( cbm_raw_read(&dummy, 1) != 1 ) {
+        if ( cbm_raw_read(0, &dummy, 1) != 1 ) {
             rv = -1;
             break;
         }
+        }
+#endif
 
         // The UNTALK is the signal for end of transmission
-        cbm_untalk();
+        cbm_untalk(0);
     }
 
     return rv;
 }
 
-int cbm_identify(CBM_FILE rv, unsigned char DeviceAddress, enum cbm_device_type_e *CbmDeviceType, const char **CbmDeviceString)
+int cbm_identify(CBM_FILE, unsigned char DeviceAddress, enum cbm_device_type_e *CbmDeviceType, const char **CbmDeviceString)
 {
     enum cbm_device_type_e deviceType = cbm_dt_unknown;
     unsigned short magic;
     unsigned char buf[3];
-    char command[] = { 'M', '-', 'R', (char) 0x40, (char) 0xff, (char) 0x02 };
+    char command[] = { 'm', '-', 'r', (char) 0x40, (char) 0xff, (char) 0x02 };
     static char unknownDevice[] = "*unknown*";
     char *deviceString = unknownDevice;
-    rv = -1;
+    int rv = -1;
 
     /* get footprint from 0xFF40 */
-    if (cbm_exec_command(1, DeviceAddress, command, sizeof(command)) == 0
-        && cbm_talk(DeviceAddress, 15) == 0)
+    if (cbm_exec_command(0, DeviceAddress, command, sizeof(command)) == 0
+        && cbm_talk(0, DeviceAddress, 15) == 0)
     {
-        if (cbm_raw_read(buf, 3) == 3)
+        if (cbm_raw_read(0, buf, 3) == 2)
         {
             magic = buf[0] | (buf[1] << 8);
 
             if(magic == 0xaaaa)
             {
-                cbm_untalk();
+                cbm_untalk(0);
                 command[3] = (char) 0xFE; /* get footprint from 0xFFFE, IRQ vector */
-                if (cbm_exec_command(1, DeviceAddress, command, sizeof(command)) == 0
-                    && cbm_talk(DeviceAddress, 15) == 0)
+                if (cbm_exec_command(0, DeviceAddress, command, sizeof(command)) == 0
+                    && cbm_talk(0, DeviceAddress, 15) == 0)
                 {
-                    if (cbm_raw_read(buf, 3) == 3
+                    if (cbm_raw_read(0, buf, 3) == 2
                         && ( buf[0] != 0x67 || buf[1] != 0xFE ) )
                     {
                         magic = buf[0] | (buf[1] << 8);
@@ -353,6 +361,51 @@ int cbm_identify(CBM_FILE rv, unsigned char DeviceAddress, enum cbm_device_type_
             switch(magic)
             {
                 default:
+                    break;
+
+                case 0xfeb6:
+                    deviceType = cbm_dt_cbm2031;
+                    deviceString = "2031";
+                    break;
+
+                case 0xaaaa:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "1540 or 1541";
+                    break;
+
+                case 0xf00f:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "1541-II";
+                    break;
+
+                case 0xcd18:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "1541C";
+                    break;
+
+                case 0x10ca:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "DolphinDOS 1541";
+                    break;
+
+                case 0x6f10:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "SpeedDOS 1541";
+                    break;
+
+                case 0x2710:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "ProfessionalDOS 1541";
+                    break;
+
+                case 0x8085:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "JiffyDOS 1541";
+                    break;
+
+                case 0xaeea:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "64'er DOS 1541";
                     break;
 
                 case 0xfed7:
@@ -372,7 +425,7 @@ int cbm_identify(CBM_FILE rv, unsigned char DeviceAddress, enum cbm_device_type_
             }
             rv = 0;
         }
-        cbm_untalk();
+        cbm_untalk(0);
     }
 
     if(CbmDeviceType)

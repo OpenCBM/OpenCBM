@@ -7,6 +7,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __C128__
+#include <c128.h>
+#endif
+
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(_x) ( sizeof (_x) / sizeof ((_x)[0]) )
 #endif
@@ -172,7 +176,11 @@ void set_1581()
     current_drive = 1;
 }
 
+#ifdef __C64__
+#define DUMP_BYTE_PER_ROW 8
+#else
 #define DUMP_BYTE_PER_ROW 16
+#endif
 
 void memdump(const char * text, const unsigned char * buffer, unsigned int bufferlen, unsigned int offset)
 {
@@ -232,7 +240,11 @@ unsigned int check_result(const unsigned char * buffer_in, unsigned int len, uns
 
 void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *drive_functions)
 {
+#if defined(__CBM__)
+    char execute_command[] = "m-e  ";
+#else
     char execute_command[] = "M-E  ";
+#endif
     const unsigned int drvaddress_baudrate = drive_functions->cia_sdr_icr_startaddress;
     const unsigned int drvaddress_start    = drvaddress_baudrate + 3;
 
@@ -386,6 +398,10 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 {
     unsigned char drv = argc > 1 ? arch_atoc(argv[1]) : 8;
     CBM_FILE fd;
+
+#ifdef __C128__
+    videomode(5);
+#endif
 
     if(cbm_driver_open_ex(&fd, NULL) == 0)
     {

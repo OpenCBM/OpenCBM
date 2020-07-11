@@ -1,11 +1,15 @@
 PROG=cia_irq_c128.prg cia_irq_c64.prg
+PROG2=test_c64.prg test_c128.prg
+
 SRC=cia_irq.c CC65/opencbm.c
+SRC2=CC65/test.c CC65/opencbm.c
 ASM_SRC=cia-sdr-icr-1571.a65 cia-sdr-icr-1581.a65 irqdelay-1571.a65 irqdelay-1581.a65 irqdelay-1571-oneshot.a65 irqdelay-1581-oneshot.a65
 
 ASM_OBJ=$(patsubst %.a65,%.o65,$(ASM_SRC))
 ASM_INC=$(patsubst %.a65,%.inc,$(ASM_SRC))
 ASM_LST=$(patsubst %.a65,%.l65,$(ASM_SRC))
 C_OBJ=$(patsubst %.c,%.o,$(SRC))
+C2_OBJ=$(patsubst %.c,%.o,$(SRC2))
 
 CC=cl65
 CL65=cl65
@@ -21,11 +25,13 @@ OD_FLAGS    = -w8 -txC -v -An
 
 all: $(PROG)
 
-test:
-	@echo ASM_OBJ=$(ASM_OBJ)
-	@echo ASM_LST=$(ASM_LST)
-	@echo ASM_INC=$(ASM_LST)
-	@echo C_OBJ=$(C_OBJ)
+test: $(PROG2)
+
+test_c64.prg: $(SRC2)
+	$(CL65) $(CFLAGS) -t c64 -o $@ $(SRC2)
+
+test_c128.prg: $(SRC2)
+	$(CL65) $(CFLAGS) -t c128 -o $@ $(SRC2)
 
 .a65.o65:
 	@echo Building $@
@@ -38,10 +44,10 @@ test:
 	sed 's/\([0-9a-f]\{2\}\) */0x\1,/g; $$s/,$$//' > $@
 
 clean:
-	rm -f -- $(C_OBJ) $(ASM_INC) $(ASM_OBJ) $(ASM_LST)
+	rm -f -- $(C_OBJ) $(C2_OBJ) $(ASM_INC) $(ASM_OBJ) $(ASM_LST)
 
 mrproper: clean
-	rm -f -- *~ */*~ $(PROG)
+	rm -f -- *~ */*~ $(PROG) $(PROG2)
 
 
 # dependencies:
