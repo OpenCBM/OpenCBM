@@ -16,8 +16,8 @@ void cbm_driver_close(CBM_FILE f)
 
 static void cbm_listen(unsigned char dev, unsigned char secondary)
 {
-  cbm_k_listen(dev);
-  cbm_k_second(secondary | 0x20);
+  cbm_k_listen(dev | 0x20);
+  cbm_k_second(secondary | 0x60);
 }
 
 static void cbm_unlisten()
@@ -27,8 +27,8 @@ static void cbm_unlisten()
 
 static int cbm_talk(unsigned char dev, unsigned char secondary)
 {
-  cbm_k_talk(dev);
-  cbm_k_tksa(secondary | 0x40);
+  cbm_k_talk(dev | 0x40);
+  cbm_k_tksa(secondary | 0x60);
   return 0;
 }
 
