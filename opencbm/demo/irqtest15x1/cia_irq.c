@@ -56,7 +56,7 @@ enum {
     INDEX_LAST
 };
 
-static unsigned int test_baudrates[] = { /* 0 */ 1, 1, 3, 4, 19, 39 };
+static unsigned int test_baudrates[] = { 0, 1, 3, 4, 19, 39 };
 
 static struct dump_s {
     unsigned int const   count;
@@ -288,6 +288,15 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
     unsigned int jsr_swap_address = 0;
 
     printf("\n\nTest CIA SDR:\n");
+
+    if (current_drive == 0) {
+        // 1570/1571, put into 1541 mode
+#if defined(__CBM__)
+        cbm_exec_command(fd, drv, "u0>m1", 0);
+#else
+        cbm_exec_command(fd, drv, "U0>M1", 0);
+#endif
+    }
 
     create_all_compare_dumps();
 
