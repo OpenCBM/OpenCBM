@@ -363,6 +363,7 @@ int cbm_identify(CBM_FILE, unsigned char DeviceAddress, enum cbm_device_type_e *
                 default:
                     break;
 
+#if 0
                 case 0xfeb6:
                     deviceType = cbm_dt_cbm2031;
                     deviceString = "2031";
@@ -407,6 +408,7 @@ int cbm_identify(CBM_FILE, unsigned char DeviceAddress, enum cbm_device_type_e *
                     deviceType = cbm_dt_cbm1541;
                     deviceString = "64'er DOS 1541";
                     break;
+#endif
 
                 case 0xfed7:
                     deviceType = cbm_dt_cbm1570;

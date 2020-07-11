@@ -13,7 +13,7 @@ clockslide:
 .if DRIVE=1571
 
 results2 = results
-samples = 512
+samples = 768
 
 .else
 
@@ -27,19 +27,19 @@ baudrate .byte 0
 
 ;------------------------------------------------------------------------------
 
-    sei
+	sei
 
-	 lda #$c9
-	 ldx #0
-	 sta clockslide,x
-	 inx
-	 bne *-4
-	 lda #$c5
-	 ldx #$ea
-	 ldy #$60
-	 sta clockslide+254
-	 stx clockslide+255
-	 sty clockslide+256
+	lda #$c9
+	ldx #0
+	sta clockslide,x
+	inx
+	bne *-4
+	lda #$c5
+	ldx #$ea
+	ldy #$60
+	sta clockslide+254
+	stx clockslide+255
+	sty clockslide+256
 
 	lda baudrate
 	sta baud
@@ -51,48 +51,91 @@ baudrate .byte 0
 	lda #$00
 	sta delay256+1
 	lda #255
-    sta delay+1
-    lda #<results
-    sta storeresult1+1
-    lda #>results
-    sta storeresult1+2
-    lda #<results2
-    sta storeresult2+1
-    lda #>results2
-    sta storeresult2+2
+	sta delay+1
+	lda #<results
+	sta storeresult1+1
+	lda #>results
+	sta storeresult1+2
+	lda #<results2
+	sta storeresult2+1
+	lda #>results2
+	sta storeresult2+2
+	lda #<(samples+1)
+	sta samplecount
+	lda #>(samples+1)
+	sta samplecount+1
 
-    lda CIA_BASE + CIA::CRA
-    and #%10000000
-    sta CIA_BASE + CIA::CRA    ; stop TA (keep 50Hz flag)
-    lda #%00000000
-    sta CIA_BASE + CIA::CRB    ; stop TB
+	lda CIA_BASE + CIA::CRA
+	and #%10000000
+	sta CIA_BASE + CIA::CRA    ; stop TA (keep 50Hz flag)
+	lda #%00000000
+	sta CIA_BASE + CIA::CRB    ; stop TB
 baud = * + 1
-    ldx #$08
-    stx CIA_BASE + CIA::TA    ; TA low
-    lda #$00
-    sta CIA_BASE + CIA::TA + 1    ; TA hi
-    lda #%01111111
-    sta CIA_BASE + CIA::ICR    ; disable interrupts
-    jsr test
-    jmp nextloop       ; Ignore first result
+	ldx #$08
+	stx CIA_BASE + CIA::TA    ; TA low
+	lda #$00
+	sta CIA_BASE + CIA::TA + 1    ; TA hi
+	lda #%01111111
+	sta CIA_BASE + CIA::ICR    ; disable interrupts
+	jsr test
+	jmp nextloop       ; Ignore first result
 
 loop
 	jsr test
 
 jsr_swap_addr
-    jsr storeresult1
-    jsr storeresult2
+	jsr storeresult1
+	jsr storeresult2
 
 nextloop
 	ldx delay+1
-    dex
-    stx delay+1
-    cpx #$ff
-    bne loop
-    inc delay256+1
-    lda #>samples
-    cmp delay256+1
-    bcs loop
+	dex
+	stx delay+1
+	cpx #$ff
+	bne :+
+	inc delay256+1
+:	dec samplecount
+	bne loop
+	dec samplecount+1
+	bpl loop
+
+
+	; restore CIA settings so that the communication can restart
+
+	ldax #$0006
+	stax CIA_BASE + CIA::TA
+
+.if DRIVE=1581
+
+	lda #$01     ;    Timer A starten
+	sta CIA_BASE + CIA::CRA
+	lda #$11
+	sta CIA_BASE + CIA::CRB
+
+	; clear all IRQ sources
+	lda #$7f
+	sta CIA_BASE + CIA::ICR
+
+	; restore IRQ source for 1581
+	lda #$9a
+	sta CIA_BASE + CIA::ICR
+
+.else
+
+	lda #$01
+	sta CIA_BASE + CIA::CRA
+	lda #$08
+	sta CIA_BASE + CIA::CRB
+
+	; clear all IRQ sources
+	lda #$7f
+	sta CIA_BASE + CIA::ICR
+
+.endif
+
+	; clear any pending IRQ
+	bit CIA_BASE + CIA::ICR
+
 	cli
 	rts
 
@@ -102,41 +145,43 @@ nextloop
 
 test
 	ldy CIA_BASE + CIA::ICR    ; clear ICR
-    ldy #$55
-    ; setup SDR
-    lda #%01010001    ; TA started, force load, SDR output
-    sta CIA_BASE + CIA::CRA
-    sty CIA_BASE + CIA::SDR    ; send
-    ldy CIA_BASE + CIA::ICR    ; clear ICR
+	ldy #$55
+	; setup SDR
+	lda #%01010001    ; TA started, force load, SDR output
+	sta CIA_BASE + CIA::CRA
+	sty CIA_BASE + CIA::SDR    ; send
+	ldy CIA_BASE + CIA::ICR    ; clear ICR
 delay
-    jsr clockslide
+	jsr clockslide
 delay256
 	ldx #0
-    beq c1          ;2                    (  2)
-    jsr clockslide+(255-(249-14)) ;249  (251)
-    dex             ;2                    (253)
-    jmp delay256+2  ;3                  (256)
+	beq c1          ;2                    (  2)
+	jsr clockslide+(255-(249-14)) ;249  (251)
+	dex             ;2                    (253)
+	jmp delay256+2  ;3                  (256)
 c1
-    ldx CIA_BASE + CIA::ICR    ; clear ICR - lag of 14 + 5 +4
+	ldx CIA_BASE + CIA::ICR    ; clear ICR - lag of 14 + 5 +4
 
 next
-    lda CIA_BASE + CIA::CRA
-    and #%10000000
-    sta CIA_BASE + CIA::CRA    ; stop TA (keep 50Hz flag)
-    rts
+	lda CIA_BASE + CIA::CRA
+	and #%10000000
+	sta CIA_BASE + CIA::CRA    ; stop TA (keep 50Hz flag)
+	rts
 
 storeresult1
-    stx results
-    inc storeresult1+1
-    bne :+
-    inc storeresult1+2
-:   rts
+	stx results
+	inc storeresult1+1
+	bne :+
+	inc storeresult1+2
+:	rts
 
 storeresult2
-    sty results2
-    inc storeresult2+1
-    bne :+
-    inc storeresult2+2
-:   rts
+	sty results2
+	inc storeresult2+1
+	bne :+
+	inc storeresult2+2
+:	rts
+
+samplecount .word 0
 
 results = (* + $ff) & $ff00

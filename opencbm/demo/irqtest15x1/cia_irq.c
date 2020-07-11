@@ -11,6 +11,10 @@
 #include <c128.h>
 #endif
 
+#ifdef __CBM__
+#include <cbm.h>
+#endif
+
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(_x) ( sizeof (_x) / sizeof ((_x)[0]) )
 #endif
@@ -52,7 +56,7 @@ enum {
     INDEX_LAST
 };
 
-static unsigned int test_baudrates[] = { /*0*/ 1, 1, 3, 4, 19, 39 };
+static unsigned int test_baudrates[] = { /* 0 */ 1, 1, 3, 4, 19, 39 };
 
 static struct dump_s {
     unsigned int const   count;
@@ -109,8 +113,6 @@ static void create_all_compare_dumps()
     dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_39_result2;
     dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_39_result1;
     dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_39_result2;
-
-    printf("DONE\n");
 }
 
 struct drive_functions_s {
@@ -146,7 +148,7 @@ static struct drive_functions_s drive_functions[] = {
         0x1,                // where are the JSR to change between results and results2 (relative to start of first block)
         0x0500,             // results are found here
         0x0500,             // results2 are found here
-        767                 // tottests
+        768                 // tottests
     },
     {
         irqdelay_1581,
@@ -184,6 +186,7 @@ void set_1581()
 
 void memdump(const char * text, const unsigned char * buffer, unsigned int bufferlen, unsigned int offset)
 {
+#if 1
     unsigned int row, col;
     printf("DUMP of %s:", text);
 
@@ -194,6 +197,7 @@ void memdump(const char * text, const unsigned char * buffer, unsigned int buffe
         }
     }
     printf("\n");
+#endif
 }
 
 void mod_and(unsigned char * buffer, unsigned int bufferlen, unsigned char mask)
@@ -233,9 +237,34 @@ unsigned int check_result(const unsigned char * buffer_in, unsigned int len, uns
         }
     }
 
-//    match = 1;
-
     return match;
+}
+
+#ifdef __CBM__
+unsigned long cbm_k_rdtim()
+{
+    static unsigned long ret = 0;
+
+    __asm__("jsr RDTIM");
+    __asm__("sta %v", ret);
+    __asm__("stx %v + 1", ret);
+    __asm__("sty %v + 2", ret);
+
+    return ret;
+}
+#endif
+
+void wait_for_execution()
+{
+#ifdef __CBM__
+    unsigned long tim_end = cbm_k_rdtim() + 1 * 60; // 1 second
+
+    /* handle wrap-around at 'midnight' */
+    if (tim_end > 60*60*60*24) tim_end -= 60*60*60*24;
+
+    while (cbm_k_rdtim() < tim_end)
+        ;
+#endif
 }
 
 void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *drive_functions)
@@ -318,6 +347,7 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
             cbm_upload(fd, drv, jsr_swap_address, jsrfunc_swapped, sizeof jsrfunc_swapped);
         }
         cbm_exec_command(fd, drv, execute_command, 5);
+        wait_for_execution();
 
         // now, get the results from the drive
         cbm_download(fd, drv, drive_functions->cia_sdr_result_address,  result,  drive_functions->cia_sdr_tottest);
@@ -338,6 +368,7 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
         if (jsr_swap_address) {
             cbm_upload(fd, drv, jsr_swap_address, jsrfunc_orig, sizeof jsrfunc_orig);
             cbm_exec_command(fd, drv, execute_command, 5);
+            wait_for_execution();
         }
 
         if (drive_functions->cia_sdr_result2_address) {
