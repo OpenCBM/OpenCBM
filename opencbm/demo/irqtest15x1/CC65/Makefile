@@ -21,11 +21,23 @@ OD_FLAGS    = -w8 -txC -v -An
 
 .SUFFIXES: .inc .o65 .a65 .c .h .o
 
-.PHONY: all clean mrproper test
+.PHONY: all clean mrproper test checkvice checkvice64 checkvice128
 
 all: $(PROG)
 
 test: $(PROG2)
+
+checkvice: checkvice64 checkvice128
+
+checkvice64: $(PROG)
+	x64  -drive8type 1570 +warp cia_irq_c64.prg
+	x64  -drive8type 1571 +warp cia_irq_c64.prg
+	x64  -drive8type 1581 +warp cia_irq_c64.prg
+
+checkvice128: $(PROG)
+	x128 -drive8type 1570 +warp cia_irq_c128.prg
+	x128 -drive8type 1571 +warp cia_irq_c128.prg
+	x128 -drive8type 1581 +warp cia_irq_c128.prg
 
 test_c64.prg: $(SRC2)
 	$(CL65) $(CFLAGS) -t c64 -o $@ $(SRC2)
