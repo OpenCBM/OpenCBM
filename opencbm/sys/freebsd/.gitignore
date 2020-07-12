@@ -1,0 +1,9 @@
+*
+*/
+!LINUX
+!LINUX/*
+!opencbm.c
+!opencbm.4
+!Makefile
+!.gitignore
+
