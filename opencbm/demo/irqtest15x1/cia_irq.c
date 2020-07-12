@@ -79,38 +79,38 @@ static void create_all_compare_dumps()
     }
 
     index = 0;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_0_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_0_result2;
+    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_0_result1;
+    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_0_result2;
     dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_0_result1;
     dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_0_result2;
 
     index = 1;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_1_7f_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_1_7f_result2;
+    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_1_7f_result1;
+    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_1_7f_result2;
     dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_1_7f_result1;
     dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_1_7f_result2;
 
     index = 2;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_3_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_3_result2;
+    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_3_result1;
+    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_3_result2;
     dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_3_result1;
     dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_3_result2;
 
     index = 3;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_4_7f_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_4_7f_result2;
+    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_4_7f_result1;
+    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_4_7f_result2;
     dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_4_7f_result1;
     dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_4_7f_result2;
 
     index = 4;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_19_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_19_result2;
+    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_19_result1;
+    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_19_result2;
     dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_19_result1;
     dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_19_result2;
 
     index = 5;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_39_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_39_result2;
+    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_39_result1;
+    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_39_result2;
     dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_39_result1;
     dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_39_result2;
 }
