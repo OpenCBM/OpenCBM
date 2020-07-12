@@ -774,10 +774,13 @@ This will  install  all  necessary  stuff  to  /usr/local/...  (can be
 changed in `opencbm/LINUX/config.make')
 </itemize>
 
-<sect2>Loading the Linux module (XA1541/XM1541 only)
+<sect2>Loading the kernel module (XA1541/XM1541 only)
 
 <p>
 <bf/This is only needed if you are using the XA1541 or XM1541 cables. Otherwise, skip this section/
+<p>
+This section describes the kernel module for Linux. For the FreeBSD kernel
+module, please refer to the included man page, opencbm(4)
 <p>
 If  you're  using  the  parport subsystem (which is default), you
 should now be able to load the driver module by issuing (as root)
