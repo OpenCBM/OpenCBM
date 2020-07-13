@@ -128,7 +128,7 @@ damage or data loss caused by it or by any use of it.
       support libusb-1.0 should be supported. Linux, FreeBSD and Mac OS X
       have been explicitly tested.
 <item>For parallel port based cables:
-      Linux 3.x and 2.6 variants, FreeBSD 11.x and newer. Linux 2.0, 2.2 and
+      Linux 4.x, 3.x and 2.6 variants, FreeBSD 11.x and newer. Linux 2.0, 2.2 and
       2.4 might still work, but have not been tested for ages. For Linux,
       i386 and AMD64 architectures are supported.
 <item>For parallel port based as well as USB based cables:
@@ -698,7 +698,7 @@ cables.
 
 <p>
 The kernel module on Linux (cbm.o) does not require any kernel patches and
-should compile right out of the box, at least with kernel 3.x and 2.6.x, but
+should compile right out of the box, at least with kernel 4.x, 3.x and 2.6.x, but
 2.0.x, 2.2.x and 2.4.x might still work as well. They have not been tested in
 ages, though, thus, you are on your own.
 
