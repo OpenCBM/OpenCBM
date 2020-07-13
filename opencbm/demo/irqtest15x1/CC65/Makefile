@@ -59,15 +59,20 @@ clean:
 	rm -f -- $(C_OBJ) $(C2_OBJ) $(ASM_INC) $(ASM_OBJ) $(ASM_LST)
 
 mrproper: clean
-	rm -f -- *~ */*~ $(PROG) $(PROG2)
+	rm -f -- *~ */*~ $(PROG) $(PROG2) compressdump dump_compressed.bin
 
+compressdump: compressdump.c
+	gcc -o $@ $<
+
+dump_compressed.bin: compressdump
+	./compressdump
 
 # dependencies:
 
-cia_irq_c64.prg: $(SRC) $(ASM_INC)
+cia_irq_c64.prg: $(SRC) $(ASM_INC) dump_compressed.bin
 	$(CL65) $(CFLAGS) -t c64 -o $@ $(SRC)
 
-cia_irq_c128.prg: $(SRC) $(ASM_INC)
+cia_irq_c128.prg: $(SRC) $(ASM_INC) dump_compressed.bin
 	$(CL65) $(CFLAGS) -t c128 -o $@ $(SRC)
 
 cia_irq.o: $(ASM_INC)

@@ -46,13 +46,15 @@ static const unsigned char cia_sdr_icr_1581[] = {
 };
 
 
-#include "dump.bin"
+#include "dump_compressed.bin"
 
 enum {
-    INDEX_RESULT1,
+    INDEX_RESULT1_GEN,
     INDEX_RESULT1_4485,
-    INDEX_RESULT2,
+    INDEX_RESULT1,
+    INDEX_RESULT2_GEN,
     INDEX_RESULT2_4485,
+    INDEX_RESULT2,
     INDEX_LAST
 };
 
@@ -61,7 +63,7 @@ static unsigned int test_baudrates[] = { 0, 1, 3, 4, 19, 39 };
 static struct dump_s {
     unsigned int const   count;
     unsigned int         baudrate[ARRAYSIZE(test_baudrates)];
-    unsigned char       *dump[INDEX_LAST][ARRAYSIZE(test_baudrates)];
+    unsigned char       *dump_compressed[INDEX_LAST][ARRAYSIZE(test_baudrates)];
 } dumps = {
     ARRAYSIZE(test_baudrates),
 };
@@ -74,45 +76,57 @@ static void create_all_compare_dumps()
     for (baud_index = 0; baud_index < ARRAYSIZE(dumps.baudrate); baud_index++) {
         dumps.baudrate[baud_index] = test_baudrates[baud_index];
         for (index = 0; index < INDEX_LAST; index++) {
-            dumps.dump[index][baud_index] = NULL;
+            dumps.dump_compressed[index][baud_index] = NULL;
         }
     }
 
     index = 0;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_0_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_0_result2;
-    dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_0_result1;
-    dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_0_result2;
+    dumps.dump_compressed[INDEX_RESULT1]     [index] = cia_sdr_icr_0_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2]     [index] = cia_sdr_icr_0_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_GEN] [index] = cia_sdr_icr_generic_0_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_GEN] [index] = cia_sdr_icr_generic_0_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_0_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_0_result2_compressed;
 
     index = 1;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_1_7f_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_1_7f_result2;
-    dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_1_7f_result1;
-    dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_1_7f_result2;
+    dumps.dump_compressed[INDEX_RESULT1]     [index] = cia_sdr_icr_1_7f_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2]     [index] = cia_sdr_icr_1_7f_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_GEN] [index] = cia_sdr_icr_generic_1_7f_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_GEN] [index] = cia_sdr_icr_generic_1_7f_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_1_7f_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_1_7f_result2_compressed;
 
     index = 2;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_3_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_3_result2;
-    dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_3_result1;
-    dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_3_result2;
+    dumps.dump_compressed[INDEX_RESULT1]     [index] = cia_sdr_icr_3_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2]     [index] = cia_sdr_icr_3_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_GEN] [index] = cia_sdr_icr_generic_3_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_GEN] [index] = cia_sdr_icr_generic_3_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_3_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_3_result2_compressed;
 
     index = 3;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_4_7f_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_4_7f_result2;
-    dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_4_7f_result1;
-    dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_4_7f_result2;
+    dumps.dump_compressed[INDEX_RESULT1]     [index] = cia_sdr_icr_4_7f_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2]     [index] = cia_sdr_icr_4_7f_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_GEN] [index] = cia_sdr_icr_generic_4_7f_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_GEN] [index] = cia_sdr_icr_generic_4_7f_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_4_7f_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_4_7f_result2_compressed;
 
     index = 4;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_19_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_19_result2;
-    dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_19_result1;
-    dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_19_result2;
+    dumps.dump_compressed[INDEX_RESULT1]     [index] = cia_sdr_icr_19_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2]     [index] = cia_sdr_icr_19_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_GEN] [index] = cia_sdr_icr_generic_19_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_GEN] [index] = cia_sdr_icr_generic_19_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_19_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_19_result2_compressed;
 
     index = 5;
-    dumps.dump[INDEX_RESULT1]     [index] = cia_sdr_icr_generic_39_result1;
-    dumps.dump[INDEX_RESULT2]     [index] = cia_sdr_icr_generic_39_result2;
-    dumps.dump[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_39_result1;
-    dumps.dump[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_39_result2;
+    dumps.dump_compressed[INDEX_RESULT1]     [index] = cia_sdr_icr_39_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2]     [index] = cia_sdr_icr_39_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_GEN] [index] = cia_sdr_icr_generic_39_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_GEN] [index] = cia_sdr_icr_generic_39_result2_compressed;
+    dumps.dump_compressed[INDEX_RESULT1_4485][index] = cia_sdr_icr_4485_39_result1_compressed;
+    dumps.dump_compressed[INDEX_RESULT2_4485][index] = cia_sdr_icr_4485_39_result2_compressed;
 }
 
 struct drive_functions_s {
@@ -184,7 +198,7 @@ void set_1581()
 #define DUMP_BYTE_PER_ROW 16
 #endif
 
-void memdump(const char * text, const unsigned char * buffer, unsigned int bufferlen, unsigned int offset)
+void memdump(const char * text, const unsigned char * buffer, unsigned int bufferlen, unsigned int offset, const unsigned char * buffer2, unsigned int bufferlen2)
 {
 #if 1
     unsigned int row, col;
@@ -195,6 +209,14 @@ void memdump(const char * text, const unsigned char * buffer, unsigned int buffe
         for (col = row; (col < bufferlen) && (col < row + DUMP_BYTE_PER_ROW); col++) {
             printf("%02X ", buffer[col]);
         }
+#ifndef __C64__
+        if (buffer2) {
+            printf(" --- ");
+            for (col = row; (col < bufferlen2) && (col < row + DUMP_BYTE_PER_ROW); col++) {
+                printf("%02X ", buffer2[col]);
+            }
+        }
+#endif
     }
     printf("\n");
 #endif
@@ -208,8 +230,41 @@ void mod_and(unsigned char * buffer, unsigned int bufferlen, unsigned char mask)
     }
 }
 
+static void uncompress_dump(unsigned char * src, unsigned char * dest, unsigned int length)
+{
+    unsigned int writeptr = 0;
+
+    do {
+        if (*src & 0x80) {
+            unsigned int count = 0;
+            if (*src == 0xFF) {
+                break;
+            }
+            count = (*src++ & 0x7F) + 1;
+
+            while (--count && writeptr < length) {
+                *dest++ = *src;
+                ++writeptr;
+            }
+        }
+        else {
+            *dest++ = *src++;
+            ++writeptr;
+        }
+    } while (writeptr < length);
+
+    if (writeptr != 1000)
+    {
+        printf("Uncompressed with wrong size %d!\n", writeptr);
+        exit(1);
+    }
+}
+
+
 unsigned int check_result(const unsigned char * buffer_in, unsigned int len, unsigned int baudrate, unsigned int index)
 {
+    static unsigned char dump_buffer[2000];
+
     unsigned int match = 0;
 
     unsigned int i;
@@ -224,18 +279,19 @@ unsigned int check_result(const unsigned char * buffer_in, unsigned int len, uns
 
     if (baudrate_index == dumps.count) return match;
 
-    if (dumps.dump[index][baudrate_index] == NULL) return match;
+    if (dumps.dump_compressed[index][baudrate_index] == NULL) return match;
 
-//    memdump("result", buffer_in, len, 0x500);
-//    memdump("compare", dumps.dump[index][baudrate_index], len, 0x500);
+    uncompress_dump(dumps.dump_compressed[index][baudrate_index], dump_buffer, sizeof dump_buffer);
 
     match = 1;
     for (i = 0; i < len; i++) {
-        if ( (dumps.dump[index][baudrate_index][i] & IGNORE_MASK) != ( buffer_in[i] & IGNORE_MASK) ) {
-//            printf("DIFF: %04X: %02x != %02x\n", i, (dumps.dump[index][baudrate_index][i] & IGNORE_MASK), ( buffer_in[i] & IGNORE_MASK));
+        if ( (dump_buffer[i] & IGNORE_MASK) != ( buffer_in[i] & IGNORE_MASK) ) {
+//            printf("DIFF: %04X: %02x != %02x\n", i, (dump_buffer[i] & IGNORE_MASK), ( buffer_in[i] & IGNORE_MASK));
             match = 0;
         }
     }
+
+//    if (!match) memdump("result - compare", buffer_in, len, 0x500, dump_buffer, len);
 
     return match;
 }
@@ -322,8 +378,7 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
         jsrfunc_swapped[5] = jsrfunc_orig[2];
 
 #if DBG_PROGRAM
-        memdump("orig jsrfunc", jsrfunc_orig, 6, jsr_swap_address);
-        memdump("mod. jsrfunc", jsrfunc_swapped, 6, jsr_swap_address);
+        memdump("jsrfunc", jsrfunc_orig, 6, jsr_swap_address, jsrfunc_swapped, 6);
         printf("\n");
 #endif
     }
@@ -340,7 +395,9 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
     memdump("up1",
             drive_functions->cia_sdr_icr,
             drive_functions->cia_sdr_icr_startaddress_len,
-            drive_functions->cia_sdr_icr_startaddress);
+            drive_functions->cia_sdr_icr_startaddress,
+            NULL,
+            0);
 #endif
 
     for (baudindex = 0; baudindex < ARRAYSIZE(test_baudrates); baudindex++) {
@@ -363,15 +420,18 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
 
 
 //printf("\nRESULT1:\n");
-        if (check_result(result, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], INDEX_RESULT1)) {
-            printf("result for normal CIA\n");
+        if (check_result(result, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], INDEX_RESULT1_GEN)) {
+            printf("result for GENERIC CIA\n");
         }
         else if (check_result(result, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], INDEX_RESULT1_4485)) {
             printf("result for 4485 CIA\n");
         }
+        else if (check_result(result, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], INDEX_RESULT1)) {
+            printf("result for unspec. CIA\n");
+        }
         else {
 //          mod_and(result, drive_functions->cia_sdr_tottest, IGNORE_MASK);
-            memdump("result",  result,  drive_functions->cia_sdr_tottest, drive_functions->cia_sdr_result_address);
+            memdump("result",  result,  drive_functions->cia_sdr_tottest, drive_functions->cia_sdr_result_address, NULL, 0);
         }
 
         if (jsr_swap_address) {
@@ -385,17 +445,18 @@ void test_cia_sdr(CBM_FILE fd, unsigned char drv, struct drive_functions_s *driv
 
 
 //printf("\nRESULT2:\n");
-            if (check_result(result2, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], INDEX_RESULT2)) {
-                printf("result2 for normal CIA\n");
+            if (check_result(result2, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], INDEX_RESULT2_GEN)) {
+                printf("result2 for GENERIC CIA\n");
+            }
+            else if (check_result(result, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], INDEX_RESULT2_4485)) {
+                printf("result2 for 4485 CIA\n");
+            }
+            else if (check_result(result, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], INDEX_RESULT2)) {
+                printf("result2 for unspec. CIA\n");
             }
             else {
-                if (check_result(result, drive_functions->cia_sdr_tottest, test_baudrates[baudindex], INDEX_RESULT2_4485)) {
-                    printf("result2 for 4485 CIA\n");
-                }
-                else {
-//                  mod_and(result2, drive_functions->cia_sdr_tottest, IGNORE_MASK);
-                    memdump("result2", result2, drive_functions->cia_sdr_tottest, drive_functions->cia_sdr_result2_address);
-                }
+//              mod_and(result2, drive_functions->cia_sdr_tottest, IGNORE_MASK);
+                memdump("result2", result2, drive_functions->cia_sdr_tottest, drive_functions->cia_sdr_result2_address, NULL, 0);
             }
         }
     }
