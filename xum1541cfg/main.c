@@ -662,14 +662,6 @@ main(int argc, char *argv[])
     libusb_context *usbContext;
 #endif
 
-#if HAVE_LIBUSB0
-    fprintf(stderr, "*** Using libusb-0.1\n\n");
-#elif HAVE_LIBUSB1
-    fprintf(stderr, "*** Using libusb-1.0\n\n");
-#else
-    fprintf(stderr, "*** UNKNOWN libusb VERSION***\n\n");
-#endif
-
     // Parse command line flags
     force = 0;
     deviceType = validDeviceTypes[DEFAULT_TYPE_IDX].commonName;
