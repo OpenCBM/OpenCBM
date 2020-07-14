@@ -17,15 +17,15 @@ OpenCBM can be used on PCs on Linux and Windows (all cables). Additioanlly, USB 
 
 OpenCBM supports the following operating systems:
 
-* For USB based cables: Any Linux, FreeBSD or MacOS X variant that support libusb-0.1 should be supported. Linux, FreeBSD and Mac OS X have been explicitly tested.
-* For parallel port based cables: Linux 3.x and 2.6 variants, FreeBSD 11.x and newer. Linux 2.0, 2.2 and 2.4 might still work, but have not been tested for ages. For Linux, i386 and AMD64 architectures are supported.
-* For parallel port based as well as USB based cables: Windows NT 4.0, 2000, XP and Server 2003, Vista, 7 and 8. For USB based cables, NT 4.0 is not supported, though. The i386 architecture a.k.a "x86" ("32 bit") is fully supported; additionally, 64 bit Windows ("x64", "x86_64") versions are supported. Itanium-based Windows ("iA64") are not supported, though.
+* For USB based cables: Any Linux, FreeBSD or MacOS X variant that support libusb-1.0 should be supported. Linux, FreeBSD and Mac OS X have been explicitly tested. For compatibility reasons, also libusb-0.1 is supported at the moment, but that support will be dropped in sme future version.
+* For parallel port based cables: Linux 4.x, 3.x and 2.6 variants, FreeBSD 11.x and newer. Linux 2.0, 2.2 and 2.4 might still work, but have not been tested for ages. For Linux, i386 and AMD64 architectures are supported.
+* For parallel port based as well as USB based cables: Windows NT 4.0, 2000, XP and Server 2003, Vista, 7 and 8. For USB based cables, NT 4.0 is not supported, though. The i386 architecture a.k.a "x86" ("32 bit") is fully supported; additionally, 64 bit Windows ("x64", "x86_64") versions are supported. Itanium-based Windows ("iA64") are not supported anymore, though.
 
 ##  Supported CBM hardware
 
 Currently, opencbm supports the following CBM devices:
 
-* VIC 1541, VIC1540 (all variants, including clones)
+* VIC 1541, VIC 1540 (all variants, including clones)
 * VIC 1570, VIC 1571 (including the 1571CR and the 1571 inside of a C128DCR)
 * VIC 1581 (not with d64copy ( d64copy), not with cbmformat ( cbmformat) or cbmforng ( cbmforng))
 * other CBM IEC drives, printers, and compatibles (only with cbmctrl ( cbmctrl))
@@ -40,7 +40,7 @@ A Doxygen output of the sources (for developers) (still work-in-progress) can be
 
 The mailing lists of OpenCBM can be found at https://sourceforge.net/p/opencbm/mailman/.
 
-Bug tracker are available at https://sourceforge.net/p/opencbm/_list/tickets.
+Bug tracker are available at https://github.com/OpenCBM/OpenCBM/issues
 
 ## Contributions
 

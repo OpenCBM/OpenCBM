@@ -1,21 +1,21 @@
 <!doctype linuxdoc system>
 
 <article>
-<title>opencbm 0.4.99.99 Users Guide
+<title>OpenCBM 0.4.99.103 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
 name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de/" name="d81.de">,
 Arnd Menge <htmlurl url="mailto:arnd(at)jonnz(dot)de" name="arnd(at)jonnz(dot)de">,
-<date>2017-09-06
+<date>2020-07-13
 
 <abstract>
-This document describes the opencbm package, which can be used to control and
+This document describes the OpenCBM package, which can be used to control and
 use serial devices as used by most Commodore (CBM) 8-bit machines.
 
 The latest version of the document can be found online at <htmlurl
-url="http://opencbm.trikaliotis.net/" name="http://opencbm.trikaliotis.net/">.
+url="https://opencbm.trikaliotis.net/" name="https://opencbm.trikaliotis.net/">.
 
-OpenCBM consists of a kernel module ("driver") for Linux and Windows for cables
+OpenCBM consists of a kernel module ("driver") for Linux, FreeBSD and Windows for cables
 connected via the parallel port, which is almost obsolete on modern PC
 hardware. Thus, it also includes support for USB based devices, the so-called
 XU1541 and XUM1541 adapters. Additionally, it has support software and tools
@@ -53,7 +53,7 @@ using a custom serial bus to talk to attached devices (disk drive, printer).
 This proprietary serial bus protocol is not natively supported by modern hard-
 or software.
 
-opencbm provides an interface to this so-called IEC bus at the level of simple
+OpenCBM provides an interface to this so-called IEC bus at the level of simple
 TALK and LISTEN commands, similar to the one provided by the Commodore kernel
 routines. Additionally, some higher and lower level bus control is available as
 well, allowing for full control of the bus.
@@ -64,18 +64,18 @@ Alternatively, more modern USB cable solutions like XU1541 or XUM1541 (a.k.a.
 ZoomFloppy) are supported. For cables, cf. <ref
 id="cable" name="cable">.
 
-opencbm has a plugin concept which allows to additionally add custom build
+OpenCBM has a plugin concept which allows to additionally add custom build
 cables.
 
-opencbm can be used on PCs on Linux, Windows and FreeBSD (all cables).
+OpenCBM can be used on PCs on Linux, Windows and FreeBSD (all cables).
 Additioanlly, USB based cables are supported on Mac OS X.
 
-<sect1>Introduction to opencbm<label id="introduction">
+<sect1>Introduction to OpenCBM<label id="introduction">
 
 <p>
-This is version 0.4.99.99 of opencbm, a support package for retro devices that
+This is version 0.4.99.103 of OpenCBM, a support package for retro devices that
 communicate with the serial CBM bus protocol, known from the C64, VIC-20, etc.
-Opencbm runs on Linux, Windows, FreeBSD and Mac OS X.  opencbm 0.4.0 was a
+Opencbm runs on Linux, Windows, FreeBSD and Mac OS X. OpenCBM 0.4.0 was a
 re-join of the two projects cbm4linux (latest standalone version: 0.3.2) and
 cbm4win (latest standalone version: 0.1.0a). It should be noted that both
 projects were highly related from the beginning, as cbm4win 0.1.0 was based on
@@ -90,8 +90,8 @@ The following cable types are supported:
 
 <p>
 <itemize>
-<item>XUM1541            (opencbm version >= 0.4.99.x)
-<item>XU1541             (opencbm version >= 0.4.99.x)
+<item>XUM1541            (OpenCBM version >= 0.4.99.xx)
+<item>XU1541             (OpenCBM version >= 0.4.99.xx)
 <item>XM1541 and XA1541  (cbm4linux version >= 0.2.1, cbm4win version >= 0.1.0)
 <item>XP1541             (cbm4linux version >= 0.2.0, cbm4win version >= 0.1.0)
 <item>XP1571             (cbm4linux version >= 0.2.4, cbm4win version >= 0.1.0)
@@ -121,12 +121,14 @@ damage or data loss caused by it or by any use of it.
 <sect1>Supported operating systems<label id="supported-os">
 
 <p>
-<it/opencbm/ supports the following operating systems:
+<it/OpenCBM/ supports the following operating systems:
 
 <itemize>
 <item>For USB based cables: Any Linux, FreeBSD or MacOS X variant that
       support libusb-1.0 should be supported. Linux, FreeBSD and Mac OS X
-      have been explicitly tested.
+      have been explicitly tested. For backward compatibility with older releases
+      of OpenCBM, currently, also libusb-0.1 is supported. Note that this support
+      will be dropped in some future version of OpenCBM.
 <item>For parallel port based cables:
       Linux 4.x, 3.x and 2.6 variants, FreeBSD 11.x and newer. Linux 2.0, 2.2 and
       2.4 might still work, but have not been tested for ages. For Linux,
@@ -143,13 +145,15 @@ damage or data loss caused by it or by any use of it.
 <sect1>Supported CBM hardware<label id="supported-drives">
 
 <p>
-Currently, opencbm supports the following CBM devices:
+Currently, OpenCBM supports the following CBM devices:
 
 <itemize>
 <item>VIC 1541, VIC1540 (all variants, including clones)
 <item>VIC 1570, VIC 1571 (including the 1571CR and the 1571 inside of a C128DCR)
 <item>VIC 1581 (not with d64copy (<ref id="d64copy" name="d64copy">), not with
 cbmformat (<ref id="cbmformat" name="cbmformat">) or cbmforng (<ref id="cbmforng" name="cbmforng">))
+<item>The IEC2IEEE (<htmlurl url="http://www.nlq.de/"
+  name="http://www.nlq.de/">) adapter
 <item>other CBM IEC drives, printers, and compatibles (only with cbmctrl (<ref
 id="cbmctrl" name="cbmctrl">))
 <item>VIC 8250, 8050, 4040, 2031, SFD 1001, and possibly other IEEE drives with
@@ -161,7 +165,7 @@ extension that lets you use IEEE devices directly.
 <sect1>Cables<label id="cable">
 
 <p>
-Since the last opencbm release, the PC market has changed considerably. Modern
+Since the last OpenCBM release, the PC market has changed considerably. Modern
 PCs do not contain parallel ports anymore, nor do they have ISA type connectors
 for extension cards. Additionally, parallel port cards connected via PCI, PCIe
 or other modern replacements are reported not to work with OpenCBM.
@@ -177,7 +181,7 @@ too, and they should be preferred to the parallel port based ones.
 
 <p>
 There are two types of USB cables currently supported. The <htmlurl
-url="http://www.trikaliotis.net/xu1541" name="XU1541"> cable is a simple cable,
+url="https://spiro.trikaliotis.net/xu1541" name="XU1541"> cable is a simple cable,
 optimised for ease of building and low costs. Its big downside is that
 transfers with this cable are very slow. In fact, the parallel port based
 solutions for the XA1541 or XM1541 (a.k.a. XAP1541 or XMP1541) were faster than
@@ -323,7 +327,7 @@ of the same connections as the XM1541, but instead of using diodes, it uses
 transistors which drive the lines better. Because of this difference, the logic
 for outputs is reversed between the XA1541 and the XM1541.
 
-<p>Additionally to the cable types above, opencbm also supports XP1541 and
+<p>Additionally to the cable types above, OpenCBM also supports XP1541 and
 XP1571 parallel cables, which have to be used <em>in conjunction</em> with the
 XM1541 or XA1541 cable.
 
@@ -336,19 +340,67 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 
 <p>
 <descrip>
-<tag/opencbm v0.4.99.99:/
+<tag/OpenCBM v0.4.99.103:/
 
 <itemize>
- <item>New tool xum1541cfg, because the old one was severely outdated
+ <item>new: Windows installation script for automatical installation
+ <item>new: Pre-built Linux packages
+ <item>new: MacOS and FreeBSD ports
+ <item>new: Integration of USB based devices (XU1541, XUM1541) by introducing a plugin concept
+ <item>new: tool <it/d82copy/
+ <item>new: Allow serial nibbling for nibtools with VIC-1570 and VIC-1571 devices
+ <item>change: Transfer routines are more robust now
+ <item>change: Added option <it/--petscii/ to <it/cbmctrl/
+ <item>change: Various fixes for newer compilers (gcc) and platforms (Linux
+       3.x, 4.x, Windows 10)
+ <item>fix: Many, many bug fixes
+ <item>Moved development for SourceForge to GitHub
 </itemize>
 
-<tag/opencbm v0.4.99.98:/
+<tag/OpenCBM v0.4.2 (2007-11-18):/
 
 <itemize>
- <item> TBD @@@
+ <item>Windows:
+  <itemize>
+  <item>Added upgrade instructions to the manual (<ref id="upgrading">)
+  <item>The 0.4.1 Windows binary release was not wrong, but the resulting binary files were way to
+        big. Additionally, the documentation was missing. Fixed that. (Found by Joe Forster)
+  </itemize>
 </itemize>
 
-<tag/opencbm v0.4.0:/
+<tag/OpenCBM v0.4.1 (2007-11-11):/
+
+<itemize>
+
+ <item>General:
+  <itemize>
+  <item>Issue a UNLISTEN after a successfull cbm_close(). This was a deviation from the original protocol.
+        I don't know if this has any practical implications.
+  <item>When doing transfers, give the kernel time to `breath' between the single bytes (code was already there,
+        but erroneous) (found by Till Harbaum)
+  </itemize>
+
+ <item>Linux driver:
+  <itemize>
+  <item>The build system is more robust regarding the shell used. It now specifically asks for bash.
+  <item>Fixed build errors with newer Linux kernels (Spiro Trikaliotis, Frédéric Brière)
+  <item>Fixed build errors with AMD64 targets (Spiro Trikaliotis, Frédéric Brière)
+  <item>Implementation of cbm_setrelease() was wrong, as only only lines was modified (fixed by Till Harbaum)
+  <item>Remove all files on uninstall
+  </itemize>
+
+ <item>Windows driver:
+  <itemize>
+  <item>If the parallel port supported neither ECP nor EPP, OpenCBM refused to load. Fixed this.
+  </itemize>
+</itemize>
+
+<tag/OpenCBM v0.4.0 (2006-04-28):/
+
+<p>
+cbm4win and cbm4linux have been re-joined to opencbm; for the NEWS,
+have a look at the documentation (http://opencbm.trikaliotis.net/,
+or with "info opencbm").
 
 <itemize>
 
@@ -369,8 +421,9 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
   <item>compiles for AMD64, iA64, i386 (Windows only)
   <item>VDD to allow DOS programs to access cbm4win
   <item>new unit file for Delphi, to allow to access cbm4win from Delphi
-  <item>New project opencbmvice for debugging with the help of VICE (<htmlurl
-  url="http://www.viceteam.org/" name="http://www.viceteam.org/">). For this, a
+  <item>New project OpenCBMvice for debugging with the help of VICE (<htmlurl
+  url="https://vice-emu.sourceforge.io/"
+  name="https://vice-emu.sourceforge.io/">). For this, a
   special version of VICE is needed.
   </itemize>
 
@@ -473,13 +526,136 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
  <item><it/cbmformat/: make sure disk name is 0-terminated (Spiro Trikaliotis)
 </itemize>
 
+<tag/cbm4win 0.1.0/
+<itemize>
+<item>Port of cbm4linux 0.3.2 to Windows
+</itemize>
+
+<tag/cbm4linux 0.3.2/
+<itemize>
+<item>we're debianized now
+<item>reset line can now be controlled through cbm_iec_{set,release}
+<item>prepared for the 2.6 kernel series
+<item>new module parameter 'hold_clk'
+<item>cbmcopy hang-at-exit-bug fixed
+<item>gcc 3.3 fixes (Count Zero, Andreas Boose)
+<item>RPM .spec file tweaks (allows for non-root build)
+<item>1571 w/ XP1571 hang fixed
+<item>cbm{copy,read,write} didn't understand '-f' ('--file-type' works, though)
+  (reported by Ullrich von Bassewitz)
+</itemize>
+
+<tag/cbm4linux 0.3.1/
+<itemize>
+<item>a few compilation fixes for various distros (RH 7.1, slackware 8.0,
+  SuSE 7.3) by me and Kees Jongenburger
+</itemize>
+
+<tag/cbm4linux 0.3.0/
+<itemize>
+<item>the fast file copier (cbmcopy/cbmread/cbmwrite) for 1541/1570/1571/1581
+  drives has landed.
+<item>driver module uses generic parport driver by default
+<item>libopencbm is a shared library now and contains most of the d64copy and
+  cbmwrite code
+<item>an experimental perl API has arrived
+<item>d64copy handles error information
+<item>support for odd-sized .d64 images in d64copy
+<item>head movement optimization for 1571 in double double sided mode
+<item>better error handling in d64copy
+<item>cbmctrl 'detect' command added
+</itemize>
+
+<tag/cbm4linux 0.2.5a/
+<itemize>
+<item>compilation fix for kernel 2.4.10
+</itemize>
+
+<tag/cbm4linux 0.2.5/
+<itemize>
+<item>.d71 support in d64copy, all modes except warp
+<item>cbmformat comes with a ugly progress indicator (-p option)
+<item>minor Makefile fixes
+</itemize>
+
+<tag/cbm4linux 0.2.4/
+<itemize>
+<item>SGML documentation to create Texinfo and HTML docs
+<item>1571/2MHz support in d64copy, Turbo and Warp mode
+<item>XP1571 support in d64copy
+<item>compiles for Linux 2.4.0 kernel
+<item>cbmupload and cbmdownload merged into cbmctrl
+<item>cbm4linux.spec file to build binary RPMs
+</itemize>
+
+<tag/cbm4linux 0.2.3/
+<itemize>
+<item>some config.make/Makefile tweaks
+<item>new ioctl's: CBMCTRL_IEC_WAIT (experimental), CBMCTRL_GET_EOI
+<item>cbmctrl: `dir´ command fixed for devices other than 8
+<item>`cbm.h´ renamed to `cbm4linux.h´, `libcbm.a´ renamed to `libcbm4linux.a´.
+  Both files get installed systemwide in $(INCDIR) resp. $(LIBDIR)
+<item>`xa´ not mandatory any more, as suggested by Ullrich von Bassewitz.
+  Preassembled 6502 binaries included.
+<item>(Forgotten) device locking added. Pointed out by Ullrich von Bassewitz.
+<item>kernel module: #include &lt;linux/config.h&gt; and &lt;linux/modversions.h&gt; (the
+  latter one #ifdef CONFIG_MODVERSION)
+<item>default interleave values increased by one, should be more reasonable now
+</itemize>
+
+<tag/cbm4linux 0.2.2/
+<itemize>
+<item>CABLE description fixed (thanks, Joe)
+<item>d64copy: added `-b´ and `-B´ options. Poorly tested.
+<item>d64copy.c: GCR stuff moved to d64copy/gcr.c, code cleanup
+<item>cbmdownload: fixed byte count
+<item>cbmctrl: new command `dir´, no need for petcat any more
+<item>kernel module: use save_flags()/restore_flags() instead of cli()/sti(),
+  module description added
+</itemize>
+
+<tag/cbm4linux 0.2.1/
+<itemize>
+<item>XA1541/XM1541 support
+<item>ports in PS/2 mode should work now
+<item>support for 40-track images in d64copy and cbmformat
+<item>new utilities: cbmdownload, cbmupload
+</itemize>
+
+<tag/cbm4linux 0.2.0a/
+<itemize>
+<item>bugfix: writing an image with `serial2´ and `turbo' should work now
+</itemize>
+
+<tag/cbm4linux 0.2.0/
+<itemize>
+<item>fast transfer routines in d64copy (serial1, serial2, parallel)
+<item>source tree restructured
+<item>new utility: cbmformat
+
+</itemize>
+
+<tag/cbm4linux 0.1.0/
+<itemize>
+<item>Initial relase
+</itemize>
+
 </descrip>
+
+<sect>Upgrading OpenCBM from an older installation<label id="upgrading">
+
+<p>
+Currently, OpenCBM does not support a upgrade other than completely uninstalling
+it, and re-installing it from scratch. Have a look at the uninstall instructions
+(<ref id="uninstall">) and the corresponding install
+instructions (<ref id="installation">).
+
 
 <sect>Installation<label id="installation">
 
 <p>
-Depending on the system you are running opencbm on, there are different ways to
-install opencbm. Use the appropriate category for you:
+Depending on the system you are running OpenCBM on, there are different ways to
+install OpenCBM. Use the appropriate category for you:
 
 <sect1>Quick installation walk-through
 <p>
@@ -490,6 +666,33 @@ of this chapter unless you encounter any problems.
 If you are more interested for a clean installation, skip this section and read
 the rest of this chapter.
 
+<sect2>Linux installation with pre-built packages
+
+<p>
+Before trying to build OpenCBM on your own, you can have a look if it is supported
+by the pre-built packages at <htmlurl
+url="https://software.opensuse.org/download.html?project=home%3Astrik&amp;package=opencbm"
+name="https://software.opensuse.org/download.html?project=home%3Astrik&amp;package=opencbm">.
+
+At the time of this writing, there are DEB packages available for Debian 8,
+9, 10 (which should also install on Ubutu), as well as Raspbian 9 and
+10. Furthermore, RPM based openSUSE package are available, too.
+
+These packages are rebuilt as soon as there are changes to the OpenCBM
+sources. If you use these packages, you do not need to manually compile
+and install OpenCBM.
+
+In order to run OpenCBM, you need the package: opencbm-XXX,
+with XXX being one of xa1541, xu1541 or xum1541. It will install the necessary
+packages, too.
+
+If you want to mix multiple variants (e.g., you have an xum1541 and an xu1541
+device), then you can install both of them (opencbm-xum1541 and
+opencbm-xu1541). Note that the first device that is installed is the default.
+
+Additionally, there is also a nibtools package available (it is called
+opencbm-nibtools on RPM based distributions).
+
 <sect2>Linux installation walk-through
 
 <p>
@@ -497,11 +700,11 @@ Perform the following steps to install OpenCBM on your Linux machine:
 
 <itemize>
 <item>Get the sources from the tarball at <htmlurl
-      url="http://www.trikaliotis.net/Download/opencbm-0.4.99.99/opencbm-0.4.99.99.tar.bz2"
-      name="http://www.trikaliotis.net/Download/opencbm-0.4.99.99/opencbm-0.4.99.99.tar.bz2">.
-<item>Unpack them into a directory (i.e., <it>&tilde;/opencbm-0.4.99.99</it>, with
-      0.4.99.99 being the version number of OpenCBM).
-<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.99</it>
+      url="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.tar.bz2"
+      name="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.tar.bz2">.
+<item>Unpack them into a directory (i.e., <it>&tilde;/opencbm-0.4.99.103</it>, with
+      0.4.99.103 being the version number of OpenCBM).
+<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.103</it>
 <item>Compile OpenCBM and the appropriate plugin: <it>make -f LINUX/Makefile
 opencbm plugin-<em/XXX/</it>, with <it/XXX/ being one of <it/xa1541/, <it/xu1541/ or
 <it/xum1541/, depending upon which adapter you are using:
@@ -539,6 +742,10 @@ correctly recognized.
 <item>You are almost done. Check if the command <it/cbmctrl reset/ resets your
 drive, or if the command <it/cbmctrl detect/ prints out your device with your
 device number. If this works, you are done! If not, please proceed:
+<item>If you are using an USB based cable (XU1541, XUM1541, ZoomFloppy),
+unplug the device, wait a second and replug it. This should be necessary
+only once and only if the device was connected to the PC while OpenCBM
+was not installed yet.
 <item>If you get an error message that libopencbm cannot be found, you must add
 it to your linker path. In order to do so, enter the command <it>make -f
 LINUX/Makefile ldconfig</it>
@@ -559,19 +766,40 @@ should be your primary source for instructions.
 
 <p>
 You need the Windows binaries from <htmlurl
-url="http://www.trikaliotis.net/Download/opencbm-0.4.99.99/opencbm-0.4.99.99.zip"
-name="http://www.trikaliotis.net/Download/opencbm-0.4.99.99/opencbm-0.4.99.99.zip"> in order to install OpenCBM.
-
-<p>
-For Windows, you have to install the USB drivers first if you want to use the ZoomFloppy, XUM1541 or XU1541 devices.
+url="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.zip"
+name="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.zip"> in order to install OpenCBM.
 
 <sect3>USB driver installation
 
 <p>
+For Windows, you have to install the USB drivers first if you want to use the ZoomFloppy, XUM1541 or XU1541 devices.
+
+<p>
+Previous versions of OpenCBM demanded you to install the USB drivers first. You
+had to fiddle around with the driver signature enforcement in order to get
+this done, or you had to use an external tool (zadig.exe) to install the USB
+driver.
+
+<p>
+This release of OpenCBM included the necessary parts in order to install
+the USB drivers without manual intervention. When you install the tools
+(cf. below), you are asked if you want to install the USB drivers.
+
+<p>
+If you have had any previous versions of OpenCBM installed, you should
+answer with YES so your drivers will get updated!
+
+<p>
+Note that this will *not* work for Windows 2000. For this, a separate
+driver installation package will be provided in the near future, if
+there is some demand. Just ask me for it.
+
+<!--
+<p>
 For previous version of OpenCBM and 64 bit versions of Windows, that meant you had to fiddle around with the
 driver signature enforcement in order to get this done.
 
-For v0.4.99.99, we rely on an external tool which makes it much easier for you.
+For v0.4.99.103, we rely on an external tool which makes it much easier for you.
 
 Please proceed as follows:
 
@@ -631,6 +859,7 @@ or put them at a specific location. Just use it "as is".</it>
 </figure>
 
 Now, proceed with installation the OpenCBM tools.
+-->
 
 <sect3>OpenCBM tool installation
 
@@ -639,27 +868,44 @@ In order to install OpenCBM, proceed as follows:
 
 <itemize>
 <item>Download the OpenCBM package binary for Windows from <htmlurl
-      url="http://www.trikaliotis.net/Download/opencbm-0.4.99.99/opencbm-0.4.99.99.zip"
-      name="http://www.trikaliotis.net/Download/opencbm-0.4.99.99/opencbm-0.4.99.99.zip">
-      Note that unlike previous versions of OpenCBM, v0.4.99.99 now contains one package for
+      url="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.zip"
+      name="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.zip">
+      Note that unlike previous versions of OpenCBM, v0.4.99.103 now contains one package for
       all supported architectures (i386 vs. amd64, 32 bit vs. 64 bit). You do not have to
       choose which one to get.
 <item>Unpack it into a directory of your liking
-<item>Start a cmd.exe shell as administrator. The exact procedure varies among the different Windows versions.
+<!-- <item>Start a cmd.exe shell as administrator. The exact procedure varies among the different Windows versions. -->
 <item>Go to the directory where you unpacked the OpenCBM installation package (with the "cd" command)
-<item>Enter<itemize>
+<item><bf/For Windows XP:/ Enter<itemize>
+      <item><bf/ZoomFloppy only:/ <it/install -xp zoomfloppy/ (this is also default, that it, it suffices if you enter <it/install/ only)
+      <item><bf/XUM1541 only:/ <it/install -xp xum1541/
+      <item><bf/XU1541 only:/ <it/install -xp xu1541/
+      <item><bf/XA1541 only:/ <it/install -xp xa1541/
+      </itemize>
+<item><bf/For Windows 7 and above:/ Enter<itemize>
       <item><bf/ZoomFloppy only:/ <it/install zoomfloppy/ (this is also default, that it, it suffices if you enter <it/install/ only)
       <item><bf/XUM1541 only:/ <it/install xum1541/
       <item><bf/XU1541 only:/ <it/install xu1541/
       <item><bf/XA1541 only:/ <it/install xa1541/
       </itemize>
-<item>If you want to use the OpenCBM tool whenever you are in the cmd.exe
-      shell, you have to add the directory that is printed in the last line of
-      the install.cmd output to your PATH environment variable. In many cases,
-      it will be C:\Program Files\OpenCBM.
+<item>Windows will start the installation procedure. If needed (Windows 7 and
+      above), it will give you the UAC prompt in order to get additional
+      rights for installation. You must allow this, or OpenCBM will not install
+      successfully.
+      On Windows XP, it will ask you for your administrator password. Again,
+      you must give it, or OpenCBM will not install successfully.
+<item>Afterwards, it will ask you if you want to install the USB drivers.
+      <bf/Note that OpenCBM 0.4.99.103 uses other drivers than previous versions of
+      OpenCBM, and it will not work reliably with the old drivers!/
+      Thus, if you are upgrading or installing for the first time, answer "yes"
+      here.
+<item>The installation program will add a link to a command line console on the
+      Desktop of the current user. That link can be used to use the OpenCBM
+      tools. For this, the directory where OpenCBM was installed is added to the
+      path, but only on that console window!
 </itemize>
 
-<sect1>Installing opencbm on Mac OS X (USB cable)<label id="cbm4mac-install">
+<sect1>Installing OpenCBM on Mac OS X (USB cable)<label id="cbm4mac-install">
 
 <p>
 For Mac OS X, there are <htmlurl
@@ -668,7 +914,7 @@ installation instructions"> available on the blog of Christian Vogelgsang, who
 actually ported OpenCBM to the Mac. His site should be your primary source for
 instructions.
 
-<sect1>Installing opencbm on Linux or FreeBSD<label id="cbm4linux-install-all">
+<sect1>Installing OpenCBM on Linux or FreeBSD<label id="cbm4linux-install-all">
 
 <p>
 The installation of OpenCBM differs a little bit depending on the cable used to
@@ -723,7 +969,7 @@ If you intend to modify the drive routines for `d64copy' and `cbmformat' you
 also need a crossassembler. `opencbm/LINUX/config.make' comes with rules for Ullrich
 von Bassewitz' `cl65' (comes
 with cc65, <htmlurl url="http://www.cc65.org/" name="http://www.cc65.org/">).
-Starting with version cbm4linux 0.2.3, opencbm includes precompiled 6502
+Starting with version cbm4linux 0.2.3, OpenCBM includes precompiled 6502
 binaries, so as long as you don't touch the .a65 files, there's no need for a
 crossassembler.
 
@@ -733,7 +979,7 @@ process. Additionally, all files needed to built Debian .DEB packages are
 included. If you upgrade from a previous (non-RPM and non-DEB) version and want
 to install a packetized binary version (RPM or DEB), don't forget to remove the
 old files hanging aroung (just do "<it/make uninstall/", preferably in the
-*old* source directory. For a >= 0.4.0 version of opencbm, change the line to
+*old* source directory. For a >= 0.4.0 version of OpenCBM, change the line to
 "<it>make -f LINUX/Makefile uninstall</it>".).
 
 <sect2>Compile-time configuration
@@ -788,8 +1034,8 @@ should now be able to load the driver module by issuing (as root)
 <p>
 <itemize>
 <item><it>/sbin/depmod</it>
-<item><it>/sbin/modprobe parport</it>      (unless compiled into the kernel)
-<item><it>/sbin/insmod cbm lp=</it>your_lp   (usually 0, which is default)
+<item><it>/sbin/modprobe parport</it>      (unless compiled into the kernel, or already loaded))
+<item><it>/sbin/modprobe cbm lp=</it>your_lp   (usually 0, which is default; if you only have one parallel port, you can also use <it>/sbin/modprobe cbm</it> instead)
 </itemize>
 
 <p>
@@ -797,7 +1043,7 @@ or, when built with -DDIRECT_PORT_ACCESS:
 
 <p>
 <itemize>
-<item><it>/sbin/insmod cbm port=your_ioport irq=your_irq</it>
+<item><it>/sbin/modprobe cbm port=your_ioport irq=your_irq</it>
 (default is 0x378 for port, 7 for irq)
 </itemize>
 
@@ -848,9 +1094,9 @@ releases.
 <item>If you are using the parport subsystem (no -DDIRECT_PORT_ACCESS):
 
 <itemize>
-<item>the port might be occupied by another device (e.g. `lp.o')
+<item>the port might be occupied by another device (e.g. `lp.o').
      cbm.o does NOT support port sharing (wouldn't work anyway).
-     Enter <it>cat /proc/parport/port/devices</it> to find out.
+     Enter <it>lsmod|grep parport</it> to find out.
 
 <item>parport_pc might not use an IRQ.
      <it>/etc/modules.conf</it> should contain something like:
@@ -913,9 +1159,9 @@ some older SuSE systems)
 With [options] being one or more of:
 
 <itemize>
-<item><it/lp=*lp*/       (parport only, as used in <it>/sbin/insmod</it> above)
-<item><it/irq=*irq*/     (direct port only, as used in <it>/sbin/insmod</it> above)
-<item><it/port=*port*/   (direct port only, as used in <it>/sbin/insmod</it> above)
+<item><it/lp=*lp*/       (parport only, as used in <it>/sbin/modprobe</it> above)
+<item><it/irq=*irq*/     (direct port only, as used in <it>/sbin/modprobe</it> above)
+<item><it/port=*port*/   (direct port only, as used in <it>/sbin/modprobe</it> above)
 <item><it/cable=*n*/      force cable type:
  <itemize>
  <item>               -1  for autodetection (default)
@@ -932,11 +1178,82 @@ With [options] being one or more of:
  </itemize>
 </itemize>
 
+<sect2>Security considerations
+
 <p>
-Congratulation, you have successfully set up your opencbm installation!
+By default, OpenCBM installs the device driver so that anyone has access to
+the CBM devices:
+
+<tscreen><verb>
+    $ ls -l /dev/cbm
+    crw-rw-rw- 1 root root 10, 177 2007-11-11 14:34 /dev/cbm
+</verb></tscreen>
+
+You might want to change this behaviour to control more specifically who is
+allowed to use OpenCBM, and who is not.
+
+The best way is to define a group (for example, `cbmuser') and restrict the
+access rights to the owner (root) and this group (cbmuser) only.
+
+I assume you already have defined a group `cbmuser', for example, by using
+groupadd(8) (all Linux variants) or addgroup(8) (all Debian based Linux
+distributions).
+
+Now, you can restrict the access by two different means, depending upon if you
+are using devfs or udev:
+<itemize>
+<item>If you are using devfs (all Linux kernels prior to
+ 2.6.0), this can be done by issuing the commands
+
+ <tscreen><verb>
+    $ chmod 660 /dev/cbm
+    $ chgrp cbmuser /dev/cbm
+    $ ls -l /dev/cbm
+    crw-rw---- 1 root cbmuser 10, 177 2007-11-11 14:34 /dev/cbm
+ </verb></tscreen>
+<item>If you are using udev (newer 2.6.x kernels) instead, you have to modify
+ the file /etc/udev/rules.d/45-opencbm-parallel.rules. It looks like follows:
+ <tscreen><verb>
+ACTION!="add", GOTO="opencbm_plugin_xa1541_rules_end"
+
+# xa1541/xm1541 parallel port driver
+KERNEL=="cbm", GROUP="root", MODE="0666"
+
+LABEL="opencbm_plugin_xa1541_rules_end"
+ </verb></tscreen>
+
+To change the group to another one, change the part `root' in `GROUP="root"'
+by the name of the group you want to use. To change the access mode,
+change `MODE="0666"' to `MODE="0660"', so your files looks like:
+ <tscreen><verb>
+ACTION!="add", GOTO="opencbm_plugin_xa1541_rules_end"
+
+# xa1541/xm1541 parallel port driver
+KERNEL=="cbm", GROUP="cbmuser", MODE="0660"
+
+LABEL="opencbm_plugin_xa1541_rules_end"
+ </verb></tscreen>
+
+ For your changes to take effect, issue
+ <tscreen><verb>
+ $ rmmod cbm
+ $ modprobe cbm
+ </verb></tscreen>
+ You might also want to adjust the file `sys/linux/45-opencbm-parallel.rules', which
+ is used when installing the OpenCBM driver out of the source package.
+</itemize>
+
+<p>
+Congratulation, you have successfully set up your OpenCBM installation!
 
 
-<sect1>Installing opencbm on Windows (cbm4win)<label id="opencbm-install">
+<sect1>Installing OpenCBM on Windows (cbm4win)<label id="opencbm-install">
+
+<p>
+<it/It is highly recommended that you use the install.cmd script to install
+OpenCBM instead of doing it "by hand" as suggested here. This part of the
+manual is only relevant for people who want to know how it works in the
+background, or if you have troubles./
 
 <p>
 <it/WARNING! If you have already installed a previous version of OpenCBM on your
@@ -1005,14 +1322,15 @@ unpackaged the drivers into again.
 
 <sect>Checking if the installation is complete
 <p>
-After you installed opencbm (cf. <ref id="installation" name="Installation">,
+After you installed OpenCBM (cf. <ref id="installation" name="Installation">,
 it is wise to check if the installation works as expected. For this, do the
 following:
 
 <itemize>
-<item>Switch on the floppy drive. Depending on the type of
-cable you are using (XA1541 or XM1541) and the parallel port of your PC, the
+<item>Switch on the floppy drive. If you are using a parallel port based cable
+(XA1541 or XM1541), the
 drive might keep spinning endless now, because it is continuously resetted.
+This is not an error!
 
 <item>Type "<it/cbmctrl reset/" and press enter. If it does not already, the red
 floppy drive LED should light up, and the drive should start spinning. After
@@ -1083,11 +1401,11 @@ your command line, or look at <ref id="cbmctrl" name="cbmctrl">. For the other
 programs, you get help by issuing the "--help" option, or look at the
 appropriate section in <ref id="utilities" name="utilities">.
 
-<sect>Uninstall<label id="installation">
+<sect>Uninstall<label id="uninstall">
 
 <p>
-Depending on the system you are running opencbm on, there are different ways to
-uninstall opencbm. Use the appropriate category for you:
+Depending on the system you are running OpenCBM on, there are different ways to
+uninstall OpenCBM. Use the appropriate category for you:
 
 <sect1>Quick uninstallation walk-through
 <p>
@@ -1098,6 +1416,13 @@ of this chapter unless you encounter any problems.
 If you are more interested in a clean uninstallation, skip this section and read
 the rest of this chapter.
 
+<sect2>Linux uninstallation with pre-built packages
+
+<p>
+If you installed OpenCBM with the pre-built packages (from openSUSE),
+then you just have to uninstall OpenCBM via the mechanism of your system
+(apt, aptitude, synaptics, YaST, ...)
+
 <sect2>Linux uninstallation walk-through
 
 <p>
@@ -1105,9 +1430,9 @@ Perform the following steps to uninstall OpenCBM on your Linux machine:
 
 <itemize>
 <item>I assume you already have an installation directory for OpenCBM handy.
-      Let's assume it is <it>&tilde;/opencbm-0.4.99.99</it>, with
-      0.4.99.99 being the version number of OpenCBM.
-<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.99</it>
+      Let's assume it is <it>&tilde;/opencbm-0.4.99.103</it>, with
+      0.4.99.103 being the version number of OpenCBM.
+<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.103</it>
 <item>Enter: <it>sudo make -f LINUX/Makefile uninstall</it>
 <item>Now, everything should be uninstalled.
 </itemize>
@@ -1233,9 +1558,9 @@ programs are included with this package:
 <sect1>instcbm (Windows only)<label id="instcbm">
 
 <p>
-<it/instcbm/ is used on Windows to install the opencbm driver.
+<it/instcbm/ is used on Windows to install the OpenCBM driver.
 
-<em/Please note that the syntax of instcbm has changed considerably in v0.4.99.99
+<em/Please note that the syntax of instcbm has changed considerably in v0.4.99.103
 with respect to the syntax used until version v0.4.2!/
 
 <sect2>instcbm invocation<label id="instcbm command structure">
@@ -1338,7 +1663,7 @@ display version information about the xum1541 plugin.
 
 <p>
 Install the XA1541/XM1541 driver and the DLL on the machine. The driver and the DLL
-are copied into the Windows system directory, so opencbm can be used from
+are copied into the Windows system directory, so OpenCBM can be used from
 every program:
 <code>
 instcbm xa1541
@@ -1376,21 +1701,21 @@ Change the default adapter after OpenCBM was already installed:
 
 <p>
 Remove the driver including <em/all/ plugins from the system. You will not be
-able to use opencbm after this command, unless you re-install it. If files were
+able to use OpenCBM after this command, unless you re-install it. If files were
 copied into the Windows system directory, they will be removed:
 <code>
 instcbm --remove
 </code>
 
 <p>
-After opencbm has been installed (with <it/instcbm/>), change the parallel
+After OpenCBM has been installed (with <it/instcbm/>), change the parallel
 port to be used to 2:
 <code>
 instcbm --update xa1541 --lpt=2
 </code>
 
 <p>
-Install opencbm, directly specifying LPT3 as the parallel port to use:
+Install OpenCBM, directly specifying LPT3 as the parallel port to use:
 <code>
 instcbm xa1541 --lpt=3
 </code>
@@ -1448,6 +1773,7 @@ supported by the backend.
 
 <tag>-f, --forget</tag>
 <p>Future extension, unused at the moment
+
 <tag>-p, --petscii (default for all actions but <it>open</it> and
 <it>command</it>)</tag>
 <p>Convert input or output parameter from CBM format (PETSCII)
@@ -1457,7 +1783,7 @@ texts from the floppy, convert them from/to petscii before outputting.
 This way, small letters on the PC side are small letters on the CBM side.
 The opposite is -r, --raw.
 <tag>-r, --raw (default for <it>open</it> and <it>command</it></tag>
-<p>Do not convert data between CBM and PC side.
+<p>Do not convert data between CBM and PC side. The opposite to --petscii.
 
 </descrip>
 
@@ -1469,7 +1795,7 @@ The opposite is -r, --raw.
 <tag>detect</tag>
 <p>Detect all drives on the IEC bus
 <tag>lock</tag>
-<p>Lock the parallel port for opencbm (cbm4linux/cbm4win) use
+<p>Lock the parallel port for OpenCBM (cbm4linux/cbm4win) use
 <tag>unlock</tag>
 <p>Unlock the parallel port from exclusive usage
 <tag>listen</tag>
@@ -1559,18 +1885,18 @@ drives only).
 
 <label id="action-lock">
 <tag>lock</tag>
-This command locks the parallel port for the use by opencbm, so that
+This command locks the parallel port for the use by OpenCBM, so that
 sequences of e.g. <it/talk//<it/read//<it/untalk or <it/listen//<it/write//<it/unlisten/
 are not broken by concurrent processes wanting to access the parallel port.
 
-You should issue <it/cbmctrl lock/ before doing any access to opencbm tools,
+You should issue <it/cbmctrl lock/ before doing any access to OpenCBM tools,
 and <it/cbmctrl unlock/ after you are done.
 
 <label id="action-unlock">
 <tag>unlock</tag>
-This command unlocks the parallel port after the use by opencbm.
+This command unlocks the parallel port after the use by OpenCBM.
 
-You should issue <it/cbmctrl lock/ before doing any access to opencbm tools,
+You should issue <it/cbmctrl lock/ before doing any access to OpenCBM tools,
 and <it/cbmctrl unlock/ after you are done.
 
 <label id="action-listen">
@@ -2170,7 +2496,7 @@ transfer times will dramatically increase.
 
 <tag>-w, --warp</tag>
 Enable warp mode. This is default now; this option is only supported for
-backward-compatibility with opencbm (cbm4linux/cbm4win) versions before 0.4.0.
+backward-compatibility with OpenCBM (cbm4linux/cbm4win) versions before 0.4.0.
 
 <tag>--no-warp</tag>
 Disable warp mode. Warp mode is usually a good idea for transferring disk
@@ -2316,7 +2642,7 @@ transfer times will dramatically increase.
 
 <tag>-w, --warp</tag>
 Enable warp mode. This is default now; this option is only supported for
-backward-compatibility with opencbm (cbm4linux/cbm4win) versions before 0.4.0.
+backward-compatibility with OpenCBM (cbm4linux/cbm4win) versions before 0.4.0.
 
 <p>
 Note that <it/d82copy/ currently supports <it/original/ transfer mode only;
@@ -2480,7 +2806,7 @@ transfer times will dramatically increase.
 
 <tag>-w, --warp</tag>
 Enable warp mode. This is default now; this option is only supported for
-backward-compatibility with opencbm (cbm4linux/cbm4win) versions before 0.4.0.
+backward-compatibility with OpenCBM (cbm4linux/cbm4win) versions before 0.4.0.
 
 <tag>--no-warp</tag>
 Disable warp mode. Warp mode is usually a good idea for transferring disk
@@ -2776,15 +3102,15 @@ cable. Currently, the only documentation for this can be found in the source
 tarball at <it>opencbm/tape/</it>.
 
 
-<sect>opencbm API<label id="opencbm-API">
+<sect>OpenCBM API<label id="opencbm-API">
 <p>
 The OpenCBM API is documented as doxygen file. You can find it only on
-<htmlurl url="http://opencbm.trikaliotis.net/doxygen/" name="http://opencbm.trikaliotis.net/doxygen/">
+<htmlurl url="https://opencbm.trikaliotis.net/doxygen/" name="https://opencbm.trikaliotis.net/doxygen/">
 
 
 <sect>Known bugs and problems<label id="knownbugs">
 <p>
-There are some known bugs in opencbm:
+There are some known bugs and limitations in OpenCBM:
 
 <itemize>
 <item><it/cbmcopy/ is still known to have some protocol races, especially with
@@ -2794,25 +3120,27 @@ There are some known bugs in opencbm:
  Whenever this happens, use <it/--drive-type/ for <it/cbmcopy/ and <it/d64copy/.
  Furthermore, I would be happy if you could send me a ROM dump of the floppy ROM
  so I can update the drive type recognition for some future version of OpenCBM.
-<item>Windows: If you have any other devices connected to your parallel port,
+<item>Windows with XA1541/XM1541: If you have any other devices connected to
+ your parallel port,
  you cannot use them as long as OpenCBM is installed. In this case, either
- remove opencbm whenever you want to access that other device, or install
- opencbm with <it/instcbm --lock=no/ and make sure to issue <it/cbmctrl lock/
+ remove OpenCBM whenever you want to access that other device, or install
+ OpenCBM with <it/instcbm --lock=no/ and make sure to issue <it/cbmctrl lock/
  before accessing the drive, and <it/cbmctrl unlock/ afterwards.
-<item>Windows: No third party PCI or PCIe parallel port card does work with
-  opencbm on Windows currently; to say it with other words: there
+<item>Windows with XA1541/XM1541: No third party PCI or PCIe parallel port card
+  does work with OpenCBM on Windows currently; to say it with other words: there
   is no proof or positive report that any third party PCI or PCIe
-  parallel port card does or did work with opencbm on Windows. The exact
+  parallel port card does or did work with OpenCBM on Windows. The exact
   failure reason is not known to date, but we are investigating
   further since that feature is a must, when integrated parallel
   ports were removed from mainstream mainboards in the future.
   Thus, it would be best if you use XU1541 or XUM1541 adapters instead
   of XA1541 and XM1541!
-<item>Linux: PCI or PCIe based parallel port cards might work, but there
-  is no guarantee for this.
+<item>Linux with XA1541/XM1541: PCI or PCIe based parallel port cards might
+  work, but there is no guarantee for this.
   Thus, it would be best if you use XU1541 or XUM1541 adapters instead
   of XA1541 and XM1541!
-<item>All: An XA1541 or XM1541 cable will definitely <em/not/ work with a
+<item>All with XA1541/XM1541: An XA1541 or XM1541 cable will definitely
+  <em/not/ work with a
   USB-to-parallel-port adapter. These are commonly used to connect parallel port
   printers to modern PCs. However, neither do they offer full access to all
   parallel port lines, as it is needed for the XA1541/XM1541 cables, nor do they
@@ -2945,7 +3273,7 @@ The XUM1541 / ZoomFloppy cable is (C) Jim Brain and Nate Lawson.
 <sect1>Contributions
 
 <p>
-People who directly or indirectly contributed to opencbm (in no particular
+People who directly or indirectly contributed to OpenCBM (in no particular
 order):
 
 <itemize>
@@ -2954,7 +3282,7 @@ order):
 part)
 <item>
 <it>Joe Forster/STA</it> made the Star Commander and supplied the source and
-info about the X?1541 interfaces; who knows, without this work, opencbm might never
+info about the X?1541 interfaces; who knows, without this work, OpenCBM might never
 have appeared at all.
 <item>
 <it/Nicolas Welte/ helped with the XA1541 and XM1541 interfaces and supplied a
@@ -2974,6 +3302,15 @@ whenever it was needed.
 <item>
 <it/Spiro Trikaliotis/ with discussions, lots of fixes and doing an overall
 great review while porting the driver to "other" operating systems ;-)
+<item>
+<it/Andreas Senk/ reported a problem with <htmlurl
+ url="http://www.nlq.de" name="IEC2IEEE"> and donated
+ an IEC2IEEE device. This led to the discovery of a severe protocol bug in the
+ implementation of OpenCBM.
+<item>
+<it/Jochen Adler/, author of <htmlurl
+ url="http://www.nlq.de" name="IEC2IEEE">, helped
+ in debugging the problem Andreas Senk reported (cf. above).
 <item>
 <it/Christian Vogelgsang/ made the MacOS port and documented it.
 <item>
@@ -3010,6 +3347,22 @@ IEEE-488 support for the XUM1541.
 name="http://www.nlq.de/"> and for sending me free
 hardware in order to test it with my SFD1001 and VIC 8250LP.
 <item>
+<it/Andrea Musuruane/ helped in making the Linux udev rules more robust.
+<item>
+<it/David Riley/ and <it/Matt Dainty/ worked on the MacOS X port and installation
+<item>
+<it/Olli Savia/ fixed some memory issues which resulted in overwritten memory areas
+<item>
+<it/Henning Pingel/ fixed some build issues
+<item>
+<it/Martin Thierer/ did a lot in order to debug nasty USB problems with the XUM1541 devices
+<item>
+<it/Felix Palmen/ worked on the FreeBSD port and fixed some portability issues
+<item>
+<it/Dennis Ahrens/ and <it/Peter Stuge/ did the work to port the USB plugins to libusb 1.0, moving away from
+ the outdated libusb-0.1 API.
+
+<item>
 and anyone else who sent patches, suggestions, praises & flames!
 </itemize>
 
@@ -3020,9 +3373,18 @@ and anyone else who sent patches, suggestions, praises & flames!
 Feel free to drop a note if you have ideas, patches etc. or if you just want to
 tell how happy you are with this program ;-)
 
+<p>
+If possible, we would prefer if you send bug reports, patches and wishlist
+itemts to the <htmlurl url="https://github.com/OpenCBM/OpenCBM/issues"
+name="GitHub"> tracker on
+<htmlurl url="https://github.com/OpenCBM/OpenCBM/issues"
+name="https://github.com/OpenCBM/OpenCBM/issues">, and general
+discussions on the SourceForge mailing list `opencbm-user' on <htmlurl
+url="https://sourceforge.net/p/opencbm/mailman/"
+name="https://sourceforge.net/p/opencbm/mailman/">.
 
 Have fun,
 
-The opencbm team.
+The OpenCBM team.
 
 </article>

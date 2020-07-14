@@ -1,12 +1,16 @@
 
-              README for opencbm/cbm4linux 0.4.0
+              README for opencbm/cbm4linux 0.5.0
               ----------------------------------
 
 This README is not maintained separately, but has been integrated
 into the main opencbm documentation, which can be found in the
 docs/ directory.
 
-Either built it yourself:
+Either have a look at the online version
+
+  http://opencbm.trikaliotis.net/
+
+or build it yourself:
 
   cd docs/
   make -f LINUX/Makefile
@@ -21,11 +25,6 @@ or
 
   info opencbm.info (if you are in the docs/ directory)
 
-or have a look at the online version
-
-http://opencbm.trikaliotis.net/
-
 
 Have fun,
-Michael Klein <nip@c64.org>
-Spiro Trikaliotis.
+the OpenCBM team.
