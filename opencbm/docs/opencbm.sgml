@@ -130,7 +130,7 @@ damage or data loss caused by it or by any use of it.
       of OpenCBM, currently, also libusb-0.1 is supported. Note that this support
       will be dropped in some future version of OpenCBM.
 <item>For parallel port based cables:
-      Linux 4.x, 3.x and 2.6 variants, FreeBSD 11.x and newer. Linux 2.0, 2.2 and
+      Linux 5.x, 4.x, 3.x and 2.6 variants, FreeBSD 11.x and newer. Linux 2.0, 2.2 and
       2.4 might still work, but have not been tested for ages. For Linux,
       i386 and AMD64 architectures are supported.
 <item>For parallel port based as well as USB based cables:
