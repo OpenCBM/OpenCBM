@@ -33,7 +33,7 @@ struct opencbm_usb_handle {
 #elif HAVE_LIBUSB0
         usb_dev_handle *devh; /*!< \internal \brief handle to the xu1541 device */
 #else
-#error Nothing defined!
+#error Could not find the libusb 1.0 development packages. Please install them and retry!
 #endif
 };
 
