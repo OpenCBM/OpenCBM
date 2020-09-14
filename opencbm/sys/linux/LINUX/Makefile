@@ -16,7 +16,7 @@ all: cbm.o
 
 .PHONY: all clean mrproper install uninstall install-files checksources
 clean:
-	rm -f cbm.mod.c cbm.mod *.o *.ko .cbm* Modules.symvers
+	rm -f cbm.mod.c cbm.mod *.o *.ko .cbm* Modules.symvers .Module.symvers.cmd .modules.order.cmd
 	rm -fr .tmp_versions
 	rm -f Makefile
 	rm -f Module.symvers modules.order
