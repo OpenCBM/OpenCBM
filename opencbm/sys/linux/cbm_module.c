@@ -1005,6 +1005,12 @@ static void cbm_interrupt_pp(void *dev_id)
 }
 #endif /* DIRECT_PORT_ACCESS */
 
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(4,19,0))
+# define HAVE_PARPORT_REGISTER_DEV_MODEL 1
+#else
+# undef HAVE_PARPORT_REGISTER_DEV_MODEL
+#endif
+
 static const struct file_operations cbm_fops = {
     .owner      = THIS_MODULE,
     .read       = cbm_read,
@@ -1036,6 +1042,15 @@ void cbm_cleanup(void)
     CBMPROCFS_CLEANUP
 }
 
+#ifdef HAVE_PARPORT_REGISTER_DEV_MODEL
+static const struct pardev_cb cbm_pardev_cb = {
+    NULL,             // int (*preempt)(void *);
+    NULL,             // void (*wakeup)(void *);
+    NULL,             // void *private;
+    cbm_interrupt_pp, // void (*irq_func)(void *);
+    PARPORT_DEV_EXCL  //unsigned int flags;
+};
+#endif
 int cbm_init(void)
 {
     unsigned char in, out;
@@ -1070,9 +1085,13 @@ int cbm_init(void)
         return -ENODEV;
     }
 
+#ifdef HAVE_PARPORT_REGISTER_DEV_MODEL
+    cbm_device = parport_register_dev_model(pp, NAME, &cbm_pardev_cb, 123);
+#else
     cbm_device = parport_register_device(pp, NAME, NULL, NULL,
                          cbm_interrupt_pp,
                          PARPORT_DEV_EXCL, NULL);
+#endif
     if (cbm_device == NULL) {
         printk("cbm_init: could not register with parallel port\n");
         return -EBUSY;
