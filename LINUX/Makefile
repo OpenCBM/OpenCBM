@@ -66,7 +66,7 @@ all-doc: all doc
 
 # dependencies:
 $(call CREATE_TARGETS,opencbm/lib,all):: $(call CREATE_TARGET,opencbm/arch/$(OS_ARCH) opencbm/libmisc,all)
-$(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),all):: $(call CREATE_TARGET,opencbm/lib,all)
+$(call CREATE_TARGETS,$(filter-out $(SUBDIRS_PLUGIN_XA1541),$(SUBDIRS_ALL_NON_OPTIONAL)) $(SUBDIRS_OPTIONAL),all):: $(call CREATE_TARGET,opencbm/lib,all)
 $(call CREATE_TARGETS,opencbm/sample/libtrans,all):: $(call CREATE_TARGET,opencbm/libtrans,all)
 
 $(call CREATE_TARGETS,opencbm/lib,install):: $(call CREATE_TARGET,opencbm/arch/$(OS_ARCH) opencbm/libmisc,install)
