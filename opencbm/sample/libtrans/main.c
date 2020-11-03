@@ -336,6 +336,61 @@ read_line_status(CBM_FILE fd)
 }
 
 static int
+main_showlines(int argc, char **argv)
+{
+    /* CBM_FILE fd; */
+    int rv;
+
+    FUNC_ENTER();
+
+    do
+    {
+        int data = -1;
+        int clock = -1;
+        int atn = -1;
+        int reset = -1;
+        int pp = -1;
+
+        rv = cbm_driver_open(&fd, 0);
+
+        if (rv != 0)
+            break;
+
+        while (1) {
+                int data1  = cbm_iec_get(fd, IEC_DATA);
+                int clock1 = cbm_iec_get(fd, IEC_CLOCK);
+                int atn1   = cbm_iec_get(fd, IEC_ATN);
+                int reset1 = cbm_iec_get(fd, IEC_RESET);
+                int pp1    = cbm_pp_read(fd);
+
+                if ( (data != data1)
+                        || (clock != clock1)
+                        || (atn != atn1)
+                        || (reset != reset1)
+                        || (pp != pp1)
+                   )
+                {
+                    data = data1;
+                    clock = clock1;
+                    atn = atn1;
+                    reset = reset1;
+                    pp = pp1;
+
+                    fprintf(stderr,
+                        "READ: DATA = %s, CLOCK = %s, ATN = %s, RESET = %s, PP = $%02x\n",
+                        data  ? "TRUE " : "FALSE",
+                        clock ? "TRUE " : "FALSE",
+                        atn   ? "TRUE " : "FALSE",
+                        reset ? "TRUE " : "FALSE",
+                        pp);
+                }
+        }
+    } while (0);
+
+    return 0;
+}
+
+static int
 main_testlines(int argc, char **argv)
 {
     /* CBM_FILE fd; */
@@ -430,6 +485,9 @@ ARCH_MAINDECL main(int argc, char **argv)
     arch_set_ctrlbreak_handler(handle_CTRL_C);
 
     if (argc > 1) {
+        if (strcmp(argv[1], "--show")==0) {
+            return main_showlines(argc, argv);
+        }
         if (strcmp(argv[1], "--lines")==0) {
             return main_testlines(argc, argv);
         }
