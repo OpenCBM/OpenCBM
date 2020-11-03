@@ -540,6 +540,96 @@ static int do_iec_uclk(CBM_FILE fd, OPTIONS * const options)
 }
 
 /*
+ * Simple wrapper for data
+ */
+static int do_iec_data(CBM_FILE fd, OPTIONS * const options)
+{
+    int rv = skip_options(options);
+
+    rv = rv || check_if_parameters_ok(options);
+
+    if (rv == 0)
+        cbm_iec_set(fd, IEC_DATA);
+
+    return rv;
+}
+
+/*
+ * Simple wrapper for udata
+ */
+static int do_iec_udata(CBM_FILE fd, OPTIONS * const options)
+{
+    int rv = skip_options(options);
+
+    rv = rv || check_if_parameters_ok(options);
+
+    if (rv == 0)
+        cbm_iec_release(fd, IEC_DATA);
+
+    return rv;
+}
+
+/*
+ * Simple wrapper for atn
+ */
+static int do_iec_atn(CBM_FILE fd, OPTIONS * const options)
+{
+    int rv = skip_options(options);
+
+    rv = rv || check_if_parameters_ok(options);
+
+    if (rv == 0)
+        cbm_iec_set(fd, IEC_ATN);
+
+    return rv;
+}
+
+/*
+ * Simple wrapper for uatn
+ */
+static int do_iec_uatn(CBM_FILE fd, OPTIONS * const options)
+{
+    int rv = skip_options(options);
+
+    rv = rv || check_if_parameters_ok(options);
+
+    if (rv == 0)
+        cbm_iec_release(fd, IEC_ATN);
+
+    return rv;
+}
+
+/*
+ * Simple wrapper for reset
+ */
+static int do_iec_reset(CBM_FILE fd, OPTIONS * const options)
+{
+    int rv = skip_options(options);
+
+    rv = rv || check_if_parameters_ok(options);
+
+    if (rv == 0)
+        cbm_iec_set(fd, IEC_RESET);
+
+    return rv;
+}
+
+/*
+ * Simple wrapper for ureset
+ */
+static int do_iec_ureset(CBM_FILE fd, OPTIONS * const options)
+{
+    int rv = skip_options(options);
+
+    rv = rv || check_if_parameters_ok(options);
+
+    if (rv == 0)
+        cbm_iec_release(fd, IEC_RESET);
+
+    return rv;
+}
+
+/*
  * Simple wrapper for listen
  */
 static int do_listen(CBM_FILE fd, OPTIONS * const options)
@@ -1696,6 +1786,30 @@ static struct prog prog_table[] =
     {1, "uclk"    , PA_UNSPEC,  do_iec_uclk , "",
         "Unset the clk line on the IEC bus.",
         "This command unconditionally unsets the CLK line on the IEC bus." },
+
+    {1, "data"    , PA_UNSPEC,  do_iec_data , "",
+        "Set the data line on the IEC bus.",
+        "This command unconditionally sets the DATA line on the IEC bus." },
+
+    {1, "udata"   , PA_UNSPEC,  do_iec_udata, "",
+        "Unset the data line on the IEC bus.",
+        "This command unconditionally unsets the DATA line on the IEC bus." },
+
+    {1, "atn"     , PA_UNSPEC,  do_iec_atn  , "",
+        "Set the atn line on the IEC bus.",
+        "This command unconditionally sets the ATN line on the IEC bus." },
+
+    {1, "uatn"    , PA_UNSPEC,  do_iec_uatn , "",
+        "Unset the atn line on the IEC bus.",
+        "This command unconditionally unsets the ATN line on the IEC bus." },
+
+    {1, "ireset"  , PA_UNSPEC,  do_iec_reset, "",
+        "Set the resetn line on the IEC bus.",
+        "This command unconditionally sets the RESET line on the IEC bus." },
+
+    {1, "uireset" , PA_UNSPEC,  do_iec_ureset , "",
+        "Unset the reset line on the IEC bus.",
+        "This command unconditionally unsets the RESET line on the IEC bus." },
 
     {1, "reset"   , PA_UNSPEC,  do_reset   , "",
         "reset all drives on the IEC bus",
