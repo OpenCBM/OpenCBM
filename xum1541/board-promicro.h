@@ -179,9 +179,9 @@ iec_srq_write(uint8_t data)
         IEC_DDR = (((data >> 5) & IO_DATA) ^ IO_DATA) | IO_SRQ;
 
         data <<= 1;          // get next bit: 1 clock
-        DELAY_US(0.2);       // (nibtools relies on this timing, do not change)
+        DELAY_US(0.3);       // (nibtools relies on this timing, do not change)
         iec_release(IO_SRQ); // release SRQ: 2 clocks
-        DELAY_US(0.935);     // (nibtools relies on this timing, do not change)
+        DELAY_US(0.80);      // (nibtools relies on this timing, do not change)
 
         // Decrement i and loop: 3 clock cycles when branch taken
         // Total: 13 clocks per loop (minus delays); 19 clocks left.
