@@ -67,6 +67,7 @@ static struct XumDevice validDeviceTypes[] = {
 // Maximum size the firmware could be
 #define AVR_MAX_FW_SIZE     262144
 
+static int StartBootloader(char *deviceType);
 static int RunUpdate(dfu_device_t *devHandle, char *firmwareFile,
      char *deviceType, int forceFlag);
 static int PrintFirmwareInfo(char *firmwareFile);
@@ -109,6 +110,37 @@ int debug;  // Used by dfu-programmer
 libusb_context *usbcontext;
 #endif
 
+
+// put the given device into bootloader mode, so it can be programmed
+// (for example, with avrdude)
+static int
+StartBootloader(char *deviceType)
+{
+    int ret;
+#if HAVE_LIBUSB0
+    usb_dev_handle *usbHandle;
+#elif HAVE_LIBUSB1
+    libusb_device_handle *usbHandle;
+    libusb_device *usbDevice;
+#endif
+
+    // Find an xum1541 device
+    fprintf(stderr, "finding and preparing device for update...\n");
+#if HAVE_LIBUSB0
+    ret = GetXumDevice(deviceType, &usbHandle);
+#elif HAVE_LIBUSB1
+    ret = GetXumDevice(deviceType, &usbHandle, &usbDevice);
+#endif
+    if (ret == 0) {
+        ret = SetDFUMode(usbHandle);
+        if (ret != 0)
+            return ret;
+    } else {
+        fprintf(stderr, "warning: no xum1541 found\n");
+    }
+
+    return 0;
+}
 
 // Update a device with new firmware from a file
 static int
@@ -623,6 +655,9 @@ usage(void)
 "    Updates the firmware of an xum1541 device. Optional flags:\n"
 "      -t type: specify the device type (defaults to \"ZOOMFLOPPY\")\n"
 "      -f: force update to given firmware. USE WITH CAUTION!\n"
+"* bootloader\n"
+"    Put the xum1541 device into bootloader mode. Optional flags:\n"
+"      -t type: specify the device type (defaults to \"ZOOMFLOPPY\")\n"
 "* info xum1541-firmware.hex\n"
 "    Prints info extracted from the firmware file argument.\n"
 "* devinfo\n"
@@ -710,6 +745,9 @@ main(int argc, char *argv[])
             goto error;
         }
         if (RunUpdate(&dfuDevice, argv[1], deviceType, force) != 0)
+            goto error;
+    } else if (!strcmp(*argv, "bootloader")) {
+        if (StartBootloader(deviceType) != 0)
             goto error;
     } else if (!strcmp(*argv, "info")) {
         if (PrintFirmwareInfo(argv[1]) != 0)
