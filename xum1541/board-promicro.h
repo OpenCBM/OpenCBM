@@ -171,14 +171,15 @@ iec_srq_write(uint8_t data)
     for (i = 8; i != 0; --i) {
         /*
          * Take the high bit of the data byte. Shift it down to the IO_DATA
-         * pin for the ZF board. Combine it (inverted) with the IO_SRQ line
-         * being set. Write both of these to port D at the same time.
+         * pin for the board. Combine it (inverted) with the IO_SRQ line
+         * being set. Write both of these to the port at the same time.
          *
-         * This is 7 clock cycles with gcc 9.1.0 at both -Os and -O2.
+         * This is 8 clock cycles with gcc 9.1.0 at both -Os and -O2.
          */
-        PORTD = (((data >> 4) & IO_DATA) ^ IO_DATA) | IO_SRQ;
+        IEC_DDR = (((data >> 5) & IO_DATA) ^ IO_DATA) | IO_SRQ;
+
         data <<= 1;          // get next bit: 1 clock
-        DELAY_US(0.3);       // (nibtools relies on this timing, do not change)
+        DELAY_US(0.2);       // (nibtools relies on this timing, do not change)
         iec_release(IO_SRQ); // release SRQ: 2 clocks
         DELAY_US(0.935);     // (nibtools relies on this timing, do not change)
 
