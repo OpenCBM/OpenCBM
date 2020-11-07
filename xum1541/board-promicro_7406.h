@@ -210,20 +210,22 @@ INLINE void
 iec_srq_write(uint8_t data)
 {
     uint8_t i;
+    uint8_t port_base_data = (IEC_B_PORT & IO_ATN) | IO_SRQ;
 
     for (i = 8; i != 0; --i) {
         /*
          * Take the high bit of the data byte. Shift it down to the IO_DATA
-         * pin for the ZF board. Combine it (inverted) with the IO_SRQ line
-         * being set. Write both of these to port D at the same time.
+         * pin for the board. Combine it (inverted) with the IO_SRQ line
+         * being set. Write both of these to port B at the same time.
          *
-         * This is 7 clock cycles with gcc 9.1.0 at both -Os and -O2.
+         * This is 8 clock cycles with gcc 9.1.0 at both -Os and -O2.
          */
-        PORTD = (((data >> 4) & IO_DATA) ^ IO_DATA) | IO_SRQ;
+        IEC_B_PORT = (((data >> 5) & IO_DATA) ^ IO_DATA) | port_base_data;
+
         data <<= 1;          // get next bit: 1 clock
         DELAY_US(0.3);       // (nibtools relies on this timing, do not change)
         iec_release(IO_SRQ); // release SRQ: 2 clocks
-        DELAY_US(0.935);     // (nibtools relies on this timing, do not change)
+        DELAY_US(0.80);      // (nibtools relies on this timing, do not change)
 
         // Decrement i and loop: 3 clock cycles when branch taken
         // Total: 13 clocks per loop (minus delays); 19 clocks left.
