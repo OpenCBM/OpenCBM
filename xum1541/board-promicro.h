@@ -167,6 +167,7 @@ INLINE void
 iec_srq_write(uint8_t data)
 {
     uint8_t i;
+    uint8_t port_base_data = (IEC_DDR & IO_ATN) | IO_SRQ;
 
     for (i = 8; i != 0; --i) {
         /*
@@ -176,7 +177,7 @@ iec_srq_write(uint8_t data)
          *
          * This is 8 clock cycles with gcc 9.1.0 at both -Os and -O2.
          */
-        IEC_DDR = (((data >> 5) & IO_DATA) ^ IO_DATA) | IO_SRQ;
+        IEC_DDR = (((data >> 5) & IO_DATA) ^ IO_DATA) | port_base_data;
 
         data <<= 1;          // get next bit: 1 clock
         DELAY_US(0.3);       // (nibtools relies on this timing, do not change)
