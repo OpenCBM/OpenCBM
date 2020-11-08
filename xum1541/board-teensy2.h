@@ -31,7 +31,7 @@ void board_init_iec(void);
 #define PAR_PORT_PORT   PORTB
 #define PAR_PORT_DDR    DDRB
 #define PAR_PORT_PIN    PINB
-#define SRQ_NIB_SUPPORT
+#define SRQ_NIB_SUPPORT 1
 
 /*
  * Use always_inline to override gcc's -Os option. Since we measured each
