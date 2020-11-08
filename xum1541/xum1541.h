@@ -50,7 +50,7 @@
 #include "cpu-promicro.h"
 #include "board-promicro.h"
 #elif MODEL == PROMICRO_7406
-#include "cpu-promicro_7406.h"
+#include "cpu-promicro.h"
 #include "board-promicro_7406.h"
 #endif
 

@@ -26,13 +26,28 @@ cpu_init(void)
 static inline void
 cpu_bootloader_start(void)
 {
+    // this is uint16_t on the original Caterina bootloader,
+    // and uint8_t on the sparkfun variant
+    // However, as the value written is 0x7777 for uint16_t and
+    // 0x77 for uint8_t, we are compatible with both bootloaders
+    // if we do as if it were always uint16_t.
+    //
+    volatile static uint16_t *const bootKeyPtr = (volatile uint16_t *) 0x0800;
+    enum { bootKey = 0x7777 };
+
     // Disable timer and then jump to bootloader address
     TCCR1B = 0;
     OCR1A = 0;
 
-    // Jump to Caterina bootloader
-	// nisam siguran za ovo
-    __asm__ __volatile__ ("jmp 0x3800" "\n\t");
+    // pretend that there was already a previous reset
+    *bootKeyPtr = bootKey;
+
+    // Jump to Caterina bootloader by doing a WD reset,
+    // so the bootloader recognizes it as a HW reset
+    //
+    wdt_enable(WDTO_15MS);
+    while (true)
+        ;
 }
 
 // Timer and delay functions
