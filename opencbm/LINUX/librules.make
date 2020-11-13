@@ -41,7 +41,7 @@ install-lib:
 	install -d $(DESTDIR)$(LIBDIR)
 	install -m 755 $(SHLIBV3) $(DESTDIR)$(LIBDIR)
 	install -m 644 $(LIB) $(DESTDIR)$(LIBDIR)
-	cd $(DESTDIR)$(LIBDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
+	cd $(DESTDIR)$(LIBDIR) && ln -sf $(SHLIBV3) $(SHLIBV) && ln -sf $(SHLIBV) $(SHLIB)
 	# Install the plugin helper tool
 	install -d $(DESTDIR)$(BINDIR)
 	install -m 755 ${RELATIVEPATH}/LINUX/plugin_helper_tools $(DESTDIR)$(BINDIR)/opencbm_plugin_helper_tools
