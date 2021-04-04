@@ -498,10 +498,14 @@ int ARCH_MAINDECL main(int argc, char **argv)
                                 strncpy(buf, auto_name, 16);
                                 buf[16] = '\0';
                             }
-                            strcat(buf, ",x");
-                            buf[strlen(buf)-1] =
-                                output_type ? output_type : auto_type;
-                            strcat(buf, ",W");
+                            for(tail = buf; *tail; tail++)
+                            {
+                                /* replace illegal characters in CBM filename */
+                                if(strchr(":?*,=", *tail)) *tail = ' ';
+                            }
+                            *tail++ = ',';
+                            *tail++ = output_type ? output_type : auto_type;
+                            strcpy(tail, ",W");
 
                             my_message_cb( sev_info,
                                            "writing %s -> %s", fname, buf );
