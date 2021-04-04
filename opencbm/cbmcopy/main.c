@@ -577,18 +577,21 @@ int ARCH_MAINDECL main(int argc, char **argv)
                             case 'u': ext = "usr"; break;
                         }
                     }
-                    fs_name = malloc(strlen(fname) + strlen(ext) + 2);
-                    if(fs_name) sprintf(fs_name, "%s.%s", fname, ext);
-                }
 
-                if(fs_name)
-                {
-                    for(tail = fs_name; *tail; tail++)
+                    fs_name = malloc(strlen(fname) + strlen(ext) + 2);
+                    if(fs_name)
                     {
-                        if(*tail == '/') *tail = '_';
+                        strcpy(fs_name, fname);
+                        for(tail = fs_name; *tail; tail++)
+                        {
+                            if(*tail == '/') *tail = '_';
+                        }
+                        *tail++ = '.';
+                        strcpy(tail, ext);
                     }
                 }
-                else
+
+                if(!fs_name)
                 {
                     /* should not happen... */
                     cbm_driver_close( fd );
