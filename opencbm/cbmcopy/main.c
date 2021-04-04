@@ -584,7 +584,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
                         strcpy(fs_name, fname);
                         for(tail = fs_name; *tail; tail++)
                         {
-                            if(*tail == '/') *tail = '_';
+                            if(strchr("\\/\"<>|", *tail)) *tail = '_';
                         }
                         *tail++ = '.';
                         strcpy(tail, ext);
