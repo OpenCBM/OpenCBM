@@ -507,8 +507,17 @@ int ARCH_MAINDECL main(int argc, char **argv)
                             *tail++ = output_type ? output_type : auto_type;
                             strcpy(tail, ",W");
 
+                            /* convert result to ASCII for display */
+                            tail = strdup(buf);
+                            /* use buf as fallback if allocation failed */
+                            if(tail) cbm_petscii2ascii(tail);
+                            else tail = buf;
+
                             my_message_cb( sev_info,
-                                           "writing %s -> %s", fname, buf );
+                                           "writing %s -> %s", fname, tail );
+
+                            /* tail == buf means allocation failed */
+                            if(tail != buf) free(tail);
 
                             if(address >= 0 && filesize > 1)
                             {
@@ -603,7 +612,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
                     exit(1);
                 }
 
-                my_message_cb( sev_info, "reading %s -> %s", buf, fs_name );
+                my_message_cb( sev_info, "reading %s -> %s", fname, fs_name );
 
                 if(cbmcopy_read_file(fd, settings, drive, buf, strlen(buf),
                                      &filedata, &filesize,
