@@ -486,7 +486,6 @@ int ARCH_MAINDECL main(int argc, char **argv)
                                     auto_name, &auto_type,
                                     &filedata, &filesize, my_message_cb ) == 0)
                         {
-                            buf[16] = '\0';
                             if(output_name)
                             {
                                 sprintf(buf, "%.16s", output_name);
