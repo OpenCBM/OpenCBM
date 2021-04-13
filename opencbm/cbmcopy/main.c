@@ -486,16 +486,17 @@ int ARCH_MAINDECL main(int argc, char **argv)
                                     auto_name, &auto_type,
                                     &filedata, &filesize, my_message_cb ) == 0)
                         {
-                            buf[16] = '\0';
                             if(output_name)
                             {
                                 strncpy(buf, output_name, 16);
+                                buf[16] = '\0';
                                 cbm_ascii2petscii(buf);
                             }
                             else
                             {
                                 /* no charset conversion */
                                 strncpy(buf, auto_name, 16);
+                                buf[16] = '\0';
                             }
                             strcat(buf, ",x");
                             buf[strlen(buf)-1] =
