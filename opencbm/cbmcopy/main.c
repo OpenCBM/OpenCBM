@@ -488,13 +488,15 @@ int ARCH_MAINDECL main(int argc, char **argv)
                         {
                             if(output_name)
                             {
-                                sprintf(buf, "%.16s", output_name);
+                                strncpy(buf, output_name, 16);
+                                buf[16] = '\0';
                                 cbm_ascii2petscii(buf);
                             }
                             else
                             {
                                 /* no charset conversion */
-                                sprintf(buf, "%.16s", auto_name);
+                                strncpy(buf, auto_name, 16);
+                                buf[16] = '\0';
                             }
                             strcat(buf, ",x");
                             buf[strlen(buf)-1] =
