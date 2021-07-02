@@ -156,6 +156,16 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                     deviceString = "64'er DOS 1541";
                     break;
 
+                case 0x180d:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "Turbo Access / Turbo Trans";
+                    break;
+
+                case 0x094c:
+                    deviceType = cbm_dt_cbm1541;
+                    deviceString = "Prologic DOS";
+                    break;
+
                 case 0xfed7:
                     deviceType = cbm_dt_cbm1570;
                     deviceString = "1570";
