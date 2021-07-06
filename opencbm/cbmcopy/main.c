@@ -498,13 +498,26 @@ int ARCH_MAINDECL main(int argc, char **argv)
                                 strncpy(buf, auto_name, 16);
                                 buf[16] = '\0';
                             }
-                            strcat(buf, ",x");
-                            buf[strlen(buf)-1] =
-                                output_type ? output_type : auto_type;
-                            strcat(buf, ",W");
+                            for(tail = buf; *tail; tail++)
+                            {
+                                /* replace illegal characters in CBM filename */
+                                if(strchr(":?*,=", *tail)) *tail = ' ';
+                            }
+                            *tail++ = ',';
+                            *tail++ = output_type ? output_type : auto_type;
+                            strcpy(tail, ",W");
+
+                            /* convert result to ASCII for display */
+                            tail = strdup(buf);
+                            /* use buf as fallback if allocation failed */
+                            if(tail) cbm_petscii2ascii(tail);
+                            else tail = buf;
 
                             my_message_cb( sev_info,
-                                           "writing %s -> %s", fname, buf );
+                                           "writing %s -> %s", fname, tail );
+
+                            /* tail == buf means allocation failed */
+                            if(tail != buf) free(tail);
 
                             if(address >= 0 && filesize > 1)
                             {
@@ -577,18 +590,21 @@ int ARCH_MAINDECL main(int argc, char **argv)
                             case 'u': ext = "usr"; break;
                         }
                     }
-                    fs_name = malloc(strlen(fname) + strlen(ext) + 2);
-                    if(fs_name) sprintf(fs_name, "%s.%s", fname, ext);
-                }
 
-                if(fs_name)
-                {
-                    for(tail = fs_name; *tail; tail++)
+                    fs_name = malloc(strlen(fname) + strlen(ext) + 2);
+                    if(fs_name)
                     {
-                        if(*tail == '/') *tail = '_';
+                        strcpy(fs_name, fname);
+                        for(tail = fs_name; *tail; tail++)
+                        {
+                            if(strchr("\\/\"<>|", *tail)) *tail = '_';
+                        }
+                        *tail++ = '.';
+                        strcpy(tail, ext);
                     }
                 }
-                else
+
+                if(!fs_name)
                 {
                     /* should not happen... */
                     cbm_driver_close( fd );

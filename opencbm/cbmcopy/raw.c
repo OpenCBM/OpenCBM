@@ -39,7 +39,26 @@ static int read(FILE *file, const char *fname, int entry,
         }
     }
 
+    *type = 'P';
     strncpy(cbmname, tail ? tail+1 : fname, 16);
+    tail = strrchr(cbmname, '.');
+    if(tail)
+    {
+        if (strcasecmp(tail, ".prg") == 0)
+        {
+            *tail = '\0';
+        }
+        else if (strcasecmp(tail, ".seq") == 0)
+        {
+            *type = 'S';
+            *tail = '\0';
+        }
+        else if (strcasecmp(tail, ".usr") == 0)
+        {
+            *type = 'U';
+            *tail = '\0';
+        }
+    }
     for(tail = cbmname; *tail; tail++)
     {
         switch(*tail)
@@ -52,7 +71,6 @@ static int read(FILE *file, const char *fname, int entry,
                 break;
         }
     }
-    *type = 'P';
     *data = NULL;
 
     if(entry == 0 && fseek( file, 0L, SEEK_END ) == 0 )
