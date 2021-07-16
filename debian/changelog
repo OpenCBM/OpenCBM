@@ -1,3 +1,9 @@
+opencbm (0.4.99.103) unstable; urgency=low
+
+  * Update to v0.4.99.103
+
+ -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Fri, 16 Jul 2021 21:56:53 +0200
+
 opencbm (0.4.99.102.git.1593016058.07635d9e) unstable; urgency=low
 
   * Compile latest version.
