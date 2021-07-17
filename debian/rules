@@ -57,7 +57,9 @@ clean:
 	# if we have a source tar with .orig., we are building quilt, not native
 	# (obs). Adjust the source format accordingly.
 ifneq ($(wildcard /usr/src/packages/SOURCES.DEB/opencbm_*.orig.tar*),)
-	echo "3.0 (quilt)" > debian/source/format
+ifneq ($(wildcard debian/source/format),)
+	rm -- debian/source/format
+endif
 endif
 
 install: build
