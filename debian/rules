@@ -54,15 +54,6 @@ clean:
 
 	dh_clean
 
-	# if we have a source tar with .orig., we are building quilt, not native
-	# (obs). Adjust the source format accordingly.
-ifneq ($(wildcard /usr/src/packages/SOURCES.DEB/opencbm_*.orig.tar*),)
-ifneq ($(wildcard debian/source/format),)
-	echo Removing debian source format
-	rm -- debian/source/*
-endif
-endif
-
 install: build
 	dh_testdir
 	dh_testroot
