@@ -58,7 +58,8 @@ clean:
 	# (obs). Adjust the source format accordingly.
 ifneq ($(wildcard /usr/src/packages/SOURCES.DEB/opencbm_*.orig.tar*),)
 ifneq ($(wildcard debian/source/format),)
-	rm -- debian/source/format
+	echo Removing debian source format
+	rm -- debian/source/*
 endif
 endif
 
