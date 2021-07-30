@@ -19,8 +19,10 @@
 # TEENSY: Teensy 2.0 USB Development Board with 16 MHz ATMEGA32U4 cpu
 # PROMICRO: Arduino Pro Micro USB Development Board with 16 MHz ATMEGA32U4 cpu
 # PROMICRO_7406: Arduino Pro Micro USB Development Board with 16 MHz ATMEGA32U4 with a 7406
+# MINIMUS: Minimus AVR USB development board with 16 MHz AT90USB162 cpu with 16K flash
+# MINIMUS32: Minimus AVR 32K USB development board with 16 MHz ATmega32U2 cpu with 32K flash
 
-MODELS= USBKEY ZOOMFLOPPY BUMBLEB OLIMEX TEENSY2 PROMICRO PROMICRO_7406
+MODELS= USBKEY ZOOMFLOPPY BUMBLEB OLIMEX TEENSY2 PROMICRO PROMICRO_7406 MINIMUS MINIMUS32
 .PHONY: $(MODELS)
 
 # Enable to get debug printing via the UART (port D)
@@ -75,6 +77,16 @@ CPUMODEL=	atmega32u4
 CPURATE=	16000000
 BOARD=		BOARD_PROMICRO_7406
 BOARD_OBJS=	board-promicro_7406.o
+else ifeq ($(MODEL),MINIMUS)
+CPUMODEL=	at90usb162
+CPURATE=	16000000
+BOARD=		BOARD_MINIMUS
+BOARD_OBJS=	board-minimus.o
+else ifeq ($(MODEL),MINIMUS32)
+CPUMODEL=	atmega32u2
+CPURATE=	16000000
+BOARD=		BOARD_MINIMUS32
+BOARD_OBJS=	board-minimus.o
 endif
 
 # Final name for firmware hex file
