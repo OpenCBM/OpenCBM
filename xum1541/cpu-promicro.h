@@ -21,6 +21,13 @@ cpu_init(void)
 
     // Enable watchdog timer and set for 1 second.
     wdt_enable(WDTO_1S);
+
+    // Do a clean restart via WD reset if USB was already enabled by the
+    // bootloader. Otherwise the VBUSTI interrupt, that main() is waiting
+    // for, might never happen.
+    if (USBCON & _BV(USBE))
+        while (true)
+            ;
 }
 
 static inline void
