@@ -30,6 +30,9 @@
 #define XUM1541_SHUTDOWN            (XUM1541_ECHO + 3)
 #define XUM1541_ENTER_BOOTLOADER    (XUM1541_ECHO + 4)
 #define XUM1541_TAP_BREAK           (XUM1541_ECHO + 5)
+#define XUM1541_GITREV              (XUM1541_ECHO + 6)
+#define XUM1541_GCCVER              (XUM1541_ECHO + 7)
+#define XUM1541_LIBCVER             (XUM1541_ECHO + 8)
 
 // Adapter capabilities, but device may not support them
 #define XUM1541_CAP_CBM             0x01 // supports CBM commands

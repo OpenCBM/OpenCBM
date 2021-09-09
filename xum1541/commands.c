@@ -574,6 +574,15 @@ enterBootLoader(void)
 }
 
 /*
+ * git revision (if known) plus gcc and libc version strings for XUM1541_GITREV,
+ * XUM1541_GCCVER and XUM1541_LIBCVER control messages.
+ * To be used by the host in diagnostic messages.
+ */
+static const char gitRevision[] PROGMEM = __XUM1541_GIT_REVISION__;
+static const char gccVersion[] PROGMEM = __VERSION__;
+static const char libcVersion[] PROGMEM = __AVR_LIBC_VERSION_STRING__;
+
+/*
  * Process the given USB control command, storing the result in replyBuf
  * and returning the number of output bytes. Returns -1 if command is
  * invalid. All control processing has to happen until completion (no
@@ -645,6 +654,15 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
         cmds->cbm_reset(false);
         return 0;
 #endif // TAPE_SUPPORT
+    case XUM1541_GITREV:
+        strncpy_P((char *)replyBuf, gitRevision, XUM_DEVINFO_SIZE);
+        return XUM_DEVINFO_SIZE;
+    case XUM1541_GCCVER:
+        strncpy_P((char *)replyBuf, gccVersion, XUM_DEVINFO_SIZE);
+        return XUM_DEVINFO_SIZE;
+    case XUM1541_LIBCVER:
+        strncpy_P((char *)replyBuf, libcVersion, XUM_DEVINFO_SIZE);
+        return XUM_DEVINFO_SIZE;
     default:
         DEBUGF(DBG_ERROR, "ERR: control cmd %d not impl\n", cmd);
         return -1;

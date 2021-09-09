@@ -515,7 +515,7 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
 {
     struct opencbm_usb_handle *HandleXum1541;
     unsigned char devInfo[XUM_DEVINFO_SIZE], devStatus;
-    int len, ret;
+    int cmd, len, ret;
     int success = 0;
 
     if (HandleXum1541_p == NULL) {
@@ -642,6 +642,47 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
 
         success = 1;
 
+        // extended compile infos are not supported in firmware versions < 8
+        if (devInfo[0] < 8) {
+            break;
+        }
+
+        /*
+         * Check if the firmware supports the extended compile info commands
+         * and, if so, print their results to the debug log.
+         *
+         * Silently ignore a possible error.
+         */
+        for (cmd = XUM1541_GITREV; cmd <= XUM1541_LIBCVER; cmd++) {
+#if HAVE_LIBUSB0
+            len = usb.control_msg(HandleXum1541->devh,
+                USB_TYPE_CLASS | USB_ENDPOINT_IN,
+                cmd, 0, 0, (char*)devInfo, sizeof(devInfo), USB_TIMEOUT);
+#elif HAVE_LIBUSB1
+            len = usb.control_transfer(HandleXum1541->devh,
+                LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_ENDPOINT_IN,
+                cmd, 0, 0, devInfo, sizeof(devInfo), USB_TIMEOUT);
+#endif
+            if (len <= 0) {
+                break;
+            }
+
+            // Command returned data
+            switch (cmd) {
+                case XUM1541_GITREV:
+                    xum1541_dbg(1, "firmware git revision is %.*s",
+                        XUM_DEVINFO_SIZE, devInfo);
+                    break;
+                case XUM1541_GCCVER:
+                    xum1541_dbg(1, "compiled with avr-gcc version %.*s",
+                        XUM_DEVINFO_SIZE, devInfo);
+                    break;
+                case XUM1541_LIBCVER:
+                    xum1541_dbg(1, "and using avr-libc version %.*s",
+                        XUM_DEVINFO_SIZE, devInfo);
+                    break;
+            }
+        }
     } while (0);
 
     /* error cleanup */

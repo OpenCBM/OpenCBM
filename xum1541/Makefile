@@ -83,10 +83,14 @@ MODELVERSION= xum1541-$(MODEL)-v$(XUMFW_VERSION)
 # Resulting full revision number for model and firmware version
 REVISION=$(shell grep '\#define $(MODEL)' xum1541.h | sed 's/\#define $(MODEL)//' | xargs printf "%02X")$(XUMFW_VERSION)
 
+# git revision or "unknown" if either not a git repo or git command unavailable
+GITREV=$(shell git describe --always --exclude '*' || echo 'unknown')
+
 # If we wanted to reduce inlining to save size, these flags might be a
 # good start:
 #   --param inline-call-cost=2 -finline-limit=3 -fno-inline-small-functions
 CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
+        -D__XUM1541_GIT_REVISION__="\"$(GITREV)\"" \
         -DF_CPU=$(CPURATE)UL -DF_CLOCK=F_CPU -mmcu=$(CPUMODEL) \
         -Os -g -Werror -Wall -Wstrict-prototypes -Wundef \
         -Winline -Wno-error=inline -std=gnu99 -I . \
