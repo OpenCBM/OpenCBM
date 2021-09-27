@@ -107,6 +107,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name imgcopy
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name demodownloadrom
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -292,6 +295,24 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libmisc
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "demodownloadrom"=..\demo\downloadrom\WINDOWS\demodownloadrom.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
     End Project Dependency
 }}}
 

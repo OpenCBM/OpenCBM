@@ -1,4 +1,5 @@
 DIRS= \
+	downloadrom \
 	rpm1541 \
 	flash \
 	morse
