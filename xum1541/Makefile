@@ -12,17 +12,18 @@
 # and board type (i.e., IO port/pin layout, peripherals, etc.)
 #
 # Currently, valid models are:
-# USBKEY: Atmel USB key development board with 8 MHz AT90USB1287 cpu
+# USBKEY: (unsupported) Atmel USB key development board with 8 MHz AT90USB1287 cpu
 # ZOOMFLOPPY: commercial board with 16 MHz ATmega32U2 cpu
-# BUMBLEB: Bumble-B with 16 MHz AT90USB162 cpu and IEC daughtercard
-# OLIMEX: Olimex dev board with 8 MHz AT90USB162 cpu and IEC daughtercard
-# TEENSY: Teensy 2.0 USB Development Board with 16 MHz ATMEGA32U4 cpu
+# BUMBLEB: (unsupported) Bumble-B with 16 MHz AT90USB162 cpu and IEC daughtercard
+# OLIMEX: (unsupported) Olimex dev board with 8 MHz AT90USB162 cpu and IEC daughtercard
+# TEENSY: (unsupported) Teensy 2.0 USB Development Board with 16 MHz ATMEGA32U4 cpu
 # PROMICRO: Arduino Pro Micro USB Development Board with 16 MHz ATMEGA32U4 cpu
 # PROMICRO_7406: Arduino Pro Micro USB Development Board with 16 MHz ATMEGA32U4 with a 7406
-# MINIMUS: Minimus AVR USB development board with 16 MHz AT90USB162 cpu with 16K flash
-# MINIMUS32: Minimus AVR 32K USB development board with 16 MHz ATmega32U2 cpu with 32K flash
+# MINIMUS: (unsupported) Minimus AVR USB development board with 16 MHz AT90USB162 cpu with 16K flash
+# MINIMUS32: (unsupported) Minimus AVR 32K USB development board with 16 MHz ATmega32U2 cpu with 32K flash
 
 MODELS= USBKEY ZOOMFLOPPY BUMBLEB OLIMEX TEENSY2 PROMICRO PROMICRO_7406 MINIMUS MINIMUS32
+MODELS_TO_COMPILE= ZOOMFLOPPY PROMICRO PROMICRO_7406
 .PHONY: $(MODELS)
 
 # Enable to get debug printing via the UART (port D)
@@ -33,7 +34,7 @@ MODELS= USBKEY ZOOMFLOPPY BUMBLEB OLIMEX TEENSY2 PROMICRO PROMICRO_7406 MINIMUS 
 # Firmware version. Bump when changing the firmware code.
 XUMFW_VERSION= 08
 
-all: $(MODELS)
+all: $(MODELS_TO_COMPILE)
 
 define MAKE_model
 $1:
