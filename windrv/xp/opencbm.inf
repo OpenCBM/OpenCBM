@@ -86,9 +86,8 @@ DeviceID_Atmel90U1287   = VID_03eb&PID_2ffb
 Signature   = "$Windows NT$"
 Class       = "USBDevice"
 ClassGuid   = {88bae032-5a81-49f0-bc3d-a4ff138216d6}
-Provider    = "libwdi"
-CatalogFile = #CAT_FILENAME#
-DriverVer   = #DRIVER_DATE#, #DRIVER_VERSION#
+Provider    = "OpenCBM development team"
+DriverVer   = 04/18/2019, 6.1.7600.16385
 
 [ClassInstall32]
 Addreg = WinUSBDeviceClassReg
@@ -222,7 +221,7 @@ Include    = winusb.inf
 AddService = WinUSB,0x00000002,WinUSB_ServiceInstall
 
 [WinUSB_ServiceInstall]
-DisplayName   = "WinUSB - Kernel Driver #DRIVER_DATE# #DRIVER_VERSION#"
+DisplayName   = "WinUSB - Kernel Driver 04/18/2019 6.1.7600.16385"
 ServiceType   = 1
 StartType     = 3
 ErrorControl  = 1
@@ -232,10 +231,10 @@ ServiceBinary = %12%\WinUSB.sys
 KmdfService = WINUSB, WinUsb_Install
 
 [WinUSB_Install]
-KmdfLibraryVersion = #KMDF_VERSION#
+KmdfLibraryVersion = 1.9
 
 [USB_Install.HW]
-AddReg = #USE_DEVICE_INTERFACE_GUID#
+AddReg = AddDeviceInterfaceGUID
 
 [NoDeviceInterfaceGUID]
 ; Avoids adding a DeviceInterfaceGUID for generic driver
@@ -248,11 +247,11 @@ AddReg    = CoInstallers_AddReg
 CopyFiles = CoInstallers_CopyFiles
 
 [CoInstallers_AddReg]
-HKR,,CoInstallers32,0x00010000,"WdfCoInstaller#WDF_VERSION#.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
+HKR,,CoInstallers32,0x00010000,"WdfCoInstaller01009.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
 
 [CoInstallers_CopyFiles]
 WinUSBCoInstaller2.dll
-WdfCoInstaller#WDF_VERSION#.dll
+WdfCoInstaller01009.dll
 
 [DestinationDirs]
 CoInstallers_CopyFiles = 11
@@ -262,12 +261,12 @@ CoInstallers_CopyFiles = 11
 
 [SourceDisksFiles.x86]
 WinUSBCoInstaller2.dll = 1,x86
-WdfCoInstaller#WDF_VERSION#.dll = 1,x86
+WdfCoInstaller01009.dll = 1,x86
 
 [SourceDisksFiles.amd64]
 WinUSBCoInstaller2.dll = 1,amd64
-WdfCoInstaller#WDF_VERSION#.dll = 1,amd64
+WdfCoInstaller01009.dll = 1,amd64
 
 [SourceDisksFiles.arm]
 WinUSBCoInstaller2.dll = 1,arm
-WdfCoInstaller#WDF_VERSION#.dll = 1,arm
+WdfCoInstaller01009.dll = 1,arm
