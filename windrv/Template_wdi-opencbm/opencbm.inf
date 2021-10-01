@@ -1,0 +1,273 @@
+; opencbm.inf
+; Copyright (c) 2021 OpenCBM development team
+; based on automatically generated file by libwdi
+; Copyright (c) 2010-2016 Pete Batard <pete@akeo.ie> (GNU LGPL)
+[Strings]
+DeviceGUID = "{04ECF226-1023-4259-B25C-15E904D846DE}"
+VendorName = "OpenCBM development team"
+SourceName = "xu1541/xum1541 floppy adapter Install Disk"
+
+DeviceName_XU_gen = "OpenCBM XU1541 (generic)"
+DeviceName_XU_V   = "OpenCBM XU1541 (V-USB)"
+DeviceName_XU_T   = "OpenCBM XU1541 (USBtiny)"
+
+DeviceID_XU_gen   = VID_0403&PID_c632
+DeviceID_XU_V     = VID_0403&PID_c632&REV_0100
+DeviceID_XU_T     = VID_0403&PID_c632&REV_0200
+
+DeviceName_gen    = "xum1541 floppy adapter (generic)"
+DeviceName_00_v07 = "xum1541 floppy adapter (USBKEY-v07)"
+DeviceName_01_v07 = "xum1541 floppy adapter (BUMBLEB-v07)"
+DeviceName_02_v07 = "xum1541 floppy adapter (ZOOMFLOPPY-v07)"
+DeviceName_03_v07 = "xum1541 floppy adapter (OLIMEX-v07)"
+DeviceName_04_v07 = "xum1541 floppy adapter (TEENSY2-v07)"
+DeviceName_05_v07 = "xum1541 floppy adapter (PROMICRO-v07)"
+DeviceName_06_v07 = "xum1541 floppy adapter (PROMICRO_7406-v07)"
+DeviceName_00_v08 = "xum1541 floppy adapter (USBKEY-v08)"
+DeviceName_01_v08 = "xum1541 floppy adapter (BUMBLEB-v08)"
+DeviceName_02_v08 = "xum1541 floppy adapter (ZOOMFLOPPY-v08)"
+DeviceName_03_v08 = "xum1541 floppy adapter (OLIMEX-v08)"
+DeviceName_04_v08 = "xum1541 floppy adapter (TEENSY2-v08)"
+DeviceName_05_v08 = "xum1541 floppy adapter (PROMICRO-v08)"
+DeviceName_06_v08 = "xum1541 floppy adapter (PROMICRO_7406-v08)"
+DeviceName_07_v08 = "xum1541 floppy adapter (MINIMUS-v08)"
+DeviceName_08_v08 = "xum1541 floppy adapter (MINIMUS32-v08)"
+DeviceName_00_v09 = "xum1541 floppy adapter (USBKEY-v09)"
+DeviceName_01_v09 = "xum1541 floppy adapter (BUMBLEB-v09)"
+DeviceName_02_v09 = "xum1541 floppy adapter (ZOOMFLOPPY-v09)"
+DeviceName_03_v09 = "xum1541 floppy adapter (OLIMEX-v09)"
+DeviceName_04_v09 = "xum1541 floppy adapter (TEENSY2-v09)"
+DeviceName_05_v09 = "xum1541 floppy adapter (PROMICRO-v09)"
+DeviceName_06_v09 = "xum1541 floppy adapter (PROMICRO_7406-v09)"
+DeviceName_07_v09 = "xum1541 floppy adapter (MINIMUS-v09)"
+DeviceName_08_v09 = "xum1541 floppy adapter (MINIMUS32-v09)"
+
+DeviceID_gen      = "VID_16D0&PID_0504"
+DeviceID_00_v07   = "VID_16D0&PID_0504&REV_0007"
+DeviceID_01_v07   = "VID_16D0&PID_0504&REV_0107"
+DeviceID_02_v07   = "VID_16D0&PID_0504&REV_0207"
+DeviceID_03_v07   = "VID_16D0&PID_0504&REV_0307"
+DeviceID_04_v07   = "VID_16D0&PID_0504&REV_0407"
+DeviceID_05_v07   = "VID_16D0&PID_0504&REV_0507"
+DeviceID_06_v07   = "VID_16D0&PID_0504&REV_0607"
+DeviceID_00_v08   = "VID_16D0&PID_0504&REV_0008"
+DeviceID_01_v08   = "VID_16D0&PID_0504&REV_0108"
+DeviceID_02_v08   = "VID_16D0&PID_0504&REV_0208"
+DeviceID_03_v08   = "VID_16D0&PID_0504&REV_0308"
+DeviceID_04_v08   = "VID_16D0&PID_0504&REV_0408"
+DeviceID_05_v08   = "VID_16D0&PID_0504&REV_0508"
+DeviceID_06_v08   = "VID_16D0&PID_0504&REV_0608"
+DeviceID_07_v08   = "VID_16D0&PID_0504&REV_0708"
+DeviceID_08_v08   = "VID_16D0&PID_0504&REV_0808"
+DeviceID_00_v09   = "VID_16D0&PID_0504&REV_0009"
+DeviceID_01_v09   = "VID_16D0&PID_0504&REV_0109"
+DeviceID_02_v09   = "VID_16D0&PID_0504&REV_0209"
+DeviceID_03_v09   = "VID_16D0&PID_0504&REV_0309"
+DeviceID_04_v09   = "VID_16D0&PID_0504&REV_0409"
+DeviceID_05_v09   = "VID_16D0&PID_0504&REV_0509"
+DeviceID_06_v09   = "VID_16D0&PID_0504&REV_0609"
+DeviceID_07_v09   = "VID_16D0&PID_0504&REV_0709"
+DeviceID_08_v09   = "VID_16D0&PID_0504&REV_0809"
+
+; AVR DFU devices for firmware updates
+DeviceName_Atmel32U2    = "Atmel firmware update device (ATmega32U2)"
+DeviceName_Atmel32U4    = "Atmel firmware update device (ATmega32U4)"
+DeviceName_Atmel90U162  = "Atmel firmware update device (AT90USB162)"
+DeviceName_Atmel90U1287 = "Atmel firmware update device (AT90USB1287)"
+
+DeviceID_Atmel32U2      = VID_03eb&PID_2ff0
+DeviceID_Atmel32U4      = VID_03eb&PID_2ff4
+DeviceID_Atmel90U162    = VID_03eb&PID_2ffa
+DeviceID_Atmel90U1287   = VID_03eb&PID_2ffb
+
+
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = "USBDevice"
+ClassGuid   = {88bae032-5a81-49f0-bc3d-a4ff138216d6}
+Provider    = "libwdi"
+CatalogFile = #CAT_FILENAME#
+DriverVer   = #DRIVER_DATE#, #DRIVER_VERSION#
+
+[ClassInstall32]
+Addreg = WinUSBDeviceClassReg
+
+[WinUSBDeviceClassReg]
+HKR,,,0,"Universal Serial Bus devices"
+HKR,,Icon,,-20
+
+[Manufacturer]
+%VendorName% = libusbDevice_WinUSB,NTx86,NTamd64,NTarm
+
+[libusbDevice_WinUSB.NTx86]
+%DeviceName_gen% = USB_Install, USB\%DeviceID_gen%
+%DeviceName_00_v07% = USB_Install, USB\%DeviceID_00_v07%
+%DeviceName_01_v07% = USB_Install, USB\%DeviceID_01_v07%
+%DeviceName_02_v07% = USB_Install, USB\%DeviceID_02_v07%
+%DeviceName_03_v07% = USB_Install, USB\%DeviceID_03_v07%
+%DeviceName_04_v07% = USB_Install, USB\%DeviceID_04_v07%
+%DeviceName_05_v07% = USB_Install, USB\%DeviceID_05_v07%
+%DeviceName_06_v07% = USB_Install, USB\%DeviceID_06_v07%
+%DeviceName_00_v08% = USB_Install, USB\%DeviceID_00_v08%
+%DeviceName_01_v08% = USB_Install, USB\%DeviceID_01_v08%
+%DeviceName_02_v08% = USB_Install, USB\%DeviceID_02_v08%
+%DeviceName_03_v08% = USB_Install, USB\%DeviceID_03_v08%
+%DeviceName_04_v08% = USB_Install, USB\%DeviceID_04_v08%
+%DeviceName_05_v08% = USB_Install, USB\%DeviceID_05_v08%
+%DeviceName_06_v08% = USB_Install, USB\%DeviceID_06_v08%
+%DeviceName_07_v08% = USB_Install, USB\%DeviceID_07_v08%
+%DeviceName_08_v08% = USB_Install, USB\%DeviceID_08_v08%
+%DeviceName_00_v09% = USB_Install, USB\%DeviceID_00_v09%
+%DeviceName_01_v09% = USB_Install, USB\%DeviceID_01_v09%
+%DeviceName_02_v09% = USB_Install, USB\%DeviceID_02_v09%
+%DeviceName_03_v09% = USB_Install, USB\%DeviceID_03_v09%
+%DeviceName_04_v09% = USB_Install, USB\%DeviceID_04_v09%
+%DeviceName_05_v09% = USB_Install, USB\%DeviceID_05_v09%
+%DeviceName_06_v09% = USB_Install, USB\%DeviceID_06_v09%
+%DeviceName_07_v09% = USB_Install, USB\%DeviceID_07_v09%
+%DeviceName_08_v09% = USB_Install, USB\%DeviceID_08_v09%
+
+%DeviceName_XU_gen% = USB_Install, USB\%DeviceID_XU_gen%
+%DeviceName_XU_V%   = USB_Install, USB\%DeviceID_XU_V%
+%DeviceName_XU_T%   = USB_Install, USB\%DeviceID_XU_T%
+
+%DeviceName_Atmel32U2%    = USB_Install, USB\%DeviceID_Atmel32U2%
+%DeviceName_Atmel32U4%    = USB_Install, USB\%DeviceID_Atmel32U4%
+%DeviceName_Atmel90U162%  = USB_Install, USB\%DeviceID_Atmel90U162%
+%DeviceName_Atmel90U1287% = USB_Install, USB\%DeviceID_Atmel90U1287%
+
+[libusbDevice_WinUSB.NTamd64]
+%DeviceName_gen% = USB_Install, USB\%DeviceID_gen%
+%DeviceName_00_v07% = USB_Install, USB\%DeviceID_00_v07%
+%DeviceName_01_v07% = USB_Install, USB\%DeviceID_01_v07%
+%DeviceName_02_v07% = USB_Install, USB\%DeviceID_02_v07%
+%DeviceName_03_v07% = USB_Install, USB\%DeviceID_03_v07%
+%DeviceName_04_v07% = USB_Install, USB\%DeviceID_04_v07%
+%DeviceName_05_v07% = USB_Install, USB\%DeviceID_05_v07%
+%DeviceName_06_v07% = USB_Install, USB\%DeviceID_06_v07%
+%DeviceName_00_v08% = USB_Install, USB\%DeviceID_00_v08%
+%DeviceName_01_v08% = USB_Install, USB\%DeviceID_01_v08%
+%DeviceName_02_v08% = USB_Install, USB\%DeviceID_02_v08%
+%DeviceName_03_v08% = USB_Install, USB\%DeviceID_03_v08%
+%DeviceName_04_v08% = USB_Install, USB\%DeviceID_04_v08%
+%DeviceName_05_v08% = USB_Install, USB\%DeviceID_05_v08%
+%DeviceName_06_v08% = USB_Install, USB\%DeviceID_06_v08%
+%DeviceName_07_v08% = USB_Install, USB\%DeviceID_07_v08%
+%DeviceName_08_v08% = USB_Install, USB\%DeviceID_08_v08%
+%DeviceName_00_v09% = USB_Install, USB\%DeviceID_00_v09%
+%DeviceName_01_v09% = USB_Install, USB\%DeviceID_01_v09%
+%DeviceName_02_v09% = USB_Install, USB\%DeviceID_02_v09%
+%DeviceName_03_v09% = USB_Install, USB\%DeviceID_03_v09%
+%DeviceName_04_v09% = USB_Install, USB\%DeviceID_04_v09%
+%DeviceName_05_v09% = USB_Install, USB\%DeviceID_05_v09%
+%DeviceName_06_v09% = USB_Install, USB\%DeviceID_06_v09%
+%DeviceName_07_v09% = USB_Install, USB\%DeviceID_07_v09%
+%DeviceName_08_v09% = USB_Install, USB\%DeviceID_08_v09%
+
+
+%DeviceName_XU_gen% = USB_Install, USB\%DeviceID_XU_gen%
+%DeviceName_XU_V%   = USB_Install, USB\%DeviceID_XU_V%
+%DeviceName_XU_T%   = USB_Install, USB\%DeviceID_XU_T%
+
+%DeviceName_Atmel32U2%    = USB_Install, USB\%DeviceID_Atmel32U2%
+%DeviceName_Atmel32U4%    = USB_Install, USB\%DeviceID_Atmel32U4%
+%DeviceName_Atmel90U162%  = USB_Install, USB\%DeviceID_Atmel90U162%
+%DeviceName_Atmel90U1287% = USB_Install, USB\%DeviceID_Atmel90U1287%
+
+[libusbDevice_WinUSB.NTarm]
+%DeviceName_gen% = USB_Install, USB\%DeviceID_gen%
+%DeviceName_00_v07% = USB_Install, USB\%DeviceID_00_v07%
+%DeviceName_01_v07% = USB_Install, USB\%DeviceID_01_v07%
+%DeviceName_02_v07% = USB_Install, USB\%DeviceID_02_v07%
+%DeviceName_03_v07% = USB_Install, USB\%DeviceID_03_v07%
+%DeviceName_04_v07% = USB_Install, USB\%DeviceID_04_v07%
+%DeviceName_05_v07% = USB_Install, USB\%DeviceID_05_v07%
+%DeviceName_06_v07% = USB_Install, USB\%DeviceID_06_v07%
+%DeviceName_00_v08% = USB_Install, USB\%DeviceID_00_v08%
+%DeviceName_01_v08% = USB_Install, USB\%DeviceID_01_v08%
+%DeviceName_02_v08% = USB_Install, USB\%DeviceID_02_v08%
+%DeviceName_03_v08% = USB_Install, USB\%DeviceID_03_v08%
+%DeviceName_04_v08% = USB_Install, USB\%DeviceID_04_v08%
+%DeviceName_05_v08% = USB_Install, USB\%DeviceID_05_v08%
+%DeviceName_06_v08% = USB_Install, USB\%DeviceID_06_v08%
+%DeviceName_07_v08% = USB_Install, USB\%DeviceID_07_v08%
+%DeviceName_08_v08% = USB_Install, USB\%DeviceID_08_v08%
+%DeviceName_00_v09% = USB_Install, USB\%DeviceID_00_v09%
+%DeviceName_01_v09% = USB_Install, USB\%DeviceID_01_v09%
+%DeviceName_02_v09% = USB_Install, USB\%DeviceID_02_v09%
+%DeviceName_03_v09% = USB_Install, USB\%DeviceID_03_v09%
+%DeviceName_04_v09% = USB_Install, USB\%DeviceID_04_v09%
+%DeviceName_05_v09% = USB_Install, USB\%DeviceID_05_v09%
+%DeviceName_06_v09% = USB_Install, USB\%DeviceID_06_v09%
+%DeviceName_07_v09% = USB_Install, USB\%DeviceID_07_v09%
+%DeviceName_08_v09% = USB_Install, USB\%DeviceID_08_v09%
+
+
+%DeviceName_XU_gen% = USB_Install, USB\%DeviceID_XU_gen%
+%DeviceName_XU_V%   = USB_Install, USB\%DeviceID_XU_V%
+%DeviceName_XU_T%   = USB_Install, USB\%DeviceID_XU_T%
+
+%DeviceName_Atmel32U2%    = USB_Install, USB\%DeviceID_Atmel32U2%
+%DeviceName_Atmel32U4%    = USB_Install, USB\%DeviceID_Atmel32U4%
+%DeviceName_Atmel90U162%  = USB_Install, USB\%DeviceID_Atmel90U162%
+%DeviceName_Atmel90U1287% = USB_Install, USB\%DeviceID_Atmel90U1287%
+
+[USB_Install]
+Include = winusb.inf
+Needs   = WINUSB.NT
+
+[USB_Install.Services]
+Include    = winusb.inf
+AddService = WinUSB,0x00000002,WinUSB_ServiceInstall
+
+[WinUSB_ServiceInstall]
+DisplayName   = "WinUSB - Kernel Driver #DRIVER_DATE# #DRIVER_VERSION#"
+ServiceType   = 1
+StartType     = 3
+ErrorControl  = 1
+ServiceBinary = %12%\WinUSB.sys
+
+[USB_Install.Wdf]
+KmdfService = WINUSB, WinUsb_Install
+
+[WinUSB_Install]
+KmdfLibraryVersion = #KMDF_VERSION#
+
+[USB_Install.HW]
+AddReg = #USE_DEVICE_INTERFACE_GUID#
+
+[NoDeviceInterfaceGUID]
+; Avoids adding a DeviceInterfaceGUID for generic driver
+
+[AddDeviceInterfaceGUID]
+HKR,,DeviceInterfaceGUIDs,0x10000,%DeviceGUID%
+
+[USB_Install.CoInstallers]
+AddReg    = CoInstallers_AddReg
+CopyFiles = CoInstallers_CopyFiles
+
+[CoInstallers_AddReg]
+HKR,,CoInstallers32,0x00010000,"WdfCoInstaller#WDF_VERSION#.dll,WdfCoInstaller","WinUSBCoInstaller2.dll"
+
+[CoInstallers_CopyFiles]
+WinUSBCoInstaller2.dll
+WdfCoInstaller#WDF_VERSION#.dll
+
+[DestinationDirs]
+CoInstallers_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %SourceName%
+
+[SourceDisksFiles.x86]
+WinUSBCoInstaller2.dll = 1,x86
+WdfCoInstaller#WDF_VERSION#.dll = 1,x86
+
+[SourceDisksFiles.amd64]
+WinUSBCoInstaller2.dll = 1,amd64
+WdfCoInstaller#WDF_VERSION#.dll = 1,amd64
+
+[SourceDisksFiles.arm]
+WinUSBCoInstaller2.dll = 1,arm
+WdfCoInstaller#WDF_VERSION#.dll = 1,arm
