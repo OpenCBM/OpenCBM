@@ -410,6 +410,40 @@ typedef int CBMAPIDECL opencbm_plugin_s2_read_n_t (CBM_FILE HandleDevice,       
 */
 typedef int CBMAPIDECL opencbm_plugin_s2_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
 
+/*! \brief read a block of data from the OpenCBM backend with protocol serial-3
+
+ \param HandleDevice
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
+
+ \param data
+    Pointer to a buffer which will contain the data read from the OpenCBM backend
+
+ \param size
+    The number of bytes to read from the OpenCBM backend
+
+ \return
+    The number of bytes actually read, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
+*/
+typedef int CBMAPIDECL opencbm_plugin_s3_read_n_t (CBM_FILE HandleDevice,       unsigned char *data, unsigned int size);
+
+/*! \brief write a block of data to the OpenCBM backend with protocol serial-3
+
+ \param HandleDevice
+   Pointer to a CBM_FILE which will contain the file handle of the OpenCBM backend
+
+ \param data
+    Pointer to buffer which contains the data to be written to the OpenCBM backend
+
+ \param size
+    The length of the data buffer to be written to the OpenCBM backend
+
+ \return
+    The number of bytes actually written, 0 on OpenCBM backend error.
+    If there is a fatal error, returns -1.
+*/
+typedef int CBMAPIDECL opencbm_plugin_s3_write_n_t(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size);
+
 /*! \brief read a block of data from the OpenCBM backend with protocol parallel/d64copy
 
  \param HandleDevice

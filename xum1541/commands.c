@@ -729,6 +729,10 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
             ret = 0;
             break;
 #ifdef SRQ_NIB_SUPPORT
+        case XUM1541_S3:
+            ioReadLoop(s3_read_byte, len);
+            ret = 0;
+            break;
         case XUM1541_NIB_SRQ:
             ioReadNibSrqLoop(len);
             ret = 0;
@@ -789,6 +793,10 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
             ret = 0;
             break;
 #ifdef SRQ_NIB_SUPPORT
+        case XUM1541_S3:
+            ioWriteLoop(s3_write_byte, len);
+            ret = 0;
+            break;
         case XUM1541_NIB_SRQ:
             ioWriteNibSrqLoop(len);
             ret = 0;
