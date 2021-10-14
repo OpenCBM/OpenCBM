@@ -94,7 +94,7 @@ MYUSB_OBJS= \
         LUFA/Drivers/USB/HighLevel/USBTask.o \
         LUFA/Drivers/USB/HighLevel/USBInterrupt.o
 
-IEC_OBJS= iec.o s1.o s2.o pp.o p2.o nib.o
+IEC_OBJS= iec.o s1.o s2.o s3.o pp.o p2.o nib.o
 
 OBJS=   $(addprefix obj/$(MODEL)/,              \
         main.o commands.o descriptor.o          \

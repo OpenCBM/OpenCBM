@@ -123,6 +123,7 @@
 #define XUM1541_NIB_COMMAND         (7 << 4) // BN parallel commands
 #define XUM1541_NIB_SRQ             (8 << 4) // 1571 serial nibbler
 #define XUM1541_NIB_SRQ_COMMAND     (9 << 4) // Serial commands
+#define XUM1541_S3                  (10 << 4) // serial3 (bursts)
 
 // Flags for use with write and XUM1541_CBM protocol
 #define XUM_WRITE_TALK              (1 << 0)
