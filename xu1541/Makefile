@@ -1,4 +1,4 @@
-.PHONY: all mrproper distclean clean all-linux firmware bootloader bootloader-avrusb bootloader-usbtiny update-bootloader misc update_tool program-avrusb program-usbtiny update-avrusb update-usbtiny update-bios-avrusb update-bios-usbtiny update-all-avrusb update-all-usbtiny diff terminal version xu1541lib xmingw exe cygwin
+.PHONY: all mrproper distclean clean all-linux firmware firmware-avrusb firmware-usbtiny bootloader bootloader-avrusb bootloader-usbtiny update-bootloader misc update_tool program-avrusb program-usbtiny update-avrusb update-usbtiny update-bios-avrusb update-bios-usbtiny update-all-avrusb update-all-usbtiny diff terminal version xu1541lib xmingw exe cygwin
 
 all:	all-linux
 
@@ -13,15 +13,21 @@ clean:
 
 all-linux: xu1541lib misc update_tool firmware bootloader update-bootloader
 
-firmware:
+firmware firmware/firmware.hex:
 	make -C firmware
+
+firmware-avrusb: firmware/firmware.hex bootloader/bootloader-avrusb.hex
+	(head -n -1 firmware/firmware.hex; cat bootloader/bootldr-avrusb.hex) > firmware+bootloader-avrusb.hex
+
+firmware-usbtiny: firmware/firmware.hex bootloader/bootloader-usbtiny.hex
+	(head -n -1 firmware/firmware.hex; cat bootloader/bootldr-usbtiny.hex) > firmware+bootloader-usbtiny.hex
 
 bootloader: bootloader-avrusb bootloader-usbtiny
 
-bootloader-avrusb:
+bootloader-avrusb bootloader/bootloader-avrusb.hex:
 	make -C bootloader -f Makefile-avrusb
 
-bootloader-usbtiny:
+bootloader-usbtiny bootloader/bootloader-usbtiny.hex:
 	make -C bootloader -f Makefile-usbtiny
 
 update-bootloader:
