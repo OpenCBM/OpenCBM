@@ -147,7 +147,7 @@ extern volatile uint8_t TSR;
 #define IEC_CLOCK   0x02
 #define IEC_ATN     0x04
 #define IEC_RESET   0x08
-#define IEC_SRQ     0x80
+#define IEC_SRQ     0x10
 
 /* specifiers for the IEEE-488 lines (must match values from opencbm.h) */
 #define IEE_NDAC    0x01 // Not data accepted

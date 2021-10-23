@@ -510,6 +510,36 @@ static int do_reset(CBM_FILE fd, OPTIONS * const options)
 }
 
 /*
+ * Simple wrapper for srq
+ */
+static int do_iec_srq(CBM_FILE fd, OPTIONS * const options)
+{
+    int rv = skip_options(options);
+
+    rv = rv || check_if_parameters_ok(options);
+
+    if (rv == 0)
+        cbm_iec_set(fd, IEC_SRQ);
+
+    return rv;
+}
+
+/*
+ * Simple wrapper for usrq
+ */
+static int do_iec_usrq(CBM_FILE fd, OPTIONS * const options)
+{
+    int rv = skip_options(options);
+
+    rv = rv || check_if_parameters_ok(options);
+
+    if (rv == 0)
+        cbm_iec_release(fd, IEC_SRQ);
+
+    return rv;
+}
+
+/*
  * Simple wrapper for clk
  */
 static int do_iec_clk(CBM_FILE fd, OPTIONS * const options)
@@ -1779,6 +1809,14 @@ static struct prog prog_table[] =
         " cbmctrl upload 8 0x500 BUFFER2.BIN\n"
         " * writes the file BUFFER2.BIN to drive 8, address $500." },
 
+    {1, "srq"     , PA_UNSPEC,  do_iec_srq  , "",
+        "Set the srq line on the IEC bus.",
+        "This command unconditionally sets the SRQ line on the IEC bus." },
+
+    {1, "usrq"    , PA_UNSPEC,  do_iec_usrq , "",
+        "Unset the srq line on the IEC bus.",
+        "This command unconditionally unsets the SRQ line on the IEC bus." },
+
     {1, "clk"     , PA_UNSPEC,  do_iec_clk  , "",
         "Set the clk line on the IEC bus.",
         "This command unconditionally sets the CLK line on the IEC bus." },
@@ -1804,7 +1842,7 @@ static struct prog prog_table[] =
         "This command unconditionally unsets the ATN line on the IEC bus." },
 
     {1, "ireset"  , PA_UNSPEC,  do_iec_reset, "",
-        "Set the resetn line on the IEC bus.",
+        "Set the reset line on the IEC bus.",
         "This command unconditionally sets the RESET line on the IEC bus." },
 
     {1, "uireset" , PA_UNSPEC,  do_iec_ureset , "",

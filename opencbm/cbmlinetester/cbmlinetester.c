@@ -81,6 +81,8 @@ static void help()
         "  -C, --CLOCK                RELEASE the CLOCK line\n"
         "  -d, --data                 SET the DATA line\n"
         "  -D, --DATA                 RELEASE the DATA line\n"
+        "  -s, --srq                  SET the SRQ line\n"
+        "  -S, --SRQ                  RELEASE the SRQ line\n"
         "\n"
         );
 }
@@ -92,13 +94,15 @@ static void hint(char *s)
 
 static const char * getLineStatus(int status)
 {
-    static char strstatus[25];
+    static char strstatus[6 * 6 + 1];
 
-    arch_snprintf(strstatus, sizeof strstatus, "%s %s %s %s",
+    arch_snprintf(strstatus, sizeof strstatus, "%04X: %s %s %s %s %s",
+        status,
         (status & IEC_RESET) ? "RESET" : "     ",
         (status & IEC_ATN  ) ? "ATN  " : "     ",
         (status & IEC_DATA ) ? "DATA " : "     ",
-        (status & IEC_CLOCK) ? "CLOCK" : "     ");
+        (status & IEC_CLOCK) ? "CLOCK" : "     ",
+        (status & IEC_SRQ  ) ? "SRQ  " : "     ");
 
     return strstatus;
 }
@@ -155,6 +159,8 @@ static void interactive(CBM_FILE fd, int ownmask)
             case 'C': releasemask = IEC_CLOCK; break;
             case 'd': setmask     = IEC_DATA;  break;
             case 'D': releasemask = IEC_DATA;  break;
+            case 's': setmask     = IEC_SRQ;   break;
+            case 'S': releasemask = IEC_SRQ;   break;
             case 'q': case 'Q': case 'x': case 'X': quit = 1; break;
             default:  break;
         }
@@ -203,14 +209,16 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         { "atn"        , no_argument      , NULL, 'a' },
         { "clock"      , no_argument      , NULL, 'c' },
         { "data"       , no_argument      , NULL, 'd' },
+        { "srq"        , no_argument      , NULL, 's' },
         { "RESET"      , no_argument      , NULL, 'R' },
         { "ATN"        , no_argument      , NULL, 'A' },
         { "CLOCK"      , no_argument      , NULL, 'C' },
         { "DATA"       , no_argument      , NULL, 'D' },
+        { "SRQ"        , no_argument      , NULL, 'S' },
         { NULL         , 0                , NULL, 0   }
     };
 
-    static const char shortopts[] ="hV@:pracdRACD"
+    static const char shortopts[] ="hV@:pracdsRACDS"
 #ifdef HAVE_NCURSES
                                    "i"
 #endif // #ifdef HAVE_NCURSES
@@ -247,6 +255,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
                       break;
             case 'd': setmask |= IEC_DATA;
                       break;
+            case 's': setmask |= IEC_SRQ;
+                      break;
             case 'R': releasemask |= IEC_RESET;
                       break;
             case 'A': releasemask |= IEC_ATN;
@@ -254,6 +264,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             case 'C': releasemask |= IEC_CLOCK;
                       break;
             case 'D': releasemask |= IEC_DATA;
+                      break;
+            case 'S': releasemask |= IEC_SRQ;
                       break;
             default : hint(argv[0]);
                       return 1;
@@ -282,6 +294,10 @@ int ARCH_MAINDECL main(int argc, char *argv[])
             if (doubled_mask & IEC_CLOCK) {
                 fprintf(stderr, "\tCLOCK");
                     if ((doubled_mask &= ~IEC_CLOCK) != 0) fprintf(stderr, ",\n");
+            }
+            if (doubled_mask & IEC_SRQ) {
+                fprintf(stderr, "\tSRQ");
+                    if ((doubled_mask &= ~IEC_SRQ) != 0) fprintf(stderr, ",\n");
             }
             fprintf(stderr, "\nat the same time.\n\nThis cannot work, thus, aborting.\n");
             break;

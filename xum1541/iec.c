@@ -71,6 +71,22 @@ static const uint8_t iec2hw_table[] PROGMEM = {
     IO_DATA |          IO_ATN | IO_RESET,
               IO_CLK | IO_ATN | IO_RESET,
     IO_DATA | IO_CLK | IO_ATN | IO_RESET,
+                                           IO_SRQ,
+    IO_DATA                              | IO_SRQ,
+              IO_CLK                     | IO_SRQ,
+    IO_DATA | IO_CLK                     | IO_SRQ,
+                       IO_ATN            | IO_SRQ,
+    IO_DATA |          IO_ATN            | IO_SRQ,
+              IO_CLK | IO_ATN            | IO_SRQ,
+    IO_DATA | IO_CLK | IO_ATN            | IO_SRQ,
+                                IO_RESET | IO_SRQ,
+    IO_DATA |                   IO_RESET | IO_SRQ,
+              IO_CLK |          IO_RESET | IO_SRQ,
+    IO_DATA | IO_CLK |          IO_RESET | IO_SRQ,
+                       IO_ATN | IO_RESET | IO_SRQ,
+    IO_DATA |          IO_ATN | IO_RESET | IO_SRQ,
+              IO_CLK | IO_ATN | IO_RESET | IO_SRQ,
+    IO_DATA | IO_CLK | IO_ATN | IO_RESET | IO_SRQ,
 };
 
 static uint8_t
@@ -567,6 +583,8 @@ iec_poll(void)
         rv |= IEC_CLOCK;
     if ((iec_state & IO_ATN) == 0)
         rv |= IEC_ATN;
+    if ((iec_state & IO_SRQ) == 0)
+        rv |= IEC_SRQ;
 
     return rv;
 }
