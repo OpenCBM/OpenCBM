@@ -60,6 +60,22 @@
 
 #include "cbm_module.h"
 
+#if ! defined(set_current_state) && LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
+  /* we have a Kernal < 4.0.0, and it does not have a set_current_state() macro:
+   * expose an equivalent by an own macro.
+   *
+   * Note: We also test for the Kernel version because in the future, set_current_state()
+   *       might be a function instead of a macro. For Kernels before 4.0.0, we can be
+   *       sure that it is not a function.
+   *
+   * Note: set_current_state() is available beginning with Kernel 2.2.13 in some drivers,
+   *       and in 2.2.18 for all drivers (in include/linux/sched.h).
+   */
+
+  #define set_current_state(_x) \
+          current->state = (_x);
+#endif
+
 /*! \brief
  * If DBG_IMPLANT_FAIL is defined, then there is a machinsm so we can fail some
  * communication calls.  That is, we can emulate the failure of the
@@ -411,7 +427,7 @@ static void show(char *s)
 
 static void timeout_us(int us)
 {
-    current->state = TASK_INTERRUPTIBLE;
+    set_current_state(TASK_INTERRUPTIBLE);
     schedule_timeout(HZ / 1000000 * us);
 }
 
@@ -482,7 +498,7 @@ static void do_reset(void)
 #endif
     data_reverse = 0;
     SET(RESET);
-    current->state = TASK_INTERRUPTIBLE;
+    set_current_state(TASK_INTERRUPTIBLE);
     schedule_timeout(HZ / 10);  /* 100ms */
     RELEASE(RESET);
 
@@ -533,7 +549,7 @@ static void wait_for_listener(void)
 #endif
     add_wait_queue(&cbm_wait_q, &wait);
     DPRINTK_INT("cbm: wait_for_listener() waits for interrupt\n");
-    current->state = TASK_INTERRUPTIBLE;
+    set_current_state(TASK_INTERRUPTIBLE);
     RELEASE(CLK_OUT);
     while (cbm_irq_count && !signal_pending(current))
         schedule();
@@ -562,7 +578,7 @@ static ssize_t cbm_read(struct file *f, char *buf, size_t count, loff_t *ppos)
         i = 0;
         while (GET(CLK_IN)) {
             if (i >= 50) {
-                current->state = TASK_INTERRUPTIBLE;
+                set_current_state(TASK_INTERRUPTIBLE);
                 schedule_timeout(HZ / 50);
                 if (signal_pending(current))
                     return -EINTR;
@@ -649,7 +665,7 @@ static int cbm_raw_write(const char *buf, size_t cnt, int atn, int talk)
         return -ENODEV;
     }
 
-    current->state = TASK_INTERRUPTIBLE;
+    set_current_state(TASK_INTERRUPTIBLE);
     schedule_timeout(HZ / 50);  /* 20ms */
 
     while (cnt > sent && rv == 0) {
@@ -788,7 +804,7 @@ static long cbm_unlocked_ioctl(struct file *f,
         i = 0;
         while ((POLL() & mask) == state) {
             if (i >= 20) {
-                current->state = TASK_INTERRUPTIBLE;
+                set_current_state(TASK_INTERRUPTIBLE);
                 schedule_timeout(HZ / 50);  /* 20ms */
                 if (signal_pending(current))
                     return -EINTR;
@@ -797,7 +813,7 @@ static long cbm_unlocked_ioctl(struct file *f,
                 udelay(10);
             }
         }
-        /* fall through */
+        /* falls through */
 
     case CBMCTRL_IEC_POLL:
         c = POLL();
@@ -1151,7 +1167,7 @@ int cbm_init(void)
 #endif
     data_reverse = 0;
 
-    current->state = TASK_INTERRUPTIBLE;
+    set_current_state(TASK_INTERRUPTIBLE);
     schedule_timeout(HZ / 20);  /* 50ms */
 
 #ifndef DIRECT_PORT_ACCESS
