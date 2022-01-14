@@ -28,7 +28,11 @@ SUBDIRS_PLUGIN_XUM1541 = opencbm/lib/plugin/xum1541 xum1541cfg
 endif
 
 ifeq ($(strip $(HAVE_KERNEL_SOURCE)),)
+ifeq ($(strip $(FORCE_PLUGIN_XA1541)),)
 SUBDIRS_PLUGIN_XA1541 =
+else
+SUBDIRS_PLUGIN_XA1541 = opencbm/lib/plugin/xa1541
+endif
 else
 ifeq "$(OS)" "FreeBSD"
 SUBDIRS_PLUGIN_XA1541 = opencbm/lib/plugin/xa1541 opencbm/sys/freebsd/
