@@ -1,0 +1,15 @@
+opencbm-xa1541-module for Debian
+--------------------------------
+
+This package contains the kernel module needed for the XA1541 and
+XM1541 cables into the kernel.
+
+It is based on DKMS and does not need any configuration or manual
+intervention.
+
+It is based on the older opencbm-xa1541-modules-source package written by
+Michael Klein:
+
+  -- Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>, Sun, 31 Aug 2003 19:16:27 +0200
+  -- Spiro Trikaliotis <cbm4win@trikaliotis.net>, Thu, 12 Jan 2012 21:33:03 +0100
+  -- Spiro Trikaliotis <cbm4win@trikaliotis.net>, Sun, 16 Jan 2022 15:45:00 +0100

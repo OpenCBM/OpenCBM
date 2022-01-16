@@ -27,6 +27,9 @@ major=0
 #major=`ls src/.libs/lib*.so.* | \
 # awk '{if (match($$0,/\.so\.[0-9]+$$/)) print substr($$0,RSTART+4)}'`
 
+DEB_UPSTREAM_VERSION=$(shell dpkg-parsechangelog | egrep '^Version:' | cut -f 2 -d ' '  | cut -d: -f2- | cut -d- -f1 |  sed 's/-[^-]*$$//')
+
+
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -40,7 +43,7 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) -f LINUX/Makefile all-doc
+	$(MAKE) -f LINUX/Makefile FORCE_PLUGIN_XA1541=1 all-doc
 
 	touch build-stamp
 
@@ -54,6 +57,15 @@ clean:
 
 	dh_clean
 
+	# if we have a source tar with .orig., we are building quilt, not native
+	# (obs). Adjust the source format accordingly.
+ifneq ($(wildcard /usr/src/packages/SOURCES.DEB/opencbm_*.orig.tar*),)
+ifneq ($(wildcard debian/source/format),)
+	echo Removing debian source format
+	rm -- debian/source/*
+endif
+endif
+
 install: build
 	dh_testdir
 	dh_testroot
@@ -63,9 +75,12 @@ install: build
 	mkdir -p $(CURDIR)/debian/tmp/etc $(CURDIR)/debian/tmp/lib/udev/rules.d
 	touch $(CURDIR)/debian/tmp/etc/ld.so.conf
 
+	dh_dkms -V ${DEB_UPSTREAM_VERSION}
+
 	# Add here commands to install the package into debian/tmp
 
 	$(MAKE) -f LINUX/Makefile \
+		FORCE_PLUGIN_XA1541=1 \
 		DESTDIR=$(CURDIR)/debian/tmp \
 		PREFIX=/usr \
 		PLUGINDIR=/usr/lib/opencbm/plugin \
@@ -74,8 +89,6 @@ install: build
 		UDEVRULESDIR=/lib/udev/rules.d/ \
 		install-all
 
-	install -D -o root -g root -m 644 debian/opencbm-xa1541-modules-source.conf.h \
-		debian/tmp/etc/opencbm/opencbm-xa1541-modules-source.conf.h
 	install -D -o root -g root -m 644 debian/opencbm.modutils \
 		debian/tmp/etc/modutils/opencbm
 
@@ -84,13 +97,9 @@ install: build
 	install -D -o root -g root -m 755 debian/install_plugin.sh \
 		debian/tmp/usr/lib/opencbm
 
-	mkdir -p debian/tmp/usr/src/modules/opencbm/debian
-	for f in debian/copyright debian/changelog debian/*.MODULE; \
-		do cp $$f debian/tmp/usr/src/modules/opencbm/`echo $$f | sed 's/\\.MODULE$$//'`; \
-	done
-	cp opencbm/sys/linux/cbm_module.c opencbm/include/LINUX/cbm_module.h debian/tmp/usr/src/modules/opencbm/
-	cp debian/Makefile.module debian/tmp/usr/src/modules/opencbm/Makefile
-	tar -czf debian/tmp/usr/src/opencbm.tar.gz -C debian/tmp/usr/src modules/
+	mkdir -p debian/tmp/usr/src/opencbm-xa1541-${DEB_UPSTREAM_VERSION}
+	cp opencbm/sys/linux/cbm_module.c opencbm/include/LINUX/cbm_module.h debian/tmp/usr/src/opencbm-xa1541-${DEB_UPSTREAM_VERSION}
+	cp debian/Makefile.module debian/tmp/usr/src/opencbm-xa1541-${DEB_UPSTREAM_VERSION}/Makefile
 
 # Build architecture-independent files here.
 binary-indep: build install

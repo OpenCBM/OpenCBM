@@ -1,0 +1,13 @@
+# DKMS configuration for the OpenCBM XA1541 kernel module.
+
+# The version is replaced at build time by dh_dkms invoked in debian/rules.
+PACKAGE_NAME="opencbm-xa1541"
+PACKAGE_VERSION="#MODULE_VERSION#"
+
+AUTOINSTALL=yes
+
+MAKE[0]="make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build"
+CLEAN="make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build clean"
+BUILT_MODULE_NAME[0]="cbm"
+
+DEST_MODULE_LOCATION[0]="/extra"
