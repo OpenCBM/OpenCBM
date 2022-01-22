@@ -11,19 +11,20 @@
 #include <string.h>
 
 #include "opencbm.h"
+#include "arch.h"
 
 #include "inputfiles.h"
 
-static int probe(FILE *file, const char *fname, cbmcopy_message_cb msg_cb)
+static int myprobe(FILE *file, const char *fname, cbmcopy_message_cb msg_cb)
 {
     return 1;
 }
 
 
-static int read(FILE *file, const char *fname, int entry,
-                char *cbmname, char *type,
-                unsigned char **data, size_t *size,
-                cbmcopy_message_cb msg_cb)
+static int myread(FILE *file, const char *fname, int entry,
+                  char *cbmname, char *type,
+                  unsigned char **data, size_t *size,
+                  cbmcopy_message_cb msg_cb)
 {
     char *tail;
     char *tail2;

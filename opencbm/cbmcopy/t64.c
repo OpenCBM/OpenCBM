@@ -13,7 +13,7 @@
 #include "opencbm.h"
 #include "inputfiles.h"
 
-static int probe(FILE *file, const char *fname, cbmcopy_message_cb msg_cb)
+static int myprobe(FILE *file, const char *fname, cbmcopy_message_cb msg_cb)
 {
     /* signature list stolen from cbmconvert */
     const char signatures[][32] =
@@ -63,10 +63,10 @@ static int probe(FILE *file, const char *fname, cbmcopy_message_cb msg_cb)
 }
 
 
-static int read(FILE *file, const char *fname, int entry,
-                char *cbmname, char *type,
-                unsigned char **data, size_t *size,
-                cbmcopy_message_cb msg_cb)
+static int myread(FILE *file, const char *fname, int entry,
+                  char *cbmname, char *type,
+                  unsigned char **data, size_t *size,
+                  cbmcopy_message_cb msg_cb)
 {
     struct
     {

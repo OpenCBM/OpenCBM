@@ -37,6 +37,8 @@
 typedef unsigned long ULONG_PTR;
 #endif
 
+#define strcasecmp(_a, _b) _stricmp(_a, _b)
+
 #else
 
 # define ARCH_CBM_LINUX_WIN( _linux, _win) _linux

@@ -13,7 +13,7 @@
 
 #include "inputfiles.h"
 
-static int probe(FILE *file, const char *fname, cbmcopy_message_cb msg_cb)
+static int myprobe(FILE *file, const char *fname, cbmcopy_message_cb msg_cb)
 {
     char sig[8];
 
@@ -30,10 +30,10 @@ static int probe(FILE *file, const char *fname, cbmcopy_message_cb msg_cb)
 }
 
 
-static int read(FILE *file, const char *fname, int entry,
-                char *cbmname, char *type,
-                unsigned char **data, size_t *size,
-                cbmcopy_message_cb msg_cb)
+static int myread(FILE *file, const char *fname, int entry,
+                  char *cbmname, char *type,
+                  unsigned char **data, size_t *size,
+                  cbmcopy_message_cb msg_cb)
 {
     const char *ext;
 

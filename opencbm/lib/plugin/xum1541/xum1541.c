@@ -515,7 +515,8 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
 {
     struct opencbm_usb_handle *HandleXum1541;
     unsigned char devInfo[XUM_DEVINFO_SIZE], devStatus;
-    int cmd, len, ret;
+    uint8_t cmd;
+    int len, ret;
     int success = 0;
 
     if (HandleXum1541_p == NULL) {

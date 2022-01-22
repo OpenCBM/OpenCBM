@@ -33,7 +33,7 @@ typedef struct {
 } input_reader;
 
 #define DECLARE_INPUT_READER(x) \
-    input_reader cbmwrite_ ## x = {probe, read}
+    input_reader cbmwrite_ ## x = {myprobe, myread}
 
 #ifdef __cplusplus
 }
