@@ -1,12 +1,12 @@
 <!doctype linuxdoc system>
 
 <article>
-<title>OpenCBM 0.4.99.103 Users Guide
+<title>OpenCBM 0.4.99.104 Users Guide
 <author>Michael Klein, <htmlurl url="mailto:nip@c64.org" name="nip@c64.org">,
 Spiro Trikaliotis, <htmlurl url="mailto:cbm4win@trikaliotis.net"
 name="cbm4win@trikaliotis.net">, Wolfgang Moser <htmlurl url="http://d81.de/" name="d81.de">,
 Arnd Menge <htmlurl url="mailto:arnd(at)jonnz(dot)de" name="arnd(at)jonnz(dot)de">,
-<date>2020-07-13
+<date>2022-01-22
 
 <abstract>
 This document describes the OpenCBM package, which can be used to control and
@@ -73,7 +73,7 @@ Additioanlly, USB based cables are supported on Mac OS X.
 <sect1>Introduction to OpenCBM<label id="introduction">
 
 <p>
-This is version 0.4.99.103 of OpenCBM, a support package for retro devices that
+This is version 0.4.99.104 of OpenCBM, a support package for retro devices that
 communicate with the serial CBM bus protocol, known from the C64, VIC-20, etc.
 Opencbm runs on Linux, Windows, FreeBSD and Mac OS X. OpenCBM 0.4.0 was a
 re-join of the two projects cbm4linux (latest standalone version: 0.3.2) and
@@ -340,6 +340,31 @@ url="http://sta.c64.org/xcables.html" name="http://sta.c64.org/xcables.html">)
 
 <p>
 <descrip>
+<tag/OpenCBM v0.4.99.104:/
+
+<itemize>
+ <item>new: xum1541cfg: add bootloader command
+ <item>new: cbmctrl add low-level IEC line handling (ireset, uireset, atn, uatn,
+       data, udata)
+ <item>new: xum1541 firmware version 8 for PROMICRO boards with various fixes
+       and additions (SRQ nibbling, bootloader)
+ <item>new: xum1541 firmware split into supported and unsupported devices;
+       new make target "unsupported"
+ <item>new: xum1541 firmware and plugin: include compilation details
+ <item>new: xu1541 firmware: Generated combined bootloader and firmware hex files
+       for easier initial setup
+ <item>fix: Windows installation could not update the installed driver for xu1541
+       or xum1541 devices. Fixed, update works now.
+ <item>fix: xum1541 firmware: fix IEC_SRQ setting/unsetting which resulted in
+       unpredictable behaviour
+ <item>change: cbmcopy: don't filter user-provided local output filenames
+ <item>change: Various fixes for newer compilers (gcc) and platforms (Linux
+       5.x)
+ <item>change: change devmodel for parport driver to allow compilation with
+       newer versions (Linux)
+ <item>change: do not build plugins that are not needed
+</itemize>
+
 <tag/OpenCBM v0.4.99.103:/
 
 <itemize>
@@ -700,11 +725,11 @@ Perform the following steps to install OpenCBM on your Linux machine:
 
 <itemize>
 <item>Get the sources from the tarball at <htmlurl
-      url="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.tar.bz2"
-      name="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.tar.bz2">.
-<item>Unpack them into a directory (i.e., <it>&tilde;/opencbm-0.4.99.103</it>, with
-      0.4.99.103 being the version number of OpenCBM).
-<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.103</it>
+      url="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.104/opencbm-0.4.99.104.tar.bz2"
+      name="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.104/opencbm-0.4.99.104.tar.bz2">.
+<item>Unpack them into a directory (i.e., <it>&tilde;/opencbm-0.4.99.104</it>, with
+      0.4.99.104 being the version number of OpenCBM).
+<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.104</it>
 <item>Compile OpenCBM and the appropriate plugin: <it>make -f LINUX/Makefile
 opencbm plugin-<em/XXX/</it>, with <it/XXX/ being one of <it/xa1541/, <it/xu1541/ or
 <it/xum1541/, depending upon which adapter you are using:
@@ -766,8 +791,8 @@ should be your primary source for instructions.
 
 <p>
 You need the Windows binaries from <htmlurl
-url="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.zip"
-name="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.zip"> in order to install OpenCBM.
+url="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.104/opencbm-0.4.99.104.zip"
+name="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.104/opencbm-0.4.99.104.zip"> in order to install OpenCBM.
 
 <sect3>USB driver installation
 
@@ -868,9 +893,9 @@ In order to install OpenCBM, proceed as follows:
 
 <itemize>
 <item>Download the OpenCBM package binary for Windows from <htmlurl
-      url="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.zip"
-      name="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.103/opencbm-0.4.99.103.zip">
-      Note that unlike previous versions of OpenCBM, v0.4.99.103 now contains one package for
+      url="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.104/opencbm-0.4.99.104.zip"
+      name="https://spiro.trikaliotis.net/Download/opencbm-0.4.99.104/opencbm-0.4.99.104.zip">
+      Note that unlike previous versions of OpenCBM, v0.4.99.104 now contains one package for
       all supported architectures (i386 vs. amd64, 32 bit vs. 64 bit). You do not have to
       choose which one to get.
 <item>Unpack it into a directory of your liking
@@ -895,7 +920,7 @@ In order to install OpenCBM, proceed as follows:
       On Windows XP, it will ask you for your administrator password. Again,
       you must give it, or OpenCBM will not install successfully.
 <item>Afterwards, it will ask you if you want to install the USB drivers.
-      <bf/Note that OpenCBM 0.4.99.103 uses other drivers than previous versions of
+      <bf/Note that OpenCBM 0.4.99.104 uses other drivers than previous versions of
       OpenCBM, and it will not work reliably with the old drivers!/
       Thus, if you are upgrading or installing for the first time, answer "yes"
       here.
@@ -1430,9 +1455,9 @@ Perform the following steps to uninstall OpenCBM on your Linux machine:
 
 <itemize>
 <item>I assume you already have an installation directory for OpenCBM handy.
-      Let's assume it is <it>&tilde;/opencbm-0.4.99.103</it>, with
-      0.4.99.103 being the version number of OpenCBM.
-<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.103</it>
+      Let's assume it is <it>&tilde;/opencbm-0.4.99.104</it>, with
+      0.4.99.104 being the version number of OpenCBM.
+<item><it>cd</it> into the directory: <it>cd &tilde;/opencbm-0.4.99.104</it>
 <item>Enter: <it>sudo make -f LINUX/Makefile uninstall</it>
 <item>Now, everything should be uninstalled.
 </itemize>
@@ -1560,7 +1585,7 @@ programs are included with this package:
 <p>
 <it/instcbm/ is used on Windows to install the OpenCBM driver.
 
-<em/Please note that the syntax of instcbm has changed considerably in v0.4.99.103
+<em/Please note that the syntax of instcbm has changed considerably in v0.4.99.104
 with respect to the syntax used until version v0.4.2!/
 
 <sect2>instcbm invocation<label id="instcbm command structure">
