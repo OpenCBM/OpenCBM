@@ -97,4 +97,7 @@ EXTERN opencbm_plugin_iec_dbg_write_t              opencbm_plugin_iec_dbg_write;
 EXTERN opencbm_plugin_init_t                       opencbm_plugin_init;
 EXTERN opencbm_plugin_uninit_t                     opencbm_plugin_uninit;
 
+EXTERN opencbm_plugin_get_list_of_configuration_parameter_t opencbm_plugin_get_list_of_configuration_parameter;
+EXTERN opencbm_plugin_set_configuration_parameter_t         opencbm_plugin_set_configuration_parameter;
+
 #endif // #ifndef ARCHLIB_H

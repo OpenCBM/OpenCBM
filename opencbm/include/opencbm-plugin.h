@@ -21,6 +21,46 @@
 
 #include "opencbm.h"
 
+/*! \brief types of configuration data
+
+ \remark
+   Specify which type of configuration data is expected
+   by struct opencbm_plugin_configuration_data_t.
+*/
+enum opencbm_plugin_configuration_data_type {
+    OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_LASTENTRY, /**< this is the last (dummy) entry; does not contain any data */
+    OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_INTEGER,   /**< the expected data is (signed) integer */
+    OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_UINTEGER,  /**< the expected data is an (unsigned) integer */
+    OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_STRING,    /**< the expected data is an arbitrary string */
+    OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_BOOLEAN    /**< the expected data is a boolean (1/true/yes or 0/false/no) */
+};
+
+/*! \brief specification of needed configuration data
+
+ \remark
+   This is used by opencbm_plugin_get_list_of_configuration_parameter_t() and
+   opencbm_plugin_set_configuration_parameter_t()
+*/
+typedef
+struct opencbm_plugin_configuration_data_t {
+  enum opencbm_plugin_configuration_data_type   type;     /**< the type of the configuration entry */
+  const char                                  * name;     /**< the name of the configuration entry */
+  int                                           isValid;  /**< is 0 if the entry is not valid; otherwise, if the entry is valid, it is set to 1. */
+  union {
+            signed int   integer;        /**< the returned value if type is OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_INTEGER */
+          unsigned int   uinteger;       /**< the returned value if type is OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_INTEGER */
+          char         * string;         /**< the returned value if type is OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_STRING.
+
+                                           \note
+                                           The plugin must copy this
+                                           value if it needs it after
+                                           opencbm_plugin_set_configuration_parameter()
+                                           has returned!
+                                           */
+          unsigned int   boolean;        /**< the returned value (1 or 0) if type is OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_BOOLEAN */
+  };
+} opencbm_plugin_configuration_data_t;
+
 /*! \brief @@@@@ \todo document
 
 \return
@@ -531,6 +571,43 @@ typedef int CBMAPIDECL opencbm_plugin_iec_dbg_read_t(CBM_FILE HandleDevice);
 */
 typedef int CBMAPIDECL opencbm_plugin_iec_dbg_write_t(CBM_FILE HandleDevice, unsigned char Value);
 
+/*! \brief Get a memory area which contains the configuration data
+
+ \return
+    Pointer to a memory area that contains the names and the types of the
+    configuration data that are wanted.
+
+ \remark
+    The plugin fills the buffer and returns it with this function.
+    The opencbm DLL/.SO will fill in the known data values into this buffer.
+
+    The DLL/SO will call this function, and afterwards, it will call
+    the opencbm_plugin_set_configuration_parameter_t function.
+*/
+typedef opencbm_plugin_configuration_data_t * CBMAPIDECL opencbm_plugin_get_list_of_configuration_parameter_t(void);
+
+/*! \brief Get a memory area which contains the configuration data
+
+ \return
+    Pointer to a memory area that contains the names and the types of the
+    configuration data that are wanted.
+
+ \remark
+    The plugin fills the buffer and returns it with this function.
+    The opencbm DLL/.SO will fill in the known data values into this buffer.
+
+    The DLL/SO will call the function
+    opencbm_plugin_get_list_of_configuration_parameter_t first; afterwards,
+    it will call this function with the data filled in.
+
+    The DLL/SO is only allowed to fill the buffer given by
+    opencbm_plugin_get_list_of_configuration_parameter_t function.
+
+    After the opencbm_plugin_set_configuration_parameter_t returns, the data
+    areas pointed to (for the strings) cannot be accessed anymore.
+    Thus, if the strings are needed, they must be copied to a safe place.
+*/
+typedef void CBMAPIDECL opencbm_plugin_set_configuration_parameter_t(opencbm_plugin_configuration_data_t * ConfigurationData);
 
 /*! \brief holds all callbacks of the plugin
 
@@ -598,6 +675,9 @@ struct opencbm_plugin_s {
     opencbm_plugin_tap_download_config_t        * opencbm_plugin_tap_download_config;     /*!< pointer to a opencbm_plugin_tap_download_config_t() function */
     opencbm_plugin_tap_upload_config_t          * opencbm_plugin_tap_upload_config;       /*!< pointer to a opencbm_plugin_tap_upload_config_t() function */
     opencbm_plugin_tap_break_t                  * opencbm_plugin_tap_break;               /*!< pointer to a opencbm_plugin_tap_break_t() function */
+
+    opencbm_plugin_get_list_of_configuration_parameter_t * opencbm_plugin_get_list_of_configuration_parameter;
+    opencbm_plugin_set_configuration_parameter_t         * opencbm_plugin_set_configuration_parameter;
 
 } opencbm_plugin_t;
 

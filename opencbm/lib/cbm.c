@@ -181,6 +181,8 @@ static struct plugin_read_pointer plugin_pointer_to_read_optional[] =
     PLUGIN_POINTER_DEF(opencbm_plugin_parallel_burst_write_track),
     PLUGIN_POINTER_DEF(opencbm_plugin_pp_read),
     PLUGIN_POINTER_DEF(opencbm_plugin_pp_write),
+    PLUGIN_POINTER_DEF(opencbm_plugin_get_list_of_configuration_parameter),
+    PLUGIN_POINTER_DEF(opencbm_plugin_set_configuration_parameter),
     PLUGIN_POINTER_END()
 };
 
@@ -340,6 +342,105 @@ read_plugin_pointer_groups(
     return error;
 }
 
+static int initialize_plugin_configuration(char *plugin_name, plugin_information_t *Plugin_information, opencbm_configuration_handle handle_configuration)
+{
+    int error = 0;
+
+    opencbm_plugin_configuration_data_t * configData = NULL;
+
+    do {
+        int    counter;
+        char * tmpData;
+
+        configData = Plugin_information->Plugin.opencbm_plugin_get_list_of_configuration_parameter();
+
+        if (!configData) {
+            break;
+        }
+
+        counter = -1;
+        while (configData[++counter].type != OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_LASTENTRY) {
+            configData[counter].isValid = 0;
+
+            char          *endPtr;
+            unsigned long tmpUL;
+            int           isUL;
+            long          tmpL;
+            int           isL;
+
+            error = opencbm_configuration_get_data(handle_configuration, plugin_name,
+                    configData[counter].name, &tmpData);
+
+            tmpUL = strtoul(tmpData, &endPtr, 0);
+            isUL = (*endPtr == 0);
+
+            tmpL = strtol(tmpData, &endPtr, 0);
+            isL = (*endPtr == 0);
+
+            if (error) {
+                /* could not get the data, continue */
+                error = 0; /* this is not an error */
+                continue;
+            }
+
+            switch (configData[counter].type) {
+                case OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_BOOLEAN:
+                    if (  (arch_strcasecmp(tmpData, "false") == 0)
+                       || (arch_strcasecmp(tmpData, "no") == 0)
+                       )
+                    {
+                        configData[counter].boolean = 0;
+                        configData[counter].isValid = 1;
+                    }
+                    else if (  (arch_strcasecmp(tmpData, "true") == 0)
+                            || (arch_strcasecmp(tmpData, "yes") == 0)
+                            )
+                    {
+                        configData[counter].boolean = 1;
+                        configData[counter].isValid = 1;
+                    }
+                    else if (isUL) {
+                        configData[counter].boolean = tmpUL ? 1 : 0;
+                        configData[counter].isValid = 1;
+                    }
+                    else if (isL) {
+                        configData[counter].boolean = tmpL ? 1 : 0;
+                        configData[counter].isValid = 1;
+                    }
+                    break;
+
+                case OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_INTEGER:
+                    if (isL) {
+                        configData[counter].integer = tmpL;
+                        configData[counter].isValid = 1;
+                    }
+                    break;
+
+                case OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_UINTEGER:
+                    if (isUL) {
+                        configData[counter].uinteger = tmpUL;
+                        configData[counter].isValid = 1;
+                    }
+                    break;
+
+                case OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_STRING:
+                    configData[counter].string = tmpData;
+                    configData[counter].isValid = 1;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+
+        Plugin_information->Plugin.opencbm_plugin_set_configuration_parameter(configData);
+
+    } while (0);
+
+    return error;
+}
+
 static int
 initialize_plugin_pointer(plugin_information_t *Plugin_information, const char * const Adapter)
 {
@@ -350,9 +451,9 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
     char * plugin_name = NULL;
     char * plugin_location = NULL;
 
-    do {
+    opencbm_configuration_handle handle_configuration = NULL;
 
-        opencbm_configuration_handle handle_configuration;
+    do {
 
         if (configurationFilename == NULL) {
             DBG_ERROR((DBG_PREFIX "Do not know where the plugin information is stored!\n"));
@@ -408,8 +509,6 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
                 cbmlibmisc_strfree(plugin_location);
                 plugin_location = NULL;
             }
-
-            opencbm_configuration_close(handle_configuration);
         }
         else
         {
@@ -448,7 +547,17 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
             }
         }
 
+        if (Plugin_information->Plugin.opencbm_plugin_get_list_of_configuration_parameter
+          && Plugin_information->Plugin.opencbm_plugin_set_configuration_parameter) {
+            error = initialize_plugin_configuration(plugin_name, Plugin_information, handle_configuration);
+            if (error) {
+                DBG_ERROR((DBG_PREFIX "Configuration of plugin %s failed.\n",
+                            plugin_location));
+            }
+        }
     } while (0);
+
+    opencbm_configuration_close(handle_configuration);
 
     cbmlibmisc_strfree(plugin_name);
     cbmlibmisc_strfree(plugin_location);
