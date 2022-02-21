@@ -554,19 +554,23 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
     }
 
     do {
-        // Check if device is already configured.
-#if HAVE_LIBUSB0
-        char config = 0;
-
-        // libusb0 has no get_configuration() api call, so try to get the
-        // active configuration directly from the device via control message
-        usb.control_msg(HandleXum1541->devh, USB_TYPE_STANDARD | USB_ENDPOINT_IN,
-            USB_REQ_GET_CONFIGURATION, 0, 0, &config, sizeof(config), USB_TIMEOUT);
-#elif HAVE_LIBUSB1
         int config = 0;
 
-        usb.get_configuration(HandleXum1541->devh, &config);
+        if ( ! (xum1541_usb_quirks_mode & XUM1541_USB_QUIRKS_MODE_CONFIG_ONCE_ONLY) )
+        {
+            // Check if device is already configured.
+#if HAVE_LIBUSB0
+            char ch_config = 0;
+
+            // libusb0 has no get_configuration() api call, so try to get the
+            // active configuration directly from the device via control message
+            usb.control_msg(HandleXum1541->devh, USB_TYPE_STANDARD | USB_ENDPOINT_IN,
+                USB_REQ_GET_CONFIGURATION, 0, 0, &ch_config, sizeof(ch_config), USB_TIMEOUT);
+            config = ch_config;
+#elif HAVE_LIBUSB1
+            usb.get_configuration(HandleXum1541->devh, &config);
 #endif
+        }
 
         if (config != 1) {
             // Select first and only device configuration.
@@ -586,9 +590,19 @@ xum1541_init(struct opencbm_usb_handle **HandleXum1541_p, int PortNumber)
             break;
         }
 
-        if (ret != LIBUSB_SUCCESS) {
-            fprintf(stderr, "USB error: %s\n", usb.error_name(ret));
-            break;
+        if ( ! (xum1541_usb_quirks_mode & XUM1541_USB_QUIRKS_MODE_ALT_SETTING) )
+        {
+	    // Set interface to make sure data toggles are reset
+#if HAVE_LIBUSB0
+	    ret = usb.set_altinterface(HandleXum1541->devh, 0);
+#elif HAVE_LIBUSB1
+	    ret = usb.set_interface_alt_setting(HandleXum1541->devh, 0, 0);
+#endif
+
+	    if (ret != LIBUSB_SUCCESS) {
+		fprintf(stderr, "USB error: %s\n", usb.error_name(ret));
+		break;
+	    }
         }
 
         // Check the basic device info message for firmware version

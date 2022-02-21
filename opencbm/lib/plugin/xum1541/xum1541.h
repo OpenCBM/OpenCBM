@@ -29,6 +29,19 @@
 CTASSERT(sizeof(CBM_FILE) >= sizeof(usb_dev_handle *));
 #endif
 
+/** \brief Bitfield definitions for the USB Quirks mode */
+enum xum1541_usb_quirks_enum {
+  XUM1541_USB_QUIRKS_MODE_CONFIG_ONCE_ONLY = 0x01,  /**< if set, usb set configuration will not be send if the configuration is already set */
+  XUM1541_USB_QUIRKS_MODE_ALT_SETTING      = 0x02,  /**< if set, set "alt setting" as last step of initialization */
+};
+
+/** \brief Quirks mode
+
+  This is a bit field which enables/disables some quirks for USB.
+  The meaning of the bits is defined in xum1541_usb_quirks_enum.
+ */
+extern unsigned int xum1541_usb_quirks_mode;
+
 /*
  * Make our control transfer timeout 10% later than the device itself
  * times out. This is used for both the INIT and RESET messages since

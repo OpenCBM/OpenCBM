@@ -48,6 +48,8 @@
 
 #include "xum1541.h"
 
+unsigned int xum1541_usb_quirks_mode;
+
 /*-------------------------------------------------------------------*/
 /*--------- OPENCBM ARCH FUNCTIONS ----------------------------------*/
 
@@ -131,6 +133,65 @@ opencbm_plugin_driver_close(CBM_FILE HandleDevice)
     xum1541_close((struct opencbm_usb_handle *)HandleDevice);
 }
 
+
+/*! \brief configuration data we are interested in
+ There are the configuration data entries that we want to have
+ in our plugin.
+*/
+static opencbm_plugin_configuration_data_t configurationData[] =
+{
+        { OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_UINTEGER,  "usb-quirks" },
+        { OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_LASTENTRY, ""           }
+};
+
+/*! \brief Get a memory area which contains the configuration data
+
+ \return
+    Pointer to a memory area that contains the names and the types of the
+    configuration data that are wanted.
+
+ \remark
+    The plugin fills the buffer and returns it with this function.
+    The opencbm DLL/.SO will fill in the known data values into this buffer.
+
+    The DLL/SO will call this function, and afterwards, it will call
+    the opencbm_plugin_set_configuration_parameter() function.
+*/
+opencbm_plugin_configuration_data_t * CBMAPIDECL
+opencbm_plugin_get_list_of_configuration_parameter(void)
+{
+    return configurationData;
+}
+
+/*! \brief Get a memory area which contains the configuration data
+
+ \return
+    Pointer to a memory area that contains the names and the types of the
+    configuration data that are wanted.
+
+ \remark
+    The plugin fills the buffer and returns it with this function.
+    The opencbm DLL/.SO will fill in the known data values into this buffer.
+
+    The DLL/SO will call the function
+    opencbm_plugin_get_list_of_configuration_parameter first; afterwards,
+    it will call this function with the data filled in.
+
+    The DLL/SO is only allowed to fill the buffer given by
+    opencbm_plugin_get_list_of_configuration_parameter function.
+
+    After the opencbm_plugin_set_configuration_parameter returns, the data
+    areas pointed to (for the strings) cannot be accessed anymore.
+    Thus, if the strings are needed, they must be copied to a safe place.
+*/
+void CBMAPIDECL
+opencbm_plugin_set_configuration_parameter(opencbm_plugin_configuration_data_t * ConfigurationData)
+{
+    xum1541_usb_quirks_mode = ConfigurationData[0].isValid ? ConfigurationData[0].integer : 0;
+}
+
+
+typedef void CBMAPIDECL opencbm_plugin_set_configuration_parameter_t(opencbm_plugin_configuration_data_t * ConfigurationData);
 
 /*! \brief Lock the parallel port for the driver
 
