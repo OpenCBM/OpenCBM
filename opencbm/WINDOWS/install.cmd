@@ -146,7 +146,7 @@ if %OC_INSTALL_ELEVATED% EQU 0 (
 	rem fsutil dirty query %SYSTEMDRIVE% >nul 2>&1
 	rem
 	rem sfc should work up to 2000, and also on PE
-	sfc 2>nul | find /i "/" >nul
+	sfc 2>&1 | find /i "/" >nul
 
 	if !errorlevel! EQU 0 (
 		rem echo We have administrative rights
