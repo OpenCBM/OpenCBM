@@ -23,7 +23,7 @@ LFLAGS := -L../../lib/ -lxu1541$(LIB_WIN) $(LFLAGS)
 .PHONY:	all clean mrproper xu1541lib
 
 all:
-	make ../$(APP)
+	$(MAKE) ../$(APP)
 
 clean:
 	rm -f *.o *~
@@ -35,4 +35,4 @@ mrproper: clean
 	$(CC) $(OBJS) -o $@ $(LFLAGS)
 
 xu1541lib:
-	make -C ../../lib/
+	$(MAKE) -C ../../lib/
