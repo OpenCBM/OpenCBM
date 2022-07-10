@@ -371,17 +371,17 @@ static int initialize_plugin_configuration(char *plugin_name, plugin_information
             error = opencbm_configuration_get_data(handle_configuration, plugin_name,
                     configData[counter].name, &tmpData);
 
-            tmpUL = strtoul(tmpData, &endPtr, 0);
-            isUL = (*endPtr == 0);
-
-            tmpL = strtol(tmpData, &endPtr, 0);
-            isL = (*endPtr == 0);
-
             if (error) {
                 /* could not get the data, continue */
                 error = 0; /* this is not an error */
                 continue;
             }
+
+            tmpUL = strtoul(tmpData, &endPtr, 0);
+            isUL = (*endPtr == 0);
+
+            tmpL = strtol(tmpData, &endPtr, 0);
+            isL = (*endPtr == 0);
 
             switch (configData[counter].type) {
                 case OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_BOOLEAN:
