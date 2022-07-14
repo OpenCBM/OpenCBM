@@ -73,10 +73,6 @@ $(call CREATE_TARGETS,opencbm/lib,all):: $(call CREATE_TARGET,opencbm/arch/$(OS_
 $(call CREATE_TARGETS,$(filter-out $(SUBDIRS_PLUGIN_XA1541),$(SUBDIRS_ALL_NON_OPTIONAL)) $(SUBDIRS_OPTIONAL),all):: $(call CREATE_TARGET,opencbm/lib,all)
 $(call CREATE_TARGETS,opencbm/sample/libtrans,all):: $(call CREATE_TARGET,opencbm/libtrans,all)
 
-$(call CREATE_TARGETS,opencbm/lib,install):: $(call CREATE_TARGET,opencbm/arch/$(OS_ARCH) opencbm/libmisc,install)
-$(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL) $(SUBDIRS_OPTIONAL),install):: $(call CREATE_TARGET,opencbm/lib,install)
-$(call CREATE_TARGETS,opencbm/sample/libtrans,install):: $(call CREATE_TARGET,opencbm/libtrans,install)
-
 
 .PHONY: $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL),all clean mrproper install install-files install-files-doc install-doc uninstall)
 $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL),all clean mrproper install install-files install-files-doc install-doc uninstall)::
