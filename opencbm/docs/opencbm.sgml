@@ -1135,7 +1135,7 @@ releases.
 <item>Using direct port access (with -DDIRECT_PORT_ACCESS):
 
 <itemize>
-<item>The port/IRQ might occupied by another driver (e.g. parport.o)
+<item>The port/IRQ might be occupied by another driver (e.g. parport.o)
      Enter <it>cat /proc/interrupts</it> and <it>cat /proc/ioports</it> to find
      out.
 </itemize>
