@@ -27,6 +27,8 @@ SUBDIRS_PLUGIN_XU1541 = opencbm/lib/plugin/xu1541
 SUBDIRS_PLUGIN_XUM1541 = opencbm/lib/plugin/xum1541 xum1541cfg
 endif
 
+SUBDIRS_PLUGIN_XDUMMY = opencbm/lib/plugin/xdummy
+
 ifeq ($(strip $(HAVE_KERNEL_SOURCE)),)
 ifeq ($(strip $(FORCE_PLUGIN_XA1541)),)
 SUBDIRS_PLUGIN_XA1541 =
@@ -44,7 +46,7 @@ endif
 SUBDIRS_OPTIONAL = opencbm/addon opencbm/nibtools opencbm/mnib36 opencbm/cbmrpm41 opencbm/cbmlinetester
 
 
-SUBDIRS_PLUGIN          = $(SUBDIRS_PLUGIN_XUM1541) $(SUBDIRS_PLUGIN_XU1541) $(SUBDIRS_PLUGIN_XA1541)
+SUBDIRS_PLUGIN          = $(SUBDIRS_PLUGIN_XUM1541) $(SUBDIRS_PLUGIN_XU1541) $(SUBDIRS_PLUGIN_XA1541) $(SUBDIRS_PLUGIN_XDUMMY)
 
 SUBDIRS_ALL_NON_OPTIONAL= $(SUBDIRS) $(SUBDIRS_DOC) $(SUBDIRS_PLUGIN)
 
@@ -141,6 +143,8 @@ endif
 
 $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),install):: plugin-xa1541
 
+install-plugin-xdummy: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XDUMMY),install)
+
 
 install-plugin: $(INSTALL_PLUGINS)
 
@@ -163,6 +167,10 @@ $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XUM1541),all):: opencbm
 plugin-xa1541: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),all)
 
 $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XA1541),all):: opencbm
+
+plugin-xdummy: $(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XDUMMY),all)
+
+$(call CREATE_TARGET,$(SUBDIRS_PLUGIN_XDUMMY),all):: opencbm
 
 plugin: $(PLUGINS)
 

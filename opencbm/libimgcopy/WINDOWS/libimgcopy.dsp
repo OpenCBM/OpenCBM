@@ -138,7 +138,7 @@ SOURCE=..\pp1541.a65
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\pp1541.a65
 InputName=pp1541
 
@@ -150,7 +150,7 @@ InputName=pp1541
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\pp1541.a65
 InputName=pp1541
 
@@ -169,7 +169,7 @@ SOURCE=..\pp1571.a65
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\pp1571.a65
 InputName=pp1571
 
@@ -181,7 +181,7 @@ InputName=pp1571
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\pp1571.a65
 InputName=pp1571
 
@@ -200,7 +200,7 @@ SOURCE="..\s1-1581.a65"
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath="..\s1-1581.a65"
 InputName=s1-1581
 
@@ -212,7 +212,7 @@ InputName=s1-1581
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath="..\s1-1581.a65"
 InputName=s1-1581
 
@@ -231,7 +231,7 @@ SOURCE=..\s1.a65
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\s1.a65
 InputName=s1
 
@@ -243,7 +243,7 @@ InputName=s1
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\s1.a65
 InputName=s1
 
@@ -262,7 +262,7 @@ SOURCE="..\s2-1581.a65"
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath="..\s2-1581.a65"
 InputName=s2-1581
 
@@ -274,7 +274,7 @@ InputName=s2-1581
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath="..\s2-1581.a65"
 InputName=s2-1581
 
@@ -293,7 +293,7 @@ SOURCE=..\s2.a65
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\s2.a65
 InputName=s2
 
@@ -305,7 +305,7 @@ InputName=s2
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\s2.a65
 InputName=s2
 
@@ -323,10 +323,20 @@ SOURCE="..\s3-1581.a65"
 
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
+# Begin Custom Build
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
+InputPath="..\s3-1581.a65"
+InputName=s3-1581
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath="..\s3-1581.a65"
 InputName=s3-1581
 
@@ -344,10 +354,20 @@ SOURCE=..\s3.a65
 
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
+# Begin Custom Build
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
+InputPath=..\s3.a65
+InputName=s3
+
+"$(InputDir)\$(InputName).inc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	..\..\WINDOWS\buildoneinc ..\.. $(InputPath)
+
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\s3.a65
 InputName=s3
 
@@ -366,7 +386,7 @@ SOURCE=..\turboread1541.a65
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turboread1541.a65
 InputName=turboread1541
 
@@ -378,7 +398,7 @@ InputName=turboread1541
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turboread1541.a65
 InputName=turboread1541
 
@@ -397,7 +417,7 @@ SOURCE=..\turboread1571.a65
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turboread1571.a65
 InputName=turboread1571
 
@@ -409,7 +429,7 @@ InputName=turboread1571
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turboread1571.a65
 InputName=turboread1571
 
@@ -428,7 +448,7 @@ SOURCE=..\turboread1581.a65
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turboread1581.a65
 InputName=turboread1581
 
@@ -440,7 +460,7 @@ InputName=turboread1581
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turboread1581.a65
 InputName=turboread1581
 
@@ -459,7 +479,7 @@ SOURCE=..\turbowrite1541.a65
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turbowrite1541.a65
 InputName=turbowrite1541
 
@@ -471,7 +491,7 @@ InputName=turbowrite1541
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turbowrite1541.a65
 InputName=turbowrite1541
 
@@ -490,7 +510,7 @@ SOURCE=..\turbowrite1571.a65
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turbowrite1571.a65
 InputName=turbowrite1571
 
@@ -502,7 +522,7 @@ InputName=turbowrite1571
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turbowrite1571.a65
 InputName=turbowrite1571
 
@@ -521,7 +541,7 @@ SOURCE=..\turbowrite1581.a65
 !IF  "$(CFG)" == "libimgcopy - Win32 Release"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turbowrite1581.a65
 InputName=turbowrite1581
 
@@ -533,7 +553,7 @@ InputName=turbowrite1581
 !ELSEIF  "$(CFG)" == "libimgcopy - Win32 Debug"
 
 # Begin Custom Build
-InputDir=\cygwin\home\tri\cbm\opencbm\libimgcopy
+InputDir=\home\spiro\cbm\opencbm.git\opencbm\libimgcopy
 InputPath=..\turbowrite1581.a65
 InputName=turbowrite1581
 

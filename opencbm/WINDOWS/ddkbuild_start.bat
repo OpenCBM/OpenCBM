@@ -87,7 +87,7 @@ if /I "%0" EQU "-hollis" (
 )
 
 set DDKBUILD_PLATFORM=i386
-set OPTIONAL_DIRS=vdd nt4 win98 xu1541 xum1541
+set OPTIONAL_DIRS=vdd nt4 win98 xu1541 xum1541 xdummy
 
 if %DDKBUILD_HOLLIS% EQU 1 (
 rem	set DDKBUILD_PLATFORM_OPTION=XP
@@ -105,7 +105,7 @@ if /I "%0" EQU "-i386" (
 	set DDKBUILD_PLATFORM=ia64
 	set DDKBUILD_PLATFORM_OPTION=64
 	set DDKBUILD_PLATFORM_DIR_FROM_WINDRV=
-	set OPTIONAL_DIRS=
+	set OPTIONAL_DIRS=xdummy
 	shift
 ) else if /I "%0" EQU "-amd64" (
 	set DDKBUILD_PLATFORM=amd64
@@ -114,7 +114,7 @@ if /I "%0" EQU "-i386" (
 	) else (
 		set DDKBUILD_PLATFORM_OPTION=A64
 	)
-	set OPTIONAL_DIRS=xu1541 xum1541
+	set OPTIONAL_DIRS=xu1541 xum1541 xdummy
 	set DDKBUILD_PLATFORM_DIR_FROM_WINDRV=amd64
 	shift
 )

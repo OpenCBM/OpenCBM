@@ -110,6 +110,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name demodownloadrom
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbmxdummy
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -428,6 +431,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name opencbm
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbmxdummy
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -555,6 +561,24 @@ Package=<4>
 
 ###############################################################################
 
+Project: "opencbmxdummy"=..\lib\plugin\xdummy\WINDOWS\opencbmxdummy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "opencbmxu1541"=..\lib\plugin\xu1541\WINDOWS\opencbmxu1541.dsp - Package Owner=<4>
 
 Package=<5>
@@ -565,6 +589,9 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name libmisc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
     End Project Dependency
 }}}
 
@@ -580,6 +607,9 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name libmisc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name arch
     End Project Dependency
 }}}
 
@@ -598,6 +628,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libmisc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name opencbm
     End Project Dependency
 }}}
 

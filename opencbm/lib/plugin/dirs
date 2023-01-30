@@ -2,5 +2,6 @@ DIRS= \
 	xa1541
 
 OPTIONAL_DIRS= \
+	xdummy \
 	xu1541 \
 	xum1541
