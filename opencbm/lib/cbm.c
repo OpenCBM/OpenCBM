@@ -360,13 +360,13 @@ static int initialize_plugin_configuration(char *plugin_name, plugin_information
 
         counter = -1;
         while (configData[++counter].type != OPENCBM_PLUGIN_CONFIGURATION_DATA_TYPE_LASTENTRY) {
-            configData[counter].isValid = 0;
-
             char          *endPtr;
             unsigned long tmpUL;
             int           isUL;
             long          tmpL;
             int           isL;
+
+            configData[counter].isValid = 0;
 
             error = opencbm_configuration_get_data(handle_configuration, plugin_name,
                     configData[counter].name, &tmpData);
