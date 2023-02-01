@@ -4,8 +4,7 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005, 2007, 2009, 2011 Spiro Trikaliotis
+ *  Copyright 2023 Spiro Trikaliotis
  *
 */
 
@@ -13,13 +12,14 @@
 ** \file lib/plugin/xdummy/archlib.c \n
 ** \author Spiro Trikaliotis \n
 ** \n
-** \brief Shared library / DLL for accessing the driver, windows specific code
+** \brief dummy plugin which does nothing
 **
 ****************************************************************/
 
 #ifdef WIN32
 #include <windows.h>
 #include <windowsx.h>
+#endif
 
 /*! Mark: We are in user-space (for debug.h) */
 #define DBG_USERMODE
@@ -34,15 +34,12 @@
 // #define DBG_IS_DEBUG_C
 
 #include "debug.h"
-#endif
 
 #include <stdlib.h>
 
 //! mark: We are building the DLL */
 #define OPENCBM_PLUGIN
 #include "archlib.h"
-
-// #include "xdummy.h"
 
 
 /*-------------------------------------------------------------------*/
@@ -69,7 +66,9 @@ opencbm_plugin_get_driver_name(const char * const Port)
 {
     UNREFERENCED_PARAMETER(Port);
 
-    return "xdummy";
+    FUNC_ENTER();
+
+    FUNC_LEAVE_STRING("xdummy");
 }
 
 /*! \brief Opens the driver
@@ -97,7 +96,9 @@ opencbm_plugin_driver_open(CBM_FILE *HandleDevice, const char * const Port)
 {
     UNREFERENCED_PARAMETER(Port);
 
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 /*! \brief Closes the driver
@@ -117,6 +118,9 @@ opencbm_plugin_driver_open(CBM_FILE *HandleDevice, const char * const Port)
 void CBMAPIDECL
 opencbm_plugin_driver_close(CBM_FILE HandleDevice)
 {
+    FUNC_ENTER();
+
+    FUNC_LEAVE();
 }
 
 
@@ -147,6 +151,9 @@ opencbm_plugin_driver_close(CBM_FILE HandleDevice)
 void CBMAPIDECL
 opencbm_plugin_lock(CBM_FILE HandleDevice)
 {
+    FUNC_ENTER();
+
+    FUNC_LEAVE();
 }
 
 /*! \brief Unlock the parallel port for the driver
@@ -169,6 +176,9 @@ opencbm_plugin_lock(CBM_FILE HandleDevice)
 void CBMAPIDECL
 opencbm_plugin_unlock(CBM_FILE HandleDevice)
 {
+    FUNC_ENTER();
+
+    FUNC_LEAVE();
 }
 
 /*! \brief Write data to the IEC serial bus
@@ -198,7 +208,9 @@ opencbm_plugin_unlock(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 /*! \brief Read data from the IEC serial bus
@@ -227,7 +239,9 @@ opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count
 int CBMAPIDECL
 opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 
@@ -258,7 +272,9 @@ opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 int CBMAPIDECL
 opencbm_plugin_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 /*! \brief Send a TALK on the IEC serial bus
@@ -287,7 +303,9 @@ opencbm_plugin_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsign
 int CBMAPIDECL
 opencbm_plugin_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 /*! \brief Open a file on the IEC serial bus
@@ -314,7 +332,9 @@ opencbm_plugin_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned
 int CBMAPIDECL
 opencbm_plugin_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 /*! \brief Close a file on the IEC serial bus
@@ -341,7 +361,9 @@ opencbm_plugin_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned
 int CBMAPIDECL
 opencbm_plugin_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 /*! \brief Send an UNLISTEN on the IEC serial bus
@@ -367,7 +389,9 @@ opencbm_plugin_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigne
 int CBMAPIDECL
 opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 /*! \brief Send an UNTALK on the IEC serial bus
@@ -393,7 +417,9 @@ opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_untalk(CBM_FILE HandleDevice)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 
@@ -420,7 +446,9 @@ opencbm_plugin_untalk(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_get_eoi(CBM_FILE HandleDevice)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 /*! \brief Reset the EOI flag
@@ -441,7 +469,9 @@ opencbm_plugin_get_eoi(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_clear_eoi(CBM_FILE HandleDevice)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 /*! \brief RESET all devices
@@ -468,7 +498,9 @@ opencbm_plugin_clear_eoi(CBM_FILE HandleDevice)
 int CBMAPIDECL
 opencbm_plugin_reset(CBM_FILE HandleDevice)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 
@@ -499,7 +531,9 @@ opencbm_plugin_reset(CBM_FILE HandleDevice)
 unsigned char CBMAPIDECL
 opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 {
-    return 0xcc;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_UCHAR(0xcc);
 }
 
 /*! \brief Write a byte to a XP1541/XP1571 cable
@@ -528,6 +562,9 @@ opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 void CBMAPIDECL
 opencbm_plugin_pp_write(CBM_FILE HandleDevice, unsigned char Byte)
 {
+    FUNC_ENTER();
+
+    FUNC_LEAVE();
 }
 
 /*! \brief Read status of all bus lines.
@@ -554,7 +591,9 @@ opencbm_plugin_pp_write(CBM_FILE HandleDevice, unsigned char Byte)
 int CBMAPIDECL
 opencbm_plugin_iec_poll(CBM_FILE HandleDevice)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
 
 
@@ -579,6 +618,9 @@ opencbm_plugin_iec_poll(CBM_FILE HandleDevice)
 void CBMAPIDECL
 opencbm_plugin_iec_set(CBM_FILE HandleDevice, int Line)
 {
+    FUNC_ENTER();
+
+    FUNC_LEAVE();
 }
 
 /*! \brief Deactivate a line on the IEC serial bus
@@ -602,6 +644,9 @@ opencbm_plugin_iec_set(CBM_FILE HandleDevice, int Line)
 void CBMAPIDECL
 opencbm_plugin_iec_release(CBM_FILE HandleDevice, int Line)
 {
+    FUNC_ENTER();
+
+    FUNC_LEAVE();
 }
 
 /*! \brief Activate and deactive a line on the IEC serial bus
@@ -634,6 +679,9 @@ opencbm_plugin_iec_release(CBM_FILE HandleDevice, int Line)
 void CBMAPIDECL
 opencbm_plugin_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
+    FUNC_ENTER();
+
+    FUNC_LEAVE();
 }
 
 /*! \brief Wait for a line to have a specific state
@@ -665,5 +713,7 @@ opencbm_plugin_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 int CBMAPIDECL
 opencbm_plugin_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
-    return 0;
+    FUNC_ENTER();
+
+    FUNC_LEAVE_INT(0);
 }
