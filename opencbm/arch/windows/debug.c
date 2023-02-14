@@ -18,6 +18,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#if _MSC_VER <= 1200
+    /* MSVC 6 did not have __FUNCTION__ yet, define a mockup */
+    char __FUNCTION__[] = "";
+#endif
+
 
 
 /*! Buffers where the debug string will be build up before it is

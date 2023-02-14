@@ -28,11 +28,9 @@
    #error Only one of DBG_KERNELMODE and DBG_USERMODE must be specified!
 #endif
 
-#ifndef DBG
- #ifdef _DEBUG
-  #define DBG 1
-  #define __FUNCTION__ ""
- #endif
+#if defined(_MSC_VER) && _MSC_VER <= 1200
+  /* MSVC 6 did not have __FUNCTION__ yet, define a mockup */
+  extern char __FUNCTION__[];
 #endif
 
 /*! \brief Execute a breakpoint
