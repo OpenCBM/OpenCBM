@@ -59,7 +59,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#define OutputDebugString(_xxx) printf( "%s\n", _xxx);
+#define OutputDebugString(_xxx) fprintf(stderr, "%s", _xxx);
 
 #define IN const
 #define OUT
@@ -325,12 +325,12 @@ int __cdecl main(int argc, char *argv[])
 #ifdef DBG_KERNELMODE
 
        /*! start the debugging output line */
-       #define _DBG_START() _DBG_START_ADD DbgBufferPos[DEBUG_BUFFER_NO] = 0; DbgOutputIntoBuffer(DBG_PREFIX "%s(%u,%02x)," __FUNCTION__ "(%u): ", DBG_PROGNAME, CbmGetCurrentProcessorNumber(), DebugBufferNo, __LINE__)
+       #define _DBG_START() _DBG_START_ADD DbgBufferPos[DEBUG_BUFFER_NO] = 0; DbgOutputIntoBuffer(DBG_PREFIX "%s(%u,%02x),%s(%u): ", DBG_PROGNAME, CbmGetCurrentProcessorNumber(), DebugBufferNo, __FUNCTION__, __LINE__)
 
 #else // #if DBG_KERNELMODE
 
        /*! start the debugging output line */
-       #define _DBG_START() _DBG_START_ADD DbgBufferPos[DEBUG_BUFFER_NO] = 0; DbgOutputIntoBuffer(DBG_PREFIX "%s," __FUNCTION__ "(%u): ", DBG_PROGNAME, __LINE__)
+       #define _DBG_START() _DBG_START_ADD DbgBufferPos[DEBUG_BUFFER_NO] = 0; DbgOutputIntoBuffer(DBG_PREFIX "%s,%s(%u): ", DBG_PROGNAME, __FUNCTION__, __LINE__)
 
 #endif // #if DBG_KERNELMODE
 
