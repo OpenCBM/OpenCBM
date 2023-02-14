@@ -77,6 +77,11 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = 0x%02x, "
+                            "&CbmDeviceType = %p, &CbmDeviceString = %p",
+                            HandleDevice, DeviceAddress,
+                            CbmDeviceType, CbmDeviceString));
+
     /* get footprint from 0xFF40 */
     if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0
         && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)

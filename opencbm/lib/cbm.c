@@ -59,6 +59,8 @@ int plugin_is_active(opencbm_configuration_handle Handle, const char PluginName[
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "Handle = %p, PluginName = '%s' (%p)", Handle, PluginName ? PluginName : "(null)", PluginName));
+
     do {
         char * next;
 
@@ -94,6 +96,8 @@ int plugin_set_active(const char PluginName[])
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "PluginName = '%s' (%p)", PluginName ? PluginName : "(null)", PluginName));
+
     FUNC_LEAVE_INT(0);
 }
 
@@ -107,6 +111,8 @@ int plugin_set_active(const char PluginName[])
 int plugin_set_inactive(const char PluginName[])
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "PluginName = '%s' (%p)", PluginName ? PluginName : "(null)", PluginName));
 
     FUNC_LEAVE_INT(0);
 }
@@ -453,6 +459,10 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
 
     opencbm_configuration_handle handle_configuration = NULL;
 
+    FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "Plugin_information = %p, Adapter = '%s' (%p)", Plugin_information, Adapter ? Adapter : "(null)", Adapter));
+
     do {
 
         if (configurationFilename == NULL) {
@@ -563,12 +573,14 @@ initialize_plugin_pointer(plugin_information_t *Plugin_information, const char *
     cbmlibmisc_strfree(plugin_location);
     cbmlibmisc_strfree(configurationFilename);
 
-    return error;
+    FUNC_LEAVE_INT(error);
 }
 
 static void
 uninitialize_plugin(void)
 {
+    FUNC_ENTER();
+
     if (Plugin_information.Library != NULL)
     {
         if (Plugin_information.Plugin.opencbm_plugin_uninit) {
@@ -579,6 +591,8 @@ uninitialize_plugin(void)
 
         Plugin_information.Library = NULL;
     }
+
+    FUNC_LEAVE();
 }
 
 static int
@@ -587,6 +601,10 @@ initialize_plugin(const char * const Adapter)
     /* if library is already opened and initialized correctly then
        this function returns OK */
     int error = 0;
+
+    FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "Adapter = '%s' (%p)", Adapter ? Adapter : "(null)", Adapter));
 
     /* init pointers if library was not yet opened */
     if (Plugin_information.Library == NULL)
@@ -599,7 +617,7 @@ initialize_plugin(const char * const Adapter)
         }
     }
 
-    return error;
+    FUNC_LEAVE_INT(error);
 }
 
 // #define DBG_DUMP_RAW_READ
@@ -701,6 +719,8 @@ cbm_get_driver_name_ex(char * Adapter)
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "Adapter = '%s' (%p)", Adapter ? Adapter : "(null)", Adapter));
+
     if ( buffer ) {
         cbmlibmisc_strfree(buffer);
         buffer = NULL;
@@ -762,6 +782,8 @@ cbm_get_driver_name(int PortNumber)
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "PortNumber = %u", PortNumber));
+
     if (PortNumber >= 0 && PortNumber < 10) {
         number[1] = PortNumber + '0';
     }
@@ -796,6 +818,8 @@ cbm_driver_open_ex(CBM_FILE *HandleDevice, char * Adapter)
     char * adapter_stripped = NULL;
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Adapter = '%s' (%p)", HandleDevice, Adapter ? Adapter : "(null)", Adapter));
 
     DBG_PRINT((DBG_PREFIX "cbm_driver_open_ex() called"));
 
@@ -852,6 +876,8 @@ cbm_driver_open(CBM_FILE *HandleDevice, int PortNumber)
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, PortNumber = %u", HandleDevice, PortNumber));
+
     if (PortNumber >= 0 && PortNumber < 10) {
         number[1] = PortNumber + '0';
     }
@@ -877,6 +903,8 @@ void CBMAPIDECL
 cbm_driver_close(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
 
     Plugin_information.Plugin.opencbm_plugin_driver_close(HandleDevice);
 
@@ -914,6 +942,8 @@ cbm_lock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     if (Plugin_information.Plugin.opencbm_plugin_lock)
         Plugin_information.Plugin.opencbm_plugin_lock(HandleDevice);
 
@@ -941,6 +971,8 @@ void CBMAPIDECL
 cbm_unlock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
 
     if (Plugin_information.Plugin.opencbm_plugin_unlock)
         Plugin_information.Plugin.opencbm_plugin_unlock(HandleDevice);
@@ -980,6 +1012,8 @@ cbm_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Count = %u", HandleDevice, Buffer, (int)Count));
+
 #ifdef DBG_DUMP_RAW_WRITE
     DBG_MEMDUMP("cbm_raw_write", Buffer, Count);
 #endif
@@ -1018,6 +1052,8 @@ cbm_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Count = %u", HandleDevice, Buffer, (int)Count));
+
     bytesRead = Plugin_information.Plugin.opencbm_plugin_raw_read(HandleDevice, Buffer, Count);
 
 #ifdef DBG_DUMP_RAW_READ
@@ -1055,6 +1091,8 @@ cbm_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char Sec
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = %02X, SecondaryAddress = %02X", HandleDevice, DeviceAddress, SecondaryAddress));
+
     FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_listen(HandleDevice, DeviceAddress, SecondaryAddress));
 }
 
@@ -1085,6 +1123,8 @@ int CBMAPIDECL
 cbm_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = %02X, SecondaryAddress = %02X", HandleDevice, DeviceAddress, SecondaryAddress));
 
     FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_talk(HandleDevice, DeviceAddress, SecondaryAddress));
 }
@@ -1124,6 +1164,12 @@ cbm_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char Secon
     int returnValue;
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = %02X, SecondaryAddress = %02X, "
+                "Filename = '%s' (%p), FilenameLength = %u",
+                HandleDevice, DeviceAddress, SecondaryAddress,
+                Filename ? Filename : "(null)", Filename,
+                FilenameLength));
 
     returnValue = Plugin_information.Plugin.opencbm_plugin_open(HandleDevice, DeviceAddress, SecondaryAddress);
 
@@ -1182,6 +1228,9 @@ cbm_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char Seco
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = %02X, SecondaryAddress = %02X",
+                HandleDevice, DeviceAddress, SecondaryAddress));
+
     FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_close(HandleDevice, DeviceAddress, SecondaryAddress));
 }
 
@@ -1210,6 +1259,8 @@ cbm_unlisten(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_unlisten(HandleDevice));
 }
 
@@ -1237,6 +1288,8 @@ int CBMAPIDECL
 cbm_untalk(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
 
     FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_untalk(HandleDevice));
 }
@@ -1267,6 +1320,8 @@ cbm_get_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_get_eoi(HandleDevice));
 }
 
@@ -1289,6 +1344,8 @@ int CBMAPIDECL
 cbm_clear_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
 
     FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_clear_eoi(HandleDevice));
 }
@@ -1318,6 +1375,8 @@ int CBMAPIDECL
 cbm_reset(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
 
     FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_reset(HandleDevice));
 }
@@ -1356,6 +1415,8 @@ cbm_pp_read(CBM_FILE HandleDevice)
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     if (Plugin_information.Plugin.opencbm_plugin_pp_read)
         ret = Plugin_information.Plugin.opencbm_plugin_pp_read(HandleDevice);
 
@@ -1392,6 +1453,8 @@ cbm_pp_write(CBM_FILE HandleDevice, unsigned char Byte)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Byte = %02X", HandleDevice, Byte));
+
     if (Plugin_information.Plugin.opencbm_plugin_pp_write)
         Plugin_information.Plugin.opencbm_plugin_pp_write(HandleDevice, Byte);
 
@@ -1424,6 +1487,8 @@ cbm_iec_poll(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_iec_poll(HandleDevice));
 }
 
@@ -1450,6 +1515,8 @@ void CBMAPIDECL
 cbm_iec_set(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Line = %02X", HandleDevice, Line));
 
     if (Plugin_information.Plugin.opencbm_plugin_iec_set)
         Plugin_information.Plugin.opencbm_plugin_iec_set(HandleDevice, Line);
@@ -1481,6 +1548,8 @@ void CBMAPIDECL
 cbm_iec_release(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Line = %02X", HandleDevice, Line));
 
     if (Plugin_information.Plugin.opencbm_plugin_iec_release)
         Plugin_information.Plugin.opencbm_plugin_iec_release(HandleDevice, Line);
@@ -1522,6 +1591,8 @@ cbm_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Set = %02X, Release = %02X", HandleDevice, Set, Release));
+
     Plugin_information.Plugin.opencbm_plugin_iec_setrelease(HandleDevice, Set, Release);
 
     FUNC_LEAVE();
@@ -1558,6 +1629,8 @@ cbm_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Line = %02X, State = %02X", HandleDevice, Line, State));
+
     FUNC_LEAVE_INT(Plugin_information.Plugin.opencbm_plugin_iec_wait(HandleDevice, Line, State));
 }
 
@@ -1586,6 +1659,8 @@ int CBMAPIDECL
 cbm_iec_get(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Line = %02X", HandleDevice, Line));
 
     FUNC_LEAVE_INT((Plugin_information.Plugin.opencbm_plugin_iec_poll(HandleDevice)&Line) != 0 ? 1 : 0);
 }
@@ -1637,6 +1712,10 @@ cbm_device_status(CBM_FILE HandleDevice, unsigned char DeviceAddress,
     int retValue;
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = %u, Buffer = %p, BufferLength = %u",
+                HandleDevice, DeviceAddress,
+                Buffer, (int)BufferLength));
 
     DBG_ASSERT(Buffer && (BufferLength > 0));
 
@@ -1718,6 +1797,13 @@ cbm_exec_command(CBM_FILE HandleDevice, unsigned char DeviceAddress,
     int rv;
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = %u, Command = '%s' (%p), Size = %u",
+                HandleDevice, DeviceAddress,
+                Command ? Command : "(null)", Command, (int)Size));
+
+    DBG_ASSERT(Command);
+
     rv = cbm_listen(HandleDevice, DeviceAddress, 15);
     if(rv == 0) {
         if(Size == 0) {
@@ -1754,6 +1840,8 @@ cbm_parallel_burst_read(CBM_FILE HandleDevice)
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_read)
         ret = Plugin_information.Plugin.opencbm_plugin_parallel_burst_read(HandleDevice);
 
@@ -1782,6 +1870,8 @@ cbm_parallel_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Value = %02X", HandleDevice, Value));
+
     if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_write)
         Plugin_information.Plugin.opencbm_plugin_parallel_burst_write(HandleDevice, Value);
 
@@ -1796,6 +1886,9 @@ cbm_parallel_burst_read_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     int rv;
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Length = %u",
+                HandleDevice, Buffer, Length));
 
     if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_n) {
         rv = Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_n(
@@ -1819,6 +1912,9 @@ cbm_parallel_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     int rv;
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Length = %u",
+                HandleDevice, Buffer, Length));
 
     if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_write_n) {
         rv = Plugin_information.Plugin.opencbm_plugin_parallel_burst_write_n(
@@ -1865,6 +1961,9 @@ cbm_parallel_burst_read_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsi
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Length = %u",
+                HandleDevice, Buffer, Length));
+
     if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_track)
         ret = Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_track(HandleDevice, Buffer, Length);
 
@@ -1898,6 +1997,9 @@ cbm_parallel_burst_read_track_var(CBM_FILE HandleDevice, unsigned char *Buffer, 
     int ret = -1;
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Length = %u",
+                HandleDevice, Buffer, Length));
 
     if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_track)
         ret = Plugin_information.Plugin.opencbm_plugin_parallel_burst_read_track_var(HandleDevice, Buffer, Length);
@@ -1936,22 +2038,25 @@ cbm_parallel_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffer, uns
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Length = %u",
+                HandleDevice, Buffer, Length));
+
     if (Plugin_information.Plugin.opencbm_plugin_parallel_burst_write_track)
         ret = Plugin_information.Plugin.opencbm_plugin_parallel_burst_write_track(HandleDevice, Buffer, Length);
 
     FUNC_LEAVE_INT(ret);
 }
 
-/*! \brief PARBURST: Read from the parallel port
+/*! \brief SRQBURST: Read from the port
 
- This function is a helper function for parallel burst:
- It reads from the parallel port.
+ This function is a helper function for SRQ burst:
+ It reads a value.
 
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \return
-   The value read from the parallel port
+   The value read
 
  If cbm_driver_open() did not succeed, it is illegal to
  call this function.
@@ -1966,22 +2071,24 @@ cbm_srq_burst_read(CBM_FILE HandleDevice)
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     if (Plugin_information.Plugin.opencbm_plugin_srq_burst_read)
         ret = Plugin_information.Plugin.opencbm_plugin_srq_burst_read(HandleDevice);
 
     FUNC_LEAVE_UCHAR(ret);
 }
 
-/*! \brief PARBURST: Write to the parallel port
+/*! \brief SRQBURST: Write to the port
 
- This function is a helper function for parallel burst:
- It writes to the parallel port.
+ This function is a helper function for SRQ burst:
+ It writes a value
 
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
  \param Value
-   The value to be written to the parallel port
+   The value to be written
 
  If cbm_driver_open() did not succeed, it is illegal to
  call this function.
@@ -1993,6 +2100,8 @@ void CBMAPIDECL
 cbm_srq_burst_write(CBM_FILE HandleDevice, unsigned char Value)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Value = %02X", HandleDevice, Value));
 
     if (Plugin_information.Plugin.opencbm_plugin_srq_burst_write)
         Plugin_information.Plugin.opencbm_plugin_srq_burst_write(HandleDevice, Value);
@@ -2008,6 +2117,9 @@ cbm_srq_burst_read_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     int rv;
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Length = %u",
+                HandleDevice, Buffer, Length));
 
     if (Plugin_information.Plugin.opencbm_plugin_srq_burst_read_n) {
         rv = Plugin_information.Plugin.opencbm_plugin_srq_burst_read_n(
@@ -2032,6 +2144,9 @@ cbm_srq_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buffer,
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Length = %u",
+                HandleDevice, Buffer, Length));
+
     if (Plugin_information.Plugin.opencbm_plugin_srq_burst_write_n) {
         rv = Plugin_information.Plugin.opencbm_plugin_srq_burst_write_n(
             HandleDevice, Buffer, Length);
@@ -2046,9 +2161,9 @@ cbm_srq_burst_write_n(CBM_FILE HandleDevice, unsigned char *Buffer,
     FUNC_LEAVE_INT(rv);
 }
 
-/*! \brief PARBURST: Read a complete track
+/*! \brief SRQBURST: Read a complete track
 
- This function is a helper function for parallel burst:
+ This function is a helper function for SRQ burst:
  It reads a complete track from the disk
 
  \param HandleDevice
@@ -2077,15 +2192,18 @@ cbm_srq_burst_read_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned 
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Length = %u",
+                HandleDevice, Buffer, Length));
+
     if (Plugin_information.Plugin.opencbm_plugin_srq_burst_read_track)
         ret = Plugin_information.Plugin.opencbm_plugin_srq_burst_read_track(HandleDevice, Buffer, Length);
 
     FUNC_LEAVE_INT(ret);
 }
 
-/*! \brief PARBURST: Write a complete track
+/*! \brief SRQBURST: Write a complete track
 
- This function is a helper function for parallel burst:
+ This function is a helper function for SRQ burst:
  It writes a complete track to the disk
 
  \param HandleDevice
@@ -2114,6 +2232,9 @@ cbm_srq_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Length = %u",
+                HandleDevice, Buffer, Length));
+
     if (Plugin_information.Plugin.opencbm_plugin_srq_burst_write_track)
         ret = Plugin_information.Plugin.opencbm_plugin_srq_burst_write_track(HandleDevice, Buffer, Length);
 
@@ -2127,6 +2248,9 @@ cbm_srq_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned
 
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
+
+ \param Status
+   The return status.
 
  \return
    != 0 on success.
@@ -2158,6 +2282,9 @@ cbm_tap_prepare_capture(CBM_FILE HandleDevice, int *Status)
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
+ \param Status
+   The return status.
+
  \return
    != 0 on success.
 
@@ -2188,6 +2315,9 @@ cbm_tap_prepare_write(CBM_FILE HandleDevice, int *Status)
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
+ \param Status
+   The return status.
+
  \return
    The tape sense state
 
@@ -2217,6 +2347,9 @@ cbm_tap_get_sense(CBM_FILE HandleDevice, int *Status)
 
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
+
+ \param Status
+   The return status.
 
  \return
    != 0 on success.
@@ -2278,6 +2411,9 @@ cbm_tap_wait_for_play_sense(CBM_FILE HandleDevice, int *Status)
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
 
+ \param Status
+   The return status.
+
  \return
    != 0 on success.
 
@@ -2307,6 +2443,9 @@ cbm_tap_motor_on(CBM_FILE HandleDevice, int *Status)
 
  \param HandleDevice
    A CBM_FILE which contains the file handle of the driver.
+
+ \param Status
+   The return status.
 
  \return
    != 0 on success.
@@ -2604,6 +2743,8 @@ cbm_iec_dbg_read(CBM_FILE HandleDevice)
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     if ( Plugin_information.Plugin.opencbm_plugin_iec_dbg_read ) {
         returnValue = Plugin_information.Plugin.opencbm_plugin_iec_dbg_read(HandleDevice);
     }
@@ -2646,6 +2787,8 @@ cbm_iec_dbg_write(CBM_FILE HandleDevice, unsigned char Value)
     int returnValue = -1;
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Value = %02X", HandleDevice, Value));
 
     if ( Plugin_information.Plugin.opencbm_plugin_iec_dbg_write ) {
         returnValue = Plugin_information.Plugin.opencbm_plugin_iec_dbg_write(HandleDevice, Value);

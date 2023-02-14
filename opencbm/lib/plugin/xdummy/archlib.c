@@ -37,7 +37,7 @@
 
 #include <stdlib.h>
 
-//! mark: We are building the DLL */
+/*! mark: We are building the DLL */
 #define OPENCBM_PLUGIN
 #include "archlib.h"
 
@@ -67,6 +67,8 @@ opencbm_plugin_get_driver_name(const char * const Port)
     UNREFERENCED_PARAMETER(Port);
 
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "Port = '%s' (%p)", Port ? Port : "(null)", Port));
 
     FUNC_LEAVE_STRING("xdummy");
 }
@@ -98,6 +100,8 @@ opencbm_plugin_driver_open(CBM_FILE *HandleDevice, const char * const Port)
 
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Port = '%s' (%p)", HandleDevice, Port ? Port : "(null)", Port));
+
     FUNC_LEAVE_INT(0);
 }
 
@@ -119,6 +123,8 @@ void CBMAPIDECL
 opencbm_plugin_driver_close(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
 
     FUNC_LEAVE();
 }
@@ -153,6 +159,8 @@ opencbm_plugin_lock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     FUNC_LEAVE();
 }
 
@@ -177,6 +185,8 @@ void CBMAPIDECL
 opencbm_plugin_unlock(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
 
     FUNC_LEAVE();
 }
@@ -210,6 +220,9 @@ opencbm_plugin_raw_write(CBM_FILE HandleDevice, const void *Buffer, size_t Count
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Count = %u",
+			    HandleDevice, Buffer, Count));
+
     FUNC_LEAVE_INT(0);
 }
 
@@ -240,6 +253,9 @@ int CBMAPIDECL
 opencbm_plugin_raw_read(CBM_FILE HandleDevice, void *Buffer, size_t Count)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Buffer = %p, Count = %u",
+			    HandleDevice, Buffer, Count));
 
     FUNC_LEAVE_INT(0);
 }
@@ -274,6 +290,9 @@ opencbm_plugin_listen(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsign
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = %02X, SecondaryAddress = %02X",
+			    HandleDevice, DeviceAddress, SecondaryAddress));
+
     FUNC_LEAVE_INT(0);
 }
 
@@ -305,6 +324,9 @@ opencbm_plugin_talk(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = %02X, SecondaryAddress = %02X",
+			    HandleDevice, DeviceAddress, SecondaryAddress));
+
     FUNC_LEAVE_INT(0);
 }
 
@@ -333,6 +355,9 @@ int CBMAPIDECL
 opencbm_plugin_open(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigned char SecondaryAddress)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = %02X, SecondaryAddress = %02X",
+			    HandleDevice, DeviceAddress, SecondaryAddress));
 
     FUNC_LEAVE_INT(0);
 }
@@ -363,6 +388,9 @@ opencbm_plugin_close(CBM_FILE HandleDevice, unsigned char DeviceAddress, unsigne
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, DeviceAddress = %02X, SecondaryAddress = %02X",
+			    HandleDevice, DeviceAddress, SecondaryAddress));
+
     FUNC_LEAVE_INT(0);
 }
 
@@ -391,6 +419,8 @@ opencbm_plugin_unlisten(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     FUNC_LEAVE_INT(0);
 }
 
@@ -418,6 +448,8 @@ int CBMAPIDECL
 opencbm_plugin_untalk(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
 
     FUNC_LEAVE_INT(0);
 }
@@ -448,6 +480,8 @@ opencbm_plugin_get_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     FUNC_LEAVE_INT(0);
 }
 
@@ -470,6 +504,8 @@ int CBMAPIDECL
 opencbm_plugin_clear_eoi(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
 
     FUNC_LEAVE_INT(0);
 }
@@ -499,6 +535,8 @@ int CBMAPIDECL
 opencbm_plugin_reset(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
 
     FUNC_LEAVE_INT(0);
 }
@@ -533,6 +571,8 @@ opencbm_plugin_pp_read(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     FUNC_LEAVE_UCHAR(0xcc);
 }
 
@@ -564,6 +604,8 @@ opencbm_plugin_pp_write(CBM_FILE HandleDevice, unsigned char Byte)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     FUNC_LEAVE();
 }
 
@@ -593,6 +635,8 @@ opencbm_plugin_iec_poll(CBM_FILE HandleDevice)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p", HandleDevice));
+
     FUNC_LEAVE_INT(0);
 }
 
@@ -620,6 +664,8 @@ opencbm_plugin_iec_set(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Line = %02X", HandleDevice, Line));
+
     FUNC_LEAVE();
 }
 
@@ -645,6 +691,8 @@ void CBMAPIDECL
 opencbm_plugin_iec_release(CBM_FILE HandleDevice, int Line)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Line = %02X", HandleDevice, Line));
 
     FUNC_LEAVE();
 }
@@ -681,6 +729,9 @@ opencbm_plugin_iec_setrelease(CBM_FILE HandleDevice, int Set, int Release)
 {
     FUNC_ENTER();
 
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Set = %02X, Release = %02X",
+			    HandleDevice, Set, Release));
+
     FUNC_LEAVE();
 }
 
@@ -714,6 +765,9 @@ int CBMAPIDECL
 opencbm_plugin_iec_wait(CBM_FILE HandleDevice, int Line, int State)
 {
     FUNC_ENTER();
+
+    FUNC_PARAM((DBG_PREFIX "HandleDevice = %p, Line = %02X, State = %02X",
+			    HandleDevice, Line, State));
 
     FUNC_LEAVE_INT(0);
 }
