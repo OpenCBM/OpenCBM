@@ -1125,7 +1125,10 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
                 }
                 cbm_untalk(fd);
                 cbm_device_status(fd, command.device, buf, sizeof(buf));
-                printf("%s", cbm_petscii2ascii(buf));
+                if (options->petsciiraw == PA_PETSCII) {
+                    cbm_petscii2ascii(buf);
+                }
+                printf("%s", buf);
             }
             else
             {
