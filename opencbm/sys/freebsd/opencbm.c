@@ -697,7 +697,7 @@ cbm_ioctl(struct cdev *dev, u_long cmd, caddr_t data, int fflag,
                     break;
                 }
                 rv = !cbm_parallel_burst_read_track(sc, ppbus, sc->sc_buf);
-                if (!rv) copyout(sc->sc_buf, val->buffer, BUFFER_SIZE);
+                if (!rv) rv = copyout(sc->sc_buf, val->buffer, BUFFER_SIZE);
                 break;
 
         case CBMCTRL_PARBURST_READ_TRACK_VAR:
@@ -708,7 +708,7 @@ cbm_ioctl(struct cdev *dev, u_long cmd, caddr_t data, int fflag,
                     break;
                 }
                 rv = !cbm_parallel_burst_read_track_var(sc, ppbus, sc->sc_buf);
-                if (!rv) copyout(sc->sc_buf, val->buffer, BUFFER_SIZE);
+                if (!rv) rv = copyout(sc->sc_buf, val->buffer, BUFFER_SIZE);
                 break;
 
         case CBMCTRL_PARBURST_WRITE_TRACK:
@@ -718,7 +718,9 @@ cbm_ioctl(struct cdev *dev, u_long cmd, caddr_t data, int fflag,
                     rv = EINVAL;
                     break;
                 }
-                copyin(val->buffer, sc->sc_buf, val->length);
+                rv = copyin(val->buffer, sc->sc_buf, val->length);
+                if (rv)
+                    break;
                 rv = !cbm_parallel_burst_write_track(sc, ppbus,
                         val->buffer, val->length);
                 break;
