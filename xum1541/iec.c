@@ -99,7 +99,7 @@ iec2hw(uint8_t iec)
 struct ProtocolFunctions *
 iec_init()
 {
-    iec_release(IO_ATN | IO_CLK | IO_DATA | IO_RESET);
+    iec_release(IO_ATN | IO_CLK | IO_DATA | IO_RESET | IO_SRQ);
     DELAY_US(10);
     return &iecFunctions;
 }
@@ -192,7 +192,7 @@ static void
 iec_reset(bool forever)
 {
     DEBUGF(DBG_ALL, "reset\n");
-    iec_release(IO_DATA | IO_ATN | IO_CLK);
+    iec_release(IO_DATA | IO_ATN | IO_CLK | IO_SRQ);
 
     /*
      * Hold the device in reset a while. 20 ms was too short and it didn't
