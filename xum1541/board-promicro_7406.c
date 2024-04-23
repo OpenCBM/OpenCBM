@@ -65,7 +65,7 @@ board_init_iec(void)
     // IO port initialization
 
     IEC_B_DDR  = IEC_B_MASK;
-    IEC_B_PORT = IEC_B_MASK;
+    IEC_B_PORT &= ~IEC_B_MASK;
 
     IEC_C_DDR  = IEC_C_MASK;
     IEC_C_PORT = IEC_C_MASK;
