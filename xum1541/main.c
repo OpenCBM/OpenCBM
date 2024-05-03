@@ -20,12 +20,6 @@ volatile bool doDeviceReset;
 // Flag for whether we are in EOI state
 volatile uint8_t eoi;
 
-// Are we in an active state? If so, run the command loop.
-volatile bool device_running;
-
-// Is the USB bus connected? If so, wait to enter active state.
-static volatile bool usb_connected;
-
 static bool USB_BulkWorker(void);
 
 int
@@ -45,7 +39,7 @@ main(void)
      */
     cpu_init();
     USB_Init();
-    while (!usb_connected)
+    while (USB_DeviceState < DEVICE_STATE_Powered)
         wdt_reset();
 
     // Indicate device not ready
@@ -65,7 +59,7 @@ main(void)
     for (;;) {
         wdt_reset();
 
-        while (device_running) {
+        while (USB_DeviceState == DEVICE_STATE_Configured) {
             // Check for and process any commands coming in on the bulk pipe.
             USB_BulkWorker();
 
@@ -80,7 +74,7 @@ main(void)
         // TODO: save power here when device is not running
 
         // Wait for device to be reconnected to USB
-        while (!usb_connected)
+        while (USB_DeviceState < DEVICE_STATE_Addressed)
             wdt_reset();
     }
 }
@@ -91,7 +85,6 @@ EVENT_USB_Device_Connect(void)
     DEBUGF(DBG_ALL, "usbcon\n");
     board_set_status(STATUS_CONNECTING);
     doDeviceReset = false;
-    usb_connected = true;
 }
 
 void
@@ -99,9 +92,7 @@ EVENT_USB_Device_Disconnect(void)
 {
     DEBUGF(DBG_ALL, "usbdiscon\n");
 
-    // Halt the main() command loop and indicate we are not configured
-    usb_connected = false;
-    device_running = false;
+    // Indicate we are not configured
     board_set_status(STATUS_INIT);
 }
 
@@ -125,7 +116,6 @@ EVENT_USB_Device_ConfigurationChanged(void)
 
     // Indicate USB connected and ready to start event loop in main()
     board_set_status(STATUS_READY);
-    device_running = true;
 }
 
 void
