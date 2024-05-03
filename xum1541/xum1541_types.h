@@ -56,7 +56,6 @@
 
 // Actual auto-detected status
 #define XUM1541_DOING_RESET         0x01 // no clean shutdown, will reset now
-#define XUM1541_NO_DEVICE           0x02 // no IEC device present yet
 #define XUM1541_IEEE488_PRESENT     0x10 // IEEE-488 device connected
 #define XUM1541_TAPE_PRESENT        0x20 // 153x tape device connected
 

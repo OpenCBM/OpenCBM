@@ -632,13 +632,6 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
         }
         cmdSeqInProgress |= XUM1541_CMD_IN_PROGRESS;
 
-        /*
-         * We wait in main() until at least one device is present on the
-         * IEC bus. Notify the user if they requested a command before
-         * that has been detected.
-         */
-        if (!device_running)
-            replyBuf[2] |= XUM1541_NO_DEVICE;
         return 8;
     case XUM1541_SHUTDOWN:
         cmdSeqInProgress = 0;
