@@ -32,6 +32,7 @@ void board_init_iec(void);
 #define LED_MASK        _BV(5) // PD5 / GREEN ONBOARD LED
 #define LED_PORT        PORTD
 #define LED_DDR         DDRD
+#define LED_PIN         PIND // for LED toggle
 
 // IEC and parallel port accessors
 // Pins: 3, 2, RXI, TXO, A3, A2, A1, A0 make a Parallel Port
@@ -193,9 +194,7 @@ iec_srq_write(uint8_t data)
 uint8_t iec_poll_pins(void);
 
 // Status indicators (LEDs)
-uint8_t board_get_status(void);
-void board_set_status(uint8_t status);
-void board_update_display(void);
+void board_update_display(uint8_t status);
 bool board_timer_fired(void);
 
 #endif // _BOARD_PROMICRO_H

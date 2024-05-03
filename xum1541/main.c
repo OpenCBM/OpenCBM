@@ -20,6 +20,9 @@ volatile bool doDeviceReset;
 // Flag for whether we are in EOI state
 volatile uint8_t eoi;
 
+// Board status which controls the status indicators (e.g. LEDs)
+static volatile uint8_t statusValue;
+
 static bool USB_BulkWorker(void);
 
 int
@@ -44,7 +47,8 @@ main(void)
 
     // Indicate device not ready
     board_init();
-    board_set_status(STATUS_INIT);
+    set_status(STATUS_INIT);
+    doDeviceReset = false;
 
     // If a CBM 153x tape drive is attached, detect it and enable tape mode.
     // If any IEC/IEEE drives are attached, detect them early.
@@ -57,44 +61,47 @@ main(void)
      * handled separately via IRQs.
      */
     for (;;) {
-        wdt_reset();
+        /*
+        * Do periodic tasks each command. If we found the device was in
+        * a stalled state, reset it before the next command.
+        */
+        if (!TimerWorker())
+            doDeviceReset = false;
 
-        while (USB_DeviceState == DEVICE_STATE_Configured) {
+        if (USB_DeviceState >= DEVICE_STATE_Configured) {
+            /*
+             * If we just got configured, we're ready now (status
+             * might also be "ACTIVE" here, don't change that).
+             */
+            if (statusValue == STATUS_INIT)
+                set_status(STATUS_READY);
+
             // Check for and process any commands coming in on the bulk pipe.
             USB_BulkWorker();
+        } else if (USB_DeviceState < DEVICE_STATE_Addressed) {
+            // TODO: save power here when device is not running
 
-            /*
-             * Do periodic tasks each command. If we found the device was in
-             * a stalled state, reset it before the next command.
-             */
-            if (!TimerWorker())
-                doDeviceReset = false;
+            // Indicate we are not configured
+            set_status(STATUS_INIT);
         }
-
-        // TODO: save power here when device is not running
-
-        // Wait for device to be reconnected to USB
-        while (USB_DeviceState < DEVICE_STATE_Addressed)
-            wdt_reset();
     }
 }
 
-void
-EVENT_USB_Device_Connect(void)
+// Board status for indicators (e.g. LEDs)
+uint8_t
+get_status()
 {
-    DEBUGF(DBG_ALL, "usbcon\n");
-    doDeviceReset = false;
+    return statusValue;
 }
 
 void
-EVENT_USB_Device_Disconnect(void)
+set_status(uint8_t status)
 {
-    DEBUGF(DBG_ALL, "usbdiscon\n");
-
-    // Indicate we are not configured
-    board_set_status(STATUS_INIT);
+    statusValue = status;
+    board_update_display(status);
 }
 
+// USB event handlers
 void
 EVENT_USB_Device_ConfigurationChanged(void)
 {
@@ -112,9 +119,6 @@ EVENT_USB_Device_ConfigurationChanged(void)
         ENDPOINT_DIR_IN, XUM_ENDPOINT_BULK_SIZE, ENDPOINT_BANK_DOUBLE);
     Endpoint_ConfigureEndpoint(XUM_BULK_OUT_ENDPOINT, EP_TYPE_BULK,
         ENDPOINT_DIR_OUT, XUM_ENDPOINT_BULK_SIZE, ENDPOINT_BANK_DOUBLE);
-
-    // Indicate USB connected and ready to start event loop in main()
-    board_set_status(STATUS_READY);
 }
 
 void
@@ -139,7 +143,7 @@ EVENT_USB_Device_UnhandledControlRequest(void)
     len = usbHandleControl(USB_ControlRequest.bRequest, replyBuf);
     if (len == -1) {
         DEBUGF(DBG_ERROR, "ctrl req err\n");
-        board_set_status(STATUS_ERROR);
+        set_status(STATUS_ERROR);
         return;
     }
 
@@ -158,6 +162,7 @@ EVENT_USB_Device_UnhandledControlRequest(void)
     }
 }
 
+// USB IO functions and command handlers
 static bool
 USB_BulkWorker()
 {
@@ -192,7 +197,7 @@ USB_BulkWorker()
 
     // Read in the command from the host now that one is ready.
     if (!USB_ReadBlock(cmdBuf, sizeof(cmdBuf))) {
-        board_set_status(STATUS_ERROR);
+        set_status(STATUS_ERROR);
         return false;
     }
 
@@ -215,7 +220,7 @@ USB_BulkWorker()
         USB_WriteBlock(statusBuf, sizeof(statusBuf));
     } else if (status < 0) {
         DEBUGF(DBG_ERROR, "usbblk err\n");
-        board_set_status(STATUS_ERROR);
+        set_status(STATUS_ERROR);
         Endpoint_StallTransaction();
         return false;
     }
@@ -259,7 +264,7 @@ TimerWorker()
 
     // If the timer has fired, update the board display
     if (board_timer_fired())
-        board_update_display();
+        board_update_display(statusValue);
     return true;
 }
 

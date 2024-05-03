@@ -167,6 +167,10 @@ enum {
 extern volatile uint8_t eoi;
 extern volatile bool doDeviceReset;
 
+// Board status handling
+uint8_t get_status(void);
+void set_status(uint8_t status);
+
 // USB IO functions and command handlers
 int8_t usbHandleControl(uint8_t cmd, uint8_t *replyBuf);
 int8_t usbHandleBulk(uint8_t *request, uint8_t *status);

@@ -605,7 +605,7 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
         return 1;
     case XUM1541_INIT:
         savedNibWritePtr = savedNibWrites;
-        board_set_status(STATUS_ACTIVE);
+        set_status(STATUS_ACTIVE);
 
         // First time: init IO pins and probe for IEC or IEEE devices
         if (cmds == NULL)
@@ -635,7 +635,7 @@ usbHandleControl(uint8_t cmd, uint8_t *replyBuf)
         return 8;
     case XUM1541_SHUTDOWN:
         cmdSeqInProgress = 0;
-        board_set_status(STATUS_READY);
+        set_status(STATUS_READY);
         return 0;
     case XUM1541_RESET:
         // Only do reset if we didn't just reset in INIT (above).
@@ -680,7 +680,7 @@ usbHandleBulk(uint8_t *request, uint8_t *status)
     ret = XUM1541_IO_READY;
     cmd = request[0];
     len = *(uint16_t *)&request[2];
-    board_set_status(STATUS_ACTIVE);
+    set_status(STATUS_ACTIVE);
     switch (cmd) {
     case XUM1541_READ:
         // Disallow any other protocols if in IEEE mode.

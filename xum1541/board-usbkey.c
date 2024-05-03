@@ -78,21 +78,9 @@ board_init_iec(void)
 #define LED_LOWER_RED   LEDS_LED1
 #define LED_LOWER_GREEN LEDS_LED2
 
-static uint8_t statusValue;
-static uint8_t statusMask;
-
-uint8_t
-board_get_status()
-{
-    return statusValue;
-}
-
-// Status indicators (LEDs for this board)
 void
-board_set_status(uint8_t status)
+board_update_display(uint8_t status)
 {
-    statusValue = status;
-
     switch (status) {
     case STATUS_INIT:
         LEDs_SetAllLEDs(LED_UPPER_RED);
@@ -102,28 +90,24 @@ board_set_status(uint8_t status)
         break;
     case STATUS_ACTIVE:
         // Toggle both green LEDs while busy
-        statusMask = LED_UPPER_GREEN | LED_LOWER_GREEN;
-        LEDs_SetAllLEDs(statusMask);
+        if (LEDs_GetLEDs() & (LED_UPPER_GREEN | LED_LOWER_GREEN) != 0) {
+            LEDs_SetAllLEDs(0);
+        } else {
+            LEDs_SetAllLEDs(LED_UPPER_GREEN | LED_LOWER_GREEN);
+        }
         break;
     case STATUS_ERROR:
-        // Set both red on error
-        statusMask = LED_UPPER_RED | LED_LOWER_RED;
-        LEDs_SetAllLEDs(statusMask);
+        // Toggle both red on error
+        if (LEDs_GetLEDs() & (LED_UPPER_RED | LED_LOWER_RED) != 0) {
+            LEDs_SetAllLEDs(0);
+        } else {
+            LEDs_SetAllLEDs(LED_UPPER_RED | LED_LOWER_RED);
+        }
         break;
     default:
         DEBUGF(DBG_ERROR, "badstsval %d\n", status);
+        break;
     }
-}
-
-/*
- * Callback for when the timer fires.
- * Update LEDs or do other tasks that should be done about every
- */
-void
-board_update_display()
-{
-    if (statusValue == STATUS_ACTIVE || statusValue == STATUS_ERROR)
-        LEDs_SetAllLEDs(LEDs_GetLEDs() ^ statusMask);
 }
 
 /*

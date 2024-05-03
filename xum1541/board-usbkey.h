@@ -107,9 +107,7 @@ iec_poll_pins(void)
 }
 
 // Status indicators (LEDs)
-uint8_t board_get_status(void);
-void board_set_status(uint8_t status);
-void board_update_display(void);
+void board_update_display(uint8_t status);
 bool board_timer_fired(void);
 
 #endif // _BOARD_USBKEY_H

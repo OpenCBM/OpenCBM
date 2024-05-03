@@ -79,20 +79,13 @@ iec_poll_pins(void)
     return IEC_PIN & (IO_DATA | IO_CLK | IO_ATN | IO_SRQ | IO_RESET);
 }
 
-static uint8_t statusValue;
-
-uint8_t
-board_get_status()
-{
-    return statusValue;
-}
-
-// Status indicators (LEDs for this board)
+/*
+ * Callback for when the timer fires.
+ * Update LEDs or do other tasks that should be done about every ~100 ms
+ */
 void
-board_set_status(uint8_t status)
+board_update_display(uint8_t status)
 {
-    statusValue = status;
-
     switch (status) {
     case STATUS_INIT:
         LED_PORT |= LED_MASK;
@@ -102,27 +95,14 @@ board_set_status(uint8_t status)
         LED_PORT &= ~LED_MASK;
         break;
     case STATUS_ACTIVE:
-        // Turn on LED. The update routine will toggle it.
-        LED_PORT |= LED_MASK;
-        break;
     case STATUS_ERROR:
-        // Set red on error
-        LED_PORT |= LED_MASK;
+        // Toggle LED
+        LED_PIN |= LED_MASK;
         break;
     default:
         DEBUGF(DBG_ERROR, "badstsval %d\n", status);
+        break;
     }
-}
-
-/*
- * Callback for when the timer fires.
- * Update LEDs or do other tasks that should be done about every
- */
-void
-board_update_display()
-{
-    if (statusValue == STATUS_ACTIVE || statusValue == STATUS_ERROR)
-        LED_PORT ^= LED_MASK;
 }
 
 /* 

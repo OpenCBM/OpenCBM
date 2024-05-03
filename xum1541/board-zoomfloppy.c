@@ -28,8 +28,8 @@ void
 board_init(void)
 {
     // Initialize just the IO pin for LED at this point
-    PORTC = 0;
-    DDRC = LED_MASK;
+    PORTC = LED_MASK;
+    DDRC  = LED_MASK;
 
 #ifdef DEBUG
 #define BAUD 115200
@@ -61,7 +61,7 @@ void
 board_init_iec(void)
 {
     // IO port initialization. CBM is on D and C, parallel B.
-    PORTC = 0;
+    PORTC = LED_MASK;
     PORTD = 0;
     DDRC = IO_MASK_C;
     DDRD = IO_MASK_D;
@@ -79,20 +79,13 @@ iec_poll_pins(void)
            ((PINC & IO_RESET_IN) >> 1);
 }
 
-static uint8_t statusValue;
-
-uint8_t
-board_get_status()
-{
-    return statusValue;
-}
-
-// Status indicators (LEDs for this board)
+/*
+ * Callback for when the timer fires.
+ * Update LEDs or do other tasks that should be done about every ~100 ms.
+ */
 void
-board_set_status(uint8_t status)
+board_update_display(uint8_t status)
 {
-    statusValue = status;
-
     switch (status) {
     case STATUS_INIT:
         PORTC |= LED_MASK;
@@ -102,27 +95,14 @@ board_set_status(uint8_t status)
         PORTC &= ~LED_MASK;
         break;
     case STATUS_ACTIVE:
-        // Turn on LED. The update routine will toggle it.
-        PORTC |= LED_MASK;
-        break;
     case STATUS_ERROR:
-        // Set red on error
-        PORTC |= LED_MASK;
+        // Toggle LED
+        PINC |= LED_MASK;
         break;
     default:
         DEBUGF(DBG_ERROR, "badstsval %d\n", status);
+        break;
     }
-}
-
-/*
- * Callback for when the timer fires.
- * Update LEDs or do other tasks that should be done about every
- */
-void
-board_update_display()
-{
-    if (statusValue == STATUS_ACTIVE || statusValue == STATUS_ERROR)
-        PORTC ^= LED_MASK;
 }
 
 /*
