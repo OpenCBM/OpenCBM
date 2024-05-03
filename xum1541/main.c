@@ -83,7 +83,6 @@ void
 EVENT_USB_Device_Connect(void)
 {
     DEBUGF(DBG_ALL, "usbcon\n");
-    board_set_status(STATUS_CONNECTING);
     doDeviceReset = false;
 }
 

@@ -91,10 +91,9 @@
 
 // Status levels to notify the user (e.g. LEDS)
 #define STATUS_INIT             0
-#define STATUS_CONNECTING       1
-#define STATUS_READY            2
-#define STATUS_ACTIVE           3
-#define STATUS_ERROR            4
+#define STATUS_READY            1
+#define STATUS_ACTIVE           2
+#define STATUS_ERROR            3
 
 #ifdef TAPE_SUPPORT
 

@@ -97,9 +97,6 @@ board_set_status(uint8_t status)
     case STATUS_INIT:
         LEDs_SetAllLEDs(LED_UPPER_RED);
         break;
-    case STATUS_CONNECTING:
-        LEDs_SetAllLEDs(LED_UPPER_GREEN);
-        break;
     case STATUS_READY:
         LEDs_SetAllLEDs(LED_LOWER_GREEN);
         break;

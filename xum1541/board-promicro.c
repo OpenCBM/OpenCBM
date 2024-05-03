@@ -99,8 +99,6 @@ board_set_status(uint8_t status)
     case STATUS_INIT:
         LED_PORT |= LED_MASK;
         break;
-    case STATUS_CONNECTING:
-        break;
     case STATUS_READY:
         // Turn off LED
         LED_PORT &= ~LED_MASK;
