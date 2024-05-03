@@ -110,7 +110,7 @@ CFLAGS+= -DMODEL=$(MODEL) -DMODELNAME=\"$(MODEL)\" -DBOARD=$(BOARD) \
         -Os -g -Werror -Wall -Wstrict-prototypes -Wundef \
         -Winline -Wno-error=inline -std=gnu99 -I . \
         -DUSB_DEVICE_ONLY -DFIXED_CONTROL_ENDPOINT_SIZE=8 \
-        -DINTERRUPT_CONTROL_ENDPOINT \
+        -DINTERRUPT_CONTROL_ENDPOINT -DNO_LIMITED_CONTROLLER_CONNECT \
         -DUSE_SINGLE_DEVICE_CONFIGURATION \
         -DUSE_STATIC_OPTIONS="(USB_DEVICE_OPT_FULLSPEED | USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)" \
         -funsigned-char -funsigned-bitfields \
