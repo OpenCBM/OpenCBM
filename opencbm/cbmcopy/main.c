@@ -30,6 +30,8 @@
 #include "statedebug.h"
 
 
+#define FN_BUFFER_SIZE 48
+
 /* global, because of signal handler */
 static CBM_FILE fd_cbm;
 
@@ -180,7 +182,7 @@ int ARCH_MAINDECL main(int argc, char **argv)
     int option;
     unsigned char *filedata;
     size_t filesize;
-    char buf[48];
+    char buf[FN_BUFFER_SIZE];
     int num_entries;
     int num_files;
     int rv;
@@ -488,8 +490,9 @@ int ARCH_MAINDECL main(int argc, char **argv)
                         {
                             if(output_name)
                             {
-                                strncpy(buf, output_name, 16);
-                                buf[16] = '\0';
+                                /* leave room for file type, mode and '\0'  */
+                                strncpy(buf, output_name, sizeof(buf)-5);
+                                buf[sizeof(buf)-5] = '\0';
                                 cbm_ascii2petscii(buf);
 
                                 tail = strchr(buf, '\0');
@@ -569,8 +572,9 @@ int ARCH_MAINDECL main(int argc, char **argv)
             }
             else
             {
-                strncpy(buf, fname, 16);
-                buf[16] = '\0';
+                /* leave room for file type and '\0' */
+                strncpy(buf, fname, sizeof(buf)-3);
+                buf[sizeof(buf)-3] = '\0';
                 cbm_ascii2petscii(buf);
 
                 if(output_name)
