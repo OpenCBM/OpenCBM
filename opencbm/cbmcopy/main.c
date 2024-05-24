@@ -491,17 +491,20 @@ int ARCH_MAINDECL main(int argc, char **argv)
                                 strncpy(buf, output_name, 16);
                                 buf[16] = '\0';
                                 cbm_ascii2petscii(buf);
+
+                                tail = strchr(buf, '\0');
                             }
                             else
                             {
                                 /* no charset conversion */
                                 strncpy(buf, auto_name, 16);
                                 buf[16] = '\0';
-                            }
-                            for(tail = buf; *tail; tail++)
-                            {
-                                /* replace illegal characters in CBM filename */
-                                if(strchr(":?*,=", *tail)) *tail = ' ';
+
+                                for(tail = buf; *tail; tail++)
+                                {
+                                    /* replace illegal characters in CBM filename */
+                                    if(strchr(":?*,=", *tail)) *tail = ' ';
+                                }
                             }
                             *tail++ = ',';
                             *tail++ = output_type ? output_type : auto_type;
