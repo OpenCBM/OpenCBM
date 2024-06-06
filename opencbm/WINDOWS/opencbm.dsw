@@ -113,6 +113,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name opencbmxdummy
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name fdx000copy
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -377,6 +380,21 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name opencbm
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libmisc
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "fdx000copy"=..\fdx000copy\WINDOWS\fdx000copy.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
     Begin Project Dependency
     Project_Dep_Name libmisc
     End Project Dependency

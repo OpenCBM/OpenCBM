@@ -11,6 +11,7 @@ DIRS= \
 	d82copy \
 	libimgcopy \
 	imgcopy \
+	fdx000copy \
 	cbmctrl \
 	install \
 	lib \

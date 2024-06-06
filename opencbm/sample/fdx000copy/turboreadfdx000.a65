@@ -1,0 +1,125 @@
+; Copyright (C) 2024 Spiro Trikaliotis
+; All rights reserved.
+;
+; This file is part of OpenCBM
+;
+; Redistribution and use in source and binary forms, with or without
+; modification, are permitted provided that the following conditions are met:
+;
+;     * Redistributions of source code must retain the above copyright
+;       notice, this list of conditions and the following disclaimer.
+;     * Redistributions in binary form must reproduce the above copyright
+;       notice, this list of conditions and the following disclaimer in
+;       the documentation and/or other materials provided with the
+;       distribution.
+;     * Neither the name of the OpenCBM team nor the names of its
+;       contributors may be used to endorse or promote products derived
+;       from this software without specific prior written permission.
+;
+; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+; IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+; TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+; PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+; OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+; EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+; PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+; PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+; LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+; NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;
+
+; FD2000/FD4000 Turbo read routine
+
+	.org $0500
+
+INPUTBUFFER := $0200
+
+INPUTBUFFER_LEN                  := $2753
+FDx_JOBS_TRACK_SECTOR            := $2800
+FDx_JOBS_SIDE                    := $2840
+FDx_JOBS_TA_HIGH                 := $2860
+FDx_JOBS_TA_LOW                  := $2880
+FDx_JOBS_BLOCKCOUNT              := $28A0
+FDx_JOBS_TRANSLATED_TRACK_SECTOR := $28C0
+FDx_JOBS_TRANSLATED_SIDE         := $2900
+
+SYS_HIGH                         := $2B45
+SYS_LOW                          := $2B47
+
+COPJMP          := $FF21
+CCDJMP          := $FF4E
+CDXJMP          := $FF6F
+
+BLOCK_TO_USE = 30
+
+JOBCODE_READ         := $80
+JOBCODE_READ_PHYS_NQ := $B2
+
+        jmp     start
+        jmp     init
+
+track_start:    .byte 0
+track_end:      .byte 80
+
+block_to_use:   .byte BLOCK_TO_USE
+
+result:         .byte 0
+
+initstate:      .byte 1
+
+init:
+        lda     #1
+        sta     initstate
+
+        rts
+
+start:
+        ldx     block_to_use                    ; job queue to use
+        txa
+        asl
+        tay
+
+        lda     initstate
+        bne     firstrun
+
+
+next:
+        ; switch to the other side
+        lda     #1
+        eor     FDx_JOBS_SIDE,x
+        sta     FDx_JOBS_SIDE,x                 ; change to the other side
+
+        bne     execute
+
+        lda     FDx_JOBS_TRACK_SECTOR,y         ; get track
+        cmp     track_end
+        bcs     quit
+
+        adc     #1
+        sta     FDx_JOBS_TRACK_SECTOR,y         ; advance to next track
+        bne     execute
+
+firstrun:
+        lda     track_start
+        sta     FDx_JOBS_TRACK_SECTOR,y         ; start track
+
+        lda     #1
+        sta     FDx_JOBS_TRACK_SECTOR + 1,y     ; sector 1
+
+        lda     #0
+        sta     FDx_JOBS_SIDE,x                 ; side 0
+        sta     initstate
+
+execute:
+        lda     #JOBCODE_READ_PHYS_NQ
+        jsr     CCDJMP
+
+        .byte   $2C
+
+quit:
+        lda     #$FF
+
+error:
+        sta     result
+        rts
