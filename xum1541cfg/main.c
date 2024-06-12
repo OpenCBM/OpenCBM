@@ -626,7 +626,7 @@ ihex_search(int16_t *buf, int bufSize, uint8_t *pattern, uint8_t patternSize)
 
     j = 0;
     for (i = 0; i < bufSize; i++) {
-        while (buf[i] == pattern[j] && j <= patternSize) {
+        while (buf[i] == pattern[j] && j < patternSize) {
             i++;
             j++;
         }
