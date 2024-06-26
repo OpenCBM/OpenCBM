@@ -14,8 +14,12 @@ SRCS    = pp.c \
 INCS    = pp-1541.inc \
 	  pp-1571.inc \
 	  s1-1541-1571.inc \
+	  s1-1581.inc \
 	  s2-1541-1571.inc \
-          turbomain-1541-1571.inc
+	  s2-1581.inc \
+	  turbomain-1541-1571.inc \
+	  turbomain-1581.inc \
+
 
 OBJS    = $(SRCS:.c=.lo)
 
@@ -26,6 +30,7 @@ clean:
 
 mrproper: clean
 	rm -f $(INCS)
+	rm -f *~ LINUX/*~ WINDOWS/*~
 
 install-files:
 
@@ -37,13 +42,13 @@ pp-1541.inc: pp-1541.a65 common.i65
 
 pp-1571.inc: pp-1571.a65 common.i65
 
-s1.lo: s1.c s1-1541-1571.inc
+s1.lo: s1.c s1-1541-1571.inc s1-1581.inc
 
-s2.lo: s2.c s2-1541-1571.inc
+s2.lo: s2.c s2-1541-1571.inc s2-1581.inc
 
 pp.lo: pp.c pp-1541.inc pp-1571.inc
 
-turbo.lo: turbomain-1541-1571.inc
+turbo.lo: turbomain-1541-1571.inc turbomain-1581.inc
 
 .c.o:
 	$(CC) $(LIB_CFLAGS) -c -o $@ $<
