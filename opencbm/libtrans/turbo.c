@@ -13,7 +13,7 @@
 #include <stdio.h>
 
 static const unsigned char turbomain_drive_prog[] = {
-#include "turbomain.inc"
+#include "turbomain-1541-1571.inc"
 };
 
 

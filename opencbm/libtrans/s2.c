@@ -15,7 +15,7 @@
 #include "arch.h"
 
 static const unsigned char s2_drive_prog[] = {
-#include "s2.inc"
+#include "s2-1541-1571.inc"
 };
 
 static int s2_read_byte(CBM_FILE fd, unsigned char *c)
