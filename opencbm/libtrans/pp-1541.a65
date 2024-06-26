@@ -32,4 +32,4 @@
 
 Drive1541       = 1                     ;Compile for 1541 drives
 
-.include "pp1571.a65"
+.include "pp-1571.a65"

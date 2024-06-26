@@ -11,11 +11,15 @@ SRCS    = pp.c \
 	  s2.c \
 	  turbo.c
 
-INCS    = pp1541.inc \
-	  pp1571.inc \
-	  s1.inc \
-	  s2.inc \
-          turbomain.inc
+INCS    = pp-1541.inc \
+	  pp-1571.inc \
+	  s1-1541-1571.inc \
+	  s1-1581.inc \
+	  s2-1541-1571.inc \
+	  s2-1581.inc \
+	  turbomain-1541-1571.inc \
+	  turbomain-1581.inc \
+
 
 OBJS    = $(SRCS:.c=.lo)
 
@@ -26,6 +30,7 @@ clean:
 
 mrproper: clean
 	rm -f $(INCS)
+	rm -f *~ LINUX/*~ WINDOWS/*~
 
 install-files:
 
@@ -33,17 +38,17 @@ install: install-files
 
 uninstall:
 
-pp1541.inc: pp1541.a65 common.i65
+pp-1541.inc: pp-1541.a65 common.i65
 
-pp1571.inc: pp1571.a65 common.i65
+pp-1571.inc: pp-1571.a65 common.i65
 
-s1.lo: s1.c s1.inc
+s1.lo: s1.c s1-1541-1571.inc s1-1581.inc
 
-s2.lo: s2.c s2.inc
+s2.lo: s2.c s2-1541-1571.inc s2-1581.inc
 
-pp.lo: pp.c pp1541.inc pp1571.inc
+pp.lo: pp.c pp-1541.inc pp-1571.inc
 
-turbo.lo: turbomain.inc
+turbo.lo: turbomain-1541-1571.inc turbomain-1581.inc
 
 .c.o:
 	$(CC) $(LIB_CFLAGS) -c -o $@ $<

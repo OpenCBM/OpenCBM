@@ -15,7 +15,7 @@
 #include "arch.h"
 
 static const unsigned char s1_drive_prog[] = {
-#include "s1.inc"
+#include "s1-1541-1571.inc"
 };
 
 static int s1_write_byte_nohs(CBM_FILE fd, unsigned char c)

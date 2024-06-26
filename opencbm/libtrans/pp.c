@@ -15,11 +15,11 @@
 #include "arch.h"
 
 static const unsigned char pp1541_drive_prog[] = {
-#include "pp1541.inc"
+#include "pp-1541.inc"
 };
 
 static const unsigned char pp1571_drive_prog[] = {
-#include "pp1571.inc"
+#include "pp-1571.inc"
 };
 
 static int pp_write(CBM_FILE fd, unsigned char c1, unsigned char c2)
