@@ -150,16 +150,15 @@ wait_for_line_active:
         beq wait_for_line_active
         rts
 
+set_clock_out:
+        lda #IEC_CLOCK_OUT
+        .byte $2c
+
 set_data_out:
         lda #IEC_DATA_OUT
         .byte $2c
 
 unset_data_clock:
         lda #$00
-        sta IEC_PORT
-        rts
-
-set_clock_out:
-        lda #IEC_CLOCK_OUT
         sta IEC_PORT
         rts
