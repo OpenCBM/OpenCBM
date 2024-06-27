@@ -29,7 +29,7 @@
 ; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 
-Drive1541_1571  = 1                     ;Compile for 1541 and 1571 drives
+Drive1581       = 1                     ;Compile for 1581 drives
 
 ; libopencbmtransfer routines, main loop
 

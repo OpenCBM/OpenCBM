@@ -29,24 +29,24 @@
 ; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 
-Drive1541_1571  = 1                     ;Compile for 1541 and 1571 drives
+Drive1581       = 1                     ;Compile for 1581 drives
 
 	.include "common.i65"
 
         * = TRANSFER_ROUTINES
 
-.assert * = transfer_get_ts, error, "s1-1541/1571 get_ts is not at right location"
+.assert * = transfer_get_ts, error, "s1-1581 get_ts is not at right location"
         jmp gts         ; get track/sector
-.assert * = transfer_get_byte, error, "s1-1541/1571 get_byte is not at right location"
+.assert * = transfer_get_byte, error, "s1-1581 get_byte is not at right location"
         jmp gbyte
-.assert * = transfer_get_block, error, "s1-1541/1571 get_block is not at right location"
+.assert * = transfer_get_block, error, "s1-1581 get_block is not at right location"
         jmp gblk        ; receive block
-.assert * = transfer_send_byte, error, "s1-1541/1571 send_byte is not at right location"
+.assert * = transfer_send_byte, error, "s1-1581 send_byte is not at right location"
         jmp sbyte       ; send byte
-.assert * = transfer_send_block, error, "s1-1541/1571 send_block is not at right location"
+.assert * = transfer_send_block, error, "s1-1581 send_block is not at right location"
         jmp sblk        ; send block
 
-.assert * = transfer_init, error, "s1-1541/1571 init is not at right location"
+.assert * = transfer_init, error, "s1-1581 init is not at right location"
         lda #IEC_PORT_DATA_OUT
         sta IEC_PORT
         rts

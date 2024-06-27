@@ -37,14 +37,21 @@
 
         .include "common.i65"
 
-        * = $0700
+        * = TRANSFER_ROUTINES
 
-get_ts     jmp gts         ; get track/sector
-get_byte   jmp gbyte       ; get byte
-get_block  jmp gblk        ; receive block
-send_byte  jmp sbyte       ; send byte
-send_block jmp sblk        ; send block
-init    jsr setinput
+.assert * = transfer_get_ts, error, "s1-1541/1571 get_ts is not at right location"
+        jmp gts         ; get track/sector
+.assert * = transfer_get_byte, error, "s1-1541/1571 get_byte is not at right location"
+        jmp gbyte
+.assert * = transfer_get_block, error, "s1-1541/1571 get_block is not at right location"
+        jmp gblk        ; receive block
+.assert * = transfer_send_byte, error, "s1-1541/1571 send_byte is not at right location"
+        jmp sbyte       ; send byte
+.assert * = transfer_send_block, error, "s1-1541/1571 send_block is not at right location"
+        jmp sblk        ; send block
+
+.assert * = transfer_init, error, "s1-1541/1571 init is not at right location"
+        jsr setinput
         jmp data_1
 
 sblk    jsr setoutput

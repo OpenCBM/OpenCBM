@@ -12,8 +12,12 @@
 
 #include <stdio.h>
 
-static const unsigned char turbomain_drive_prog[] = {
+static const unsigned char turbomain_1541_1571_drive_prog[] = {
 #include "turbomain-1541-1571.inc"
+};
+
+static const unsigned char turbomain_1581_drive_prog[] = {
+#include "turbomain-1581.inc"
 };
 
 
@@ -23,7 +27,7 @@ static const unsigned char turbomain_drive_prog[] = {
 libopencbmtransfer_test()
 */
 
-static transfer_funcs *current_transfer_funcs = &libopencbmtransfer_pp;
+static transfer_funcs *current_transfer_funcs = &libopencbmtransfer_s1;
 
 int
 libopencbmtransfer_set_transfer(opencbm_transfer_t TransferType)
@@ -76,8 +80,8 @@ libopencbmtransfer_install(CBM_FILE HandleDevice, unsigned char DeviceAddress)
     enum cbm_device_type_e cbmDeviceType;
     const char *cbmDeviceString;
     int error = 0;
-
-    FUNC_ENTER();
+    const unsigned char *turbomain_drive_prog = 0;
+    unsigned int turbomain_drive_prog_length = 0;
 
     if (cbm_identify(HandleDevice, DeviceAddress, &cbmDeviceType, &cbmDeviceString))
     {
@@ -89,10 +93,49 @@ libopencbmtransfer_install(CBM_FILE HandleDevice, unsigned char DeviceAddress)
         DBG_SUCCESS((DBG_PREFIX "cbm_identify returned %s", cbmDeviceString));
     }
 
+    switch (cbmDeviceType)
+    {
+    case cbm_dt_cbm1581:
+        DBG_PRINT((DBG_PREFIX "recognized 1581."));
+        turbomain_drive_prog = turbomain_1581_drive_prog;
+        turbomain_drive_prog_length = sizeof(turbomain_1581_drive_prog);
+        break;
+
+    case cbm_dt_cbm1541:
+        DBG_PRINT((DBG_PREFIX "recognized 1541."));
+        turbomain_drive_prog = turbomain_1541_1571_drive_prog;
+        turbomain_drive_prog_length = sizeof(turbomain_1541_1571_drive_prog);
+        break;
+
+    case cbm_dt_cbm1570:
+    case cbm_dt_cbm1571:
+        DBG_PRINT((DBG_PREFIX "recognized 1571."));
+        turbomain_drive_prog = turbomain_1541_1571_drive_prog;
+        turbomain_drive_prog_length = sizeof(turbomain_1541_1571_drive_prog);
+        break;
+
+    case cbm_dt_unknown:
+        /* FALL THROUGH */
+
+    default:
+        DBG_ERROR((DBG_PREFIX "unknown device type!"));
+        return 1;
+    }
+
+
+    // set device type for transfer routine
+
+    if (current_transfer_funcs->set_device_type(cbmDeviceType)) {
+        fprintf(stderr, "this transfer method does not work on this drive.");
+        return 1;
+    }
 
     // Upload turbo routines into drive
 
-    current_transfer_funcs->upload(HandleDevice, DeviceAddress);
+    if (current_transfer_funcs->upload(HandleDevice, DeviceAddress)) {
+        fprintf(stderr, "this transfer method does not work on this drive,\nor upload failed.");
+        return 1;
+    }
 
     if (!error)
     {
@@ -101,12 +144,12 @@ libopencbmtransfer_install(CBM_FILE HandleDevice, unsigned char DeviceAddress)
         // Now, upload the main loop into the drive
 
         bytesWritten = cbm_upload(HandleDevice, DeviceAddress, 0x500,
-            turbomain_drive_prog, sizeof(turbomain_drive_prog));
+            turbomain_drive_prog, turbomain_drive_prog_length);
 
-        if (bytesWritten != sizeof(turbomain_drive_prog))
+        if (bytesWritten != turbomain_drive_prog_length)
         {
             DBG_ERROR((DBG_PREFIX "wanted to write %u bytes, but only %u "
-                "bytes could be written" ,sizeof(turbomain_drive_prog), bytesWritten));
+                "bytes could be written", turbomain_drive_prog_length, bytesWritten));
 
             error = 1;
         }
@@ -191,6 +234,8 @@ libopencbmtransfer_read_write_mem(CBM_FILE HandleDevice, unsigned char DeviceAdd
 
     FUNC_ENTER();
 
+    fprintf(stderr, " ");
+
     // If we have to transfer more than one page, process the complete pages first
                                                                         SETSTATEDEBUG(DebugBlockCount = 0);
     while (Length >= 0x100)
@@ -241,5 +286,8 @@ libopencbmtransfer_write_mem(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 int
 libopencbmtransfer_remove(CBM_FILE HandleDevice, unsigned char DeviceAddress)
 {
-    return libopencbmtransfer_execute_command(HandleDevice, DeviceAddress, 0xEBE7);
+    // TODO: does not work with 1581, only with 1541/1571!
+    // better: write a JMP to the RESET routine, and execute that
+    return cbm_reset(HandleDevice);
+//    return libopencbmtransfer_execute_command(HandleDevice, DeviceAddress, 0xEBE7);
 }
