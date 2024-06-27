@@ -1,24 +1,59 @@
         *=$0700
 
-        jmp gts         ; get track/sector  $072c
-        jmp gbyte       ;                   $0740
-        jmp gblk        ; receive block     $0737
-        jmp sbyte       ; send byte         $0760
-        jmp sblk        ; send block        $078b 
+FAST_IEC_AS_INPUT	:= $81b2
+FAST_IEC_AS_OUTPUT	:= $81ce
 
-        lda #$04
-        jsr br3
-        jsr $81ce
-        jsr $81b2
-        lda #$01
-        sta $4004
-        lda #$00
-        sta $4005
-        lda #$08
-        sta $400d
-        jmp br5
+CIA		:= $4000
+CIA_PB		:= CIA + $0
+CIA_PA		:= CIA + $1
+CIA_DDRB	:= CIA + $2
+CIA_DDRA	:= CIA + $3
+CIA_TALO	:= CIA + $4
+CIA_TAHI	:= CIA + $5
+CIA_TBLO	:= CIA + $6
+CIA_TBHI	:= CIA + $7
+CIA_TOD10THS	:= CIA + $8
+CIA_TODSEC	:= CIA + $9
+CIA_TODMIN	:= CIA + $A
+CIA_TODHR	:= CIA + $B
+CIA_SDR		:= CIA + $C
+CIA_ICR		:= CIA + $D
+CIA_CRA		:= CIA + $E
+CIA_CRB		:= CIA + $F
 
-gts     jsr gbyte
+CIA_ICR_B_SP	:= $08
+CIA_CRA_B_SP_OUTPUT	:= $40
+
+IEC_PORT	:= $1800
+
+IEC_DATA_IN	:= $01
+IEC_DATA_OUT	:= $02
+IEC_CLOCK_IN	:= $04
+IEC_CLOCK_OUT	:= $08
+IEC_ATNA	:= $10
+IEC_ATN_IN	:= $80
+
+        jmp gts         ; get track/sector
+        jmp gbyte       ;
+        jmp gblk        ; receive block
+        jmp sbyte       ; send byte
+        jmp sblk        ; send block
+
+; init:
+        lda #IEC_CLOCK_IN
+        jsr wait_for_line_inactive
+        jsr FAST_IEC_AS_OUTPUT
+        jsr FAST_IEC_AS_INPUT
+        lda #<$0001
+        sta CIA_TALO
+        lda #>$0001
+        sta CIA_TAHI
+        lda #CIA_ICR_B_SP
+        sta CIA_ICR
+        jmp set_data_out
+
+gts:
+        jsr gbyte
         pha
         jsr gbyte
         tay
@@ -26,93 +61,105 @@ gts     jsr gbyte
         tax
         rts
 
-gblk    jsr gbyte
+gblk:
+        jsr gbyte
         sta ($30),y
         iny
         bne gblk
         rts
 
-gbyte   lda #$04
-        jsr br4
-        bit $400d
-        jsr br6
-        lda #$08
-br1     bit $400d
-        beq br1
-        lda $400c
+gbyte:
+        lda #IEC_CLOCK_IN
+        jsr wait_for_line_active
+        bit CIA_ICR
+        jsr unset_data_clock
+        lda #CIA_ICR_B_SP
+@wait_for_sp_end:
+        bit CIA_ICR
+        beq @wait_for_sp_end
+        lda CIA_SDR
         pha
-        lda #$04
-        jsr br3
-        jsr br5
+        lda #IEC_CLOCK_IN
+        jsr wait_for_line_inactive
+        jsr set_data_out
         pla
         rts
 
-sbyte   pha
-        lda #$04
-        jsr br4
-        jsr br7
-        lda #$01
-        jsr br4
-        jsr $81ce
-        jsr br6
-        lda #$04
-        jsr br4
+sbyte:
+        pha
+        lda #IEC_CLOCK_IN
+        jsr wait_for_line_active
+        jsr set_clock_out
+        lda #IEC_DATA_IN
+        jsr wait_for_line_active
+        jsr FAST_IEC_AS_OUTPUT
+        jsr unset_data_clock
+        lda #IEC_CLOCK_IN
+        jsr wait_for_line_active
         pla
-        sta $400c
-        lda #$04
-        jsr br3
-        jsr br7
-        jsr $81b2
-        jmp br5
+        sta CIA_SDR
+        lda #IEC_CLOCK_IN
+        jsr wait_for_line_inactive
+        jsr set_clock_out
+        jsr FAST_IEC_AS_INPUT
+        jmp set_data_out
 
-sblk    lda #$04
-        jsr br4
-        jsr br7
-        lda #$01
-        jsr br4
-        jsr $81ce
-        jmp br8
+sblk:
+        lda #IEC_CLOCK_IN
+        jsr wait_for_line_active
+        jsr set_clock_out
+        lda #IEC_DATA_IN
+        jsr wait_for_line_active
+        jsr FAST_IEC_AS_OUTPUT
+        jmp @br2
 
-br2     lda $400e
-        and #$bf
-        sta $400e
-        jsr br5
-        lda #$04
-        jsr br4
-        jsr br7
-        lda #$01
-        jsr br4
-        lda $400e
-        ora #$40
-        sta $400e
-br8     jsr br6             ; $07be
-        lda #$04
-        jsr br4
+@br1:
+        lda CIA_CRA
+        and #(~ CIA_CRA_B_SP_OUTPUT) & $FF
+        sta CIA_CRA
+        jsr set_data_out
+        lda #IEC_CLOCK_IN
+        jsr wait_for_line_active
+        jsr set_clock_out
+        lda #IEC_DATA_IN
+        jsr wait_for_line_active
+        lda CIA_CRA
+        ora #CIA_CRA_B_SP_OUTPUT
+        sta CIA_CRA
+@br2:
+        jsr unset_data_clock
+        lda #IEC_CLOCK_IN
+        jsr wait_for_line_active
         lda ($30),y
-        sta $400c
-        lda #$04
-        jsr br3
-        jsr br7
+        sta CIA_SDR
+        lda #IEC_CLOCK_IN
+        jsr wait_for_line_inactive
+        jsr set_clock_out
         iny
-        bne br2
-        jsr $81b2
-        jmp br5
+        bne @br1
+        jsr FAST_IEC_AS_INPUT
+        jmp set_data_out
 
-br3     bit $1800           ; $07dc
-        bne br3
+wait_for_line_inactive:
+        bit IEC_PORT
+        bne wait_for_line_inactive
         rts
 
-br4     bit $1800           ; $07e2
-        beq br4
+wait_for_line_active:
+        bit IEC_PORT
+        beq wait_for_line_active
         rts
 
-br5     lda #$02            ; $07e8
+set_data_out:
+        lda #IEC_DATA_OUT
         .byte $2c
 
-br6     lda #$00            ; $07eb
-        sta $1800
+unset_data_clock:
+        lda #$00
+        sta IEC_PORT
         rts
 
-br7     lda #$08            ; $07f1
-        sta $1800
+set_clock_out:
+        lda #IEC_CLOCK_OUT
+        sta IEC_PORT
         rts
