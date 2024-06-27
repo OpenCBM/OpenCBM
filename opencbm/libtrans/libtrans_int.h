@@ -29,65 +29,8 @@
 #include "debug.h"
 
 
-#if 0
-
-#define BLOCKSIZE 256
-#define GCRBUFSIZE 326
-
-/* standard .d64 track count */
-#define STD_TRACKS   35
-/* "standard" 40-track .d64 */
-#define EXT_TRACKS   40
-/* absolute limit. may not work with all drives */
-#define TOT_TRACKS   42
-
-/* .d71 track count */
-#define D71_TRACKS   70
-
-#define STD_BLOCKS  683
-#define D71_BLOCKS  (STD_BLOCKS*2)
-
-#define MAX_SECTORS  21
-
-#define NEED_SECTOR(b) ((((b)==bs_error)||((b)==bs_must_copy))?1:0)
-
-typedef int(*turbo_start)(CBM_FILE,unsigned char);
-
 typedef struct {
-    int  (*open_disk)(CBM_FILE,d64copy_settings*,const void*,int,
-                      turbo_start,d64copy_message_cb);
-    int  (*read_block)(unsigned char,unsigned char,char*);
-    int  (*write_block)(unsigned char,unsigned char,const char*,int,int);
-    void (*close_disk)(void);
-    int  is_cbm_drive;
-    int  needs_turbo;
-    int  (*send_track_map)(unsigned char,const char*,unsigned char);
-    int  (*read_gcr_block)(unsigned char*,unsigned char*);
-} transfer_funcs;
-
-#define DECLARE_TRANSFER_FUNCS(x,c,t) \
-    transfer_funcs d64copy_ ## x = {open_disk, \
-                        read_block, \
-                        write_block, \
-                        close_disk, \
-                        c, \
-                        t, \
-                        NULL, \
-                        NULL}
-
-#define DECLARE_TRANSFER_FUNCS_EX(x,c,t) \
-    transfer_funcs d64copy_ ## x = {open_disk, \
-                        read_block, \
-                        write_block, \
-                        close_disk, \
-                        c, \
-                        t, \
-                        send_track_map, \
-                        read_gcr_block}
-
-#endif
-
-typedef struct {
+    int (*set_device_type)(enum cbm_device_type_e device_type);
     int (*upload)    (CBM_FILE fd, unsigned char drive);
     int (*init)      (CBM_FILE fd, unsigned char drive);
     int (*read1byte) (CBM_FILE fd, unsigned char *c1);
@@ -101,6 +44,7 @@ typedef struct {
 #define DECLARE_TRANSFER_FUNCS(_name_) \
     transfer_funcs libopencbmtransfer_ ## _name_ = \
     { \
+        set_device_type, \
         upload,     \
         init,       \
         read1byte,  \

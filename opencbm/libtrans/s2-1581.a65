@@ -29,7 +29,7 @@
 ; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 
-Drive1541_1571  = 1                     ;Compile for 1541 and 1571 drives
+Drive1581       = 1                     ;Compile for 1581 drives
 
 	.include "common.i65"
 
@@ -47,8 +47,13 @@ Drive1541_1571  = 1                     ;Compile for 1541 and 1571 drives
         jmp sblk        ; send block
 
 .assert * = transfer_init, error, "s1-1541/1571 init is not at right location"
-        lda #IEC_PORT_DATA_OUT
+        lda #IEC_PORT_CLK_IN
+i0      bit IEC_PORT
+        bne i0
+        asl
         sta IEC_PORT
+i1      lda IEC_PORT
+        bpl i1
         rts
 
 gts     jsr gbyte
@@ -65,62 +70,55 @@ gblk    jsr gbyte
         bne gblk
         rts
 
-sbyte   sta TMP1
-        ldx #8
-write0  lda #IEC_PORT_CLK_IN
-writeclk        bit IEC_PORT
-        bne writeclk
-        lda #0
-        lsr TMP1
-        rol
-        asl
-        asl
-        asl
-        sta TMP2
-        sta IEC_PORT
-        lda #IEC_PORT_DATA_IN
-write1  bit IEC_PORT
-        beq write1
-        lda TMP2
-        eor #IEC_PORT_CLK_OUT
-        sta IEC_PORT
-        lda #IEC_PORT_DATA_IN
-write3  bit IEC_PORT
-        bne write3
-        asl
-        sta IEC_PORT
-        dex
-        bne write0
-        rts
-
 sblk    lda (ptr),y
         jsr sbyte
         iny
         bne sblk
         rts
 
-gbyte   ldx #8
-read0   lda #IEC_PORT_CLK_IN
-read1   and IEC_PORT
-        bne read1
+sbyte   sta TMP1
+        ldx #$04
+write0
+write1  lda IEC_PORT
+        bmi write1
+        lda #0
+        lsr TMP1
+        rol
+        asl
         sta IEC_PORT
-        lda IEC_PORT
-        and #IEC_PORT_DATA_IN ; this is 1
-        sta TMP2
-        lsr
-        rol TMP1
+write2  lda IEC_PORT
+        bpl write2
+        lda #$06
+        lsr TMP1
+        rol
+        asl
+        sta IEC_PORT
+        dex
+        bne write0
+write3  lda IEC_PORT
+        bmi write3
+        lda #IEC_PORT_NONE
+        sta IEC_PORT
+write4  lda IEC_PORT
+        bpl write4
         lda #IEC_PORT_CLK_OUT
         sta IEC_PORT
-read2   lda IEC_PORT
-        and #IEC_PORT_DATA_IN ; this is 1
-        cmp TMP2
-        beq read2
-        lsr             ; a = 0
-        sta IEC_PORT
-        lda #IEC_PORT_CLK_IN
-read3   bit IEC_PORT
-        beq read3
+        rts
+
+gbyte   ldx #4
+read0   lda IEC_PORT
+        bmi read0
+        lda IEC_PORT
         lsr
+        ror TMP1
+        lda #0 ; IEC_PORT_ATNA_OUT
+        sta IEC_PORT
+read1   lda IEC_PORT
+        bpl read1
+        lda IEC_PORT
+        lsr
+        ror TMP1
+        lda #IEC_PORT_CLK_OUT
         sta IEC_PORT
         dex
         bne read0

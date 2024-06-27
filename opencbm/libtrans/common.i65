@@ -29,21 +29,33 @@
 ; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 
-.if .defined(Drive1541)
+.if .defined(Drive1541_1571) .or .defined(Drive1541) .or .defined(Drive1571)
+    IEC_PORT   = $1800
 
-        IEC_PORT   = $1800
+    LED_PORT   = $1c00
+    LED_BIT    = $08
+
+    .if .defined(Drive1541)
+
         PP_DATA    = $1801
         PP_DDR     = $1803
 
-.elseif .defined(Drive1571)
+    .endif
+    .if .defined(Drive1571)
 
-        IEC_PORT   = $1800
         PP_DATA    = $4001
         PP_DDR     = $4003
+
+    .endif
 
 .elseif .defined(Drive1581)
 
         IEC_PORT   = $4001
+
+        LED_PORT   = $4000
+        LED_ACTIVITY = $40
+        LED_POWER    = $80
+        LED_BIT      = LED_ACTIVITY
 
 .else
 
@@ -67,6 +79,67 @@
 
 OPCODE_BIT_2BYTE  = $2C
 
-ptr = $30
-TMP1 = $14
-TMP2 = $1d
+.if .defined(Drive1541_1571) .or .defined(Drive1541) .or .defined(Drive1571)
+    ptr  = $30
+    ptr2 = $32
+    TMP1 = $14
+    TMP2 = $1d
+
+    JOB0   = $00
+    TRACK0 = $06
+
+.elseif .defined(Drive1581)
+    ptr  = TRACK3
+    ptr2 = TRACK5
+    TMP1 = TRACK2
+    TMP2 = SECTOR2
+
+    JOB0   = $02
+    TRACK0 = $0B
+
+    BUFFCACHE = $0C00
+.endif
+
+JOB1 = JOB0 + 1
+JOB2 = JOB0 + 1
+JOB3 = JOB0 + 1
+JOB4 = JOB0 + 1
+JOB5 = JOB0 + 1
+
+SECTOR0 = TRACK0 + $01
+TRACK1  = TRACK0 + $02
+SECTOR1 = TRACK0 + $03
+TRACK2  = TRACK0 + $04
+SECTOR2 = TRACK0 + $05
+TRACK3  = TRACK0 + $06
+SECTOR3 = TRACK0 + $07
+TRACK4  = TRACK0 + $08
+SECTOR4 = TRACK0 + $09
+TRACK5  = TRACK0 + $0A
+SECTOR5 = TRACK0 + $0B
+
+BUFFER0 = $0300
+BUFFER1 = $0400
+BUFFER2 = $0500
+BUFFER3 = $0600
+BUFFER4 = $0700
+
+TURBOMAIN_ROUTINES = BUFFER2
+TRANSFER_ROUTINES  = BUFFER4
+
+turbo_init           = TURBOMAIN_ROUTINES + $00
+turbo_start          = TURBOMAIN_ROUTINES + $03
+
+transfer_get_ts      = TRANSFER_ROUTINES + $00
+transfer_get_byte    = TRANSFER_ROUTINES + $03
+transfer_get_block   = TRANSFER_ROUTINES + $06
+transfer_send_byte   = TRANSFER_ROUTINES + $09
+transfer_send_block  = TRANSFER_ROUTINES + $0c
+transfer_init        = TRANSFER_ROUTINES + $0f
+
+
+; commands for turbomain:
+
+CMD_EXECUTE  = $80
+CMD_READMEM  = $1
+CMD_WRITEMEM = $0

@@ -230,7 +230,10 @@ main_testtransfer(int argc, char **argv)
     }
 
     DBG_PRINT((DBG_PREFIX "before install"));
-    libopencbmtransfer_install(fd, drive);
+    if (libopencbmtransfer_install(fd, drive)) {
+        cbm_driver_close(fd);
+        return 1;
+    }
 
     memset(buffer, 0, sizeof(buffer));
 
