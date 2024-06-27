@@ -14,9 +14,15 @@
 
 #include "arch.h"
 
-static const unsigned char s1_drive_prog[] = {
+static const unsigned char s1_1541_1571_drive_prog[] = {
 #include "s1-1541-1571.inc"
 };
+
+static const unsigned char s1_1581_drive_prog[] = {
+#include "s1-1581.inc"
+};
+
+static enum cbm_device_type_e device_type = cbm_dt_unknown;
 
 static int s1_write_byte_nohs(CBM_FILE fd, unsigned char c)
 {
@@ -119,17 +125,75 @@ static int s1_read_byte(CBM_FILE fd, unsigned char *c)
     return 0;
 }
 
+
+static int
+set_device_type(enum cbm_device_type_e dt)
+{
+    device_type = dt;
+
+    switch (dt)
+    {
+    case cbm_dt_cbm1541:
+    case cbm_dt_cbm1570:
+    case cbm_dt_cbm1571:
+    case cbm_dt_cbm1581:
+        break;
+
+    case cbm_dt_unknown:
+        /* FALL THROUGH */
+
+    default:
+        DBG_ERROR((DBG_PREFIX "unknown device type!"));
+        device_type = cbm_dt_unknown;
+        return 1;
+    }
+
+    return 0;
+}
+
 static int
 upload(CBM_FILE fd, unsigned char drive)
 {
+    const unsigned char *s1_drive_prog = 0;
+    unsigned int s1_drive_prog_length = 0;
+
     unsigned int bytesWritten;
 
-    bytesWritten = cbm_upload(fd, drive, 0x700, s1_drive_prog, sizeof(s1_drive_prog));
+    switch (device_type)
+    {
+    case cbm_dt_cbm1581:
+        DBG_PRINT((DBG_PREFIX "recognized 1581."));
+        s1_drive_prog = s1_1581_drive_prog;
+        s1_drive_prog_length = sizeof(s1_1581_drive_prog);
+        break;
 
-    if (bytesWritten != sizeof(s1_drive_prog))
+    case cbm_dt_cbm1541:
+        DBG_PRINT((DBG_PREFIX "recognized 1541."));
+        s1_drive_prog = s1_1541_1571_drive_prog;
+        s1_drive_prog_length = sizeof(s1_1541_1571_drive_prog);
+        break;
+
+    case cbm_dt_cbm1570:
+    case cbm_dt_cbm1571:
+        DBG_PRINT((DBG_PREFIX "recognized 1571."));
+        s1_drive_prog = s1_1541_1571_drive_prog;
+        s1_drive_prog_length = sizeof(s1_1541_1571_drive_prog);
+        break;
+
+    case cbm_dt_unknown:
+        /* FALL THROUGH */
+
+    default:
+        DBG_ERROR((DBG_PREFIX "unknown device type!"));
+        return 1;
+    }
+
+    bytesWritten = cbm_upload(fd, drive, 0x700, s1_drive_prog, s1_drive_prog_length);
+
+    if (bytesWritten != s1_drive_prog_length)
     {
         DBG_ERROR((DBG_PREFIX "wanted to write %u bytes, but only %u "
-            "bytes could be written", sizeof(s1_drive_prog), bytesWritten));
+            "bytes could be written", s1_drive_prog_length, bytesWritten));
 
         return 1;
     }

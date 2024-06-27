@@ -22,6 +22,8 @@ static const unsigned char pp1571_drive_prog[] = {
 #include "pp-1571.inc"
 };
 
+static enum cbm_device_type_e device_type = cbm_dt_unknown;
+
 static int pp_write(CBM_FILE fd, unsigned char c1, unsigned char c2)
 {
                                                                         SETSTATEDEBUG((void)0);
@@ -91,17 +93,41 @@ static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 
 
 static int
+set_device_type(enum cbm_device_type_e dt)
+{
+    device_type = dt;
+
+    switch (dt)
+    {
+    case cbm_dt_cbm1541:
+    case cbm_dt_cbm1570:
+    case cbm_dt_cbm1571:
+        break;
+
+    case cbm_dt_cbm1581:
+        DBG_ERROR((DBG_PREFIX "1581 not supported!"));
+        return 1;
+
+    case cbm_dt_unknown:
+        /* FALL THROUGH */
+
+    default:
+        DBG_ERROR((DBG_PREFIX "unknown device type!"));
+        device_type = cbm_dt_unknown;
+        return 1;
+    }
+
+    return 0;
+}
+
+static int
 upload(CBM_FILE fd, unsigned char drive)
 {
-    enum cbm_device_type_e driveType;
     const unsigned char *pp_drive_prog = 0;
     unsigned int pp_drive_prog_length = 0;
     unsigned int bytesWritten;
 
-    if (cbm_identify(fd, drive, &driveType, NULL))
-        return 1;
-
-    switch (driveType)
+    switch (device_type)
     {
     case cbm_dt_cbm1581:
         DBG_ERROR((DBG_PREFIX "1581 not supported!"));
