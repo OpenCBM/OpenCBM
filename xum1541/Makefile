@@ -96,7 +96,7 @@ endif
 MODELVERSION= xum1541-$(MODEL)-v$(XUMFW_VERSION)
 
 # Resulting full revision number for model and firmware version
-REVISION=$(shell grep '\#define $(MODEL) ' xum1541.h | sed 's/\#define $(MODEL)//' | xargs printf "%02X")$(XUMFW_VERSION)
+REVISION=$(shell grep -F '#define $(MODEL) ' xum1541.h | sed 's/\#define $(MODEL)//' | xargs printf "%02X")$(XUMFW_VERSION)
 
 # git revision or "unknown" if either not a git repo or git command unavailable
 GITREV=$(shell git describe --always --exclude '*' || echo 'unknown')
