@@ -88,7 +88,7 @@ write1  lda IEC_PORT
         sta IEC_PORT
 write2  lda IEC_PORT
         bpl write2
-        lda #$06
+        lda #IEC_PORT_CLK_OUT >> 2
         lsr TMP1
         rol
         asl
