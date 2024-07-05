@@ -48,9 +48,15 @@
 
     .endif
 
+    PP_DDR_IN         = $00
+    PP_DDR_OUT        = $FF
+
 .elseif .defined(Drive1581)
 
         IEC_PORT   = $4001
+
+        IEC_PORT_FAST_DIR = $20
+        IEC_PORT_WPTR     = $40
 
         LED_PORT   = $4000
         LED_ACTIVITY = $40
@@ -65,9 +71,6 @@
 
 .if .defined(DriveNone)
 .else
-    PP_DDR_IN         = $00
-    PP_DDR_OUT        = $FF
-
     IEC_PORT_ATN_IN   = $80
     IEC_PORT_ATNA_OUT = $10
     IEC_PORT_CLK_OUT  = $08
@@ -88,6 +91,11 @@ OPCODE_BIT_2BYTE  = $2C
     JOB0   = $00
     TRACK0 = $06
 
+    .if .defined(Drive1571)
+        FAST_IEC_AS_INPUT  := $81b2
+        FAST_IEC_AS_OUTPUT := $81ce
+    .endif
+
 .elseif .defined(Drive1581)
     ptr  = TRACK3
     ptr2 = TRACK5
@@ -98,6 +106,21 @@ OPCODE_BIT_2BYTE  = $2C
     TRACK0 = $0B
 
     BUFFCACHE = $0C00
+
+    FAST_IEC_AS_INPUT  := $acb6
+    FAST_IEC_AS_OUTPUT := $accf
+.endif
+
+.if .defined(Drive1571) .or .defined(Drive1581)
+    CIA          := $4000
+
+    CIA_TALO     := CIA + $4
+    CIA_TAHI     := CIA + $5
+
+    CIA_SDR      := CIA + $C
+    CIA_ICR      := CIA + $D
+
+    CIA_ICR_B_SP := $08
 .endif
 
 JOB1 = JOB0 + 1

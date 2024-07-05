@@ -10,9 +10,15 @@
 #include "opencbm.h"
 #include "libtrans_int.h"
 
+#include "opencbm-plugin.h"
+
 #include <stdlib.h>
 
 #include "arch.h"
+
+static opencbm_plugin_pp_dc_read_n_t  * opencbm_plugin_pp_dc_read_n  = NULL;
+static opencbm_plugin_pp_dc_write_n_t * opencbm_plugin_pp_dc_write_n = NULL;
+
 
 static const unsigned char pp1541_drive_prog[] = {
 #include "pp-1541.inc"
@@ -165,6 +171,9 @@ upload(CBM_FILE fd, unsigned char drive)
 static int
 init(CBM_FILE fd, unsigned char drive)
 {
+    opencbm_plugin_pp_dc_read_n  = cbm_get_plugin_function_address("opencbm_plugin_pp_dc_read_n");
+    opencbm_plugin_pp_dc_write_n = cbm_get_plugin_function_address("opencbm_plugin_pp_dc_write_n");
+
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_set(fd, IEC_CLOCK);
                                                                         SETSTATEDEBUG((void)0);
@@ -201,6 +210,11 @@ readblock(CBM_FILE fd, unsigned char *p, unsigned int length)
     unsigned char c1;
     unsigned char c2;
                                                                         SETSTATEDEBUG(DebugByteCount = 0);
+    if (opencbm_plugin_pp_dc_read_n)
+    {
+        return opencbm_plugin_pp_dc_read_n(fd, p, length) == 0;
+    }
+
     for (; length < 0x100; length++)
     {
                                                                         SETSTATEDEBUG(DebugByteCount += 2);
@@ -245,7 +259,11 @@ write2byte(CBM_FILE fd, unsigned char c1, unsigned char c2)
 static int
 writeblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
-                                                                        SETSTATEDEBUG(DebugByteCount = 0);
+    if (opencbm_plugin_pp_dc_write_n) {
+        /* redirects USB writes to the external writer if possible */
+        return opencbm_plugin_pp_dc_write_n(fd, p, length) == 0;
+    }
+
     for (; length < 0x100; length += 2, p += 2)
     {
                                                                         SETSTATEDEBUG(DebugByteCount += 2);

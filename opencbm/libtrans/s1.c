@@ -10,9 +10,14 @@
 #include "opencbm.h"
 #include "libtrans_int.h"
 
+#include "opencbm-plugin.h"
+
 #include <stdlib.h>
 
 #include "arch.h"
+
+static opencbm_plugin_s1_read_n_t  * opencbm_plugin_s1_read_n = NULL;
+static opencbm_plugin_s1_write_n_t * opencbm_plugin_s1_write_n = NULL;
 
 static const unsigned char s1_1541_1571_drive_prog[] = {
 #include "s1-1541-1571.inc"
@@ -197,6 +202,9 @@ upload(CBM_FILE fd, unsigned char drive)
 static int
 init(CBM_FILE fd, unsigned char drive)
 {
+    opencbm_plugin_s1_read_n  = cbm_get_plugin_function_address("opencbm_plugin_s1_read_n");
+    opencbm_plugin_s1_write_n = cbm_get_plugin_function_address("opencbm_plugin_s1_write_n");
+
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_wait(fd, IEC_DATA, 1);
                                                                         SETSTATEDEBUG((void)0);
@@ -231,6 +239,13 @@ read2byte(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 static int
 readblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
+#if 0
+    /* s1 protocol is different! */
+    if (opencbm_plugin_s1_read_n) {
+        return opencbm_plugin_s1_read_n(fd, p, length) == 0;
+    }
+#endif
+
                                                                         SETSTATEDEBUG(DebugByteCount = 0);
     for (; length < 0x100; length++)
     {
@@ -274,6 +289,12 @@ write2byte(CBM_FILE fd, unsigned char c1, unsigned char c2)
 static int
 writeblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
+#if 0
+    /* s1 protocol is different! */
+    if (opencbm_plugin_s1_write_n) {
+        return opencbm_plugin_s1_write_n(fd, p, length) == 0;
+    }
+#endif
                                                                         SETSTATEDEBUG(DebugByteCount = 0);
     for (; length < 0x100; length++)
     {

@@ -8,7 +8,7 @@
  *
  *  Copyright 2009-2010 Nate Lawson <nate@root.org>
  *  Copyright 1999-2001 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005, 2007, 2010 Spiro Trikaliotis
+ *  Copyright 2001-2005, 2007, 2010, 2024 Spiro Trikaliotis
  */
 
 /*! **************************************************************
@@ -133,6 +133,48 @@ int CBMAPIDECL
 opencbm_plugin_s2_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
 {
     return xum1541_write((struct opencbm_usb_handle *)HandleDevice, XUM1541_S2, data, size);
+}
+
+/*! \brief Read data with serial3 protocol
+
+  \param HandleDevice
+    A CBM_FILE which contains the file handle of the driver.
+
+  \param data
+    Pointer to the data buffer which will hold the read bytes.
+
+  \param size
+    The size of the data buffer the read bytes will be written to.
+
+  \return
+    The number of bytes actually read, 0 on device error. If there is a
+    fatal error, returns -1.
+*/
+int CBMAPIDECL
+opencbm_plugin_s3_read_n(CBM_FILE HandleDevice, unsigned char *data, unsigned int size)
+{
+    return xum1541_read((struct opencbm_usb_handle *)HandleDevice, XUM1541_S3, data, size);
+}
+
+/*! \brief Write data with serial3 protocol
+
+  \param HandleDevice
+    A CBM_FILE which contains the file handle of the driver.
+
+  \param data
+    Pointer to the data buffer to be written
+
+  \param size
+    The size of the data buffer to be written
+
+  \return
+    The number of bytes actually written, 0 on device error. If there is a
+    fatal error, returns -1.
+*/
+int CBMAPIDECL
+opencbm_plugin_s3_write_n(CBM_FILE HandleDevice, const unsigned char *data, unsigned int size)
+{
+    return xum1541_write((struct opencbm_usb_handle *)HandleDevice, XUM1541_S3, data, size);
 }
 
 /*! \brief Read data with parallel protocol (d64copy)

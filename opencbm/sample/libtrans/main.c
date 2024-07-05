@@ -4,7 +4,7 @@
  *  as published by the Free Software Foundation; either version
  *  2 of the License, or (at your option) any later version.
  *
- *  Copyright 2006 Spiro Trikaliotis
+ *  Copyright 2006, 2009, 2011, 2016, 2020, 2024 Spiro Trikaliotis
 */
 
 #include "opencbm.h"
@@ -29,13 +29,15 @@
 
 #include "debug.h"
 
-static int startaddress = 0x8000;
-static int transferlength = 0x110;
+static int startaddress = 0xc000;
+static int transferlength = 0x120;
 static int writedumpfile = 0;
 static int outputdump = 0;
 static int compare = 0;
+static int do_read = 0;
+static int do_write = 0;
 static unsigned char drive = 8;
-static unsigned int count = -1;
+static unsigned int count = 1;
 
 static CBM_FILE fd;
 
@@ -104,6 +106,10 @@ processParameter(const int argc, char ** argv)
                 {
                     libopencbmtransfer_set_transfer(opencbm_transfer_serial2);
                 }
+                else if ((strcmp(&argv[i][2], "s3") == 0) || (strcmp(&argv[i][2], "srq") == 0))
+                {
+                    libopencbmtransfer_set_transfer(opencbm_transfer_serial3);
+                }
                 else if (strcmp(&argv[i][2], "pp") == 0)
                 {
                     libopencbmtransfer_set_transfer(opencbm_transfer_parallel);
@@ -131,8 +137,16 @@ processParameter(const int argc, char ** argv)
                 outputdump = 1;
                 break;
 
-            case 'w':
+            case 'W':
                 writedumpfile = 1;
+                break;
+
+            case 'r':
+                do_read = 1;
+                break;
+
+            case 'w':
+                do_write = 1;
                 break;
 
             case 'a':
@@ -144,7 +158,6 @@ processParameter(const int argc, char ** argv)
                 printf("unknown option '%s'\n", argv[i]);
                 exit(1);
             }
-            // current_transfer_funcs = &libopencbmtransfer_pp;
         }
         else
         {
@@ -159,6 +172,11 @@ processParameter(const int argc, char ** argv)
                 exit(1);
             }
         }
+    }
+
+    if (do_read == 0 && do_write == 0) {
+        do_read = 1;
+        do_write = 1;
     }
 
 }
@@ -200,6 +218,45 @@ main_o65(int argc, char **argv)
     FUNC_LEAVE_INT(0);
 }
 #endif
+
+static void
+perform_read(CBM_FILE fd, unsigned char *buffer, unsigned char *compare_buffer, unsigned int count, unsigned int error) {
+        printf("read:  %i, error = %u: \n", count+1, error);
+        libopencbmtransfer_read_mem(fd, drive, buffer, startaddress, transferlength);
+        if (compare)
+        {
+            if (memcmp(buffer, compare_buffer, transferlength) != 0)
+            {
+                char filename[128];
+                int n;
+
+                printf("\n\n***** ERROR COMPARING DATA! *****\n\n");
+                ++error;
+
+                strcpy(filename, "image.err.");
+                n = strlen(filename);
+
+                if (error > 9999) filename[n++] = ((error / 10000) % 10) + '0';
+                if (error >  999) filename[n++] = ((error /  1000) % 10) + '0';
+                if (error >   99) filename[n++] = ((error /   100) % 10) + '0';
+                if (error >    9) filename[n++] = ((error /    10) % 10) + '0';
+                if (error >    0) filename[n++] = ((error /     1) % 10) + '0';
+
+                filename[n] = 0;
+                write_to_file(buffer, transferlength, filename);
+            }
+            else
+            {
+                printf("       compare success\n");
+            }
+        }
+}
+
+static void
+perform_write(CBM_FILE fd, unsigned char *compare_buffer, unsigned int count, unsigned int error) {
+    printf("write: %i, error = %u: \n", count+1, error);
+    libopencbmtransfer_write_mem(fd, drive, compare_buffer, startaddress, transferlength);
+}
 
 static int
 main_testtransfer(int argc, char **argv)
@@ -257,38 +314,13 @@ main_testtransfer(int argc, char **argv)
 #else
     while (count--)
     {
-        printf("read:  %i, error = %u: \n", count+1, error);
-        libopencbmtransfer_read_mem(fd, drive, buffer, startaddress, transferlength);
-        if (compare)
-        {
-            if (memcmp(buffer, compare_buffer, transferlength) != 0)
-            {
-                char filename[128];
-                int n;
-
-                printf("\n\n***** ERROR COMPARING DATA! *****\n\n");
-                ++error;
-
-                strcpy(filename, "image.err.");
-                n = strlen(filename);
-
-                if (error > 9999) filename[n++] = ((error / 10000) % 10) + '0';
-                if (error >  999) filename[n++] = ((error /  1000) % 10) + '0';
-                if (error >   99) filename[n++] = ((error /   100) % 10) + '0';
-                if (error >    9) filename[n++] = ((error /    10) % 10) + '0';
-                if (error >    0) filename[n++] = ((error /     1) % 10) + '0';
-
-                filename[n] = 0;
-                write_to_file(buffer, transferlength, filename);
-            }
-            else
-            {
-                printf("       compare success\n");
-            }
+        if (do_read) {
+            perform_read(fd, buffer, compare_buffer, count, error);
         }
 
-        printf("write: %i, error = %u: \n", count+1, error);
-        libopencbmtransfer_write_mem(fd, drive, compare_buffer, startaddress, transferlength);
+        if (do_write) {
+            perform_write(fd, compare_buffer, count, error);
+        }
     }
 #endif
 

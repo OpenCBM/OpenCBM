@@ -24,6 +24,7 @@ enum opencbm_transfer_e
 {
     opencbm_transfer_serial1,
     opencbm_transfer_serial2,
+    opencbm_transfer_serial3,
     opencbm_transfer_parallel
 } opencbm_transfer_t;
 

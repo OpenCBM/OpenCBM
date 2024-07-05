@@ -42,6 +42,10 @@ libopencbmtransfer_set_transfer(opencbm_transfer_t TransferType)
         current_transfer_funcs = &libopencbmtransfer_s2;
         break;
 
+    case opencbm_transfer_serial3:
+        current_transfer_funcs = &libopencbmtransfer_s3;
+        break;
+
     case opencbm_transfer_parallel:
         current_transfer_funcs = &libopencbmtransfer_pp;
         break;
@@ -157,7 +161,7 @@ libopencbmtransfer_install(CBM_FILE HandleDevice, unsigned char DeviceAddress)
 
     if (!error)
     {
-        if (cbm_exec_command(HandleDevice, DeviceAddress, "U3:", 0))
+        if (cbm_exec_command(HandleDevice, DeviceAddress, "U3", 0))
         {
             DBG_ERROR((DBG_PREFIX "cbm_exec_command returnd with an error."));
             error = 1;

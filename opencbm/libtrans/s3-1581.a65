@@ -1,5 +1,4 @@
-; Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
-; Copyright      2005 Spiro Trikaliotis
+; Copyright 2024 Spiro Trikaliotis
 ; All rights reserved.
 ;
 ; This file is part of OpenCBM
@@ -30,73 +29,67 @@
 ; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 
-.if .defined(Drive1541)
-.else
-        Drive1571       = 1                     ;Compile for 1571 drives
-.endif
+Drive1581       = 1                     ;Compile for 1581 drives
 
         .include "common.i65"
 
+TA_DELAY = 1
+
         * = TRANSFER_ROUTINES
 
-.assert * = transfer_get_ts, error, "s1-1541/1571 get_ts is not at right location"
+.assert * = transfer_get_ts, error, "s3-1581 get_ts is not at right location"
         jmp gts         ; get track/sector
-.assert * = transfer_get_byte, error, "s1-1541/1571 get_byte is not at right location"
+.assert * = transfer_get_byte, error, "s3-1581 get_byte is not at right location"
         jmp gbyte
-.assert * = transfer_get_block, error, "s1-1541/1571 get_block is not at right location"
+.assert * = transfer_get_block, error, "s3-1581 get_block is not at right location"
         jmp gblk        ; receive block
-.assert * = transfer_send_byte, error, "s1-1541/1571 send_byte is not at right location"
+.assert * = transfer_send_byte, error, "s3-1581 send_byte is not at right location"
         jmp sbyte       ; send byte
-.assert * = transfer_send_block, error, "s1-1541/1571 send_block is not at right location"
+.assert * = transfer_send_block, error, "s3-1581 send_block is not at right location"
         jmp sblk        ; send block
 
-.assert * = transfer_init, error, "s1-1541/1571 init is not at right location"
-        jsr setinput
-        jmp data_1
+.assert * = transfer_init, error, "s3-1581 init is not at right location"
 
-sblk    jsr setoutput
-sblk0   jsr clk_1
-        lda (ptr),y
-        sta PP_DATA
-        jsr data_0
-        iny
-        jsr clk_0
-        lda (ptr),y
-        sta PP_DATA
-        jsr data_1
-        iny
-        bne sblk0
+        sei
 
-        ; fall through to sbyte: perform end-handshake
+        jsr FAST_IEC_AS_INPUT
 
-sbyte   pha
-        jsr setoutput
-        jsr clk_1
-        pla
-        sta PP_DATA
-        jsr data_0
-        jsr clk_0
-        jsr data_1
+        lda #<TA_DELAY
+        sta CIA_TALO
+        lda #>TA_DELAY
+        sta CIA_TAHI
 
-setinput
-        lda #PP_DDR_IN
+        ; release CLK to signal: I am ready
+        lda IEC_PORT
+        and #<~(IEC_PORT_DATA_OUT | IEC_PORT_CLK_OUT)
+        sta IEC_PORT
+
+        ; wait for the PC to set DATA
+        lda #IEC_PORT_DATA_IN
+@i0     bit IEC_PORT
+        beq @i0
+        rts
+
+waitsp
+        lda #CIA_ICR_B_SP
+@gb     bit CIA_ICR                     ; wait for SP transfer to be done
+        beq @gb
+        rts
+
+WCLK_0  lda #IEC_PORT_CLK_IN
+@wc0    bit IEC_PORT
+        beq @wc0
+        rts
+
+WCLK_1  lda #IEC_PORT_CLK_IN
+@wc1    bit IEC_PORT
+        bne @wc1
+        rts
+
+SCLK_0  lda #IEC_PORT_CLK_OUT
         .byte OPCODE_BIT_2BYTE
-setoutput
-        lda #PP_DDR_OUT
-        sta PP_DDR
-        rts
-
-
-; wait for clock to go inactive
-clk_0   lda #IEC_PORT_CLK_IN
-c0      bit IEC_PORT
-        beq c0
-        rts
- 
-; wait for clock to go active
-clk_1   lda #IEC_PORT_CLK_IN
-c1      bit IEC_PORT
-        bne c1
+SCLK_1  lda #0
+        sta IEC_PORT
         rts
 
 gbyte   tya
@@ -107,32 +100,52 @@ gbyte   tya
         txa
         rts
 
-gts     jsr clk_1
-        ldx PP_DATA
-        jsr data_0
-        jsr clk_0
-        ldy PP_DATA
-data_1  lda #IEC_PORT_DATA_OUT
-        .byte OPCODE_BIT_2BYTE
-data_0  lda #IEC_PORT_NONE
-        sta IEC_PORT
+gts     jsr SCLK_0
+        jsr waitsp
+        ldx CIA_SDR
+        jsr SCLK_1
+        jsr waitsp
+        ldy CIA_SDR
         rts
 
 gblk    tya
         lsr
-        bcc gblk0
+        bcc @gb0
         jsr gbyte
         sta (ptr),y
         iny
-gblk0   jsr clk_1
-        lda PP_DATA
+@gb0    jsr SCLK_0
+        jsr waitsp
+        lda CIA_SDR
         sta (ptr),y
         iny
-        jsr data_0
-        jsr clk_0
-        lda PP_DATA
+        jsr SCLK_1
+        jsr waitsp
+        lda CIA_SDR
         sta (ptr),y
-        jsr data_1
         iny
-        bne gblk0
+        bne @gb0
         rts
+
+sblk    jsr FAST_IEC_AS_OUTPUT
+@sb0    jsr WCLK_0
+        lda (ptr),y
+        sta CIA_SDR
+        jsr waitsp
+        iny
+        jsr WCLK_1
+        lda (ptr),y
+        sta CIA_SDR
+        jsr waitsp
+        iny
+        bne @sb0
+        jmp FAST_IEC_AS_INPUT
+
+sbyte   pha
+        jsr FAST_IEC_AS_OUTPUT
+        pla
+        jsr WCLK_0
+        sta CIA_SDR
+        jsr WCLK_1
+        sta CIA_SDR			; dummy write, is not used!
+        jmp FAST_IEC_AS_INPUT
