@@ -225,6 +225,8 @@ uint8_t s1_read_byte(void);
 void s1_write_byte(uint8_t c);
 uint8_t s2_read_byte(void);
 void s2_write_byte(uint8_t c);
+void s3_read_2_bytes(uint8_t *c);
+void s3_write_2_bytes(uint8_t *c);
 uint8_t p2_read_byte(void);
 void p2_write_byte(uint8_t c);
 void pp_read_2_bytes(uint8_t *c);

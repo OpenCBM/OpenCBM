@@ -150,6 +150,7 @@
 #define XUM1541_NIB_SRQ_COMMAND     (9 << 4) // Serial commands
 #define XUM1541_TAP                (10 << 4) // tape read/write
 #define XUM1541_TAP_CONFIG         (11 << 4) // tape send/receive configuration
+#define XUM1541_S3                 (12 << 4) // serial3 (SRQ)
 
 // Flags for use with write and XUM1541_CBM protocol
 #define XUM_WRITE_TALK              (1 << 0)

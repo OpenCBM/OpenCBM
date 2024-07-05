@@ -9,6 +9,7 @@ LIB     = libtrans.a
 SRCS    = pp.c \
 	  s1.c \
 	  s2.c \
+	  s3.c \
 	  turbo.c
 
 INCS    = pp-1541.inc \
@@ -17,6 +18,8 @@ INCS    = pp-1541.inc \
 	  s1-1581.inc \
 	  s2-1541-1571.inc \
 	  s2-1581.inc \
+	  s3-1571.inc \
+	  s3-1581.inc \
 	  turbomain-1541-1571.inc \
 	  turbomain-1581.inc \
 
@@ -45,6 +48,8 @@ pp-1571.inc: pp-1571.a65 common.i65
 s1.lo: s1.c s1-1541-1571.inc s1-1581.inc
 
 s2.lo: s2.c s2-1541-1571.inc s2-1581.inc
+
+s3.lo: s3.c s3-1571.inc s3-1581.inc
 
 pp.lo: pp.c pp-1541.inc pp-1571.inc
 
