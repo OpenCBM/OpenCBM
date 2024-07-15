@@ -1,0 +1,36 @@
+# EditorConfig: https://editorconfig.org
+
+root = true
+
+[Makefile]
+charset = utf-8
+tab_width = 8
+indent_size = 8
+indent_style = tab
+
+[*.{c,h,a65,i65,idh}]
+charset = utf-8
+tab_width = 4
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{md,txt}]
+charset = utf-8
+tab_width = 2
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[{dirs,sources}]
+charset = utf-8
+tab_width = 4
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{bat,vbs,ps1,dsp,dsw}]
+end_of_line = CRLF
