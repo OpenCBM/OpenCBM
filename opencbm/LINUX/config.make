@@ -60,7 +60,7 @@ CFLAGS_OC_DEBUG = -O2 -D_FORTIFY_SOURCE=2
 else
 CFLAGS_OC_DEBUG = -ggdb -O0
 endif
-CFLAGS       = $(CFLAGS_OC_DEBUG) -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\" -DOPENCBM_CONFIG_FILE=\"$(OPENCBM_CONFIG_FILE)\"
+CFLAGS       = $(CFLAGS_OC_DEBUG) -Wall -I$(RELATIVEPATH)/include -I$(RELATIVEPATH)/include/LINUX -DPREFIX=\"$(PREFIX)\" -DOPENCBM_CONFIG_FILE=\"$(OPENCBM_CONFIG_FILE)\"
 CFLAGS      += -fstack-protector
 CFLAGS      += $(USER_CFLAGS)
 
@@ -68,7 +68,7 @@ LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
 SHLIB_EXT    = so
 SHLIB_SWITCH = -shared
-LINK_FLAGS   = -L../lib -L../arch/$(OS_ARCH) -L../libmisc -lopencbm -larch -lmisc
+LINK_FLAGS   = -L$(RELATIVEPATH)/lib -L$(RELATIVEPATH)/arch/$(OS_ARCH) -L$(RELATIVEPATH)/libmisc -lopencbm -larch -lmisc
 SONAME       = -Wl,-soname -Wl,
 CC           = gcc
 AR           = ar
@@ -222,7 +222,7 @@ XA          = xa
 # (cc65 >= 2.6 required)
 CL65        = cl65
 LD65        = ld65
-CA65_FLAGS  = --feature labels_without_colons --feature pc_assignment --feature loose_char_term --asm-include-dir ..
+CA65_FLAGS  = --feature labels_without_colons --feature pc_assignment --feature loose_char_term --asm-include-dir $(RELATIVEPATH)
 
 
 #

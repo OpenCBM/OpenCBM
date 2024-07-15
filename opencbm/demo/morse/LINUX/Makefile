@@ -1,5 +1,5 @@
 RELATIVEPATH=../../
-include ../config.make
+include ${RELATIVEPATH}LINUX/config.make
 
 DEMO    = morse
 
