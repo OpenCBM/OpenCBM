@@ -1,29 +1,11 @@
-RELATIVEPATH=../
+RELATIVEPATH=../../
 include ../config.make
 
-.PHONY: all mrproper clean install uninstall install-files
+DEMO    = downloadrom
 
-DOWNLOADROM = downloadrom
+PROG    = $(DEMO)
+INC     = $(DEMO).inc
 
-PROGS   = $(DOWNLOADROM)
-INC     = $(DOWNLOADROM).inc
+OBJS    = $(DEMO).o
 
-all: $(PROGS)
-
-clean:
-	rm -f $(PROGS) *.o *.o65
-
-mrproper: clean
-	rm -f $(INC)
-
-$(DOWNLOADROM).o: $(DOWNLOADROM).c $(DOWNLOADROM).inc
-	$(CC) $(CFLAGS) -c $(DOWNLOADROM).c -o $@
-
-$(DOWNLOADROM): $(DOWNLOADROM).o
-	$(CC) $< -o $@ $(LINK_FLAGS)
-
-install-files:
-
-install:
-
-uninstall:
+include ${RELATIVEPATH}LINUX/prgrules.make

@@ -1,29 +1,11 @@
-RELATIVEPATH=../
+RELATIVEPATH=../../
 include ../config.make
-
-.PHONY: all mrproper clean install uninstall install-files
 
 DEMO    = rpm1541
 
-PROGS   = $(DEMO)
+PROG    = $(DEMO)
 INC     = $(DEMO).inc
 
-all: $(PROGS)
+OBJS    = $(DEMO).o
 
-clean:
-	rm -f $(PROGS) *.o *.o65
-
-mrproper: clean
-	rm -f $(INC)
-
-$(DEMO).o: $(DEMO).c $(DEMO).inc
-	$(CC) $(CFLAGS) -c $(DEMO).c -o $@
-
-$(DEMO): $(DEMO).o
-	$(CC) $< -o $@ $(LINK_FLAGS)
-
-install-files:
-
-install:
-
-uninstall:
+include ${RELATIVEPATH}LINUX/prgrules.make
