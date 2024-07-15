@@ -106,4 +106,4 @@ $(LIB): $(OBJS)
 clean:
 
 mrproper: clean
-	rm -f *~ LINUX/*~ WINDOWS/*~
+	rm -f *~ LINUX/*~ WINDOWS/*~ $(INCS)

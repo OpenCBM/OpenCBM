@@ -6,11 +6,11 @@ CBMPERM  = 666
 DEVMAJOR = 10
 DEVMINOR = 177
 SUBDIRS  = opencbm/include opencbm/arch/$(OS_ARCH) opencbm/libmisc opencbm/lib \
-	   opencbm/libtrans \
+	   opencbm/libtransfer \
            opencbm/cbmctrl opencbm/cbmformat opencbm/cbmforng opencbm/d64copy opencbm/cbmcopy \
 	   opencbm/d82copy opencbm/imgcopy \
            opencbm/demo/flash opencbm/demo/morse opencbm/demo/rpm1541 \
-	   opencbm/sample/libtrans opencbm/sample/testlines
+	   opencbm/sample/libtransfer opencbm/sample/testlines
 ifeq "$(OS)" "Linux"
 SUBDIRS += opencbm/compat
 endif
@@ -73,7 +73,7 @@ all-doc: all doc
 # dependencies:
 $(call CREATE_TARGETS,opencbm/lib,all):: $(call CREATE_TARGET,opencbm/arch/$(OS_ARCH) opencbm/libmisc,all)
 $(call CREATE_TARGETS,$(filter-out $(SUBDIRS_PLUGIN_XA1541),$(SUBDIRS_ALL_NON_OPTIONAL)) $(SUBDIRS_OPTIONAL),all):: $(call CREATE_TARGET,opencbm/lib,all)
-$(call CREATE_TARGETS,opencbm/sample/libtrans,all):: $(call CREATE_TARGET,opencbm/libtrans,all)
+$(call CREATE_TARGETS,opencbm/sample/libtransfer,all):: $(call CREATE_TARGET,opencbm/libtransfer,all)
 
 
 .PHONY: $(call CREATE_TARGETS,$(SUBDIRS_ALL_NON_OPTIONAL),all clean mrproper install install-files install-files-doc install-doc uninstall)

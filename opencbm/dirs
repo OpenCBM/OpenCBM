@@ -15,7 +15,7 @@ DIRS= \
 	install \
 	lib \
 	libmisc \
-	libtrans \
+	libtransfer \
 	demo \
 	sample \
 	cbmrpm41 \
