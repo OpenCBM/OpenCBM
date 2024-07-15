@@ -200,12 +200,12 @@ OPENCBM_CONFIG_FILE = $(OPENCBM_CONFIG_PATH)/opencbm.conf
 #
 # common compile flags
 #
-.SUFFIXES: .a65 .o65 .inc .lo
+.SUFFIXES: .a65 .bin65 .inc .lo
 
 .c.lo:
 	$(CC) $(SHLIB_CFLAGS) -c -o $@ $<
 
-.o65.inc:
+.bin65.inc:
 	test -s $< && od $(OD_FLAGS) $< | \
 	sed 's/\([0-9a-f]\{2\}\) */0x\1,/g; $$s/,$$//' > $@
 
@@ -228,7 +228,7 @@ CA65_FLAGS  = --feature labels_without_colons --feature pc_assignment --feature 
 #
 # suffix rules
 #
-.a65.o65:
+.a65.bin65:
 ifeq ($(XASS),xa)
 	$(XA) $< -o $@
 else
