@@ -95,7 +95,7 @@ DbgOutputIntoBuffer(unsigned long BufferNumber, const char * const Format, ...)
 
     // Get a pointer to the current position in the given DebugBuffer
 
-    char *buffer = &DbgBuffer[BufferNumber][DbgBufferPos[BufferNumber]];
+    char *buffer = (char*) &DbgBuffer[BufferNumber][DbgBufferPos[BufferNumber]];
 
     va_start(arg_ptr, Format);
 
