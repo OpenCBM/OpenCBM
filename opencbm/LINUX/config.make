@@ -200,7 +200,7 @@ OPENCBM_CONFIG_FILE = $(OPENCBM_CONFIG_PATH)/opencbm.conf
 #
 # common compile flags
 #
-.SUFFIXES: .a65 .bin65 .inc .lo
+.SUFFIXES: .a65 .bin65 .o65 .inc .lo
 
 .c.lo:
 	$(CC) $(SHLIB_CFLAGS) -c -o $@ $<
@@ -235,6 +235,21 @@ else
 ifeq ($(XASS),cl65)
 	$(CL65) -c $(CA65_FLAGS) -o $*.tmp $<
 	$(LD65) -o $@ --target none $*.tmp && rm -f $*.tmp
+else
+	@echo "*** Error: No crossassembler defined. Check config.make" 2>&1
+	exit 1
+endif
+endif
+
+.a65.o65:
+ifeq ($(XASS),xa)
+	@echo "*** Error: o65 file format currently not supported with xa65 assembler" 2>&!
+	exit 1
+#	$(XA) $< -o $@
+else
+ifeq ($(XASS),cl65)
+	$(CL65) -c $(CA65_FLAGS) -o $*.tmp $<
+	$(LD65) -C $<.config -o $@ $*.tmp && rm -f $*.tmp
 else
 	@echo "*** Error: No crossassembler defined. Check config.make" 2>&1
 	exit 1
