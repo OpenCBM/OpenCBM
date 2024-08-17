@@ -21,6 +21,17 @@ set OC_INSTALLED_SIZE_IN_KB_I386=2000
 set OC_VARIANT_DISPLAY=
 set OC_VARIANT=
 
+if [%PROCESSOR_ARCHITEW6432%] == [AMD64] (
+	if [%PROCESSOR_ARCHITECTURE%] == [x86] (
+		rem running a 32 bit cmd.exe on 64 bit Windows, escape by calling the 64 bit cmd.exe
+		echo running a 32 bit cmd.exe on 64 bit Windows, escape by calling the 64 bit cmd.exe
+		pause
+		%WINDIR%\sysnative\cmd.exe /c %0 %*
+		pause
+		goto EXIT
+	)
+)
+
 if [%PROCESSOR_ARCHITECTURE%] == [AMD64] (
 	set OC_BINDIR_LOCAL=amd64
 	set OC_INSTALLED_SIZE_IN_KB=%OC_INSTALLED_SIZE_IN_KB_AMD64%
@@ -196,7 +207,7 @@ if %OC_INSTALL_ELEVATED% == 0 (
 			start xp_drv
 		)
 		rem create Shortcut
-		.\tools\genShortCut.vbs "%USERPROFILE%" "%OC_DESTINATION%" "%OC_VERSION%"
+		%OC_SOURCE_PATH%\tools\genShortCut.vbs "%USERPROFILE%" "%OC_DESTINATION%" "%OC_VERSION%"
 	)
 	pause
 	goto EXIT
