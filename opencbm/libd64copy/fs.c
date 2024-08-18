@@ -286,7 +286,7 @@ static void close_disk(void)
                 {
                     for(i = 0; !has_errors && i < block_count; i++)
                     {
-                        has_errors = error_map[i] != 1;
+                        has_errors = (error_map[i] != 1) && (error_map[i] != 0);
                     }
                 }
                 break;
