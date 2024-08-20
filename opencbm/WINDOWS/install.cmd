@@ -24,10 +24,7 @@ set OC_VARIANT=
 if [%PROCESSOR_ARCHITEW6432%] == [AMD64] (
 	if [%PROCESSOR_ARCHITECTURE%] == [x86] (
 		rem running a 32 bit cmd.exe on 64 bit Windows, escape by calling the 64 bit cmd.exe
-		echo running a 32 bit cmd.exe on 64 bit Windows, escape by calling the 64 bit cmd.exe
-		pause
 		%WINDIR%\sysnative\cmd.exe /c %0 %*
-		pause
 		goto EXIT
 	)
 )
