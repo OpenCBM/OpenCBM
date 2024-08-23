@@ -69,6 +69,7 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 {
     enum cbm_device_type_e deviceType = cbm_dt_unknown;
     unsigned short magic;
+    int            magic_extra = -1;
     unsigned char buf[3];
     char command[] = { 'M', '-', 'R', (char) 0x40, (char) 0xff, (char) 0x02 };
     static char unknownDevice[] = "*unknown*, footprint=<....>";
@@ -97,10 +98,27 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                 if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0
                     && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
                 {
-                    if (cbm_raw_read(HandleDevice, buf, 3) == 3
+                    if (cbm_raw_read(HandleDevice, buf, sizeof buf) == sizeof buf
                         && ( buf[0] != 0x67 || buf[1] != 0xFE ) )
                     {
                         magic = buf[0] | (buf[1] << 8);
+                    }
+                }
+            }
+
+            if(magic == 0x01ba)
+            {
+                /* FD2000/4000 and 1581 must be distinguished */
+
+                cbm_untalk(HandleDevice);
+                command[3] = (char) 0x8;  /* get footprint from 0x8008 */
+                command[4] = (char) 0x80; /* get footprint from 0x8008 */
+                if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0
+                    && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
+                {
+                    if (cbm_raw_read(HandleDevice, buf, sizeof buf) == sizeof buf)
+                    {
+                        magic_extra = buf[0] | (buf[1] << 8);
                     }
                 }
             }
@@ -182,8 +200,17 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                     break;
 
                 case 0x01ba:
-                    deviceType = cbm_dt_cbm1581;
-                    deviceString = "1581";
+                    switch (magic_extra) {
+                        case 0x4446: /* the "FD" in "CMD FD DOS" */
+                            deviceType = cbm_dt_fdx000;
+                            deviceString = "FD2000/FD4000";
+                            break;
+
+                        default:
+                            deviceType = cbm_dt_cbm1581;
+                            deviceString = "1581";
+                            break;
+                    }
                     break;
 
                 case 0x32f0:

@@ -125,10 +125,11 @@ enum cbm_device_type_e
     cbm_dt_cbm4031,      /*!< The device is a CBM-4031 DOS2.6      */
     cbm_dt_cbm8050,      /*!< The device is a CBM-8050             */
     cbm_dt_cbm8250,      /*!< The device is a CBM-8250 or SFD-1001 */
-    cbm_dt_sfd1001       /*!< The device is a SFD-1001             */
+    cbm_dt_sfd1001,      /*!< The device is a SFD-1001             */
+    cbm_dt_fdx000        /*!< The device is a CMD FD2000 or FD4000 */
 };
 
-/*! Specifies the type of a device for cbm_identify() */
+/*! Specifies the type of a cable for cbm_identify() */
 enum cbm_cable_type_e
 {
     cbm_ct_unknown = -1, /*!< The device could not be identified */

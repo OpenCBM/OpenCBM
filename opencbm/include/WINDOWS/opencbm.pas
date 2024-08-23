@@ -23,7 +23,16 @@ type cbm_device_type = ( { one of }
    cbm_dt_cbm1541 = 0,
    cbm_dt_cbm1570 = 1,
    cbm_dt_cbm1571 = 2,
-   cbm_dt_cbm1581 = 3
+   cbm_dt_cbm1581 = 3,
+   cbm_dt_cbm2040 = 4,
+   cbm_dt_cbm2031 = 5,
+   cbm_dt_cbm3040 = 6,
+   cbm_dt_cbm4040 = 7,
+   cbm_dt_cbm4031 = 8,
+   cbm_dt_cbm8050 = 9,
+   cbm_dt_cbm8250 = 10,
+   cbm_dt_sfd1001 = 11,
+   cbm_dt_fdx000  = 12
    );
 
 type CBM_FILE = INTEGER; { HANDLE }
