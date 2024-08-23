@@ -7,6 +7,7 @@ include ${RELATIVEPATH}LINUX/config.make
 
 LIBNAME = libopencbmtransfer
 SRCS    = \
+	  o65.c \
 	  pp.c \
 	  s1.c \
 	  s2.c \

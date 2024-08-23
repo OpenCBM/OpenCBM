@@ -10,6 +10,8 @@
 #include "opencbm.h"
 #include "libtrans.h"
 
+#include "o65.h"
+
 #include "arch.h"
 
 #include <stdio.h>
@@ -181,43 +183,24 @@ processParameter(const int argc, char ** argv)
 
 }
 
-#if 0
-
-#include "o65.h"
-
 static int
 main_o65(int argc, char **argv)
 {
-    int i;
-    int count;
-    PVOID o65file[10];
-
     FUNC_ENTER();
 
 #if DBG
     DbgFlags = DBGF_SUCCESS | DBGF_ERROR | DBGF_WARNING | DBGF_ASSERT;
 #endif
 
-    count = argc > 10 ? 10 : argc - 1;
+    while (--argc) {
+        void * o65file = NULL;
 
-    for (i=0; i < count; i++)
-    {
-        o65_file_load(argv[i+1], &o65file[i]);
+        fprintf(stderr, "processing: %s\n", argv[1]);
+        o65_file_load(argv[1], &o65file);
+        ++argv;
     }
-
-    for (i=0; i < count; i++)
-    {
-        o65_file_reloc(o65file[i], i*0x204);
-    }
-
-    for (i=0; i < count; i++)
-    {
-        o65_file_delete(o65file[i]);
-    }
-
     FUNC_LEAVE_INT(0);
 }
-#endif
 
 static void
 perform_read(CBM_FILE fd, unsigned char *buffer, unsigned char *compare_buffer, unsigned int count, unsigned int error) {
@@ -521,19 +504,17 @@ ARCH_MAINDECL main(int argc, char **argv)
 
     if (argc > 1) {
         if (strcmp(argv[1], "--show")==0) {
-            return main_showlines(argc, argv);
+            return main_showlines(argc - 1, argv + 1);
         }
         if (strcmp(argv[1], "--lines")==0) {
-            return main_testlines(argc, argv);
+            return main_testlines(argc - 1, argv + 1);
         }
         if (strcmp(argv[1], "--transfer")==0) {
-            return main_testtransfer(argc, argv);
+            return main_testtransfer(argc - 1, argv + 1);
         }
-#if 0
         if (strcmp(argv[1], "--o65")==0) {
-            return main_o65(argc, argv);
+            return main_o65(argc - 1, argv + 1);
         }
-#endif
     }
 
 #ifdef TEST_DEFAULT_LINES

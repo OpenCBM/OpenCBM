@@ -3,7 +3,8 @@ include ${RELATIVEPATH}LINUX/config.make
 
 LIBTRANSFER=$(RELATIVEPATH)libtransfer
 
-LINK_FLAGS := -L$(LIBTRANSFER) -lopencbmtransfer $(LINK_FLAGS)
+CFLAGS += -I$(LIBTRANSFER)
+LINK_FLAGS += -L$(LIBTRANSFER) -lopencbmtransfer
 
 OBJS = main.o
 PROG = samplelibtransfer
