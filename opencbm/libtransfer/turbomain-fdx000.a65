@@ -1,4 +1,4 @@
-; Copyright 2005 Spiro Trikaliotis
+; Copyright 2005, 2024 Spiro Trikaliotis
 ; All rights reserved.
 ;
 ; This file is part of OpenCBM
@@ -29,7 +29,7 @@
 ; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 
-Drive1581       = 1                     ;Compile for 1581 drives
+DriveFDx000     = 1                     ;Compile for FDx000 (FD2000/FD4000) drives
 
 ; libopencbmtransfer routines, main loop
 
@@ -37,13 +37,14 @@ Drive1581       = 1                     ;Compile for 1581 drives
 
 ; define the next if WRITEMEM should be tested
 ; DefTestWriteMem = 1
+DefTestWriteMem = 1
 DefFlipLed = 1
 
         * = TURBOMAIN_ROUTINES
 
-.assert * = turbo_init,  error, "1581 turbo_init is not at right location"
+.assert * = turbo_init,  error, "FDx000 turbo_init is not at right location"
         jsr transfer_init
-.assert * = turbo_start, error, "1581 turbo_start is not at right location"
+.assert * = turbo_start, error, "FDx000 turbo_start is not at right location"
         jmp start
 
 readmem:

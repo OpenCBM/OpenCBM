@@ -35,18 +35,18 @@ Drive1581       = 1                     ;Compile for 1581 drives
 
         * = TRANSFER_ROUTINES
 
-.assert * = transfer_get_ts, error, "s1-1541/1571 get_ts is not at right location"
+.assert * = transfer_get_ts, error, "s2-1581 get_ts is not at right location"
         jmp gts         ; get track/sector
-.assert * = transfer_get_byte, error, "s1-1541/1571 get_byte is not at right location"
+.assert * = transfer_get_byte, error, "s2-1581 get_byte is not at right location"
         jmp gbyte
-.assert * = transfer_get_block, error, "s1-1541/1571 get_block is not at right location"
+.assert * = transfer_get_block, error, "s2-1581 get_block is not at right location"
         jmp gblk        ; receive block
-.assert * = transfer_send_byte, error, "s1-1541/1571 send_byte is not at right location"
+.assert * = transfer_send_byte, error, "s2-1581 send_byte is not at right location"
         jmp sbyte       ; send byte
-.assert * = transfer_send_block, error, "s1-1541/1571 send_block is not at right location"
+.assert * = transfer_send_block, error, "s2-1581 send_block is not at right location"
         jmp sblk        ; send block
 
-.assert * = transfer_init, error, "s1-1541/1571 init is not at right location"
+.assert * = transfer_init, error, "s2-1581 init is not at right location"
         lda #IEC_PORT_CLK_IN
 i0      bit IEC_PORT
         bne i0

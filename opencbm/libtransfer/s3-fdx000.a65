@@ -1,0 +1,186 @@
+; Copyright 2024 Spiro Trikaliotis
+; All rights reserved.
+;
+; This file is part of OpenCBM
+;
+; Redistribution and use in source and binary forms, with or without
+; modification, are permitted provided that the following conditions are met:
+;
+;     * Redistributions of source code must retain the above copyright
+;       notice, this list of conditions and the following disclaimer.
+;     * Redistributions in binary form must reproduce the above copyright
+;       notice, this list of conditions and the following disclaimer in
+;       the documentation and/or other materials provided with the
+;       distribution.
+;     * Neither the name of the OpenCBM team nor the names of its
+;       contributors may be used to endorse or promote products derived
+;       from this software without specific prior written permission.
+;
+; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+; IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+; TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+; PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+; OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+; EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+; PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+; PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+; LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+; NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+;
+
+DriveFDx000     = 1                     ;Compile for CMD FDx000 (FD2000/FD4000) drives
+
+        .include "common.i65"
+
+TA_DELAY = 0
+
+        * = TRANSFER_ROUTINES
+
+.assert * = transfer_get_ts, error, "s3-fdx000 get_ts is not at right location"
+        jmp gts         ; get track/sector
+.assert * = transfer_get_byte, error, "s3-fdx000 get_byte is not at right location"
+        jmp gbyte
+.assert * = transfer_get_block, error, "s3-fdx000 get_block is not at right location"
+        jmp gblk        ; receive block
+.assert * = transfer_send_byte, error, "s3-fdx000 send_byte is not at right location"
+        jmp sbyte       ; send byte
+.assert * = transfer_send_block, error, "s3-fdx000 send_block is not at right location"
+        jmp sblk        ; send block
+
+.assert * = transfer_init, error, "s3-fdx000 init is not at right location"
+
+        sei
+
+        lda #<TA_DELAY
+        sta VIA_T2CL
+        lda #>TA_DELAY
+        sta VIA_T2CH
+
+        ; release CLK to signal: I am ready
+        lda IEC_PORT
+        and #<~(IEC_PORT_DATA_OUT | IEC_PORT_CLK_OUT)
+        sta IEC_PORT
+
+        ; wait for the PC to set DATA
+        lda #IEC_PORT_DATA_IN
+@i0     bit IEC_PORT
+        beq @i0
+        rts
+
+waitsp
+        lda #VIA_IFR_SR
+@gb     bit VIA_IFR                     ; wait for SP transfer to be done
+        beq @gb
+        rts
+
+WCLK_0  lda #IEC_PORT_CLK_IN
+@wc0    bit IEC_PORT
+        beq @wc0
+        rts
+
+WCLK_1  lda #IEC_PORT_CLK_IN
+@wc1    bit IEC_PORT
+        bne @wc1
+        rts
+
+SCLK_0  lda #IEC_PORT_CLK_OUT
+        .byte OPCODE_BIT_2BYTE
+SCLK_1  lda #0
+        sta IEC_PORT
+        rts
+
+gbyte   tya
+        pha
+        jsr gts
+        pla
+        tay
+        txa
+        rts
+
+gts     jsr SCLK_0
+        jsr waitsp
+        ldx VIA_SR
+        jsr SCLK_1
+        jsr waitsp
+        ldy VIA_SR
+        rts
+
+gblk    tya
+        lsr
+        bcc @gb0
+        jsr gbyte
+        sta (ptr),y
+        iny
+@gb0    jsr SCLK_0
+        jsr waitsp
+        lda VIA_SR
+        sta (ptr),y
+        iny
+        jsr SCLK_1
+        jsr waitsp
+        lda VIA_SR
+        sta (ptr),y
+        iny
+        bne @gb0
+        rts
+
+sblk    jsr FAST_IEC_AS_OUTPUT
+@sb0    jsr WCLK_0
+        lda (ptr),y
+        eor #$FF            ; the FDx000 has opposite polarity to the 157x/1581
+        sta VIA_SR
+        jsr waitsp
+        iny
+        jsr WCLK_1
+        lda (ptr),y
+        eor #$FF            ; the FDx000 has opposite polarity to the 157x/1581
+        sta VIA_SR
+        jsr waitsp
+        iny
+        bne @sb0
+        jmp FAST_IEC_AS_INPUT
+
+sbyte   pha
+        jsr FAST_IEC_AS_OUTPUT
+        pla
+        jsr WCLK_0
+        eor #$FF            ; the FDx000 has opposite polarity to the 157x/1581
+        sta VIA_SR
+        jsr WCLK_1
+        sta VIA_SR	 		; dummy write, is not used!
+        jmp FAST_IEC_AS_INPUT
+
+FAST_IEC_AS_OUTPUT:
+        php
+        sei
+        lda VIA_PA
+        ora #VIA_PA_DIR
+        sta VIA_PA
+        lda VIA_ACR
+        and #<~VIA_ACR_SHIFT_MASK
+        sta VIA_ACR
+        ora #VIA_ACR_SHIFT_OUT_T2
+        sta VIA_ACR
+        plp
+
+        rts
+
+FAST_IEC_AS_INPUT:
+        php
+        sei
+        lda VIA_ACR
+        and #<~VIA_ACR_SHIFT_MASK
+        sta VIA_ACR
+        ora #VIA_ACR_SHIFT_IN_CB1
+        sta VIA_ACR
+
+        lda VIA_PA
+        ora #VIA_PA_DIR
+        and #<~(IEC_PORT_CLK_OUT | IEC_PORT_DATA_OUT)
+        sta VIA_PA
+
+        lda VIA_SR
+
+        plp
+        rts

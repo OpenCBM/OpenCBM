@@ -28,6 +28,10 @@ static const unsigned char s3_1581_drive_prog[] = {
 #include "s3-1581.inc"
 };
 
+static const unsigned char s3_fdx000_drive_prog[] = {
+#include "s3-fdx000.inc"
+};
+
 static enum cbm_device_type_e device_type = cbm_dt_unknown;
 
 static int
@@ -62,6 +66,8 @@ set_device_type(enum cbm_device_type_e dt)
 
     switch (dt)
     {
+    case cbm_dt_fdx000:
+        /* FALL THROUGH */
     case cbm_dt_cbm1581:
         /* FALL THROUGH */
     case cbm_dt_cbm1570:
@@ -102,6 +108,12 @@ upload(CBM_FILE fd, unsigned char drive)
 
     switch (device_type)
     {
+    case cbm_dt_fdx000:
+        DBG_PRINT((DBG_PREFIX "recognized FDx000 (FD2000/FD4000)."));
+        s3_drive_prog = s3_fdx000_drive_prog;
+        s3_drive_prog_length = sizeof(s3_fdx000_drive_prog);
+        break;
+
     case cbm_dt_cbm1581:
         DBG_PRINT((DBG_PREFIX "recognized 1581."));
         s3_drive_prog = s3_1581_drive_prog;

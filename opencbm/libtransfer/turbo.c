@@ -20,6 +20,10 @@ static const unsigned char turbomain_1581_drive_prog[] = {
 #include "turbomain-1581.inc"
 };
 
+static const unsigned char turbomain_fdx000_drive_prog[] = {
+#include "turbomain-fdx000.inc"
+};
+
 
 /*
 // functions to perform:
@@ -99,6 +103,12 @@ libopencbmtransfer_install(CBM_FILE HandleDevice, unsigned char DeviceAddress)
 
     switch (cbmDeviceType)
     {
+    case cbm_dt_fdx000:
+        DBG_PRINT((DBG_PREFIX "recognized CMD FDx000 (FD2000/FD4000)."));
+        turbomain_drive_prog = turbomain_fdx000_drive_prog;
+        turbomain_drive_prog_length = sizeof(turbomain_fdx000_drive_prog);
+        break;
+
     case cbm_dt_cbm1581:
         DBG_PRINT((DBG_PREFIX "recognized 1581."));
         turbomain_drive_prog = turbomain_1581_drive_prog;

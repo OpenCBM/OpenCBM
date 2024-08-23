@@ -63,6 +63,17 @@
         LED_POWER    = $80
         LED_BIT      = LED_ACTIVITY
 
+.elseif .defined(DriveFDx000)
+
+        IEC_PORT          = $4001
+
+        IEC_PORT_FAST_DIR = $20
+
+        LED_PORT          = $4000
+        LED_ERROR         = $20
+        LED_ACTIVITY      = $40
+        LED_BIT           = LED_ACTIVITY
+
 .else
 
         DriveNone = 1
@@ -109,6 +120,42 @@ OPCODE_BIT_2BYTE  = $2C
 
     FAST_IEC_AS_INPUT  := $acb6
     FAST_IEC_AS_OUTPUT := $accf
+
+.elseif .defined(DriveFDx000)
+
+    ptr  = $0B
+    ptr2 = $0D
+    TMP1 = $10
+    TMP2 = $12
+
+    JOB0   = $0028
+    TRACK0 = $2800
+
+    BUFFCACHE = $5000
+
+    VIA = $4000
+    VIA_PB    = VIA + $0
+    VIA_PA    = VIA + $1
+        VIA_PA_DIR = $20
+    VIA_DDRB  = VIA + $2
+    VIA_DDRA  = VIA + $3
+    VIA_T2CL  = VIA + $8
+    VIA_T2CH  = VIA + $9
+    VIA_SR    = VIA + $A
+    VIA_ACR   = VIA + $B
+        VIA_ACR_SHIFT_MASK  = $1C
+        VIA_ACR_SHIFT_OUT_T2 = $14
+        VIA_ACR_SHIFT_IN_CB1 = $0C
+    VIA_PCR   = VIA + $C
+    VIA_IFR   = VIA + $D
+        VIA_IFR_SR  = $04
+    VIA_IER   = VIA + $E
+        VIA_IER_SR  = $04
+        VIA_IER_SET = $80
+
+    IEC_SR_TIMER_L = VIA_T2CL
+    IEC_SR_TIMER_H = VIA_T2CH
+    IEC_SR         = VIA_SR
 .endif
 
 .if .defined(Drive1571) .or .defined(Drive1581)
@@ -121,6 +168,10 @@ OPCODE_BIT_2BYTE  = $2C
     CIA_ICR      := CIA + $D
 
     CIA_ICR_B_SP := $08
+
+    IEC_SR_TIMER_L = CIA_TALO
+    IEC_SR_TIMER_H = CIA_TAHI
+    IEC_SR         = CIA_SDR
 .endif
 
 JOB1 = JOB0 + 1

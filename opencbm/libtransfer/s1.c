@@ -27,6 +27,10 @@ static const unsigned char s1_1581_drive_prog[] = {
 #include "s1-1581.inc"
 };
 
+static const unsigned char s1_fdx000_drive_prog[] = {
+#include "s1-fdx000.inc"
+};
+
 static enum cbm_device_type_e device_type = cbm_dt_unknown;
 
 static int s1_write_byte_nohs(CBM_FILE fd, unsigned char c)
@@ -135,6 +139,7 @@ set_device_type(enum cbm_device_type_e dt)
     case cbm_dt_cbm1570:
     case cbm_dt_cbm1571:
     case cbm_dt_cbm1581:
+    case cbm_dt_fdx000:
         break;
 
     case cbm_dt_unknown:
@@ -159,6 +164,12 @@ upload(CBM_FILE fd, unsigned char drive)
 
     switch (device_type)
     {
+    case cbm_dt_fdx000:
+        DBG_PRINT((DBG_PREFIX "recognized FDx000 (FD2000/FD4000)."));
+        s1_drive_prog = s1_fdx000_drive_prog;
+        s1_drive_prog_length = sizeof(s1_fdx000_drive_prog);
+        break;
+
     case cbm_dt_cbm1581:
         DBG_PRINT((DBG_PREFIX "recognized 1581."));
         s1_drive_prog = s1_1581_drive_prog;

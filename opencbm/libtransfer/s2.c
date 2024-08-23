@@ -27,6 +27,10 @@ static const unsigned char s2_1581_drive_prog[] = {
 #include "s2-1581.inc"
 };
 
+static const unsigned char s2_fdx000_drive_prog[] = {
+#include "s2-fdx000.inc"
+};
+
 static enum cbm_device_type_e device_type = cbm_dt_unknown;
 
 static int s2_read_byte(CBM_FILE fd, unsigned char *c)
@@ -117,6 +121,7 @@ set_device_type(enum cbm_device_type_e dt)
 
     switch (dt)
     {
+    case cbm_dt_fdx000:
     case cbm_dt_cbm1541:
     case cbm_dt_cbm1570:
     case cbm_dt_cbm1571:
@@ -145,6 +150,12 @@ upload(CBM_FILE fd, unsigned char drive)
 
     switch (device_type)
     {
+    case cbm_dt_fdx000:
+        DBG_PRINT((DBG_PREFIX "recognized FDx000 (FD2000/FD4000)."));
+        s2_drive_prog = s2_fdx000_drive_prog;
+        s2_drive_prog_length = sizeof(s2_fdx000_drive_prog);
+        break;
+
     case cbm_dt_cbm1581:
         DBG_PRINT((DBG_PREFIX "recognized 1581."));
         s2_drive_prog = s2_1581_drive_prog;
@@ -229,9 +240,12 @@ read2byte(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 static int
 readblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
+#if 0
+    /* don't use s2 in the device yet */
     if (opencbm_plugin_s2_read_n) {
         return opencbm_plugin_s2_read_n(fd, p, length) == 0;
     }
+#endif
                                                                         SETSTATEDEBUG(DebugByteCount = 0);
     for (; length < 0x100; length++)
     {
@@ -272,9 +286,12 @@ write2byte(CBM_FILE fd, unsigned char c1, unsigned char c2)
 static int
 writeblock(CBM_FILE fd, unsigned char *p, unsigned int length)
 {
+#if 0
+    /* don't use s2 in the device yet */
     if (opencbm_plugin_s2_write_n) {
         return opencbm_plugin_s2_write_n(fd, p, length) == 0;
     }
+#endif
                                                                         SETSTATEDEBUG(DebugByteCount = 0);
     for (; length < 0x100; length++)
     {

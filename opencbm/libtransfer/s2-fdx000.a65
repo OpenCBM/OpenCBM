@@ -1,4 +1,5 @@
 ; Copyright 1999-2005 Michael Klein <michael.klein@puffin.lb.shuttle.de>
+; Copyright 2024      Spiro Trikaliotis
 ; All rights reserved.
 ;
 ; This file is part of OpenCBM
@@ -29,24 +30,24 @@
 ; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ;
 
-Drive1541_1571  = 1                     ;Compile for 1541 and 1571 drives
+DriveFDx000     = 1                     ;Compile for CMD FDx000 (FD2000/FD4000) drives
 
 	.include "common.i65"
 
         * = TRANSFER_ROUTINES
 
-.assert * = transfer_get_ts, error, "s2-1541/1571 get_ts is not at right location"
+.assert * = transfer_get_ts, error, "s2-fdx000 get_ts is not at right location"
         jmp gts         ; get track/sector
-.assert * = transfer_get_byte, error, "s2-1541/1571 get_byte is not at right location"
+.assert * = transfer_get_byte, error, "s2-fdx000 get_byte is not at right location"
         jmp gbyte
-.assert * = transfer_get_block, error, "s2-1541/1571 get_block is not at right location"
+.assert * = transfer_get_block, error, "s2-fdx000 get_block is not at right location"
         jmp gblk        ; receive block
-.assert * = transfer_send_byte, error, "s2-1541/1571 send_byte is not at right location"
+.assert * = transfer_send_byte, error, "s2-fdx000 send_byte is not at right location"
         jmp sbyte       ; send byte
-.assert * = transfer_send_block, error, "s2-1541/1571 send_block is not at right location"
+.assert * = transfer_send_block, error, "s2-fdx000 send_block is not at right location"
         jmp sblk        ; send block
 
-.assert * = transfer_init, error, "s2-1541/1571 init is not at right location"
+.assert * = transfer_init, error, "s2-fdx000 init is not at right location"
         lda #IEC_PORT_CLK_IN
 i0      bit IEC_PORT
         bne i0
@@ -88,7 +89,7 @@ write1  lda IEC_PORT
         sta IEC_PORT
 write2  lda IEC_PORT
         bpl write2
-        lda #(IEC_PORT_ATNA_OUT | IEC_PORT_CLK_OUT) >> 2
+        lda #IEC_PORT_CLK_OUT >> 2
         lsr TMP1
         rol
         asl
@@ -111,7 +112,7 @@ read0   lda IEC_PORT
         lda IEC_PORT
         lsr
         ror TMP1
-        lda #IEC_PORT_ATNA_OUT
+        lda #0 ; IEC_PORT_ATNA_OUT
         sta IEC_PORT
 read1   lda IEC_PORT
         bpl read1
