@@ -64,6 +64,9 @@ CFLAGS       = $(CFLAGS_OC_DEBUG) -Wall -I../include -I../include/LINUX -DPREFIX
 CFLAGS      += -fstack-protector
 CFLAGS      += $(USER_CFLAGS)
 
+# make usleep() known to newer gcc compilers
+CFLAGS      += -D_XOPEN_SOURCE=500
+
 LIB_CFLAGS   = $(CFLAGS) -D_REENTRANT
 SHLIB_CFLAGS = $(LIB_CFLAGS) -fPIC
 SHLIB_EXT    = so
