@@ -47,7 +47,8 @@ USB bootloader builtin. This means that you don't need any special cables
 to flash the device. Simply plug it into your USB port and program it. I
 recommend the free Atmel Flip or avrdude programming software.
 
-The steps to program the firmware with Flip are:
+Programming using the Atmel Flip software
+-----------------------------------------
 
 1. Start up Atmel Flip
 2. Select the appropriate device type (Device->Select). Choose one of
@@ -85,22 +86,13 @@ by running "cbmctrl detect". You should see something like:
 
     8: 1540 or 1541 (XP1541)
 
+Programming using AVRDUDE
+-------------------------
 
-Compiling
-=========
-Whenever new releases come out, the .hex files are updated as well.
-Thus most users should never need to compile the firmware. If you're a
-developer, here's how to do it.
+On Linux, as root, for Arduino Pro Micro. Adjust parameters as needed.
 
-Get avr-gcc, avr-binutils, avr-libc, and a Unix shell environment (make).
-On Windows, I use WinAVR to get all of the AVR utils in one place and
-Cygwin for the shell environment. Try just typing "make" and it should
-build the firmware. To enable the debug build, uncomment the appropriate
-line in the Makefile. If the build fails, check your path to be sure
-the AVR bin directory is present.
-
-Currently I am building releases using WinAVR-20100110. The LUFA version
-included in this distribution is 091223.
+1. stty -F /dev/ttyACM0 speed 1200  # to reset the device
+2. avrdude -p m32U4 -P /dev/ttyACM0 -c avr109 -U flash:w:xum1541-PROMICRO-vXX.hex
 
 
 Usage notes
@@ -124,78 +116,67 @@ CAUTION: never connect serial or parallel IEC drives at the same time as
 IEEE-488 drives. You should only use one bus type at a time.
 
 
-Developer notes
-===============
-The xum1541 is very different from the xu1541 (e.g., the USB IO model).
-However, the IEC routines are based on code from the xu1541 and I got a
-lot of ideas from Till Harbaum's design. The LUFA USB library by Dean
-Camera was also invaluable.
-
-The xum1541 has 3 USB endpoints: control, bulk in, and bulk out.
-The control endpoint is used for initializing the device and reseting it
-and the CBM drive if an error occurs. It is run from an interrupt handler
-so that the command can override any pending transfer.
-
-The bulk endpoints are used for the command, data, and status phases of
-various transactions. The ordinary procedure for a command that transfers
-data from the drive is:
-
-1. Write 4-byte command descriptor to bulk out pipe
-2. Wait indefinitely on bulk in pipe for data to be transferred.
-   Once it is ready, keep reading until all has been retrieved.
-3. Wait indefinitely on bulk in pipe for 3-byte status to be transferred.
-   The status phase is optional for some commands.
-
-The procedure for a command that transfers data to the drive is:
-1. Write 4-byte command descriptor to bulk out pipe
-2. Write data to the bulk out pipe until all has been transferred.
-3. Wait indefinitely on bulk in pipe for 3-byte status to be transferred.
-   The status phase is optional for some commands.
-
-The xu1541 uses only control transfers, and thus has to implement IO in
-two stages. First it transfers data to the microcontroller in a 128-byte
-buffer, then it transfers it to the PC or drive. We do not use this model.
-Since the AT90USB can stream the data all at once, we transfer each byte
-as it is ready (e.g., usbSendByte() and usbRecvByte()). This increases
-performance and allows support for the nibtools protocol for copying
-protected disks.
-
-The firmware is organized in a logical way to support multiple device
-models being based off the same firmware. The first model is the USBKEY,
-which is based on the Atmel development board of the same name. The CPU
-files (e.g., cpu-usbkey.h) define routines that are unique to the CPU, in
-this case the AT90USB1287. This includes timers and initialization. The
-board files (e.g., board-usbkey.[ch]) define the methods for setting up
-and interacting with the IO pins on the board. Each device is composed of
-a combination of board/cpu in the Makefile.
-
-This approach allows reuse. Adding a new design is simply a matter of
-making a copy of the board and cpu files and adding your own interface
-routines. However, you should avoid doing this whenever possible.
-For example, if you changed to an AT90USB16 CPU from the AT90USB1287, there
-is not any need yet to change CPU files as both use the same IO ports and
-same basic timer routines.
-
-
 ZoomFloppy model
 ================
-The ZoomFloppy is a simpler version of the original design, intended for
-low-cost manufacturing with high-speed performance. It is available
-commercially from RETRO Innovations, making it the best choice for most
-users.
+The ZoomFloppy is a simpler version of the original AT90USB design,
+intended for low-cost manufacturing with high-speed performance.
+It is available commercially from RETRO Innovations, making it the
+best choice for most users.
 
     http://go4retro.com/
 
 If you want to build it yourself, it can also be based on the Bumble-B
-daughterboard. However, the easiest option for DIY is the USBKEY board
-(below) since that only requires soldering a single connector (DB25) to
-the development board.
+daughterboard. However, the easiest option for DIY is the Arduino
+Pro Micro board (below) since that only requires soldering a single
+connector (DB25) to the board.
 
 This device uses an ATmega32U2 microcontroller (AT90USB162 if you use the
 original Bumble-B). It has a 7406N hex inverter for better control of the
 pins. It runs at 5V with the board supplying power for the inverter.
 
 For build info, see the included schematic, zoomfloppy-schem-*.png.
+
+
+Arduino Pro Micro model (recommended DIY version)
+=================================================
+The Arduino Pro Micro is a very small low-cost 24 pin board with an
+ATMEGA32U4 controller. It is available in various places.
+Compatible clones exist on ebay.com and other places.
+
+You need the 5V/16MHz version: Make sure a 16MHz crystal is installed,
+and the J1 jumper is shortened (default on most boards these days).
+
+No additional components are required (unless you're building the 7406 version
+which is closer to the original ZoomFloppy design and supports SRQ nibbling)
+all the IEC lines can be soldered directly to the board:
+
+    PB2 (MOSI, ATMEGA Pin 10, D16, "16" mark on board)   DATA
+    PB3 (MISO, ATMEGA Pin 11, D17, "14" mark on board)   CLK
+    PB4 (ADC11, ATMEGA Pin 28, D8, "8" mark on board)    ATN
+    PB5 (ADC12, ATMEGA Pin 29, D9, "9" mark on board)    SRQ
+    PB6 (ADC13, ATMEGA Pin 30, D10, "10" mark on board)  RESET
+
+  IN pins only for 7406 model
+    PC6 (ATMEGA Pin 31, D5, "5" mark on board)           DATA IN
+    PB1 (SCK, ATMEGA Pin 9, D15, "15" mark on board)     CLK IN
+    PE6 (ATMEGA Pin 1, D7, "7" mark on board)            ATN IN
+    PD4 (ADC8, ATMEGA Pin 25, D4, "4" mark on board)     SRQ IN
+    PD7 (ADC10, ATMEGA Pin 27, D6, "6" mark on board)    RESET IN
+
+  Optional parallel connection
+    PD0 (SCL, ATMEGA Pin 18, D3, "3" mark on board)      DATA0
+    PD1 (SDA, ATMEGA Pin 19, D2, "2" mark on board)      DATA1
+    PD2 (RX, ATMEGA Pin 20, RXI, "RXI" mark on board)    DATA2
+    PD3 (TX, ATMEGA Pin 21, TXO, "TXO" mark on board)    DATA3
+    PF4 (ADC4, ATMEGA Pin 39, A3, "A3" mark on board)    DATA4
+    PF5 (ADC5, ATMEGA Pin 38, A2, "A2" mark on board)    DATA5
+    PF6 (ADC6, ATMEGA Pin 37, A1, "A1" mark on board)    DATA6
+    PF7 (ADC7, ATMEGA Pin 36, A0, "A0" mark on board)    DATA7
+
+    PD5 (ATMEGA Pin 22)        LED     already on the board
+
+    PD2        RXD1    UART for debug output
+    PD3        TXD1    (optional, under #ifdef DEBUG)
 
 
 USBKEY model
@@ -271,47 +252,80 @@ The Teensy also comes with a built-in "HalfKay" Bootloader and it's
 own firmware update utility. See PRJC's homepage for details.
 
 
-Arduino Pro Micro model
-=======================
-The Arduino Pro Micro is a very small, low-cost board with an ATMEGA32U4
-controller. It is available in various places. Compatible clones exist on
-ebay.com and other places.
-
-No additional components are required (unless you're building the 7406 version
-which is closer to the original ZoomFloppy design and supports SRQ nibbling)
-all the IEC lines can be soldered directly to the board:
-
-    PB2 (16)   DATA
-    PB3 (14)   CLK
-    PB4 (8)    ATN
-    PB5 (9)    SRQ
-    PB6 (10)   RESET
-
-  IN pins only for 7406 model
-    PC6 (5)    DATA IN
-    PB1 (15)   CLK IN
-    PE6 (7)    ATN IN
-    PD4 (4)    SRQ IN
-    PD7 (6)    RESET IN
-
-    PD0 (3)    DATA0 (optional parallel connection)
-    PD1 (2)    DATA1 (optional parallel connection)
-    PD2 (RXI)  DATA2 (optional parallel connection)
-    PD3 (TXO)  DATA3 (optional parallel connection)
-    PF4 (A3)   DATA4 (optional parallel connection)
-    PF5 (A2)   DATA5 (optional parallel connection)
-    PF6 (A1)   DATA6 (optional parallel connection)
-    PF7 (A0)   DATA7 (optional parallel connection)
-
-    PD5        LED     already on the board
-
-    PD2        RXD1    UART for debug output
-    PD3        TXD1    (optional, under #ifdef DEBUG)
-
 Other models
 ============
 I expect others will offer custom or prepackaged boards based on this
 firmware.
+
+
+Developer notes
+===============
+The xum1541 is very different from the xu1541 (e.g., the USB IO model).
+However, the IEC routines are based on code from the xu1541 and I got a
+lot of ideas from Till Harbaum's design. The LUFA USB library by Dean
+Camera was also invaluable.
+
+The xum1541 has 3 USB endpoints: control, bulk in, and bulk out.
+The control endpoint is used for initializing the device and reseting it
+and the CBM drive if an error occurs. It is run from an interrupt handler
+so that the command can override any pending transfer.
+
+The bulk endpoints are used for the command, data, and status phases of
+various transactions. The ordinary procedure for a command that transfers
+data from the drive is:
+
+1. Write 4-byte command descriptor to bulk out pipe
+2. Wait indefinitely on bulk in pipe for data to be transferred.
+   Once it is ready, keep reading until all has been retrieved.
+3. Wait indefinitely on bulk in pipe for 3-byte status to be transferred.
+   The status phase is optional for some commands.
+
+The procedure for a command that transfers data to the drive is:
+1. Write 4-byte command descriptor to bulk out pipe
+2. Write data to the bulk out pipe until all has been transferred.
+3. Wait indefinitely on bulk in pipe for 3-byte status to be transferred.
+   The status phase is optional for some commands.
+
+The xu1541 uses only control transfers, and thus has to implement IO in
+two stages. First it transfers data to the microcontroller in a 128-byte
+buffer, then it transfers it to the PC or drive. We do not use this model.
+Since the AT90USB can stream the data all at once, we transfer each byte
+as it is ready (e.g., usbSendByte() and usbRecvByte()). This increases
+performance and allows support for the nibtools protocol for copying
+protected disks.
+
+The firmware is organized in a logical way to support multiple device
+models being based off the same firmware. The first model is the USBKEY,
+which is based on the Atmel development board of the same name. The CPU
+files (e.g., cpu-usbkey.h) define routines that are unique to the CPU, in
+this case the AT90USB1287. This includes timers and initialization. The
+board files (e.g., board-usbkey.[ch]) define the methods for setting up
+and interacting with the IO pins on the board. Each device is composed of
+a combination of board/cpu in the Makefile.
+
+This approach allows reuse. Adding a new design is simply a matter of
+making a copy of the board and cpu files and adding your own interface
+routines. However, you should avoid doing this whenever possible.
+For example, if you changed to an AT90USB16 CPU from the AT90USB1287, there
+is not any need yet to change CPU files as both use the same IO ports and
+same basic timer routines.
+
+
+Compiling
+=========
+Whenever new releases come out, the .hex files are updated as well.
+Thus most users should never need to compile the firmware. If you're a
+developer, here's how to do it.
+
+Get avr-gcc, avr-binutils, avr-libc, and a Unix shell environment (make).
+On Windows, I use WinAVR to get all of the AVR utils in one place and
+Cygwin for the shell environment. Try just typing "make" and it should
+build the firmware. To enable the debug build, uncomment the appropriate
+line in the Makefile. If the build fails, check your path to be sure
+the AVR bin directory is present.
+
+Currently I am building releases using WinAVR-20100110. The LUFA version
+included in this distribution is 091223.
 
 
 Tasks
