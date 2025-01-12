@@ -27,7 +27,7 @@ cpu_bootloader_start(void)
     // Disable timer and then jump to bootloader address
     TCCR1B = 0;
     OCR1A = 0;
-    __asm__ __volatile__ ("jmp 0x3800" "\n\t");
+    __asm__ __volatile__ ("jmp 0x7000" "\n\t");
 }
 
 // Timer and delay functions
