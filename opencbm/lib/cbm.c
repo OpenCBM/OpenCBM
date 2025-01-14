@@ -1705,6 +1705,7 @@ cbm_iec_get(CBM_FILE HandleDevice, int Line)
  call this function.
 */
 
+#include <stdio.h>
 int CBMAPIDECL
 cbm_device_status(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                   void *Buffer, size_t BufferLength)
@@ -1723,43 +1724,50 @@ cbm_device_status(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
     retValue = 99;
 
-    if (Buffer && (BufferLength > 0))
+    char *buf = (char *)Buffer;
+    // Should be an unnecessary memset as we ensure NULL terminated below
+    memset(buf, 0, BufferLength);
+    int bytesRead = -1;
+    if (cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
     {
-        char *bufferToWrite = Buffer;
-
-        // make sure we have a trailing zero at the end of the buffer:
-
-        bufferToWrite[--BufferLength] = '\0';
-
-        // pre-occupy buffer with the error value
-
-        strncpy(bufferToWrite, "99, DRIVER ERROR,00,00\r", BufferLength);
-
-        // Now, ask the drive for its error status:
-
-        if (cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
+        int ii = 0;
+        while (ii < (BufferLength-1))
         {
-            unsigned int bytesRead;
-
-            bytesRead = cbm_raw_read(HandleDevice, bufferToWrite, BufferLength - 1);
-
-            DBG_ASSERT(bytesRead <= BufferLength);
-
-            // make sure we have a trailing zero at the end of the status:
-
-            if (bytesRead < BufferLength) {
-                bufferToWrite[bytesRead] = '\0';
-            }
-            else {
-                /* cbm_raw_read() returned an error */
-                strncpy(bufferToWrite, "99, DRIVER ERROR,01,00\r", BufferLength);
-                retValue = 99;
-            }
-
-            cbm_untalk(HandleDevice);
+          bytesRead = cbm_raw_read(HandleDevice, buf+ii, 1);
+          if (bytesRead <= 0)
+          {
+            // Failed to read
+            break;
+          }
+          if (buf[ii] == 0x0d)
+          {
+            // Got to a newline
+            ii++;
+            break;
+          }
+          ii++;
         }
+        buf[ii] = 0; // NULL terminate
+        bytesRead = ii; // Store off bytes read
+        cbm_untalk(HandleDevice);
+    }
 
-        retValue = atoi(bufferToWrite);
+    if (bytesRead > 0)
+    {
+        retValue = atoi(buf);
+    }
+    else
+    {
+        // cbm_raw_read returned an error
+        #define DEFAULT_ERR_STRING "99, DRIVER ERROR,0,0\r"
+        bytesRead = strlen(DEFAULT_ERR_STRING);
+        if (BufferLength < bytesRead)
+        {
+          bytesRead = BufferLength-1;
+        }
+        memcpy((char*)buf, DEFAULT_ERR_STRING, bytesRead);
+        buf[bytesRead] = 0;
+        // retValue already prepopulated to 99
     }
 
     FUNC_LEAVE_INT(retValue);
