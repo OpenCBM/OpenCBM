@@ -187,8 +187,6 @@ int8_t usbRecvByte(uint8_t *data);
 void Set_usbDataLen(uint16_t Len);
 
 // IEC functions
-#define XUM_WRITE_TALK          (1 << 0)
-#define XUM_WRITE_ATN           (1 << 1)
 #define IEC_DELAY()             DELAY_US(2) // Time for IEC lines to change
 
 // IEC or IEEE handlers for protocols
