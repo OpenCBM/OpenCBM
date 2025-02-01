@@ -404,8 +404,8 @@ static struct pardevice *cbm_device;
 #endif
 
 static wait_queue_head_t cbm_wait_q;
-volatile static int eoi;
-volatile static int cbm_irq_count;
+static volatile int eoi;
+static volatile int cbm_irq_count;
 
 #if defined(DIRECT_PORT_ACCESS) && (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18))
 # define SA_INTERRUPT IRQF_DISABLED
@@ -814,6 +814,9 @@ static long cbm_unlocked_ioctl(struct file *f,
             }
         }
         /* falls through */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)
+        fallthrough;
+#endif
 
     case CBMCTRL_IEC_POLL:
         c = POLL();
@@ -1042,7 +1045,7 @@ static struct miscdevice cbm_dev = {
     .fops       = &cbm_fops,
 };
 
-void cbm_cleanup(void)
+static void cbm_cleanup(void)
 {
     kfree(track_buffer);
 #ifdef DIRECT_PORT_ACCESS
@@ -1067,7 +1070,7 @@ static const struct pardev_cb cbm_pardev_cb = {
     PARPORT_DEV_EXCL  //unsigned int flags;
 };
 #endif
-int cbm_init(void)
+static int cbm_init(void)
 {
     unsigned char in, out;
     char *msg;
