@@ -169,6 +169,7 @@ endif
 #
 ifeq "$(OS)" "Darwin"
 ETCDIR=$(PREFIX)/etc
+CFLAGS += -D_DARWIN_C_SOURCE
 
 # We therefore definitely have a libusb
 HAVE_LIBUSB0 = ${shell pkg-config libusb-legacy && echo 1} 
