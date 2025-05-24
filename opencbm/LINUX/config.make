@@ -60,7 +60,7 @@ CFLAGS_OC_DEBUG = -O2 -D_FORTIFY_SOURCE=2
 else
 CFLAGS_OC_DEBUG = -ggdb -O0
 endif
-CFLAGS       = $(CFLAGS_OC_DEBUG) -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\" -DOPENCBM_CONFIG_FILE=\"$(OPENCBM_CONFIG_FILE)\"
+CFLAGS       = $(CFLAGS_OC_DEBUG) -std=c99 -Wall -I../include -I../include/LINUX -DPREFIX=\"$(PREFIX)\" -DOPENCBM_CONFIG_FILE=\"$(OPENCBM_CONFIG_FILE)\"
 CFLAGS      += -fstack-protector
 CFLAGS      += $(USER_CFLAGS)
 
