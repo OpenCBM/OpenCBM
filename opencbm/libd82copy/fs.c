@@ -123,8 +123,16 @@ static int open_disk(CBM_FILE fd, d82copy_settings *settings,
         }
         else
         {
+            /** find out if this image has a non-standard track count
+             *
+             * @todo Does it even make sense? Are there D80 images
+             * with a non-standard track number?
+             *
+             * It looks like this code was just copied from d64copy
+             * without thinking about it (and without even testing it)
+             */
             block_count = D80_BLOCKS;
-            for( tr = D82_TRACKS; !is_image && tr <= D82_TRACKS; )
+            for( tr = D80_TRACKS; !is_image && tr <= D82_TRACKS; )
             {
                 is_image = filesize == block_count * BLOCKSIZE;
                 if(!is_image)
