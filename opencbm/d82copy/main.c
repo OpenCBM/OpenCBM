@@ -30,15 +30,6 @@ static int no_progress = 0;
 static CBM_FILE fd_cbm;
 
 
-#if 0
-static int is_cbm(char *name)
-{
-    return((strcmp(name, "8" ) == 0) || (strcmp(name, "9" ) == 0) ||
-           (strcmp(name, "10") == 0) || (strcmp(name, "11") == 0) );
-}
-#else
-
-
 static int cbm_address_extract_drive_and_medium(char * arg, unsigned char * unit)
 {
     char * endptr = NULL;
@@ -84,7 +75,6 @@ static int cbm_address_extract_drive_and_medium(char * arg, unsigned char * unit
 
     return 1;
 }
-#endif
 
 
 static void help()
@@ -411,19 +401,8 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     src_arg = argv[optind];
     dst_arg = argv[optind+1];
 
-#if 0
-    src_is_cbm = is_cbm(src_arg);
-    dst_is_cbm = is_cbm(dst_arg);
-    if (src_is_cbm) {
-        src_unit = atoi(src_arg);
-    }
-    if (dst_is_cbm) {
-        dst_unit = atoi(dst_arg);
-    }
-#else
     src_is_cbm = cbm_address_extract_drive_and_medium(src_arg, &src_unit);
     dst_is_cbm = cbm_address_extract_drive_and_medium(dst_arg, &dst_unit);
-#endif
 
     if(src_is_cbm == dst_is_cbm)
     {
