@@ -30,11 +30,61 @@ static int no_progress = 0;
 static CBM_FILE fd_cbm;
 
 
+#if 0
 static int is_cbm(char *name)
 {
     return((strcmp(name, "8" ) == 0) || (strcmp(name, "9" ) == 0) ||
            (strcmp(name, "10") == 0) || (strcmp(name, "11") == 0) );
 }
+#else
+
+
+static int cbm_address_extract_drive_and_medium(char * arg, unsigned char * unit)
+{
+    char * endptr = NULL;
+    long drive;
+    int  medium;
+
+    errno = 0;
+    drive = strtol(arg, &endptr, 10);
+
+    if (errno || drive < 0 || drive > 15) {
+        // not a CBM drive address
+        return 0;
+    }
+
+    // assume medium default of 0: this is the old behaviour
+    medium = 0;
+
+    if (*endptr == ':') {
+        ++endptr;
+        // there seems to be a medium, process that
+        switch (*endptr) {
+            case '0':
+                medium = 0;
+                ++endptr;
+                break;
+
+            case '1':
+                medium = 1;
+                ++endptr;
+                break;
+
+            default:
+                return 0;
+        }
+    }
+
+    if (*endptr) {
+        // there is still something following, this is not a valid CBM address
+        return 0;
+    }
+
+    *unit = (drive & 0x7F) | (medium ? 0x80 : 0);
+
+    return 1;
+}
+#endif
 
 
 static void help()
@@ -208,12 +258,15 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     char *tm = NULL;
     char *src_arg;
     char *dst_arg;
+
     char *adapter = NULL;
 
     int  option;
     int  rv = 1;
     int  l;
 
+    unsigned char src_unit;
+    unsigned char dst_unit;
     int src_is_cbm;
     int dst_is_cbm;
 
@@ -358,8 +411,19 @@ int ARCH_MAINDECL main(int argc, char *argv[])
     src_arg = argv[optind];
     dst_arg = argv[optind+1];
 
+#if 0
     src_is_cbm = is_cbm(src_arg);
     dst_is_cbm = is_cbm(dst_arg);
+    if (src_is_cbm) {
+        src_unit = atoi(src_arg);
+    }
+    if (dst_is_cbm) {
+        dst_unit = atoi(dst_arg);
+    }
+#else
+    src_is_cbm = cbm_address_extract_drive_and_medium(src_arg, &src_unit);
+    dst_is_cbm = cbm_address_extract_drive_and_medium(dst_arg, &dst_unit);
+#endif
 
     if(src_is_cbm == dst_is_cbm)
     {
@@ -376,7 +440,7 @@ int ARCH_MAINDECL main(int argc, char *argv[])
         settings->transfer_mode =
             d82copy_check_auto_transfer_mode(fd_cbm,
                 settings->transfer_mode,
-                atoi(src_is_cbm ? src_arg : dst_arg));
+                src_is_cbm ? src_unit : dst_unit);
 
         my_message_cb(3, "decided to use transfer mode %d", settings->transfer_mode );
 
@@ -384,12 +448,12 @@ int ARCH_MAINDECL main(int argc, char *argv[])
 
         if(src_is_cbm)
         {
-            rv = d82copy_read_image(fd_cbm, settings, atoi(src_arg), dst_arg,
+            rv = d82copy_read_image(fd_cbm, settings, src_unit, dst_arg,
                     my_message_cb, my_status_cb);
         }
         else
         {
-            rv = d82copy_write_image(fd_cbm, settings, src_arg, atoi(dst_arg),
+            rv = d82copy_write_image(fd_cbm, settings, src_arg, dst_unit,
                     my_message_cb, my_status_cb);
         }
 

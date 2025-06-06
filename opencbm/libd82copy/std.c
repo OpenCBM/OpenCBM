@@ -14,7 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static unsigned char drive = 0;
+static unsigned char drive = 0;  // the "unit" in CBM speaking
+static unsigned char medium = 0; // 0 for drive 0, 1 for drive 1 on the floppy
 static CBM_FILE fd_cbm = (CBM_FILE) -1;
 
 static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
@@ -22,7 +23,7 @@ static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
     char cmd[48];
     int rv = 1;
 
-    sprintf(cmd, "U1:2 0 %d %d", tr, se);
+    sprintf(cmd, "U1:2 %u %d %d", medium, tr, se);
     if(cbm_exec_command(fd_cbm, drive, cmd, 0) == 0) {
         rv = cbm_device_status(fd_cbm, drive, cmd, sizeof(cmd));
         if(rv == 0) {
@@ -54,7 +55,7 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
             cbm_unlisten(fd_cbm);
             if(rv == 0)
             {
-                sprintf(cmd ,"U2:2 0 %d %d", tr, se);
+                sprintf(cmd ,"U2:2 %u %d %d", medium, tr, se);
                 cbm_exec_command(fd_cbm, drive, cmd, 0);
                 rv = cbm_device_status(fd_cbm, drive, cmd, sizeof(cmd));
             }
@@ -78,6 +79,10 @@ static int open_disk(CBM_FILE fd, d82copy_settings *settings,
     }
 
     drive = (unsigned char)(ULONG_PTR)arg;
+
+    /// extract the medium and the drive
+    medium = (drive & 0x80) ? 1 : 0;
+    drive = drive & 0x7F;
 
     fd_cbm = fd;
 
