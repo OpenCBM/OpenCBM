@@ -67,6 +67,12 @@
  *
  * - cbm_dos_memory_read()
  * - cbm_dos_memory_write()
+ *
+ * These functions can be configured with the help of:
+ *
+ * - cbm_dos_memory_read_set_max_retries()
+ * - cbm_dos_memory_write_set_max_retries()
+ * - cbm_dos_set_dos1_compatibility()
  */
 
 /** @{ @ingroup opencbm_dos */
@@ -81,8 +87,28 @@
  *
  * DOS1 drives were very early 2040, 3040 and 4040 drives. Most of them
  * have been upgraded to DOS2, though.
+ *
+ * This value is modified with cbm_dos_set_dos1_compatibility().
  */
 static int cbm_dos_dos1_compatibility = 0;
+
+/** @brief maximum number of retries for cbm_dos_memory_read()
+ *
+ * The maximum number of retries that cbm_dos_memory_read()
+ * is allowed to perform.
+ *
+ * This value is modified with cbm_dos_memory_read_set_max_retries).
+ */
+static int cbm_dos_memory_read_max_retries = 0;
+
+/** @brief maximum number of retries for cbm_dos_memory_write()
+ *
+ * The maximum number of retries that cbm_dos_memory_write()
+ * is allowed to perform.
+ *
+ * This value is modified with cbm_dos_memory_write_set_max_retries).
+ */
+static int cbm_dos_memory_write_max_retries = 0;
 
 /** @brief DOS: Set DOS1 compatibility flag
 
@@ -1302,6 +1328,89 @@ cbm_dos_open_channel_specific(
     FUNC_LEAVE_INT(rv);
 }
 
+/** @brief DOS: Set the maximum number of retries for cbm_dos_memory_read()
+
+ This function sets the maximum number of retries that cbm_dos_memory_read()
+ is allowed to perform.
+
+ This might be necessary if the cable setup is not fully reliable. There are
+ configurations where the IEC protocol is not completely stable, but the
+ fast protocols work, anyway. In this case, it is a good idea to allow
+ cbm_dos_memory_read() to handle some errors and recover from them.
+
+ The default is no retries.
+
+ @param[in] Number
+   The maximum number of retries that are allowed. Set to 0 to disallow
+   retries.
+
+ @return
+   The maximum number of retries before calling this function.
+   If the returned value is 0, no retries were allowed.
+
+ @remark
+   - Do not switch on retries if it is not necessary. In most cases, it
+     is better to fail instead of hiding the fact that the setup is not reliable.
+     In some cases, however, it might be good to be able to do memory operations,
+     anyway. This might be good for downloading the firmware ROMs, or for a disk monitor.
+
+*/
+int CBMAPIDECL
+cbm_dos_memory_read_set_max_retries(
+        unsigned int Number
+        )
+{
+    int retries_old = cbm_dos_memory_read_max_retries;
+
+    FUNC_ENTER();
+
+    cbm_dos_memory_read_max_retries = Number;
+
+    FUNC_LEAVE_INT(retries_old);
+}
+
+/** @brief DOS: Set the maximum number of retries for cbm_dos_memory_write()
+
+ This function sets the maximum number of retries that cbm_dos_memory_write()
+ is allowed to perform.
+
+ This might be necessary if the cable setup is not fully reliable. There are
+ configurations where the IEC protocol is not completely stable, but the
+ fast protocols work, anyway. In this case, it is a good idea to allow
+ cbm_dos_memory_write() to handle some errors and recover from them.
+
+ The default is no retries.
+
+ @param[in] Number
+   The maximum number of retries that are allowed. Set to 0 to disallow
+   retries.
+
+ @return
+   The maximum number of retries before calling this function.
+   If the returned value is 0, no retries were allowed.
+
+ @remark
+   - Do not switch on retries if it is not necessary. In most cases, it
+     is better to fail instead of hiding the fact that the setup is not reliable.
+     In some cases, however, it might be good to be able to do memory operations,
+     anyway. This might be good for downloading the firmware ROMs, or for a disk monitor.
+
+*/
+int CBMAPIDECL
+cbm_dos_memory_write_set_max_retries(
+        unsigned int Number
+        )
+{
+    int retries_old = cbm_dos_memory_write_max_retries;
+
+    FUNC_ENTER();
+
+    cbm_dos_memory_write_max_retries = Number;
+
+    FUNC_LEAVE_INT(retries_old);
+}
+
+
 /** @brief DOS: Write to the floppy memory
 
  This function writes an arbitrary region to the floppy memory.
@@ -1372,6 +1481,8 @@ cbm_dos_memory_write(
 
     uint16_t callback_next = 0x0;
 
+    int retrycounter;
+
     FUNC_ENTER();
 
     for (offset_start = 0; offset_start < Count; offset_start += count_missing) {
@@ -1404,9 +1515,16 @@ cbm_dos_memory_write(
             callback_next += 0x100;
         }
 
-        rv = cbm_dos_cmd_memory_write(HandleDevice,
-                DeviceAddress, MemoryAddress + offset_start, count_missing,
-                Buffer + offset_start);
+        for (retrycounter = cbm_dos_memory_write_max_retries; retrycounter >= 0; --retrycounter) {
+            rv = cbm_dos_cmd_memory_write(HandleDevice,
+                    DeviceAddress, MemoryAddress + offset_start, count_missing,
+                    Buffer + offset_start);
+
+            if (rv == 0) {
+                break;
+            }
+        }
+
         if (rv < 0) {
             break;
         }
@@ -1505,6 +1623,8 @@ cbm_dos_memory_read(
 
     int page2workaround_allowed = 1;
 
+    int retrycounter;
+
     FUNC_ENTER();
 
     if (cbm_dos_dos1_compatibility) {
@@ -1553,18 +1673,24 @@ cbm_dos_memory_read(
             break;
         }
 
-        if (cbm_dos_dos1_compatibility) {
-            rv = cbm_dos_cmd_memory_read_dos1(HandleDevice, Buffer + buffer_write_offset, BufferSize - buffer_write_offset,
-                    DeviceAddress, memory_page + offset_start);
+        for (retrycounter = cbm_dos_memory_read_max_retries; retrycounter >= 0; --retrycounter) {
+            if (cbm_dos_dos1_compatibility) {
+                rv = cbm_dos_cmd_memory_read_dos1(HandleDevice, Buffer + buffer_write_offset, BufferSize - buffer_write_offset,
+                        DeviceAddress, memory_page + offset_start);
+            }
+            else {
+                rv = cbm_dos_cmd_memory_read(HandleDevice, Buffer + buffer_write_offset, BufferSize - buffer_write_offset,
+                        DeviceAddress, memory_page + offset_start, count_missing);
+            }
+            if (rv == 0) {
+                break;
+            }
         }
-        else {
-            rv = cbm_dos_cmd_memory_read(HandleDevice, Buffer + buffer_write_offset, BufferSize - buffer_write_offset,
-                    DeviceAddress, memory_page + offset_start, count_missing);
-        }
+
         if (rv < 0) {
             break;
         }
-        if (rv > 0) {
+        else if (rv > 0) {
             /*
              * The read could not be completed.
              *

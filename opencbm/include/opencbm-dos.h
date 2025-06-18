@@ -139,12 +139,22 @@ opencbm_dos_memory_read_write_callback(
 
 EXTERN int CBMAPIDECL
 cbm_dos_set_dos1_compatibility(
-        int on
+        int On
         );
 
 EXTERN int CBMAPIDECL
 cbm_dos_get_dos1_compatibility(
         void
+        );
+
+EXTERN int CBMAPIDECL
+cbm_dos_memory_read_set_max_retries(
+        unsigned int Number
+        );
+
+EXTERN int CBMAPIDECL
+cbm_dos_memory_write_set_max_retries(
+        unsigned int Number
         );
 
 EXTERN int CBMAPIDECL
