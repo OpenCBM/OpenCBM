@@ -10,7 +10,7 @@ LIBMISC    = ../libmisc
 
 # specify lib
 LIBNAME = libopencbm
-SRCS    = cbm.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c \
+SRCS    = cbm.c dos.c detect.c detectxp1541.c petscii.c gcr_4b5b.c upload.c \
 	  LINUX/configuration_name.c
 
 LIBS = $(LIBARCH)/libarch.a $(LIBMISC)/libmisc.a
