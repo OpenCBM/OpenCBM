@@ -5,7 +5,7 @@
  *      2 of the License, or (at your option) any later version.
  *
  *  Copyright 1999-2005           Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005,2007-2009, 2011 Spiro Trikaliotis
+ *  Copyright 2001-2005,2007-2009, 2011, 2025 Spiro Trikaliotis
  *  Copyright 2009,2011           Arnd Menge <arnd(at)jonnz(dot)de>
  *
 */
@@ -39,6 +39,7 @@
 //! mark: We are building the DLL */
 #define DLL
 #include "opencbm.h"
+#include "opencbm-dos.h"
 #include "archlib.h"
 
 #include "opencbm-plugin.h"
@@ -1733,7 +1734,6 @@ cbm_iec_get(CBM_FILE HandleDevice, int Line)
  call this function.
 */
 
-#include <stdio.h>
 int CBMAPIDECL
 cbm_device_status(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                   void *Buffer, size_t BufferLength)
@@ -1748,55 +1748,78 @@ cbm_device_status(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
     DBG_ASSERT(Buffer && (BufferLength > 0));
 
-    // Pre-occupy return value
+    do {
+        char *bufferToWrite = Buffer;
 
-    retValue = 99;
+        // Pre-occupy return value
 
-    char *buf = (char *)Buffer;
-    // Should be an unnecessary memset as we ensure NULL terminated below
-    memset(buf, 0, BufferLength);
-    int bytesRead = -1;
-    if (cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
-    {
-        int ii = 0;
-        while (ii < (BufferLength-1))
-        {
-          bytesRead = cbm_raw_read(HandleDevice, buf+ii, 1);
-          if (bytesRead <= 0)
-          {
-            // Failed to read
-            break;
-          }
-          if (buf[ii] == 0x0d)
-          {
-            // Got to a newline
-            ii++;
-            break;
-          }
-          ii++;
+        retValue = 99;
+
+        /*
+         * Memory for the error code. This is longer than the error buffer
+         * in the floppy, that is, this must suffice in all cases.
+         */
+        uint8_t buffer_local[40] = { 0 };
+
+        int rv = cbm_dos_channel_read(HandleDevice, DeviceAddress, 15, sizeof buffer_local, buffer_local, sizeof buffer_local);
+
+        DBG_ASSERT(rv <= sizeof buffer_local);
+
+        if (rv < 0) {
+            strncpy(Buffer, "99 DRIVER ERROR,01,00\r", BufferLength);
         }
-        buf[ii] = 0; // NULL terminate
-        bytesRead = ii; // Store off bytes read
-        cbm_untalk(HandleDevice);
-    }
+        else {
+            char * p_end;
 
-    if (bytesRead > 0)
-    {
-        retValue = atoi(buf);
-    }
-    else
-    {
-        // cbm_raw_read returned an error
-        #define DEFAULT_ERR_STRING "99, DRIVER ERROR,0,0\r"
-        bytesRead = strlen(DEFAULT_ERR_STRING);
-        if (BufferLength < bytesRead)
-        {
-          bytesRead = BufferLength-1;
+            /* make sure the string is 0-terminated */
+
+            if (rv < sizeof buffer_local) {
+                buffer_local[rv] = 0;
+            }
+            else {
+                buffer_local[sizeof buffer_local - 1] = 0;
+            }
+
+            /* check if there is a CBM CR (13, '\r'); if so, the status ends there */
+            p_end = strchr(buffer_local, '\r');
+
+            if (p_end) {
+                *p_end = 0;
+            }
+
+            /* copy the status into the return buffer */
+            strncpy(Buffer, buffer_local, BufferLength);
+
+            /* if the buffer is not big enough for the terminating 0, add one
+             * by overwriting the last char
+             */
+            if (rv == BufferLength) {
+                bufferToWrite[rv-1] = 0;
+            }
         }
-        memcpy((char*)buf, DEFAULT_ERR_STRING, bytesRead);
-        buf[bytesRead] = 0;
-        // retValue already prepopulated to 99
-    }
+
+        /* get the numerical error code */
+        retValue = atoi(bufferToWrite);
+
+        if (rv == sizeof buffer_local) {
+            /* the read was very long. This should only happen in case of DOS1
+             * devices that do not send an EOI after the status.
+             *
+             * If we have set DOS1 compatibility, consume the remaining bytes
+             * of the (next) status, so the next call to us will return a full
+             * status again.
+             */
+            if (cbm_dos_get_dos1_compatibility()) {
+                uint8_t ch = 0;
+                int rv_consume = 0;
+
+                while (rv_consume >= 0 && ch != '\r') {
+                    rv_consume = cbm_dos_channel_read(HandleDevice, DeviceAddress, 15, sizeof ch, &ch, sizeof ch);
+                }
+            }
+        }
+
+    } while (0);
 
     FUNC_LEAVE_INT(retValue);
 }
@@ -1846,8 +1869,8 @@ cbm_exec_command(CBM_FILE HandleDevice, unsigned char DeviceAddress,
             Size = (size_t) strlen(Command);
         }
         rv = (size_t) cbm_raw_write(HandleDevice, Command, Size) != Size;
-        cbm_unlisten(HandleDevice);
     }
+    cbm_unlisten(HandleDevice);
 
     FUNC_LEAVE_INT(rv);
 }

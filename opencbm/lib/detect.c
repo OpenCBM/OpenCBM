@@ -4,10 +4,10 @@
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
- *  Copyright 1999-2005 Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
- *  Copyright 2001-2005 Spiro Trikaliotis
- *  Copyright 2011      Wolfgang Moser (http://d81.de)
- *  Copyright 2011      Thomas Winkler
+ *  Copyright 1999-2005       Michael Klein <michael(dot)klein(at)puffin(dot)lb(dot)shuttle(dot)de>
+ *  Copyright 2001-2005, 2025 Spiro Trikaliotis
+ *  Copyright 2011            Wolfgang Moser (http://d81.de)
+ *  Copyright 2011            Thomas Winkler
  *
 */
 
@@ -32,6 +32,7 @@
 //! mark: We are building the DLL */
 #define DLL
 #include "opencbm.h"
+#include "opencbm-dos.h"
 #include "archlib.h"
 
 
@@ -64,9 +65,6 @@
  call this function.
 */
 
-
-#include <stdio.h>
-
 int CBMAPIDECL
 cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
              enum cbm_device_type_e *CbmDeviceType,
@@ -75,12 +73,10 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
     enum cbm_device_type_e deviceType = cbm_dt_unknown;
     unsigned short magic;
     int            magic_extra = -1;
-    unsigned char buf[3];
-    char command[] = { 'M', '-', 'R', (char) 0x40, (char) 0xff, (char) 0x02 };
+
     static char unknownDevice[] = "*unknown*, footprint=<....>";
     char *deviceString = unknownDevice;
     int rv = -1;
-    int read_magic = 0;
 
     FUNC_ENTER();
 
@@ -89,63 +85,39 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                             HandleDevice, DeviceAddress,
                             CbmDeviceType, CbmDeviceString));
 
-    // Read two bytes at 0xFF40.  To be compatible with DOS 1 drives, we need
-    // to read a byte at a time - DOS 1 doesn't support reading 2 bytes at once
-    // We leave the command with 0x02 at the end - if we detect an appropriate
-    // device we will use that later to read 2 bytes, but for now avoid passing
-    // the last byte into exec_command
-    if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)-1) == 0
-        && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
-    {
-        if (cbm_raw_read(HandleDevice, buf, 2) == 2)
-        {
-            command[3]++; // Now read a byte at 0xFF41
-            if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)-1) == 0
-                && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
-            {
-                if (cbm_raw_read(HandleDevice, buf+1, 2) == 2)
-                {
-                    magic = buf[0] | (buf[1] << 8);
-                    read_magic = 1;
-                    // No need to reset command[3] to what it was - it gets set
-                    // again below if required
-                }
-            }   
-        }
-    }
+    do {
+        uint8_t buf[2];
 
-    if (read_magic)
-    {
-        if(magic == 0xaaaa)
-        {
-            cbm_untalk(HandleDevice);
-            command[3] = (char) 0xFE; /* get footprint from 0xFFFE, IRQ vector */
-            if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0
-                && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
-            {
-                if (cbm_raw_read(HandleDevice, buf, sizeof buf) == sizeof buf
-                    && ( buf[0] != 0x67 || buf[1] != 0xFE ) )
-                {
-                    magic = buf[0] | (buf[1] << 8);
-                }
+        /* get footprint from 0xFF40 */
+        if ((rv = cbm_dos_memory_read(HandleDevice, buf, sizeof buf, DeviceAddress, 0xFF40u, 2, NULL, NULL)) < 0) {
+            break;
+        }
+
+        magic = buf[0] | (buf[1] << 8);
+
+        if (magic == 0xAAAAu) {
+            uint16_t magic2;
+
+            if ((rv = cbm_dos_memory_read(HandleDevice, buf, sizeof buf, DeviceAddress, 0xFFFEu, 2, NULL, NULL)) < 0) {
+                break;
+            }
+
+            magic2 = buf[0] | (buf[1] << 8);
+
+            if (magic2 != 0xFE67u) {
+                magic = magic2;
             }
         }
 
-        if(magic == 0x01ba)
-        {
+        if (magic == 0x01ba) {
             /* FD2000/4000 and 1581 must be distinguished */
 
-            cbm_untalk(HandleDevice);
-            command[3] = (char) 0x8;  /* get footprint from 0x8008 */
-            command[4] = (char) 0x80; /* get footprint from 0x8008 */
-            if (cbm_exec_command(HandleDevice, DeviceAddress, command, sizeof(command)) == 0
-                && cbm_talk(HandleDevice, DeviceAddress, 15) == 0)
-            {
-                if (cbm_raw_read(HandleDevice, buf, sizeof buf) == sizeof buf)
-                {
-                    magic_extra = buf[0] | (buf[1] << 8);
-                }
+            /* get footprint from 0x8008 */
+            if ((rv = cbm_dos_memory_read(HandleDevice, buf, sizeof buf, DeviceAddress, 0x8008u, 2, NULL, NULL)) < 0) {
+                break;
             }
+
+            magic_extra = buf[0] | (buf[1] << 8);
         }
 
         switch(magic)
@@ -239,8 +211,8 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                 break;
 
             case 0x20f0:
-		// A DOS 1 2040
-		// Values 0xF0 and 0x20 from ROM 901468-07
+                // A DOS 1 2040
+                // Values 0xF0 and 0x20 from ROM 901468-07
                 deviceType = cbm_dt_cbm2040;
                 deviceString = "2040";
                 break;
@@ -267,10 +239,11 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
                 deviceString = "8250 dos2.7";
                 break;
         }
+
         rv = 0;
 
-        cbm_untalk(HandleDevice);
-    }
+    } while (0);
+
 
     if(CbmDeviceType)
     {
