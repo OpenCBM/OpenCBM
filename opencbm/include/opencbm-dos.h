@@ -57,7 +57,7 @@ struct opencbm_dos_cmd {
      *
      * This must be equal or greater than answer_expected_size
      */
-    uint8_t   answer_buffer_size;
+    size_t    answer_buffer_size;
 
     union {
         /** buffer for the command to be sent to the drive */
@@ -159,11 +159,11 @@ cbm_dos_memory_write_set_max_retries(
 
 EXTERN int CBMAPIDECL
 cbm_dos_cmd_memory_write(
-        CBM_FILE  HandleDevice,
-        uint8_t   DeviceAddress,
-        uint16_t  Address,
-        uint8_t   Count,
-        uint8_t * Buffer
+        CBM_FILE        HandleDevice,
+        uint8_t         DeviceAddress,
+        uint16_t        Address,
+        uint8_t         Count,
+        const uint8_t * Buffer
         );
 
 EXTERN int CBMAPIDECL
@@ -235,7 +235,7 @@ cbm_dos_memory_write(
         uint8_t                                DeviceAddress,
         uint16_t                               Address,
         uint16_t                               Count,
-        uint8_t *                              Buffer,
+        const uint8_t *                        Buffer,
         opencbm_dos_memory_read_write_callback Callback,
         void *                                 Callback_Context
         );
@@ -250,6 +250,16 @@ cbm_dos_memory_read(
         uint16_t                               Count,
         opencbm_dos_memory_read_write_callback Callback,
         void *                                 Callback_Context
+        );
+
+EXTERN int CBMAPIDECL
+cbm_dos_channel_read(
+        CBM_FILE  HandleDevice,
+        uint8_t   DeviceAddress,
+        uint8_t   ChannelNumber,
+        uint16_t  MaxCount,
+        uint8_t * Buffer,
+        size_t    BufferSize
         );
 
 /** @} */

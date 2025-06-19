@@ -270,8 +270,8 @@ cbm_dos_init_cmd_memory_read(
         if (Command->command_size < sizeof(Command->command)) {
             Command->answer_expected_size       = Count;
             Command->answer_expected_extra_size = 1;
-            Command->answer_buffer_size         = AnswerBufferSize;
             Command->answer_buffer              = AnswerBuffer;
+            Command->answer_buffer_size         = AnswerBufferSize;
 
             rv = 0;
         }
@@ -382,7 +382,7 @@ cbm_dos_init_cmd_memory_write(
         uint8_t           DeviceAddress,
         uint16_t          MemoryAddress,
         uint8_t           Count,
-        uint8_t *         Buffer
+        const uint8_t *   Buffer
         )
 {
     int rv = -1;
@@ -699,6 +699,10 @@ cbm_dos_cmd_send(
 
     rv = cbm_exec_command(HandleDevice, Command->deviceAddress, Command->command, Command->command_size);
 
+    if (rv) {
+        rv = -1;
+    }
+
     FUNC_LEAVE_INT(rv);
 }
 
@@ -730,13 +734,11 @@ cbm_dos_cmd_read_answer(
         )
 {
     int rv = -1;
-    int talk_is_done = 0;
 
     FUNC_ENTER();
 
     do {
-        char buffer_extra[2];
-        int answer_how_many_byte;
+        uint8_t buffer_extra[2];
 
         DBG_ASSERT(Command->answer_expected_extra_size < sizeof buffer_extra);
 
@@ -748,34 +750,42 @@ cbm_dos_cmd_read_answer(
             break;
         }
 
-        if ((rv = cbm_talk(HandleDevice, Command->deviceAddress, 15)) < 0) {
-            /* talk failed, we are done */
-            rv = -1;
-            break;
+        if (Command->answer_expected_size) {
+            if (
+                    (rv = cbm_dos_channel_read(
+                        HandleDevice,
+                        Command->deviceAddress,
+                        15,
+                        Command->answer_expected_size,
+                        Command->answer_buffer,
+                        Command->answer_buffer_size)
+                    ) != Command->answer_expected_size
+                )
+            {
+                break;
+            }
         }
 
-        talk_is_done = 1;
-
-        if (Command->answer_expected_size
-            && (answer_how_many_byte = cbm_raw_read(HandleDevice, Command->answer_buffer, Command->answer_expected_size)) != Command->answer_expected_size)
-        {
-            rv = answer_how_many_byte;
-            break;
-        }
-
-        if (Command->answer_expected_extra_size
-            && cbm_raw_read(HandleDevice, buffer_extra, Command->answer_expected_extra_size) != Command->answer_expected_extra_size) {
-            rv = -1;
-            break;
+        if (Command->answer_expected_extra_size) {
+            if (
+                    (rv = cbm_dos_channel_read(
+                        HandleDevice,
+                        Command->deviceAddress,
+                        15,
+                        Command->answer_expected_extra_size,
+                        buffer_extra,
+                        sizeof buffer_extra)
+                    ) != Command->answer_expected_extra_size
+                )
+            {
+                rv = -1;
+                break;
+            }
         }
 
         rv = 0;
 
     } while (0);
-
-    if (talk_is_done) {
-        cbm_untalk(HandleDevice);
-    }
 
     FUNC_LEAVE_INT(rv);
 }
@@ -853,11 +863,11 @@ cbm_dos_cmd_send_and_read_answer(
 */
 int CBMAPIDECL
 cbm_dos_cmd_memory_write(
-        CBM_FILE  HandleDevice,
-        uint8_t   DeviceAddress,
-        uint16_t  MemoryAddress,
-        uint8_t   Count,
-        uint8_t * Buffer
+        CBM_FILE        HandleDevice,
+        uint8_t         DeviceAddress,
+        uint16_t        MemoryAddress,
+        uint8_t         Count,
+        const uint8_t * Buffer
         )
 {
     opencbm_dos_cmd command_memory_write;
@@ -1467,7 +1477,7 @@ cbm_dos_memory_write(
         uint8_t                                DeviceAddress,
         uint16_t                               MemoryAddress,
         uint16_t                               Count,
-        uint8_t *                              Buffer,
+        const uint8_t *                        Buffer,
         opencbm_dos_memory_read_write_callback Callback,
         void *                                 Callback_Context
         )
@@ -1594,9 +1604,6 @@ cbm_dos_memory_write(
    at once. \n
    \n
    This function works on all floppy drives.
-
- @todo
-   Handle page 2 problem (early stop when reading)
 */
 int CBMAPIDECL
 cbm_dos_memory_read(
@@ -1725,6 +1732,45 @@ cbm_dos_memory_read(
     FUNC_LEAVE_INT(rv);
 }
 
+
+int CBMAPIDECL
+cbm_dos_channel_read(
+        CBM_FILE  HandleDevice,
+        uint8_t   DeviceAddress,
+        uint8_t   ChannelNumber,
+        uint16_t  MaxCount,
+        uint8_t * Buffer,
+        size_t    BufferSize
+        )
+{
+    int rv = -1;
+    int talk_is_done = 0;
+
+    FUNC_ENTER();
+
+    DBG_ASSERT(MaxCount <= BufferSize);
+
+    do {
+        if ((rv = cbm_talk(HandleDevice, DeviceAddress, ChannelNumber)) < 0) {
+            /* talk failed, we are done */
+            rv = -1;
+            break;
+        }
+
+        talk_is_done = 1;
+
+        if (MaxCount) {
+            rv = cbm_raw_read(HandleDevice, Buffer, MaxCount);
+        }
+
+    } while (0);
+
+    if (talk_is_done) {
+        cbm_untalk(HandleDevice);
+    }
+
+    FUNC_LEAVE_INT(rv);
+}
 
 
 /** @} */
