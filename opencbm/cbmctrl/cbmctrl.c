@@ -11,6 +11,7 @@
  */
 
 #include "opencbm.h"
+#include "opencbm-dos.h"
 
 #include "cbmctrl.h"
 
@@ -992,7 +993,7 @@ static int do_status(CBM_FILE fd, OPTIONS * const options)
     if (options->petsciiraw == PA_PETSCII)
         cbm_petscii2ascii(buf);
 
-    printf("%s", buf);
+    printf("%s\n", buf);
 
     return (rv == 99) ? 1 : 0;
 }
@@ -1128,7 +1129,7 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
                 if (options->petsciiraw == PA_PETSCII) {
                     cbm_petscii2ascii(buf);
                 }
-                printf("%s", buf);
+                printf("%s\n", buf);
             }
             else
             {
@@ -1138,7 +1139,7 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
         }
         else
         {
-            printf("%s", cbm_petscii2ascii(buf));
+            printf("%s\n", cbm_petscii2ascii(buf));
         }
         cbm_close(fd, command.device, 0);
     }
@@ -1150,7 +1151,7 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
 
 static void show_monkey(unsigned int c)
 {
-    // const static char monkey[]={"¸,ø¤*º°´`°º*¤ø,¸"};     // for fast moves
+    // const static char monkey[]={"Â¸,Ã¸Â¤*ÂºÂ°Â´`Â°Âº*Â¤Ã¸,Â¸"};     // for fast moves
     // const static char monkey[]={"\\|/-"};    // from cbmcopy
     // const static char monkey[]={"-\\|/"};    // from libtrans (reversed)
     // const static char monkey[]={"\\-/|"};    // from cbmcopy  (reversed)
@@ -1209,15 +1210,29 @@ static int do_test_updown(CBM_FILE fd, OPTIONS * const options)
 }
 #endif // #ifdef DBG_TEST_UPDOWN
 
+static int
+do_download_callback(
+        void *   Context,
+        uint16_t MemoryAddress,
+        uint16_t MemoryAddressEnd,
+        uint16_t Count,
+        uint8_t  Percent
+        )
+{
+    uint16_t start_address = Context;
+    show_monkey((MemoryAddress - start_address) >> 8);
+    return 0;
+}
+
 /*
  * read device memory, dump to stdout or a file
  */
 static int do_download(CBM_FILE fd, OPTIONS * const options)
 {
     unsigned char unit;
-    unsigned short c;
     int addr, count, rv = 0;
-    char *tail, buf[256];
+    char *tail;
+    char *buf = NULL;
     FILE *f;
 
     char *tmpstring;
@@ -1263,40 +1278,38 @@ static int do_download(CBM_FILE fd, OPTIONS * const options)
         return 1;
 
 
-    // download in chunks of sizeof(buf) (currently: 256) bytes
-    while(count > 0)
-    {
-        show_monkey(count / sizeof(buf));
+    do {
+        int read;
 
-        c = (count > sizeof(buf)) ? sizeof(buf) : count;
-
-        if (c + (addr & 0xFF) > 0x100) {
-            c = 0x100 - (addr & 0xFF);
-        }
-
-        if(c != cbm_download(fd, unit, addr, buf, c))
+        if ((buf = malloc(count)) == 0)
         {
+                rv = 1;
+                fprintf(stderr, "Could not allocate memory for transfer!\n");
+                break;
+        }
+        read = cbm_dos_memory_read(fd, (uint8_t*) buf, count, unit, addr, count, do_download_callback, (void*)addr);
+        if (read != 0) {
             rv = 1;
             fprintf(stderr, "A transfer error occurred!\n");
             break;
         }
 
-        // If the user wants to convert them from PETSCII, do this
-        // (I find it hard to believe someone would want to do this,
-        // but who knows?)
+        /* If the user wants to convert them from PETSCII, do this
+         * (I find it hard to believe someone would want to do this,
+         * but who knows?)
+         */
 
         if (options->petsciiraw == PA_PETSCII)
         {
             int i;
-            for (i = 0; i < c; i++)
+            for (i = 0; i < count; i++)
                 buf[i] = cbm_petscii2ascii_c(buf[i]);
         }
 
-        fwrite(buf, 1, c, f);
+        fwrite(buf, 1, count, f);
+    } while (0);
 
-        addr  += c;
-        count -= c;
-    }
+    free(buf);
 
     fclose(f);
     return rv;
@@ -1942,6 +1955,9 @@ static int do_help(CBM_FILE fd, OPTIONS * const options)
             "                  and 'command'\n"
             "   -r, --raw:     Do not convert data between CBM and PC format.\n"
             "                  Default with 'open' and 'command'.\n"
+            "   -1, --dos1:    Use DOS1 compatibility mode\n"
+            "   -R, --retry:   Allow retries in case of errors on memory transfers. The optional\n"
+            "                  argument specifies the number of retries. Default is 5.\n"
             "   --             Delimiter between action_opt and action_args; if any of the\n"
             "                  arguments in action_args starts with a '-', make sure to set\n"
             "                  the '--' so the argument is not treated as an option,\n"
@@ -2018,7 +2034,7 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
     int option_index;
     int option;
 
-    static const char short_options[] = "+fhVpr@:";
+    static const char short_options[] = "+fhVpr1@:R::";
     static struct option long_options[] =
     {
         { "adapter" , required_argument, NULL, '@' },
@@ -2027,6 +2043,8 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
         { "version" , no_argument,       NULL, 'V' },
         { "petscii" , no_argument,       NULL, 'p' },
         { "raw"     , no_argument,       NULL, 'r' },
+        { "dos1"    , no_argument,       NULL, '1' },
+        { "retry"   , optional_argument, NULL, 'R' },
         { NULL      , no_argument,       NULL, 0   }
     };
 
@@ -2092,6 +2110,37 @@ process_cmdline_common_options(int argc, char **argv, OPTIONS *options)
 
         case 'r':
             options->error |= set_option_petsciiraw(&options->petsciiraw, PA_RAW, 0);
+            break;
+
+        case '1':
+            cbm_dos_set_dos1_compatibility(1);
+            break;
+
+        case 'R':
+            {
+                unsigned int retries = 5;
+
+                if (optarg) {
+                    char * tail = NULL;
+                    long value;
+
+                    value = strtol(optarg, &tail, 0);
+                    if (*tail == 0) {
+                        if (value < 0) {
+                            fprintf(stderr, "Retries '%s' must be non-negative for --retry/-R\n", optarg);
+                        }
+                        else {
+                            retries = value;
+                        }
+                    }
+                    else {
+                        fprintf(stderr, "Option '%s' is not a value for --retries/-R\n", optarg);
+                    }
+                }
+
+                cbm_dos_memory_read_set_max_retries(retries);
+                cbm_dos_memory_write_set_max_retries(retries);
+            }
             break;
         };
     }
