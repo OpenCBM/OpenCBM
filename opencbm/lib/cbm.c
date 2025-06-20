@@ -16,6 +16,11 @@
 ** \n
 ** \brief Shared library / DLL for accessing the driver
 **
+** @defgroup opencbm_iec    OpenCBM IEC/IEEE low level functions
+** @defgroup opencbm_tape   OpenCBM Tape functions (experimental)
+** @defgroup opencbm_plugin OpenCBM Plugin handling functions
+** @defgroup opencbm_burst  OpenCBM Burst functions
+**
 ****************************************************************/
 
 /*! Mark: We are in user-space (for debug.h) */
@@ -43,6 +48,23 @@
 #include "configuration.h"
 
 #include "arch.h"
+
+/** @page opencbm_iec_overview IEC/IEEE low level functions
+ *
+ * [TOC]
+ *
+ * These functions can be used to access the floppy drive on the DOS
+ * level. That is, they provide a higher abstraction layer than the
+ * IEC/IEEE-layer which works with TALK, LISTEN, OPEN and CLOSE commands
+ * directly. \n
+ *
+ * @section iec_functions Available functions
+ *
+ * The following functions are available:
+ *
+ */
+
+/** @{ @ingroup opencbm_plugin */
 
 /*! \brief @@@@@ \todo document
 
@@ -620,6 +642,10 @@ initialize_plugin(const char * const Adapter)
     FUNC_LEAVE_INT(error);
 }
 
+/** @} */
+
+/** @{ @ingroup opencbm_iec */
+
 // #define DBG_DUMP_RAW_READ
 // #define DBG_DUMP_RAW_WRITE
 
@@ -705,7 +731,6 @@ cbm_split_adapter_in_name_and_port(char * Adapter, char ** Port)
    Returns a pointer to a null-terminated string containing the
    driver name, or NULL if an error occurred.
 */
-
 const char * CBMAPIDECL
 cbm_get_driver_name_ex(char * Adapter)
 {
@@ -1665,10 +1690,13 @@ cbm_iec_get(CBM_FILE HandleDevice, int Line)
     FUNC_LEAVE_INT((Plugin_information.Plugin.opencbm_plugin_iec_poll(HandleDevice)&Line) != 0 ? 1 : 0);
 }
 
+/** @} */
 
 /*-------------------------------------------------------------------*/
 /*--------- HELPER FUNCTIONS ----------------------------------------*/
 
+/** @{ @ingroup opencbm_dos
+ */
 
 /*! \brief Read the drive status from a floppy
 
@@ -1815,6 +1843,11 @@ cbm_exec_command(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
     FUNC_LEAVE_INT(rv);
 }
+
+/** @} */
+
+/** @{ @ingroup opencbm_burst */
+
 
 /*! \brief PARBURST: Read from the parallel port
 
@@ -2241,6 +2274,10 @@ cbm_srq_burst_write_track(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned
     FUNC_LEAVE_INT(ret);
 }
 
+/** @} */
+
+/** @{ @ingroup opencbm_tape */
+
 /*! \brief TAPE: Prepare capture
 
  This function is a helper function for tape:
@@ -2340,7 +2377,7 @@ cbm_tap_get_sense(CBM_FILE HandleDevice, int *Status)
     FUNC_LEAVE_INT(ret);
 }
 
-/*! \brief TAPE: Wait for <STOP> sense
+/*! \brief TAPE: Wait for STOP sense
 
  This function is a helper function for tape:
  It waits until the user stops the tape.
@@ -2373,7 +2410,7 @@ cbm_tap_wait_for_stop_sense(CBM_FILE HandleDevice, int *Status)
     FUNC_LEAVE_INT(ret);
 }
 
-/*! \brief TAPE: Wait for <PLAY> sense
+/*! \brief TAPE: Wait for PLAY sense
 
  This function is a helper function for tape:
  It waits until the user presses play on tape.
@@ -2683,6 +2720,9 @@ cbm_tap_upload_config(CBM_FILE HandleDevice, unsigned char *Buffer, unsigned int
     FUNC_LEAVE_INT(ret);
 }
 
+/** @} */
+
+/** @{ @ingroup opencbm_iec */
 
 /*! \brief Get the function pointer for a function in a plugin
 
@@ -2796,3 +2836,5 @@ cbm_iec_dbg_write(CBM_FILE HandleDevice, unsigned char Value)
 
     FUNC_LEAVE_INT(returnValue);
 }
+
+/** @} */

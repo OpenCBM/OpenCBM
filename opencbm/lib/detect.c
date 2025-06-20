@@ -35,6 +35,8 @@
 #include "archlib.h"
 
 
+/** @{ @ingroup opencbm_dos */
+
 /*! \brief Identify the connected floppy drive.
 
  This function tries to identify a connected floppy drive.
@@ -252,3 +254,5 @@ cbm_identify(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
     FUNC_LEAVE_INT(rv);
 }
+
+/** @} */

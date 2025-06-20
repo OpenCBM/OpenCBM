@@ -31,6 +31,8 @@
 
 #include <stddef.h>
 
+/** @{ @ingroup opencbm_dos */
+
 /*! \brief Decode GCR data
 
  This function decodes a buffer of 5 GCR bytes into a buffer
@@ -265,3 +267,5 @@ gcr_4_to_5_encode(const unsigned char *source, unsigned char *dest,
     FUNC_LEAVE_INT(rv);
     return rv;
 }
+
+/** @} */

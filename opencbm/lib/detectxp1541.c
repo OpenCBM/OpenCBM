@@ -36,6 +36,8 @@
 #include "arch.h"
 
 
+/** @{ @ingroup opencbm_dos */
+
 /*! \brief \internal Set the PIA back to input mode
 
  This function sets the parallel port PIA back to input mode.
@@ -324,3 +326,5 @@ cbm_identify_xp1541(CBM_FILE HandleDevice, unsigned char DeviceAddress,
 
     FUNC_LEAVE_INT(ret);
 }
+
+/** @} */
