@@ -48,9 +48,9 @@
  * IEC/IEEE-layer which works with TALK, LISTEN, OPEN and CLOSE commands
  * directly. \n
  *
- * @section functions Available functions
+ * @section dos_functions Available functions
  *
- * @subsection functions_raw Raw functions
+ * @subsection dos_functions_raw Raw functions
  *
  * The following functions are available:
  * - cbm_dos_cmd_memory_read()
@@ -60,7 +60,7 @@
  * - cbm_dos_cmd_u1_block_read()
  * - cbm_dos_cmd_u2_block_write()
  *
- * @subsection functions_higher Higher-level functions
+ * @subsection dos_functions_higher Higher-level functions
  *
  * The following functions implement higher level
  * functionality on top of the lower-level functions:
@@ -1771,6 +1771,5 @@ cbm_dos_channel_read(
 
     FUNC_LEAVE_INT(rv);
 }
-
 
 /** @} */
