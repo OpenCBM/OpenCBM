@@ -53,7 +53,8 @@ static int pp_write(CBM_FILE fd, char c1, char c2)
     pp_check_direction(PP_WRITE);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
-    while(!cbm_iec_get(fd, IEC_DATA));
+    while(!cbm_iec_get(fd, IEC_DATA)) {
+    }
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
@@ -64,7 +65,8 @@ static int pp_write(CBM_FILE fd, char c1, char c2)
 
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
-    while(cbm_iec_get(fd, IEC_DATA));
+    while(cbm_iec_get(fd, IEC_DATA)) {
+    }
 #else
     cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
@@ -98,7 +100,8 @@ static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
     pp_check_direction(PP_READ);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
-    while(!cbm_iec_get(fd, IEC_DATA));
+    while(!cbm_iec_get(fd, IEC_DATA)) {
+    }
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
@@ -109,7 +112,8 @@ static int pp_read(CBM_FILE fd, unsigned char *c1, unsigned char *c2)
 
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
-    while(cbm_iec_get(fd, IEC_DATA));
+    while(cbm_iec_get(fd, IEC_DATA)) {
+    }
 #else
     cbm_iec_wait(fd, IEC_DATA, 0);
 #endif

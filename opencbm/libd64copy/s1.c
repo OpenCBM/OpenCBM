@@ -40,7 +40,8 @@ static int s1_write_byte_nohs(CBM_FILE fd, unsigned char c)
         cbm_iec_release(fd, IEC_CLOCK);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
-        while(!cbm_iec_get(fd, IEC_CLOCK));
+        while(!cbm_iec_get(fd, IEC_CLOCK)) {
+        }
 #else
         cbm_iec_wait(fd, IEC_CLOCK, 1);
 #endif
@@ -48,7 +49,8 @@ static int s1_write_byte_nohs(CBM_FILE fd, unsigned char c)
         if(b) cbm_iec_release(fd, IEC_DATA); else cbm_iec_set(fd, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
-        while(cbm_iec_get(fd, IEC_CLOCK));
+        while(cbm_iec_get(fd, IEC_CLOCK)) {
+        }
 #else
         cbm_iec_wait(fd, IEC_CLOCK, 0);
 #endif
@@ -62,7 +64,8 @@ static int s1_write_byte_nohs(CBM_FILE fd, unsigned char c)
                                                                         SETSTATEDEBUG((void)0);
 
 #ifndef USE_CBM_IEC_WAIT
-        while(!cbm_iec_get(fd, IEC_DATA));
+        while(!cbm_iec_get(fd, IEC_DATA)) {
+        }
 #else
         cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
@@ -76,7 +79,8 @@ static int s1_write_byte(CBM_FILE fd, unsigned char c)
     s1_write_byte_nohs(fd, c);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
-    while(!cbm_iec_get(fd, IEC_DATA));
+    while(!cbm_iec_get(fd, IEC_DATA)) {
+    }
 #else
     cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
@@ -106,7 +110,8 @@ static int s1_read_byte(CBM_FILE fd, unsigned char *c)
     for(i=7; i>=0; i--) {
                                                                         SETSTATEDEBUG(DebugBitCount=i);
 #ifndef USE_CBM_IEC_WAIT
-        while(cbm_iec_get(fd, IEC_DATA));
+        while(cbm_iec_get(fd, IEC_DATA)) {
+        }
 #else
         cbm_iec_wait(fd, IEC_DATA, 0);
 #endif
@@ -119,7 +124,8 @@ static int s1_read_byte(CBM_FILE fd, unsigned char *c)
         cbm_iec_set(fd, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
-        while(b == cbm_iec_get(fd, IEC_CLOCK));
+        while(b == cbm_iec_get(fd, IEC_CLOCK)) {
+        }
 #else
         cbm_iec_wait(fd, IEC_CLOCK, !b);
 #endif
@@ -127,7 +133,8 @@ static int s1_read_byte(CBM_FILE fd, unsigned char *c)
         cbm_iec_release(fd, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);
 #ifndef USE_CBM_IEC_WAIT
-        while(!cbm_iec_get(fd, IEC_DATA));
+        while(!cbm_iec_get(fd, IEC_DATA)) {
+        }
 #else
         cbm_iec_wait(fd, IEC_DATA, 1);
 #endif
@@ -221,7 +228,8 @@ static int open_disk(CBM_FILE fd, d64copy_settings *settings,
                                                                         SETSTATEDEBUG((void)0);
     start(fd, d);
                                                                         SETSTATEDEBUG((void)0);
-    while(!cbm_iec_get(fd_cbm, IEC_DATA));
+    while(!cbm_iec_get(fd_cbm, IEC_DATA)) {
+    }
                                                                         SETSTATEDEBUG((void)0);
     return 0;
 }

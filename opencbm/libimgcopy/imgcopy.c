@@ -295,6 +295,7 @@ static int imgcopy_set_image_type(imgcopy_settings *settings, const char *filena
             message_cb(3, "imagetype D80 from drive type");
             break;
 
+           case cbm_dt_fdx000:
            case cbm_dt_cbm8250:
            case cbm_dt_sfd1001:
            case cbm_dt_unknown:
