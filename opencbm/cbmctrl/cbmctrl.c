@@ -1219,7 +1219,7 @@ do_download_callback(
         uint8_t  Percent
         )
 {
-    uint16_t start_address = Context;
+    int start_address = *((int *) Context);
     show_monkey((MemoryAddress - start_address) >> 8);
     return 0;
 }
@@ -1232,7 +1232,7 @@ static int do_download(CBM_FILE fd, OPTIONS * const options)
     unsigned char unit;
     int addr, count, rv = 0;
     char *tail;
-    char *buf = NULL;
+    uint8_t *buf = NULL;
     FILE *f;
 
     char *tmpstring;
@@ -1287,7 +1287,7 @@ static int do_download(CBM_FILE fd, OPTIONS * const options)
                 fprintf(stderr, "Could not allocate memory for transfer!\n");
                 break;
         }
-        read = cbm_dos_memory_read(fd, (uint8_t*) buf, count, unit, addr, count, do_download_callback, (void*)addr);
+        read = cbm_dos_memory_read(fd, buf, count, unit, addr, count, do_download_callback, &addr);
         if (read != 0) {
             rv = 1;
             fprintf(stderr, "A transfer error occurred!\n");

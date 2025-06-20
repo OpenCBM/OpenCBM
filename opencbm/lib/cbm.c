@@ -1781,14 +1781,14 @@ cbm_device_status(CBM_FILE HandleDevice, unsigned char DeviceAddress,
             }
 
             /* check if there is a CBM CR (13, '\r'); if so, the status ends there */
-            p_end = strchr(buffer_local, '\r');
+            p_end = strchr((char*)buffer_local, '\r');
 
             if (p_end) {
                 *p_end = 0;
             }
 
             /* copy the status into the return buffer */
-            strncpy(Buffer, buffer_local, BufferLength);
+            strncpy(Buffer, (char*)buffer_local, BufferLength);
 
             /* if the buffer is not big enough for the terminating 0, add one
              * by overwriting the last char
