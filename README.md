@@ -1,5 +1,5 @@
 # OpenCBM
-Win 7/8/10, and Linux/i386/AMD64 kernel driver and development library to control serial CBM devices, such as the Commodore 1541 disk drive, connected to the PC's parallel port via a XM1541 or XA1541 cable. Fast disk copier included. Successor of cbm4linux. Also supports the XU1541 and the XUM1541 devices (a.k.a. "ZoomFloppy").
+Win NT/2K/XP/7/8/10/11, Linux/i386/AMD64/ARM, FreeBSD and MacOS X kernel driver and development library to control serial CBM devices, such as the Commodore 1541 disk drive, connected to the PC's parallel port via a XM1541 or XA1541 cable. Fast disk copier included. Successor of cbm4linux. Also supports the XU1541 and the XUM1541 USB devices (a.k.a. "ZoomFloppy").
 
 ## What is OpenCBM?
 
