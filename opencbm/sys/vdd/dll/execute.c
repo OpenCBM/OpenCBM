@@ -1448,7 +1448,7 @@ vdd_usleep(VOID)
 {
     FUNC_ENTER();
 
-    arch_usleep(getCX());
+    arch_sleep_us(getCX());
 
     FUNC_LEAVE_BOOLEAN(FALSE);
 }

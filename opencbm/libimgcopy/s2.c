@@ -153,7 +153,7 @@ static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
                                                                         SETSTATEDEBUG((void)0);
     write_n(&se, 1);
 #ifndef USE_CBM_IEC_WAIT
-    arch_usleep(20000);
+    arch_sleep_ms(20);
 #endif
                                                                         SETSTATEDEBUG((void)0);
     read_n(&status, 1);
@@ -176,7 +176,7 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
                                                                         SETSTATEDEBUG(DebugByteCount=-1);
 #ifndef USE_CBM_IEC_WAIT
     if(size == BLOCKSIZE) {
-        arch_usleep(20000);
+        arch_sleep_ms(20);
     }
 #endif
                                                                         SETSTATEDEBUG((void)0);
@@ -232,7 +232,7 @@ static int open_disk(CBM_FILE fd, imgcopy_settings *settings,
     while(!cbm_iec_get(fd_cbm, IEC_CLOCK));
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_set(fd_cbm, IEC_ATN);
-    arch_usleep(20000);
+    arch_sleep_ms(20);
 
                                                                         SETSTATEDEBUG((void)0);
     return 0;
@@ -244,7 +244,7 @@ static void close_disk(void)
     s2_write_byte(fd_cbm, 0);
                                                                         SETSTATEDEBUG((void)0);
     s2_write_byte_nohs(fd_cbm, 0);
-    arch_usleep(100);
+    arch_sleep_us(100);
                                                                         SETSTATEDEBUG(DebugBitCount=-1);
     cbm_iec_release(fd_cbm, IEC_DATA);
                                                                         SETSTATEDEBUG((void)0);

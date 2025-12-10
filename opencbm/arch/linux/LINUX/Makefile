@@ -7,7 +7,8 @@ CFLAGS += -I../../include
 
 LIB     = libarch.a
 SRCS    = ctrlbreak.c \
-	  file.c
+	  file.c \
+	  sleep.c
 
 ifeq "$(OS)" "Darwin"
 SRCS += error.c

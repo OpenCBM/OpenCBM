@@ -133,7 +133,7 @@ output_pia(CBM_FILE HandleDevice, unsigned char Drive, unsigned int PiaAddress, 
         /*
          * Give the drive time to be able to execute this command
          */
-        arch_usleep(10000);
+        arch_sleep_ms(10);
 
         /*
          * Read back the value. Hopefully, it is exactly what we just have written.

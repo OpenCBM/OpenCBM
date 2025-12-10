@@ -45,7 +45,7 @@ handle_CTRL_C(int dummy)
     fprintf(stderr, "\nSIGINT caught, resetting IEC bus...\n");
     DEBUG_PRINTDEBUGCOUNTERS();
 
-    arch_sleep(1);
+    arch_sleep_s(1);
     cbm_reset(fd);
 
     cbm_driver_close(fd);

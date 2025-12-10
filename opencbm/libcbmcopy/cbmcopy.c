@@ -247,14 +247,14 @@ static int cbmcopy_read(CBM_FILE fd,
          * Hotfix proposion for the 1581 protocols:
          *    add a little delay after the turbo start
          */
-        arch_usleep(1000);
+        arch_sleep_ms(1);
 
         SETSTATEDEBUG(DebugBlockCount=0);   // turbo sent condition
 
         while( (error = trf->check_error(fd, 0)) == 0 )
         {
             SETSTATEDEBUG((void)0); // after check_error condition
-            arch_usleep(1000);      // fix for Tim's environment
+            arch_sleep_ms(1);       // fix for Tim's environment
 
             SETSTATEDEBUG(DebugBlockCount++);    // preset condition
 
@@ -285,7 +285,7 @@ static int cbmcopy_read(CBM_FILE fd,
                  *        now, shouldn't we wait for it then?"
                  *    add a little delay after the turbo start
                  */
-                arch_usleep(1000);
+                arch_sleep_ms(1);
 
                 if( i < 255)
                 {
@@ -329,7 +329,7 @@ static int cbmcopy_read(CBM_FILE fd,
          *
          * Hotfix proposion for the 1571 protocol:
          *    add a listen/unlisten sequence, just doing a decent
-         *    arch_usleep() and waiting some time did not work
+         *    arch_sleep_ms() and waiting some time did not work
          */
         cbm_listen(fd, drive, SA_READ);
         cbm_unlisten(fd);
@@ -606,7 +606,7 @@ int cbmcopy_write_file(CBM_FILE fd,
          * Hotfix proposion for the 1581 protocols:
          *    add a little delay after the turbo start
          */
-        arch_usleep(1000);
+        arch_sleep_ms(1);
 
         SETSTATEDEBUG(DebugBlockCount=0);   // turbo sent condition
 
@@ -645,7 +645,7 @@ int cbmcopy_write_file(CBM_FILE fd,
              *        now, shouldn't we wait for it then?"
              *    add a little delay after the turbo start
              */
-            arch_usleep(1000);
+            arch_sleep_ms(1);
 
             status_cb( ++blocks_written );
             SETSTATEDEBUG((void)0);

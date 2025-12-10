@@ -972,7 +972,7 @@ static int do_dir(CBM_FILE fd, OPTIONS * const options)
 
 static void show_monkey(unsigned int c)
 {
-    // const static char monkey[]={"¸,ø¤*º°´`°º*¤ø,¸"};     // for fast moves
+    // const static char monkey[]={"Â¸,Ã¸Â¤*ÂºÂ°Â´`Â°Âº*Â¤Ã¸,Â¸"};     // for fast moves
     // const static char monkey[]={"\\|/-"};    // from cbmcopy
     // const static char monkey[]={"-\\|/"};    // from libtrans (reversed)
     // const static char monkey[]={"\\-/|"};    // from cbmcopy  (reversed)
@@ -1610,34 +1610,34 @@ do_test(CBM_FILE fd)
     do {
         output_status(fd, "start:", 0);
         cbm_reset(fd);
-        arch_usleep(250000);
+        arch_sleep_ms(250);
         output_status(fd, "RESET:", 0);
 
         cbm_iec_set(fd, IEC_ATN);
         output_status(fd, "ATN:", 0x05);
-        arch_usleep(200000);
+        arch_sleep_ms(200);
         output_status(fd, "ATN + 200ms:", 0x04);
         cbm_iec_release(fd, IEC_ATN);
         output_status(fd, "-ATN:", 0x00);
-        arch_usleep(200000);
+        arch_sleep_ms(200);
         output_status(fd, "-ATN + 200ms:", 0x00);
 
         cbm_iec_set(fd, IEC_DATA);
         output_status(fd, "DATA:", 0x01);
-        arch_usleep(200000);
+        arch_sleep_ms(200);
         output_status(fd, "DATA + 200ms:", 0x01);
         cbm_iec_release(fd, IEC_DATA);
         output_status(fd, "-DATA:", 0x00);
-        arch_usleep(200000);
+        arch_sleep_ms(200);
         output_status(fd, "-DATA + 200ms:", 0x00);
 
         cbm_iec_set(fd, IEC_CLOCK);
         output_status(fd, "CLK:", 0x02);
-        arch_usleep(200000);
+        arch_sleep_ms(200);
         output_status(fd, "CLK + 200ms:", 0x02);
         cbm_iec_release(fd, IEC_CLOCK);
         output_status(fd, "-CLK:", 0x00);
-        arch_usleep(200000);
+        arch_sleep_ms(200);
         output_status(fd, "-CLK + 200ms:", 0x00);
 
         rv = 0;

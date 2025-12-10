@@ -16,7 +16,8 @@ SOURCES=../debug.c \
         ../file.c \
         ../getopt.c \
         ../getopt1.c \
-        ../getopt_init.c
+        ../getopt_init.c \
+        ../sleep.c
 
 UMTYPE=console
 #UMBASE=0x100000

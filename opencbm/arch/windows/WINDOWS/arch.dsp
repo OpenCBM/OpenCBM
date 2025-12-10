@@ -115,6 +115,10 @@ SOURCE=..\getopt1.c
 
 SOURCE=..\getopt_init.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\sleep.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

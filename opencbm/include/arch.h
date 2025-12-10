@@ -71,13 +71,15 @@ typedef bool BOOL;
 
 #endif // WIN32
 
+/* functions to sleep (pause execution) for a specified time */
+extern void arch_sleep_us(unsigned int Microseconds);
+extern void arch_sleep_ms(unsigned int Milliseconds);
+extern void arch_sleep_s(unsigned int Seconds);
+
 #include <string.h>
 
 #define arch_strcasecmp(_x,_y)     ARCH_CBM_LINUX_WIN(strcasecmp(_x,_y), _stricmp(_x,_y))
 #define arch_strncasecmp(_x,_y,_z) ARCH_CBM_LINUX_WIN(strncasecmp(_x,_y,_z), _strnicmp(_x,_y,_z))
-
-#define arch_sleep(_x)  ARCH_CBM_LINUX_WIN(sleep(_x), Sleep((_x) * 1000))
-#define arch_usleep(_x) ARCH_CBM_LINUX_WIN(usleep(_x), Sleep( ((_x) + 999) / 1000))
 
 #ifdef WIN32
  extern void arch_error(int AUnused, unsigned int ErrorCode, const char *format, ...);
@@ -131,5 +133,7 @@ int arch_filesize(const char *Filename, off_t *Filesize);
 
 typedef void (ARCH_SIGNALDECL *ARCH_CTRLBREAK_HANDLER)(int dummy);
 extern void arch_set_ctrlbreak_handler(ARCH_CTRLBREAK_HANDLER Handler);
+
+
 
 #endif /* #ifndef CBM_ARCH_H */

@@ -424,7 +424,7 @@ int xu1541_ioctl(struct opencbm_usb_handle *HandleXu1541, unsigned int cmd, unsi
                   xu1541_dbg(3, "unexpected result (%d/%d)", rv[0], rv[1]);
 
                   /* not the expected result */
-                  arch_usleep(TIMEOUT_DELAY);
+                  arch_sleep_us(TIMEOUT_DELAY);
               }
           }
           else
@@ -434,7 +434,7 @@ int xu1541_ioctl(struct opencbm_usb_handle *HandleXu1541, unsigned int cmd, unsi
               /* count the error states (just out of couriosity) */
               err++;
 
-              arch_usleep(TIMEOUT_DELAY);
+              arch_sleep_us(TIMEOUT_DELAY);
           }
       }
       while(!link_ok);
@@ -562,7 +562,7 @@ int xu1541_write(struct opencbm_usb_handle *HandleXu1541, const unsigned char *d
                 else
                 {
                     xu1541_dbg(3, "unexpected result (%d/%d)", rv[0], rv[1]);
-                    arch_usleep(TIMEOUT_DELAY);
+                    arch_sleep_us(TIMEOUT_DELAY);
                 }
             }
             else
@@ -665,7 +665,7 @@ int xu1541_read(struct opencbm_usb_handle *HandleXu1541, unsigned char *data, si
                 if(rv[0] != XU1541_IO_READ_DONE)
                 {
                     xu1541_dbg(3, "unexpected result");
-                    arch_usleep(TIMEOUT_DELAY);
+                    arch_sleep_us(TIMEOUT_DELAY);
                 }
                 else
                 {

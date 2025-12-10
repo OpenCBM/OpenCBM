@@ -295,7 +295,7 @@ static int start_turbo(CBM_FILE fd, int write)
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_set(fd, IEC_ATN);
                                                                         SETSTATEDEBUG((void)0);
-    arch_usleep(20000);
+    arch_sleep_ms(20);
                                                                         SETSTATEDEBUG((void)0);
     return 0;
 }
@@ -309,7 +309,7 @@ static void exit_turbo(CBM_FILE fd, int write)
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_set(fd, IEC_CLOCK);
                                                                         SETSTATEDEBUG((void)0);
-    arch_usleep(20000);
+    arch_sleep_ms(20);
                                                                         SETSTATEDEBUG((void)0);
 //    cbm_iec_wait(fd, IEC_DATA, 0);
                                                                         SETSTATEDEBUG((void)0);

@@ -171,7 +171,7 @@ static int open_disk(CBM_FILE fd, imgcopy_settings *settings,
 
     printf("starting code...) \n");
     cbm_iec_release(fd, IEC_CLOCK);
-    arch_usleep(300);
+    arch_sleep_us(300);
 
     return 0;
 }

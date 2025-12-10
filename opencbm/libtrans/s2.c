@@ -133,7 +133,7 @@ init(CBM_FILE fd, unsigned char drive)
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_set(fd, IEC_ATN);
                                                                         SETSTATEDEBUG((void)0);
-    arch_usleep(20000);
+    arch_sleep_ms(20);
 
     return 0;
 }

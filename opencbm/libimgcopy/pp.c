@@ -42,7 +42,7 @@ static void pp_check_direction(enum pp_direction_e dir)
     static enum pp_direction_e direction = PP_READ;
     if(direction != dir)
     {
-        arch_usleep(100);
+        arch_sleep_us(100);
         direction = dir;
     }
 }
@@ -146,7 +146,7 @@ static int read_block(unsigned char tr, unsigned char se, unsigned char *block)
     write_n(status, 2);
 
 #ifndef USE_CBM_IEC_WAIT
-    arch_usleep(20000);
+    arch_sleep_ms(20);
 #endif
                                                                         SETSTATEDEBUG((void)0);
     read_n(status, 2);
@@ -180,7 +180,7 @@ static int write_block(unsigned char tr, unsigned char se, const unsigned char *
                                                                         SETSTATEDEBUG(debugLibImgByteCount=-1);
 #ifndef USE_CBM_IEC_WAIT
     if(size == BLOCKSIZE) {
-        arch_usleep(20000);
+        arch_sleep_ms(20);
     }
 #endif
 
@@ -239,7 +239,7 @@ static void close_disk(void)
 {
                                                                         SETSTATEDEBUG((void)0);
     pp_write(fd_cbm, 0, 0);
-    arch_usleep(100);
+    arch_sleep_us(100);
                                                                         SETSTATEDEBUG((void)0);
     cbm_iec_wait(fd_cbm, IEC_DATA, 0);
 

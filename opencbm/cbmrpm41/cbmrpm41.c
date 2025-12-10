@@ -111,11 +111,11 @@ handle_CTRL_C(int dummy)
 
     DEBUG_PRINTDEBUGCOUNTERS();
 
-    arch_sleep(1);
+    arch_sleep_s(1);
     cbm_reset(fd_cbm_local);
 
 #if 0   // reset automatically restores the VIA shift register
-    arch_usleep(100000);
+    arch_sleep_ms(100);
     fprintf(stderr, "Emergency resetting VIA2 shift register to default.\n");
     cbm_exec_command(fd, drive, CmdBuffer, sizeof(CmdBuffer));
 #endif
