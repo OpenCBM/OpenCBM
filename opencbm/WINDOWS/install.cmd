@@ -54,12 +54,19 @@ rem Check Windows version
 
 for /f "tokens=4-5 delims=. " %%i in ('ver') do set VERSION=%%i.%%j
 for /f "tokens=5-6 delims=. " %%i in ('ver') do set VERSION2=%%i.%%j
+for /f "tokens=6-6 delims=. " %%i in ('ver') do set VERSION3=%%i
 
 rem echo.
 
 if "%version%" == "10.0" (
-	rem echo Windows 10
-	set OC_INSTALL_WIN=10
+	rem echo Windows 10 or higher
+	if %version3% geq 26000 (
+		rem echo . Windows 11
+		set OC_INSTALL_WIN=11
+	) else (
+		rem echo . Windows 10
+		set OC_INSTALL_WIN=10
+	)
 )
 if "%version%" == "6.3" (
 	rem echo Windows 8.1
@@ -101,6 +108,8 @@ if "%version2%" == "4.0" (
 	set OC_INSTALL_WIN=4
 	set OC_IS_XP_OR_OLDER=1
 )
+
+echo Detected Windows %OC_INSTALL_WIN%, architecture %OC_BINDIR_LOCAL%
 
 rem Process command line parameter
 
