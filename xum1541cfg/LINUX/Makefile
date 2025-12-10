@@ -1,7 +1,7 @@
 RELATIVEPATH=../opencbm/
 include ${RELATIVEPATH}LINUX/config.make
 
-CFLAGS+= -g $(LIBUSB_CFLAGS) -I $(DFU_SRC) -I $(LIBMISC) -I ../opencbm/include/ -Wall
+CFLAGS+= -std=c99 -g $(LIBUSB_CFLAGS) -I $(DFU_SRC) -I $(LIBMISC) -I ../opencbm/include/ -Wall
 LINK_FLAGS= $(LIBUSB_LDFLAGS) $(LIBUSB_LIBS)
 
 DFU_SRC= dfu-programmer-0.5.4/src
