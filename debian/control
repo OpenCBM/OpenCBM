@@ -5,6 +5,7 @@ Maintainer: Spiro Trikaliotis <spiro.trikaliotis@gmx.de>
 Build-Depends: debhelper (>= 9), linuxdoc-tools-latex, linuxdoc-tools-text, libusb-1.0-0-dev, pkg-config, cc65, libncurses5-dev, texlive-fonts-recommended, texinfo, ghostscript
 Homepage: http://opencbm.trikaliotis.net/
 Standards-Version: 3.9.8
+Rules-Requires-Root: binary-targets
 
 Package: opencbm
 Architecture: any

@@ -2,15 +2,33 @@ opencbm (0.4.99.104) unstable; urgency=low
 
   * Update to v0.4.99.104
 
- -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Sat, 22 Jan 2022 20:59:53 +0100
+ -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Sun, 23 Jan 2022 20:47:53 +0100
 
 opencbm (0.4.99.103) unstable; urgency=low
 
-  * Update to v0.4.99.103
+  * opencbm-xa1541-module: use DKMS to make it work again.
 
- -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Fri, 16 Jul 2021 21:56:53 +0200
+ -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Sun, 16 Jan 2022 16:19:00 +0100
 
-opencbm (0.4.99.102.git.1593016058.07635d9e) unstable; urgency=low
+opencbm (0.4.99.103) unstable; urgency=low
+
+  * Fix compilation by removing the revision number after the hyphen
+
+ -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Fri, 16 Jul 2021 17:35:00 +0200
+
+opencbm (0.4.99.103-2) unstable; urgency=low
+
+  * Fix missing libopencbm.so symlink to libopencbm.so.0
+
+ -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Fri, 13 Nov 2020 17:37:00 +0100
+
+opencbm (0.4.99.103) unstable; urgency=low
+
+  * Compile latest version.
+
+ -- Spiro Trikaliotis <cbm4win@trikaliotis.net>  Thu, 16 Jul 2020 16:41:00 +0200
+
+opencbm (0.4.99.102) unstable; urgency=low
 
   * Compile latest version.
 

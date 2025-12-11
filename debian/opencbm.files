@@ -12,6 +12,5 @@ usr/bin/frm_analyzer
 usr/bin/imgcopy
 usr/bin/opencbm_plugin_helper_tools
 etc/devfs/*/opencbm
-etc/modutils/opencbm
 usr/lib/opencbm/install_plugin.sh
 usr/lib/opencbm/plugin_helper_tools

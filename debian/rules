@@ -9,8 +9,6 @@
 # Note: debian/compat is the place to change this!
 #export DH_COMPAT=7
 
-
-
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -g
 endif
@@ -89,8 +87,8 @@ install: build
 		UDEVRULESDIR=/lib/udev/rules.d/ \
 		install-all
 
-	install -D -o root -g root -m 644 debian/opencbm.modutils \
-		debian/tmp/etc/modutils/opencbm
+	install -D -o root -g root -m 644 debian/opencbm.modprobe.d.opencbm.conf \
+		debian/tmp/etc/modprobe.d/opencbm.conf
 
 	install -D -o root -g root -m 755 opencbm/LINUX/plugin_helper_tools \
 		debian/tmp/usr/lib/opencbm
@@ -98,8 +96,8 @@ install: build
 		debian/tmp/usr/lib/opencbm
 
 	mkdir -p debian/tmp/usr/src/opencbm-xa1541-${DEB_UPSTREAM_VERSION}
-	cp opencbm/sys/linux/cbm_module.c opencbm/include/LINUX/cbm_module.h debian/tmp/usr/src/opencbm-xa1541-${DEB_UPSTREAM_VERSION}
-	cp debian/Makefile.module debian/tmp/usr/src/opencbm-xa1541-${DEB_UPSTREAM_VERSION}/Makefile
+	cp -p opencbm/sys/linux/cbm_module.c opencbm/include/LINUX/cbm_module.h debian/tmp/usr/src/opencbm-xa1541-${DEB_UPSTREAM_VERSION}
+	cp -p debian/Makefile.module debian/tmp/usr/src/opencbm-xa1541-${DEB_UPSTREAM_VERSION}/Makefile
 
 # Build architecture-independent files here.
 binary-indep: build install
