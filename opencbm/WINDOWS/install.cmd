@@ -10,9 +10,12 @@ set OC_VARIANT_DEFAULT_INSTALL_IS_USB=1
 
 rem ---------------------------------------
 
-setlocal enabledelayedexpansion
+setlocal disabledelayedexpansion
 
-set OC_SOURCE_PATH=%~dp0
+set OC_SOURCE_PATH_ORIG=%~dp0
+set OC_SOURCE_PATH_INSTALL_CMD=%~dpnx0
+
+set OC_SOURCE_PATH=%OC_SOURCE_PATH_ORIG:!=^^^!%
 
 set OC_VERSION=0.4.99.104
 set OC_INSTALLED_SIZE_IN_KB_AMD64=1500
@@ -20,6 +23,8 @@ set OC_INSTALLED_SIZE_IN_KB_I386=2000
 
 set OC_VARIANT_DISPLAY=
 set OC_VARIANT=
+
+setlocal enabledelayedexpansion
 
 if [%PROCESSOR_ARCHITEW6432%] == [AMD64] (
 	if [%PROCESSOR_ARCHITECTURE%] == [x86] (
@@ -187,9 +192,11 @@ if %OC_INSTALL_ELEVATED% == 0 (
 	echo or I will not be able to continue!
 	echo.
 	if %OC_IS_XP_OR_OLDER% EQU 0 (
-		powershell -Command "Start-Process -FilePath \"%~dpnx0\" -ArgumentList \"--internal_call_elevated %*\" -Verb runAs"
+		setlocal disabledelayedexpansion
+		powershell -Command "Start-Process -FilePath \"%OC_SOURCE_PATH_INSTALL_CMD%\" -ArgumentList \"--internal_call_elevated %*\" -Verb runAs"
 	) else (
-		runas /user:administrator "\"%~dpnx0\" --internal_call_elevated %*"
+		setlocal disabledelayedexpansion
+		runas /user:administrator "\"%OC_SOURCE_PATH_INSTALL_CMD%\" --internal_call_elevated %*"
 	)
 	echo.
 	if errorlevel 1 (
@@ -213,7 +220,8 @@ if %OC_INSTALL_ELEVATED% == 0 (
 			start xp_drv
 		)
 		rem create Shortcut
-		%OC_SOURCE_PATH%\tools\genShortCut.vbs "%USERPROFILE%" "%OC_DESTINATION%" "%OC_VERSION%"
+		setlocal disabledelayedexpansion
+		"%OC_SOURCE_PATH_ORIG%\tools\genShortCut.vbs" "%USERPROFILE%" "%OC_DESTINATION%" "%OC_VERSION%"
 	)
 	pause
 	goto EXIT
@@ -281,13 +289,19 @@ echo.
 
 if %OC_IS_XP_OR_OLDER% EQU 1 goto EXIT
 
+
+rem Check if we need a driver, and try to install it if it is needed
+
+setlocal disabledelayedexpansion
 set INFER_PATH="%OC_SOURCE_PATH%\tools"
 set INFER_EXENAME=INFer.exe
 set INFER_EXE="%INFER_PATH%\%INFER_EXENAME%"
 
+setlocal enabledelayedexpansion
+
 if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_DRIVER_XU1541%" == "0 0 0" (
 
-	If exist "%INFER_EXE%" (
+	if exist "!INFER_EXE!" (
 
 		echo.
 		echo I could install the necessary USB drivers if you like.
@@ -304,7 +318,7 @@ if not "%OC_INSTALL_DRIVER_ZOOMFLOPPY% %OC_INSTALL_DRIVER_XUM1541% %OC_INSTALL_D
 
 		if [!OC_INSTALL_USB_RESULT!] == [1] (
 			echo.
-			pushd "%INFER_PATH%"
+			pushd %INFER_PATH%
 			"%INFER_EXENAME%" -f opencbm.inf
 			popd
 		) else (
