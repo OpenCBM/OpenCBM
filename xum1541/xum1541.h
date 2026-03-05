@@ -32,6 +32,7 @@
 #define PROMICRO_7406           6
 #define MINIMUS                 7
 #define MINIMUS32               8
+#define TAKEN_BY_MISUSERS       9 /* people seem to use that model number although the VID:PID does not belong to them. Thus, keep this one unused. */
 
 #if MODEL == USBKEY
 #include "cpu-usbkey.h"
@@ -60,6 +61,8 @@
 #elif MODEL == MINIMUS32
 #include "cpu-minimus.h"
 #include "board-minimus.h"
+#elif MODEL == TAKEN_BY_MISUSERS
+#error DO NOT USE THIS MODEL, it has been used in the wild by people who do not understand the meaning of a VID:PID belonging to someone!
 #endif
 
 #include "xum1541_types.h"      // Version and protocol definitions
