@@ -69,7 +69,7 @@ install-plugin:
 	install -m 644 $(LIB) $(DESTDIR)$(PLUGINDIR)
 	cd $(DESTDIR)$(PLUGINDIR) && ln -sf $(SHLIBV3) $(SHLIBV); ln -sf $(SHLIBV) $(SHLIB)
 	@echo "[${PLUGIN_NAME}]" > ${TMPFILE}
-	@echo "location=$(PLUGINDIR)$(SHLIB)" >> ${TMPFILE}
+	@echo "location=$(PLUGINDIR)/$(SHLIB)" >> ${TMPFILE}
 	@echo "" >> ${TMPFILE}
 	$(RELATIVEPATH)/LINUX/plugin_helper_tools install "$(DESTDIR)$(OPENCBM_CONFIG_PATH)" 10${PLUGIN_NAME}.conf ${TMPFILE}
 	@rm ${TMPFILE}
