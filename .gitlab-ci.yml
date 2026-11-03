@@ -1,0 +1,106 @@
+# You can override the included template(s) by including variable overrides
+# SAST customization: https://docs.gitlab.com/user/application_security/sast/#available-cicd-variables
+# Secret Detection customization: https://docs.gitlab.com/user/application_security/secret_detection/pipeline/configure/
+# Dependency Scanning customization: https://docs.gitlab.com/user/application_security/dependency_scanning/#customizing-analyzer-behavior
+# Container Scanning customization: https://docs.gitlab.com/user/application_security/container_scanning/#customizing-analyzer-behavior
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ci/variables/#cicd-variable-precedence
+
+stages:
+- test
+- secret-detection
+- build
+- pages
+
+sast:
+  stage: test
+
+include:
+- template: Security/SAST.gitlab-ci.yml
+- template: Security/Secret-Detection.gitlab-ci.yml
+
+variables:
+  SECRET_DETECTION_ENABLED: 'true'
+
+secret_detection:
+  stage: secret-detection
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^feature\//
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "development"
+    - if: $CI_COMMIT_BRANCH =~ /^release\//
+
+variables:
+  DEB_BUILD_DEPENDENCIES: linuxdoc-tools-latex linuxdoc-tools-text libusb-1.0-0-dev pkg-config cc65 libncurses5-dev texlive-fonts-recommended texinfo ghostscript doxygen
+  GIT_REVISION: $CI_COMMIT_SHORT_SHA
+
+build_opencbm_linux:
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^feature\//
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "development"
+    - if: $CI_COMMIT_BRANCH =~ /^release\//
+
+  stage: build
+
+  tags:
+    - saas-linux-small-amd64
+
+  before_script:
+    - apt-get update
+    - apt-get install -y $DEB_BUILD_DEPENDENCIES
+
+  script:
+    # create the source distribution, part 1:
+    # copy the sources into a new dir
+    # This way, we have a pristine copy without any artifacts
+    - cp -pr ./ ../opencbm-source-$GIT_REVISION
+
+    # create the linuxdoc documentation as html
+    - make -f LINUX/Makefile all-doc
+
+    # "install" everything (including plugins) into a dir so we can
+    # have a tarball of it afterwards
+    - make -f LINUX/Makefile DESTDIR=`pwd`/opencbm-linux-$GIT_REVISION/ install-all
+
+    # create the doxygen documentation
+    - (cd opencbm/; doxygen)
+    - cp -pr opencbm/.doxygen/html opencbm-doxygen-$GIT_REVISION
+    - cp -pr opencbm/docs/html opencbm-doc-$GIT_REVISION
+
+    # create the source distribution, part 2:
+    # create the tarball and copy it so we can save it as artifact
+    - pushd ../opencbm-source-$GIT_REVISION
+    - make -f LINUX/Makefile dist
+    - popd
+    - mv ../opencbm-source-$GIT_REVISION.tar.gz .
+
+  artifacts:
+    paths:
+      - opencbm-doc-$GIT_REVISION/*
+      - opencbm-doxygen-$GIT_REVISION/*
+      - opencbm-linux-$GIT_REVISION/*
+      - opencbm-source-$GIT_REVISION.tar.gz
+
+create-pages:
+
+  stage: pages
+
+  pages:
+    # The folder that contains the files to be exposed at the Page URL
+    publish: public
+
+  dependencies:
+    - build_opencbm_linux
+
+  script:
+    - mkdir public
+
+    - cp -p opencbm-doc-$GIT_REVISION/* public/
+    - cp -pr opencbm-doxygen-$GIT_REVISION public/doxygen
+    - cd public/; ln -s opencbm.html index.html
+
+  rules:
+    # This ensures that only pushes with a tag will trigger
+    # a pages deploy
+    - if: $CI_COMMIT_TAG

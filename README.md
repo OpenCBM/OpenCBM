@@ -29,14 +29,14 @@ Currently, opencbm supports the following CBM devices:
 * VIC 1570, VIC 1571 (including the 1571CR and the 1571 inside of a C128DCR)
 * VIC 1581 (not with d64copy ( d64copy), not with cbmformat ( cbmformat) or cbmforng ( cbmforng))
 * other CBM IEC drives, printers, and compatibles (only with cbmctrl ( cbmctrl))
-* VIC 8250, 8050, 4040, 2031, SFD 1001, and possibly other IEEE drives with an IEC to IEEE converter (for example, IEC2IEEE from Jochen Adler, cf. http://www.nlq.de/, or with a ZoomFloppy extension that lets you use IEEE devices directly.
+* VIC 8250, 8050, 4040, 2031, SFD 1001, and possibly other IEEE drives with an IEC to IEEE converter (for example, IEC2IEEE from Jochen Adler (formerly at http://www.nlq.de/ but no defunct), or with a ZoomFloppy extension that lets you use IEEE devices directly.
 * VIC 1530 (a.k.a. C2N) tape device, and VIC 1531 with an appropriate adapter; both are supported by ZoomTape, only.
 
 ## Further reading
 
-The current manual, including installation instructions, can be read online at http://opencbm.trikaliotis.net/.
+The current manual, including installation instructions, can be read online at https://opencbm.gitlab.io/opencbm/.
 
-A Doxygen output of the sources (for developers) (still work-in-progress) can be found at http://opencbm.trikaliotis.net/doxygen/.
+A Doxygen output of the sources (for developers) (still work-in-progress) can be found at https://opencbm.gitlab.io/opencbm/doxygen/.
 
 The mailing lists of OpenCBM can be found at https://sourceforge.net/p/opencbm/mailman/.
 
