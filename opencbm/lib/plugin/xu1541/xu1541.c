@@ -369,7 +369,7 @@ int xu1541_ioctl(struct opencbm_usb_handle *HandleXu1541, unsigned int cmd, unsi
      (cmd == XU1541_LISTEN) || (cmd == XU1541_UNLISTEN) ||
      (cmd == XU1541_OPEN)   || (cmd == XU1541_CLOSE))
   {
-      int link_ok = 0, err = 0;
+      int link_ok = 0;
 
       /* USB_TIMEOUT msec timeout required for reset */
 #if HAVE_LIBUSB0
@@ -430,9 +430,6 @@ int xu1541_ioctl(struct opencbm_usb_handle *HandleXu1541, unsigned int cmd, unsi
           else
           {
               xu1541_dbg(3, "usb timeout");
-
-              /* count the error states (just out of couriosity) */
-              err++;
 
               arch_sleep_us(TIMEOUT_DELAY);
           }
@@ -496,7 +493,7 @@ int xu1541_write(struct opencbm_usb_handle *HandleXu1541, const unsigned char *d
 
     while(len)
     {
-        int link_ok = 0, err = 0;
+        int link_ok = 0;
         int wr;
         uint16_t bytes2write;
         bytes2write = (len > XU1541_IO_BUFFER_SIZE)?XU1541_IO_BUFFER_SIZE:len;
@@ -568,8 +565,6 @@ int xu1541_write(struct opencbm_usb_handle *HandleXu1541, const unsigned char *d
             else
             {
                 xu1541_dbg(3, "usb timeout");
-                /* count the error states (just out of couriosity) */
-                err++;
             }
         }
         while(!link_ok);
@@ -601,7 +596,7 @@ int xu1541_read(struct opencbm_usb_handle *HandleXu1541, unsigned char *data, si
     {
         int rd;
         uint16_t bytes2read;
-        int link_ok = 0, err = 0;
+        int link_ok = 0;
         unsigned char rv[2];
 
         /* limit transfer size */
@@ -678,9 +673,6 @@ int xu1541_read(struct opencbm_usb_handle *HandleXu1541, unsigned char *data, si
             else
             {
                 xu1541_dbg(3, "usb timeout");
-
-                /* count the error states (just out of couriosity) */
-                err++;
             }
         }
         while(!link_ok);

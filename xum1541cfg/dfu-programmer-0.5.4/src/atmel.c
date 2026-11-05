@@ -502,7 +502,6 @@ static int32_t __atmel_read_page( dfu_device_t *device,
     uint8_t command[6] = { 0x03, 0x00, 0x00, 0x00, 0x00, 0x00 };
     uint32_t current_start;
     size_t size;
-    uint32_t mini_page;
     int32_t result;
 
     TRACE( "%s( %p, %u, %u, %p, %s )\n", __FUNCTION__, device, start, end,
@@ -514,7 +513,7 @@ static int32_t __atmel_read_page( dfu_device_t *device,
 
     current_start = start;
     size = end - current_start;
-    for( mini_page = 0; 0 < size; mini_page++ ) {
+    while( 0 < size ) {
         if( ATMEL_MAX_TRANSFER_SIZE < size ) {
             size = ATMEL_MAX_TRANSFER_SIZE;
         }

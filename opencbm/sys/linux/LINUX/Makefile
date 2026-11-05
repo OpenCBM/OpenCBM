@@ -1,5 +1,7 @@
 ifneq ($(KERNELRELEASE),)
 EXTRA_CFLAGS := $(OPENCBM_KERNEL_FLAGS) -I$(here)/../../include -I$(here)/../../include/LINUX
+# Kbuild dropped EXTRA_CFLAGS support in 6.15, ccflags-y exists since 2.6.24:
+ccflags-y    := $(EXTRA_CFLAGS)
 obj-m 	     := cbm.o
 cbm-objs     := cbm_module.o
 

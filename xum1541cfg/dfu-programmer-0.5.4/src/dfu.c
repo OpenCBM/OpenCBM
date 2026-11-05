@@ -435,7 +435,12 @@ retry:
                                 case 1:
                                     retries--;
                                     libusb_free_device_list( list, 1 );
-                                    goto retry;
+                                    if( 0 < retries ) {
+                                        goto retry;
+                                    }
+                                    dfu_device->handle = NULL;
+                                    dfu_device->interface = 0;
+                                    return NULL;
                             }
 
                             DEBUG( "Failed to put the device in dfuIDLE mode.\n" );
