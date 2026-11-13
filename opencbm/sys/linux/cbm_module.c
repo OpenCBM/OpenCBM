@@ -428,7 +428,7 @@ static void show(char *s)
 static void timeout_us(int us)
 {
     set_current_state(TASK_INTERRUPTIBLE);
-    schedule_timeout(HZ / 1000000 * us);
+    schedule_timeout(usecs_to_jiffies(us));
 }
 
 static int check_if_bus_free(void)
