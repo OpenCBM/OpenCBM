@@ -441,8 +441,14 @@ static int check_if_bus_free(void)
         /* wait for the drive to have time to react */
         timeout_us(100);
 
-        /* assert ATN */
-        SET(ATN_OUT);
+        /*
+         * assert ATN and CLK, like a C64 does before sending a command
+         * byte: the drive acknowledges ATN by pulling DATA and holds it
+         * as long as CLK is asserted. If CLK was released, the drive
+         * would release DATA again right away, waiting for a byte to be
+         * sent, and we would miss its acknowledge.
+         */
+        SET(ATN_OUT | CLK_OUT);
 
         /* now, wait for the drive to have time to react */
         timeout_us(100);
