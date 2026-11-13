@@ -313,6 +313,10 @@ MODULE_PARM_DESC(hold_clk,
 MODULE_AUTHOR("Michael Klein");
 MODULE_DESCRIPTION("Serial CBM bus driver module");
 MODULE_LICENSE("GPL");
+#if !defined(DIRECT_PORT_ACCESS) && defined(MODULE_SOFTDEP)
+/* cbm_init() needs an already registered parport to attach to */
+MODULE_SOFTDEP("pre: parport_pc");
+#endif
 
 #define NAME      "cbm"
 #define CBM_MINOR 177
@@ -428,7 +432,7 @@ static void show(char *s)
 static void timeout_us(int us)
 {
     set_current_state(TASK_INTERRUPTIBLE);
-    schedule_timeout(HZ / 1000000 * us);
+    schedule_timeout(usecs_to_jiffies(us));
 }
 
 static int check_if_bus_free(void)
@@ -441,8 +445,14 @@ static int check_if_bus_free(void)
         /* wait for the drive to have time to react */
         timeout_us(100);
 
-        /* assert ATN */
-        SET(ATN_OUT);
+        /*
+         * assert ATN and CLK, like a C64 does before sending a command
+         * byte: the drive acknowledges ATN by pulling DATA and holds it
+         * as long as CLK is asserted. If CLK was released, the drive
+         * would release DATA again right away, waiting for a byte to be
+         * sent, and we would miss its acknowledge.
+         */
+        SET(ATN_OUT | CLK_OUT);
 
         /* now, wait for the drive to have time to react */
         timeout_us(100);
@@ -466,9 +476,12 @@ static int check_if_bus_free(void)
     return ret;
 }
 
+/* give the drive(s) enough time to finish their power-on/reset sequence */
+#define FREE_BUS_TIMEOUT (3 * HZ)
+
 static void wait_for_free_bus(void)
 {
-    int i = 1;
+    unsigned long timeout = jiffies + FREE_BUS_TIMEOUT;
 
     while (1) {
         if (check_if_bus_free()) {
@@ -476,12 +489,16 @@ static void wait_for_free_bus(void)
             break;
         }
 
-        ++i;
-
-        if (i == 1000) {
+        if (time_after(jiffies, timeout)) {
             printk("cbm: quitting because of timeout\n");
             break;
         }
+
+        if (signal_pending(current)) {
+            printk("cbm: quitting because of pending signal\n");
+            break;
+        }
+
         timeout_us(1000);
     }
 }
@@ -923,9 +940,11 @@ static long cbm_unlocked_ioctl(struct file *f,
         return 0;
 
     case CBMCTRL_PP_WRITE:
+        if (get_user(c, (unsigned char *)arg))
+            return -EFAULT;
         if (data_reverse)
             set_data_forward();
-        XP_WRITE(intarg);
+        XP_WRITE(c);
         return 0;
 
 /* and now the parallel burst-routines */
