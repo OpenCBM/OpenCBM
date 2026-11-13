@@ -466,9 +466,12 @@ static int check_if_bus_free(void)
     return ret;
 }
 
+/* give the drive(s) enough time to finish their power-on/reset sequence */
+#define FREE_BUS_TIMEOUT (3 * HZ)
+
 static void wait_for_free_bus(void)
 {
-    int i = 1;
+    unsigned long timeout = jiffies + FREE_BUS_TIMEOUT;
 
     while (1) {
         if (check_if_bus_free()) {
@@ -476,12 +479,16 @@ static void wait_for_free_bus(void)
             break;
         }
 
-        ++i;
-
-        if (i == 1000) {
+        if (time_after(jiffies, timeout)) {
             printk("cbm: quitting because of timeout\n");
             break;
         }
+
+        if (signal_pending(current)) {
+            printk("cbm: quitting because of pending signal\n");
+            break;
+        }
+
         timeout_us(1000);
     }
 }
