@@ -923,9 +923,11 @@ static long cbm_unlocked_ioctl(struct file *f,
         return 0;
 
     case CBMCTRL_PP_WRITE:
+        if (get_user(c, (unsigned char *)arg))
+            return -EFAULT;
         if (data_reverse)
             set_data_forward();
-        XP_WRITE(intarg);
+        XP_WRITE(c);
         return 0;
 
 /* and now the parallel burst-routines */
