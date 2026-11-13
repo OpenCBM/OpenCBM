@@ -313,6 +313,10 @@ MODULE_PARM_DESC(hold_clk,
 MODULE_AUTHOR("Michael Klein");
 MODULE_DESCRIPTION("Serial CBM bus driver module");
 MODULE_LICENSE("GPL");
+#if !defined(DIRECT_PORT_ACCESS) && defined(MODULE_SOFTDEP)
+/* cbm_init() needs an already registered parport to attach to */
+MODULE_SOFTDEP("pre: parport_pc");
+#endif
 
 #define NAME      "cbm"
 #define CBM_MINOR 177
